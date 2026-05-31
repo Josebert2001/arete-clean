@@ -85,6 +85,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           <button
             onClick={reset}
             className="text-coffee-400 hover:text-cream p-1.5 rounded transition-colors"
+            aria-label="Reset code"
             title="Reset code"
           >
             <RotateCcw size={14} />
@@ -113,6 +114,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           value={code}
           onChange={e => setCode(e.target.value)}
           spellCheck={false}
+          aria-label="Java code editor"
           className="flex-1 bg-transparent text-cream py-4 pr-4 outline-none resize-y"
           style={{ fontFamily: 'JetBrains Mono', fontSize: '0.8rem', lineHeight: '1.6', minHeight: '180px' }}
         />
@@ -130,7 +132,18 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
               </span>
             )}
           </div>
-          <pre className="px-4 py-3 text-sm whitespace-pre-wrap overflow-x-auto" style={{ fontFamily: 'JetBrains Mono', fontSize: '0.8rem', lineHeight: '1.6', color: kind === 'success' ? '#B6D178' : (kind === 'not_configured' || kind === 'limit') ? '#CFA665' : kind === 'compile_error' || kind === 'runtime_error' ? '#E8927C' : '#F5EFE0' }}>
+          <pre
+            className="px-4 py-3 text-sm whitespace-pre-wrap overflow-x-auto"
+            style={{
+              fontFamily: 'JetBrains Mono',
+              fontSize: '0.8rem',
+              lineHeight: '1.6',
+              color: kind === 'success' ? 'var(--syntax-str)'
+                   : kind === 'not_configured' || kind === 'limit' ? 'var(--syntax-num)'
+                   : kind === 'compile_error' || kind === 'runtime_error' ? '#E8927C'
+                   : 'var(--cream)',
+            }}
+          >
             {running ? 'Compiling and running...' : output}
           </pre>
         </div>

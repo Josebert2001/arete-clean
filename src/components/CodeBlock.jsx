@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 // Simple Java syntax highlighter
 const KEYWORDS = [
@@ -86,17 +86,17 @@ function tokenize(code) {
 }
 
 const colorMap = {
-  kw: '#E07A2C',
-  str: '#B6D178',
-  num: '#CFA665',
-  com: '#7A7268',
-  fn: '#F0E4CD',
-  type: '#CFA665',
-  plain: '#F5EFE0',
+  kw:    'var(--syntax-kw)',
+  str:   'var(--syntax-str)',
+  num:   'var(--syntax-num)',
+  com:   'var(--syntax-com)',
+  fn:    'var(--syntax-fn)',
+  type:  'var(--syntax-num)',
+  plain: 'var(--syntax-plain)',
 };
 
 export default function CodeBlock({ code, showLineNumbers = true }) {
-  const lines = tokenize(code);
+  const lines = useMemo(() => tokenize(code), [code]);
   return (
     <div className="code-block my-4">
       <pre className="text-sm leading-relaxed overflow-x-auto">

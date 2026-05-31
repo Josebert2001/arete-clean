@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, Code2, CheckSquare, Rocket, CheckCircle2, Circle, Lightbulb, Play } from 'lucide-react';
 import { getModuleById, modules } from '../data/modules';
 import { useProgress } from '../components/useProgress';
@@ -28,7 +28,7 @@ export default function ModuleDetail() {
     );
   }
 
-  const currentIndex = modules.findIndex(m => m.id === id);
+  const currentIndex = useMemo(() => modules.findIndex(m => m.id === id), [id]);
   const prev = modules[currentIndex - 1];
   const next = modules[currentIndex + 1];
   const done = isComplete(mod.id);

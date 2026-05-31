@@ -109,6 +109,7 @@ export default function Quiz({ questions, moduleId, onComplete }) {
               key={idx}
               onClick={() => handleSelect(idx)}
               disabled={answered}
+              aria-label={`Option ${idx + 1}: ${opt}`}
               className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all flex items-center justify-between gap-3 ${style}`}
             >
               <span className="text-ink text-sm sm:text-base">{opt}</span>

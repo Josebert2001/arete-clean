@@ -65,8 +65,17 @@ export default function CodeExplainer() {
 
   const loadSample = () => setCode(SAMPLE);
 
-  const copyExplanation = () => {
-    navigator.clipboard?.writeText(explanation);
+  const copyExplanation = async () => {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(explanation);
+    } else {
+      const el = document.createElement('textarea');
+      el.value = explanation;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -100,6 +109,7 @@ export default function CodeExplainer() {
           value={code}
           onChange={e => setCode(e.target.value)}
           placeholder="Paste your Java code here..."
+          aria-label="Paste your Java code for explanation"
           rows={12}
           className="w-full bg-ink text-cream font-mono text-sm rounded-xl p-4 outline-none border-2 border-transparent focus:border-ember-500 resize-y"
           style={{ lineHeight: 1.6 }}
@@ -109,6 +119,7 @@ export default function CodeExplainer() {
       <button
         onClick={explain}
         disabled={loading || !code.trim()}
+        aria-label="Explain this code"
         className="btn-primary w-full justify-center disabled:opacity-40 disabled:cursor-not-allowed mb-8"
       >
         {loading ? 'Analyzing...' : <><Wand2 size={16} /> Explain this code</>}

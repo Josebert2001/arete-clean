@@ -1,5 +1,3 @@
-import { Heart } from 'lucide-react';
-
 export default function Footer() {
   return (
     <footer className="border-t border-coffee-200 mt-20 bg-cream/50">
@@ -8,7 +6,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-8 h-8 rounded-md bg-ink flex items-center justify-center">
-                <span style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#CFA665', lineHeight: 1 }}>a</span>
+                <span className="font-display font-bold text-coffee-300 text-[1.1rem] leading-none">a</span>
               </div>
               <span className="font-display text-lg font-bold text-ink">Arete</span>
             </div>
@@ -39,11 +37,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-coffee-200 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-coffee-700">
+        <div className="border-t border-coffee-200 pt-6 text-xs text-coffee-700">
           <p>© 2025 Arete by JRsolvy. Built for learners, everywhere.</p>
-          <p className="flex items-center gap-1.5 mt-2 sm:mt-0">
-            Made with <Heart size={12} className="text-rust fill-rust" /> in Uyo, Nigeria
-          </p>
         </div>
       </div>
     </footer>

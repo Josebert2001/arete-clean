@@ -100,6 +100,9 @@ export default function Install() {
                   <button
                     key={ci}
                     onClick={() => toggle(key)}
+                    role="checkbox"
+                    aria-checked={isChecked}
+                    aria-label={item}
                     className="flex items-start gap-3 text-left w-full group"
                   >
                     {isChecked

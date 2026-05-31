@@ -20,7 +20,7 @@ export default function Navbar() {
         <Link to="/" className="flex items-center gap-3 group">
           {/* Arete logo mark */}
           <div className="w-10 h-10 rounded-lg bg-ink flex items-center justify-center group-hover:bg-coffee-700 transition-colors">
-            <span style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: '1.35rem', fontWeight: 700, color: '#CFA665', lineHeight: 1 }}>a</span>
+            <span className="font-display font-bold text-coffee-300 text-[1.35rem] leading-none">a</span>
           </div>
           <div className="leading-tight">
             <div className="font-display font-bold text-ink text-xl tracking-tight">Arete</div>

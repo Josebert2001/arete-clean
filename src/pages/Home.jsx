@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Brain, Play, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 import { modules } from '../data/modules';
 import { useProgress } from '../components/useProgress';
 
@@ -136,25 +136,25 @@ export default function Home() {
       )}
 
       {/* WHAT'S INSIDE */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="text-center mb-12">
-          <div className="text-xs font-mono uppercase tracking-widest text-coffee-700 mb-3">What's inside</div>
-          <h2 className="display-heading text-4xl text-ink">Everything you need to actually learn it</h2>
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <div className="flex items-center gap-8 mb-12">
+          <h2 className="display-heading text-4xl sm:text-5xl text-ink shrink-0">What's inside</h2>
+          <div className="h-px flex-1 bg-coffee-200" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="border-t border-coffee-200">
           {[
-            { icon: BookOpen, title: '13 Modules', body: 'Foundations → OOP → JDBC → Swing GUI. Every core Java concept.' },
-            { icon: Play, title: 'Run Real Code', body: 'Write and run Java in your browser, every module. No setup needed.' },
-            { icon: CheckCircle2, title: 'Practice Quizzes', body: 'Test yourself after each module before moving on.' },
-            { icon: Brain, title: 'AI Tutor', body: 'Stuck? Ask any Java question and get a clear answer instantly.' },
+            { num: '01', title: '13 Modules', body: 'Foundations → OOP → JDBC → Swing GUI. Every core Java concept, sequenced the way you need to learn it.' },
+            { num: '02', title: 'Run Real Code', body: 'Write and execute Java in your browser, every module. No local setup, no friction.' },
+            { num: '03', title: 'Practice Quizzes', body: 'Test your understanding after each module before advancing. Repetition is how this works.' },
+            { num: '04', title: 'AI Tutor', body: "Ask any Java question. When the examples aren't clicking, the tutor fills the gap." },
           ].map((f, i) => (
-            <div key={i} className="bg-paper border border-coffee-200 rounded-xl p-6 hover:border-coffee-500 transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-coffee-100 flex items-center justify-center mb-4">
-                <f.icon size={18} className="text-coffee-700" />
+            <div key={i} className="py-7 border-b border-coffee-200 flex gap-5 group">
+              <span className="font-mono text-xs text-coffee-400 tabular-nums pt-1.5 w-6 shrink-0">{f.num}</span>
+              <div className="flex-1 sm:flex sm:items-baseline sm:gap-12">
+                <h3 className="display-heading text-2xl text-ink group-hover:text-coffee-600 transition-colors duration-200 mb-1 sm:mb-0 sm:w-48 shrink-0">{f.title}</h3>
+                <p className="text-coffee-700 leading-relaxed text-sm sm:text-base">{f.body}</p>
               </div>
-              <h3 className="font-display font-bold text-ink mb-2">{f.title}</h3>
-              <p className="text-sm text-coffee-700 leading-relaxed">{f.body}</p>
             </div>
           ))}
         </div>
@@ -163,10 +163,7 @@ export default function Home() {
       {/* MODULES PREVIEW */}
       <section className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-end justify-between mb-8">
-          <div>
-            <div className="text-xs font-mono uppercase tracking-widest text-coffee-700 mb-3">Java Track</div>
-            <h2 className="display-heading text-4xl text-ink">13 modules. One language. Zero shortcuts.</h2>
-          </div>
+          <h2 className="display-heading text-4xl text-ink">13 modules. One language. Zero shortcuts.</h2>
           <Link to="/modules" className="text-sm font-medium text-coffee-700 hover:text-ink hidden sm:inline-flex items-center gap-1">
             View all <ArrowRight size={14} />
           </Link>
@@ -203,16 +200,32 @@ export default function Home() {
       </section>
 
       {/* PHILOSOPHY SECTION */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="bg-ink text-cream rounded-2xl p-10 sm:p-14 text-center">
-          <p className="font-display text-4xl sm:text-5xl font-bold leading-tight mb-6">
-            "Excellence is never an accident.<br/>
-            <span className="text-coffee-300">It is the result of practice."</span>
+      <section className="max-w-6xl mx-auto px-6 py-20 relative overflow-hidden">
+        <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2 select-none pointer-events-none" aria-hidden>
+          <span className="display-heading leading-none text-coffee-100" style={{ fontSize: 'clamp(10rem, 22vw, 20rem)' }}>ἀ</span>
+        </div>
+
+        <div className="relative z-10 max-w-3xl">
+          <p className="display-heading text-ink leading-none mb-1" style={{ fontSize: 'clamp(2.25rem, 5.5vw, 4.25rem)' }}>
+            "Excellence is never
           </p>
-          <p className="text-coffee-400 text-sm mb-8">— Adapted from Aristotle</p>
-          <Link to="/modules" className="inline-flex items-center gap-2 bg-cream text-ink px-6 py-3 rounded-lg font-bold hover:bg-coffee-100 transition-colors">
-            Start Module 1 <ArrowRight size={16} />
-          </Link>
+          <p className="display-heading text-coffee-500 leading-none mb-1 italic" style={{ fontSize: 'clamp(2.25rem, 5.5vw, 4.25rem)', paddingLeft: 'clamp(1.5rem, 4vw, 4rem)' }}>
+            an accident.
+          </p>
+          <p className="display-heading text-ink leading-none mb-10" style={{ fontSize: 'clamp(2.25rem, 5.5vw, 4.25rem)' }}>
+            It is the result<br />of practice."
+          </p>
+
+          <div className="flex items-center gap-6 flex-wrap">
+            <span className="font-display text-sm text-coffee-600 italic">— Adapted from Aristotle</span>
+            <div className="h-px bg-coffee-200 flex-1 min-w-12 max-w-32" />
+            <Link
+              to="/modules"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink border-b border-ink/25 hover:text-coffee-700 hover:border-coffee-700 transition-all pb-0.5"
+            >
+              Start Module 1 <ArrowRight size={13} />
+            </Link>
+          </div>
         </div>
       </section>
     </div>

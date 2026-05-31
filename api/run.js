@@ -62,6 +62,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No source code provided' });
     }
 
+    if (source_code.length > 10000) {
+      return res.status(400).json({ error: 'Code exceeds the 10,000 character limit.' });
+    }
+
     const lang = LANGUAGES[language] || LANGUAGES.java;
 
     const jdoodleRes = await fetch('https://api.jdoodle.com/v1/execute', {

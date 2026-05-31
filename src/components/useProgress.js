@@ -16,7 +16,7 @@ export function useProgress() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
     } catch (e) {
-      // ignore
+      console.warn('Progress could not be saved to localStorage:', e);
     }
   }, [progress]);
 

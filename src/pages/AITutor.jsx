@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, User, Bot, AlertCircle } from 'lucide-react';
+import { Send, User, Bot, AlertCircle } from 'lucide-react';
 import { modules } from '../data/modules';
 
 /*
@@ -160,6 +160,7 @@ export default function AITutor() {
               <button
                 key={i}
                 onClick={() => send(s)}
+                aria-label={`Ask: ${s}`}
                 className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-1.5 text-coffee-700 hover:border-coffee-500 transition-colors"
               >
                 {s}
@@ -175,11 +176,13 @@ export default function AITutor() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Ask a Java question..."
+            aria-label="Ask a Java question"
             className="flex-1 bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
           />
           <button
             onClick={() => send()}
             disabled={loading || !input.trim()}
+            aria-label="Send message"
             className="btn-primary px-4 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Send size={16} />

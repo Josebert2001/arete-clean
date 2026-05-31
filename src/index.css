@@ -9,6 +9,14 @@
   --coffee-500: #8E5A1F;
   --coffee-700: #52310F;
   --ember: #C9531C;
+
+  /* Syntax highlighting tokens */
+  --syntax-kw:    #E07A2C;
+  --syntax-str:   #B6D178;
+  --syntax-num:   #CFA665;
+  --syntax-com:   #7A7268;
+  --syntax-fn:    #F0E4CD;
+  --syntax-plain: #F5EFE0;
 }
 
 * {
