@@ -77,7 +77,7 @@ export default function Install() {
             </div>
 
             {step.actions && (
-              <div className="ml-13 mb-4 flex flex-col gap-2" style={{ marginLeft: '3.25rem' }}>
+              <div className="ml-10 sm:ml-[3.25rem] mb-4 flex flex-col gap-2">
                 {step.actions.map((a, ai) => (
                   <a
                     key={ai}
@@ -92,7 +92,7 @@ export default function Install() {
               </div>
             )}
 
-            <div className="space-y-2" style={{ marginLeft: '3.25rem' }}>
+            <div className="space-y-2 ml-10 sm:ml-[3.25rem]">
               {step.checklist.map((item, ci) => {
                 const key = `${si}-${ci}`;
                 const isChecked = checked.includes(key);
@@ -117,7 +117,7 @@ export default function Install() {
             </div>
 
             {step.code && (
-              <div style={{ marginLeft: '3.25rem' }}>
+              <div className="ml-10 sm:ml-[3.25rem]">
                 <CodeBlock code={step.code} />
               </div>
             )}

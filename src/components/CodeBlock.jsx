@@ -99,7 +99,7 @@ export default function CodeBlock({ code, showLineNumbers = true }) {
   const lines = useMemo(() => tokenize(code), [code]);
   return (
     <div className="code-block my-4">
-      <pre className="text-sm leading-relaxed overflow-x-auto">
+      <pre className="text-xs sm:text-sm leading-relaxed overflow-x-auto">
         <code>
           {lines.map(({ lineIdx, tokens }) => (
             <div key={lineIdx} className="flex">

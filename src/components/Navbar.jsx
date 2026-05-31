@@ -29,7 +29,7 @@ export default function Navbar() {
         </Link>
 
         <button
-          className="md:hidden text-ink p-2"
+          className="md:hidden text-ink p-3"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >

@@ -110,7 +110,7 @@ export default function CodeExplainer() {
           onChange={e => setCode(e.target.value)}
           placeholder="Paste your Java code here..."
           aria-label="Paste your Java code for explanation"
-          rows={12}
+          rows={8}
           className="w-full bg-ink text-cream font-mono text-sm rounded-xl p-4 outline-none border-2 border-transparent focus:border-ember-500 resize-y"
           style={{ lineHeight: 1.6 }}
         />

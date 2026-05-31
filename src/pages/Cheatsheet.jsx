@@ -153,7 +153,7 @@ arr[arr.length - 1]  // last element
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {sections.map((s, i) => (
           <div key={i} className="bg-paper border border-coffee-200 rounded-xl p-5">
             <h3 className="font-display font-bold text-ink mb-2">{s.title}</h3>

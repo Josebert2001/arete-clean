@@ -129,7 +129,7 @@ export default function AITutor() {
               }`}>
                 {m.role === 'user' ? <User size={15} /> : <Bot size={15} />}
               </div>
-              <div className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+              <div className={`max-w-[90%] sm:max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                 m.role === 'user'
                   ? 'bg-ember-500 text-cream'
                   : 'bg-cream border border-coffee-200 text-ink'
@@ -161,7 +161,7 @@ export default function AITutor() {
                 key={i}
                 onClick={() => send(s)}
                 aria-label={`Ask: ${s}`}
-                className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-1.5 text-coffee-700 hover:border-coffee-500 transition-colors"
+                className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-2 text-coffee-700 hover:border-coffee-500 transition-colors"
               >
                 {s}
               </button>

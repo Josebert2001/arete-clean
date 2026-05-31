@@ -12,7 +12,7 @@ export default function Home() {
     <div>
       {/* HERO */}
       <section className="relative max-w-6xl mx-auto px-6 pt-16 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 animate-fade-up">
 
             {/* Badge */}
@@ -23,7 +23,7 @@ export default function Home() {
 
             {/* Name + tagline */}
             <div className="flex items-baseline gap-4 mb-4">
-              <h1 className="display-heading text-7xl sm:text-8xl text-ink tracking-tight">Arete</h1>
+              <h1 className="display-heading text-5xl sm:text-7xl lg:text-8xl text-ink tracking-tight">Arete</h1>
               <span className="font-display text-lg text-coffee-600 italic hidden sm:inline">ἀρετή</span>
             </div>
 
@@ -151,7 +151,7 @@ export default function Home() {
           ].map((f, i) => (
             <div key={i} className="py-7 border-b border-coffee-200 flex gap-5 group">
               <span className="font-mono text-xs text-coffee-400 tabular-nums pt-1.5 w-6 shrink-0">{f.num}</span>
-              <div className="flex-1 sm:flex sm:items-baseline sm:gap-12">
+              <div className="flex-1 sm:flex sm:items-baseline sm:gap-6 md:gap-12">
                 <h3 className="display-heading text-2xl text-ink group-hover:text-coffee-600 transition-colors duration-200 mb-1 sm:mb-0 sm:w-48 shrink-0">{f.title}</h3>
                 <p className="text-coffee-700 leading-relaxed text-sm sm:text-base">{f.body}</p>
               </div>
@@ -201,7 +201,7 @@ export default function Home() {
 
       {/* PHILOSOPHY SECTION */}
       <section className="max-w-6xl mx-auto px-6 py-20 relative overflow-hidden">
-        <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2 select-none pointer-events-none" aria-hidden>
+        <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2 select-none pointer-events-none hidden md:block" aria-hidden>
           <span className="display-heading leading-none text-coffee-100" style={{ fontSize: 'clamp(10rem, 22vw, 20rem)' }}>ἀ</span>
         </div>
 
