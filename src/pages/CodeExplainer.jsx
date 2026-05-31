@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Wand2, AlertCircle, Copy, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Wand2, Copy, Check, ArrowRight } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
 /*
@@ -82,76 +83,102 @@ export default function CodeExplainer() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
-      <div className="mb-6">
-        <div className="text-xs font-mono uppercase tracking-widest text-coffee-700 mb-3">Understand any code</div>
+      <div className="mb-8">
         <h1 className="display-heading text-5xl text-ink mb-3">Code Explainer</h1>
         <p className="text-lg text-coffee-700">
           Paste confusing Java code and get a clear, plain-English breakdown of what it does.
         </p>
       </div>
 
-      {DEMO_MODE && (
-        <div className="flex items-center gap-2 text-sm bg-coffee-100 border border-coffee-200 rounded-lg px-4 py-3 mb-6 text-coffee-700">
-          <AlertCircle size={16} className="flex-shrink-0" />
-          <span>Demo mode — connect Groq to enable real explanations (see code comments).</span>
+      {DEMO_MODE ? (
+        <div className="bg-paper border border-coffee-200 rounded-2xl p-8 sm:p-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-ember-500 animate-pulse" />
+            Coming Soon
+          </div>
+          <h2 className="display-heading text-3xl text-ink mb-4">Line-by-line. On its way.</h2>
+          <p className="text-coffee-700 leading-relaxed mb-8 max-w-lg">
+            Paste any Java code and get a plain-English walkthrough of what it does — line by line where it matters, with notes on common mistakes and what the output will be.
+          </p>
+          <ul className="space-y-3 mb-8">
+            {[
+              'Plain-English breakdown of every line that matters',
+              'What the output will be before you run it',
+              'Common mistakes hidden in the code',
+              'Suggestions for cleaner alternatives',
+            ].map((item, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-coffee-700">
+                <span className="font-mono text-coffee-400 shrink-0 pt-0.5">{String(i + 1).padStart(2, '0')}</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+          <div className="border-t border-coffee-200 pt-6 flex flex-wrap items-center gap-4">
+            <p className="text-sm text-coffee-700">For now, read the annotated examples —</p>
+            <Link to="/modules" className="btn-ghost text-sm">
+              Go to modules <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
-      )}
-
-      {/* Input */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium text-ink">Your Java code</label>
-          <button onClick={loadSample} className="text-xs text-coffee-700 hover:text-ink underline">
-            Load sample
-          </button>
-        </div>
-        <textarea
-          value={code}
-          onChange={e => setCode(e.target.value)}
-          placeholder="Paste your Java code here..."
-          aria-label="Paste your Java code for explanation"
-          rows={8}
-          className="w-full bg-ink text-cream font-mono text-sm rounded-xl p-4 outline-none border-2 border-transparent focus:border-ember-500 resize-y"
-          style={{ lineHeight: 1.6 }}
-        />
-      </div>
-
-      <button
-        onClick={explain}
-        disabled={loading || !code.trim()}
-        aria-label="Explain this code"
-        className="btn-primary w-full justify-center disabled:opacity-40 disabled:cursor-not-allowed mb-8"
-      >
-        {loading ? 'Analyzing...' : <><Wand2 size={16} /> Explain this code</>}
-      </button>
-
-      {/* Output */}
-      {(explanation || loading) && (
-        <div className="bg-paper border border-coffee-200 rounded-xl p-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-bold text-ink flex items-center gap-2">
-              <Wand2 size={16} className="text-coffee-500" /> Explanation
-            </h3>
-            {explanation && !loading && (
-              <button
-                onClick={copyExplanation}
-                className="text-xs text-coffee-700 hover:text-ink inline-flex items-center gap-1"
-              >
-                {copied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
+      ) : (
+        <>
+          {/* Input */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-ink">Your Java code</label>
+              <button onClick={loadSample} className="text-xs text-coffee-700 hover:text-ink underline">
+                Load sample
               </button>
-            )}
+            </div>
+            <textarea
+              value={code}
+              onChange={e => setCode(e.target.value)}
+              placeholder="Paste your Java code here..."
+              aria-label="Paste your Java code for explanation"
+              rows={8}
+              className="w-full bg-ink text-cream font-mono text-sm rounded-xl p-4 outline-none border-2 border-transparent focus:border-ember-500 resize-y"
+              style={{ lineHeight: 1.6 }}
+            />
           </div>
 
-          {loading ? (
-            <div className="flex gap-1.5">
-              <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <button
+            onClick={explain}
+            disabled={loading || !code.trim()}
+            aria-label="Explain this code"
+            className="btn-primary w-full justify-center disabled:opacity-40 disabled:cursor-not-allowed mb-8"
+          >
+            {loading ? 'Analyzing...' : <><Wand2 size={16} /> Explain this code</>}
+          </button>
+
+          {/* Output */}
+          {(explanation || loading) && (
+            <div className="bg-paper border border-coffee-200 rounded-xl p-6 animate-fade-in">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-display font-bold text-ink flex items-center gap-2">
+                  <Wand2 size={16} className="text-coffee-500" /> Explanation
+                </h3>
+                {explanation && !loading && (
+                  <button
+                    onClick={copyExplanation}
+                    className="text-xs text-coffee-700 hover:text-ink inline-flex items-center gap-1"
+                  >
+                    {copied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
+                  </button>
+                )}
+              </div>
+
+              {loading ? (
+                <div className="flex gap-1.5">
+                  <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              ) : (
+                <p className="text-sm text-coffee-700 leading-relaxed whitespace-pre-wrap">{explanation}</p>
+              )}
             </div>
-          ) : (
-            <p className="text-sm text-coffee-700 leading-relaxed whitespace-pre-wrap">{explanation}</p>
           )}
-        </div>
+        </>
       )}
     </div>
   );
