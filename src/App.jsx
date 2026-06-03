@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import FloatingHelp from './components/FloatingHelp';
 import Home from './pages/Home';
 import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
@@ -38,6 +39,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      <FloatingHelp />
     </div>
   );
 }

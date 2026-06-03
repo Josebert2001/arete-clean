@@ -6,7 +6,7 @@ An interactive programming and computer-science platform for 200L Cybersecurity 
 
 Three full interactive language tracks, a 200L Cybersecurity course hub, an AI tutor, and a code explainer.
 
-Built by **Josebert Sunday Robert (JRsolvy)** — Director of Software & Hardware, Cybersecurity Dept., UniUyo.
+Built by the **Department of Cybersecurity**, University of Uyo.
 
 ---
 
