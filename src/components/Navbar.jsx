@@ -7,7 +7,8 @@ export default function Navbar() {
 
   const links = [
     { to: '/', label: 'Home' },
-    { to: '/modules', label: 'Modules' },
+    { to: '/tracks', label: 'Tracks' },
+    { to: '/courses', label: 'Courses' },
     { to: '/install', label: 'Install' },
     { to: '/tutor', label: 'AI Tutor' },
     { to: '/explainer', label: 'Code Explainer' },

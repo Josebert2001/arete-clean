@@ -3,37 +3,30 @@ import { Link } from 'react-router-dom';
 import { Wand2, Copy, Check, ArrowRight } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
-/*
- ============================================================================
-  GROQ INTEGRATION POINT  —  Code Explainer
- ============================================================================
-  Same setup as AITutor.jsx. Wire askExplainer() to your backend → Groq.
+const DEMO_MODE = false;
 
-  SUGGESTED SYSTEM PROMPT:
-  "You are a Java code explainer for beginner students. Given Java code, explain
-   what it does in plain English, line by line where useful. Point out common
-   mistakes and what the output would be. Be concise and encouraging."
-
-  Send the user's pasted code as the user message.
- ============================================================================
-*/
-
-const DEMO_MODE = true;
-
-async function askExplainer(code) {
-  await new Promise(r => setTimeout(r, 1000));
-  return `🔌 **Code Explainer is in demo mode.**
-
-Once Groq is connected, paste any Java code here and get:
-• A plain-English breakdown of what it does
-• Line-by-line explanation of the tricky parts
-• What the output will be
-• Common mistakes to watch for
-
-See the comment block in CodeExplainer.jsx to wire it up.`;
+async function askExplainer(code, language) {
+  const res = await fetch('/api/explainer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, language }),
+  });
+  if (!res.ok) throw new Error('Request failed');
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.explanation;
 }
 
-const SAMPLE = `public class Mystery {
+const LANGUAGES = [
+  { value: '', label: 'Auto-detect' },
+  { value: 'java', label: 'Java' },
+  { value: 'python', label: 'Python' },
+  { value: 'c', label: 'C' },
+  { value: 'cpp', label: 'C++' },
+];
+
+const SAMPLES = {
+  java: `public class Mystery {
     public static void main(String[] args) {
         int[] nums = {4, 8, 15, 16, 23, 42};
         int sum = 0;
@@ -42,10 +35,28 @@ const SAMPLE = `public class Mystery {
         }
         System.out.println("Total: " + sum);
     }
-}`;
+}`,
+  python: `nums = [4, 8, 15, 16, 23, 42]
+total = 0
+for n in nums:
+    total += n
+print(f"Total: {total}")`,
+  c: `#include <stdio.h>
+
+int main(void) {
+    int nums[] = {4, 8, 15, 16, 23, 42};
+    int sum = 0;
+    for (int i = 0; i < 6; i++) {
+        sum += nums[i];
+    }
+    printf("Total: %d\\n", sum);
+    return 0;
+}`,
+};
 
 export default function CodeExplainer() {
   const [code, setCode] = useState('');
+  const [language, setLanguage] = useState('');
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -55,16 +66,20 @@ export default function CodeExplainer() {
     setLoading(true);
     setExplanation('');
     try {
-      const result = await askExplainer(code);
+      const result = await askExplainer(code, language);
       setExplanation(result);
-    } catch {
-      setExplanation('Something went wrong. Please try again.');
+    } catch (e) {
+      setExplanation(
+        e?.message && e.message !== 'Request failed'
+          ? e.message
+          : 'Something went wrong. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const loadSample = () => setCode(SAMPLE);
+  const loadSample = () => setCode(SAMPLES[language] || SAMPLES.java);
 
   const copyExplanation = async () => {
     if (navigator.clipboard) {
@@ -86,7 +101,7 @@ export default function CodeExplainer() {
       <div className="mb-8">
         <h1 className="display-heading text-5xl text-ink mb-3">Code Explainer</h1>
         <p className="text-lg text-coffee-700">
-          Paste confusing Java code and get a clear, plain-English breakdown of what it does.
+          Paste confusing Java, Python, or C code and get a clear, plain-English breakdown of what it does.
         </p>
       </div>
 
@@ -124,8 +139,21 @@ export default function CodeExplainer() {
         <>
           {/* Input */}
           <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-ink">Your Java code</label>
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="flex items-center gap-2">
+                <label htmlFor="explainer-lang" className="text-sm font-medium text-ink">Your code</label>
+                <select
+                  id="explainer-lang"
+                  value={language}
+                  onChange={e => setLanguage(e.target.value)}
+                  aria-label="Code language"
+                  className="bg-paper border border-coffee-200 rounded-md px-2 py-1 text-xs text-ink focus:border-coffee-500 outline-none"
+                >
+                  {LANGUAGES.map(l => (
+                    <option key={l.value || 'auto'} value={l.value}>{l.label}</option>
+                  ))}
+                </select>
+              </div>
               <button onClick={loadSample} className="text-xs text-coffee-700 hover:text-ink underline">
                 Load sample
               </button>
@@ -133,8 +161,8 @@ export default function CodeExplainer() {
             <textarea
               value={code}
               onChange={e => setCode(e.target.value)}
-              placeholder="Paste your Java code here..."
-              aria-label="Paste your Java code for explanation"
+              placeholder="Paste your code here..."
+              aria-label="Paste your code for explanation"
               rows={8}
               className="w-full bg-ink text-cream font-mono text-sm rounded-xl p-4 outline-none border-2 border-transparent focus:border-ember-500 resize-y"
               style={{ lineHeight: 1.6 }}

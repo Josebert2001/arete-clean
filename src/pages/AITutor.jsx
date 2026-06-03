@@ -1,65 +1,41 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Send, User, Bot, ArrowRight } from 'lucide-react';
-import { modules } from '../data/modules';
+import { trackConfig } from '../data/trackConfig';
 
-/*
- ============================================================================
-  GROQ INTEGRATION POINT  —  Josebert, wire this up later
- ============================================================================
-  1. Get a free API key from https://console.groq.com
-  2. For production, DO NOT expose the key in frontend code.
-     Create a small backend route (Node/Express) that proxies the request.
-     Your stack already has Express — reuse it.
+const DEMO_MODE = false;
 
-  3. Replace the askAI() function below with a real call. Example shape:
-
-  async function askAI(question, moduleContext) {
-    const res = await fetch('/api/tutor', {           // your backend route
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, moduleContext })
-    });
-    const data = await res.json();
-    return data.answer;
-  }
-
-  4. On the backend, call Groq:
-
-  const completion = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },   // see below
-      { role: 'user', content: question }
-    ]
-  });
-
-  SUGGESTED SYSTEM PROMPT:
-  "You are a friendly Java tutor for COS 222 students at the University of Uyo.
-   Explain concepts simply, use Nigerian/student-relatable examples, always show
-   short Java code where helpful, and never give full project solutions — guide
-   them to figure it out. Keep answers concise."
- ============================================================================
-*/
-
-const DEMO_MODE = true; // set to false once Groq is wired up
+// Focus options grouped by track — each value is a ready-to-send context label.
+const FOCUS_GROUPS = Object.values(trackConfig).map(t => ({
+  label: t.label,
+  options: t.modules.map(m => ({
+    key: `${t.slug}-${m.id}`,
+    value: `${t.label} — Module ${String(m.number).padStart(2, '0')}: ${m.title}`,
+  })),
+}));
 
 async function askAI(question, moduleContext) {
-  // ---- DEMO RESPONSE (remove once Groq is connected) ----
-  await new Promise(r => setTimeout(r, 900));
-  return `🔌 **AI Tutor is in demo mode.**\n\nOnce you wire up Groq (see the comment block in AITutor.jsx), I'll answer questions like:\n\n*"${question}"*\n\n...with real, module-aware explanations and code examples — tailored for COS 222 students.\n\nFor now, head to the **Modules** section for full theory and examples on this topic.`;
+  const res = await fetch('/api/tutor', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, moduleContext }),
+  });
+  if (!res.ok) throw new Error('Request failed');
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.answer;
 }
 
 const SUGGESTED = [
-  'What is the difference between == and .equals()?',
-  'Explain OOP like I am 5 years old',
-  'When should I use ArrayList vs array?',
-  'Why does my program throw NullPointerException?',
+  'What is the difference between == and .equals() in Java?',
+  'Explain pointers in C with a simple example',
+  'How are Python lists different from dictionaries?',
+  'What is Big-O notation, in plain English?',
 ];
 
 export default function AITutor() {
   const [messages, setMessages] = useState([
-    { role: 'bot', text: "Hi! I'm your Java tutor. Ask me anything about COS 222 — concepts, errors, syntax, or how to approach a mini project. What are you stuck on?" }
+    { role: 'bot', text: "Hi! I'm your Arete tutor. Ask me anything about Java, Python, C, or core CS topics — concepts, errors, syntax, or how to approach a mini project. What are you stuck on?" }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -82,7 +58,10 @@ export default function AITutor() {
       const answer = await askAI(question, selectedModule);
       setMessages(m => [...m, { role: 'bot', text: answer }]);
     } catch (e) {
-      setMessages(m => [...m, { role: 'bot', text: 'Something went wrong. Please try again.' }]);
+      const text = e?.message && e.message !== 'Request failed'
+        ? e.message
+        : 'Something went wrong. Please try again.';
+      setMessages(m => [...m, { role: 'bot', text }]);
     } finally {
       setLoading(false);
     }
@@ -131,15 +110,19 @@ export default function AITutor() {
         <>
           {/* Module context selector */}
           <div className="mb-4">
-            <label className="text-xs font-medium text-coffee-700 block mb-1.5">Focus on a module (optional)</label>
+            <label className="text-xs font-medium text-coffee-700 block mb-1.5">Focus on a language or module (optional)</label>
             <select
               value={selectedModule}
               onChange={e => setSelectedModule(e.target.value)}
               className="w-full bg-paper border border-coffee-200 rounded-lg px-3 py-2 text-sm text-ink focus:border-coffee-500 outline-none"
             >
-              <option value="">General Java</option>
-              {modules.map(m => (
-                <option key={m.id} value={m.id}>Module {m.number}: {m.title}</option>
+              <option value="">General — any language or topic</option>
+              {FOCUS_GROUPS.map(group => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.options.map(o => (
+                    <option key={o.key} value={o.value}>{o.value}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>

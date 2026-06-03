@@ -1,15 +1,16 @@
 {
-  "name": "cos222-java-companion",
+  "name": "arete",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Interactive Java learning companion for COS 222 students at UniUyo and beyond. Built by JRsolvy.",
+  "description": "Arete — interactive learning platform for the Cybersecurity Department, University of Uyo. Java, Python & C tracks plus a full 200L course hub. Built by JRsolvy.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "groq-sdk": "^1.2.1",
     "lucide-react": "^0.400.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

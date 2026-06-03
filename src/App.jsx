@@ -4,6 +4,11 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Modules from './pages/Modules';
 import ModuleDetail from './pages/ModuleDetail';
+import Courses from './pages/Courses';
+import CourseDetail from './pages/CourseDetail';
+import Tracks from './pages/Tracks';
+import TrackModules from './pages/TrackModules';
+import TrackModuleDetail from './pages/TrackModuleDetail';
 import Install from './pages/Install';
 import AITutor from './pages/AITutor';
 import CodeExplainer from './pages/CodeExplainer';
@@ -16,6 +21,11 @@ export default function App() {
       <main className="flex-1 relative z-10">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:slug" element={<CourseDetail />} />
+          <Route path="/tracks" element={<Tracks />} />
+          <Route path="/tracks/:lang" element={<TrackModules />} />
+          <Route path="/tracks/:lang/:id" element={<TrackModuleDetail />} />
           <Route path="/modules" element={<Modules />} />
           <Route path="/modules/:id" element={<ModuleDetail />} />
           <Route path="/install" element={<Install />} />

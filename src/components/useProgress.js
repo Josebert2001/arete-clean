@@ -1,24 +1,36 @@
 import { useState, useEffect } from 'react';
 
-const STORAGE_KEY = 'cos222-progress-v1';
+const EMPTY_PROGRESS = { completedModules: [], quizScores: {} };
 
-export function useProgress() {
-  const [progress, setProgress] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : { completedModules: [], quizScores: {} };
-    } catch {
-      return { completedModules: [], quizScores: {} };
-    }
-  });
+function readProgress(storageKey) {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    return raw ? JSON.parse(raw) : { ...EMPTY_PROGRESS };
+  } catch {
+    return { ...EMPTY_PROGRESS };
+  }
+}
+
+export function useProgress(storageKey = 'cos222-progress-v1') {
+  const [progress, setProgress] = useState(() => readProgress(storageKey));
+  const [loadedKey, setLoadedKey] = useState(storageKey);
+
+  // If the storageKey changes on a mounted instance (e.g. switching tracks
+  // within the same route), reload from the new key during render — before any
+  // effect can persist the previous track's progress into it.
+  if (loadedKey !== storageKey) {
+    setLoadedKey(storageKey);
+    setProgress(readProgress(storageKey));
+  }
 
   useEffect(() => {
+    if (loadedKey !== storageKey) return; // mid key-change; skip the stale write
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+      localStorage.setItem(storageKey, JSON.stringify(progress));
     } catch (e) {
       console.warn('Progress could not be saved to localStorage:', e);
     }
-  }, [progress]);
+  }, [progress, storageKey, loadedKey]);
 
   const markComplete = (moduleId) => {
     setProgress(p => p.completedModules.includes(moduleId)

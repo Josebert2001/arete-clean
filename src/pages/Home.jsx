@@ -1,7 +1,56 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, Code2, Terminal, Coffee } from 'lucide-react';
 import { modules } from '../data/modules';
+import { trackConfig } from '../data/trackConfig';
 import { useProgress } from '../components/useProgress';
+
+const trackHighlights = [
+  {
+    slug: 'java',
+    icon: Coffee,
+    color: 'bg-ink',
+    text: 'text-cream',
+    label: 'Java',
+    tag: 'COS 222',
+    count: 13,
+    blurb: 'OOP, collections, JDBC, Swing GUI — full interactive track.',
+  },
+  {
+    slug: 'python',
+    icon: Code2,
+    color: 'bg-moss',
+    text: 'text-cream',
+    label: 'Python',
+    tag: null,
+    count: 12,
+    blurb: 'From Hello World to OOP, files, and the standard library.',
+  },
+  {
+    slug: 'c',
+    icon: Terminal,
+    color: 'bg-ember-500',
+    text: 'text-cream',
+    label: 'C',
+    tag: 'COS 211',
+    count: 12,
+    blurb: 'Pointers, memory, structs — the language that explains how computers work.',
+  },
+];
+
+function TrackProgressBar({ track }) {
+  const { progress } = useProgress(trackConfig[track.slug].storageKey);
+  const done = progress.completedModules.length;
+  if (done === 0) return null;
+  const pct = Math.round((done / track.count) * 100);
+  return (
+    <div className="mt-2">
+      <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+        <div className="h-full bg-white/70 transition-all duration-700" style={{ width: `${pct}%` }} />
+      </div>
+      <p className="text-xs mt-1 opacity-60">{done}/{track.count} done</p>
+    </div>
+  );
+}
 
 export default function Home() {
   const { progress, isComplete } = useProgress();
@@ -18,7 +67,7 @@ export default function Home() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
               <Sparkles size={12} />
-              <span>Java Track · 13 modules · COS 222 & beyond</span>
+              <span>Java · Python · C — 37 interactive modules</span>
             </div>
 
             {/* Name + tagline */}
@@ -32,20 +81,20 @@ export default function Home() {
             </p>
 
             <p className="text-lg text-coffee-700 mb-8 max-w-xl leading-relaxed">
-              The ancient Greeks believed excellence isn't a gift — it's earned through daily practice and discipline. So is coding.
-              13 Java modules, built for students who want to learn it properly. No shortcuts.
+              The ancient Greeks believed excellence isn't a gift — it's earned through daily practice
+              and discipline. So is coding. Three language tracks, built for students who want to
+              learn properly. No shortcuts.
             </p>
 
             <div className="flex flex-wrap gap-3">
-              <Link to="/modules" className="btn-primary">
-                Start Learning <ArrowRight size={16} />
+              <Link to="/tracks" className="btn-primary">
+                Pick a language <ArrowRight size={16} />
               </Link>
               <Link to="/install" className="btn-ghost">
                 Install Java first
               </Link>
             </div>
 
-            {/* Greek etymology note */}
             <p className="text-xs text-coffee-600 mt-6 font-display italic">
               ἀρετή (ar-eh-TAY) · Greek · "excellence achieved through practice"
             </p>
@@ -55,8 +104,6 @@ export default function Home() {
           <div className="lg:col-span-5 animate-fade-up" style={{ animationDelay: '120ms' }}>
             <div className="relative">
               <div className="bg-ink text-cream p-8 rounded-2xl shadow-xl relative overflow-hidden">
-
-                {/* Top bar */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex gap-1.5">
                     <span className="w-3 h-3 rounded-full bg-rust/60" />
@@ -66,7 +113,6 @@ export default function Home() {
                   <span className="text-xs font-mono text-coffee-400 tracking-widest">Excellence.java</span>
                 </div>
 
-                {/* Steam above the code */}
                 <div className="flex gap-3 mb-4 opacity-50">
                   <span className="steam text-coffee-300 text-lg">∿</span>
                   <span className="steam text-coffee-300 text-lg" style={{ animationDelay: '0.4s' }}>∿</span>
@@ -100,7 +146,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Sticky note */}
               <div className="sticky-note absolute -bottom-5 -left-5 p-4 w-40 hidden sm:block">
                 <p className="font-display text-sm text-ink leading-snug">
                   "Type every example. Don't copy-paste."
@@ -112,12 +157,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PROGRESS STRIP */}
+      {/* JAVA PROGRESS STRIP */}
       {completedCount > 0 && (
         <section className="max-w-6xl mx-auto px-6 mb-16">
           <div className="bg-cream border border-coffee-200 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-center justify-between">
             <div>
-              <div className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-1">Your Progress</div>
+              <div className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-1">Java Progress</div>
               <div className="font-display text-2xl font-bold text-ink">
                 {completedCount} of {modules.length} modules complete
               </div>
@@ -135,6 +180,51 @@ export default function Home() {
         </section>
       )}
 
+      {/* THREE TRACKS */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className="flex items-center gap-8 mb-10">
+          <h2 className="display-heading text-4xl sm:text-5xl text-ink shrink-0">Three tracks.</h2>
+          <div className="h-px flex-1 bg-coffee-200" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+          {trackHighlights.map(track => {
+            const Icon = track.icon;
+            return (
+              <Link
+                key={track.slug}
+                to={trackConfig[track.slug].listPath}
+                className={`${track.color} ${track.text} rounded-2xl p-6 group hover:opacity-90 transition-all`}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <Icon size={24} className="opacity-80" />
+                  <div className="flex items-center gap-2">
+                    {track.tag && (
+                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-white/15">
+                        {track.tag}
+                      </span>
+                    )}
+                    <span className="text-xs font-mono opacity-60">{track.count} modules</span>
+                  </div>
+                </div>
+                <h3 className="font-display font-bold text-2xl mb-1">{track.label}</h3>
+                <p className="text-sm opacity-75 leading-relaxed mb-4">{track.blurb}</p>
+                <TrackProgressBar track={track} />
+                <div className="flex items-center gap-1.5 text-sm font-medium mt-4 opacity-80 group-hover:opacity-100 transition-opacity">
+                  Open track <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="text-center">
+          <Link to="/tracks" className="btn-ghost">
+            Compare all three tracks <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
       {/* WHAT'S INSIDE */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="flex items-center gap-8 mb-12">
@@ -144,10 +234,10 @@ export default function Home() {
 
         <div className="border-t border-coffee-200">
           {[
-            { num: '01', title: '13 Modules', body: 'Foundations → OOP → JDBC → Swing GUI. Every core Java concept, sequenced the way you need to learn it.' },
-            { num: '02', title: 'Run Real Code', body: 'Write and execute Java in your browser, every module. No local setup, no friction.' },
-            { num: '03', title: 'Practice Quizzes', body: 'Test your understanding after each module before advancing. Repetition is how this works.' },
-            { num: '04', title: 'AI Tutor', body: "Ask any Java question. When the examples aren't clicking, the tutor fills the gap." },
+            { num: '01', title: '37 Modules', body: 'Java (13), Python (12), and C (12) — full interactive learning tracks. Theory, code examples, quizzes, playgrounds, and mini projects for every module.' },
+            { num: '02', title: 'Run Real Code', body: 'Write and execute Java, Python, or C in your browser, every module. No local setup, no friction — just code and run.' },
+            { num: '03', title: 'Practice Quizzes', body: 'Test your understanding after each module before advancing. 7 questions per module, with explanations for every answer.' },
+            { num: '04', title: 'AI Tutor', body: "Ask any programming question. When the code examples aren't clicking, the tutor fills the gap." },
           ].map((f, i) => (
             <div key={i} className="py-7 border-b border-coffee-200 flex gap-5 group">
               <span className="font-mono text-xs text-coffee-400 tabular-nums pt-1.5 w-6 shrink-0">{f.num}</span>
@@ -160,12 +250,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MODULES PREVIEW */}
+      {/* JAVA MODULES PREVIEW */}
       <section className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-end justify-between mb-8">
-          <h2 className="display-heading text-4xl text-ink">13 modules. One language. Zero shortcuts.</h2>
+          <h2 className="display-heading text-4xl text-ink">Java track preview.</h2>
           <Link to="/modules" className="text-sm font-medium text-coffee-700 hover:text-ink hidden sm:inline-flex items-center gap-1">
-            View all <ArrowRight size={14} />
+            All 13 modules <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -194,12 +284,12 @@ export default function Home() {
 
         <div className="text-center mt-8">
           <Link to="/modules" className="btn-ghost">
-            See all 13 modules <ArrowRight size={16} />
+            See all 13 Java modules <ArrowRight size={16} />
           </Link>
         </div>
       </section>
 
-      {/* PHILOSOPHY SECTION */}
+      {/* PHILOSOPHY */}
       <section className="max-w-6xl mx-auto px-6 py-20 relative overflow-hidden">
         <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2 select-none pointer-events-none hidden md:block" aria-hidden>
           <span className="display-heading leading-none text-coffee-100" style={{ fontSize: 'clamp(10rem, 22vw, 20rem)' }}>ἀ</span>
@@ -220,10 +310,10 @@ export default function Home() {
             <span className="font-display text-sm text-coffee-600 italic">— Adapted from Aristotle</span>
             <div className="h-px bg-coffee-200 flex-1 min-w-12 max-w-32" />
             <Link
-              to="/modules"
+              to="/tracks"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink border-b border-ink/25 hover:text-coffee-700 hover:border-coffee-700 transition-all pb-0.5"
             >
-              Start Module 1 <ArrowRight size={13} />
+              Pick your track <ArrowRight size={13} />
             </Link>
           </div>
         </div>

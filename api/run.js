@@ -34,8 +34,12 @@ const LANGUAGES = {
   python: { language: 'python3', versionIndex: '6' },
 };
 
+// Restrict browser callers to the deployed site. Set ALLOWED_ORIGIN in Vercel
+// to your domain (e.g. https://arete.vercel.app); falls back to '*' if unset.
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -58,7 +62,7 @@ export default async function handler(req, res) {
   try {
     const { source_code, language = 'java', stdin = '' } = req.body || {};
 
-    if (!source_code || !source_code.trim()) {
+    if (typeof source_code !== 'string' || !source_code.trim()) {
       return res.status(400).json({ error: 'No source code provided' });
     }
 

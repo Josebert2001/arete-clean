@@ -38,7 +38,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-coffee-200 pt-6 text-xs text-coffee-700">
-          <p>© 2025 Arete by JRsolvy. Built for learners, everywhere.</p>
+          <p>© {new Date().getFullYear()} Arete by JRsolvy. Built for learners, everywhere.</p>
         </div>
       </div>
     </footer>
