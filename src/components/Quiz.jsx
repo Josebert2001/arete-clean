@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 
-export default function Quiz({ questions, moduleId, onComplete }) {
+export default function Quiz({ questions, onComplete }) {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answered, setAnswered] = useState(false);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [answers, setAnswers] = useState([]);
 
   const q = questions[current];
 
@@ -15,9 +14,7 @@ export default function Quiz({ questions, moduleId, onComplete }) {
     if (answered) return;
     setSelected(idx);
     setAnswered(true);
-    const correct = idx === q.correctIndex;
-    if (correct) setScore(s => s + 1);
-    setAnswers(a => [...a, { question: current, selected: idx, correct }]);
+    if (idx === q.correctIndex) setScore(s => s + 1);
   };
 
   const next = () => {
@@ -38,7 +35,6 @@ export default function Quiz({ questions, moduleId, onComplete }) {
     setAnswered(false);
     setScore(0);
     setFinished(false);
-    setAnswers([]);
   };
 
   if (finished) {

@@ -326,7 +326,8 @@ System.out.println("Goodbye!");`,
       },
       {
         heading: 'Indexing Starts at 0',
-        body: 'This trips up every beginner. The FIRST element is at index 0, the second at index 1, and so on. An array of 5 elements has indices 0, 1, 2, 3, 4 — NOT 1 to 5.'
+        body: 'This trips up every beginner. The FIRST element is at index 0, the second at index 1, and so on. An array of 5 elements has indices 0, 1, 2, 3, 4 — NOT 1 to 5.',
+        diagram: 'c-array'
       },
       {
         heading: 'Array Size is Fixed',
@@ -560,7 +561,8 @@ System.out.println(factorial(5));  // Output: 120`,
       },
       {
         heading: 'Class vs Object',
-        body: 'A class is a blueprint. An object is a real thing built from that blueprint. "Student" is a class — the general idea. "Josebert" is an object — an actual student with real values for name, age, matric number.'
+        body: 'A class is a blueprint. An object is a real thing built from that blueprint. "Student" is a class — the general idea. "Josebert" is an object — an actual student with real values for name, age, matric number.',
+        diagram: 'java-class'
       },
       {
         heading: 'Constructors',
@@ -695,7 +697,8 @@ Student s1 = new Student("Josebert", "22/CYB/001", 4.85);`,
     theory: [
       {
         heading: 'Inheritance',
-        body: 'Inheritance lets one class inherit fields and methods from another. The child class can use everything the parent has, plus add its own things. This avoids rewriting the same code in similar classes. Use the extends keyword.'
+        body: 'Inheritance lets one class inherit fields and methods from another. The child class can use everything the parent has, plus add its own things. This avoids rewriting the same code in similar classes. Use the extends keyword.',
+        diagram: 'java-inheritance'
       },
       {
         heading: 'Polymorphism',

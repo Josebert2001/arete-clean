@@ -6,6 +6,7 @@ import { useProgress } from '../components/useProgress';
 import CodeBlock from '../components/CodeBlock';
 import CodePlayground from '../components/CodePlayground';
 import Quiz from '../components/Quiz';
+import Diagram from '../components/Diagram';
 
 export default function TrackModuleDetail() {
   const { lang, id } = useParams();
@@ -15,8 +16,16 @@ export default function TrackModuleDetail() {
   const mod = useMemo(() => track?.getModuleById(id), [track, id]);
   const { isComplete, markComplete, markIncomplete, setQuizScore } = useProgress(track?.storageKey);
 
-  useEffect(() => {
+  // Reset tab to 'theory' on route change — render-time pattern (cheaper than
+  // a setState-in-effect bounce, per the React docs).
+  const routeKey = `${lang}-${id}`;
+  const [lastRouteKey, setLastRouteKey] = useState(routeKey);
+  if (lastRouteKey !== routeKey) {
+    setLastRouteKey(routeKey);
     setTab('theory');
+  }
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [id, lang]);
 
@@ -114,6 +123,7 @@ export default function TrackModuleDetail() {
               <div key={i} className="bg-paper border border-coffee-200 rounded-xl p-6">
                 <h3 className="font-display text-xl font-bold text-ink mb-3">{section.heading}</h3>
                 <p className="text-coffee-700 leading-relaxed">{section.body}</p>
+                {section.diagram && <Diagram name={section.diagram} />}
               </div>
             ))}
           </div>

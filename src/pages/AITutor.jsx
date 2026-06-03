@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Send, User, Bot, ArrowRight } from 'lucide-react';
 import { trackConfig } from '../data/trackConfig';
 
+// Force the Coming Soon screen during local dev without removing the live
+// chat. The server also signals "not configured" at runtime (see askAI below).
 const DEMO_MODE = false;
 
 // Focus options grouped by track — each value is a ready-to-send context label.
@@ -21,9 +23,7 @@ async function askAI(question, moduleContext) {
     body: JSON.stringify({ question, moduleContext }),
   });
   if (!res.ok) throw new Error('Request failed');
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data.answer;
+  return res.json();
 }
 
 const SUGGESTED = [
@@ -40,6 +40,7 @@ export default function AITutor() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedModule, setSelectedModule] = useState('');
+  const [comingSoon, setComingSoon] = useState(false);
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -55,8 +56,13 @@ export default function AITutor() {
     setLoading(true);
 
     try {
-      const answer = await askAI(question, selectedModule);
-      setMessages(m => [...m, { role: 'bot', text: answer }]);
+      const data = await askAI(question, selectedModule);
+      if (data.notConfigured) {
+        setComingSoon(true);
+        return;
+      }
+      if (data.error) throw new Error(data.error);
+      setMessages(m => [...m, { role: 'bot', text: data.answer }]);
     } catch (e) {
       const text = e?.message && e.message !== 'Request failed'
         ? e.message
@@ -76,7 +82,7 @@ export default function AITutor() {
         </p>
       </div>
 
-      {DEMO_MODE ? (
+      {(DEMO_MODE || comingSoon) ? (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-8 sm:p-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-ember-500 animate-pulse" />
@@ -101,7 +107,7 @@ export default function AITutor() {
           </ul>
           <div className="border-t border-coffee-200 pt-6 flex flex-wrap items-center gap-4">
             <p className="text-sm text-coffee-700">In the meantime —</p>
-            <Link to="/modules" className="btn-ghost text-sm">
+            <Link to="/tracks" className="btn-ghost text-sm">
               Read the modules <ArrowRight size={14} />
             </Link>
           </div>

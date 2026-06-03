@@ -163,7 +163,8 @@ print(type(gpa))`,
     theory: [
       {
         heading: 'Making Decisions with if/elif/else',
-        body: 'Control flow lets a program choose which code to run based on conditions. The if statement evaluates a condition; if it is True, the indented block below runs. elif ("else if") provides additional conditions to check in order. else runs when none of the above conditions were True. Python uses indentation (4 spaces) to define which lines belong to each branch.'
+        body: 'Control flow lets a program choose which code to run based on conditions. The if statement evaluates a condition; if it is True, the indented block below runs. elif ("else if") provides additional conditions to check in order. else runs when none of the above conditions were True. Python uses indentation (4 spaces) to define which lines belong to each branch.',
+        diagram: 'py-indentation'
       },
       {
         heading: 'Comparison Operators',
@@ -175,7 +176,7 @@ print(type(gpa))`,
       },
       {
         heading: 'Truthy and Falsy Values',
-        body: 'In Python, every value has an implicit boolean meaning. Falsy values include: 0, 0.0, empty string "", empty list [], None, and False itself. Everything else is truthy. This lets you write clean conditions like "if name:" to check if a string is non-empty, instead of "if name != \"\":".'
+        body: 'In Python, every value has an implicit boolean meaning. Falsy values include: 0, 0.0, empty string "", empty list [], None, and False itself. Everything else is truthy. This lets you write clean conditions like "if name:" to check if a string is non-empty, instead of "if name != """:".'
       }
     ],
     codeExamples: [
@@ -655,7 +656,8 @@ describe_student("Salome", department="Cybersecurity", gpa=4.2, year=2)`,
     theory: [
       {
         heading: 'Lists: Ordered and Mutable',
-        body: 'A list is an ordered, mutable (changeable) sequence of items enclosed in square brackets. Items can be of any type, even mixed. You access items by their index starting at 0, and negative indices count from the end (-1 is the last item). Lists are one of the most used data structures in Python.'
+        body: 'A list is an ordered, mutable (changeable) sequence of items enclosed in square brackets. Items can be of any type, even mixed. You access items by their index starting at 0, and negative indices count from the end (-1 is the last item). Lists are one of the most used data structures in Python.',
+        diagram: 'py-list'
       },
       {
         heading: 'Slicing',
@@ -818,7 +820,8 @@ print(f"{name} — Age {age} — {dept}")`,
     theory: [
       {
         heading: 'Dictionaries: Key-Value Stores',
-        body: 'A dictionary stores data as key-value pairs enclosed in curly braces: {"name": "Josebert", "age": 21}. Each key must be unique and immutable (strings and numbers are common keys). Dictionaries maintain insertion order in Python 3.7+. They provide very fast lookups by key, making them ideal for representing real-world entities.'
+        body: 'A dictionary stores data as key-value pairs enclosed in curly braces: {"name": "Josebert", "age": 21}. Each key must be unique and immutable (strings and numbers are common keys). Dictionaries maintain insertion order in Python 3.7+. They provide very fast lookups by key, making them ideal for representing real-world entities.',
+        diagram: 'py-dict'
       },
       {
         heading: 'Accessing and Updating Dictionaries',
@@ -1153,7 +1156,8 @@ print(f"{'GPA':<12}: {gpa:.2f}")`,
     theory: [
       {
         heading: 'Classes and Objects',
-        body: 'Object-Oriented Programming organises code around objects — entities that bundle data (attributes) and behaviour (methods) together. A class is the blueprint; an object is an instance built from that blueprint. You define a class with the class keyword. Each object created from the class is independent and holds its own data.'
+        body: 'Object-Oriented Programming organises code around objects — entities that bundle data (attributes) and behaviour (methods) together. A class is the blueprint; an object is an instance built from that blueprint. You define a class with the class keyword. Each object created from the class is independent and holds its own data.',
+        diagram: 'java-class'
       },
       {
         heading: '__init__ and self',
@@ -1345,7 +1349,8 @@ print(f"University: {Student.university}")`,
     theory: [
       {
         heading: 'Inheritance and super()',
-        body: 'Inheritance lets a child class acquire the attributes and methods of a parent class. Use class Child(Parent): to declare it. The child can add new methods or override existing ones. super() calls a method from the parent class — most commonly used in __init__ to run the parent\'s initialisation before adding attributes unique to the child.'
+        body: 'Inheritance lets a child class acquire the attributes and methods of a parent class. Use class Child(Parent): to declare it. The child can add new methods or override existing ones. super() calls a method from the parent class — most commonly used in __init__ to run the parent\'s initialisation before adding attributes unique to the child.',
+        diagram: 'java-inheritance'
       },
       {
         heading: 'Method Overriding and Polymorphism',

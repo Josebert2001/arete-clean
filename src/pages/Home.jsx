@@ -1,8 +1,74 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, CheckCircle2, Code2, Terminal, Coffee } from 'lucide-react';
+import { ArrowRight, Sparkles, Code2, Terminal, Coffee } from 'lucide-react';
 import { modules } from '../data/modules';
+import { pythonModules } from '../data/pythonModules';
+import { cModules } from '../data/cModules';
 import { trackConfig } from '../data/trackConfig';
 import { useProgress } from '../components/useProgress';
+
+const HERO_SNIPPETS = [
+  {
+    lang: 'java',
+    filename: 'Excellence.java',
+    runCmd: '$ javac Excellence.java',
+    code: `public class Excellence {
+
+  // Arete: excellence through practice
+
+  public static void main(
+      String[] args) {
+
+    String motto = "No shortcuts.";
+    int daysOfPractice = 0;
+
+    while (!isExcellent()) {
+      practice();
+      daysOfPractice++;
+    }
+
+    System.out.println("Ready.");
+  }
+}`,
+  },
+  {
+    lang: 'python',
+    filename: 'excellence.py',
+    runCmd: '$ python excellence.py',
+    code: `# Arete: excellence through practice
+
+motto = "No shortcuts."
+days_of_practice = 0
+
+while not is_excellent():
+    practice()
+    days_of_practice += 1
+
+print("Ready.")`,
+  },
+  {
+    lang: 'c',
+    filename: 'excellence.c',
+    runCmd: '$ gcc excellence.c -o excellence',
+    code: `#include <stdio.h>
+
+// Arete: excellence through practice
+
+int main(void) {
+
+  char *motto = "No shortcuts.";
+  int days_of_practice = 0;
+
+  while (!is_excellent()) {
+    practice();
+    days_of_practice++;
+  }
+
+  printf("Ready.\\n");
+  return 0;
+}`,
+  },
+];
 
 const trackHighlights = [
   {
@@ -53,9 +119,15 @@ function TrackProgressBar({ track }) {
 }
 
 export default function Home() {
-  const { progress, isComplete } = useProgress();
-  const completedCount = progress.completedModules.length;
-  const progressPercent = Math.round((completedCount / modules.length) * 100);
+  const [heroSnippet] = useState(
+    () => HERO_SNIPPETS[Math.floor(Math.random() * HERO_SNIPPETS.length)]
+  );
+
+  const sampleModules = [
+    ...modules.slice(0, 2).map(m => ({ m, trackSlug: 'java' })),
+    ...pythonModules.slice(0, 2).map(m => ({ m, trackSlug: 'python' })),
+    ...cModules.slice(0, 2).map(m => ({ m, trackSlug: 'c' })),
+  ];
 
   return (
     <div>
@@ -90,8 +162,8 @@ export default function Home() {
               <Link to="/tracks" className="btn-primary">
                 Pick a language <ArrowRight size={16} />
               </Link>
-              <Link to="/install" className="btn-ghost">
-                Install Java first
+              <Link to="/courses" className="btn-ghost">
+                Browse course hub
               </Link>
             </div>
 
@@ -110,7 +182,7 @@ export default function Home() {
                     <span className="w-3 h-3 rounded-full bg-coffee-400/60" />
                     <span className="w-3 h-3 rounded-full bg-moss/60" />
                   </div>
-                  <span className="text-xs font-mono text-coffee-400 tracking-widest">Excellence.java</span>
+                  <span className="text-xs font-mono text-coffee-400 tracking-widest">{heroSnippet.filename}</span>
                 </div>
 
                 <div className="flex gap-3 mb-4 opacity-50">
@@ -119,29 +191,10 @@ export default function Home() {
                   <span className="steam text-coffee-300 text-lg" style={{ animationDelay: '0.8s' }}>∿</span>
                 </div>
 
-                <pre className="font-mono text-sm leading-relaxed">
-{`public class Excellence {
-
-  // Arete: excellence through practice
-
-  public static void main(
-      String[] args) {
-
-    String motto = "No shortcuts.";
-    int daysOfPractice = 0;
-
-    while (!isExcellent()) {
-      practice();
-      daysOfPractice++;
-    }
-
-    System.out.println("Ready.");
-  }
-}`}
-                </pre>
+                <pre className="font-mono text-sm leading-relaxed">{heroSnippet.code}</pre>
 
                 <div className="mt-6 pt-4 border-t border-coffee-700 flex items-center justify-between text-xs text-coffee-400">
-                  <span className="font-mono">$ javac Excellence.java</span>
+                  <span className="font-mono">{heroSnippet.runCmd}</span>
                   <span className="text-ember-400">● Running</span>
                 </div>
               </div>
@@ -156,29 +209,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* JAVA PROGRESS STRIP */}
-      {completedCount > 0 && (
-        <section className="max-w-6xl mx-auto px-6 mb-16">
-          <div className="bg-cream border border-coffee-200 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-center justify-between">
-            <div>
-              <div className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-1">Java Progress</div>
-              <div className="font-display text-2xl font-bold text-ink">
-                {completedCount} of {modules.length} modules complete
-              </div>
-            </div>
-            <div className="flex-1 max-w-md w-full">
-              <div className="h-2 bg-coffee-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-ember-500 transition-all duration-700"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <div className="text-xs text-coffee-700 mt-2 text-right">{progressPercent}% — keep going</div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* THREE TRACKS */}
       <section className="max-w-6xl mx-auto px-6 py-16">
@@ -250,41 +280,46 @@ export default function Home() {
         </div>
       </section>
 
-      {/* JAVA MODULES PREVIEW */}
+      {/* SAMPLE MODULES — 2 per track */}
       <section className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-end justify-between mb-8">
-          <h2 className="display-heading text-4xl text-ink">Java track preview.</h2>
-          <Link to="/modules" className="text-sm font-medium text-coffee-700 hover:text-ink hidden sm:inline-flex items-center gap-1">
-            All 13 modules <ArrowRight size={14} />
+          <h2 className="display-heading text-4xl text-ink">Sample modules.</h2>
+          <Link to="/tracks" className="text-sm font-medium text-coffee-700 hover:text-ink hidden sm:inline-flex items-center gap-1">
+            All 37 modules <ArrowRight size={14} />
           </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {modules.slice(0, 6).map(m => (
-            <Link
-              key={m.id}
-              to={`/modules/${m.id}`}
-              className="module-card bg-paper border border-coffee-200 rounded-xl p-5 group"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-mono text-coffee-700">MODULE {String(m.number).padStart(2, '0')}</span>
-                <span className="text-xs text-coffee-400">{'●'.repeat(m.difficulty)}{'○'.repeat(5 - m.difficulty)}</span>
-              </div>
-              <h3 className="font-display font-bold text-lg text-ink mb-1 group-hover:text-coffee-700 transition-colors">
-                {m.title}
-              </h3>
-              <p className="text-sm text-coffee-700 mb-3">{m.subtitle}</p>
-              <div className="flex items-center justify-between text-xs text-coffee-700">
-                <span>~{m.estimatedHours} hours</span>
-                {isComplete(m.id) && <CheckCircle2 size={14} className="text-moss" />}
-              </div>
-            </Link>
-          ))}
+          {sampleModules.map(({ m, trackSlug }) => {
+            const track = trackConfig[trackSlug];
+            return (
+              <Link
+                key={`${trackSlug}-${m.id}`}
+                to={track.detailPath(m.id)}
+                className="module-card bg-paper border border-coffee-200 rounded-xl p-5 group"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`text-xs font-mono px-2 py-0.5 rounded ${track.accentBg} ${track.accentText}`}>
+                    {track.label}
+                  </span>
+                  <span className="text-xs text-coffee-400">{'●'.repeat(m.difficulty)}{'○'.repeat(5 - m.difficulty)}</span>
+                </div>
+                <h3 className="font-display font-bold text-lg text-ink mb-1 group-hover:text-coffee-700 transition-colors">
+                  {m.title}
+                </h3>
+                <p className="text-sm text-coffee-700 mb-3">{m.subtitle}</p>
+                <div className="flex items-center justify-between text-xs text-coffee-700">
+                  <span>Module {String(m.number).padStart(2, '0')}</span>
+                  <span>~{m.estimatedHours}h</span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
         <div className="text-center mt-8">
-          <Link to="/modules" className="btn-ghost">
-            See all 13 Java modules <ArrowRight size={16} />
+          <Link to="/tracks" className="btn-ghost">
+            Compare all three tracks <ArrowRight size={16} />
           </Link>
         </div>
       </section>

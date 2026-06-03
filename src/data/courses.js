@@ -236,7 +236,7 @@ export const courses = [
     description:
       'Object-oriented design and programming in Java: classes, inheritance, polymorphism, collections, file I/O, exception handling, and GUI development with Swing.',
     hasInteractiveModules: true,
-    interactiveTrackPath: '/modules',
+    interactiveTrackPath: '/tracks/java',
     interactiveLabel: 'Java',
     interactiveModuleCount: 13,
     topics: [

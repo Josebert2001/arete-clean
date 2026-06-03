@@ -1,21 +1,51 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Code2, Terminal, Coffee } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { trackConfig } from '../data/trackConfig';
 import { useProgress } from '../components/useProgress';
 
+function JavaMark() {
+  return (
+    <svg viewBox="0 0 64 64" className="w-7 h-7" aria-hidden>
+      <path d="M22 12 c2 6 -4 9 -4 14 c0 4 4 6 4 10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M32 8 c3 8 -5 11 -5 16 c0 5 5 7 5 12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M14 44 c10 5 26 5 36 0" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M18 52 c8 4 20 4 28 0" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PythonMark() {
+  return (
+    <svg viewBox="0 0 64 64" className="w-7 h-7" aria-hidden>
+      <path d="M22 10 h14 c4 0 7 3 7 7 v10 h-18 c-3 0 -5 2 -5 5 v6 h-4 c-4 0 -6 -3 -6 -7 v-14 c0 -4 3 -7 7 -7 z" fill="currentColor" opacity="0.85" />
+      <circle cx="26" cy="16" r="2" fill="#FAF4EA" />
+      <path d="M42 54 h-14 c-4 0 -7 -3 -7 -7 v-10 h18 c3 0 5 -2 5 -5 v-6 h4 c4 0 6 3 6 7 v14 c0 4 -3 7 -7 7 z" fill="currentColor" opacity="0.6" />
+      <circle cx="38" cy="48" r="2" fill="#FAF4EA" />
+    </svg>
+  );
+}
+
+function CMark() {
+  return (
+    <svg viewBox="0 0 64 64" className="w-7 h-7" aria-hidden>
+      <path d="M48 22 a18 18 0 1 0 0 20" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const trackMeta = {
   java: {
-    icon: Coffee,
+    Mark: JavaMark,
     why: 'COS 222 · Required for your degree. Deep interactive track with full module content, quizzes, and a live Java playground.',
     bullets: ['13 full modules', 'Live code playground', 'Practice quizzes', 'Mini projects'],
   },
   python: {
-    icon: Code2,
+    Mark: PythonMark,
     why: 'The most widely-used language in data science, AI, automation, and cybersecurity scripting. Clean syntax, fast to learn.',
     bullets: ['12 full modules', 'Python 3 playground', 'Practice quizzes', 'Mini projects'],
   },
   c: {
-    icon: Terminal,
+    Mark: CMark,
     why: 'COS 211 · Teaches how computers actually work: memory, pointers, and systems thinking. Foundation of every lower-level language.',
     bullets: ['12 full modules', 'C playground', 'Practice quizzes', 'Mini projects'],
   },
@@ -34,13 +64,13 @@ function ProgressPill({ storageKey, total }) {
 
 function TrackCard({ track }) {
   const meta = trackMeta[track.slug];
-  const Icon = meta.icon;
+  const Mark = meta.Mark;
 
   return (
     <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 flex flex-col gap-5 hover:border-coffee-400 hover:shadow-md transition-all group">
       <div className="flex items-start justify-between gap-4">
-        <div className={`w-12 h-12 rounded-xl ${track.accentBg} flex items-center justify-center shrink-0`}>
-          <Icon size={22} className={track.accentText} />
+        <div className={`w-14 h-14 rounded-xl ${track.accentBg} ${track.accentText} flex items-center justify-center shrink-0`}>
+          <Mark />
         </div>
         <ProgressPill storageKey={track.storageKey} total={track.moduleCount} />
       </div>

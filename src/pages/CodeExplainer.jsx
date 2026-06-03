@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Wand2, Copy, Check, ArrowRight } from 'lucide-react';
-import CodeBlock from '../components/CodeBlock';
 
+// Force the Coming Soon screen during local dev. The server also signals
+// "not configured" at runtime — see askExplainer below.
 const DEMO_MODE = false;
 
 async function askExplainer(code, language) {
@@ -12,9 +13,7 @@ async function askExplainer(code, language) {
     body: JSON.stringify({ code, language }),
   });
   if (!res.ok) throw new Error('Request failed');
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data.explanation;
+  return res.json();
 }
 
 const LANGUAGES = [
@@ -60,14 +59,20 @@ export default function CodeExplainer() {
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [comingSoon, setComingSoon] = useState(false);
 
   const explain = async () => {
     if (!code.trim() || loading) return;
     setLoading(true);
     setExplanation('');
     try {
-      const result = await askExplainer(code, language);
-      setExplanation(result);
+      const data = await askExplainer(code, language);
+      if (data.notConfigured) {
+        setComingSoon(true);
+        return;
+      }
+      if (data.error) throw new Error(data.error);
+      setExplanation(data.explanation);
     } catch (e) {
       setExplanation(
         e?.message && e.message !== 'Request failed'
@@ -105,7 +110,7 @@ export default function CodeExplainer() {
         </p>
       </div>
 
-      {DEMO_MODE ? (
+      {(DEMO_MODE || comingSoon) ? (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-8 sm:p-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-ember-500 animate-pulse" />
@@ -130,7 +135,7 @@ export default function CodeExplainer() {
           </ul>
           <div className="border-t border-coffee-200 pt-6 flex flex-wrap items-center gap-4">
             <p className="text-sm text-coffee-700">For now, read the annotated examples —</p>
-            <Link to="/modules" className="btn-ghost text-sm">
+            <Link to="/tracks" className="btn-ghost text-sm">
               Go to modules <ArrowRight size={14} />
             </Link>
           </div>

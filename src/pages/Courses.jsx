@@ -186,7 +186,7 @@ export default function Courses() {
             Departments sometimes adjust course offerings. If something looks off, the interactive Java modules in COS 222 are always up to date.
           </p>
         </div>
-        <Link to="/modules" className="btn-ghost shrink-0">
+        <Link to="/tracks/java" className="btn-ghost shrink-0">
           Java Modules <ArrowRight size={14} />
         </Link>
       </div>

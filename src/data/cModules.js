@@ -1022,7 +1022,8 @@ int main() {
     theory: [
       {
         heading: '1D Arrays — Declaration and Access',
-        body: 'An array is a contiguous block of memory that stores multiple values of the same type. Declare with: int scores[5]; Access elements by index starting at 0: scores[0] is the first element. The last valid index is always size - 1. Accessing out-of-bounds indices is undefined behaviour — C does not perform bounds checking.'
+        body: 'An array is a contiguous block of memory that stores multiple values of the same type. Declare with: int scores[5]; Access elements by index starting at 0: scores[0] is the first element. The last valid index is always size - 1. Accessing out-of-bounds indices is undefined behaviour — C does not perform bounds checking.',
+        diagram: 'c-array'
       },
       {
         heading: '2D Arrays',
@@ -1204,7 +1205,8 @@ int main() {
       },
       {
         heading: 'Pointer Variables and the * Operator',
-        body: 'A pointer is a variable that stores a memory address. Declare a pointer with: int *ptr; This means ptr holds the address of an int. The dereference operator * reads or writes the value at the address a pointer holds: *ptr = 10 stores 10 at the address in ptr. & gives you an address; * follows an address to the value.'
+        body: 'A pointer is a variable that stores a memory address. Declare a pointer with: int *ptr; This means ptr holds the address of an int. The dereference operator * reads or writes the value at the address a pointer holds: *ptr = 10 stores 10 at the address in ptr. & gives you an address; * follows an address to the value.',
+        diagram: 'c-pointer'
       },
       {
         heading: 'Pointer Arithmetic',
@@ -1212,7 +1214,8 @@ int main() {
       },
       {
         heading: 'Pointers and Arrays, NULL Pointer',
-        body: 'An array name is a constant pointer to the first element. int arr[5] — arr equals &arr[0]. You can use pointer arithmetic to traverse an array: *(arr + i) is equivalent to arr[i]. A NULL pointer (value 0) points to nothing. Always initialise pointers to NULL if they do not point to a valid variable, and always check for NULL before dereferencing.'
+        body: 'An array name is a constant pointer to the first element. int arr[5] — arr equals &arr[0]. You can use pointer arithmetic to traverse an array: *(arr + i) is equivalent to arr[i]. A NULL pointer (value 0) points to nothing. Always initialise pointers to NULL if they do not point to a valid variable, and always check for NULL before dereferencing.',
+        diagram: 'c-array'
       }
     ],
     codeExamples: [
@@ -1371,7 +1374,8 @@ int main() {
     theory: [
       {
         heading: 'Defining a struct',
-        body: 'A struct (structure) groups variables of different types under one name, creating a custom data type. Declare with the struct keyword: struct Student { char name[50]; int age; double gpa; }; Each member is accessed with the dot operator: student1.gpa = 4.5; Structs are value types — assigning one struct to another copies all members.'
+        body: 'A struct (structure) groups variables of different types under one name, creating a custom data type. Declare with the struct keyword: struct Student { char name[50]; int age; double gpa; }; Each member is accessed with the dot operator: student1.gpa = 4.5; Structs are value types — assigning one struct to another copies all members.',
+        diagram: 'c-struct'
       },
       {
         heading: 'typedef struct',
@@ -1764,7 +1768,8 @@ int main() {
     theory: [
       {
         heading: 'Stack vs Heap Memory',
-        body: 'Local variables are allocated on the stack automatically — fast but limited in size and lifetime (destroyed when the function returns). The heap is a large memory pool managed manually by the programmer. Heap memory persists until you explicitly free it with free(). Heap allocation is slower but allows large or variable-sized blocks that outlive the function that created them.'
+        body: 'Local variables are allocated on the stack automatically — fast but limited in size and lifetime (destroyed when the function returns). The heap is a large memory pool managed manually by the programmer. Heap memory persists until you explicitly free it with free(). Heap allocation is slower but allows large or variable-sized blocks that outlive the function that created them.',
+        diagram: 'c-stack-heap'
       },
       {
         heading: 'malloc() and calloc()',

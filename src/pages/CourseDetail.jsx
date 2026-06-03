@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, ChevronRight } from 'lucide-react';
 import { getCourseBySlug, courses } from '../data/courses';
 
@@ -20,7 +20,6 @@ const subjectLabels = {
 
 export default function CourseDetail() {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const course = getCourseBySlug(slug);
 
   if (!course) {
@@ -97,7 +96,7 @@ export default function CourseDetail() {
             </p>
           </div>
           <div className="flex flex-col gap-2 shrink-0">
-            <Link to={course.interactiveTrackPath || '/modules'} className="btn-primary whitespace-nowrap">
+            <Link to={course.interactiveTrackPath || '/tracks'} className="btn-primary whitespace-nowrap">
               Open Modules <ArrowRight size={15} />
             </Link>
             <Link to="/tutor" className="btn-ghost whitespace-nowrap text-center text-sm">

@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Play, Loader2, Terminal, RotateCcw, Check, X, AlertTriangle } from 'lucide-react';
 
 /*
-  CodePlayground — editable Java editor with a Run button.
-  Calls /api/run (the Vercel serverless function) which proxies to Judge0.
+  CodePlayground — editable code editor with a Run button.
+  Supports Java, Python, and C. Calls /api/run (the Vercel serverless function)
+  which proxies to the JDoodle Compiler API.
 
-  Works without configuration too: if the API key isn't set yet, the function
+  Works without configuration too: if the API keys aren't set yet, the function
   returns a friendly "not connected" message instead of crashing.
 */
 
@@ -44,7 +45,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           setMeta({ time: data.time, memory: data.memory, status: data.status });
         }
       }
-    } catch (e) {
+    } catch {
       setOutput('Could not reach the code runner. Check your connection and try again.');
       setKind('runtime_error');
     } finally {

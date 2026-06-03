@@ -12,8 +12,8 @@ export const trackConfig = {
     modules,
     getModuleById,
     storageKey: 'cos222-progress-v1',
-    listPath: '/modules',
-    detailPath: (id) => `/modules/${id}`,
+    listPath: '/tracks/java',
+    detailPath: (id) => `/tracks/java/${id}`,
     language: 'java',
     moduleCount: 13,
     accentBg: 'bg-ink',
@@ -25,7 +25,7 @@ export const trackConfig = {
   python: {
     slug: 'python',
     label: 'Python',
-    fullName: 'Python',
+    fullName: 'Python (COS 121)',
     tagline: 'From Hello World to OOP, files, and standard libraries',
     description: '12 modules covering Python 3: variables, control flow, functions, data structures, OOP, file handling, exceptions, and modules.',
     modules: pythonModules,
@@ -39,12 +39,12 @@ export const trackConfig = {
     accentText: 'text-cream',
     accentLight: 'bg-moss/10 text-moss',
     dotColor: 'bg-moss',
-    courseCode: null,
+    courseCode: 'COS 121',
   },
   c: {
     slug: 'c',
     label: 'C',
-    fullName: 'C Programming (COS 211)',
+    fullName: 'C Programming',
     tagline: 'Systems programming: pointers, memory, structs, and file I/O',
     description: '12 modules covering C from compilation to dynamic memory: operators, functions, arrays, pointers, structs, and the preprocessor.',
     modules: cModules,
@@ -58,7 +58,7 @@ export const trackConfig = {
     accentText: 'text-cream',
     accentLight: 'bg-ember-500/10 text-ember-500',
     dotColor: 'bg-ember-500',
-    courseCode: 'COS 211',
+    courseCode: null,
   },
 };
 

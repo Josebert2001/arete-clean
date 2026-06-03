@@ -6,6 +6,7 @@ import { useProgress } from '../components/useProgress';
 export default function TrackModules() {
   const { lang } = useParams();
   const track = getTrack(lang);
+  const { isComplete, progress } = useProgress(track?.storageKey);
 
   if (!track) {
     return (
@@ -16,7 +17,6 @@ export default function TrackModules() {
     );
   }
 
-  const { isComplete, progress } = useProgress(track.storageKey);
   const completedCount = progress.completedModules.length;
   const progressPercent = Math.round((completedCount / track.modules.length) * 100);
 
