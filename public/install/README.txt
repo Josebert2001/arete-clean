@@ -16,8 +16,8 @@ Suggested filenames (match the slots already wired in Install.jsx):
   python-jupyterlab-cell.png   JupyterLab with the verify cell run
 
   c-msys2-pacman.png           MSYS2 terminal after installing GCC
-  c-vscode-cpp-ext.png         VS Code Extensions panel showing C/C++
-  c-vscode-hello-run.png       VS Code terminal running ./hello
+  c-netbeans-plugin.png        NetBeans Plugins panel — installing C/C++
+  c-netbeans-hello-run.png     NetBeans Output panel running hello.c
 
 Image guidelines:
   • PNG, JPG, or WebP — keep each file under 400 KB

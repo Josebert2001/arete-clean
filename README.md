@@ -22,7 +22,7 @@ Built by **Josebert Sunday Robert (JRsolvy)** — Director of Software & Hardwar
 
 Every module has theory, annotated code examples, a runnable in-browser playground, a 7-question practice quiz with explanations, and a guided mini project.
 
-**200L Cybersecurity course hub** — 12 courses across both semesters with descriptions, topic lists, textbook references, study tips, and search prompts. Java (COS 222) and C (COS 211) link directly into their interactive tracks; the others are curated study guides.
+**200L Cybersecurity course hub** — 11 courses across both semesters with descriptions, topic lists, textbook references, study tips, and search prompts. Java (COS 222) links directly into its interactive track; the others are curated study guides.
 
 **App-wide features**
 - **AI Tutor** — chat with a Groq-backed tutor that knows the three tracks and core 200L CS topics
