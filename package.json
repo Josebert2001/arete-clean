@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Arete — interactive learning platform for the Cybersecurity Department, University of Uyo. Java, Python & C tracks plus a full 200L course hub. Built by JRsolvy.",
+  "description": "Arete — interactive learning platform for the Cybersecurity Department, University of Uyo. Java, Python & C tracks plus a full Cybersecurity course hub.",
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/validate-modules.mjs",

@@ -124,9 +124,12 @@ export default function Home() {
   );
 
   const sampleModules = [
-    ...modules.slice(0, 2).map(m => ({ m, trackSlug: 'java' })),
-    ...pythonModules.slice(0, 2).map(m => ({ m, trackSlug: 'python' })),
-    ...cModules.slice(0, 2).map(m => ({ m, trackSlug: 'c' })),
+    { m: modules[0], trackSlug: 'java' },
+    { m: pythonModules[0], trackSlug: 'python' },
+    { m: cModules[0], trackSlug: 'c' },
+    { m: modules[1], trackSlug: 'java' },
+    { m: pythonModules[1], trackSlug: 'python' },
+    { m: cModules[1], trackSlug: 'c' },
   ];
 
   return (
@@ -139,7 +142,7 @@ export default function Home() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
               <Sparkles size={12} />
-              <span>Java · Python · C — 37 interactive modules</span>
+              <span>Tracks · Course hub · AI tutor</span>
             </div>
 
             {/* Name + tagline */}
@@ -154,8 +157,8 @@ export default function Home() {
 
             <p className="text-lg text-coffee-700 mb-8 max-w-xl leading-relaxed">
               The ancient Greeks believed excellence isn't a gift — it's earned through daily practice
-              and discipline. So is coding. Three language tracks, built for students who want to
-              learn properly. No shortcuts.
+              and discipline. So is coding. Three interactive language tracks, a curated course hub,
+              and an AI tutor — built for students who want to learn properly. No shortcuts.
             </p>
 
             <div className="flex flex-wrap gap-3">

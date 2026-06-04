@@ -17,12 +17,12 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display font-bold text-ink mb-3">Java Track</h4>
+            <h4 className="font-display font-bold text-ink mb-3">Three tracks</h4>
             <ul className="space-y-2 text-sm text-coffee-700">
-              <li>13 interactive modules</li>
-              <li>Practice quizzes per module</li>
-              <li>Real annotated code examples</li>
-              <li>Mini projects per topic</li>
+              <li>Java · Python · C</li>
+              <li>37 interactive modules</li>
+              <li>Practice quizzes &amp; mini projects</li>
+              <li>Runnable in-browser playgrounds</li>
             </ul>
           </div>
 

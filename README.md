@@ -2,9 +2,9 @@
 
 > ἀρετή (ar-eh-TAY) · Greek · "excellence achieved through practice"
 
-An interactive programming and computer-science platform for 200L Cybersecurity students at the University of Uyo — and anyone learning Java, Python, or C from scratch.
+An interactive programming and computer-science platform for anyone learning Java, Python, or C from scratch — and a study companion for Cybersecurity students at the University of Uyo.
 
-Three full interactive language tracks, a 200L Cybersecurity course hub, an AI tutor, and a code explainer.
+Three full interactive language tracks, a Cybersecurity course hub, an AI tutor, and a code explainer.
 
 Built by the **Department of Cybersecurity**, University of Uyo.
 
@@ -22,10 +22,10 @@ Built by the **Department of Cybersecurity**, University of Uyo.
 
 Every module has theory, annotated code examples, a runnable in-browser playground, a 7-question practice quiz with explanations, and a guided mini project.
 
-**200L Cybersecurity course hub** — 11 courses across both semesters with descriptions, topic lists, textbook references, study tips, and search prompts. Java (COS 222) links directly into its interactive track; the others are curated study guides.
+**Cybersecurity course hub** — 11 courses across both semesters with descriptions, topic lists, textbook references, study tips, and search prompts. Java (COS 222) links directly into its interactive track; the others are curated study guides.
 
 **App-wide features**
-- **AI Tutor** — chat with a Groq-backed tutor that knows the three tracks and core 200L CS topics
+- **AI Tutor** — chat with a Groq-backed tutor that knows the three tracks and core CS topics
 - **Code Explainer** — paste Java / Python / C, get a plain-English breakdown
 - **Install guide** — JDK + NetBeans, step by step with an interactive checklist
 - **Cheatsheet** — quick syntax reference across all three languages
@@ -40,7 +40,7 @@ Every module has theory, annotated code examples, a runnable in-browser playgrou
 /tracks                 Pick a language
 /tracks/:lang           Module list for java | python | c
 /tracks/:lang/:id       Module detail (theory, code, playground, quiz, project)
-/courses                200L Cybersecurity course hub
+/courses                Cybersecurity course hub
 /courses/:slug          Single course page
 /install                JDK + NetBeans setup walkthrough
 /tutor                  AI Tutor
@@ -134,7 +134,7 @@ React 18 · Vite · Tailwind CSS · React Router · lucide-react · groq-sdk
 
 - [ ] User accounts + cloud progress sync
 - [ ] Self-hosted Judge0 to lift the 20-runs/day cap
-- [ ] Expand the course hub beyond 200L
+- [ ] Expand the course hub to more year levels
 - [ ] Mobile app (React Native)
 
 ---
