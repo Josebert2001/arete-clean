@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, ChevronRight, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, ChevronRight, Clock, FileText } from 'lucide-react';
 import { getCourseBySlug, courses } from '../data/courses';
+import LectureNotes from '../components/LectureNotes';
 
 const subjectStyles = {
   cs:    { codeBg: 'bg-ink',        codeText: 'text-cream',  accent: 'text-ink',        tag: 'bg-coffee-100 text-coffee-800' },
@@ -33,6 +35,7 @@ const subjectLabels = {
 export default function CourseDetail() {
   const { slug } = useParams();
   const course = getCourseBySlug(slug);
+  const [activeTab, setActiveTab] = useState('resources');
 
   if (!course) {
     return (
@@ -47,6 +50,7 @@ export default function CourseDetail() {
   const courseIndex = courses.findIndex(c => c.slug === slug);
   const prev = courseIndex > 0 ? courses[courseIndex - 1] : null;
   const next = courseIndex < courses.length - 1 ? courses[courseIndex + 1] : null;
+  const hasNotes = course.lectureNotes?.length > 0;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
@@ -89,6 +93,12 @@ export default function CourseDetail() {
               Study resources
             </span>
           )}
+          {hasNotes && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-rust/10 text-rust rounded-full">
+              <FileText size={11} />
+              Lecture notes available
+            </span>
+          )}
         </div>
 
         <h1 className="display-heading text-4xl sm:text-5xl text-ink mb-4 leading-tight">
@@ -123,6 +133,41 @@ export default function CourseDetail() {
         </div>
       )}
 
+      {/* Tab bar — only show when course has lecture notes */}
+      {hasNotes && (
+        <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0">
+          {[
+            { key: 'resources', label: 'Study Resources', icon: BookOpen },
+            { key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} topics` },
+          ].map(({ key, label, icon: Icon, badge }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-all -mb-px ${
+                activeTab === key
+                  ? 'border-ink text-ink bg-paper'
+                  : 'border-transparent text-coffee-600 hover:text-ink hover:border-coffee-300'
+              }`}
+            >
+              <Icon size={14} />
+              {label}
+              {badge && (
+                <span className="text-xs font-mono px-1.5 py-0.5 bg-coffee-100 text-coffee-600 rounded-full">{badge}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Lecture Notes tab */}
+      {hasNotes && activeTab === 'notes' && (
+        <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <LectureNotes topics={course.lectureNotes} />
+        </div>
+      )}
+
+      {/* Resources tab (always visible when no notes; conditional when notes exist) */}
+      {(!hasNotes || activeTab === 'resources') && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* Left column — Topics + nav */}
@@ -254,6 +299,7 @@ export default function CourseDetail() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Bottom nav */}
       <div className="mt-12 pt-8 border-t border-coffee-200 flex items-center justify-between gap-4">

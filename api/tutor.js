@@ -11,13 +11,15 @@
 
 import Groq from 'groq-sdk';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders } from './_lib/request-policy.js';
-import { COURSE_KNOWLEDGE, MODULE_KNOWLEDGE } from './_lib/courseData.js';
+import { COURSE_KNOWLEDGE, MODULE_KNOWLEDGE, LECTURE_NOTES_KNOWLEDGE } from './_lib/courseData.js';
 
 const SYSTEM_PROMPT = `You are Arete's AI academic tutor for the Department of Cybersecurity, University of Uyo, Nigeria.
 You have complete knowledge of the entire B.Sc. Cybersecurity programme — every course, every topic, and every interactive programming module available in the app.
 
 WHAT YOU KNOW:
 ${COURSE_KNOWLEDGE}
+
+${LECTURE_NOTES_KNOWLEDGE}
 
 ${MODULE_KNOWLEDGE}
 

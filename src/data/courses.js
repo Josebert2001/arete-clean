@@ -954,6 +954,174 @@ export const courses = [
       'The cloud shared responsibility model is exam-critical: know clearly what the provider vs customer secures',
       'Use OWASP resources on SQL injection and data security — they are free and authoritative',
     ],
+    lectureNotes: [
+      {
+        number: '1',
+        title: 'Introduction to Big Data Security',
+        sections: [
+          {
+            type: 'definition',
+            heading: '1.1 Definition',
+            text: 'Big Data Security refers to the tools, policies, and measures used to protect large volumes of data from unauthorized access, breaches, and misuse throughout its lifecycle — from collection to processing and storage.',
+          },
+          {
+            type: 'fivers',
+            heading: '1.2 Characteristics of Big Data — The 5Vs',
+            items: [
+              { term: 'Volume', def: 'Large amount of data generated and stored' },
+              { term: 'Velocity', def: 'Speed at which data is generated and processed' },
+              { term: 'Variety', def: 'Different types and formats of data' },
+              { term: 'Veracity', def: 'Quality, accuracy, and reliability of the data' },
+              { term: 'Value', def: 'Turning processed data into meaningful insight' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '1.3 Where Does Big Data Come From?',
+            items: [
+              { term: 'M2M (Machine to Machine)', def: 'data exchanged between connected devices' },
+              { term: 'People to Machine', def: 'data generated through human interactions with technology' },
+              { term: 'Organisational Data', def: 'data produced by businesses and institutions' },
+            ],
+          },
+        ],
+      },
+      {
+        number: '2',
+        title: 'Operational and Analytical Big Data',
+        date: '02/06/2026',
+        sections: [
+          {
+            type: 'definition',
+            heading: '2.1 Operational Big Data',
+            text: 'Operational Big Data refers to real or nearly real-time data used to support daily business operations and decision making. It processes data immediately as it is generated, supports transactional systems, and requires fast processing.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Sources',
+            items: ['Social media activities', 'Online transactions', 'ATM transactions', 'Sensor and IoT devices', 'Mobile applications', 'GPS tracking systems'],
+          },
+          {
+            type: 'bullets',
+            heading: 'Examples',
+            items: ['Online banking transactions', 'E-commerce order processing', 'Hospital patient monitoring systems', 'Airline reservation systems', 'Traffic management systems'],
+          },
+          {
+            type: 'bullets',
+            heading: 'Technologies Used',
+            items: ['Apache Kafka', 'Apache Storm', 'Apache Flink'],
+          },
+          {
+            type: 'proscons',
+            heading: 'Advantages & Disadvantages',
+            advantages: ['Real-time decision making', 'Faster response to customer needs', 'Improved operational efficiency', 'Enhanced customer experience'],
+            disadvantages: ['High infrastructure cost', 'Data security concerns', 'Complex management'],
+          },
+          {
+            type: 'definition',
+            heading: '2.2 Analytical Big Data',
+            text: 'Analytical Big Data refers to historical and accumulated data used for analysis, forecasting, reporting, and strategic decision making. It focuses on past and current data, supports business intelligence, and is often stored in data warehouses.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Sources',
+            items: ['Historical transaction records', 'Customer databases', 'Business reports', 'Data warehouses', 'Web logs'],
+          },
+          {
+            type: 'bullets',
+            heading: 'Examples',
+            items: ['Sales trends analysis', 'Customer behaviour analysis', 'Market forecasting', 'Fraud detection', 'Academic research'],
+          },
+          {
+            type: 'bullets',
+            heading: 'Technologies Used',
+            items: ['Apache Spark', 'Business intelligence tools', 'Machine learning platforms'],
+          },
+          {
+            type: 'table',
+            heading: '2.3 Comparison: Operational vs Analytical Big Data',
+            headers: ['Aspect', 'Operational', 'Analytical'],
+            rows: [
+              ['Nature', 'Real-time / near real-time', 'Historical / accumulated'],
+              ['Purpose', 'Daily operations & decisions', 'Analysis, forecasting, strategy'],
+              ['Data freshness', 'Continuously updated', 'Stored in data warehouses'],
+              ['Focus', 'Transactional systems', 'Business intelligence & trends'],
+              ['Technologies', 'Kafka, Storm, Flink', 'Spark, BI tools, ML platforms'],
+              ['Examples', 'ATM txn, GPS, e-commerce', 'Sales trends, fraud detection'],
+            ],
+          },
+        ],
+      },
+      {
+        number: '3',
+        title: 'Big Data Skills',
+        date: '09/06/2026',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Definition',
+            text: 'Big Data Skills are the knowledge, abilities, and competencies required to collect, process, store, analyze, visualize, and interpret large amounts of data.',
+          },
+          {
+            type: 'termlist',
+            heading: '3.1 Categories of Big Data Skills',
+            items: [
+              { term: 'Technical Skills', def: 'programming, database management, big data frameworks' },
+              { term: 'Analytical Skills', def: 'data analysis, pattern recognition, statistical analysis' },
+              { term: 'Business Skills', def: 'translating insights into actionable business strategies' },
+              { term: 'Communication Skills', def: 'presenting findings clearly to non-technical audiences' },
+              { term: 'Problem Solving Skills', def: 'using data-driven approaches to solve complex problems' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '3.2 Technical Skills (Detail)',
+            items: [
+              { term: 'Programming', def: 'ability to write code to manipulate and process data' },
+              { term: 'Database Skills', def: 'MySQL, Oracle — querying and managing structured data' },
+              { term: 'Big Data Frameworks', def: 'Hadoop, Spark, Kafka — large-scale data processing tools' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '3.3 Analytical Skills — Data Analysis',
+            text: 'Data analysis involves examining data to discover useful information, patterns, and insights. Key skills include data transformation, statistical analysis, and pattern recognition. Tools commonly used: Python, Excel, Apache Spark.',
+          },
+          {
+            type: 'text',
+            heading: '3.4 Business Skills',
+            text: 'Business skills involve transforming analyzed data into actionable insights that support business goals and strategic decisions. Data professionals must understand the business context to make their analysis relevant.',
+          },
+          {
+            type: 'bullets',
+            heading: '3.5 Communication Skills',
+            items: ['Report writing', 'Presentation skills', 'Team collaboration', 'Storytelling with data — presenting findings visually and narratively'],
+          },
+          {
+            type: 'termlist',
+            heading: '3.6 Problem Solving — Steps',
+            items: [
+              { term: 'Step 1', def: 'Identify the problem' },
+              { term: 'Step 2', def: 'Collect relevant data' },
+              { term: 'Step 3', def: 'Analyse the data' },
+              { term: 'Step 4', def: 'Generate insights' },
+              { term: 'Step 5', def: 'Recommend solutions' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            prompt: 'University of Uyo wants to improve student performance using big data analytics.',
+            tasks: [
+              'Identify possible data sources',
+              'Explain how the data can be collected and stored',
+              'Determine the type of analytics that can be applied',
+              'Recommend tools and technology for implementation',
+              'Discuss expected benefits and possible challenges',
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     code: 'CYB 222',

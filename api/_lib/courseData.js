@@ -256,6 +256,70 @@ Skills: ISO 27001/27002 (ISMS, Annex A controls), COBIT 2019 governance framewor
 Tips: Know the ISO 27001 Annex A control categories. The difference between ISO 27001 (requirements) and ISO 27002 (guidelines) is tested. COBIT aligns IT governance with business goals — use that framing in essays.
 `;
 
+export const LECTURE_NOTES_KNOWLEDGE = `
+=== UPLOADED LECTURE NOTES (AUTHORITATIVE CONTENT FROM LECTURERS) ===
+
+── CYB 224: Information and Big Data Security ───────────────────────────────
+
+TOPIC 1: Introduction to Big Data Security
+
+Definition: Big Data Security = tools, policies, and measures to protect large volumes of data from unauthorized access, breaches, and misuse throughout its lifecycle (collection → processing → storage).
+
+The 5 Vs of Big Data:
+  Volume   — the large amount of data generated and stored
+  Velocity — the speed at which data is generated and processed
+  Variety  — the different types and formats of data (structured, semi-structured, unstructured)
+  Veracity — the quality, accuracy, and reliability of the data
+  Value    — the ultimate goal: turning data into meaningful insight
+
+Sources of Big Data:
+  M2M (Machine to Machine) — data exchanged between connected devices
+  People to Machine — data generated through human interactions with technology
+  Organisational Data — data produced by businesses and institutions
+
+TOPIC 2: Operational and Analytical Big Data (Lecture: 02/06/2026)
+
+Operational Big Data — real or nearly real-time data supporting daily business operations.
+  Characteristics: processes data immediately, supports transactional systems, requires fast processing, continuously updated.
+  Sources: social media, online transactions, ATM transactions, IoT sensors, mobile apps, GPS.
+  Examples: online banking transactions, e-commerce orders, hospital patient monitoring, airline reservations, traffic management.
+  Technologies: Apache Kafka, Apache Storm, Apache Flink.
+  Advantages: real-time decision making, faster customer response, improved operational efficiency, enhanced customer experience.
+  Disadvantages: high infrastructure cost, data security concerns, complex management.
+
+Analytical Big Data — historical and accumulated data for analysis, forecasting, and strategic decisions.
+  Characteristics: focuses on past/current data, supports BI and analytics, used for trend analysis, stored in data warehouses.
+  Sources: historical transaction records, customer databases, business reports, data warehouses, web logs.
+  Examples: sales trends, customer behaviour analysis, market forecasting, fraud detection, academic research.
+  Technologies: Apache Spark, BI tools, machine learning platforms.
+  Challenges: large storage requirements, data integration difficulties, complex analysis, privacy concerns.
+
+Comparison Table — Operational vs Analytical:
+  Nature:      Real-time / near real-time           vs  Historical / accumulated
+  Purpose:     Daily operations & decisions         vs  Analysis, forecasting, strategy
+  Freshness:   Continuously updated                 vs  Stored in data warehouses
+  Focus:       Transactional systems                vs  Business intelligence & trends
+  Tech:        Kafka, Storm, Flink                  vs  Spark, BI tools, ML platforms
+  Examples:    ATM txn, GPS, e-commerce             vs  Sales trends, fraud detection
+
+TOPIC 3: Big Data Skills (Lecture: 09/06/2026)
+
+Definition: Big Data Skills = knowledge, abilities, and competencies required to collect, process, store, analyze, visualize, and interpret large amounts of data.
+
+5 Categories:
+  1. Technical Skills — programming (Python, Java), database management (MySQL, Oracle), big data frameworks (Hadoop, Spark, Kafka)
+  2. Analytical Skills — data transformation, statistical analysis, pattern recognition; tools: Python, Excel, Spark
+  3. Business Skills — translating analysis into actionable business insights and strategic decisions
+  4. Communication Skills — report writing, presentation, team collaboration, storytelling with data
+  5. Problem Solving Skills — data-driven approach to complex business problems
+
+Problem Solving Steps: Identify problem → Collect data → Analyse data → Generate insights → Recommend solutions
+
+Case Study (Assignment): UniUyo wants to improve student performance using big data analytics.
+  Tasks: (1) identify data sources, (2) explain collection and storage, (3) determine analytics type,
+         (4) recommend tools, (5) discuss benefits and challenges.
+`;
+
 export const MODULE_KNOWLEDGE = `
 === INTERACTIVE PROGRAMMING TRACKS — FULL MODULE CATALOGUE ===
 
