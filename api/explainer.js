@@ -6,6 +6,7 @@
 // ============================================================================
 
 import Groq from 'groq-sdk';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders } from './_lib/request-policy.js';
 
 const SYSTEM_PROMPT = `You are Arete's code explainer for beginner Cybersecurity students.
 When given code in any language (Java, Python, C, or C++), explain it clearly and simply.
@@ -32,17 +33,27 @@ const LANGUAGES = {
   cpp:    { label: 'C++',    fence: 'cpp' },
 };
 
-// Restrict browser callers to the deployed site. Set ALLOWED_ORIGIN in Vercel
-// to your domain (e.g. https://arete.vercel.app); falls back to '*' if unset.
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+const RATE_LIMIT = {
+  namespace: 'explainer',
+  limit: 8,
+  windowMs: 10 * 60 * 1000,
+};
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applyApiHeaders(res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const rateLimit = enforceRateLimit(req, RATE_LIMIT);
+  setRateLimitHeaders(res, rateLimit);
+  if (!rateLimit.allowed) {
+    res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
+    return res.status(429).json({
+      error: 'Too many explainer requests from this device. Please wait a few minutes and try again.',
+      kind: 'rate_limited',
+    });
+  }
 
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_API_KEY) {

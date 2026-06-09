@@ -15,6 +15,7 @@ export default function TrackModuleDetail() {
 
   const mod = useMemo(() => track?.getModuleById(id), [track, id]);
   const { isComplete, markComplete, markIncomplete, setQuizScore } = useProgress(track?.storageKey);
+  const [justCompleted, setJustCompleted] = useState(false);
 
   // Reset tab to 'theory' on route change — render-time pattern (cheaper than
   // a setState-in-effect bounce, per the React docs).
@@ -88,12 +89,20 @@ export default function TrackModuleDetail() {
 
       {/* Mark complete button */}
       <button
-        onClick={() => done ? markIncomplete(mod.id) : markComplete(mod.id)}
+        onClick={() => {
+          if (done) {
+            markIncomplete(mod.id);
+          } else {
+            markComplete(mod.id);
+            setJustCompleted(true);
+            setTimeout(() => setJustCompleted(false), 600);
+          }
+        }}
         className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-sm font-medium mb-8 transition-all ${
           done
             ? 'border-moss bg-moss/10 text-moss'
             : 'border-coffee-200 text-coffee-700 hover:border-coffee-500'
-        }`}
+        } ${justCompleted ? 'complete-pulse' : ''}`}
       >
         {done ? <CheckCircle2 size={16} /> : <Circle size={16} />}
         {done ? 'Completed' : 'Mark as complete'}

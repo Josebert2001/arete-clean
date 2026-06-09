@@ -116,10 +116,19 @@ export default function Quiz({ questions, onComplete }) {
       </div>
 
       {answered && (
-        <div className="bg-coffee-50 border-l-3 border-coffee-500 rounded-r-lg p-4 mb-6 animate-fade-in" style={{ borderLeftWidth: '3px' }}>
-          <p className="text-sm text-coffee-700 leading-relaxed">
-            <span className="font-bold text-ink">
-              {selected === q.correctIndex ? '✓ Correct. ' : '✗ Not quite. '}
+        <div
+          className={`rounded-lg p-4 mb-6 animate-fade-in flex gap-3 ${
+            selected === q.correctIndex
+              ? 'bg-moss/10 border border-moss/30'
+              : 'bg-rust/10 border border-rust/30'
+          }`}
+        >
+          {selected === q.correctIndex
+            ? <CheckCircle2 size={18} className="text-moss shrink-0 mt-0.5" />
+            : <XCircle size={18} className="text-rust shrink-0 mt-0.5" />}
+          <p className="text-sm leading-relaxed text-ink">
+            <span className={`font-bold ${selected === q.correctIndex ? 'text-moss' : 'text-rust'}`}>
+              {selected === q.correctIndex ? 'Correct. ' : 'Not quite. '}
             </span>
             {q.explanation}
           </p>

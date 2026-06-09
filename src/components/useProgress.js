@@ -3,6 +3,10 @@ import { useState, useEffect } from 'react';
 const EMPTY_PROGRESS = { completedModules: [], quizScores: {} };
 
 function readProgress(storageKey) {
+  if (!storageKey || typeof localStorage === 'undefined') {
+    return { ...EMPTY_PROGRESS };
+  }
+
   try {
     const raw = localStorage.getItem(storageKey);
     return raw ? JSON.parse(raw) : { ...EMPTY_PROGRESS };
@@ -24,7 +28,7 @@ export function useProgress(storageKey = 'cos222-progress-v1') {
   }
 
   useEffect(() => {
-    if (loadedKey !== storageKey) return; // mid key-change; skip the stale write
+    if (!storageKey || loadedKey !== storageKey || typeof localStorage === 'undefined') return; // mid key-change; skip the stale write
     try {
       localStorage.setItem(storageKey, JSON.stringify(progress));
     } catch (e) {

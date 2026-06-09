@@ -101,7 +101,7 @@ export default function FloatingHelp() {
           </ul>
 
           <div className="px-4 py-2.5 text-[11px] text-coffee-600 bg-cream/40 border-t border-coffee-100">
-            Replies usually within a day. For the Java track, ask in your class group.
+            Replies usually within a day. For track-specific help, ask in your class group.
           </div>
         </div>
       )}

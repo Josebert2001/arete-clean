@@ -41,10 +41,13 @@ export default {
       },
       keyframes: {
         fadeUp: {
-          '0%': { opacity: '0', transform: 'translateY(12px)' },
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(6px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         steam: {
           '0%, 100%': { opacity: '0.3', transform: 'translateY(0) scaleX(1)' },
           '50%': { opacity: '0.7', transform: 'translateY(-6px) scaleX(1.1)' },

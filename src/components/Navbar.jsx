@@ -25,7 +25,7 @@ export default function Navbar() {
           </div>
           <div className="leading-tight">
             <div className="font-display font-bold text-ink text-xl tracking-tight">Arete</div>
-            <div className="text-xs text-coffee-700 -mt-0.5 tracking-wider">Code your excellence · JRsolvy</div>
+            <div className="text-xs text-coffee-700 -mt-0.5 tracking-wider">Dept of Cybersecurity · UniUyo</div>
           </div>
         </Link>
 

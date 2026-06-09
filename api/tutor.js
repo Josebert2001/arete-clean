@@ -10,39 +10,52 @@
 // ============================================================================
 
 import Groq from 'groq-sdk';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders } from './_lib/request-policy.js';
+import { COURSE_KNOWLEDGE, MODULE_KNOWLEDGE } from './_lib/courseData.js';
 
-const SYSTEM_PROMPT = `You are Arete's friendly tutor for Cybersecurity students at the University of Uyo, Nigeria.
-You help beginner-to-intermediate students learn programming and core computer science.
+const SYSTEM_PROMPT = `You are Arete's AI academic tutor for the Department of Cybersecurity, University of Uyo, Nigeria.
+You have complete knowledge of the entire B.Sc. Cybersecurity programme — every course, every topic, and every interactive programming module available in the app.
 
-What you cover:
-- Programming in Java (COS 222 — OOP), Python (COS 121), and C
-- Core CS topics: data structures & algorithms, operating systems, computer
-  organization & architecture, discrete mathematics, probability/statistics, and
-  foundational cybersecurity concepts
-- Tooling and setup questions (installing a JDK/Python/GCC, running code, reading errors)
+WHAT YOU KNOW:
+${COURSE_KNOWLEDGE}
 
-Guidelines:
-- Explain concepts simply and clearly, pitched at a first/second-year student
-- Use short, relatable examples (everyday Nigerian/student life where it fits)
-- Show a short code snippet IN THE RELEVANT LANGUAGE when it helps understanding
-- If the student names a language or module, stay in that language unless asked otherwise
-- When a student shares an error, explain WHY it happens, not just how to fix it
-- Never give full solutions to mini projects or graded assignments — guide step by step instead
-- Keep answers concise — avoid overwhelming walls of text
-- Be encouraging and patient
-- If a question falls outside programming/CS, help briefly, then steer back to their studies`;
+${MODULE_KNOWLEDGE}
 
-// Restrict browser callers to the deployed site. Set ALLOWED_ORIGIN in Vercel
-// to your domain (e.g. https://arete.vercel.app); falls back to '*' if unset.
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+HOW TO TUTOR:
+- When a student asks about a specific course or module, draw directly on the detailed knowledge above
+- Identify the student's level from context (what they mention) and calibrate depth accordingly — 100L needs more scaffolding than 400L
+- For programming questions (Java, Python, C): write clean, runnable code examples; explain WHY things work the way they do
+- For cybersecurity concepts: use the exact terminology from the curriculum above; mention relevant tools, standards, and frameworks
+- For exam prep: point out what topics are commonly examined (the course knowledge above includes exam tips)
+- When a student shares an error: explain the root cause, not just the fix
+- Use short, relatable analogies; Nigerian/student-life context where it fits naturally
+- Never give full solutions to assignments or graded coursework — guide step by step with hints
+- Keep answers focused and scannable — use short paragraphs or numbered steps for complex answers
+- Be warm, encouraging, and patient; exams and projects are stressful
+- If asked about something outside the programme (e.g. a random general topic), help briefly then gently note you are optimised for the Cybersecurity curriculum
+- If context suggests the student is on a specific module (passed via [Studying:] tag), use that module's content to answer precisely`;
+
+const RATE_LIMIT = {
+  namespace: 'tutor',
+  limit: 8,
+  windowMs: 10 * 60 * 1000,
+};
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applyApiHeaders(res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const rateLimit = enforceRateLimit(req, RATE_LIMIT);
+  setRateLimitHeaders(res, rateLimit);
+  if (!rateLimit.allowed) {
+    res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
+    return res.status(429).json({
+      error: 'Too many tutor requests from this device. Please wait a few minutes and try again.',
+      kind: 'rate_limited',
+    });
+  }
 
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_API_KEY) {
@@ -66,7 +79,7 @@ export default async function handler(req, res) {
     const groq = new Groq({ apiKey: GROQ_API_KEY });
 
     const userMessage = safeModuleContext
-      ? `[The student is currently studying: ${safeModuleContext}]\n\n${question}`
+      ? `[Studying: ${safeModuleContext}]\n\n${question}`
       : question;
 
     const completion = await groq.chat.completions.create({
@@ -75,8 +88,8 @@ export default async function handler(req, res) {
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userMessage },
       ],
-      max_tokens: 800,
-      temperature: 0.7,
+      max_tokens: 1000,
+      temperature: 0.65,
     });
 
     const answer = completion.choices[0]?.message?.content ?? 'No response received.';

@@ -34,18 +34,31 @@ const LANGUAGES = {
   python: { language: 'python3', versionIndex: '6' },
 };
 
-// Restrict browser callers to the deployed site. Set ALLOWED_ORIGIN in Vercel
-// to your domain (e.g. https://arete.vercel.app); falls back to '*' if unset.
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders } from './_lib/request-policy.js';
+
+const RATE_LIMIT = {
+  namespace: 'run',
+  limit: 10,
+  windowMs: 10 * 60 * 1000,
+};
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applyApiHeaders(res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const rateLimit = enforceRateLimit(req, RATE_LIMIT);
+  setRateLimitHeaders(res, rateLimit);
+  if (!rateLimit.allowed) {
+    res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
+    return res.status(429).json({
+      error: 'Too many code-run requests from this device. Please wait a few minutes and try again.',
+      kind: 'limit',
+      status: 'Rate limit reached',
+    });
   }
 
   const CLIENT_ID = process.env.JDOODLE_CLIENT_ID;

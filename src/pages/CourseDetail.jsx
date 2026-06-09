@@ -1,20 +1,32 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, ChevronRight, Clock } from 'lucide-react';
 import { getCourseBySlug, courses } from '../data/courses';
 
 const subjectStyles = {
   cs:    { codeBg: 'bg-ink',        codeText: 'text-cream',  accent: 'text-ink',        tag: 'bg-coffee-100 text-coffee-800' },
+  cyb:   { codeBg: 'bg-rust',       codeText: 'text-cream',  accent: 'text-rust',       tag: 'bg-rust/10 text-rust' },
   math:  { codeBg: 'bg-moss',       codeText: 'text-cream',  accent: 'text-moss',       tag: 'bg-moss/10 text-moss' },
   stats: { codeBg: 'bg-ember-500',  codeText: 'text-cream',  accent: 'text-ember-500',  tag: 'bg-ember-500/10 text-ember-500' },
   gst:   { codeBg: 'bg-coffee-700', codeText: 'text-cream',  accent: 'text-coffee-700', tag: 'bg-coffee-100 text-coffee-700' },
+  phy:   { codeBg: 'bg-moss',       codeText: 'text-cream',  accent: 'text-moss',       tag: 'bg-moss/10 text-moss' },
+  sen:   { codeBg: 'bg-ink',        codeText: 'text-cream',  accent: 'text-ink',        tag: 'bg-coffee-100 text-coffee-800' },
+  ent:   { codeBg: 'bg-coffee-600', codeText: 'text-cream',  accent: 'text-coffee-600', tag: 'bg-coffee-100 text-coffee-700' },
+  ins:   { codeBg: 'bg-ember-500',  codeText: 'text-cream',  accent: 'text-ember-500',  tag: 'bg-ember-500/10 text-ember-500' },
+  siwes: { codeBg: 'bg-coffee-700', codeText: 'text-cream',  accent: 'text-coffee-700', tag: 'bg-coffee-100 text-coffee-700' },
   ele:   { codeBg: 'bg-rust',       codeText: 'text-cream',  accent: 'text-rust',       tag: 'bg-rust/10 text-rust' },
 };
 
 const subjectLabels = {
-  cs:    'Core CS / Cybersecurity',
+  cs:    'Computer Science',
+  cyb:   'Cybersecurity',
   math:  'Mathematics',
   stats: 'Statistics',
   gst:   'General Studies',
+  phy:   'Physics',
+  sen:   'Software Engineering',
+  ent:   'Entrepreneurship',
+  ins:   'Information Systems',
+  siwes: 'Industrial Training / SIWES',
   ele:   'Electronics',
 };
 
@@ -59,8 +71,13 @@ export default function CourseDetail() {
             {subjectLabels[course.subject]}
           </span>
           <span className="text-xs font-mono text-coffee-700 px-2.5 py-1 bg-coffee-100 rounded-full">
-            Semester {course.semester} · {course.units} units
+            {course.level}L · Semester {course.semester} · {course.units} units
           </span>
+          {(course.lh > 0 || course.ph > 0) && (
+            <span className="text-xs font-mono text-coffee-600 px-2.5 py-1 bg-coffee-50 border border-coffee-100 rounded-full">
+              {course.lh > 0 ? `${course.lh}h lecture` : ''}{course.lh > 0 && course.ph > 0 ? ' · ' : ''}{course.ph > 0 ? `${course.ph}h practical` : ''}
+            </span>
+          )}
           {course.hasInteractiveModules ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-moss/15 text-moss rounded-full">
               <Sparkles size={11} />
@@ -221,15 +238,18 @@ export default function CourseDetail() {
           </div>
 
           {/* Past questions placeholder */}
-          <div className="bg-cream border border-coffee-200 border-dashed rounded-xl p-5">
-            <h2 className="font-display font-bold text-ink mb-1">Past Questions</h2>
-            <p className="text-sm text-coffee-700 mb-4 leading-relaxed">
-              Past examination questions for {course.code} will appear here. If you have past questions,
-              share them with your class — the more resources available, the better everyone performs.
-            </p>
-            <div className="flex items-center gap-2 text-xs text-coffee-500">
-              <span className="w-2 h-2 rounded-full bg-coffee-300" />
-              No past questions uploaded yet for this course
+          <div className="bg-cream border border-dashed border-coffee-300 rounded-xl p-5 flex items-start gap-4">
+            <div className="w-9 h-9 rounded-lg bg-coffee-100 flex items-center justify-center shrink-0 mt-0.5">
+              <Clock size={18} className="text-coffee-500" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="font-display font-bold text-ink">Past Questions</h2>
+                <span className="text-xs font-mono px-2 py-0.5 bg-coffee-100 text-coffee-600 rounded-full">Planned</span>
+              </div>
+              <p className="text-sm text-coffee-700 leading-relaxed">
+                Past examination questions for {course.code} are planned for a future release. When they arrive, they’ll appear here with worked solutions.
+              </p>
             </div>
           </div>
         </div>

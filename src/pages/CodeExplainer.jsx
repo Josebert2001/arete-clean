@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Wand2, Copy, Check, ArrowRight } from 'lucide-react';
+import { fetchJsonWithFallback } from '../utils/apiClient';
 
 // Force the Coming Soon screen during local dev. The server also signals
 // "not configured" at runtime — see askExplainer below.
 const DEMO_MODE = false;
 
 async function askExplainer(code, language) {
-  const res = await fetch('/api/explainer', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code, language }),
-  });
-  if (!res.ok) throw new Error('Request failed');
-  return res.json();
+  return fetchJsonWithFallback(
+    '/api/explainer',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, language }),
+    },
+    'The Code Explainer needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.'
+  );
 }
 
 const LANGUAGES = [
@@ -49,6 +52,18 @@ int main(void) {
         sum += nums[i];
     }
     printf("Total: %d\\n", sum);
+    return 0;
+}`,
+  cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    int nums[] = {4, 8, 15, 16, 23, 42};
+    int sum = 0;
+    for (int n : nums) {
+        sum += n;
+    }
+    cout << "Total: " << sum << endl;
     return 0;
 }`,
 };
@@ -106,7 +121,7 @@ export default function CodeExplainer() {
       <div className="mb-8">
         <h1 className="display-heading text-5xl text-ink mb-3">Code Explainer</h1>
         <p className="text-lg text-coffee-700">
-          Paste confusing Java, Python, or C code and get a clear, plain-English breakdown of what it does.
+          Paste confusing Java, Python, C, or C++ code and get a clear, plain-English breakdown of what it does.
         </p>
       </div>
 
@@ -118,7 +133,7 @@ export default function CodeExplainer() {
           </div>
           <h2 className="display-heading text-3xl text-ink mb-4">Line-by-line. On its way.</h2>
           <p className="text-coffee-700 leading-relaxed mb-8 max-w-lg">
-            Paste any Java code and get a plain-English walkthrough of what it does — line by line where it matters, with notes on common mistakes and what the output will be.
+            Paste Java, Python, C, or C++ code and get a plain-English walkthrough of what it does — line by line where it matters, with notes on common mistakes and what the output will be.
           </p>
           <ul className="space-y-3 mb-8">
             {[
@@ -201,10 +216,13 @@ export default function CodeExplainer() {
               </div>
 
               {loading ? (
-                <div className="flex gap-1.5">
-                  <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs text-coffee-500 italic">Analyzing…</span>
+                  <span className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
                 </div>
               ) : (
                 <p className="text-sm text-coffee-700 leading-relaxed whitespace-pre-wrap">{explanation}</p>

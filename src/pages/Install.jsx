@@ -55,7 +55,7 @@ const tracks = [
       },
       {
         title: 'Download & Install NetBeans IDE',
-        body: 'NetBeans is the IDE used in COS 222 labs. It has a drag-and-drop GUI designer you will use later.',
+        body: 'NetBeans is the IDE used in COS 211 / 221 labs. It has a drag-and-drop GUI designer you will use later.',
         actions: [
           { label: 'Go to netbeans.apache.org/front/main/download', url: 'https://netbeans.apache.org/front/main/download/' },
         ],
@@ -318,7 +318,7 @@ export default function Install() {
                     {isChecked
                       ? <CheckCircle2 size={18} className="text-moss flex-shrink-0 mt-0.5" />
                       : <div className="w-[18px] h-[18px] rounded-full border-2 border-coffee-300 flex-shrink-0 mt-0.5 group-hover:border-coffee-500" />}
-                    <span className={`text-sm leading-relaxed ${isChecked ? 'text-coffee-400 line-through' : 'text-coffee-700'}`}>
+                    <span className={`checklist-item text-sm leading-relaxed ${isChecked ? 'text-coffee-400 line-through opacity-60' : 'text-coffee-700'}`}>
                       {item}
                     </span>
                   </button>

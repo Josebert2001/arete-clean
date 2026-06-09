@@ -6,9 +6,9 @@ export const trackConfig = {
   java: {
     slug: 'java',
     label: 'Java',
-    fullName: 'Java (COS 222)',
-    tagline: 'Object-oriented programming from foundations to GUI',
-    description: 'The complete COS 222 track: 13 modules covering Java fundamentals, OOP, collections, file I/O, JDBC, and Swing GUI.',
+    fullName: 'Java (COS 211)',
+    tagline: 'Computer Programming I — OOP from foundations to GUI',
+    description: 'The complete COS 211 track: 13 modules covering Java fundamentals, OOP, collections, file I/O, JDBC, and Swing GUI. Also supports COS 221 (Computer Programming II).',
     modules,
     getModuleById,
     storageKey: 'cos222-progress-v1',
@@ -20,7 +20,7 @@ export const trackConfig = {
     accentText: 'text-cream',
     accentLight: 'bg-coffee-100 text-coffee-800',
     dotColor: 'bg-ember-500',
-    courseCode: 'COS 222',
+    courseCode: 'COS 211',
   },
   python: {
     slug: 'python',

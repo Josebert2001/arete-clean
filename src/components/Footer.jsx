@@ -11,18 +11,18 @@ export default function Footer() {
               <span className="font-display text-lg font-bold text-ink">Arete</span>
             </div>
             <p className="text-sm text-coffee-700 leading-relaxed">
-              Code your excellence. An interactive learning platform built for students who want to learn properly — from foundations up.
+              Academic companion for B.Sc. Cybersecurity students at the University of Uyo — courses, interactive programming tracks, and an AI tutor, all four years.
             </p>
             <p className="text-xs text-coffee-600 mt-3 italic font-display">ἀρετή · Greek for "excellence through practice"</p>
           </div>
 
           <div>
-            <h4 className="font-display font-bold text-ink mb-3">Three tracks</h4>
+            <h4 className="font-display font-bold text-ink mb-3">What's inside</h4>
             <ul className="space-y-2 text-sm text-coffee-700">
-              <li>Java · Python · C</li>
-              <li>37 interactive modules</li>
-              <li>Practice quizzes &amp; mini projects</li>
-              <li>Runnable in-browser playgrounds</li>
+              <li>All courses · 100L to 400L</li>
+              <li>Java · Python · C interactive tracks</li>
+              <li>37 modules · quizzes · playgrounds</li>
+              <li>AI Tutor · Code Explainer</li>
             </ul>
           </div>
 

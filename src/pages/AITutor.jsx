@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Send, User, Bot, ArrowRight } from 'lucide-react';
 import { trackConfig } from '../data/trackConfig';
+import { fetchJsonWithFallback } from '../utils/apiClient';
 
 // Force the Coming Soon screen during local dev without removing the live
 // chat. The server also signals "not configured" at runtime (see askAI below).
@@ -17,25 +18,31 @@ const FOCUS_GROUPS = Object.values(trackConfig).map(t => ({
 }));
 
 async function askAI(question, moduleContext) {
-  const res = await fetch('/api/tutor', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, moduleContext }),
-  });
-  if (!res.ok) throw new Error('Request failed');
-  return res.json();
+  return fetchJsonWithFallback(
+    '/api/tutor',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, moduleContext }),
+    },
+    'The AI Tutor needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.'
+  );
 }
 
 const SUGGESTED = [
   'What is the difference between == and .equals() in Java?',
   'Explain pointers in C with a simple example',
+  'What is the CIA triad and why does it matter?',
+  'How does RSA encryption work?',
+  'What is the OWASP Top 10?',
   'How are Python lists different from dictionaries?',
+  'Explain SQL injection with an example',
   'What is Big-O notation, in plain English?',
 ];
 
 export default function AITutor() {
   const [messages, setMessages] = useState([
-    { role: 'bot', text: "Hi! I'm your Arete tutor. Ask me anything about Java, Python, C, or core CS topics — concepts, errors, syntax, or how to approach a mini project. What are you stuck on?" }
+    { role: 'bot', text: "Hi! I'm your Arete tutor. I know the full B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks (Java, Python, C), cryptography, networking, ethical hacking, digital forensics, and more. Ask me anything. What are you working on?" }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -90,11 +97,11 @@ export default function AITutor() {
           </div>
           <h2 className="display-heading text-3xl text-ink mb-4">Real answers. On their way.</h2>
           <p className="text-coffee-700 leading-relaxed mb-8 max-w-lg">
-            The AI Tutor will answer your Java questions in plain English — tailored for COS 222 students. Ask about concepts, errors, or how to approach a problem and get a clear response with code examples.
+            The AI Tutor knows the complete B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks, and the full module content. Ask about concepts, errors, exam topics, or how to approach a problem and get a precise, curriculum-aligned answer.
           </p>
           <ul className="space-y-3 mb-8">
             {[
-              'Explain any Java concept at your level',
+              'Explain any programming concept at your level',
               'Debug errors — paste the message and get a fix',
               'Understand why something works the way it does',
               'Get unstuck on mini projects without spoiling the answer',
@@ -107,11 +114,11 @@ export default function AITutor() {
           </ul>
           <div className="border-t border-coffee-200 pt-6 flex flex-wrap items-center gap-4">
             <p className="text-sm text-coffee-700">In the meantime —</p>
-            <Link to="/tracks" className="btn-ghost text-sm">
-              Read the modules <ArrowRight size={14} />
-            </Link>
+              <Link to="/tracks" className="btn-ghost text-sm">
+                Read the modules <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
-        </div>
       ) : (
         <>
           {/* Module context selector */}
@@ -157,10 +164,13 @@ export default function AITutor() {
                   <div className="w-8 h-8 rounded-lg bg-ink text-cream flex items-center justify-center flex-shrink-0">
                     <Bot size={15} />
                   </div>
-                  <div className="bg-cream border border-coffee-200 rounded-xl px-4 py-3 flex gap-1.5">
-                    <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="bg-cream border border-coffee-200 rounded-xl px-4 py-3 flex items-center gap-2.5">
+                    <span className="text-xs text-coffee-500 italic">Thinking…</span>
+                    <span className="flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </span>
                   </div>
                 </div>
               )}
@@ -175,7 +185,7 @@ export default function AITutor() {
                     key={i}
                     onClick={() => send(s)}
                     aria-label={`Ask: ${s}`}
-                    className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-2 text-coffee-700 hover:border-coffee-500 transition-colors"
+                    className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-2 text-coffee-700 hover:bg-coffee-100 hover:text-ink hover:border-coffee-500 transition-all"
                   >
                     {s}
                   </button>
@@ -189,8 +199,8 @@ export default function AITutor() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && send()}
-                placeholder="Ask a Java question..."
-                aria-label="Ask a Java question"
+                placeholder="Ask about Java, Python, C, or a course concept..."
+                aria-label="Ask a programming or CS question"
                 className="flex-1 bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
               />
               <button

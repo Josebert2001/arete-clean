@@ -152,12 +152,25 @@ body {
 .btn-ghost:hover { background: rgba(28, 24, 20, 0.05); border-color: var(--ink); }
 
 /* Tab style */
-.tab-active { background: var(--ink); color: var(--cream); }
-.tab-inactive { background: transparent; color: var(--ink); }
-.tab-inactive:hover { background: rgba(28, 24, 20, 0.05); }
+.tab-active {
+  background: var(--ink);
+  color: var(--cream);
+  box-shadow: 0 1px 4px rgba(28, 24, 20, 0.18);
+}
+.tab-inactive {
+  background: transparent;
+  color: var(--ink);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.tab-inactive:hover { background: rgba(28, 24, 20, 0.07); }
 
 /* Progress dot */
-.progress-dot { width: 8px; height: 8px; border-radius: 50%; }
+.progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
 
 /* Module card hover */
 .module-card {
@@ -167,6 +180,19 @@ body {
   transform: translateY(-3px);
   box-shadow: 0 12px 32px rgba(82, 49, 15, 0.12);
 }
+
+/* Checklist item */
+.checklist-item {
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+/* Mark-complete pulse */
+@keyframes pulse-once {
+  0%   { box-shadow: 0 0 0 0 rgba(92, 107, 63, 0.5); }
+  70%  { box-shadow: 0 0 0 8px rgba(92, 107, 63, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(92, 107, 63, 0); }
+}
+.complete-pulse { animation: pulse-once 0.55s ease-out; }
 
 /* Steam animation for hero */
 .steam {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Play, Loader2, Terminal, RotateCcw, Check, X, AlertTriangle } from 'lucide-react';
+import { fetchJsonWithFallback } from '../utils/apiClient';
 
 /*
   CodePlayground — editable code editor with a Run button.
@@ -9,6 +10,13 @@ import { Play, Loader2, Terminal, RotateCcw, Check, X, AlertTriangle } from 'luc
   Works without configuration too: if the API keys aren't set yet, the function
   returns a friendly "not connected" message instead of crashing.
 */
+
+const LANGUAGE_LABELS = {
+  java: 'Java',
+  python: 'Python',
+  c: 'C',
+  cpp: 'C++',
+};
 
 export default function CodePlayground({ initialCode = '', language = 'java', stdin = '' }) {
   const [code, setCode] = useState(initialCode);
@@ -25,16 +33,22 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
     setMeta(null);
 
     try {
-      const res = await fetch('/api/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source_code: code, language, stdin }),
-      });
-      const data = await res.json();
+      const data = await fetchJsonWithFallback(
+        '/api/run',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source_code: code, language, stdin }),
+        },
+        'The code runner needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.'
+      );
 
       if (data.notConfigured) {
         setOutput(data.output);
         setKind('not_configured');
+      } else if (data.kind === 'limit' || data.responseStatus === 429) {
+        setOutput(data.output || data.error || 'Daily run limit reached. Please try again later.');
+        setKind('limit');
       } else if (data.error) {
         setOutput(data.error + (data.detail ? `\n\n${data.detail}` : ''));
         setKind('runtime_error');
@@ -79,7 +93,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
         <div className="flex items-center gap-2">
           <Terminal size={14} className="text-coffee-400" />
           <span className="text-xs font-mono text-coffee-300 uppercase tracking-wider">
-            {language} · try it yourself
+            {LANGUAGE_LABELS[language] || language} · try it yourself
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -115,7 +129,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           value={code}
           onChange={e => setCode(e.target.value)}
           spellCheck={false}
-          aria-label="Java code editor"
+          aria-label={`${LANGUAGE_LABELS[language] || 'Code'} editor`}
           className="flex-1 bg-transparent text-cream py-4 pr-4 outline-none resize-y"
           style={{ fontFamily: 'JetBrains Mono', fontSize: '0.8rem', lineHeight: '1.6', minHeight: '180px' }}
         />
