@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 
-// Simple Java syntax highlighter
-const KEYWORDS = [
+// Lightweight syntax highlighter for Java, Python, C, and C++.
+
+const JAVA_KEYWORDS = [
   'public', 'private', 'protected', 'static', 'final', 'abstract',
   'class', 'interface', 'extends', 'implements', 'new', 'this', 'super',
   'void', 'int', 'double', 'float', 'boolean', 'char', 'long', 'short', 'byte',
@@ -11,7 +12,7 @@ const KEYWORDS = [
   'import', 'package', 'true', 'false', 'null', 'synchronized', 'volatile',
 ];
 
-const TYPES = ['ArrayList', 'HashMap', 'HashSet', 'Scanner', 'BufferedReader', 'BufferedWriter',
+const JAVA_TYPES = ['ArrayList', 'HashMap', 'HashSet', 'Scanner', 'BufferedReader', 'BufferedWriter',
   'FileReader', 'FileWriter', 'IOException', 'Exception', 'RuntimeException',
   'Thread', 'Runnable', 'JFrame', 'JButton', 'JLabel', 'JPanel', 'JTextField',
   'JOptionPane', 'ActionListener', 'ActionEvent', 'Connection', 'PreparedStatement',
@@ -23,16 +24,60 @@ const TYPES = ['ArrayList', 'HashMap', 'HashSet', 'Scanner', 'BufferedReader', '
   'InsufficientFundsException', 'Printable', 'Saveable', 'JLabel.CENTER',
   'JFrame.EXIT_ON_CLOSE', 'JOptionPane.YES_NO_OPTION', 'JOptionPane.YES_OPTION'];
 
-function tokenize(code) {
+const PYTHON_KEYWORDS = [
+  'def', 'return', 'if', 'elif', 'else', 'for', 'while', 'in', 'not', 'and',
+  'or', 'is', 'None', 'True', 'False', 'class', 'import', 'from', 'as', 'with',
+  'try', 'except', 'finally', 'raise', 'lambda', 'pass', 'break', 'continue',
+  'global', 'nonlocal', 'yield', 'del', 'assert', 'async', 'await', 'self',
+];
+
+const C_KEYWORDS = [
+  'int', 'char', 'float', 'double', 'void', 'long', 'short', 'unsigned',
+  'signed', 'const', 'struct', 'union', 'enum', 'typedef', 'sizeof', 'return',
+  'if', 'else', 'switch', 'case', 'default', 'break', 'continue', 'for',
+  'while', 'do', 'goto', 'static', 'extern', 'auto', 'register', 'volatile',
+  'inline', 'NULL', 'true', 'false', 'bool',
+  // C++ extras (harmless for C snippets)
+  'class', 'public', 'private', 'protected', 'new', 'delete', 'namespace',
+  'using', 'template', 'virtual', 'this',
+];
+
+const C_TYPES = ['FILE', 'size_t', 'Point', 'Student', 'string', 'cout', 'cin', 'endl', 'std'];
+
+const LANG_CONFIG = {
+  java:   { label: 'JAVA',   keywords: JAVA_KEYWORDS,   types: JAVA_TYPES, lineComment: '//', hashIsPreproc: false },
+  python: { label: 'PYTHON', keywords: PYTHON_KEYWORDS, types: [],         lineComment: '#',  hashIsPreproc: false },
+  c:      { label: 'C',      keywords: C_KEYWORDS,      types: C_TYPES,    lineComment: '//', hashIsPreproc: true },
+  cpp:    { label: 'C++',    keywords: C_KEYWORDS,      types: C_TYPES,    lineComment: '//', hashIsPreproc: true },
+};
+
+function tokenize(code, lang) {
+  const cfg = LANG_CONFIG[lang] || LANG_CONFIG.java;
   const lines = code.split('\n');
   return lines.map((line, lineIdx) => {
     const tokens = [];
     let i = 0;
     while (i < line.length) {
-      // Comment
-      if (line.slice(i, i + 2) === '//') {
+      // Line comment ('//' for Java/C, '#' for Python)
+      if (line.startsWith(cfg.lineComment, i)) {
         tokens.push({ type: 'com', value: line.slice(i) });
         break;
+      }
+      // C block comment on a single line: /* ... */
+      if (line.slice(i, i + 2) === '/*') {
+        const close = line.indexOf('*/', i + 2);
+        const end = close === -1 ? line.length : close + 2;
+        tokens.push({ type: 'com', value: line.slice(i, end) });
+        i = end;
+        continue;
+      }
+      // C preprocessor directive: #include, #define, ...
+      if (cfg.hashIsPreproc && line[i] === '#') {
+        let end = i + 1;
+        while (end < line.length && /[a-zA-Z]/.test(line[end])) end++;
+        tokens.push({ type: 'kw', value: line.slice(i, end) });
+        i = end;
+        continue;
       }
       // String
       if (line[i] === '"') {
@@ -45,7 +90,7 @@ function tokenize(code) {
         i = end + 1;
         continue;
       }
-      // Char literal
+      // Char literal / Python single-quoted string
       if (line[i] === "'") {
         let end = i + 1;
         while (end < line.length && line[end] !== "'") end++;
@@ -66,9 +111,9 @@ function tokenize(code) {
         let end = i;
         while (end < line.length && /[a-zA-Z0-9_$]/.test(line[end])) end++;
         const word = line.slice(i, end);
-        if (KEYWORDS.includes(word)) {
+        if (cfg.keywords.includes(word)) {
           tokens.push({ type: 'kw', value: word });
-        } else if (TYPES.includes(word)) {
+        } else if (cfg.types.includes(word)) {
           tokens.push({ type: 'type', value: word });
         } else if (line[end] === '(') {
           tokens.push({ type: 'fn', value: word });
@@ -96,9 +141,10 @@ const colorMap = {
   plain: 'var(--syntax-plain)',
 };
 
-export default function CodeBlock({ code, showLineNumbers = true }) {
-  const lines = useMemo(() => tokenize(code), [code]);
+export default function CodeBlock({ code, language = 'java', showLineNumbers = true }) {
+  const lines = useMemo(() => tokenize(code, language), [code, language]);
   const [copied, setCopied] = useState(false);
+  const label = (LANG_CONFIG[language] || {}).label || language.toUpperCase();
 
   const copy = async () => {
     try {
@@ -112,14 +158,19 @@ export default function CodeBlock({ code, showLineNumbers = true }) {
 
   return (
     <div className="code-block my-4 relative">
-      <button
-        onClick={copy}
-        aria-label="Copy code"
-        title="Copy code"
-        className="absolute top-2 right-2 p-1.5 rounded text-coffee-400 hover:text-cream transition-colors z-10"
-      >
-        {copied ? <Check size={13} className="text-moss" /> : <Copy size={13} />}
-      </button>
+      <div className="absolute top-1.5 right-2 z-10 flex items-center gap-1.5">
+        <span className="select-none text-[0.625rem] font-semibold tracking-[0.15em] text-cream/40">
+          {label}
+        </span>
+        <button
+          onClick={copy}
+          aria-label="Copy code"
+          title="Copy code"
+          className="p-1.5 rounded text-coffee-400 hover:text-cream transition-colors"
+        >
+          {copied ? <Check size={13} className="text-moss" /> : <Copy size={13} />}
+        </button>
+      </div>
       <pre className="text-xs sm:text-sm leading-relaxed overflow-x-auto">
         <code>
           {lines.map(({ lineIdx, tokens }) => (
@@ -138,7 +189,7 @@ export default function CodeBlock({ code, showLineNumbers = true }) {
                     {t.value}
                   </span>
                 ))}
-                {tokens.length === 0 && '\u00A0'}
+                {tokens.length === 0 && ' '}
               </span>
             </div>
           ))}

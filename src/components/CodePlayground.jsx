@@ -93,7 +93,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
         <div className="flex min-w-0 items-center gap-2">
           <Terminal size={14} className="text-coffee-400" />
           <span className="truncate text-xs font-mono uppercase tracking-wider text-coffee-300">
-            {LANGUAGE_LABELS[language] || language} Â· try it yourself
+            {LANGUAGE_LABELS[language] || language} · try it yourself
           </span>
         </div>
         <div className="flex items-center justify-end gap-2">

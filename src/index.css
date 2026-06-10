@@ -84,16 +84,6 @@ body {
   overflow-x: auto;
   position: relative;
 }
-.code-block::before {
-  content: 'JAVA';
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  font-size: 0.625rem;
-  letter-spacing: 0.15em;
-  color: rgba(245, 239, 224, 0.4);
-  font-weight: 600;
-}
 .code-block .kw { color: #E07A2C; font-weight: 600; }
 .code-block .str { color: #B6D178; }
 .code-block .num { color: #CFA665; }
@@ -215,4 +205,16 @@ body {
 @keyframes steam {
   0%, 100% { opacity: 0.3; transform: translateY(0) scaleX(1); }
   50% { opacity: 0.7; transform: translateY(-6px) scaleX(1.1); }
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
