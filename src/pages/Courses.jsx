@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield, Search, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield, Search, X } from 'lucide-react';
 import { courses, getCoursesByLevelAndSemester, LEVELS, levelMeta } from '../data/courses';
 import { trackMeta } from '../data/trackMeta';
 import { usePageTitle } from '../utils/usePageTitle';
@@ -178,7 +178,7 @@ function LevelPicker({ onSelect }) {
         <h2 className="display-heading text-2xl text-ink">Pick your level</h2>
       </div>
       <p className="text-sm text-coffee-700 max-w-2xl mb-8 leading-relaxed">
-        Choose your year to see only the courses that matter to you right now. You can switch levels any time using the tabs above.
+        Choose your year, then your semester — you'll only see the courses that matter to you right now.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -216,6 +216,128 @@ function LevelPicker({ onSelect }) {
   );
 }
 
+// ─── Semester picker (after a level is chosen) ────────────────────────────────
+
+function SemesterPicker({ level, onSelect, onShowAll, onBack }) {
+  const meta = levelMeta[level];
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 text-sm text-coffee-700 hover:text-ink transition-colors mb-5"
+      >
+        <ArrowLeft size={14} /> Change level
+      </button>
+
+      <p className="text-xs font-mono uppercase tracking-widest text-coffee-700 mb-2">{meta.label} · Pick a semester</p>
+      <h2 className="display-heading text-2xl sm:text-3xl text-ink mb-6">Which semester are you in?</h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        {[1, 2].map(sem => {
+          const semCourses = getCoursesByLevelAndSemester(level, sem);
+          if (!semCourses.length) return null;
+          const isSiwes = level === 300 && sem === 2;
+          return (
+            <button
+              key={sem}
+              onClick={() => onSelect(sem)}
+              className="bg-paper border-2 border-coffee-200 rounded-2xl p-6 text-left group hover:border-ink hover:shadow-md active:scale-95 transition-all flex flex-col gap-4"
+            >
+              <div>
+                <span className="text-xs font-mono text-coffee-500 uppercase tracking-widest">Semester {sem}</span>
+                <h3 className="font-display font-bold text-2xl text-ink mt-1">
+                  {sem === 1 ? 'First Semester' : isSiwes ? 'Second Semester — SIWES' : 'Second Semester'}
+                </h3>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-coffee-700">
+                  {semCourses.length} {isSiwes ? 'components' : 'courses'} · {semCourses.reduce((s, c) => s + c.units, 0)} units
+                </span>
+                <span className="inline-flex items-center gap-1 font-medium text-ink opacity-70 group-hover:opacity-100 group-hover:gap-2 transition-all">
+                  View <ArrowRight size={13} />
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={onShowAll}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-coffee-700 hover:text-ink transition-colors"
+      >
+        Or show the full course list for all four years <ArrowRight size={13} />
+      </button>
+    </div>
+  );
+}
+
+// ─── One semester's courses (final step of the picker flow) ───────────────────
+
+function SemesterCoursesView({ level, semester, onBack, onSwitchSemester, onShowAll }) {
+  const meta = levelMeta[level];
+  const semCourses = getCoursesByLevelAndSemester(level, semester);
+  const otherSemester = semester === 1 ? 2 : 1;
+  const otherCourses = getCoursesByLevelAndSemester(level, otherSemester);
+  const isSiwes = level === 300 && semester === 2;
+  const otherIsSiwes = level === 300 && otherSemester === 2;
+  const semLabel = semester === 1 ? 'First Semester' : isSiwes ? 'Second Semester — SIWES' : 'Second Semester';
+
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 text-sm text-coffee-700 hover:text-ink transition-colors mb-5"
+      >
+        <ArrowLeft size={14} /> Change semester
+      </button>
+
+      <div className="mb-6">
+        <p className="text-xs font-mono uppercase tracking-widest text-coffee-700 mb-1">
+          {meta.label} · {semLabel}
+        </p>
+        <h2 className="display-heading text-2xl sm:text-3xl text-ink">
+          {semCourses.length} {isSiwes ? 'components' : 'courses'} · {semCourses.reduce((s, c) => s + c.units, 0)} units
+        </h2>
+      </div>
+
+      {isSiwes && (
+        <div className="mb-6 p-4 bg-coffee-50 border border-coffee-200 rounded-xl text-sm text-coffee-700 leading-relaxed">
+          <strong className="text-ink">SIWES (Student Industrial Work Experience Scheme)</strong> — the full second semester of 300L is spent on industrial training. Students are placed in organisations in cybersecurity, IT, or technology roles. This is your first sustained professional experience; treat it with the same seriousness as your academic work.
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        {semCourses.map(c => <CourseCard key={c.slug} course={c} />)}
+      </div>
+
+      {otherCourses.length > 0 && (
+        <div className="border border-dashed border-coffee-300 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <p className="text-xs font-mono text-coffee-500 uppercase tracking-widest mb-1">Also available</p>
+            <h3 className="font-display font-bold text-lg text-ink">
+              {meta.label} {otherSemester === 1 ? 'First' : 'Second'} Semester{otherIsSiwes ? ' — SIWES' : ''}
+            </h3>
+            <p className="text-sm text-coffee-700 mt-0.5">
+              {otherCourses.length} {otherIsSiwes ? 'components' : 'courses'} · {otherCourses.reduce((s, c) => s + c.units, 0)} units
+            </p>
+          </div>
+          <button onClick={() => onSwitchSemester(otherSemester)} className="btn-ghost shrink-0 text-sm">
+            Browse Semester {otherSemester} <ArrowRight size={13} />
+          </button>
+        </div>
+      )}
+
+      <button
+        onClick={onShowAll}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-coffee-700 hover:text-ink transition-colors"
+      >
+        Show the full course list for all four years <ArrowRight size={13} />
+      </button>
+    </div>
+  );
+}
+
 const LEVEL_STORAGE_KEY = 'arete-selected-level';
 
 // 'all' | 100 | 200 | 300 | 400 | null (invalid/absent)
@@ -223,6 +345,12 @@ function parseLevel(value) {
   if (value === 'all') return 'all';
   const n = Number(value);
   return LEVELS.includes(n) ? n : null;
+}
+
+// 1 | 2 | null (invalid/absent)
+function parseSemester(value) {
+  const n = Number(value);
+  return n === 1 || n === 2 ? n : null;
 }
 
 function getStoredLevel() {
@@ -252,13 +380,27 @@ export default function Courses() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [semesterFilter, setSemesterFilter] = useState(0);
 
-  // The URL is the source of truth; the last remembered choice fills in when
-  // the param is absent. null = nothing chosen yet, so show the picker.
+  // The URL is the source of truth; the last remembered level fills in when
+  // the param is absent. null level = show the level picker. The semester is
+  // deliberately not remembered — picking a level always asks for it, one
+  // question at a time.
   const paramLevel = parseLevel(searchParams.get('level'));
   const activeLevel = paramLevel !== null ? paramLevel : getStoredLevel();
+  const activeSemester = typeof activeLevel === 'number' ? parseSemester(searchParams.get('semester')) : null;
 
   function selectLevel(level) {
     setSearchParams({ level: String(level) });
+  }
+
+  function selectSemester(sem) {
+    setSearchParams({ level: String(activeLevel), semester: String(sem) });
+  }
+
+  function clearLevel() {
+    try {
+      localStorage.removeItem(LEVEL_STORAGE_KEY);
+    } catch { /* private mode — nothing stored anyway */ }
+    setSearchParams({});
   }
 
   // Normalise a bare /courses URL to the remembered level so back/forward and
@@ -398,7 +540,8 @@ export default function Courses() {
         </div>
       </div>
 
-      {/* Level tabs */}
+      {/* Level tabs — hidden on the level-picker screen, where the cards do this job */}
+      {activeLevel !== null && (
       <div className="flex flex-wrap gap-2 mb-12">
         <button
           onClick={() => selectLevel('all')}
@@ -426,9 +569,11 @@ export default function Courses() {
           );
         })}
       </div>
+      )}
 
-      {/* Interactive tracks — only show when all years or 100L/200L selected */}
-      {!isFiltering && (activeLevel === 'all' || activeLevel === 100 || activeLevel === 200) && (
+      {/* Interactive tracks — only on the full catalogue view; the stepper
+          flow already badges track courses on their cards */}
+      {!isFiltering && activeLevel === 'all' && (
         <InteractiveTracks />
       )}
 
@@ -483,43 +628,50 @@ export default function Courses() {
         </div>
       )}
 
-      {/* Course listings */}
+      {/* Course listings — level picker → semester picker → that semester's courses */}
       {!isFiltering && (
         activeLevel === null ? (
           <LevelPicker onSelect={selectLevel} />
-        ) : (
+        ) : activeLevel === 'all' ? (
           <div>
             <div className="flex items-center gap-3 mb-10">
               <Shield size={16} className="text-rust" />
-              <h2 className="display-heading text-2xl text-ink">
-                {activeLevel === 'all'
-                  ? 'All courses by year'
-                  : `${levelMeta[activeLevel].label} — ${levelMeta[activeLevel].description}`}
-              </h2>
+              <h2 className="display-heading text-2xl text-ink">All courses by year</h2>
             </div>
 
-            {activeLevel === 'all' ? (
-              <div className="space-y-20">
-                {LEVELS.map(level => (
-                  <div key={level}>
-                    <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 mb-10">
-                      <div>
-                        <span className="text-xs font-mono uppercase tracking-widest text-coffee-700">{levelMeta[level].label}</span>
-                        <h3 className="display-heading text-3xl sm:text-4xl text-ink">{levelMeta[level].description}</h3>
-                      </div>
-                      <div className="h-px flex-1 bg-coffee-200" />
-                      <span className="text-sm text-coffee-700 font-mono shrink-0">
-                        {getCoursesByLevelAndSemester(level, 1).length + getCoursesByLevelAndSemester(level, 2).length} courses · {levelMeta[level].totalUnits} units
-                      </span>
+            <div className="space-y-20">
+              {LEVELS.map(level => (
+                <div key={level}>
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 mb-10">
+                    <div>
+                      <span className="text-xs font-mono uppercase tracking-widest text-coffee-700">{levelMeta[level].label}</span>
+                      <h3 className="display-heading text-3xl sm:text-4xl text-ink">{levelMeta[level].description}</h3>
                     </div>
-                    <LevelView level={level} />
+                    <div className="h-px flex-1 bg-coffee-200" />
+                    <span className="text-sm text-coffee-700 font-mono shrink-0">
+                      {getCoursesByLevelAndSemester(level, 1).length + getCoursesByLevelAndSemester(level, 2).length} courses · {levelMeta[level].totalUnits} units
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <LevelView level={activeLevel} />
-            )}
+                  <LevelView level={level} />
+                </div>
+              ))}
+            </div>
           </div>
+        ) : activeSemester === null ? (
+          <SemesterPicker
+            level={activeLevel}
+            onSelect={selectSemester}
+            onShowAll={() => selectLevel('all')}
+            onBack={clearLevel}
+          />
+        ) : (
+          <SemesterCoursesView
+            level={activeLevel}
+            semester={activeSemester}
+            onBack={() => selectLevel(activeLevel)}
+            onSwitchSemester={selectSemester}
+            onShowAll={() => selectLevel('all')}
+          />
         )
       )}
 
