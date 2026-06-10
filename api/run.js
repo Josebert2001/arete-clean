@@ -149,9 +149,7 @@ export default async function handler(req, res) {
       memory: data.memory,
     });
   } catch (err) {
-    return res.status(500).json({
-      error: 'Internal error running code',
-      detail: String(err).slice(0, 300),
-    });
+    console.error('Code runner error:', err);
+    return res.status(500).json({ error: 'Internal error running code. Please try again.' });
   }
 }

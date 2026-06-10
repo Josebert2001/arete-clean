@@ -97,19 +97,23 @@ async function main() {
   `);
   ok('Read policy set');
 
-  // 4. Public insert policy
+  // 4. Insert policy — authenticated students only, stamped with their user id
+  //    so every upload is attributable. (Replaces the old anonymous policy.)
+  await sql(`ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS uploaded_by UUID REFERENCES auth.users(id);`);
+  await sql(`DROP POLICY IF EXISTS "Public insert" ON course_materials;`);
   await sql(`
     DO $$ BEGIN
       IF NOT EXISTS (
         SELECT 1 FROM pg_policies
-        WHERE tablename = 'course_materials' AND policyname = 'Public insert'
+        WHERE tablename = 'course_materials' AND policyname = 'Authenticated insert'
       ) THEN
-        CREATE POLICY "Public insert" ON course_materials
-          FOR INSERT WITH CHECK (true);
+        CREATE POLICY "Authenticated insert" ON course_materials
+          FOR INSERT TO authenticated
+          WITH CHECK (auth.uid() = uploaded_by);
       END IF;
     END $$;
   `);
-  ok('Insert policy set');
+  ok('Insert policy set (signed-in students only)');
 
   // 5. Create storage bucket
   step('4. Creating storage bucket…');
@@ -133,7 +137,7 @@ async function main() {
       'application/zip',
     ],
   });
-  if (bucket.status === 409) {
+  if (bucket.status === 409 || /already exists/i.test(bucket.body?.message ?? '')) {
     ok('Bucket already exists — skipped');
   } else if (bucket.status >= 400) {
     throw new Error(bucket.body.message ?? JSON.stringify(bucket.body));
@@ -141,16 +145,17 @@ async function main() {
     ok('Bucket created');
   }
 
-  // 6. Storage policy — allow anonymous uploads
+  // 6. Storage policy — uploads require a signed-in student; reads stay public
   step('5. Setting storage upload policy…');
+  await sql(`DROP POLICY IF EXISTS "Public upload to course-materials" ON storage.objects;`);
   await sql(`
     DO $$ BEGIN
       IF NOT EXISTS (
         SELECT 1 FROM pg_policies
-        WHERE tablename = 'objects' AND policyname = 'Public upload to course-materials'
+        WHERE tablename = 'objects' AND policyname = 'Authenticated upload to course-materials'
       ) THEN
-        CREATE POLICY "Public upload to course-materials"
-          ON storage.objects FOR INSERT
+        CREATE POLICY "Authenticated upload to course-materials"
+          ON storage.objects FOR INSERT TO authenticated
           WITH CHECK (bucket_id = 'course-materials');
       END IF;
     END $$;

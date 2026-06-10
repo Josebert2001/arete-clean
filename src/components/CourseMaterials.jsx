@@ -4,6 +4,7 @@ import {
   X, CheckCircle2, AlertCircle, Loader2, Paperclip,
 } from 'lucide-react';
 import { supabase, isConfigured } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const BUCKET = 'course-materials';
 const MAX_MB = 20;
@@ -39,7 +40,16 @@ function FileIcon({ type, className }) {
   return <FileText className={className} />;
 }
 
+// Build the download link from the storage path, never from a stored URL —
+// a DB row's file_url could be tampered with to point anywhere (or be a
+// javascript: URL), while a bucket path can only resolve inside our bucket.
+function materialUrl(filePath) {
+  if (!filePath) return null;
+  return supabase.storage.from(BUCKET).getPublicUrl(filePath).data.publicUrl;
+}
+
 export default function CourseMaterials({ courseCode, courseSlug }) {
+  const { user } = useAuth();
   const [materials, setMaterials] = useState([]);
   const [fetching, setFetching] = useState(isConfigured);
   const [showForm, setShowForm] = useState(false);
@@ -58,7 +68,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
   async function load() {
     const { data } = await supabase
       .from('course_materials')
-      .select('id, display_name, file_url, file_size, file_type, description, uploaded_at')
+      .select('id, display_name, file_path, file_size, file_type, description, uploaded_at')
       .eq('course_slug', courseSlug)
       .order('uploaded_at', { ascending: false });
     setMaterials(data ?? []);
@@ -83,6 +93,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
 
   async function handleUpload(e) {
     e.preventDefault();
+    if (!user) { setError('Please sign in to upload.'); return; }
     if (!file) { setError('Please select a file.'); return; }
     setUploading(true);
     setError('');
@@ -107,6 +118,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
         file_size: file.size,
         file_type: fileExt,
         description: desc.trim() || null,
+        uploaded_by: user.id,
       });
       if (dbErr) throw dbErr;
 
@@ -174,13 +186,19 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
           )}
         </div>
         {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-sm font-semibold text-cream transition-colors hover:bg-ink/90 sm:self-start"
-          >
-            <Upload size={13} />
-            Upload
-          </button>
+          user ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-sm font-semibold text-cream transition-colors hover:bg-ink/90 sm:self-start"
+            >
+              <Upload size={13} />
+              Upload
+            </button>
+          ) : (
+            <p className="text-xs text-coffee-600 sm:self-center">
+              Sign in (top right) to upload materials
+            </p>
+          )
         )}
       </div>
 
@@ -314,13 +332,17 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
           <p className="text-sm text-coffee-600 mb-5">
             Be the first to share a resource for {courseCode}.
           </p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 border border-coffee-300 rounded-lg text-coffee-700 hover:border-ink hover:text-ink transition-colors"
-          >
-            <Upload size={13} />
-            Upload a material
-          </button>
+          {user ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 border border-coffee-300 rounded-lg text-coffee-700 hover:border-ink hover:text-ink transition-colors"
+            >
+              <Upload size={13} />
+              Upload a material
+            </button>
+          ) : (
+            <p className="text-xs text-coffee-600">Sign in (top right) to upload materials.</p>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
@@ -348,7 +370,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
               </div>
 
               <a
-                href={m.file_url}
+                href={materialUrl(m.file_path)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="shrink-0 inline-flex items-center gap-1.5 self-start rounded-lg border border-coffee-200 px-3 py-1.5 text-xs font-medium text-coffee-700 transition-all opacity-100 hover:border-ink hover:text-ink sm:self-auto sm:opacity-0 sm:group-hover:opacity-100"
