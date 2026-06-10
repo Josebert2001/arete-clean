@@ -104,7 +104,7 @@ export default function CourseDetail() {
             </p>
           </div>
           <div className="flex w-full flex-col gap-2 sm:w-auto shrink-0">
-            <Link to={course.interactiveTrackPath || '/tracks'} className="btn-primary w-full justify-center sm:w-auto whitespace-nowrap">
+            <Link to={course.interactiveTrackPath || '/lab'} className="btn-primary w-full justify-center sm:w-auto whitespace-nowrap">
               Open Modules <ArrowRight size={15} />
             </Link>
             <Link to="/tutor" className="btn-ghost w-full justify-center sm:w-auto whitespace-nowrap text-center text-sm">

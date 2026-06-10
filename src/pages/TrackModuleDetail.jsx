@@ -38,7 +38,7 @@ export default function TrackModuleDetail() {
     return (
       <div className="max-w-3xl mx-auto px-6 py-24 text-center">
         <h1 className="display-heading text-3xl text-ink mb-4">Module not found</h1>
-        <Link to="/tracks" className="btn-ghost mx-auto">← Language Tracks</Link>
+        <Link to="/lab" className="btn-ghost mx-auto">← Code Lab</Link>
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function TrackModuleDetail() {
 
       <Breadcrumbs items={[
         { label: 'Home', to: '/' },
-        { label: 'Language Tracks', to: '/tracks' },
+        { label: 'Code Lab', to: '/lab' },
         { label: `${track.label} modules`, to: track.listPath },
         { label: `Module ${String(mod.number).padStart(2, '0')}` },
       ]} />

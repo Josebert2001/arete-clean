@@ -155,8 +155,8 @@ export default function CodeExplainer() {
           </ul>
           <div className="border-t border-coffee-200 pt-6 flex flex-wrap items-center gap-4">
             <p className="text-sm text-coffee-700">For now, read the annotated examples —</p>
-            <Link to="/tracks" className="btn-ghost text-sm">
-              Go to modules <ArrowRight size={14} />
+            <Link to="/lab" className="btn-ghost text-sm">
+              Go to the Code Lab <ArrowRight size={14} />
             </Link>
           </div>
         </div>

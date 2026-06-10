@@ -15,7 +15,7 @@ export default function TrackModules() {
     return (
       <div className="max-w-3xl mx-auto px-6 py-24 text-center">
         <p className="text-coffee-700 mb-4">Track not found.</p>
-        <Link to="/tracks" className="btn-ghost">← Language Tracks</Link>
+        <Link to="/lab" className="btn-ghost">← Code Lab</Link>
       </div>
     );
   }
@@ -28,7 +28,7 @@ export default function TrackModules() {
 
       <Breadcrumbs items={[
         { label: 'Home', to: '/' },
-        { label: 'Language Tracks', to: '/tracks' },
+        { label: 'Code Lab', to: '/lab' },
         { label: track.label },
       ]} />
 

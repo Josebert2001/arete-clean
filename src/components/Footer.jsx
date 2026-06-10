@@ -25,7 +25,7 @@ export default function Footer() {
               <li>All courses · 100L to 400L</li>
               <li>Java · Python · C interactive tracks</li>
               <li>{totalModules} modules · quizzes · playgrounds</li>
-              <li>AI Tutor · Code Explainer</li>
+              <li>AI Tutor · Code Lab</li>
             </ul>
           </div>
 

@@ -7,7 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
-const Tracks = lazy(() => import('./pages/Tracks'));
+const CodeLab = lazy(() => import('./pages/CodeLab'));
 const TrackModules = lazy(() => import('./pages/TrackModules'));
 const TrackModuleDetail = lazy(() => import('./pages/TrackModuleDetail'));
 const Install = lazy(() => import('./pages/Install'));
@@ -111,7 +111,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:slug" element={<CourseDetail />} />
-            <Route path="/tracks" element={<Tracks />} />
+            <Route path="/lab" element={<CodeLab />} />
+            <Route path="/tracks" element={<Navigate to="/lab" replace />} />
             <Route path="/tracks/:lang" element={<TrackModules />} />
             <Route path="/tracks/:lang/:id" element={<TrackModuleDetail />} />
             <Route path="/modules" element={<Navigate to="/tracks/java" replace />} />

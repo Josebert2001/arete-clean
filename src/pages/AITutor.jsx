@@ -205,7 +205,7 @@ export default function AITutor() {
           </ul>
           <div className="border-t border-coffee-200 pt-6 flex flex-wrap items-center gap-4">
             <p className="text-sm text-coffee-700">In the meantime —</p>
-              <Link to="/tracks" className="btn-ghost text-sm">
+              <Link to="/lab" className="btn-ghost text-sm">
                 Read the modules <ArrowRight size={14} />
               </Link>
             </div>

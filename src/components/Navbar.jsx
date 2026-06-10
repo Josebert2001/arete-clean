@@ -1,4 +1,4 @@
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import AuthButton from './AuthButton';
@@ -6,6 +6,7 @@ import AuthButton from './AuthButton';
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const toggleRef = useRef(null);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (!open) return;
@@ -19,15 +20,17 @@ export default function Navbar() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
+  // Tracks, Install, Code Explainer, and Cheatsheet all live inside Code Lab,
+  // so the Code Lab item stays highlighted while browsing any of them.
   const links = [
     { to: '/', label: 'Home' },
-    { to: '/tracks', label: 'Tracks' },
     { to: '/courses', label: 'Courses' },
-    { to: '/install', label: 'Install' },
+    { to: '/lab', label: 'Code Lab', also: ['/tracks', '/install', '/explainer', '/cheatsheet'] },
     { to: '/tutor', label: 'AI Tutor' },
-    { to: '/explainer', label: 'Code Explainer' },
-    { to: '/cheatsheet', label: 'Cheatsheet' },
   ];
+
+  const isLinkActive = (link, isActive) =>
+    isActive || (link.also || []).some(p => pathname === p || pathname.startsWith(`${p}/`));
 
   return (
     <nav className="sticky top-0 z-50 border-b border-coffee-200 bg-paper/80 backdrop-blur-md">
@@ -68,7 +71,7 @@ export default function Navbar() {
               end={l.to === '/'}
               className={({ isActive }) =>
                 `rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                  isActive ? 'bg-ink text-cream' : 'text-ink hover:bg-coffee-100'
+                  isLinkActive(l, isActive) ? 'bg-ink text-cream' : 'text-ink hover:bg-coffee-100'
                 }`
               }
             >
@@ -90,7 +93,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `rounded-md px-3 py-2.5 text-sm font-medium ${
-                    isActive ? 'bg-ink text-cream' : 'text-ink hover:bg-coffee-100'
+                    isLinkActive(l, isActive) ? 'bg-ink text-cream' : 'text-ink hover:bg-coffee-100'
                   }`
                 }
               >
