@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CodeBlock from '../components/CodeBlock';
 import Diagram from '../components/Diagram';
+import { usePageTitle } from '../utils/usePageTitle';
 
 const javaSections = [
   {
@@ -621,6 +622,7 @@ const tracks = [
 ];
 
 export default function Cheatsheet() {
+  usePageTitle('Cheatsheets');
   const [active, setActive] = useState('java');
   const current = tracks.find(t => t.key === active);
 
@@ -635,7 +637,7 @@ export default function Cheatsheet() {
       </div>
 
       <div
-        role="tablist"
+        role="group"
         aria-label="Choose a language"
         className="inline-flex flex-wrap gap-1 bg-coffee-100 border border-coffee-200 rounded-xl p-1 mb-8"
       >
@@ -644,8 +646,7 @@ export default function Cheatsheet() {
           return (
             <button
               key={t.key}
-              role="tab"
-              aria-selected={isActive}
+              aria-pressed={isActive}
               onClick={() => setActive(t.key)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive ? t.accent : 'text-ink hover:bg-paper'
@@ -661,7 +662,7 @@ export default function Cheatsheet() {
         {current.sections.map((s, i) => (
           <div key={i} className="bg-paper border border-coffee-200 rounded-xl p-5">
             <h3 className="font-display font-bold text-ink mb-2">{s.title}</h3>
-            <CodeBlock code={s.code} showLineNumbers={false} />
+            <CodeBlock code={s.code} language={active} showLineNumbers={false} />
             {s.diagram && <Diagram name={s.diagram} />}
             {s.diagram2 && <Diagram name={s.diagram2} />}
           </div>

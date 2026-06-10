@@ -1,26 +1,35 @@
 import { useState } from 'react';
 import { Download, CheckCircle2, AlertTriangle, Terminal, ExternalLink, ImageOff } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
+import { usePageTitle } from '../utils/usePageTitle';
 
 function StepImage({ src, alt, caption }) {
   const [errored, setErrored] = useState(false);
   if (!src) return null;
-  return (
-    <figure className="mt-4 border border-coffee-200 rounded-lg overflow-hidden bg-cream/40">
-      {errored ? (
+
+  // Missing screenshot: hide the figure for students; show a reminder of
+  // where to drop the file only during local development.
+  if (errored) {
+    if (!import.meta.env.DEV) return null;
+    return (
+      <figure className="mt-4 border border-dashed border-coffee-300 rounded-lg bg-cream/40">
         <div className="flex flex-col items-center justify-center text-center px-4 py-8 text-coffee-700 text-xs">
           <ImageOff size={22} className="mb-2 opacity-60" />
-          <div className="font-mono">screenshot pending — drop {src} into public/install/</div>
+          <div className="font-mono">screenshot pending — drop {src} into public/install/ (dev-only note)</div>
         </div>
-      ) : (
-        <img
-          src={src}
-          alt={alt}
-          loading="lazy"
-          onError={() => setErrored(true)}
-          className="block w-full h-auto"
-        />
-      )}
+      </figure>
+    );
+  }
+
+  return (
+    <figure className="mt-4 border border-coffee-200 rounded-lg overflow-hidden bg-cream/40">
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onError={() => setErrored(true)}
+        className="block w-full h-auto"
+      />
       {caption && (
         <figcaption className="text-xs text-coffee-700 px-3 py-2 border-t border-coffee-200 bg-paper">
           {caption}
@@ -233,6 +242,7 @@ export default function Install() {
 
   const current = tracks.find(t => t.key === active);
   const trackChecked = checked[active] || [];
+  usePageTitle(current.title);
 
   const toggle = (key) => {
     setChecked(prev => {
@@ -251,7 +261,7 @@ export default function Install() {
       </div>
 
       <div
-        role="tablist"
+        role="group"
         aria-label="Choose a language"
         className="inline-flex flex-wrap gap-1 bg-coffee-100 border border-coffee-200 rounded-xl p-1 mb-8"
       >
@@ -260,8 +270,7 @@ export default function Install() {
           return (
             <button
               key={t.key}
-              role="tab"
-              aria-selected={isActive}
+              aria-pressed={isActive}
               onClick={() => setActive(t.key)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive ? t.accent : 'text-ink hover:bg-paper'
@@ -328,7 +337,7 @@ export default function Install() {
 
             {step.code && (
               <div className="ml-10 sm:ml-[3.25rem]">
-                <CodeBlock code={step.code} />
+                <CodeBlock code={step.code} language={current.key} />
               </div>
             )}
 

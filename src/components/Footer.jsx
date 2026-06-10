@@ -1,4 +1,7 @@
+import { trackMeta } from '../data/trackMeta';
+
 export default function Footer() {
+  const totalModules = Object.values(trackMeta).reduce((sum, t) => sum + t.moduleCount, 0);
   return (
     <footer className="border-t border-coffee-200 mt-20 bg-cream/50">
       <div className="max-w-6xl mx-auto px-6 py-10">
@@ -21,7 +24,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-coffee-700">
               <li>All courses · 100L to 400L</li>
               <li>Java · Python · C interactive tracks</li>
-              <li>37 modules · quizzes · playgrounds</li>
+              <li>{totalModules} modules · quizzes · playgrounds</li>
               <li>AI Tutor · Code Explainer</li>
             </ul>
           </div>

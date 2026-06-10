@@ -4,6 +4,8 @@ import { Send, User, Bot, ArrowRight } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useApiAvailability } from '../utils/apiClient';
 import { getAccessToken } from '../lib/supabase';
+import RichText from '../components/RichText';
+import { usePageTitle } from '../utils/usePageTitle';
 
 // Force the Coming Soon screen during local dev without removing the live
 // chat. The server also signals "not configured" at runtime (see askAI below).
@@ -86,6 +88,7 @@ const SUGGESTED = [
 ];
 
 export default function AITutor() {
+  usePageTitle('AI Tutor');
   const [messages, setMessages] = useState([
     { role: 'bot', text: "Hi! I'm your Arete tutor. I know the full B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks (Java, Python, C), cryptography, networking, ethical hacking, digital forensics, and more. Ask me anything. What are you working on?" }
   ]);
@@ -105,9 +108,10 @@ export default function AITutor() {
     const question = (text || input).trim();
     if (!question || loading) return;
 
-    // Conversation history for the API — skip the canned greeting at index 0.
+    // Conversation history for the API — skip the canned greeting at index 0
+    // and any error bubbles (they are UI feedback, not part of the dialogue).
     const history = [
-      ...messages.slice(1).map(m => ({
+      ...messages.slice(1).filter(m => !m.error).map(m => ({
         role: m.role === 'user' ? 'user' : 'assistant',
         content: m.text,
       })),
@@ -141,7 +145,7 @@ export default function AITutor() {
       const text = e?.message && e.message !== 'Request failed'
         ? e.message
         : 'Something went wrong. Please try again.';
-      setMessages(m => [...m, { role: 'bot', text }]);
+      setMessages(m => [...m, { role: 'bot', text, error: true }]);
     } finally {
       setLoading(false);
     }
@@ -228,12 +232,12 @@ export default function AITutor() {
                     }`}>
                       {m.role === 'user' ? 'You' : 'Tutor'}
                     </span>
-                    <div className={`rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-left ${
+                    <div className={`rounded-xl px-4 py-3 text-sm leading-relaxed text-left ${
                       m.role === 'user'
-                        ? 'bg-ember-500 text-cream rounded-tr-sm'
+                        ? 'bg-ember-500 text-cream rounded-tr-sm whitespace-pre-wrap'
                         : 'bg-cream border border-coffee-200 text-ink rounded-tl-sm'
                     }`}>
-                      {m.text}
+                      {m.role === 'user' ? m.text : <RichText text={m.text} />}
                     </div>
                   </div>
                 </div>

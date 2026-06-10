@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useProgress } from '../components/useProgress';
+import { usePageTitle } from '../utils/usePageTitle';
 
 function JavaMark() {
   return (
@@ -109,6 +110,7 @@ function TrackCard({ track }) {
 }
 
 export default function Tracks() {
+  usePageTitle('Language Tracks');
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
 
@@ -130,7 +132,7 @@ export default function Tracks() {
       <div className="mt-12 p-6 bg-cream border border-coffee-200 rounded-xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
           <h3 className="font-display font-bold text-ink mb-1">Also: full course resources for every Cybersecurity subject</h3>
-          <p className="text-sm text-coffee-700">Topics, textbooks, study tips, and search terms for all 11 courses — not just the programming ones.</p>
+          <p className="text-sm text-coffee-700">Topics, textbooks, study tips, and search terms for every course across all four years — not just the programming ones.</p>
         </div>
         <Link to="/courses" className="btn-ghost shrink-0">
           Course Hub <ArrowRight size={14} />

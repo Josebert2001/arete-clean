@@ -1,5 +1,5 @@
-import { Component, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useParams as useRouteParams } from 'react-router-dom';
+import { Component, lazy, Suspense, useEffect } from 'react';
+import { Routes, Route, Navigate, Link, useLocation, useParams as useRouteParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
@@ -49,6 +49,32 @@ function JavaModuleRedirect() {
   return <Navigate to={`/tracks/java/${id}`} replace />;
 }
 
+// react-router keeps the scroll position across navigations; reset it so a
+// click deep in a long list never opens the next page mid-scroll.
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+function NotFound() {
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-24 text-center">
+      <p className="text-xs font-mono uppercase tracking-widest text-coffee-500 mb-3">404</p>
+      <h1 className="display-heading text-4xl text-ink mb-3">Page not found</h1>
+      <p className="text-coffee-700 mb-8">
+        That page doesn't exist — it may have moved, or the link has a typo.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <Link to="/" className="btn-primary text-sm">Go home</Link>
+        <Link to="/courses" className="btn-ghost text-sm">Browse courses</Link>
+      </div>
+    </div>
+  );
+}
+
 function RouteLoading() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-16 animate-pulse" role="status" aria-label="Loading page">
@@ -70,8 +96,15 @@ export default function App() {
   return (
     <AuthProvider>
     <div className="min-h-screen flex flex-col paper-texture">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-cream"
+      >
+        Skip to content
+      </a>
+      <ScrollToTop />
       <Navbar />
-      <main className="flex-1 relative z-10">
+      <main id="main" className="flex-1 relative z-10">
         <ErrorBoundary>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
@@ -87,6 +120,7 @@ export default function App() {
             <Route path="/tutor" element={<AITutor />} />
             <Route path="/explainer" element={<CodeExplainer />} />
             <Route path="/cheatsheet" element={<Cheatsheet />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
         </ErrorBoundary>

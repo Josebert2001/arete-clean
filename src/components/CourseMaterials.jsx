@@ -218,7 +218,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
               <p className="text-sm font-medium text-coffee-700 group-hover:text-ink transition-colors">
                 Click to select a file
               </p>
-              <p className="text-xs text-coffee-400 mt-1">
+              <p className="text-xs text-coffee-600 mt-1">
                 PDF, DOC, PPT, XLS, images, ZIP · Max {MAX_MB} MB
               </p>
             </button>
@@ -340,7 +340,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
                     {m.description}
                   </p>
                 )}
-                <p className="text-xs text-coffee-400 mt-1 font-mono">
+                <p className="text-xs text-coffee-600 mt-1 font-mono">
                   {m.file_type?.toUpperCase()}
                   {m.file_size ? ` · ${fmtSize(m.file_size)}` : ''}
                   {' · '}{timeAgo(m.uploaded_at)}

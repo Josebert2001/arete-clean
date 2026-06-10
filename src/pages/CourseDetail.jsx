@@ -5,6 +5,7 @@ import { getCourseBySlug, courses } from '../data/courses';
 import LectureNotes from '../components/LectureNotes';
 import CourseMaterials from '../components/CourseMaterials';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { usePageTitle } from '../utils/usePageTitle';
 
 const subjectStyles = {
   cs:    { codeBg: 'bg-ink',        codeText: 'text-cream' },
@@ -24,6 +25,16 @@ export default function CourseDetail() {
   const { slug } = useParams();
   const course = getCourseBySlug(slug);
   const [activeTab, setActiveTab] = useState('resources');
+
+  // Reset to the default tab when moving to another course (prev/next nav)
+  // so a tab the new course doesn't have can't stay selected.
+  const [lastSlug, setLastSlug] = useState(slug);
+  if (lastSlug !== slug) {
+    setLastSlug(slug);
+    setActiveTab('resources');
+  }
+
+  usePageTitle(course ? `${course.code} — ${course.title}` : 'Course not found');
 
   if (!course) {
     return (

@@ -8,6 +8,7 @@ import CodePlayground from '../components/CodePlayground';
 import Quiz from '../components/Quiz';
 import Diagram from '../components/Diagram';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { usePageTitle } from '../utils/usePageTitle';
 
 export default function TrackModuleDetail() {
   const { lang, id } = useParams();
@@ -30,6 +31,8 @@ export default function TrackModuleDetail() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id, lang]);
+
+  usePageTitle(track && mod ? `${mod.title} · ${track.label}` : 'Module not found');
 
   if (!track || !mod) {
     return (
@@ -146,7 +149,7 @@ export default function TrackModuleDetail() {
                   <span className="text-coffee-400 font-mono text-sm">{String(i + 1).padStart(2, '0')}</span>
                   {ex.title}
                 </h3>
-                <CodeBlock code={ex.code} />
+                <CodeBlock code={ex.code} language={track.language} />
                 <div className="bg-coffee-50 rounded-r-lg p-4 mt-2" style={{ borderLeft: '3px solid #8E5A1F' }}>
                   <p className="text-sm text-coffee-700 leading-relaxed">
                     <span className="font-bold text-ink">What's happening: </span>

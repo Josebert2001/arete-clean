@@ -2,20 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, PlayCircle, TrendingUp } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useAuth } from '../context/AuthContext';
+import { useProgress } from './useProgress';
 
-function readProgress(storageKey) {
-  if (typeof localStorage === 'undefined') return { completedModules: [], quizScores: {} };
-  try {
-    const raw = localStorage.getItem(storageKey);
-    return raw ? JSON.parse(raw) : { completedModules: [], quizScores: {} };
-  } catch {
-    return { completedModules: [], quizScores: {} };
-  }
-}
-
-function getTrackProgress(track) {
-  const progress = readProgress(track.storageKey);
-  const completed = progress.completedModules.filter(id =>
+function getTrackProgress(track, progress) {
+  const completed = (progress.completedModules || []).filter(id =>
     track.moduleIndex.some(m => m.id === id)
   );
   const total = track.moduleIndex.length;
@@ -26,9 +16,16 @@ function getTrackProgress(track) {
 
 export default function ProgressDashboard() {
   const { user } = useAuth();
+  // useProgress merges cloud-synced progress for signed-in students, so the
+  // dashboard matches the track pages on any device — not just this one.
+  const progressBySlug = {
+    java: useProgress(trackMeta.java.storageKey).progress,
+    python: useProgress(trackMeta.python.storageKey).progress,
+    c: useProgress(trackMeta.c.storageKey).progress,
+  };
   const tracks = Object.values(trackMeta).map(track => ({
     track,
-    ...getTrackProgress(track),
+    ...getTrackProgress(track, progressBySlug[track.slug]),
   }));
 
   const started = tracks.filter(t => t.completed > 0);

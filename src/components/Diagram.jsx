@@ -117,7 +117,7 @@ function CStackHeapDiagram() {
       caption="Stack memory is automatic (locals). Heap memory needs `malloc` — and you MUST `free` it when done."
     >
       <rect x="30" y="30" width="180" height="200" fill={palette.paper} stroke={palette.coffeeDark} strokeWidth="1.5" rx="6" />
-      <text x="120" y="50" textAnchor="middle" fontFamily="Playfair Display, serif" fontSize="14" fontWeight="bold" fill={palette.ink}>Stack</text>
+      <text x="120" y="50" textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="14" fontWeight="bold" fill={palette.ink}>Stack</text>
       <text x="120" y="68" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill={palette.coffee}>auto · fast · LIFO</text>
 
       <Cell x={50} y={88} w={140} h={30} value="int x = 10" />
@@ -125,7 +125,7 @@ function CStackHeapDiagram() {
       <Cell x={50} y={168} w={140} h={30} value="int *p = ..." />
 
       <rect x="270" y="30" width="180" height="200" fill={palette.paper} stroke={palette.coffeeDark} strokeWidth="1.5" rx="6" />
-      <text x="360" y="50" textAnchor="middle" fontFamily="Playfair Display, serif" fontSize="14" fontWeight="bold" fill={palette.ink}>Heap</text>
+      <text x="360" y="50" textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="14" fontWeight="bold" fill={palette.ink}>Heap</text>
       <text x="360" y="68" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill={palette.coffee}>malloc · manual · free()</text>
 
       <Cell x={290} y={88} w={140} h={70} value="malloc(40)" fill={palette.cream} />
@@ -145,7 +145,7 @@ function CStructDiagram() {
         struct Student s = {`{ "Amaka", 20, 4.7 }`};
       </text>
       <rect x="60" y="70" width="360" height="120" fill={palette.paper} stroke={palette.coffeeDark} strokeWidth="1.5" rx="6" />
-      <text x="240" y="92" textAnchor="middle" fontFamily="Playfair Display, serif" fontSize="13" fontWeight="bold" fill={palette.ink}>struct Student</text>
+      <text x="240" y="92" textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="13" fontWeight="bold" fill={palette.ink}>struct Student</text>
       <Cell x={80} y={108} w={100} h={36} value='"Amaka"' label="name" />
       <Cell x={200} y={108} w={80} h={36} value="20" label="age" />
       <Cell x={300} y={108} w={100} h={36} value="4.7" label="gpa" />
@@ -157,7 +157,7 @@ function JavaClassDiagram() {
   return (
     <Frame title="Classes and objects" caption="A class is a blueprint. Each `new` call creates a separate object with its own field values.">
       <rect x="160" y="20" width="160" height="80" fill={palette.cream} stroke={palette.coffeeDark} strokeWidth="1.5" rx="6" />
-      <text x="240" y="40" textAnchor="middle" fontFamily="Playfair Display, serif" fontSize="14" fontWeight="bold" fill={palette.ink}>class Student</text>
+      <text x="240" y="40" textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="14" fontWeight="bold" fill={palette.ink}>class Student</text>
       <line x1="170" y1="50" x2="310" y2="50" stroke={palette.coffeeDark} strokeWidth="1" />
       <text x="180" y="68" fontFamily="JetBrains Mono, monospace" fontSize="11" fill={palette.coffeeDark}>String name</text>
       <text x="180" y="86" fontFamily="JetBrains Mono, monospace" fontSize="11" fill={palette.coffeeDark}>double gpa</text>
@@ -182,15 +182,15 @@ function JavaInheritanceDiagram() {
   return (
     <Frame title="Inheritance" caption="A subclass inherits everything the superclass has and can add or override methods.">
       <rect x="180" y="20" width="120" height="56" fill={palette.cream} stroke={palette.coffeeDark} strokeWidth="1.5" rx="6" />
-      <text x="240" y="40" textAnchor="middle" fontFamily="Playfair Display, serif" fontSize="13" fontWeight="bold" fill={palette.ink}>Animal</text>
+      <text x="240" y="40" textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="13" fontWeight="bold" fill={palette.ink}>Animal</text>
       <text x="240" y="60" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill={palette.coffeeDark}>+ eat()</text>
 
       <rect x="60" y="140" width="120" height="56" fill={palette.paper} stroke={palette.coffeeDark} strokeWidth="1.5" rx="6" />
-      <text x="120" y="160" textAnchor="middle" fontFamily="Playfair Display, serif" fontSize="13" fontWeight="bold" fill={palette.ink}>Dog</text>
+      <text x="120" y="160" textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="13" fontWeight="bold" fill={palette.ink}>Dog</text>
       <text x="120" y="180" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill={palette.coffeeDark}>+ bark()</text>
 
       <rect x="300" y="140" width="120" height="56" fill={palette.paper} stroke={palette.coffeeDark} strokeWidth="1.5" rx="6" />
-      <text x="360" y="160" textAnchor="middle" fontFamily="Playfair Display, serif" fontSize="13" fontWeight="bold" fill={palette.ink}>Cat</text>
+      <text x="360" y="160" textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontSize="13" fontWeight="bold" fill={palette.ink}>Cat</text>
       <text x="360" y="180" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill={palette.coffeeDark}>+ meow()</text>
 
       <Arrow x1={120} y1={138} x2={220} y2={78} color={palette.coffee} />

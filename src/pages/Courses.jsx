@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield, Search, X } from 'lucide-react';
 import { courses, getCoursesByLevelAndSemester, LEVELS, levelMeta } from '../data/courses';
 import { trackMeta } from '../data/trackMeta';
+import { usePageTitle } from '../utils/usePageTitle';
 
 const trackIcons = { java: Coffee, python: Code2, c: Terminal };
 
@@ -245,6 +246,7 @@ const SEMESTER_FILTERS = [
 ];
 
 export default function Courses() {
+  usePageTitle('Course Hub');
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -282,10 +284,12 @@ export default function Courses() {
   const trimmedQuery = query.trim().toLowerCase();
   const isFiltering = trimmedQuery !== '' || typeFilter !== 'all' || semesterFilter !== 0;
 
-  const filteredCourses = useMemo(() => {
-    if (!isFiltering) return [];
-    return courses.filter(c => {
-      if (typeof activeLevel === 'number' && c.level !== activeLevel) return false;
+  // hiddenByLevel counts matches outside the selected year so a search never
+  // dead-ends just because the wrong level tab is active.
+  const { filteredCourses, hiddenByLevel } = useMemo(() => {
+    if (!isFiltering) return { filteredCourses: [], hiddenByLevel: 0 };
+    const matches = (c, ignoreLevel) => {
+      if (!ignoreLevel && typeof activeLevel === 'number' && c.level !== activeLevel) return false;
       if (semesterFilter !== 0 && c.semester !== semesterFilter) return false;
       if (typeFilter === 'interactive' && !c.hasInteractiveModules) return false;
       if (typeFilter === 'resources' && c.hasInteractiveModules) return false;
@@ -294,7 +298,10 @@ export default function Courses() {
         if (!haystack.includes(trimmedQuery)) return false;
       }
       return true;
-    });
+    };
+    const inLevel = courses.filter(c => matches(c, false));
+    const anyLevel = typeof activeLevel === 'number' ? courses.filter(c => matches(c, true)) : inLevel;
+    return { filteredCourses: inLevel, hiddenByLevel: anyLevel.length - inLevel.length };
   }, [isFiltering, activeLevel, semesterFilter, typeFilter, trimmedQuery]);
 
   const clearFilters = () => {
@@ -428,11 +435,22 @@ export default function Courses() {
       {/* Search results */}
       {isFiltering && (
         <div aria-live="polite">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
             <Search size={16} className="text-moss" />
             <h2 className="display-heading text-2xl text-ink">
               {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''} found
+              {typeof activeLevel === 'number' && (
+                <span className="text-coffee-500"> in {levelMeta[activeLevel].label}</span>
+              )}
             </h2>
+            {hiddenByLevel > 0 && (
+              <button
+                onClick={() => selectLevel('all')}
+                className="text-sm font-medium text-moss hover:text-ink transition-colors inline-flex items-center gap-1"
+              >
+                +{hiddenByLevel} more in other years — show all <ArrowRight size={13} />
+              </button>
+            )}
           </div>
           {filteredCourses.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -440,13 +458,26 @@ export default function Courses() {
             </div>
           ) : (
             <div className="p-8 bg-cream border border-coffee-200 rounded-xl text-center">
-              <p className="text-ink font-display font-bold mb-1">No courses match your search</p>
-              <p className="text-sm text-coffee-700 mb-4">
-                Try a different keyword, or clear the filters to browse all {totalCourses} courses.
+              <p className="text-ink font-display font-bold mb-1">
+                {hiddenByLevel > 0
+                  ? `No matches in ${levelMeta[activeLevel].label}`
+                  : 'No courses match your search'}
               </p>
-              <button onClick={clearFilters} className="btn-ghost inline-flex items-center gap-1.5">
-                <X size={14} /> Clear search & filters
-              </button>
+              <p className="text-sm text-coffee-700 mb-4">
+                {hiddenByLevel > 0
+                  ? `${hiddenByLevel} course${hiddenByLevel !== 1 ? 's' : ''} in other years match${hiddenByLevel === 1 ? 'es' : ''} your search.`
+                  : `Try a different keyword, or clear the filters to browse all ${totalCourses} courses.`}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {hiddenByLevel > 0 && (
+                  <button onClick={() => selectLevel('all')} className="btn-primary inline-flex items-center gap-1.5 text-sm">
+                    Search all years <ArrowRight size={14} />
+                  </button>
+                )}
+                <button onClick={clearFilters} className="btn-ghost inline-flex items-center gap-1.5">
+                  <X size={14} /> Clear search & filters
+                </button>
+              </div>
             </div>
           )}
         </div>

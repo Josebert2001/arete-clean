@@ -44,7 +44,7 @@ function BulletList({ items }) {
 function ProsCons({ advantages, disadvantages }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-      <div className="bg-moss/8 border border-moss/25 rounded-xl p-4">
+      <div className="bg-moss/10 border border-moss/25 rounded-xl p-4">
         <h4 className="flex items-center gap-2 text-xs font-mono font-bold text-moss uppercase tracking-widest mb-3">
           <CheckCircle2 size={13} /> Advantages
         </h4>
@@ -57,7 +57,7 @@ function ProsCons({ advantages, disadvantages }) {
           ))}
         </ul>
       </div>
-      <div className="bg-rust/8 border border-rust/25 rounded-xl p-4">
+      <div className="bg-rust/10 border border-rust/25 rounded-xl p-4">
         <h4 className="flex items-center gap-2 text-xs font-mono font-bold text-rust uppercase tracking-widest mb-3">
           <XCircle size={13} /> Disadvantages
         </h4>

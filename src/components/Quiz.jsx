@@ -156,6 +156,7 @@ export default function Quiz({ questions, onComplete }) {
         })}
       </div>
 
+      <div aria-live="polite">
       {answered && (
         <div
           className={`rounded-lg p-4 mb-6 animate-fade-in flex gap-3 ${
@@ -175,6 +176,7 @@ export default function Quiz({ questions, onComplete }) {
           </p>
         </div>
       )}
+      </div>
 
       {answered && (
         <button onClick={next} className="btn-primary w-full justify-center">

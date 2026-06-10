@@ -3,11 +3,13 @@ import { CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { getTrack } from '../data/trackConfig';
 import { useProgress } from '../components/useProgress';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { usePageTitle } from '../utils/usePageTitle';
 
 export default function TrackModules() {
   const { lang } = useParams();
   const track = getTrack(lang);
   const { isComplete, progress } = useProgress(track?.storageKey);
+  usePageTitle(track ? `${track.label} Modules` : 'Track not found');
 
   if (!track) {
     return (

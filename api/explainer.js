@@ -23,6 +23,7 @@ Rules:
 - Use plain English — no jargon without explanation
 - Be concise and encouraging
 - Format code references using backticks, e.g. \`int x = 5;\`
+- Use simple Markdown only: **bold**, numbered or bulleted lists, and fenced code blocks tagged with the language — no tables, no HTML
 - Use the conventions of the code's actual language (e.g. pointers for C, indentation for Python)
 - If the code has a bug, point it out clearly but kindly`;
 

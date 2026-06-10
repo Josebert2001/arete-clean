@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Wand2, Copy, Check, ArrowRight } from 'lucide-react';
 import { fetchJsonWithFallback, useApiAvailability } from '../utils/apiClient';
+import RichText from '../components/RichText';
+import { usePageTitle } from '../utils/usePageTitle';
 
 // Force the Coming Soon screen during local dev. The server also signals
 // "not configured" at runtime — see askExplainer below.
@@ -69,6 +71,7 @@ int main() {
 };
 
 export default function CodeExplainer() {
+  usePageTitle('Code Explainer');
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('');
   const [explanation, setExplanation] = useState('');
@@ -227,7 +230,9 @@ export default function CodeExplainer() {
                   </span>
                 </div>
               ) : (
-                <p className="text-sm text-coffee-700 leading-relaxed whitespace-pre-wrap">{explanation}</p>
+                <div className="text-sm text-coffee-700">
+                  <RichText text={explanation} />
+                </div>
               )}
             </div>
           )}
