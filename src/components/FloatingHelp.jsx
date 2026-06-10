@@ -40,9 +40,9 @@ export default function FloatingHelp() {
   }, [open]);
 
   return (
-    <div ref={panelRef} className="fixed bottom-5 right-5 z-50 print:hidden">
+    <div ref={panelRef} className="fixed bottom-3 right-3 z-50 print:hidden sm:bottom-5 sm:right-5">
       {open && (
-        <div className="mb-3 w-[19rem] max-w-[calc(100vw-2.5rem)] bg-paper border border-coffee-200 rounded-xl shadow-xl overflow-hidden">
+        <div className="mb-3 w-[min(19rem,calc(100vw-1.5rem))] bg-paper border border-coffee-200 rounded-xl shadow-xl overflow-hidden">
           <div className="flex items-start justify-between px-4 py-3 border-b border-coffee-200 bg-cream/60">
             <div>
               <h3 className="font-display font-bold text-ink text-base leading-tight">Need help?</h3>
@@ -110,7 +110,7 @@ export default function FloatingHelp() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? 'Close help' : 'Open help'}
         aria-expanded={open}
-        className="flex items-center gap-2 px-4 py-3 rounded-full bg-ink text-cream shadow-lg hover:bg-coffee-700 transition-colors"
+        className="flex items-center gap-2 rounded-full bg-ink px-3 py-3 text-cream shadow-lg transition-colors hover:bg-coffee-700 sm:px-4"
       >
         <HelpCircle size={18} />
         <span className="text-sm font-medium hidden sm:inline">Need help?</span>

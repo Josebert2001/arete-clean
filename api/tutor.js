@@ -10,7 +10,7 @@
 // ============================================================================
 
 import Groq from 'groq-sdk';
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 import { COURSE_KNOWLEDGE, MODULE_KNOWLEDGE, LECTURE_NOTES_KNOWLEDGE } from './_lib/courseData.js';
 
 const SYSTEM_PROMPT = `You are Arete's AI academic tutor for the Department of Cybersecurity, University of Uyo, Nigeria.
@@ -49,6 +49,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  logRequest(req, 'tutor');
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {

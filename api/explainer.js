@@ -6,7 +6,7 @@
 // ============================================================================
 
 import Groq from 'groq-sdk';
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 
 const SYSTEM_PROMPT = `You are Arete's code explainer for beginner Cybersecurity students.
 When given code in any language (Java, Python, C, or C++), explain it clearly and simply.
@@ -45,6 +45,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  logRequest(req, 'explainer');
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {

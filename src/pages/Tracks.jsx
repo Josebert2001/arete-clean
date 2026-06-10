@@ -88,7 +88,7 @@ function TrackCard({ track }) {
         <p className="text-sm text-coffee-700 leading-relaxed">{meta.why}</p>
       </div>
 
-      <ul className="grid grid-cols-2 gap-2">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {meta.bullets.map(b => (
           <li key={b} className="flex items-center gap-1.5 text-xs text-coffee-700">
             <span className={`w-1.5 h-1.5 rounded-full ${track.dotColor} shrink-0`} />

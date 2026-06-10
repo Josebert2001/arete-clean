@@ -3,7 +3,7 @@ import { Play, Loader2, Terminal, RotateCcw, Check, X, AlertTriangle } from 'luc
 import { fetchJsonWithFallback } from '../utils/apiClient';
 
 /*
-  CodePlayground — editable code editor with a Run button.
+  CodePlayground - editable code editor with a Run button.
   Supports Java, Python, and C. Calls /api/run (the Vercel serverless function)
   which proxies to the JDoodle Compiler API.
 
@@ -87,19 +87,19 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
   const ks = kind ? kindStyles[kind] || kindStyles.success : null;
 
   return (
-    <div className="rounded-xl overflow-hidden border border-coffee-200">
+    <div className="overflow-hidden rounded-xl border border-coffee-200">
       {/* Editor header */}
-      <div className="bg-ink px-4 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="bg-ink flex flex-col gap-3 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
           <Terminal size={14} className="text-coffee-400" />
-          <span className="text-xs font-mono text-coffee-300 uppercase tracking-wider">
-            {LANGUAGE_LABELS[language] || language} · try it yourself
+          <span className="truncate text-xs font-mono uppercase tracking-wider text-coffee-300">
+            {LANGUAGE_LABELS[language] || language} Â· try it yourself
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2">
           <button
             onClick={reset}
-            className="text-coffee-400 hover:text-cream p-1.5 rounded transition-colors"
+            className="rounded p-1.5 text-coffee-400 transition-colors hover:text-cream"
             aria-label="Reset code"
             title="Reset code"
           >
@@ -108,7 +108,8 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           <button
             onClick={run}
             disabled={running}
-            className="inline-flex items-center gap-1.5 bg-ember-500 hover:bg-ember-400 text-cream text-sm font-semibold px-3 py-1.5 rounded-md transition-colors disabled:opacity-60"
+            title="Run code (Ctrl+Enter)"
+            className="inline-flex items-center gap-1.5 rounded-md bg-ember-500 px-3 py-1.5 text-sm font-semibold text-cream transition-colors hover:bg-ember-400 disabled:opacity-60"
           >
             {running ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
             {running ? 'Running' : 'Run'}
@@ -117,9 +118,12 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
       </div>
 
       {/* Editor body */}
-      <div className="bg-ink flex">
+      <div className="flex flex-col bg-ink sm:flex-row">
         {/* Line numbers */}
-        <div className="select-none py-4 pl-4 pr-3 text-right" style={{ fontFamily: 'JetBrains Mono', fontSize: '0.8rem', lineHeight: '1.6' }}>
+        <div
+          className="hidden select-none py-4 pl-4 pr-3 text-right sm:block"
+          style={{ fontFamily: 'JetBrains Mono', fontSize: '0.8rem', lineHeight: '1.6' }}
+        >
           {Array.from({ length: lineCount }, (_, i) => (
             <div key={i} className="text-coffee-700">{i + 1}</div>
           ))}
@@ -128,35 +132,42 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
         <textarea
           value={code}
           onChange={e => setCode(e.target.value)}
+          onKeyDown={e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+              e.preventDefault();
+              run();
+            }
+          }}
           spellCheck={false}
           aria-label={`${LANGUAGE_LABELS[language] || 'Code'} editor`}
-          className="flex-1 bg-transparent text-cream py-4 pr-4 outline-none resize-y"
-          style={{ fontFamily: 'JetBrains Mono', fontSize: '0.8rem', lineHeight: '1.6', minHeight: '180px' }}
+          title="Ctrl+Enter to run"
+          className="flex-1 resize-y bg-transparent px-4 py-4 text-sm text-cream outline-none sm:text-[0.8rem]"
+          style={{ fontFamily: 'JetBrains Mono', lineHeight: '1.6', minHeight: '220px' }}
         />
       </div>
 
       {/* Output panel */}
       {(output !== null || running) && (
         <div className="border-t border-coffee-700 bg-ink">
-          <div className="px-4 py-2 flex items-center justify-between border-b border-coffee-800">
+          <div className="flex flex-col gap-2 border-b border-coffee-800 px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs font-mono uppercase tracking-wider text-coffee-400">Output</span>
             {ks && (
               <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${ks.color}`}>
                 <ks.icon size={12} /> {ks.label}
-                {meta?.time && <span className="text-coffee-500 ml-2">{meta.time}s</span>}
+                {meta?.time && <span className="ml-2 text-coffee-500">{meta.time}s</span>}
               </span>
             )}
           </div>
           <pre
-            className="px-4 py-3 text-sm whitespace-pre-wrap overflow-x-auto"
+            className="overflow-x-auto px-4 py-3 text-sm whitespace-pre-wrap"
             style={{
               fontFamily: 'JetBrains Mono',
               fontSize: '0.8rem',
               lineHeight: '1.6',
               color: kind === 'success' ? 'var(--syntax-str)'
-                   : kind === 'not_configured' || kind === 'limit' ? 'var(--syntax-num)'
-                   : kind === 'compile_error' || kind === 'runtime_error' ? '#E8927C'
-                   : 'var(--cream)',
+                : kind === 'not_configured' || kind === 'limit' ? 'var(--syntax-num)'
+                  : kind === 'compile_error' || kind === 'runtime_error' ? '#E8927C'
+                    : 'var(--cream)',
             }}
           >
             {running ? 'Compiling and running...' : output}

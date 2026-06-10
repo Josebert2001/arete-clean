@@ -34,7 +34,7 @@ const LANGUAGES = {
   python: { language: 'python3', versionIndex: '6' },
 };
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 
 const RATE_LIMIT = {
   namespace: 'run',
@@ -50,6 +50,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  logRequest(req, 'run');
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {
@@ -78,9 +79,14 @@ export default async function handler(req, res) {
     if (typeof source_code !== 'string' || !source_code.trim()) {
       return res.status(400).json({ error: 'No source code provided' });
     }
-
     if (source_code.length > 10000) {
       return res.status(400).json({ error: 'Code exceeds the 10,000 character limit.' });
+    }
+    if (typeof stdin !== 'string') {
+      return res.status(400).json({ error: 'Invalid stdin value.' });
+    }
+    if (stdin.length > 1000) {
+      return res.status(400).json({ error: 'stdin exceeds the 1,000 character limit.' });
     }
 
     const lang = LANGUAGES[language] || LANGUAGES.java;

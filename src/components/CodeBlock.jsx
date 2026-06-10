@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { Copy, Check } from 'lucide-react';
 
 // Simple Java syntax highlighter
 const KEYWORDS = [
@@ -97,8 +98,28 @@ const colorMap = {
 
 export default function CodeBlock({ code, showLineNumbers = true }) {
   const lines = useMemo(() => tokenize(code), [code]);
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard API not available
+    }
+  };
+
   return (
-    <div className="code-block my-4">
+    <div className="code-block my-4 relative">
+      <button
+        onClick={copy}
+        aria-label="Copy code"
+        title="Copy code"
+        className="absolute top-2 right-2 p-1.5 rounded text-coffee-400 hover:text-cream transition-colors z-10"
+      >
+        {copied ? <Check size={13} className="text-moss" /> : <Copy size={13} />}
+      </button>
       <pre className="text-xs sm:text-sm leading-relaxed overflow-x-auto">
         <code>
           {lines.map(({ lineIdx, tokens }) => (

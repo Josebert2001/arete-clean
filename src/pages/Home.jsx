@@ -222,8 +222,8 @@ export default function Home() {
               <span>Dept of Cybersecurity · University of Uyo · 100L – 400L</span>
             </div>
 
-            <div className="flex items-baseline gap-4 mb-3">
-              <h1 className="display-heading text-5xl sm:text-7xl lg:text-8xl text-ink tracking-tight">Arete</h1>
+            <div className="flex flex-wrap items-end gap-2 sm:gap-4 mb-3">
+              <h1 className="display-heading text-4xl sm:text-7xl lg:text-8xl text-ink tracking-tight">Arete</h1>
               <span className="font-display text-lg text-coffee-600 italic hidden sm:inline">ἀρετή</span>
             </div>
 
@@ -247,7 +247,7 @@ export default function Home() {
               Pick your level to get started
             </p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {levelCards.map(({ level, icon: Icon, color, text, description }) => {
                 const isSelected = selectedLevel === level;
                 return (
@@ -310,7 +310,7 @@ export default function Home() {
 
       {/* ── WHAT'S INSIDE ────────────────────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="flex items-center gap-8 mb-12">
+        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
           <h2 className="display-heading text-4xl sm:text-5xl text-ink shrink-0">What's inside</h2>
           <div className="h-px flex-1 bg-coffee-200" />
         </div>

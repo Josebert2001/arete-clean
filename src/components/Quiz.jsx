@@ -65,11 +65,11 @@ export default function Quiz({ questions, onComplete }) {
   return (
     <div className="bg-paper border border-coffee-200 rounded-xl p-6 sm:p-8">
       {/* Progress */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-xs font-mono uppercase tracking-wider text-coffee-700">
           Question {current + 1} of {questions.length}
         </span>
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5 sm:justify-end">
           {questions.map((_, i) => (
             <div
               key={i}

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { Component, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useParams as useRouteParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -13,6 +13,35 @@ const Install = lazy(() => import('./pages/Install'));
 const AITutor = lazy(() => import('./pages/AITutor'));
 const CodeExplainer = lazy(() => import('./pages/CodeExplainer'));
 const Cheatsheet = lazy(() => import('./pages/Cheatsheet'));
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="max-w-3xl mx-auto px-6 py-24 text-center">
+          <p className="text-lg font-semibold text-coffee-800 mb-2">Something went wrong.</p>
+          <p className="text-sm text-coffee-600 mb-6">Try reloading the page. If the problem persists, contact support.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm font-semibold text-ember-600 hover:underline"
+          >
+            Reload page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function JavaModuleRedirect() {
   const { id } = useRouteParams();
@@ -32,6 +61,7 @@ export default function App() {
     <div className="min-h-screen flex flex-col paper-texture">
       <Navbar />
       <main className="flex-1 relative z-10">
+        <ErrorBoundary>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -48,6 +78,7 @@ export default function App() {
             <Route path="/cheatsheet" element={<Cheatsheet />} />
           </Routes>
         </Suspense>
+        </ErrorBoundary>
       </main>
       <Footer />
       <FloatingHelp />

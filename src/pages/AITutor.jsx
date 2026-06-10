@@ -142,7 +142,7 @@ export default function AITutor() {
 
           {/* Chat window */}
           <div className="bg-paper border border-coffee-200 rounded-xl overflow-hidden">
-            <div className="h-[420px] overflow-y-auto p-5 space-y-4">
+            <div className="h-[60vh] min-h-[320px] max-h-[420px] overflow-y-auto p-5 space-y-4">
               {messages.map((m, i) => (
                 <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
@@ -194,7 +194,7 @@ export default function AITutor() {
             )}
 
             {/* Input */}
-            <div className="border-t border-coffee-200 p-3 flex gap-2">
+            <div className="border-t border-coffee-200 p-3 flex flex-col gap-2 sm:flex-row">
               <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
@@ -207,7 +207,7 @@ export default function AITutor() {
                 onClick={() => send()}
                 disabled={loading || !input.trim()}
                 aria-label="Send message"
-                className="btn-primary px-4 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="btn-primary w-full justify-center px-4 disabled:opacity-40 disabled:cursor-not-allowed sm:w-auto"
               >
                 <Send size={16} />
               </button>

@@ -30,7 +30,7 @@ export default function TrackModules() {
 
       {/* Header */}
       <div className="mb-10">
-        <div className="flex items-center gap-3 mb-3">
+      <div className="flex flex-wrap items-center gap-3 mb-3">
           <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold ${track.accentBg} ${track.accentText}`}>
             {track.label}
           </span>
@@ -88,7 +88,7 @@ export default function TrackModules() {
                   </span>
                 </div>
                 <p className="text-sm text-coffee-700 mb-2">{m.subtitle}</p>
-                <div className="flex items-center gap-4 text-xs text-coffee-700">
+                <div className="flex flex-wrap items-center gap-4 text-xs text-coffee-700">
                   <span className="flex items-center gap-1"><Clock size={12} /> ~{m.estimatedHours}h</span>
                   <span>{m.practiceQuestions.length} questions</span>
                   <span>{m.codeExamples.length} examples</span>

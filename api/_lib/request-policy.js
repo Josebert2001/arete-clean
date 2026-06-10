@@ -84,3 +84,8 @@ export function setRateLimitHeaders(res, { limit, remaining, resetAt }) {
   res.setHeader('X-RateLimit-Remaining', String(remaining));
   res.setHeader('X-RateLimit-Reset', String(Math.ceil(resetAt / 1000)));
 }
+
+export function logRequest(req, route, extra = {}) {
+  const ip = getClientIp(req);
+  console.log(JSON.stringify({ route, ip, ts: Date.now(), method: req.method, ...extra }));
+}

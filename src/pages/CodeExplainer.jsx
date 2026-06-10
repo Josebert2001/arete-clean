@@ -159,7 +159,7 @@ export default function CodeExplainer() {
         <>
           {/* Input */}
           <div className="mb-4">
-            <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="flex flex-col gap-3 mb-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <label htmlFor="explainer-lang" className="text-sm font-medium text-ink">Your code</label>
                 <select
@@ -174,7 +174,7 @@ export default function CodeExplainer() {
                   ))}
                 </select>
               </div>
-              <button onClick={loadSample} className="text-xs text-coffee-700 hover:text-ink underline">
+              <button onClick={loadSample} className="self-start text-xs text-coffee-700 underline hover:text-ink sm:self-auto">
                 Load sample
               </button>
             </div>
@@ -201,7 +201,7 @@ export default function CodeExplainer() {
           {/* Output */}
           {(explanation || loading) && (
             <div className="bg-paper border border-coffee-200 rounded-xl p-6 animate-fade-in">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="font-display font-bold text-ink flex items-center gap-2">
                   <Wand2 size={16} className="text-coffee-500" /> Explanation
                 </h3>

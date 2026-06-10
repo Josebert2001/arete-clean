@@ -71,7 +71,7 @@ export default function TrackModuleDetail() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
           <span className={`text-xs font-mono px-2 py-0.5 rounded ${track.accentBg} ${track.accentText}`}>
             {track.label}
           </span>
@@ -226,22 +226,22 @@ export default function TrackModuleDetail() {
       </div>
 
       {/* Prev / Next nav */}
-      <div className="flex items-center justify-between gap-4 mt-12 pt-8 border-t border-coffee-200">
+      <div className="mt-12 flex flex-col gap-4 border-t border-coffee-200 pt-8 sm:flex-row sm:items-center sm:justify-between">
         {prev ? (
-          <Link to={track.detailPath(prev.id)} className="btn-ghost flex-1 sm:flex-none justify-center">
+          <Link to={track.detailPath(prev.id)} className="btn-ghost flex-1 justify-center sm:flex-none">
             <ArrowLeft size={16} />
             <span className="hidden sm:inline">{prev.title}</span>
             <span className="sm:hidden">Prev</span>
           </Link>
         ) : <div />}
         {next ? (
-          <Link to={track.detailPath(next.id)} className="btn-primary flex-1 sm:flex-none justify-center">
+          <Link to={track.detailPath(next.id)} className="btn-primary flex-1 justify-center sm:flex-none">
             <span className="hidden sm:inline">{next.title}</span>
             <span className="sm:hidden">Next</span>
             <ArrowRight size={16} />
           </Link>
         ) : (
-          <Link to={track.listPath} className="btn-primary flex-1 sm:flex-none justify-center">
+          <Link to={track.listPath} className="btn-primary flex-1 justify-center sm:flex-none">
             Finish <CheckCircle2 size={16} />
           </Link>
         )}

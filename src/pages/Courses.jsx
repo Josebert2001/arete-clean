@@ -116,10 +116,10 @@ function SemesterSection({ title, semCourses, index }) {
   if (!semCourses.length) return null;
   return (
     <div>
-      <div className="flex items-center gap-6 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 mb-6">
         <div>
           <span className="text-xs font-mono uppercase tracking-widest text-coffee-700">{`0${index}`}</span>
-          <h2 className="display-heading text-3xl text-ink">{title}</h2>
+          <h2 className="display-heading text-2xl sm:text-3xl text-ink">{title}</h2>
         </div>
         <div className="h-px flex-1 bg-coffee-200" />
         <span className="text-sm text-coffee-700 font-mono shrink-0">
@@ -143,10 +143,10 @@ function LevelView({ level }) {
       <SemesterSection title="First Semester" semCourses={sem1} index={1} />
       {isSiwes ? (
         <div>
-          <div className="flex items-center gap-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 mb-6">
             <div>
               <span className="text-xs font-mono uppercase tracking-widest text-coffee-700">02</span>
-              <h2 className="display-heading text-3xl text-ink">Second Semester — SIWES</h2>
+              <h2 className="display-heading text-2xl sm:text-3xl text-ink">Second Semester — SIWES</h2>
             </div>
             <div className="h-px flex-1 bg-coffee-200" />
             <span className="text-sm text-coffee-700 font-mono shrink-0">
@@ -254,10 +254,10 @@ export default function Courses() {
           <div className="space-y-20">
             {LEVELS.map(level => (
               <div key={level}>
-                <div className="flex items-center gap-4 mb-10">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 mb-10">
                   <div>
                     <span className="text-xs font-mono uppercase tracking-widest text-coffee-700">{levelMeta[level].label}</span>
-                    <h3 className="display-heading text-4xl text-ink">{levelMeta[level].description}</h3>
+                    <h3 className="display-heading text-3xl sm:text-4xl text-ink">{levelMeta[level].description}</h3>
                   </div>
                   <div className="h-px flex-1 bg-coffee-200" />
                   <span className="text-sm text-coffee-700 font-mono shrink-0">

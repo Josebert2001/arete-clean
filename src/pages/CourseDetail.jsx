@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, ChevronRight, Clock, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, ChevronRight, Clock, FileText, Paperclip } from 'lucide-react';
 import { getCourseBySlug, courses } from '../data/courses';
 import LectureNotes from '../components/LectureNotes';
+import CourseMaterials from '../components/CourseMaterials';
 
 const subjectStyles = {
   cs:    { codeBg: 'bg-ink',        codeText: 'text-cream',  accent: 'text-ink',        tag: 'bg-coffee-100 text-coffee-800' },
@@ -56,7 +57,7 @@ export default function CourseDetail() {
     <div className="max-w-6xl mx-auto px-6 py-12">
 
       {/* Back + breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-coffee-700 mb-8">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-coffee-700 mb-8">
         <Link to="/courses" className="flex items-center gap-1.5 hover:text-ink transition-colors">
           <ArrowLeft size={14} />
           All Courses
@@ -122,52 +123,58 @@ export default function CourseDetail() {
               practice quizzes with scoring, and guided mini projects.
             </p>
           </div>
-          <div className="flex flex-col gap-2 shrink-0">
-            <Link to={course.interactiveTrackPath || '/tracks'} className="btn-primary whitespace-nowrap">
+          <div className="flex w-full flex-col gap-2 sm:w-auto shrink-0">
+            <Link to={course.interactiveTrackPath || '/tracks'} className="btn-primary w-full justify-center sm:w-auto whitespace-nowrap">
               Open Modules <ArrowRight size={15} />
             </Link>
-            <Link to="/tutor" className="btn-ghost whitespace-nowrap text-center text-sm">
+            <Link to="/tutor" className="btn-ghost w-full justify-center sm:w-auto whitespace-nowrap text-center text-sm">
               Ask AI Tutor
             </Link>
           </div>
         </div>
       )}
 
-      {/* Tab bar — only show when course has lecture notes */}
-      {hasNotes && (
-        <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0">
-          {[
-            { key: 'resources', label: 'Study Resources', icon: BookOpen },
-            { key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} topics` },
-          ].map(({ key, label, icon: Icon, badge }) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-all -mb-px ${
-                activeTab === key
-                  ? 'border-ink text-ink bg-paper'
-                  : 'border-transparent text-coffee-600 hover:text-ink hover:border-coffee-300'
-              }`}
-            >
-              <Icon size={14} />
-              {label}
-              {badge && (
-                <span className="text-xs font-mono px-1.5 py-0.5 bg-coffee-100 text-coffee-600 rounded-full">{badge}</span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Tab bar */}
+      <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0 overflow-x-auto">
+        {[
+          { key: 'resources', label: 'Study Resources', icon: BookOpen },
+          ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} topics` }] : []),
+          { key: 'materials', label: 'Materials', icon: Paperclip },
+        ].map(({ key, label, icon: Icon, badge }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-all -mb-px whitespace-nowrap ${
+              activeTab === key
+                ? 'border-ink text-ink bg-paper'
+                : 'border-transparent text-coffee-600 hover:text-ink hover:border-coffee-300'
+            }`}
+          >
+            <Icon size={14} />
+            {label}
+            {badge && (
+              <span className="text-xs font-mono px-1.5 py-0.5 bg-coffee-100 text-coffee-600 rounded-full">{badge}</span>
+            )}
+          </button>
+        ))}
+      </div>
 
       {/* Lecture Notes tab */}
-      {hasNotes && activeTab === 'notes' && (
+      {activeTab === 'notes' && hasNotes && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
           <LectureNotes topics={course.lectureNotes} />
         </div>
       )}
 
-      {/* Resources tab (always visible when no notes; conditional when notes exist) */}
-      {(!hasNotes || activeTab === 'resources') && (
+      {/* Materials tab */}
+      {activeTab === 'materials' && (
+        <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <CourseMaterials courseCode={course.code} courseSlug={slug} />
+        </div>
+      )}
+
+      {/* Resources tab */}
+      {activeTab === 'resources' && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* Left column — Topics + nav */}
@@ -302,11 +309,11 @@ export default function CourseDetail() {
       )}
 
       {/* Bottom nav */}
-      <div className="mt-12 pt-8 border-t border-coffee-200 flex items-center justify-between gap-4">
+      <div className="mt-12 pt-8 border-t border-coffee-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {prev ? (
           <Link
             to={`/courses/${prev.slug}`}
-            className="flex items-center gap-2 text-sm font-medium text-coffee-700 hover:text-ink transition-colors group"
+            className="flex items-center gap-2 text-sm font-medium text-coffee-700 hover:text-ink transition-colors group sm:max-w-[40%]"
           >
             <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
             <span>
@@ -316,14 +323,14 @@ export default function CourseDetail() {
           </Link>
         ) : <div />}
 
-        <Link to="/courses" className="text-sm text-coffee-700 hover:text-ink transition-colors">
+        <Link to="/courses" className="text-sm text-coffee-700 hover:text-ink transition-colors self-start sm:self-auto">
           All Courses
         </Link>
 
         {next ? (
           <Link
             to={`/courses/${next.slug}`}
-            className="flex items-center gap-2 text-sm font-medium text-coffee-700 hover:text-ink transition-colors group text-right"
+            className="flex items-center gap-2 text-sm font-medium text-coffee-700 hover:text-ink transition-colors group text-right sm:max-w-[40%] sm:justify-end"
           >
             <span>
               <span className="block text-xs text-coffee-500 font-normal">Next</span>

@@ -16,35 +16,40 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="border-b border-coffee-200 bg-paper/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 group">
-          {/* Arete logo mark */}
-          <div className="w-10 h-10 rounded-lg bg-ink flex items-center justify-center group-hover:bg-coffee-700 transition-colors">
-            <span className="font-display font-bold text-coffee-300 text-[1.35rem] leading-none">a</span>
+    <nav className="sticky top-0 z-50 border-b border-coffee-200 bg-paper/80 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+        <Link to="/" className="group flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-ink transition-colors group-hover:bg-coffee-700">
+            <span className="font-display text-[1.35rem] font-bold leading-none text-coffee-300">a</span>
           </div>
-          <div className="leading-tight">
-            <div className="font-display font-bold text-ink text-xl tracking-tight">Arete</div>
-            <div className="text-xs text-coffee-700 -mt-0.5 tracking-wider">Dept of Cybersecurity · UniUyo</div>
+          <div className="min-w-0 leading-tight">
+            <div className="font-display text-lg font-bold tracking-tight text-ink sm:text-xl">
+              Arete
+            </div>
+            <div className="max-w-[12rem] truncate text-[11px] tracking-wide text-coffee-700 sm:max-w-none sm:text-xs sm:tracking-wider">
+              Dept of Cybersecurity Â· UniUyo
+            </div>
           </div>
         </Link>
 
         <button
-          className="md:hidden text-ink p-3"
-          onClick={() => setOpen(!open)}
+          className="rounded-lg p-2.5 text-ink transition-colors hover:bg-coffee-100 md:hidden"
+          onClick={() => setOpen(v => !v)}
           aria-label="Toggle menu"
+          aria-expanded={open}
+          aria-controls="mobile-nav"
         >
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
 
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden flex-wrap items-center justify-end gap-1 md:flex">
           {links.map(l => (
             <NavLink
               key={l.to}
               to={l.to}
               end={l.to === '/'}
               className={({ isActive }) =>
-                `px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                `rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                   isActive ? 'bg-ink text-cream' : 'text-ink hover:bg-coffee-100'
                 }`
               }
@@ -56,8 +61,8 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-coffee-200 bg-paper">
-          <div className="px-6 py-3 flex flex-col gap-1">
+        <div id="mobile-nav" className="max-h-[calc(100vh-4.5rem)] overflow-y-auto border-t border-coffee-200 bg-paper md:hidden">
+          <div className="flex flex-col gap-1 px-4 py-3 sm:px-6">
             {links.map(l => (
               <NavLink
                 key={l.to}
@@ -65,7 +70,7 @@ export default function Navbar() {
                 end={l.to === '/'}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
-                  `px-3 py-2 rounded-md text-sm font-medium ${
+                  `rounded-md px-3 py-2.5 text-sm font-medium ${
                     isActive ? 'bg-ink text-cream' : 'text-ink hover:bg-coffee-100'
                   }`
                 }
