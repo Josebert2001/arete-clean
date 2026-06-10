@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield, Search, X } from 'lucide-react';
 import { courses, getCoursesByLevelAndSemester, LEVELS, levelMeta } from '../data/courses';
-import { trackConfig } from '../data/trackConfig';
+import { trackMeta } from '../data/trackMeta';
 
 const trackIcons = { java: Coffee, python: Code2, c: Terminal };
 
 function InteractiveTracks() {
-  const tracks = Object.values(trackConfig);
+  const tracks = Object.values(trackMeta);
   return (
     <section className="mb-16">
       <div className="flex items-center gap-3 mb-5">
@@ -167,12 +167,141 @@ function LevelView({ level }) {
   );
 }
 
+// ─── Level picker (shown until a level is chosen) ─────────────────────────────
+
+function LevelPicker({ onSelect }) {
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-3">
+        <Shield size={16} className="text-rust" />
+        <h2 className="display-heading text-2xl text-ink">Pick your level</h2>
+      </div>
+      <p className="text-sm text-coffee-700 max-w-2xl mb-8 leading-relaxed">
+        Choose your year to see only the courses that matter to you right now. You can switch levels any time using the tabs above.
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        {LEVELS.map(level => {
+          const meta = levelMeta[level];
+          const count = courses.filter(c => c.level === level).length;
+          return (
+            <button
+              key={level}
+              onClick={() => onSelect(level)}
+              className="bg-paper border-2 border-coffee-200 rounded-2xl p-6 text-left group hover:border-ink hover:shadow-md active:scale-95 transition-all flex flex-col gap-4"
+            >
+              <div>
+                <span className="text-xs font-mono text-coffee-500 uppercase tracking-widest">{meta.label}</span>
+                <h3 className="font-display font-bold text-2xl text-ink mt-1">{meta.description}</h3>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-coffee-700">{count} courses · {meta.totalUnits} units</span>
+                <span className="inline-flex items-center gap-1 font-medium text-ink opacity-70 group-hover:opacity-100 group-hover:gap-2 transition-all">
+                  View <ArrowRight size={13} />
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={() => onSelect('all')}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-coffee-700 hover:text-ink transition-colors"
+      >
+        Or browse all {courses.length} courses across all four years <ArrowRight size={13} />
+      </button>
+    </div>
+  );
+}
+
+const LEVEL_STORAGE_KEY = 'arete-selected-level';
+
+// 'all' | 100 | 200 | 300 | 400 | null (invalid/absent)
+function parseLevel(value) {
+  if (value === 'all') return 'all';
+  const n = Number(value);
+  return LEVELS.includes(n) ? n : null;
+}
+
+function getStoredLevel() {
+  try {
+    return parseLevel(localStorage.getItem(LEVEL_STORAGE_KEY));
+  } catch {
+    return null;
+  }
+}
+
+const TYPE_FILTERS = [
+  { id: 'all', label: 'All types' },
+  { id: 'interactive', label: 'Interactive tracks' },
+  { id: 'resources', label: 'Study resources' },
+];
+
+const SEMESTER_FILTERS = [
+  { id: 0, label: 'Both semesters' },
+  { id: 1, label: '1st semester' },
+  { id: 2, label: '2nd semester' },
+];
+
 export default function Courses() {
-  const [activeLevel, setActiveLevel] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [semesterFilter, setSemesterFilter] = useState(0);
+
+  // The URL is the source of truth; the last remembered choice fills in when
+  // the param is absent. null = nothing chosen yet, so show the picker.
+  const paramLevel = parseLevel(searchParams.get('level'));
+  const activeLevel = paramLevel !== null ? paramLevel : getStoredLevel();
+
+  function selectLevel(level) {
+    setSearchParams({ level: String(level) });
+  }
+
+  // Normalise a bare /courses URL to the remembered level so back/forward and
+  // link sharing always reflect what is on screen.
+  useEffect(() => {
+    if (paramLevel === null) {
+      const stored = getStoredLevel();
+      if (stored !== null) setSearchParams({ level: String(stored) }, { replace: true });
+    }
+  }, [paramLevel, setSearchParams]);
+
+  useEffect(() => {
+    if (activeLevel === null) return;
+    try {
+      localStorage.setItem(LEVEL_STORAGE_KEY, String(activeLevel));
+    } catch { /* private mode — picker shows again next visit */ }
+  }, [activeLevel]);
 
   const totalCourses = courses.length;
   const totalUnits = courses.reduce((s, c) => s + c.units, 0);
   const interactiveCourses = courses.filter(c => c.hasInteractiveModules).length;
+
+  const trimmedQuery = query.trim().toLowerCase();
+  const isFiltering = trimmedQuery !== '' || typeFilter !== 'all' || semesterFilter !== 0;
+
+  const filteredCourses = useMemo(() => {
+    if (!isFiltering) return [];
+    return courses.filter(c => {
+      if (typeof activeLevel === 'number' && c.level !== activeLevel) return false;
+      if (semesterFilter !== 0 && c.semester !== semesterFilter) return false;
+      if (typeFilter === 'interactive' && !c.hasInteractiveModules) return false;
+      if (typeFilter === 'resources' && c.hasInteractiveModules) return false;
+      if (trimmedQuery) {
+        const haystack = [c.code, c.title, c.description, ...(c.topics || [])].join(' ').toLowerCase();
+        if (!haystack.includes(trimmedQuery)) return false;
+      }
+      return true;
+    });
+  }, [isFiltering, activeLevel, semesterFilter, typeFilter, trimmedQuery]);
+
+  const clearFilters = () => {
+    setQuery('');
+    setTypeFilter('all');
+    setSemesterFilter(0);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
@@ -205,12 +334,69 @@ export default function Courses() {
         </div>
       </div>
 
+      {/* Search & filters */}
+      <div className="mb-8 space-y-3">
+        <div className="relative max-w-xl">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-coffee-500" aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search courses — code, title, or topic (e.g. COS 121, networks, calculus)"
+            aria-label="Search courses"
+            className="w-full pl-10 pr-10 py-2.5 bg-paper border border-coffee-200 rounded-xl text-sm text-ink placeholder:text-coffee-500 focus:outline-none focus:border-coffee-500 focus:ring-1 focus:ring-coffee-500 transition-colors"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-coffee-500 hover:text-ink transition-colors"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {TYPE_FILTERS.map(f => (
+            <button
+              key={f.id}
+              onClick={() => setTypeFilter(f.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                typeFilter === f.id ? 'bg-ink text-cream' : 'bg-coffee-100 text-coffee-700 hover:bg-coffee-200'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+          <span className="w-px h-4 bg-coffee-200 mx-1" aria-hidden="true" />
+          {SEMESTER_FILTERS.map(f => (
+            <button
+              key={f.id}
+              onClick={() => setSemesterFilter(f.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                semesterFilter === f.id ? 'bg-ink text-cream' : 'bg-coffee-100 text-coffee-700 hover:bg-coffee-200'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+          {isFiltering && (
+            <button
+              onClick={clearFilters}
+              className="px-3 py-1.5 rounded-full text-xs font-medium text-rust hover:bg-rust/10 transition-colors inline-flex items-center gap-1"
+            >
+              <X size={12} /> Clear all
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Level tabs */}
       <div className="flex flex-wrap gap-2 mb-12">
         <button
-          onClick={() => setActiveLevel(null)}
+          onClick={() => selectLevel('all')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            activeLevel === null ? 'bg-ink text-cream' : 'bg-coffee-100 text-coffee-700 hover:bg-coffee-200'
+            activeLevel === 'all' ? 'bg-ink text-cream' : 'bg-coffee-100 text-coffee-700 hover:bg-coffee-200'
           }`}
         >
           All Years
@@ -220,7 +406,7 @@ export default function Courses() {
           return (
             <button
               key={level}
-              onClick={() => setActiveLevel(activeLevel === level ? null : level)}
+              onClick={() => selectLevel(level)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                 activeLevel === level ? 'bg-ink text-cream' : 'bg-coffee-100 text-coffee-700 hover:bg-coffee-200'
               }`}
@@ -235,41 +421,76 @@ export default function Courses() {
       </div>
 
       {/* Interactive tracks — only show when all years or 100L/200L selected */}
-      {(activeLevel === null || activeLevel === 100 || activeLevel === 200) && (
+      {!isFiltering && (activeLevel === 'all' || activeLevel === 100 || activeLevel === 200) && (
         <InteractiveTracks />
       )}
 
-      {/* Course listings */}
-      <div>
-        <div className="flex items-center gap-3 mb-10">
-          <Shield size={16} className="text-rust" />
-          <h2 className="display-heading text-2xl text-ink">
-            {activeLevel ? `${levelMeta[activeLevel].label} — ${levelMeta[activeLevel].description}` : 'All courses by year'}
-          </h2>
-        </div>
-
-        {activeLevel ? (
-          <LevelView level={activeLevel} />
-        ) : (
-          <div className="space-y-20">
-            {LEVELS.map(level => (
-              <div key={level}>
-                <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 mb-10">
-                  <div>
-                    <span className="text-xs font-mono uppercase tracking-widest text-coffee-700">{levelMeta[level].label}</span>
-                    <h3 className="display-heading text-3xl sm:text-4xl text-ink">{levelMeta[level].description}</h3>
-                  </div>
-                  <div className="h-px flex-1 bg-coffee-200" />
-                  <span className="text-sm text-coffee-700 font-mono shrink-0">
-                    {getCoursesByLevelAndSemester(level, 1).length + getCoursesByLevelAndSemester(level, 2).length} courses · {levelMeta[level].totalUnits} units
-                  </span>
-                </div>
-                <LevelView level={level} />
-              </div>
-            ))}
+      {/* Search results */}
+      {isFiltering && (
+        <div aria-live="polite">
+          <div className="flex items-center gap-3 mb-6">
+            <Search size={16} className="text-moss" />
+            <h2 className="display-heading text-2xl text-ink">
+              {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''} found
+            </h2>
           </div>
-        )}
-      </div>
+          {filteredCourses.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredCourses.map(c => <CourseCard key={c.slug} course={c} />)}
+            </div>
+          ) : (
+            <div className="p-8 bg-cream border border-coffee-200 rounded-xl text-center">
+              <p className="text-ink font-display font-bold mb-1">No courses match your search</p>
+              <p className="text-sm text-coffee-700 mb-4">
+                Try a different keyword, or clear the filters to browse all {totalCourses} courses.
+              </p>
+              <button onClick={clearFilters} className="btn-ghost inline-flex items-center gap-1.5">
+                <X size={14} /> Clear search & filters
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Course listings */}
+      {!isFiltering && (
+        activeLevel === null ? (
+          <LevelPicker onSelect={selectLevel} />
+        ) : (
+          <div>
+            <div className="flex items-center gap-3 mb-10">
+              <Shield size={16} className="text-rust" />
+              <h2 className="display-heading text-2xl text-ink">
+                {activeLevel === 'all'
+                  ? 'All courses by year'
+                  : `${levelMeta[activeLevel].label} — ${levelMeta[activeLevel].description}`}
+              </h2>
+            </div>
+
+            {activeLevel === 'all' ? (
+              <div className="space-y-20">
+                {LEVELS.map(level => (
+                  <div key={level}>
+                    <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 mb-10">
+                      <div>
+                        <span className="text-xs font-mono uppercase tracking-widest text-coffee-700">{levelMeta[level].label}</span>
+                        <h3 className="display-heading text-3xl sm:text-4xl text-ink">{levelMeta[level].description}</h3>
+                      </div>
+                      <div className="h-px flex-1 bg-coffee-200" />
+                      <span className="text-sm text-coffee-700 font-mono shrink-0">
+                        {getCoursesByLevelAndSemester(level, 1).length + getCoursesByLevelAndSemester(level, 2).length} courses · {levelMeta[level].totalUnits} units
+                      </span>
+                    </div>
+                    <LevelView level={level} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <LevelView level={activeLevel} />
+            )}
+          </div>
+        )
+      )}
 
       {/* Bottom note */}
       <div className="mt-16 p-6 bg-cream border border-coffee-200 rounded-xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">

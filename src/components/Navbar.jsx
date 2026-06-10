@@ -1,9 +1,23 @@
 import { NavLink, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import AuthButton from './AuthButton';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
 
   const links = [
     { to: '/', label: 'Home' },
@@ -27,20 +41,24 @@ export default function Navbar() {
               Arete
             </div>
             <div className="max-w-[12rem] truncate text-[11px] tracking-wide text-coffee-700 sm:max-w-none sm:text-xs sm:tracking-wider">
-              Dept of Cybersecurity Â· UniUyo
+              Dept of Cybersecurity · UniUyo
             </div>
           </div>
         </Link>
 
-        <button
-          className="rounded-lg p-2.5 text-ink transition-colors hover:bg-coffee-100 md:hidden"
-          onClick={() => setOpen(v => !v)}
-          aria-label="Toggle menu"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="flex items-center gap-1 md:hidden">
+          <AuthButton />
+          <button
+            ref={toggleRef}
+            className="rounded-lg p-2.5 text-ink transition-colors hover:bg-coffee-100"
+            onClick={() => setOpen(v => !v)}
+            aria-label="Toggle menu"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
 
         <div className="hidden flex-wrap items-center justify-end gap-1 md:flex">
           {links.map(l => (
@@ -57,6 +75,7 @@ export default function Navbar() {
               {l.label}
             </NavLink>
           ))}
+          <AuthButton />
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Wand2, Copy, Check, ArrowRight } from 'lucide-react';
-import { fetchJsonWithFallback } from '../utils/apiClient';
+import { fetchJsonWithFallback, useApiAvailability } from '../utils/apiClient';
 
 // Force the Coming Soon screen during local dev. The server also signals
 // "not configured" at runtime — see askExplainer below.
@@ -75,6 +75,8 @@ export default function CodeExplainer() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [comingSoon, setComingSoon] = useState(false);
+  const availability = useApiAvailability('/api/explainer');
+  const showComingSoon = DEMO_MODE || comingSoon || availability === 'unavailable';
 
   const explain = async () => {
     if (!code.trim() || loading) return;
@@ -125,7 +127,7 @@ export default function CodeExplainer() {
         </p>
       </div>
 
-      {(DEMO_MODE || comingSoon) ? (
+      {showComingSoon ? (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-8 sm:p-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-ember-500 animate-pulse" />

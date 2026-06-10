@@ -1,10 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { HelpCircle, X, MessageCircle, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { HelpCircle, X, MessageCircle, Mail, Bot } from 'lucide-react';
 
 // Edit these to set the humans students can reach for each track.
 // phone is in international format with no +, spaces, or dashes (used in wa.me link).
 // email is optional — omit it to show WhatsApp only.
+// Tracks without a mentor yet fall back to the AI Tutor (set phone to null).
 const CONTACTS = [
+  {
+    track: 'Java',
+    name: null,
+    role: 'Mentor coming soon — ask the AI Tutor meanwhile',
+    phone: null,
+  },
   {
     track: 'C',
     name: 'Mally',
@@ -22,11 +30,15 @@ const CONTACTS = [
 export default function FloatingHelp() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef(null);
+  const toggleRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
     function onKey(e) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
     }
     function onClick(e) {
       if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
@@ -51,7 +63,7 @@ export default function FloatingHelp() {
               </p>
             </div>
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => { setOpen(false); toggleRef.current?.focus(); }}
               aria-label="Close help"
               className="text-coffee-700 hover:text-ink p-1 -mr-1 -mt-1"
             >
@@ -68,22 +80,33 @@ export default function FloatingHelp() {
                       {c.track} track
                     </div>
                     <div className="text-xs text-coffee-700 truncate">
-                      {c.name} · {c.role}
+                      {c.name ? `${c.name} · ${c.role}` : c.role}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  <a
-                    href={`https://wa.me/${c.phone}?text=${encodeURIComponent(
-                      `Hi ${c.name}, I'm stuck on the ${c.track} track on Arete and need help.`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-ink text-cream text-xs font-medium hover:bg-coffee-700 transition-colors"
-                  >
-                    <MessageCircle size={14} />
-                    WhatsApp
-                  </a>
+                  {c.phone ? (
+                    <a
+                      href={`https://wa.me/${c.phone}?text=${encodeURIComponent(
+                        `Hi ${c.name}, I'm stuck on the ${c.track} track on Arete and need help.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-ink text-cream text-xs font-medium hover:bg-coffee-700 transition-colors"
+                    >
+                      <MessageCircle size={14} />
+                      WhatsApp
+                    </a>
+                  ) : (
+                    <Link
+                      to="/tutor"
+                      onClick={() => setOpen(false)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-ink text-cream text-xs font-medium hover:bg-coffee-700 transition-colors"
+                    >
+                      <Bot size={14} />
+                      Ask AI Tutor
+                    </Link>
+                  )}
                   {c.email && (
                     <a
                       href={`mailto:${c.email}?subject=${encodeURIComponent(
@@ -107,6 +130,7 @@ export default function FloatingHelp() {
       )}
 
       <button
+        ref={toggleRef}
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? 'Close help' : 'Open help'}
         aria-expanded={open}

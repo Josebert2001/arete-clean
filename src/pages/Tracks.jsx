@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
-import { trackConfig } from '../data/trackConfig';
+import { trackMeta } from '../data/trackMeta';
 import { useProgress } from '../components/useProgress';
 
 function JavaMark() {
@@ -33,7 +33,8 @@ function CMark() {
   );
 }
 
-const trackMeta = {
+// Presentation extras local to this page (logos + marketing copy).
+const trackExtras = {
   java: {
     Mark: JavaMark,
     why: 'COS 211 / 221 · Required for your degree. Deep interactive track with full module content, quizzes, and a live Java playground.',
@@ -63,7 +64,7 @@ function ProgressPill({ storageKey, total }) {
 }
 
 function TrackCard({ track }) {
-  const meta = trackMeta[track.slug];
+  const meta = trackExtras[track.slug];
   const Mark = meta.Mark;
 
   return (
@@ -121,7 +122,7 @@ export default function Tracks() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {Object.values(trackConfig).map(track => (
+        {Object.values(trackMeta).map(track => (
           <TrackCard key={track.slug} track={track} />
         ))}
       </div>

@@ -551,3 +551,82 @@ Code examples cover: multi-file project layout, include guards, SQUARE(x) macro.
 Practice questions on: macros need parentheses to avoid operator precedence bugs | <> for system headers | #ifndef prevents double-include | __LINE__ expands to current line number
 Mini Project: Multi-File C Project — main.c, utils.c, utils.h with include guards and shared constants.
 `;
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Derived indexes and lookups for the agentic tutor.
+//  The indexes go into the system prompt (compact); the lookup functions back
+//  the getCourseOutline / getModuleDetail tools, which fetch full detail from
+//  the knowledge strings above on demand.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// One line per course ("CODE | Title | n units") under level/semester headers.
+export const COURSE_INDEX = COURSE_KNOWLEDGE
+  .split('\n')
+  .filter(line =>
+    line.startsWith('===') ||
+    line.startsWith('──') ||
+    /\|.*\|\s*\d+\s*units?\b/i.test(line)
+  )
+  .join('\n');
+
+// One line per module ("Module NN | Title") under track headers.
+export const MODULE_INDEX = MODULE_KNOWLEDGE
+  .split('\n')
+  .filter(line =>
+    line.startsWith('===') ||
+    line.startsWith('──') ||
+    /^Module \d/.test(line)
+  )
+  .join('\n');
+
+const normalizeCode = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+// Full catalogue entry for one course code, plus uploaded lecture notes when
+// they exist for it. Returns null when nothing matches.
+export function findCourse(courseCode) {
+  const target = normalizeCode(courseCode);
+  if (!target) return null;
+
+  const blocks = COURSE_KNOWLEDGE.split(/\n\n+/).filter(b => b.includes('|'));
+  const matches = blocks.filter(block => {
+    const code = normalizeCode(block.trim().split('\n')[0].split('|')[0]);
+    return code === target || code.endsWith(target);
+  });
+
+  const noteSections = LECTURE_NOTES_KNOWLEDGE
+    .split(/\n(?=── )/)
+    .filter(s => s.startsWith('── ') && normalizeCode(s.split('\n')[0]).includes(target));
+
+  if (!matches.length && !noteSections.length) return null;
+
+  return [
+    ...matches.map(b => b.trim()),
+    ...noteSections.map(s => `LECTURE NOTES (authoritative, from the lecturer):\n${s.trim()}`),
+  ].join('\n\n');
+}
+
+const TRACK_SECTION_HEADERS = {
+  java: '── JAVA TRACK',
+  python: '── PYTHON TRACK',
+  c: '── C TRACK',
+};
+
+// Full content block for one module in a track. Returns null when not found.
+export function findModule(track, moduleNumber) {
+  const header = TRACK_SECTION_HEADERS[String(track).toLowerCase()];
+  if (!header) return null;
+
+  const start = MODULE_KNOWLEDGE.indexOf(header);
+  if (start === -1) return null;
+
+  const rest = MODULE_KNOWLEDGE.slice(start + header.length);
+  const nextHeader = rest.search(/\n── /);
+  const section = nextHeader === -1 ? rest : rest.slice(0, nextHeader);
+
+  const wanted = `Module ${String(moduleNumber).padStart(2, '0')} `;
+  const block = section
+    .split(/\n\n(?=Module \d)/)
+    .find(b => b.trim().startsWith(wanted));
+
+  return block ? block.trim() : null;
+}

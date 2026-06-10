@@ -169,6 +169,31 @@ async function main() {
   `);
   ok('Storage policies set');
 
+  // 7. User progress table (cloud-synced module progress)
+  step('6. Creating user_progress table…');
+  await sql(`
+    CREATE TABLE IF NOT EXISTS user_progress (
+      user_id     UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+      storage_key TEXT        NOT NULL,
+      progress    JSONB       NOT NULL DEFAULT '{}',
+      updated_at  TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (user_id, storage_key)
+    );
+  `);
+  await sql(`ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;`);
+  await sql(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE tablename = 'user_progress' AND policyname = 'Users manage own progress'
+      ) THEN
+        CREATE POLICY "Users manage own progress" ON user_progress
+          FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+      END IF;
+    END $$;
+  `);
+  ok('user_progress table + RLS ready');
+
   // ── Done ─────────────────────────────────────────────────────────────────
 
   console.log(`

@@ -7,6 +7,7 @@ import CodeBlock from '../components/CodeBlock';
 import CodePlayground from '../components/CodePlayground';
 import Quiz from '../components/Quiz';
 import Diagram from '../components/Diagram';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function TrackModuleDetail() {
   const { lang, id } = useParams();
@@ -61,13 +62,12 @@ export default function TrackModuleDetail() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
 
-      {/* Breadcrumb */}
-      <Link
-        to={track.listPath}
-        className="inline-flex items-center gap-1.5 text-sm text-coffee-700 hover:text-ink mb-6 transition-colors"
-      >
-        <ArrowLeft size={14} /> {track.label} modules
-      </Link>
+      <Breadcrumbs items={[
+        { label: 'Home', to: '/' },
+        { label: 'Language Tracks', to: '/tracks' },
+        { label: `${track.label} modules`, to: track.listPath },
+        { label: `Module ${String(mod.number).padStart(2, '0')}` },
+      ]} />
 
       {/* Header */}
       <div className="mb-8">

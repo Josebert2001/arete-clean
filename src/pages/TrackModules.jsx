@@ -1,7 +1,8 @@
 import { Link, useParams } from 'react-router-dom';
-import { CheckCircle2, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { getTrack } from '../data/trackConfig';
 import { useProgress } from '../components/useProgress';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function TrackModules() {
   const { lang } = useParams();
@@ -23,10 +24,11 @@ export default function TrackModules() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
 
-      {/* Breadcrumb */}
-      <Link to="/tracks" className="inline-flex items-center gap-1.5 text-sm text-coffee-700 hover:text-ink mb-8 transition-colors">
-        <ArrowLeft size={14} /> Language Tracks
-      </Link>
+      <Breadcrumbs items={[
+        { label: 'Home', to: '/' },
+        { label: 'Language Tracks', to: '/tracks' },
+        { label: track.label },
+      ]} />
 
       {/* Header */}
       <div className="mb-10">

@@ -5,7 +5,8 @@
 //  Uses the same GROQ_API_KEY environment variable as api/tutor.js.
 // ============================================================================
 
-import Groq from 'groq-sdk';
+import { createGroq } from '@ai-sdk/groq';
+import { generateText } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 
 const SYSTEM_PROMPT = `You are Arete's code explainer for beginner Cybersecurity students.
@@ -45,6 +46,12 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // Availability probe — lets the UI show the unconfigured state on page load
+  // instead of after the student has typed code. Skips rate limiting.
+  if (req.body?.probe) {
+    return res.status(200).json({ configured: Boolean(process.env.GROQ_API_KEY) });
+  }
+
   logRequest(req, 'explainer');
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
@@ -76,27 +83,22 @@ export default async function handler(req, res) {
   const lang = LANGUAGES[language]; // undefined => let the model auto-detect
 
   try {
-    const groq = new Groq({ apiKey: GROQ_API_KEY });
+    const groq = createGroq({ apiKey: GROQ_API_KEY });
 
-    const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        {
-          role: 'user',
-          content: `Explain this ${lang ? lang.label : ''} code${lang ? '' : ' (detect the language first)'}:\n\n\`\`\`${lang ? lang.fence : ''}\n${code}\n\`\`\``,
-        },
-      ],
-      max_tokens: 1000,
+    const { text } = await generateText({
+      model: groq('llama-3.3-70b-versatile'),
+      system: SYSTEM_PROMPT,
+      prompt: `Explain this ${lang ? lang.label : ''} code${lang ? '' : ' (detect the language first)'}:\n\n\`\`\`${lang ? lang.fence : ''}\n${code}\n\`\`\``,
+      maxOutputTokens: 1000,
       temperature: 0.5,
     });
 
-    const explanation = completion.choices[0]?.message?.content ?? 'No explanation received.';
+    const explanation = text || 'No explanation received.';
     return res.status(200).json({ explanation });
   } catch (err) {
     console.error('Groq explainer error:', err);
 
-    const isRateLimit = err?.status === 429;
+    const isRateLimit = err?.statusCode === 429 || err?.status === 429;
     return res.status(200).json({
       error: isRateLimit
         ? 'Too many requests — the AI is busy. Wait a moment and try again.'

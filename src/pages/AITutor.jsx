@@ -1,28 +1,33 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Send, User, Bot, ArrowRight } from 'lucide-react';
-import { trackConfig } from '../data/trackConfig';
-import { fetchJsonWithFallback } from '../utils/apiClient';
+import { trackMeta } from '../data/trackMeta';
+import { fetchJsonWithFallback, useApiAvailability } from '../utils/apiClient';
+import { getAccessToken } from '../lib/supabase';
 
 // Force the Coming Soon screen during local dev without removing the live
 // chat. The server also signals "not configured" at runtime (see askAI below).
 const DEMO_MODE = false;
 
 // Focus options grouped by track — each value is a ready-to-send context label.
-const FOCUS_GROUPS = Object.values(trackConfig).map(t => ({
+const FOCUS_GROUPS = Object.values(trackMeta).map(t => ({
   label: t.label,
-  options: t.modules.map(m => ({
+  options: t.moduleIndex.map(m => ({
     key: `${t.slug}-${m.id}`,
     value: `${t.label} — Module ${String(m.number).padStart(2, '0')}: ${m.title}`,
   })),
 }));
 
 async function askAI(question, moduleContext) {
+  const token = await getAccessToken();
   return fetchJsonWithFallback(
     '/api/tutor',
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({ question, moduleContext }),
     },
     'The AI Tutor needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.'
@@ -48,7 +53,9 @@ export default function AITutor() {
   const [loading, setLoading] = useState(false);
   const [selectedModule, setSelectedModule] = useState('');
   const [comingSoon, setComingSoon] = useState(false);
+  const availability = useApiAvailability('/api/tutor');
   const endRef = useRef(null);
+  const showComingSoon = DEMO_MODE || comingSoon || availability === 'unavailable';
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -89,7 +96,7 @@ export default function AITutor() {
         </p>
       </div>
 
-      {(DEMO_MODE || comingSoon) ? (
+      {showComingSoon ? (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-8 sm:p-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-ember-500 animate-pulse" />
@@ -142,7 +149,12 @@ export default function AITutor() {
 
           {/* Chat window */}
           <div className="bg-paper border border-coffee-200 rounded-xl overflow-hidden">
-            <div className="h-[60vh] min-h-[320px] max-h-[420px] overflow-y-auto p-5 space-y-4">
+            <div
+              className="h-[60vh] min-h-[320px] max-h-[420px] overflow-y-auto p-5 space-y-4"
+              role="log"
+              aria-live="polite"
+              aria-label="Chat messages"
+            >
               {messages.map((m, i) => (
                 <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
@@ -150,12 +162,19 @@ export default function AITutor() {
                   }`}>
                     {m.role === 'user' ? <User size={15} /> : <Bot size={15} />}
                   </div>
-                  <div className={`max-w-[90%] sm:max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                    m.role === 'user'
-                      ? 'bg-ember-500 text-cream'
-                      : 'bg-cream border border-coffee-200 text-ink'
-                  }`}>
-                    {m.text}
+                  <div className={`max-w-[90%] sm:max-w-[80%] ${m.role === 'user' ? 'text-right' : ''}`}>
+                    <span className={`block text-[10px] font-mono uppercase tracking-wider mb-1 ${
+                      m.role === 'user' ? 'text-ember-500' : 'text-coffee-500'
+                    }`}>
+                      {m.role === 'user' ? 'You' : 'Tutor'}
+                    </span>
+                    <div className={`rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-left ${
+                      m.role === 'user'
+                        ? 'bg-ember-500 text-cream rounded-tr-sm'
+                        : 'bg-cream border border-coffee-200 text-ink rounded-tl-sm'
+                    }`}>
+                      {m.text}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -199,7 +218,7 @@ export default function AITutor() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && send()}
-                placeholder="Ask about Java, Python, C, or a course concept..."
+                placeholder={availability === 'checking' ? 'Connecting to AI Tutor…' : 'Ask about Java, Python, C, or a course concept...'}
                 aria-label="Ask a programming or CS question"
                 className="flex-1 bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
               />

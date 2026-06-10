@@ -141,7 +141,7 @@ The AI Tutor, Code Explainer, and code runner are rate-limited per IP to protect
 
 ## Tech stack
 
-React 18 · Vite · Tailwind CSS · React Router v6 · Lucide Icons · groq-sdk
+React 18 · Vite · Tailwind CSS · React Router v6 · Lucide Icons · Vercel AI SDK (Groq)
 
 ---
 

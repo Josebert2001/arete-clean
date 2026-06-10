@@ -6,6 +6,7 @@
 import { modules } from '../src/data/modules.js';
 import { pythonModules } from '../src/data/pythonModules.js';
 import { cModules } from '../src/data/cModules.js';
+import { trackMeta } from '../src/data/trackMeta.js';
 
 const tracks = [
   { name: 'java',   modules },
@@ -91,6 +92,26 @@ for (const { name, modules: list } of tracks) {
   const sorted = [...numbers].sort((a, b) => a - b);
   sorted.forEach((n, i) => {
     if (n !== i + 1) errors.push(`[${name}] module numbering broken: expected ${i + 1} at position ${i}, got ${n}`);
+  });
+}
+
+// trackMeta.moduleIndex is a lightweight copy of id/number/title used by pages
+// that must not bundle the full module content. Make sure it never drifts.
+for (const { name, modules: list } of tracks) {
+  const meta = trackMeta[name];
+  if (!meta || !Array.isArray(meta.moduleIndex)) {
+    errors.push(`[${name}] trackMeta is missing a moduleIndex array`);
+    continue;
+  }
+  if (meta.moduleIndex.length !== list.length) {
+    errors.push(`[${name}] trackMeta.moduleIndex has ${meta.moduleIndex.length} entries but there are ${list.length} modules`);
+    continue;
+  }
+  list.forEach((m, i) => {
+    const idx = meta.moduleIndex[i];
+    if (idx.id !== m.id || idx.number !== m.number || idx.title !== m.title) {
+      errors.push(`[${name}] trackMeta.moduleIndex[${i}] (${idx.id} #${idx.number} "${idx.title}") does not match module (${m.id} #${m.number} "${m.title}")`);
+    }
   });
 }
 

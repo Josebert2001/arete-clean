@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useParams as useRouteParams } from 'react-rout
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
+import { AuthProvider } from './context/AuthContext';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -50,14 +51,24 @@ function JavaModuleRedirect() {
 
 function RouteLoading() {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-24 text-center">
-      <p className="text-sm font-mono uppercase tracking-wider text-coffee-700">Loading section...</p>
+    <div className="max-w-6xl mx-auto px-6 py-16 animate-pulse" role="status" aria-label="Loading page">
+      <div className="h-4 w-48 bg-coffee-100 rounded mb-6" />
+      <div className="h-12 w-2/3 max-w-md bg-coffee-100 rounded mb-4" />
+      <div className="h-4 w-full max-w-xl bg-coffee-100 rounded mb-2" />
+      <div className="h-4 w-3/4 max-w-lg bg-coffee-100 rounded mb-10" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[0, 1, 2].map(i => (
+          <div key={i} className="h-40 bg-coffee-100 rounded-xl" />
+        ))}
+      </div>
+      <span className="sr-only">Loading…</span>
     </div>
   );
 }
 
 export default function App() {
   return (
+    <AuthProvider>
     <div className="min-h-screen flex flex-col paper-texture">
       <Navbar />
       <main className="flex-1 relative z-10">
@@ -83,5 +94,6 @@ export default function App() {
       <Footer />
       <FloatingHelp />
     </div>
+    </AuthProvider>
   );
 }

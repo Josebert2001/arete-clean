@@ -41,7 +41,7 @@ function FileIcon({ type, className }) {
 
 export default function CourseMaterials({ courseCode, courseSlug }) {
   const [materials, setMaterials] = useState([]);
-  const [fetching, setFetching] = useState(true);
+  const [fetching, setFetching] = useState(isConfigured);
   const [showForm, setShowForm] = useState(false);
   const [file, setFile] = useState(null);
   const [desc, setDesc] = useState('');
@@ -51,12 +51,11 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
   const fileRef = useRef();
 
   useEffect(() => {
-    if (!isConfigured) { setFetching(false); return; }
+    if (!isConfigured) return;
     load();
   }, [courseSlug]);
 
   async function load() {
-    setFetching(true);
     const { data } = await supabase
       .from('course_materials')
       .select('id, display_name, file_url, file_size, file_type, description, uploaded_at')
