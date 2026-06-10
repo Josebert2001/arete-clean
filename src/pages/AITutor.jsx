@@ -97,12 +97,31 @@ export default function AITutor() {
   const [selectedModule, setSelectedModule] = useState('');
   const [comingSoon, setComingSoon] = useState(false);
   const availability = useApiAvailability('/api/tutor');
-  const endRef = useRef(null);
+  const logRef = useRef(null);
+  const stickToBottom = useRef(true);
+  const inputRef = useRef(null);
   const showComingSoon = DEMO_MODE || comingSoon || availability === 'unavailable';
 
+  // Follow the stream only while the reader is already at the bottom — once
+  // they scroll up to re-read, stop yanking the view down on every chunk.
+  const handleLogScroll = () => {
+    const log = logRef.current;
+    if (!log) return;
+    stickToBottom.current = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+  };
+
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const log = logRef.current;
+    if (log && stickToBottom.current) log.scrollTop = log.scrollHeight;
   }, [messages, loading]);
+
+  // Auto-grow the input up to ~5 lines so pasted errors stay visible.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+  }, [input]);
 
   const send = async (text) => {
     const question = (text || input).trim();
@@ -121,6 +140,7 @@ export default function AITutor() {
     setMessages(m => [...m, { role: 'user', text: question }]);
     setInput('');
     setLoading(true);
+    stickToBottom.current = true;
 
     let streaming = false;
     const onChunk = (partial) => {
@@ -214,9 +234,10 @@ export default function AITutor() {
           {/* Chat window */}
           <div className="bg-paper border border-coffee-200 rounded-xl overflow-hidden">
             <div
-              className="h-[60vh] min-h-[320px] max-h-[420px] overflow-y-auto p-5 space-y-4"
+              ref={logRef}
+              onScroll={handleLogScroll}
+              className="h-[60vh] min-h-[360px] max-h-[640px] overflow-y-auto p-5 space-y-4"
               role="log"
-              aria-live="polite"
               aria-label="Chat messages"
             >
               {messages.map((m, i) => (
@@ -257,7 +278,6 @@ export default function AITutor() {
                   </div>
                 </div>
               )}
-              <div ref={endRef} />
             </div>
 
             {/* Suggested prompts */}
@@ -276,15 +296,23 @@ export default function AITutor() {
               </div>
             )}
 
-            {/* Input */}
-            <div className="border-t border-coffee-200 p-3 flex flex-col gap-2 sm:flex-row">
-              <input
+            {/* Input — textarea so pasted errors/code keep their line breaks;
+                Enter sends, Shift+Enter inserts a newline. */}
+            <div className="border-t border-coffee-200 p-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+              <textarea
+                ref={inputRef}
+                rows={1}
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && send()}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
                 placeholder={availability === 'checking' ? 'Connecting to AI Tutor…' : 'Ask about Java, Python, C, or a course concept...'}
                 aria-label="Ask a programming or CS question"
-                className="flex-1 bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
+                className="flex-1 resize-none bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
               />
               <button
                 onClick={() => send()}

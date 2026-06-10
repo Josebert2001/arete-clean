@@ -51,20 +51,24 @@ const LANG_CONFIG = {
   cpp:    { label: 'C++',    keywords: C_KEYWORDS,      types: C_TYPES,    lineComment: '//', hashIsPreproc: true },
 };
 
+// Unknown languages (bash, sql, plain output...) get no keyword colouring —
+// wrong-language highlighting looks worse than none.
+const PLAIN_CONFIG = { keywords: [], types: [], lineComment: null, hashIsPreproc: false };
+
 function tokenize(code, lang) {
-  const cfg = LANG_CONFIG[lang] || LANG_CONFIG.java;
+  const cfg = LANG_CONFIG[lang] || PLAIN_CONFIG;
   const lines = code.split('\n');
   return lines.map((line, lineIdx) => {
     const tokens = [];
     let i = 0;
     while (i < line.length) {
       // Line comment ('//' for Java/C, '#' for Python)
-      if (line.startsWith(cfg.lineComment, i)) {
+      if (cfg.lineComment && line.startsWith(cfg.lineComment, i)) {
         tokens.push({ type: 'com', value: line.slice(i) });
         break;
       }
       // C block comment on a single line: /* ... */
-      if (line.slice(i, i + 2) === '/*') {
+      if (cfg.lineComment === '//' && line.slice(i, i + 2) === '/*') {
         const close = line.indexOf('*/', i + 2);
         const end = close === -1 ? line.length : close + 2;
         tokens.push({ type: 'com', value: line.slice(i, end) });

@@ -1,14 +1,13 @@
 import CodeBlock from './CodeBlock';
 
 // Renders the Markdown subset the AI endpoints are instructed to emit:
-// fenced code blocks, inline code, **bold**, headings, and lists. Anything
-// fancier (tables, HTML, images) is rendered as plain text on purpose.
-
-const KNOWN_FENCE_LANGS = new Set(['java', 'python', 'c', 'cpp']);
+// fenced code blocks, inline code, **bold**, headings, and lists. The model
+// doesn't always obey, so common strays (*italics*, --- rules, table rows)
+// degrade gracefully instead of showing raw markup.
 
 function InlineText({ text }) {
   const parts = [];
-  const regex = /(`[^`\n]+`|\*\*[^*\n]+\*\*)/g;
+  const regex = /(`[^`\n]+`|\*\*[^*\n]+\*\*|\*[^*\s][^*\n]*\*)/g;
   let last = 0;
   let match;
   let key = 0;
@@ -21,14 +20,20 @@ function InlineText({ text }) {
           {token.slice(1, -1)}
         </code>
       );
-    } else {
+    } else if (token.startsWith('**')) {
       parts.push(<strong key={key++} className="font-semibold text-ink">{token.slice(2, -2)}</strong>);
+    } else {
+      parts.push(<em key={key++}>{token.slice(1, -1)}</em>);
     }
     last = match.index + token.length;
   }
   if (last < text.length) parts.push(text.slice(last));
   return <>{parts}</>;
 }
+
+const isRuleLine = (l) => /^\s*([-*_])\s*(\1\s*){2,}$/.test(l);
+const isTableLine = (l) => /^\s*\|.*\|\s*$/.test(l);
+const isTableSeparator = (l) => /^\s*\|[\s\-:|]+\|\s*$/.test(l);
 
 function parseBlocks(text) {
   const lines = (text || '').replace(/\r\n/g, '\n').split('\n');
@@ -61,12 +66,35 @@ function parseBlocks(text) {
       continue;
     }
 
+    // Horizontal rule (---, ***, ___) — the model emits these despite
+    // instructions; show a subtle divider instead of raw dashes.
+    if (isRuleLine(line)) {
+      blocks.push({ type: 'rule' });
+      i++;
+      continue;
+    }
+
+    // Table rows — flatten each row to a text line (cells joined by " — ")
+    // since the app deliberately doesn't render tables.
+    if (isTableLine(line)) {
+      const rows = [];
+      while (i < lines.length && isTableLine(lines[i])) {
+        if (!isTableSeparator(lines[i])) {
+          const cells = lines[i].trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()).filter(Boolean);
+          if (cells.length) rows.push(cells.join(' — '));
+        }
+        i++;
+      }
+      if (rows.length) blocks.push({ type: 'table', rows });
+      continue;
+    }
+
     // List (bullet or numbered) — consecutive list lines form one block
     const isListLine = (l) => /^\s*([-*+]|\d+[.)])\s+/.test(l);
     if (isListLine(line)) {
       const ordered = /^\s*\d/.test(line);
       const items = [];
-      while (i < lines.length && isListLine(lines[i])) {
+      while (i < lines.length && isListLine(lines[i]) && !isRuleLine(lines[i])) {
         items.push(lines[i].replace(/^\s*([-*+]|\d+[.)])\s+/, ''));
         i++;
       }
@@ -88,7 +116,9 @@ function parseBlocks(text) {
       lines[i].trim() &&
       !/^```/.test(lines[i]) &&
       !/^#{1,6}\s/.test(lines[i]) &&
-      !isListLine(lines[i])
+      !isListLine(lines[i]) &&
+      !isRuleLine(lines[i]) &&
+      !isTableLine(lines[i])
     ) {
       para.push(lines[i]);
       i++;
@@ -107,12 +137,27 @@ export default function RichText({ text }) {
       {blocks.map((block, i) => {
         if (block.type === 'code') {
           return (
-            <CodeBlock
-              key={i}
-              code={block.code}
-              language={KNOWN_FENCE_LANGS.has(block.lang) ? block.lang : 'java'}
-              showLineNumbers={false}
-            />
+            <div key={i} className="[&_.code-block]:my-0">
+              <CodeBlock
+                code={block.code}
+                language={block.lang || 'text'}
+                showLineNumbers={false}
+              />
+            </div>
+          );
+        }
+        if (block.type === 'rule') {
+          return <hr key={i} className="border-coffee-200" />;
+        }
+        if (block.type === 'table') {
+          return (
+            <div key={i} className="space-y-1">
+              {block.rows.map((row, j) => (
+                <p key={j} className="leading-relaxed">
+                  <InlineText text={row} />
+                </p>
+              ))}
+            </div>
           );
         }
         if (block.type === 'heading') {
