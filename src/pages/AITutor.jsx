@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Send, User, Bot, ArrowRight } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
-import { fetchJsonWithFallback, useApiAvailability } from '../utils/apiClient';
+import { useApiAvailability } from '../utils/apiClient';
 import { getAccessToken } from '../lib/supabase';
 
 // Force the Coming Soon screen during local dev without removing the live
@@ -18,21 +18,61 @@ const FOCUS_GROUPS = Object.values(trackMeta).map(t => ({
   })),
 }));
 
-async function askAI(question, moduleContext) {
+// Sends the conversation and streams the reply. Success responses are plain
+// text streamed chunk by chunk (reported via onChunk with the accumulated
+// answer); JSON responses carry errors, rate limits, or the unconfigured flag.
+async function askAI(history, moduleContext, onChunk) {
   const token = await getAccessToken();
-  return fetchJsonWithFallback(
-    '/api/tutor',
-    {
+  let res;
+  try {
+    res = await fetch('/api/tutor', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ question, moduleContext }),
-    },
-    'The AI Tutor needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.'
-  );
+      body: JSON.stringify({ messages: history, moduleContext }),
+    });
+  } catch {
+    return { error: 'Network error — check your connection and try again.' };
+  }
+
+  const contentType = (res.headers.get('content-type') || '').toLowerCase();
+
+  if (contentType.includes('application/json')) {
+    const data = await res.json().catch(() => ({}));
+    return { ...data, responseStatus: res.status };
+  }
+
+  // Anything that isn't our text stream (e.g. Vite serving /api/* as static
+  // files during local dev) means the API routes aren't running.
+  if (!res.ok || !res.body || !contentType.includes('text/plain')) {
+    return { error: 'The AI Tutor needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.' };
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let answer = '';
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      answer += decoder.decode(value, { stream: true });
+      onChunk(answer);
+    }
+    answer += decoder.decode();
+  } catch {
+    // Connection dropped mid-stream — keep whatever arrived.
+  }
+
+  return answer.trim()
+    ? { answer }
+    : { error: 'No response received. Please try again.' };
 }
+
+// How many prior messages to send back as context (the model sees the rest
+// of the conversation through them; older turns are dropped to save tokens).
+const HISTORY_LIMIT = 12;
 
 const SUGGESTED = [
   'What is the difference between == and .equals() in Java?',
@@ -65,18 +105,38 @@ export default function AITutor() {
     const question = (text || input).trim();
     if (!question || loading) return;
 
+    // Conversation history for the API — skip the canned greeting at index 0.
+    const history = [
+      ...messages.slice(1).map(m => ({
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: m.text,
+      })),
+      { role: 'user', content: question },
+    ].slice(-HISTORY_LIMIT);
+
     setMessages(m => [...m, { role: 'user', text: question }]);
     setInput('');
     setLoading(true);
 
+    let streaming = false;
+    const onChunk = (partial) => {
+      if (!streaming) {
+        streaming = true;
+        setLoading(false);
+        setMessages(m => [...m, { role: 'bot', text: partial }]);
+      } else {
+        setMessages(m => [...m.slice(0, -1), { ...m[m.length - 1], text: partial }]);
+      }
+    };
+
     try {
-      const data = await askAI(question, selectedModule);
+      const data = await askAI(history, selectedModule, onChunk);
       if (data.notConfigured) {
         setComingSoon(true);
         return;
       }
       if (data.error) throw new Error(data.error);
-      setMessages(m => [...m, { role: 'bot', text: data.answer }]);
+      // Streamed answer is already rendered via onChunk.
     } catch (e) {
       const text = e?.message && e.message !== 'Request failed'
         ? e.message
