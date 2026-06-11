@@ -107,14 +107,11 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
         .upload(path, file, { contentType: file.type });
       if (storageErr) throw storageErr;
 
-      const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
-
       const { error: dbErr } = await supabase.from('course_materials').insert({
         course_code: courseCode,
         course_slug: courseSlug,
         display_name: file.name,
         file_path: path,
-        file_url: publicUrl,
         file_size: file.size,
         file_type: fileExt,
         description: desc.trim() || null,

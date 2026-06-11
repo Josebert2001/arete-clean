@@ -131,7 +131,11 @@ export default async function handler(req, res) {
   }
 
   const { moduleContext } = req.body || {};
-  const safeModuleContext = typeof moduleContext === 'string' ? moduleContext.slice(0, 200) : '';
+  // Strip newlines, brackets, and control chars to prevent prompt injection via
+  // a crafted context string that breaks out of the [Studying: ...] tag format.
+  const safeModuleContext = typeof moduleContext === 'string'
+    ? moduleContext.replace(/[\r\n\[\]]/g, ' ').replace(/[\x00-\x1F\x7F]/g, '').slice(0, 200).trim()
+    : '';
   if (safeModuleContext) {
     const last = messages[messages.length - 1];
     last.content = `[Studying: ${safeModuleContext}]\n\n${last.content}`;
