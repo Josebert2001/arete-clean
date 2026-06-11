@@ -1,9 +1,9 @@
 import { Component, lazy, Suspense, useEffect } from 'react';
-import { Routes, Route, Navigate, Link, useLocation, useParams as useRouteParams } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation, useNavigate, useParams as useRouteParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -14,6 +14,9 @@ const Install = lazy(() => import('./pages/Install'));
 const AITutor = lazy(() => import('./pages/AITutor'));
 const CodeExplainer = lazy(() => import('./pages/CodeExplainer'));
 const Cheatsheet = lazy(() => import('./pages/Cheatsheet'));
+const SignIn = lazy(() => import('./pages/SignIn'));
+const SetupProfile = lazy(() => import('./pages/SetupProfile'));
+const Welcome = lazy(() => import('./pages/Welcome'));
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -56,6 +59,23 @@ function ScrollToTop() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+  return null;
+}
+
+// Redirects signed-in users with no profile to /setup-profile from any page.
+function AuthStateWatcher() {
+  const { user, profileComplete, authLoading, profileLoading } = useAuth();
+  const navigate  = useNavigate();
+  const { pathname } = useLocation();
+  const authPages = ['/signin', '/setup-profile', '/welcome'];
+
+  useEffect(() => {
+    if (authLoading || profileLoading) return;
+    if (user && !profileComplete && !authPages.includes(pathname)) {
+      navigate('/setup-profile', { replace: true });
+    }
+  }, [user, profileComplete, authLoading, profileLoading, pathname]);
+
   return null;
 }
 
@@ -103,6 +123,7 @@ export default function App() {
         Skip to content
       </a>
       <ScrollToTop />
+      <AuthStateWatcher />
       <Navbar />
       <main id="main" className="flex-1 relative z-10">
         <ErrorBoundary>
@@ -121,6 +142,9 @@ export default function App() {
             <Route path="/tutor" element={<AITutor />} />
             <Route path="/explainer" element={<CodeExplainer />} />
             <Route path="/cheatsheet" element={<Cheatsheet />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/setup-profile" element={<SetupProfile />} />
+            <Route path="/welcome" element={<Welcome />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

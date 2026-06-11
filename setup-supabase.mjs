@@ -199,6 +199,32 @@ async function main() {
   `);
   ok('user_progress table + RLS ready');
 
+  // 8. Student profiles table (identity: full_name, reg_number, level)
+  step('8. Creating profiles table…');
+  await sql(`
+    CREATE TABLE IF NOT EXISTS profiles (
+      id          UUID        PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+      full_name   TEXT        NOT NULL,
+      reg_number  TEXT        NOT NULL,
+      level       TEXT        NOT NULL CHECK (level IN ('100L','200L','300L','400L')),
+      created_at  TIMESTAMPTZ DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+  await sql(`ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;`);
+  await sql(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE tablename = 'profiles' AND policyname = 'Users manage own profile'
+      ) THEN
+        CREATE POLICY "Users manage own profile" ON profiles
+          FOR ALL USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+      END IF;
+    END $$;
+  `);
+  ok('profiles table + RLS ready');
+
   // ── Done ─────────────────────────────────────────────────────────────────
 
   console.log(`
