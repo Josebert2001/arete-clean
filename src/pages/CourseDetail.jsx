@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, Check
 import { getCourseBySlug, courses } from '../data/courses';
 import LectureNotes from '../components/LectureNotes';
 import CourseMaterials from '../components/CourseMaterials';
+import CourseAIChat from '../components/CourseAIChat';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { usePageTitle } from '../utils/usePageTitle';
 
@@ -249,6 +250,11 @@ export default function CourseDetail() {
         </div>
       </div>
       )}
+
+      {/* AI course assistant */}
+      <div className="mt-10">
+        <CourseAIChat course={course} />
+      </div>
 
       {/* Bottom nav */}
       <div className="mt-12 pt-8 border-t border-coffee-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
