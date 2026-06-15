@@ -91,20 +91,30 @@ export default async function handler(req, res) {
 
     const lang = LANGUAGES[language] || LANGUAGES.java;
 
-    const jdoodleRes = await fetch('https://api.jdoodle.com/v1/execute', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        script: source_code,
-        stdin: stdin,
-        language: lang.language,
-        versionIndex: lang.versionIndex,
+    const [jdoodleRes, creditRes] = await Promise.all([
+      fetch('https://api.jdoodle.com/v1/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: CLIENT_ID,
+          clientSecret: CLIENT_SECRET,
+          script: source_code,
+          stdin: stdin,
+          language: lang.language,
+          versionIndex: lang.versionIndex,
+        }),
       }),
-    });
+      fetch('https://api.jdoodle.com/v1/credit-spent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET }),
+      }),
+    ]);
 
     const data = await jdoodleRes.json();
+    const creditData = await creditRes.json().catch(() => null);
+    const creditsUsed = typeof creditData?.used === 'number' ? creditData.used : null;
+    const DAILY_LIMIT = 20;
 
     // JDoodle daily-limit / auth errors come back with an "error" field
     // or a non-200 statusCode in the body.
@@ -118,6 +128,8 @@ export default async function handler(req, res) {
           : `Runner error: ${msg}`,
         kind: isLimit ? 'limit' : 'runtime_error',
         status: isLimit ? 'Daily limit reached' : 'Error',
+        creditsUsed: DAILY_LIMIT,
+        creditsRemaining: 0,
       });
     }
 
@@ -147,6 +159,8 @@ export default async function handler(req, res) {
             : 'No output',
       time: data.cpuTime,
       memory: data.memory,
+      creditsUsed: creditsUsed ?? null,
+      creditsRemaining: creditsUsed !== null ? Math.max(0, DAILY_LIMIT - creditsUsed) : null,
     });
   } catch (err) {
     console.error('Code runner error:', err);

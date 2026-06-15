@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 const EMPTY_PROGRESS = { completedModules: [], quizScores: {} };
 
 // Union of completed modules; for quiz scores, the most recent attempt wins.
-function mergeProgress(local, cloud) {
+export function mergeProgress(local, cloud) {
   if (!cloud) return local;
   const completedModules = [...new Set([...(local.completedModules || []), ...(cloud.completedModules || [])])];
   const quizScores = { ...(cloud.quizScores || {}) };
@@ -17,7 +17,7 @@ function mergeProgress(local, cloud) {
   return { completedModules, quizScores };
 }
 
-function readProgress(storageKey) {
+export function readProgress(storageKey) {
   if (!storageKey || typeof localStorage === 'undefined') {
     return { ...EMPTY_PROGRESS };
   }

@@ -18,12 +18,31 @@ const LANGUAGE_LABELS = {
   cpp: 'C++',
 };
 
+const DAILY_LIMIT = 20;
+const CREDITS_KEY = () => `jdoodle-credits-${new Date().toISOString().slice(0, 10)}`;
+
+function loadCachedCredits() {
+  try {
+    const raw = localStorage.getItem(CREDITS_KEY());
+    return raw !== null ? Number(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCachedCredits(remaining) {
+  try {
+    localStorage.setItem(CREDITS_KEY(), String(remaining));
+  } catch { /* storage unavailable */ }
+}
+
 export default function CodePlayground({ initialCode = '', language = 'java', stdin = '' }) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState(null);
   const [kind, setKind] = useState(null);
   const [meta, setMeta] = useState(null);
   const [running, setRunning] = useState(false);
+  const [creditsRemaining, setCreditsRemaining] = useState(() => loadCachedCredits());
 
   const run = async () => {
     if (!code.trim() || running) return;
@@ -49,6 +68,8 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
       } else if (data.kind === 'limit' || data.responseStatus === 429) {
         setOutput(data.output || data.error || 'Daily run limit reached. Please try again later.');
         setKind('limit');
+        setCreditsRemaining(0);
+        saveCachedCredits(0);
       } else if (data.error) {
         setOutput(data.error + (data.detail ? `\n\n${data.detail}` : ''));
         setKind('runtime_error');
@@ -57,6 +78,10 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
         setKind(data.kind);
         if (data.time || data.memory) {
           setMeta({ time: data.time, memory: data.memory, status: data.status });
+        }
+        if (data.creditsRemaining !== null && data.creditsRemaining !== undefined) {
+          setCreditsRemaining(data.creditsRemaining);
+          saveCachedCredits(data.creditsRemaining);
         }
       }
     } catch {
@@ -97,6 +122,20 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           </span>
         </div>
         <div className="flex items-center justify-end gap-2">
+          {creditsRemaining !== null && (
+            <span
+              className={`text-xs font-mono ${
+                creditsRemaining <= 3
+                  ? 'text-rust'
+                  : creditsRemaining <= 8
+                  ? 'text-ember'
+                  : 'text-coffee-500'
+              }`}
+              title={`Shared daily run limit: ${creditsRemaining} of ${DAILY_LIMIT} runs remaining today`}
+            >
+              {creditsRemaining}/{DAILY_LIMIT} runs left
+            </span>
+          )}
           <button
             onClick={reset}
             className="rounded p-1.5 text-coffee-400 transition-colors hover:text-cream"
@@ -107,8 +146,8 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           </button>
           <button
             onClick={run}
-            disabled={running}
-            title="Run code (Ctrl+Enter)"
+            disabled={running || creditsRemaining === 0}
+            title={creditsRemaining === 0 ? 'Daily run limit reached — try again tomorrow' : 'Run code (Ctrl+Enter)'}
             className="inline-flex items-center gap-1.5 rounded-md bg-ember-500 px-3 py-1.5 text-sm font-semibold text-cream transition-colors hover:bg-ember-400 disabled:opacity-60"
           >
             {running ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
