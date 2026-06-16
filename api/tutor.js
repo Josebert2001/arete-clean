@@ -134,7 +134,12 @@ export default async function handler(req, res) {
   // Strip newlines, brackets, and control chars to prevent prompt injection via
   // a crafted context string that breaks out of the [Studying: ...] tag format.
   const safeModuleContext = typeof moduleContext === 'string'
-    ? moduleContext.replace(/[\r\n\[\]]/g, ' ').replace(/[\x00-\x1F\x7F]/g, '').slice(0, 200).trim()
+    ? moduleContext
+        .replace(/[\r\n[\]]/g, ' ')
+        // eslint-disable-next-line no-control-regex -- deliberately strip control chars to block prompt injection
+        .replace(/[\x00-\x1F\x7F]/g, '')
+        .slice(0, 200)
+        .trim()
     : '';
   if (safeModuleContext) {
     const last = messages[messages.length - 1];

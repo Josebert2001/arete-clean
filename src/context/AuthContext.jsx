@@ -16,7 +16,10 @@ const AuthContext = createContext({
 export function AuthProvider({ children }) {
   const [user, setUser]                   = useState(null);
   const [profile, setProfile]             = useState(null);
-  const [authLoading, setAuthLoading]     = useState(true);
+  // Loading only matters when Supabase is configured (a session to fetch);
+  // without it there's nothing to load, so start settled and avoid a
+  // synchronous setState in the effect below.
+  const [authLoading, setAuthLoading]     = useState(Boolean(supabase));
   const [profileLoading, setProfileLoading] = useState(false);
 
   const loadProfile = useCallback(async (u) => {
@@ -32,7 +35,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (!supabase) { setAuthLoading(false); return; }
+    if (!supabase) return; // authLoading already initialised to false
 
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user ?? null;
