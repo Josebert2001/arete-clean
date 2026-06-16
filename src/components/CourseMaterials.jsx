@@ -3,7 +3,7 @@ import {
   Upload, FileText, Image as ImageIcon, Download,
   X, CheckCircle2, AlertCircle, Loader2, Paperclip,
 } from 'lucide-react';
-import { supabase, isConfigured } from '../lib/supabase';
+import { supabase, isConfigured, getAccessToken } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 const BUCKET = 'course-materials';
@@ -112,9 +112,14 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
       let extracted_text = null;
       if (['txt', 'docx', 'pdf'].includes(fileExt)) {
         try {
+          // /api/extract requires a signed-in caller — forward the access token.
+          const token = await getAccessToken();
           const exRes = await fetch('/api/extract', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
             body: JSON.stringify({ filePath: path, fileType: fileExt }),
           });
           if (exRes.ok) {
