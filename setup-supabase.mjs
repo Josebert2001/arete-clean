@@ -68,7 +68,6 @@ async function main() {
       course_slug  TEXT        NOT NULL,
       display_name TEXT        NOT NULL,
       file_path    TEXT        NOT NULL,
-      file_url     TEXT        NOT NULL,
       file_size    BIGINT,
       file_type    TEXT,
       description  TEXT,
@@ -77,6 +76,11 @@ async function main() {
     );
   `);
   await sql(`ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS extracted_text TEXT;`);
+  // Drop the legacy file_url column: download links are reconstructed from
+  // file_path (see materialUrl() in CourseMaterials.jsx), so a stored URL is
+  // redundant — and its NOT NULL constraint would reject the current insert
+  // shape on a fresh database.
+  await sql(`ALTER TABLE course_materials DROP COLUMN IF EXISTS file_url;`);
   ok('Table ready');
 
   // 2. Enable RLS
