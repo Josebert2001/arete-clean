@@ -85,7 +85,8 @@ export function setRateLimitHeaders(res, { limit, remaining, resetAt }) {
   res.setHeader('X-RateLimit-Reset', String(Math.ceil(resetAt / 1000)));
 }
 
+// Abuse-monitoring signal only — call when a request is denied, not on every request.
 export function logRequest(req, route, extra = {}) {
   const ip = getClientIp(req);
-  console.log(JSON.stringify({ route, ip, ts: Date.now(), method: req.method, ...extra }));
+  console.error(JSON.stringify({ route, ip, ts: Date.now(), method: req.method, ...extra }));
 }

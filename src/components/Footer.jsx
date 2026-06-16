@@ -32,8 +32,9 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-bold text-ink mb-3">Built by</h4>
             <p className="text-sm text-coffee-700 leading-relaxed">
-              The <span className="font-medium text-ink">Department of Cybersecurity</span><br/>
-              University of Uyo
+              <span className="font-medium text-ink">Josebert</span><br/>
+              Director of Software & Hardware<br/>
+              Cybersecurity Dept., UniUyo
             </p>
           </div>
         </div>

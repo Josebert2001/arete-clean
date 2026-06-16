@@ -107,6 +107,25 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
         .upload(path, file, { contentType: file.type });
       if (storageErr) throw storageErr;
 
+      // Extract text so the AI Tutor can reference this material as lecture notes.
+      // Failure is non-fatal — the upload completes even if extraction fails.
+      let extracted_text = null;
+      if (['txt', 'docx', 'pdf'].includes(fileExt)) {
+        try {
+          const exRes = await fetch('/api/extract', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filePath: path, fileType: fileExt }),
+          });
+          if (exRes.ok) {
+            const exData = await exRes.json();
+            extracted_text = exData.text ?? null;
+          }
+        } catch {
+          // extraction failure is silent — material still uploads
+        }
+      }
+
       const { error: dbErr } = await supabase.from('course_materials').insert({
         course_code: courseCode,
         course_slug: courseSlug,
@@ -116,6 +135,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
         file_type: fileExt,
         description: desc.trim() || null,
         uploaded_by: user.id,
+        extracted_text,
       });
       if (dbErr) throw dbErr;
 

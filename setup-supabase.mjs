@@ -72,9 +72,11 @@ async function main() {
       file_size    BIGINT,
       file_type    TEXT,
       description  TEXT,
+      extracted_text TEXT,
       uploaded_at  TIMESTAMPTZ DEFAULT NOW()
     );
   `);
+  await sql(`ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS extracted_text TEXT;`);
   ok('Table ready');
 
   // 2. Enable RLS

@@ -7,8 +7,24 @@
 
 import { tool } from 'ai';
 import { z } from 'zod';
+import { createClient } from '@supabase/supabase-js';
 import { findCourse, findModule } from './courseData.js';
 import { trackMeta } from '../../src/data/trackMeta.js';
+
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+
+// Anonymous read-only client — course_materials has a public read policy.
+function getAnonDb() {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+// Truncate each note to keep the AI prompt within safe limits.
+const MAX_NOTE_CHARS = 6_000;
+const MAX_NOTES = 3;
 
 const TRACK_BY_STORAGE_KEY = Object.fromEntries(
   Object.values(trackMeta).map(t => [t.storageKey, t])
@@ -79,10 +95,34 @@ export function buildTutorTools(student) {
         courseCode: z.string().describe('Course code, e.g. "CYB 224", "COS 111", "MTH 121"'),
       }),
       execute: async ({ courseCode }) => {
-        return (
-          findCourse(courseCode) ||
-          `No course found matching "${courseCode}". Use a course code from the catalogue index.`
-        );
+        const outline = findCourse(courseCode);
+        if (!outline) {
+          return `No course found matching "${courseCode}". Use a course code from the catalogue index.`;
+        }
+
+        const db = getAnonDb();
+        if (!db) return outline;
+
+        const { data } = await db
+          .from('course_materials')
+          .select('display_name, description, extracted_text')
+          .eq('course_code', courseCode)
+          .not('extracted_text', 'is', null)
+          .order('uploaded_at', { ascending: false })
+          .limit(MAX_NOTES);
+
+        if (!data || data.length === 0) return outline;
+
+        const notes = data
+          .map(m => {
+            const label = m.description ? `${m.display_name} — ${m.description}` : m.display_name;
+            const body = m.extracted_text.slice(0, MAX_NOTE_CHARS);
+            const truncated = m.extracted_text.length > MAX_NOTE_CHARS ? ' [truncated]' : '';
+            return `=== Uploaded note: ${label}${truncated} ===\n${body}`;
+          })
+          .join('\n\n');
+
+        return `${outline}\n\n${notes}`;
       },
     }),
 

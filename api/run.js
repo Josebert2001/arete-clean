@@ -50,10 +50,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  logRequest(req, 'run');
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {
+    logRequest(req, 'run', { blocked: 'rate_limit' });
     res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
     return res.status(429).json({
       error: 'Too many code-run requests from this device. Please wait a few minutes and try again.',

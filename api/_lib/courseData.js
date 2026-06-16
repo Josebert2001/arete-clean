@@ -35,11 +35,11 @@ Skills: data collection and sampling, frequency distributions, histograms, measu
 Textbooks: "Statistics for Management" (Levin & Rubin); "Fundamentals of Statistics" (Gupta & Kapoor).
 Tips: Statistics underpins cybersecurity anomaly detection and risk quantification — treat it seriously. Learn Excel/LibreOffice Calc for data tasks.
 
-UYY-CSC 111 | Computer Operations | 2 units
+UUY-CSC 111 | Computer Operations | 2 units
 Skills: Windows/Linux file management, keyboard shortcuts, Office 365 (Word, Excel, PowerPoint), OneDrive/Google Drive, cloud storage, email etiquette, internet research skills.
 Tips: Learn keyboard shortcuts — they save hours. Practise Excel formulas; they are tested in STA and INS courses.
 
-UYY-CSC 112 | Computer Troubleshooting | 3 units
+UUY-CSC 112 | Computer Troubleshooting | 3 units
 Skills: motherboard components, CPU/RAM identification, HDD vs SSD, power supply, OS installation (Windows/Linux), driver management, peripheral configuration, basic networking troubleshooting (ping, ipconfig, tracert).
 Tips: Disassemble and reassemble a PC at least once before the practical exam. Know the POST beep codes.
 
@@ -66,16 +66,16 @@ Tips: Kirchhoff's laws are tested in networking hardware courses. Electromagneti
 PHY 128 | General Practical Physics II | 1 unit
 Skills: electricity labs (Wheatstone bridge, potentiometer), optics labs (mirrors, lenses), magnetic field mapping, data analysis and graph plotting.
 
-UYY-CYB 121 | Introduction to Computer Networks | 2 units
+UUY-CYB 121 | Introduction to Computer Networks | 2 units
 Skills: OSI model (all 7 layers and their functions), TCP/IP model, IP addressing (IPv4 classes, subnetting, CIDR), MAC addresses, switching and routing fundamentals, DHCP, DNS, HTTP/HTTPS, Wi-Fi (802.11), common ports and protocols.
 Textbooks: "Computer Networking: A Top-Down Approach" (Kurose & Ross, 8th ed).
 Tips: OSI layer questions are universal in cybersecurity exams — know which protocol lives on which layer. Practice subnetting until it is automatic.
 
-UYY-CSC 121 | Introduction to Web Programming | 2 units
+UUY-CSC 121 | Introduction to Web Programming | 2 units
 Skills: HTML5 (semantic elements, forms, tables), CSS3 (box model, flexbox, media queries, variables), JavaScript basics (DOM manipulation, events, fetch API), responsive design, introduction to React or Vue, web security basics (XSS, CSRF, content security policy).
 Tips: Inspect every website you visit using browser dev tools. The XSS and CSRF concepts recur throughout the cybersecurity curriculum.
 
-UYY-CYB 122 | Principles and Practice of Information Security | 2 units
+UUY-CYB 122 | Principles and Practice of Information Security | 2 units
 Skills: CIA triad (confidentiality, integrity, availability), threat taxonomy, vulnerability vs exploit, authentication methods (passwords, MFA, biometrics), access control models (DAC, MAC, RBAC), security policies and standards, basic cryptography concepts.
 Textbooks: "Information Security: Principles and Practice" (Mark Stamp); "Security Engineering" (Ross Anderson, 3rd ed — free online).
 Tips: The CIA triad is the foundation of all CYB exams. Memorise the access control models with examples — they appear repeatedly.
@@ -105,11 +105,11 @@ Skills: SDLC models (waterfall, agile, spiral, RAD), requirements engineering (f
 Textbooks: "Software Engineering" (Ian Sommerville, 10th ed); "Clean Code" (Robert C. Martin).
 Tips: UML diagrams are consistently examined. Know the difference between verification and validation. Git is used in practicals — learn add, commit, push, pull, branch, merge.
 
-UYY-CYB 215 | Fundamentals of IoT | 2 units
+UUY-CYB 215 | Fundamentals of IoT | 2 units
 Skills: IoT architecture (perception, network, application layers), IoT protocols (MQTT, CoAP, Zigbee, Z-Wave, LoRaWAN), microcontrollers (Arduino, Raspberry Pi), IoT in smart homes/cities/health, OWASP IoT Top 10 vulnerabilities, IoT security hardening.
 Tips: Know the OWASP IoT Top 10 — questions are almost guaranteed. Understand the difference between MQTT (lightweight pub-sub) and CoAP (RESTful for constrained devices).
 
-UYY-CYB 211 | Ethical Hacking Fundamentals | 2 units
+UUY-CYB 211 | Ethical Hacking Fundamentals | 2 units
 Skills: ethical hacking methodology, reconnaissance (OSINT, Google dorking, WHOIS, Shodan), scanning and enumeration (Nmap, Nessus), vulnerability exploitation basics, OWASP Top 10 (injections, broken auth, XSS, IDOR, security misconfiguration, etc.), penetration testing report writing, legal and ethical boundaries.
 Tips: Every step of a pen test requires written authorisation — always state this in exam answers. Know Nmap flags: -sS, -sV, -A, -p. The OWASP Top 10 appears in multiple courses.
 
@@ -137,11 +137,11 @@ CYB 222 | Cybersecurity Innovation and New Technologies | 3 units
 Skills: AI/ML in threat detection, adversarial machine learning, blockchain for security, quantum computing threats to cryptography (post-quantum algorithms), cloud security models, zero-trust architecture (BeyondCorp), edge computing security, 5G security, autonomous vehicle security.
 Tips: Zero-trust is a major exam topic — understand "never trust, always verify." Know what post-quantum cryptography aims to solve.
 
-UYY-CYB 221 | Network Defense Fundamentals | 2 units
+UUY-CYB 221 | Network Defense Fundamentals | 2 units
 Skills: firewalls (packet filtering, stateful inspection, NGFW), intrusion detection and prevention (IDS vs IPS, Snort rules), VPN (IPSec, SSL/TLS), network segmentation (DMZ, VLANs), Wireshark packet analysis, SIEM concepts (log aggregation, correlation rules, alerts), honeypots.
 Tips: Know the difference between IDS (passive, alerts only) and IPS (active, blocks). DMZ architecture is a frequently drawn diagram. Learn basic Wireshark filters.
 
-UYY-CYB 222 | Web and Mobile Application Security | 2 units
+UUY-CYB 222 | Web and Mobile Application Security | 2 units
 Skills: OWASP Top 10 in depth (A01–A10: injection, broken access, cryptographic failures, XML external entities, security misconfiguration, vulnerable components, auth failures, SSRF, etc.), SQL injection (error-based, blind, time-based), XSS (reflected, stored, DOM), CSRF tokens, API security (REST/GraphQL), JWT vulnerabilities, Android/iOS security models, mobile app penetration testing.
 Tips: SQL injection and XSS are the most tested web vulnerabilities. Know both how they work AND how to mitigate them. JWT attacks (none algorithm, algorithm confusion) appear in advanced questions.
 
@@ -174,7 +174,7 @@ CYB 314 | Cybersecurity Innovation and New Technologies (Advanced) | 2 units
 Skills: DevSecOps (shift-left security, CI/CD pipeline security, SAST/DAST/SCA), containerisation security (Docker, Kubernetes security contexts, image scanning), 5G security architecture, software-defined networking (SDN) security, threat hunting methodology, extended detection and response (XDR), threat intelligence platforms.
 Tips: DevSecOps and container security are newer topics — expect essay questions. Know the difference between SAST (static), DAST (dynamic), and SCA (dependency scanning).
 
-UYY-CYB 315 | Lab for Cyber Attacks and Vulnerability Testing | 2 units
+UUY-CYB 315 | Lab for Cyber Attacks and Vulnerability Testing | 2 units
 Skills: Kali Linux toolset, Metasploit framework (auxiliary, exploit, post modules; msfconsole commands), Nessus/OpenVAS vulnerability scanning, Burp Suite (proxy, scanner, repeater, intruder), password cracking (John the Ripper, Hashcat, rainbow tables), privilege escalation techniques, reporting findings.
 Tips: Always mention authorisation and scope in practical/essay answers. Metasploit workflow: use auxiliary/exploit → set RHOSTS/LHOST → run. Burp Suite is the standard web app testing tool.
 
@@ -220,7 +220,7 @@ CYB 497 | Final Year Project I | 2 units
 First semester of the two-semester FYP. Deliverables: topic approval form, comprehensive literature review, problem statement, objectives, research methodology, preliminary implementation or prototype.
 Tips: Choose a topic early. A focused, feasible topic scores higher than an ambitious one you cannot complete. Document everything as you go — your logbook is evidence of progress.
 
-UYY-CYB 411 | Business Intelligence for SMEs | 2 units
+UUY-CYB 411 | Business Intelligence for SMEs | 2 units
 Skills: data warehousing concepts (OLAP vs OLTP, star schema, snowflake schema), ETL (extract, transform, load), BI tools (Power BI, Tableau, Excel pivot tables), KPI design, data storytelling and visualisation, cybersecurity BI (threat dashboards, security metrics), BI tool security (row-level security, audit logs).
 Tips: Learn to build a basic Power BI or Tableau dashboard before the practical exam. Data storytelling — presenting insights clearly — is assessed in the viva.
 
@@ -247,11 +247,11 @@ CYB 498 | Final Year Project II | 2 units
 Completion semester. Full implementation, testing, documentation, thesis submission, and oral defence (viva voce).
 Tips: Practise your 10-minute oral presentation until it is effortless. Expect 3–5 technical questions about your methodology and findings. Have your code, experiments, and results ready to demonstrate.
 
-UYY-CYB 424 | Database Management and Control System | 2 units
+UUY-CYB 424 | Database Management and Control System | 2 units
 Skills: advanced SQL (joins, subqueries, stored procedures, triggers, views, transactions, ACID properties), query optimisation (EXPLAIN, indexing strategies, covering indexes), NoSQL databases (MongoDB, Cassandra, Redis — use cases and trade-offs), database security (SQL injection prevention, parameterised queries, DAC/MAC for databases, auditing and logging), database activity monitoring (DAM), backup and recovery.
 Tips: Know the ACID properties with database-specific examples. SQL injection prevention — always use parameterised queries; never string concatenation. The difference between OLTP and OLAP is frequently tested.
 
-UYY-CYB 425 | Enterprise Security and Information Assurance | 1 unit
+UUY-CYB 425 | Enterprise Security and Information Assurance | 1 unit
 Skills: ISO 27001/27002 (ISMS, Annex A controls), COBIT 2019 governance framework, ITIL v4 service management, CISSP domains overview (8 domains), enterprise risk management, business continuity management (BCM, ISO 22301), security awareness and training programmes, security metrics and KPIs, third-party risk management (vendor due diligence, SLAs, right-to-audit).
 Tips: Know the ISO 27001 Annex A control categories. The difference between ISO 27001 (requirements) and ISO 27002 (guidelines) is tested. COBIT aligns IT governance with business goals — use that framing in essays.
 `;
