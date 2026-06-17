@@ -62,6 +62,11 @@ const MAX_USER_CHARS = 2000;
 const MAX_ASSISTANT_CHARS = 8000;
 const MAX_TOTAL_CHARS = 24000;
 
+// Appended to the text stream when the model/connection fails mid-response, so
+// the client can tell a truncated answer from a complete one. Only ever written
+// on the error path, at the very end. MUST match src/utils/tutorStream.js.
+const STREAM_ERROR_MARKER = '<<arete:stream-error>>';
+
 // Accepts either { messages: [{role, content}...] } (multi-turn) or the
 // legacy { question } shape. Returns a clean ModelMessage array, or a string
 // describing the validation error.
@@ -162,13 +167,23 @@ export default async function handler(req, res) {
       stopWhen: stepCountIs(5),
       maxOutputTokens: 1000,
       temperature: 0.65,
-      onError: ({ error }) => console.error('Groq tutor stream error:', error),
     });
 
-    // Streams plain text; the frontend renders chunks as they arrive. Errors
-    // mid-stream end the stream early — the client treats an empty body as a
-    // failed request.
-    result.pipeTextStreamToResponse(res);
+    // Stream plain text so the frontend renders chunks as they arrive. We pump
+    // the stream manually (rather than pipeTextStreamToResponse) so a mid-stream
+    // model/connection error can be surfaced to the client as a trailing
+    // sentinel instead of silently ending with a truncated answer.
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    try {
+      for await (const chunk of result.textStream) {
+        res.write(chunk);
+      }
+    } catch (streamErr) {
+      console.error('Groq tutor stream error:', streamErr);
+      res.write(STREAM_ERROR_MARKER);
+    }
+    return res.end();
   } catch (err) {
     console.error('Groq tutor error:', err);
 

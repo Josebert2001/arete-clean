@@ -1,15 +1,29 @@
 import { Link, useParams } from 'react-router-dom';
 import { CheckCircle2, Clock, ArrowRight } from 'lucide-react';
-import { getTrack } from '../data/trackConfig';
+import { useTrack } from '../data/useTrack';
 import { useProgress } from '../components/useProgress';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { usePageTitle } from '../utils/usePageTitle';
 
 export default function TrackModules() {
   const { lang } = useParams();
-  const track = getTrack(lang);
+  const { track, status } = useTrack(lang);
   const { isComplete, progress } = useProgress(track?.storageKey);
   usePageTitle(track ? `${track.label} Modules` : 'Track not found');
+
+  if (status === 'loading') {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-16 animate-pulse" role="status" aria-label="Loading modules">
+        <div className="h-4 w-48 bg-coffee-100 rounded mb-8" />
+        <div className="h-12 w-64 bg-coffee-100 rounded mb-4" />
+        <div className="h-4 w-full max-w-2xl bg-coffee-100 rounded mb-10" />
+        <div className="space-y-3">
+          {[0, 1, 2, 3].map(i => <div key={i} className="h-24 bg-coffee-100 rounded-xl" />)}
+        </div>
+        <span className="sr-only">Loading…</span>
+      </div>
+    );
+  }
 
   if (!track) {
     return (

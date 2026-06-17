@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, Code2, CheckSquare, Rocket, CheckCircle2, Circle, Lightbulb, Play } from 'lucide-react';
-import { getTrack } from '../data/trackConfig';
+import { useTrack } from '../data/useTrack';
 import { useProgress } from '../components/useProgress';
 import CodeBlock from '../components/CodeBlock';
 import CodePlayground from '../components/CodePlayground';
@@ -12,7 +12,7 @@ import { usePageTitle } from '../utils/usePageTitle';
 
 export default function TrackModuleDetail() {
   const { lang, id } = useParams();
-  const track = getTrack(lang);
+  const { track, status } = useTrack(lang);
   const [tab, setTab] = useState('theory');
 
   const mod = useMemo(() => track?.getModuleById(id), [track, id]);
@@ -33,6 +33,18 @@ export default function TrackModuleDetail() {
   }, [id, lang]);
 
   usePageTitle(track && mod ? `${mod.title} · ${track.label}` : 'Module not found');
+
+  if (status === 'loading') {
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-12 animate-pulse" role="status" aria-label="Loading module">
+        <div className="h-4 w-56 bg-coffee-100 rounded mb-8" />
+        <div className="h-12 w-2/3 bg-coffee-100 rounded mb-4" />
+        <div className="h-4 w-1/2 bg-coffee-100 rounded mb-10" />
+        <div className="h-72 bg-coffee-100 rounded-xl" />
+        <span className="sr-only">Loading…</span>
+      </div>
+    );
+  }
 
   if (!track || !mod) {
     return (

@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, User, Bot, ArrowRight } from 'lucide-react';
+import { Send, User, Bot, ArrowRight, Square } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useApiAvailability } from '../utils/apiClient';
-import { getAccessToken } from '../lib/supabase';
+import { streamTutor } from '../utils/tutorStream';
 import RichText from '../components/RichText';
 import { usePageTitle } from '../utils/usePageTitle';
 
 // Force the Coming Soon screen during local dev without removing the live
-// chat. The server also signals "not configured" at runtime (see askAI below).
+// chat. The server also signals "not configured" at runtime.
 const DEMO_MODE = false;
+
+const UNAVAILABLE_MESSAGE = 'The AI Tutor needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.';
 
 // Focus options grouped by track — each value is a ready-to-send context label.
 const FOCUS_GROUPS = Object.values(trackMeta).map(t => ({
@@ -19,58 +21,6 @@ const FOCUS_GROUPS = Object.values(trackMeta).map(t => ({
     value: `${t.label} — Module ${String(m.number).padStart(2, '0')}: ${m.title}`,
   })),
 }));
-
-// Sends the conversation and streams the reply. Success responses are plain
-// text streamed chunk by chunk (reported via onChunk with the accumulated
-// answer); JSON responses carry errors, rate limits, or the unconfigured flag.
-async function askAI(history, moduleContext, onChunk) {
-  const token = await getAccessToken();
-  let res;
-  try {
-    res = await fetch('/api/tutor', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ messages: history, moduleContext }),
-    });
-  } catch {
-    return { error: 'Network error — check your connection and try again.' };
-  }
-
-  const contentType = (res.headers.get('content-type') || '').toLowerCase();
-
-  if (contentType.includes('application/json')) {
-    const data = await res.json().catch(() => ({}));
-    return { ...data, responseStatus: res.status };
-  }
-
-  // Anything that isn't our text stream (e.g. Vite serving /api/* as static
-  // files during local dev) means the API routes aren't running.
-  if (!res.ok || !res.body || !contentType.includes('text/plain')) {
-    return { error: 'The AI Tutor needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.' };
-  }
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let answer = '';
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      answer += decoder.decode(value, { stream: true });
-      onChunk(answer);
-    }
-    answer += decoder.decode();
-  } catch {
-    // Connection dropped mid-stream — keep whatever arrived.
-  }
-
-  return answer.trim()
-    ? { answer }
-    : { error: 'No response received. Please try again.' };
-}
 
 // How many prior messages to send back as context (the model sees the rest
 // of the conversation through them; older turns are dropped to save tokens).
@@ -94,13 +44,18 @@ export default function AITutor() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [responding, setResponding] = useState(false);
   const [selectedModule, setSelectedModule] = useState('');
   const [comingSoon, setComingSoon] = useState(false);
   const availability = useApiAvailability('/api/tutor');
   const logRef = useRef(null);
   const stickToBottom = useRef(true);
   const inputRef = useRef(null);
+  const abortRef = useRef(null);
   const showComingSoon = DEMO_MODE || comingSoon || availability === 'unavailable';
+
+  // Abort any in-flight stream if the page unmounts.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   // Follow the stream only while the reader is already at the bottom — once
   // they scroll up to re-read, stop yanking the view down on every chunk.
@@ -125,7 +80,7 @@ export default function AITutor() {
 
   const send = async (text) => {
     const question = (text || input).trim();
-    if (!question || loading) return;
+    if (!question || responding) return;
 
     // Conversation history for the API — skip the canned greeting at index 0
     // and any error bubbles (they are UI feedback, not part of the dialogue).
@@ -140,7 +95,11 @@ export default function AITutor() {
     setMessages(m => [...m, { role: 'user', text: question }]);
     setInput('');
     setLoading(true);
+    setResponding(true);
     stickToBottom.current = true;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     let streaming = false;
     const onChunk = (partial) => {
@@ -154,12 +113,26 @@ export default function AITutor() {
     };
 
     try {
-      const data = await askAI(history, selectedModule, onChunk);
+      const data = await streamTutor({
+        messages: history,
+        moduleContext: selectedModule,
+        signal: controller.signal,
+        onChunk,
+        unavailableMessage: UNAVAILABLE_MESSAGE,
+      });
+      if (data.aborted) return;          // user stopped — keep the partial answer
       if (data.notConfigured) {
         setComingSoon(true);
         return;
       }
       if (data.error) throw new Error(data.error);
+      if (data.truncated) {
+        setMessages(m => [...m, {
+          role: 'bot',
+          text: 'That answer was cut off — the AI hit an error mid-response. Send again to retry.',
+          error: true,
+        }]);
+      }
       // Streamed answer is already rendered via onChunk.
     } catch (e) {
       const text = e?.message && e.message !== 'Request failed'
@@ -168,8 +141,12 @@ export default function AITutor() {
       setMessages(m => [...m, { role: 'bot', text, error: true }]);
     } finally {
       setLoading(false);
+      setResponding(false);
+      abortRef.current = null;
     }
   };
+
+  const stop = () => abortRef.current?.abort();
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
@@ -256,6 +233,8 @@ export default function AITutor() {
                     <div className={`rounded-xl px-4 py-3 text-sm leading-relaxed text-left ${
                       m.role === 'user'
                         ? 'bg-ember-500 text-cream rounded-tr-sm whitespace-pre-wrap'
+                        : m.error
+                        ? 'bg-red-50 border border-red-200 text-red-700 rounded-tl-sm'
                         : 'bg-cream border border-coffee-200 text-ink rounded-tl-sm'
                     }`}>
                       {m.role === 'user' ? m.text : <RichText text={m.text} />}
@@ -314,14 +293,24 @@ export default function AITutor() {
                 aria-label="Ask a programming or CS question"
                 className="flex-1 resize-none bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
               />
-              <button
-                onClick={() => send()}
-                disabled={loading || !input.trim()}
-                aria-label="Send message"
-                className="btn-primary w-full justify-center px-4 disabled:opacity-40 disabled:cursor-not-allowed sm:w-auto"
-              >
-                <Send size={16} />
-              </button>
+              {responding ? (
+                <button
+                  onClick={stop}
+                  aria-label="Stop response"
+                  className="btn-ghost w-full justify-center px-4 sm:w-auto"
+                >
+                  <Square size={15} /> Stop
+                </button>
+              ) : (
+                <button
+                  onClick={() => send()}
+                  disabled={!input.trim()}
+                  aria-label="Send message"
+                  className="btn-primary w-full justify-center px-4 disabled:opacity-40 disabled:cursor-not-allowed sm:w-auto"
+                >
+                  <Send size={16} />
+                </button>
+              )}
             </div>
           </div>
         </>

@@ -1,54 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, User, ChevronDown, ChevronUp } from 'lucide-react';
-import { getAccessToken } from '../lib/supabase';
+import { Bot, Send, User, ChevronDown, ChevronUp, Square } from 'lucide-react';
+import { streamTutor } from '../utils/tutorStream';
 import RichText from './RichText';
 
 const HISTORY_LIMIT = 12;
-
-async function askAI(history, moduleContext, onChunk) {
-  const token = await getAccessToken();
-  let res;
-  try {
-    res = await fetch('/api/tutor', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ messages: history, moduleContext }),
-    });
-  } catch {
-    return { error: 'Network error — check your connection and try again.' };
-  }
-
-  const contentType = (res.headers.get('content-type') || '').toLowerCase();
-
-  if (contentType.includes('application/json')) {
-    const data = await res.json().catch(() => ({}));
-    return { ...data, responseStatus: res.status };
-  }
-
-  if (!res.ok || !res.body || !contentType.includes('text/plain')) {
-    return { error: 'AI Tutor is not available right now.' };
-  }
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let answer = '';
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      answer += decoder.decode(value, { stream: true });
-      onChunk(answer);
-    }
-    answer += decoder.decode();
-  } catch {
-    // keep whatever arrived
-  }
-
-  return answer.trim() ? { answer } : { error: 'No response received. Please try again.' };
-}
 
 export default function CourseAIChat({ course }) {
   const moduleContext = `${course.code} — ${course.title}`;
@@ -61,9 +16,14 @@ export default function CourseAIChat({ course }) {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [responding, setResponding] = useState(false);
   const logRef = useRef(null);
   const inputRef = useRef(null);
   const stickToBottom = useRef(true);
+  const abortRef = useRef(null);
+
+  // Abort any in-flight stream if the component unmounts.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const prompts = [
     `What are the key topics I must know for ${course.code}?`,
@@ -91,7 +51,7 @@ export default function CourseAIChat({ course }) {
 
   const send = async (text) => {
     const question = (text || input).trim();
-    if (!question || loading) return;
+    if (!question || responding) return;
 
     const history = [
       ...messages.slice(1).filter(m => !m.error).map(m => ({
@@ -104,7 +64,11 @@ export default function CourseAIChat({ course }) {
     setMessages(m => [...m, { role: 'user', text: question }]);
     setInput('');
     setLoading(true);
+    setResponding(true);
     stickToBottom.current = true;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     let streaming = false;
     const onChunk = (partial) => {
@@ -118,9 +82,22 @@ export default function CourseAIChat({ course }) {
     };
 
     try {
-      const data = await askAI(history, moduleContext, onChunk);
+      const data = await streamTutor({
+        messages: history,
+        moduleContext,
+        signal: controller.signal,
+        onChunk,
+      });
+      if (data.aborted) return;          // user stopped — keep the partial answer
       if (data.notConfigured || data.error) {
         throw new Error(data.error || 'AI Tutor is not available right now.');
+      }
+      if (data.truncated) {
+        setMessages(m => [...m, {
+          role: 'bot',
+          text: 'That answer was cut off — the AI hit an error mid-response. Send again to retry.',
+          error: true,
+        }]);
       }
     } catch (e) {
       const errText = e?.message && e.message !== 'Request failed'
@@ -129,8 +106,12 @@ export default function CourseAIChat({ course }) {
       setMessages(m => [...m, { role: 'bot', text: errText, error: true }]);
     } finally {
       setLoading(false);
+      setResponding(false);
+      abortRef.current = null;
     }
   };
+
+  const stop = () => abortRef.current?.abort();
 
   return (
     <div className="border border-coffee-200 rounded-xl overflow-hidden bg-paper">
@@ -246,14 +227,24 @@ export default function CourseAIChat({ course }) {
               aria-label="Ask the AI about this course"
               className="flex-1 resize-none bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
             />
-            <button
-              onClick={() => send()}
-              disabled={loading || !input.trim()}
-              aria-label="Send message"
-              className="p-2.5 rounded-lg bg-ink text-cream hover:bg-coffee-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-            >
-              <Send size={15} />
-            </button>
+            {responding ? (
+              <button
+                onClick={stop}
+                aria-label="Stop response"
+                className="p-2.5 rounded-lg bg-ink text-cream hover:bg-coffee-700 transition-colors shrink-0"
+              >
+                <Square size={15} />
+              </button>
+            ) : (
+              <button
+                onClick={() => send()}
+                disabled={!input.trim()}
+                aria-label="Send message"
+                className="p-2.5 rounded-lg bg-ink text-cream hover:bg-coffee-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              >
+                <Send size={15} />
+              </button>
+            )}
           </div>
         </div>
       )}

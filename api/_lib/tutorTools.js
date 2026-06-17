@@ -26,6 +26,19 @@ function getAnonDb() {
 const MAX_NOTE_CHARS = 6_000;
 const MAX_NOTES = 3;
 
+// display_name/description are set by students at upload time. Strip newlines,
+// "=" (so a crafted name can't forge a "=== ... ===" note boundary), and
+// control chars before interpolating them into the note header.
+function sanitizeLabel(value) {
+  return String(value || '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/=/g, '')
+    // eslint-disable-next-line no-control-regex -- deliberately strip control chars to block prompt injection
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .slice(0, 120)
+    .trim();
+}
+
 const TRACK_BY_STORAGE_KEY = Object.fromEntries(
   Object.values(trackMeta).map(t => [t.storageKey, t])
 );
@@ -115,7 +128,9 @@ export function buildTutorTools(student) {
 
         const notes = data
           .map(m => {
-            const label = m.description ? `${m.display_name} — ${m.description}` : m.display_name;
+            const name = sanitizeLabel(m.display_name) || 'Untitled note';
+            const desc = sanitizeLabel(m.description);
+            const label = desc ? `${name} — ${desc}` : name;
             const body = m.extracted_text.slice(0, MAX_NOTE_CHARS);
             const truncated = m.extracted_text.length > MAX_NOTE_CHARS ? ' [truncated]' : '';
             return `=== Uploaded note: ${label}${truncated} ===\n${body}`;
