@@ -151,9 +151,9 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "https://arete-clean.vercel.app"
+site_url = "https://www.aretecyb.tech"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://arete-clean.vercel.app", "http://localhost:3000", "http://127.0.0.1:3000"]
+additional_redirect_urls = ["https://www.aretecyb.tech", "http://localhost:5173", "http://127.0.0.1:5173"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).
@@ -221,10 +221,17 @@ enable_confirmations = true
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
 max_frequency = "1m0s"
-# Number of characters used in the email OTP.
-otp_length = 8
+# Number of characters used in the email OTP. Must stay 6 to match the SignIn
+# code-entry UI (src/pages/SignIn.jsx requires exactly 6 digits).
+otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
+
+# Email a 6-digit code (via {{ .Token }}) instead of a magic link — the app's
+# sign-in flow asks the user to type this code.
+[auth.email.template.magic_link]
+subject = "Your Arete sign-in code"
+content_path = "./supabase/templates/magic_link.html"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
