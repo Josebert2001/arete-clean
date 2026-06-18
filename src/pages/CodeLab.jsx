@@ -21,9 +21,9 @@ function PythonMark() {
   return (
     <svg viewBox="0 0 64 64" className="w-7 h-7" aria-hidden>
       <path d="M22 10 h14 c4 0 7 3 7 7 v10 h-18 c-3 0 -5 2 -5 5 v6 h-4 c-4 0 -6 -3 -6 -7 v-14 c0 -4 3 -7 7 -7 z" fill="currentColor" opacity="0.85" />
-      <circle cx="26" cy="16" r="2" fill="#FAF4EA" />
+      <circle cx="26" cy="16" r="2" fill="#FAF6EC" />
       <path d="M42 54 h-14 c-4 0 -7 -3 -7 -7 v-10 h18 c3 0 5 -2 5 -5 v-6 h4 c4 0 6 3 6 7 v14 c0 4 -3 7 -7 7 z" fill="currentColor" opacity="0.6" />
-      <circle cx="38" cy="48" r="2" fill="#FAF4EA" />
+      <circle cx="38" cy="48" r="2" fill="#FAF6EC" />
     </svg>
   );
 }

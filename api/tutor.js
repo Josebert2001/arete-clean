@@ -99,6 +99,48 @@ function normalizeMessages(body) {
   return [{ role: 'user', content: question }];
 }
 
+// Strip newlines, brackets, and control chars before interpolating profile
+// values into the system prompt — same injection guard used for moduleContext.
+function sanitizeContextValue(value, max = 60) {
+  return String(value || '')
+    .replace(/[\r\n[\]]/g, ' ')
+    // eslint-disable-next-line no-control-regex -- deliberately strip control chars to block prompt injection
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .slice(0, max)
+    .trim();
+}
+
+// Builds the STUDENT CONTEXT line for a signed-in student, enriched with their
+// profile (first name + level) so the tutor can address them naturally and
+// pitch explanations at the right year. The profile read is RLS-scoped to the
+// student's own row; a lookup failure is non-fatal — we fall back to email only.
+async function buildStudentContext(student) {
+  let profile = null;
+  try {
+    const { data } = await student.db
+      .from('profiles')
+      .select('full_name, level')
+      .eq('id', student.user.id)
+      .maybeSingle();
+    profile = data || null;
+  } catch {
+    // Profile is optional enrichment — ignore and continue with email only.
+  }
+
+  const firstName = profile?.full_name ? sanitizeContextValue(profile.full_name).split(/\s+/)[0] : '';
+  const level = profile?.level ? sanitizeContextValue(profile.level, 12) : '';
+
+  const identity = [
+    firstName && `their name is ${firstName}`,
+    level && `they are a ${level} student`,
+  ].filter(Boolean).join(', ');
+
+  const email = student.user.email || 'no email on record';
+  return `\n\nSTUDENT CONTEXT: The student is signed in (${email}).${
+    identity ? ` Personalise to them — ${identity}; address them by first name when it fits naturally, and calibrate depth to their level.` : ''
+  } Their saved module progress and quiz scores are available through the getStudentProgress tool.`;
+}
+
 export default async function handler(req, res) {
   applyApiHeaders(res);
 
@@ -156,7 +198,7 @@ export default async function handler(req, res) {
 
     const student = await getStudentFromRequest(req);
     const studentContext = student
-      ? `\n\nSTUDENT CONTEXT: The student is signed in (${student.user.email || 'no email on record'}). Their saved module progress and quiz scores are available through the getStudentProgress tool.`
+      ? await buildStudentContext(student)
       : '\n\nSTUDENT CONTEXT: The student is browsing anonymously, so no saved progress is available. If they ask about tracking or saving progress, mention that signing in keeps it synced across devices.';
 
     const result = streamText({

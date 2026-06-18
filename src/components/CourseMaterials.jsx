@@ -211,7 +211,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
           user ? (
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-sm font-semibold text-cream transition-colors hover:bg-ink/90 sm:self-start"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-sm font-semibold text-cream transition-colors hover:bg-coffee-700 sm:self-start"
             >
               <Upload size={13} />
               Upload
@@ -315,7 +315,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
           <button
             type="submit"
             disabled={uploading || !file}
-            className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-ink text-cream text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-ink text-cream text-sm font-semibold rounded-lg hover:bg-coffee-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading ? (
               <>

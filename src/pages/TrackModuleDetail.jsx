@@ -158,11 +158,11 @@ export default function TrackModuleDetail() {
             {mod.codeExamples.map((ex, i) => (
               <div key={i}>
                 <h3 className="font-display text-lg font-bold text-ink mb-1 flex items-center gap-2">
-                  <span className="text-coffee-400 font-mono text-sm">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="text-coffee-500 font-mono text-sm">{String(i + 1).padStart(2, '0')}</span>
                   {ex.title}
                 </h3>
                 <CodeBlock code={ex.code} language={track.language} />
-                <div className="bg-coffee-50 rounded-r-lg p-4 mt-2" style={{ borderLeft: '3px solid #8E5A1F' }}>
+                <div className="bg-coffee-50 border-l-[3px] border-coffee-500 rounded-r-lg p-4 mt-2">
                   <p className="text-sm text-coffee-700 leading-relaxed">
                     <span className="font-bold text-ink">What's happening: </span>
                     {ex.explanation}
@@ -222,7 +222,7 @@ export default function TrackModuleDetail() {
               <ul className="space-y-3">
                 {mod.miniProject.hints.map((hint, i) => (
                   <li key={i} className="flex gap-3 text-sm text-coffee-700">
-                    <span className="font-mono text-coffee-400 flex-shrink-0">{i + 1}.</span>
+                    <span className="font-mono text-coffee-500 flex-shrink-0">{i + 1}.</span>
                     <span className="leading-relaxed">{hint}</span>
                   </li>
                 ))}

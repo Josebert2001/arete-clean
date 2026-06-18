@@ -148,7 +148,7 @@ export default function CodeExplainer() {
               'Suggestions for cleaner alternatives',
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-coffee-700">
-                <span className="font-mono text-coffee-400 shrink-0 pt-0.5">{String(i + 1).padStart(2, '0')}</span>
+                <span className="font-mono text-coffee-500 shrink-0 pt-0.5">{String(i + 1).padStart(2, '0')}</span>
                 {item}
               </li>
             ))}

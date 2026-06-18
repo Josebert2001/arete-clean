@@ -44,8 +44,13 @@ export function AuthProvider({ children }) {
       loadProfile(u);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null;
+      // Mark a genuine sign-in (not a session restore on reload, which fires
+      // INITIAL_SESSION) so AuthStateWatcher can resume the user one time.
+      if (event === 'SIGNED_IN') {
+        try { sessionStorage.setItem('arete-just-signed-in', '1'); } catch { /* private mode — skip resume */ }
+      }
       setUser(u);
       if (!u) { setProfile(null); setProfileLoading(false); }
       else loadProfile(u);

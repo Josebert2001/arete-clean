@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { recordLocation, readLastLocation } from './utils/lastLocation';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -62,19 +63,45 @@ function ScrollToTop() {
   return null;
 }
 
-// Redirects signed-in users with no profile to /setup-profile from any page.
+// Records the current study page so a returning user can resume it next login.
+function LastLocationTracker() {
+  const { pathname } = useLocation();
+  useEffect(() => { recordLocation(pathname); }, [pathname]);
+  return null;
+}
+
+const AUTH_PAGES = ['/signin', '/setup-profile', '/welcome'];
+
+// After a fresh sign-in, sends returning users back to where they left off
+// (instead of the landing page); also forces profile setup when incomplete.
 function AuthStateWatcher() {
   const { user, profileComplete, authLoading, profileLoading } = useAuth();
   const navigate  = useNavigate();
   const { pathname } = useLocation();
-  const authPages = ['/signin', '/setup-profile', '/welcome'];
 
   useEffect(() => {
     if (authLoading || profileLoading) return;
-    if (user && !profileComplete && !authPages.includes(pathname)) {
+
+    // One-shot resume after a real sign-in (flag set in AuthContext). Only act
+    // when the user landed on the home/sign-in page so a spurious SIGNED_IN
+    // while reading a page can never yank them away mid-study.
+    let justSignedIn = false;
+    try { justSignedIn = sessionStorage.getItem('arete-just-signed-in') === '1'; } catch { /* ignore */ }
+    if (justSignedIn) {
+      try { sessionStorage.removeItem('arete-just-signed-in'); } catch { /* ignore */ }
+      if (user && profileComplete && (pathname === '/' || pathname === '/signin')) {
+        const target = readLastLocation();
+        if (target && target !== pathname) {
+          navigate(target, { replace: true });
+          return;
+        }
+      }
+    }
+
+    if (user && !profileComplete && !AUTH_PAGES.includes(pathname)) {
       navigate('/setup-profile', { replace: true });
     }
-  }, [user, profileComplete, authLoading, profileLoading, pathname]);
+  }, [user, profileComplete, authLoading, profileLoading, pathname, navigate]);
 
   return null;
 }
@@ -123,6 +150,7 @@ export default function App() {
         Skip to content
       </a>
       <ScrollToTop />
+      <LastLocationTracker />
       <AuthStateWatcher />
       <Navbar />
       <main id="main" className="flex-1 relative z-10">

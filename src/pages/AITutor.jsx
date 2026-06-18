@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, User, Bot, ArrowRight, Square } from 'lucide-react';
+import { Send, User, Bot, ArrowRight, Square, Plus } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useApiAvailability } from '../utils/apiClient';
 import { streamTutor } from '../utils/tutorStream';
@@ -37,11 +37,23 @@ const SUGGESTED = [
   'What is Big-O notation, in plain English?',
 ];
 
+const GREETING = { role: 'bot', text: "Hi! I'm your Arete tutor. I know the full B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks (Java, Python, C), cryptography, networking, ethical hacking, digital forensics, and more. Ask me anything. What are you working on?" };
+
+// Persist the conversation for the browser session so a reload doesn't wipe it.
+const CHAT_STORAGE_KEY = 'arete-tutor-chat-v1';
+
+function loadStoredMessages() {
+  try {
+    const raw = sessionStorage.getItem(CHAT_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(parsed) && parsed.length) return parsed;
+  } catch { /* sessionStorage unavailable or corrupt — fall back to greeting */ }
+  return [GREETING];
+}
+
 export default function AITutor() {
   usePageTitle('AI Tutor');
-  const [messages, setMessages] = useState([
-    { role: 'bot', text: "Hi! I'm your Arete tutor. I know the full B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks (Java, Python, C), cryptography, networking, ethical hacking, digital forensics, and more. Ask me anything. What are you working on?" }
-  ]);
+  const [messages, setMessages] = useState(loadStoredMessages);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [responding, setResponding] = useState(false);
@@ -56,6 +68,20 @@ export default function AITutor() {
 
   // Abort any in-flight stream if the page unmounts.
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  // Persist the conversation across reloads within the session.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    } catch { /* storage full or unavailable — non-fatal */ }
+  }, [messages]);
+
+  const newChat = () => {
+    abortRef.current?.abort();
+    setMessages([GREETING]);
+    setInput('');
+    try { sessionStorage.removeItem(CHAT_STORAGE_KEY); } catch { /* non-fatal */ }
+  };
 
   // Follow the stream only while the reader is already at the bottom — once
   // they scroll up to re-read, stop yanking the view down on every chunk.
@@ -150,11 +176,22 @@ export default function AITutor() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
-      <div className="mb-8">
-        <h1 className="display-heading text-5xl text-ink mb-3">AI Tutor</h1>
-        <p className="text-lg text-coffee-700">
-          Stuck on a concept or an error? Ask in plain English and get a clear explanation.
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="display-heading text-5xl text-ink mb-3">AI Tutor</h1>
+          <p className="text-lg text-coffee-700">
+            Stuck on a concept or an error? Ask in plain English and get a clear explanation.
+          </p>
+        </div>
+        {!showComingSoon && messages.length > 1 && (
+          <button
+            onClick={newChat}
+            className="btn-ghost text-sm shrink-0"
+            aria-label="Start a new chat"
+          >
+            <Plus size={15} /> New chat
+          </button>
+        )}
       </div>
 
       {showComingSoon ? (
@@ -175,7 +212,7 @@ export default function AITutor() {
               'Get unstuck on mini projects without spoiling the answer',
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-coffee-700">
-                <span className="font-mono text-coffee-400 shrink-0 pt-0.5">{String(i + 1).padStart(2, '0')}</span>
+                <span className="font-mono text-coffee-500 shrink-0 pt-0.5">{String(i + 1).padStart(2, '0')}</span>
                 {item}
               </li>
             ))}

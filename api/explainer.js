@@ -1,6 +1,7 @@
 // ============================================================================
 //  Arete — Code Explainer Serverless Function (Vercel)
-//  Sends pasted Java code to Groq and returns a plain-English breakdown.
+//  Sends pasted code (Java, Python, C, or C++) to Groq and returns a
+//  plain-English breakdown.
 //
 //  Uses the same GROQ_API_KEY environment variable as api/tutor.js.
 // ============================================================================

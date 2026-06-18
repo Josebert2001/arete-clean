@@ -205,7 +205,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
               lineHeight: '1.6',
               color: kind === 'success' ? 'var(--syntax-str)'
                 : kind === 'not_configured' || kind === 'limit' ? 'var(--syntax-num)'
-                  : kind === 'compile_error' || kind === 'runtime_error' ? '#E8927C'
+                  : kind === 'compile_error' || kind === 'runtime_error' ? 'var(--syntax-err)'
                     : 'var(--cream)',
             }}
           >

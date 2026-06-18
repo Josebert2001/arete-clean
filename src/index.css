@@ -17,6 +17,7 @@
   --syntax-com:   #7A7268;
   --syntax-fn:    #F0E4CD;
   --syntax-plain: #F5EFE0;
+  --syntax-err:   #E8927C;
 }
 
 * {

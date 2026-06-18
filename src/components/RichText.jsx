@@ -58,10 +58,10 @@ function parseBlocks(text) {
       continue;
     }
 
-    // Heading
-    const heading = line.match(/^#{1,6}\s+(.*)$/);
+    // Heading — keep the level so #/##/### render at distinct sizes.
+    const heading = line.match(/^(#{1,6})\s+(.*)$/);
     if (heading) {
-      blocks.push({ type: 'heading', text: heading[1] });
+      blocks.push({ type: 'heading', level: heading[1].length, text: heading[2] });
       i++;
       continue;
     }
@@ -161,8 +161,9 @@ export default function RichText({ text }) {
           );
         }
         if (block.type === 'heading') {
+          const sizeClass = block.level <= 1 ? 'text-lg' : block.level === 2 ? 'text-base' : 'text-sm';
           return (
-            <p key={i} className="font-display font-bold text-ink pt-1">
+            <p key={i} className={`font-display font-bold text-ink pt-1 ${sizeClass}`}>
               <InlineText text={block.text} />
             </p>
           );

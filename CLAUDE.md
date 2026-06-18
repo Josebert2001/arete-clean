@@ -17,6 +17,8 @@ Arete is an interactive learning platform for B.Sc. Cybersecurity students at th
 npm run dev        # start Vite dev server on :5173
 npm run build      # prebuild validates modules, then builds
 npm run lint       # ESLint
+npm test           # run the Vitest suite once (CI uses this)
+npm run test:watch # run Vitest in watch mode
 vercel dev         # needed for /api/* endpoints locally
 node scripts/validate-modules.mjs  # validate module data structure
 ```
@@ -38,7 +40,7 @@ Browser → React SPA (Vite)
            ├── useProgress hook (localStorage + Supabase dual sync, 1s debounce)
            └── /api/* (Vercel serverless)
                 ├── api/tutor.js   → Groq streaming (AI Tutor, rate: 8/10min/IP)
-                ├── api/explainer.js → Groq (Code Explainer, rate: 10/10min/IP)
+                ├── api/explainer.js → Groq (Code Explainer, rate: 8/10min/IP)
                 └── api/run.js     → JDoodle (code execution, 20 runs/day free)
 ```
 
@@ -98,8 +100,13 @@ For Supabase setup script only: also need `SUPABASE_SERVICE_ROLE_KEY` and `SUPAB
 - `vercel.json` CSP/CORS headers — security-critical, confirm before changing
 - `.env.local` and any `.env.*` files — never read or write secret values
 
-## No Tests — Important Context
-There are currently no test files in this project. When writing new logic, note this gap and offer to add a test if the function is testable in isolation. Do not add a full test framework without asking first.
+## Testing — Important Context
+The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-library/react` available for component tests.
+- Config: `vitest.config.js` · setup file: `src/__tests__/setup.js` (imports `@testing-library/jest-dom`)
+- Test files live in `src/__tests__/` as `*.test.js`. Current coverage is thin — `useProgress.test.js` (the progress hook) is the only suite so far.
+- Run with `npm test` (single run) or `npm run test:watch`. CI runs `npm test` on every push.
+- When writing new logic, add or extend a test if the function is testable in isolation — coverage beyond `useProgress` is still missing, so most of the app is untested.
+- Do not add new test tooling (e.g. coverage providers, Playwright) without asking first.
 
 ## Common Tasks
 - **Adding a module:** Edit the relevant data file (`modules.js`, `pythonModules.js`, `cModules.js`), run `npm run validate` to confirm structure

@@ -18,7 +18,7 @@ Every external service this project calls. Check here before adding any new API 
   return result.toDataStreamResponse();
   ```
 - **What NOT to do:** Never call Groq directly from the browser; never expose `GROQ_API_KEY` in `VITE_*` env vars; don't use a different model without confirming it's available on the free Groq plan
-- **Rate limits:** In-memory IP rate limiting applied in each API function — tutor: 8 req/10min/IP; explainer: 10 req/10min/IP
+- **Rate limits:** In-memory IP rate limiting applied in each API function — tutor: 8 req/10min/IP; explainer: 8 req/10min/IP
 
 ---
 
@@ -39,7 +39,7 @@ Every external service this project calls. Check here before adding any new API 
     })
   });
   ```
-  Language/version strings: `java`/`4`, `c`/`5`, `cpp17`/`1`, `python3`/`4`
+  Language/version strings (verified 2026-03-26, see api/run.js): `java`/`6`, `c`/`7`, `cpp17`/`3`, `python3`/`6`
 - **What NOT to do:** Never expose `JDOODLE_CLIENT_ID` or `JDOODLE_CLIENT_SECRET` to the browser; don't add new language version strings without checking JDoodle's current version list; don't remove the 10 runs/10min/IP rate limit
 - **Cost/rate limits:** Free plan = **20 executions/day** across all users — this is a hard shared limit. Treat it as precious.
 

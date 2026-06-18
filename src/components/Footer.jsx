@@ -31,11 +31,17 @@ export default function Footer() {
 
           <div>
             <h4 className="font-display font-bold text-ink mb-3">Built by</h4>
-            <p className="text-sm text-coffee-700 leading-relaxed">
-              <span className="font-medium text-ink">Josebert</span><br/>
-              Director of Software & Hardware<br/>
-              Cybersecurity Dept., UniUyo
-            </p>
+            <div className="space-y-3 text-sm text-coffee-700 leading-relaxed">
+              <p>
+                <span className="font-medium text-ink">Josebert</span><br/>
+                Director of Software & Hardware
+              </p>
+              <p>
+                <span className="font-medium text-ink">Barry</span><br/>
+                Director of Academic
+              </p>
+              <p className="text-coffee-600">Cybersecurity Dept., UniUyo</p>
+            </div>
           </div>
         </div>
 
