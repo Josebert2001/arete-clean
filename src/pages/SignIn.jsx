@@ -13,9 +13,13 @@ const VALUE_PROPS = [
 
 export default function SignIn() {
   usePageTitle('Sign In');
-  const { user, profileComplete, authLoading, signInWithEmail } = useAuth();
+  const { user, profileComplete, authLoading, signInWithEmail, verifyEmailOtp } = useAuth();
   const [email,  setEmail]  = useState('');
+  const [code,   setCode]   = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const [verifying,   setVerifying]   = useState(false);
+  const [resending,   setResending]   = useState(false);
+  const [verifyError, setVerifyError] = useState('');
 
   if (!authLoading && user && profileComplete)  return <Navigate to="/" replace />;
   if (!authLoading && user && !profileComplete) return <Navigate to="/setup-profile" replace />;
@@ -27,6 +31,32 @@ export default function SignIn() {
     setStatus('sending');
     const { error } = await signInWithEmail(trimmed);
     setStatus(error ? 'error' : 'sent');
+  };
+
+  const verify = async (e) => {
+    e.preventDefault();
+    const token = code.trim();
+    if (token.length !== 6 || verifying) return;
+    setVerifying(true);
+    setVerifyError('');
+    const { error } = await verifyEmailOtp(email.trim(), token);
+    if (error) {
+      setVerifyError('That code is invalid or expired — check it or request a new one.');
+      setVerifying(false);
+      return;
+    }
+    // Success: auth state updates and the redirects above (plus the resume
+    // watcher) take over; keep "Verifying…" until this component unmounts.
+  };
+
+  const resend = async () => {
+    if (resending) return;
+    setResending(true);
+    setCode('');
+    setVerifyError('');
+    const { error } = await signInWithEmail(email.trim());
+    if (error) setVerifyError('Could not resend the code — try again in a moment.');
+    setResending(false);
   };
 
   return (
@@ -79,35 +109,74 @@ export default function SignIn() {
         </Link>
 
         {status === 'sent' ? (
-          /* ── Email sent state ── */
+          /* ── Code entry state ── */
           <div className="animate-fade-in">
             <div className="w-12 h-12 rounded-2xl bg-moss/10 border border-moss/20 flex items-center justify-center mb-8">
               <Mail size={22} className="text-moss" />
             </div>
-            <h1 className="font-display text-3xl font-bold text-ink mb-3">Check your email.</h1>
+            <h1 className="font-display text-3xl font-bold text-ink mb-3">Enter your code.</h1>
             <p className="text-coffee-700 leading-relaxed mb-8">
-              We sent a sign-in link to{' '}
+              We sent a 6-digit code to{' '}
               <span className="font-semibold text-ink">{email}</span>.
-              Open it on this device to finish signing in.
-              The link expires in 1 hour.
+              Enter it below to sign in. The code expires in 1 hour.
             </p>
-            <div className="flex items-start gap-3 px-4 py-3.5 bg-cream border border-coffee-200 rounded-2xl text-sm text-coffee-700 mb-8">
-              <CheckCircle2 size={16} className="text-coffee-400 mt-0.5 shrink-0" />
-              No password needed — ever. Just click the link in your email.
+
+            <form onSubmit={verify} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-coffee-700 mb-2">
+                  6-digit code
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  maxLength={6}
+                  value={code}
+                  onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  autoFocus
+                  className="w-full px-4 py-3.5 text-center text-lg font-mono tracking-[0.5em] bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
+                />
+              </div>
+
+              {verifyError && (
+                <p className="text-xs text-rust leading-relaxed">{verifyError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={verifying || code.length !== 6}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-ink text-cream text-sm font-semibold hover:bg-coffee-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <CheckCircle2 size={15} />
+                {verifying ? 'Verifying…' : 'Verify & sign in'}
+              </button>
+            </form>
+
+            <div className="flex items-center gap-4 mt-6 text-sm">
+              <button
+                onClick={resend}
+                disabled={resending}
+                className="text-coffee-600 hover:text-ink underline underline-offset-2 transition-colors disabled:opacity-50"
+              >
+                {resending ? 'Resending…' : 'Resend code'}
+              </button>
+              <span className="text-coffee-300" aria-hidden>·</span>
+              <button
+                onClick={() => { setStatus('idle'); setEmail(''); setCode(''); setVerifyError(''); }}
+                className="text-coffee-600 hover:text-ink underline underline-offset-2 transition-colors"
+              >
+                Use a different email
+              </button>
             </div>
-            <button
-              onClick={() => { setStatus('idle'); setEmail(''); }}
-              className="text-sm text-coffee-600 hover:text-ink underline underline-offset-2 transition-colors"
-            >
-              Use a different email
-            </button>
           </div>
         ) : (
           /* ── Sign-in form ── */
           <div>
             <h1 className="font-display text-4xl font-bold text-ink mb-2">Welcome.</h1>
             <p className="text-coffee-700 mb-10 leading-relaxed">
-              Enter your email and we'll send you a sign-in link.
+              Enter your email and we'll send you a 6-digit sign-in code.
               No password. No fuss.
             </p>
 
@@ -140,7 +209,7 @@ export default function SignIn() {
                 className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-ink text-cream text-sm font-semibold hover:bg-coffee-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Mail size={15} />
-                {status === 'sending' ? 'Sending…' : 'Send sign-in link'}
+                {status === 'sending' ? 'Sending…' : 'Send sign-in code'}
               </button>
             </form>
 

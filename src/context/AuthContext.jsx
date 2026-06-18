@@ -9,6 +9,7 @@ const AuthContext = createContext({
   profileComplete: false,
   authEnabled: false,
   signInWithEmail: async () => {},
+  verifyEmailOtp: async () => {},
   signOut: async () => {},
   refreshProfile: async () => {},
 });
@@ -59,11 +60,17 @@ export function AuthProvider({ children }) {
     return () => sub.subscription.unsubscribe();
   }, [loadProfile]);
 
+  // Passwordless sign-in via a 6-digit email code (not a magic link). The code
+  // is shown only if the Supabase "Magic Link" email template includes the
+  // {{ .Token }} variable; the user then enters it via verifyEmailOtp.
   const signInWithEmail = (email) =>
     supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: { shouldCreateUser: true },
     });
+
+  const verifyEmailOtp = (email, token) =>
+    supabase.auth.verifyOtp({ email, token, type: 'email' });
 
   const signOut = () => supabase.auth.signOut();
 
@@ -78,6 +85,7 @@ export function AuthProvider({ children }) {
       profileComplete: !!profile,
       authEnabled: isConfigured,
       signInWithEmail,
+      verifyEmailOtp,
       signOut,
       refreshProfile,
     }}>
