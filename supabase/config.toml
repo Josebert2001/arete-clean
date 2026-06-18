@@ -228,10 +228,16 @@ otp_length = 6
 otp_expiry = 3600
 
 # Email a 6-digit code (via {{ .Token }}) instead of a magic link — the app's
-# sign-in flow asks the user to type this code.
+# sign-in flow asks the user to type this code. magic_link is sent to existing
+# users; confirmation is sent on a new user's first sign-in (signup). Both must
+# show the code, or first-time users get a link they can't use in the code UI.
 [auth.email.template.magic_link]
 subject = "Your Arete sign-in code"
 content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Confirm your email — your Arete code"
+content_path = "./supabase/templates/confirmation.html"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
