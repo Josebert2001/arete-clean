@@ -20,20 +20,20 @@ const GOLD = [0xcf, 0xa6, 0x65];
 const EMBER = [0xe0, 0x7a, 0x2c];
 
 // Stroke segments in the 32x32 SVG coordinate space.
-const A_W = 2.6;
-const PLUS_W = 2.4;
+const A_W = 3.0;
+const PLUS_W = 2.9;
 const strokes = [
   // The "A": left leg -> apex -> right leg, then the crossbar.
-  { pts: [[7.5, 24], [13.5, 8]], w: A_W, color: GOLD },
-  { pts: [[13.5, 8], [19.5, 24]], w: A_W, color: GOLD },
-  { pts: [[9.4, 19], [17.6, 19]], w: A_W, color: GOLD },
-  // The "+".
-  { pts: [[23.7, 10.5], [28.3, 10.5]], w: PLUS_W, color: EMBER },
-  { pts: [[26, 8.2], [26, 12.8]], w: PLUS_W, color: EMBER },
+  { pts: [[6.5, 25.5], [13.5, 6.5]], w: A_W, color: GOLD },
+  { pts: [[13.5, 6.5], [20.5, 25.5]], w: A_W, color: GOLD },
+  { pts: [[8.9, 19], [18.1, 19]], w: A_W, color: GOLD },
+  // The "+" superscript, tucked against the A's right shoulder.
+  { pts: [[18.3, 9], [24.7, 9]], w: PLUS_W, color: EMBER },
+  { pts: [[21.5, 5.8], [21.5, 12.2]], w: PLUS_W, color: EMBER },
 ];
 // Bounding-box center of the art, used to recenter when scaling for solid styles.
-const ART_CX = 17.9; // (7.5 + 28.3) / 2
-const ART_CY = 16;   // (8 + 24) / 2
+const ART_CX = 15.6; // (6.5 + 24.7) / 2
+const ART_CY = 15.65; // (5.8 + 25.5) / 2
 
 // Distance from point p to segment a-b.
 function segDist(px, py, ax, ay, bx, by) {

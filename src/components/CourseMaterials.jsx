@@ -202,8 +202,8 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
           {!fetching && (
             <p className="text-xs text-coffee-600 mt-0.5">
               {materials.length === 0
-                ? 'No materials uploaded yet'
-                : `${materials.length} material${materials.length !== 1 ? 's' : ''} shared by students`}
+                ? 'Notes, slides & past questions shared by students — click any to open'
+                : `${materials.length} file${materials.length !== 1 ? 's' : ''} shared by students · click any to open`}
             </p>
           )}
         </div>
@@ -367,40 +367,44 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {materials.map(m => (
-            <div
+            <a
               key={m.id}
-              className="group flex flex-col gap-3 rounded-xl border border-coffee-200 bg-paper p-4 transition-colors hover:border-coffee-300 sm:flex-row sm:items-start"
+              href={materialUrl(m.file_path)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex h-full flex-col rounded-xl border border-coffee-200 bg-paper p-4 transition-all hover:border-ink hover:shadow-sm"
             >
-              <div className="w-9 h-9 rounded-lg bg-coffee-100 flex items-center justify-center shrink-0 mt-0.5">
-                <FileIcon type={m.file_type} className="w-4 h-4 text-coffee-600" />
+              {/* Top row — icon + type badge */}
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-coffee-100 transition-colors group-hover:bg-ink/5">
+                  <FileIcon type={m.file_type} className="h-4 w-4 text-coffee-600 group-hover:text-ink" />
+                </div>
+                <span className="rounded-full bg-coffee-100 px-2 py-0.5 font-mono text-[10px] font-medium uppercase text-coffee-600">
+                  {m.file_type}
+                </span>
               </div>
 
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-ink text-sm leading-snug truncate">{m.display_name}</p>
-                {m.description && (
-                  <p className="text-xs text-coffee-600 mt-0.5 leading-relaxed line-clamp-2">
-                    {m.description}
-                  </p>
-                )}
-                <p className="text-xs text-coffee-600 mt-1 font-mono">
-                  {m.file_type?.toUpperCase()}
-                  {m.file_size ? ` · ${fmtSize(m.file_size)}` : ''}
-                  {' · '}{timeAgo(m.uploaded_at)}
+              {/* Name + description */}
+              <p className="text-sm font-semibold leading-snug text-ink line-clamp-2">{m.display_name}</p>
+              {m.description && (
+                <p className="mt-1 text-xs leading-relaxed text-coffee-600 line-clamp-2">
+                  {m.description}
                 </p>
-              </div>
+              )}
 
-              <a
-                href={materialUrl(m.file_path)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 inline-flex items-center gap-1.5 self-start rounded-lg border border-coffee-200 px-3 py-1.5 text-xs font-medium text-coffee-700 transition-all opacity-100 hover:border-ink hover:text-ink sm:self-auto sm:opacity-0 sm:group-hover:opacity-100"
-              >
-                <Download size={11} />
-                Open
-              </a>
-            </div>
+              {/* Footer — meta + open affordance, pinned to bottom */}
+              <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+                <span className="font-mono text-[11px] text-coffee-500">
+                  {m.file_size ? `${fmtSize(m.file_size)} · ` : ''}{timeAgo(m.uploaded_at)}
+                </span>
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-coffee-600 transition-colors group-hover:text-ink">
+                  <Download size={11} />
+                  Open
+                </span>
+              </div>
+            </a>
           ))}
         </div>
       )}
