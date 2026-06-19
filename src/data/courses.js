@@ -1224,6 +1224,247 @@ export const courses = [
       'For every vulnerability, know: how it works, how to exploit it, and how to fix it',
       'Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies',
     ],
+    lectureNotes: [
+      {
+        number: '1',
+        title: 'Foundations: Web & Mobile Applications',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'The web is a collection of documents. The system stores web pages, images, videos, and other resources on a server, all connected through hyperlinks.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Key Topics Covered',
+            items: [
+              'Web app risk',
+              'Distinguishing between web apps and mobile apps',
+              'Comparison between web risk and mobile app risk',
+              'Website attacks, strengths & weaknesses',
+              'Best practices for defense',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Web Application',
+            text: 'A web application is software controlled by a centralized server and accessed through browsers with an internet connection. Web apps use a combination of server-side (e.g. PHP, ASP.NET) and client-side (HTML, CSS) scripts to process and present data to the user. Server-side scripts manage the storage and retrieval of data, ensuring web app functions are handled correctly. Web apps support various protocols, such as HTTP (Hypertext Transfer Protocol).',
+          },
+          {
+            type: 'note',
+            items: [
+              'PHP and ASP.NET are server-side languages — they run on the web server, not in the user’s browser, and are responsible for things like talking to a database or processing a login.',
+              'HTML and CSS are client-side — they run in the browser itself and control what the page looks like.',
+              'Because web apps depend on a central server, anyone who compromises that server can potentially affect every single user — the core reason web risk is described as “centralized” later in these notes.',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Mobile Application',
+            text: 'A mobile application is software installed directly on a user’s device (iOS or Android), designed to run on a mobile device or tablet. Some mobile apps can also be accessed via an internet connection and a web browser. Mobile apps typically require a version built for each platform, and can provide a more dynamic, interactive user experience with strong collaboration and fast sharing features.',
+          },
+        ],
+      },
+      {
+        number: '2',
+        title: 'Risks & Threats',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Mobile App Risks',
+            text: 'Mobile app risk refers to attacks associated with the device and OS features — vulnerabilities, threats, and security flaws that occur when mobile apps connect to the internet for data exchange, such as data leakage, spyware, cryptographic issues, and phishing attacks.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Common Mobile Vulnerabilities',
+            items: [
+              'Insecure data storage',
+              'Insecure network communication',
+              'Reverse engineering & code tampering',
+              'Push notification spam',
+              'Jailbreak / rooting',
+              'Permission abuse',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Insecure Data Storage: sensitive data (passwords, tokens, personal info) saved on the device in plain, unencrypted form, so anyone with access to the device can read it.',
+              'Reverse Engineering & Code Tampering: attackers decompile the app to study its code, find hidden secrets (like API keys), or modify it to bypass security checks.',
+              'Jailbreak / Rooting: a jailbroken or rooted phone removes the manufacturer’s built-in security restrictions, making it far easier for malicious apps to access data they shouldn’t.',
+              'Permission Abuse: apps requesting far more device permissions (camera, contacts, location) than they actually need, which increases the damage if the app is malicious or compromised.',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Web App Risks / Threats',
+            text: 'Web app threats refer to vulnerabilities and attacks that exploit weaknesses in web-based systems. These threats lead to unauthorized access, data breaches, and service disruption — driven especially by the growth of online banking and e-commerce transactions. This historical progression has driven an ever-increasing sophistication among cybercriminals, alongside a continuous need for advancement in IT security measures.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Common Threats to Web Apps',
+            items: [
+              'Injection vulnerabilities — e.g. SQL injection, Cross-Site Scripting (XSS)',
+              'Remote remediation — e.g. email phishing, privacy risk (cookies), financial risk (DoS — Denial of Service), operational/network risk (subject to user mistakes)',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Web-Based Risk Categories',
+            items: [
+              'Security risk',
+              'Privacy risk — e.g. cookies',
+              'Financial risk',
+              'Denial of Service (DoS)',
+              'Operational risk',
+              'Network risk — subject to user mistakes',
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Comparison: Web Risk vs Mobile App Risk',
+            headers: ['Feature', 'Web Risk', 'Mobile App Risk'],
+            rows: [
+              ['Centralization', 'Risk is centralized', 'Attacks are on the client side'],
+              ['Attack location', 'Attack is on the server; distributed across users', 'Attack is directly on the victim’s device'],
+              ['Data breach impact', 'Data breach affects the whole database/server', 'Data leakage from the device, often due to a lost or stolen phone'],
+              ['Connectivity', 'Requires internet connection', 'Some functionality may work offline, but data-exchange risk applies when connected'],
+              ['Common attack types', 'SQL injection, DDoS, CSRF', 'Reverse engineering, code tampering, permission abuse'],
+            ],
+          },
+        ],
+      },
+      {
+        number: '3',
+        title: 'Website Attacks',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Website Attacks',
+            text: 'A website attack is any malicious action aimed at compromising a site’s availability, integrity, and confidentiality. Attackers exploit vulnerabilities in web code, servers, and user interactions to steal sensitive data, inject malware, hijack user details, or take the site completely offline.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Data and Database Attacks',
+            items: [
+              { term: 'SQL Injection', def: 'attackers inject malicious code into search bars, login forms, or other input fields, prompting the backend database to reveal sensitive data' },
+              { term: 'Cross-Site Scripting (XSS)', def: 'attackers inject harmful scripts into web pages that are then viewed by other users' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Telling them apart: SQL injection targets the database (backend) to extract or manipulate stored data; XSS targets other users’ browsers (frontend) by getting a malicious script to run when they view the page.',
+              'Backend vs frontend: the backend is the server-side logic and database a user never sees directly; the frontend is everything rendered in the browser that the user interacts with.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Integrity and Availability Attacks',
+            items: [
+              { term: 'Distributed Denial of Service (DDoS)', def: 'attackers use a network of compromised devices to flood a website with excessive traffic, overloading the server and making the site unavailable to legitimate users' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Defacement and Deception Attacks',
+            items: [
+              { term: 'Defacement', def: 'attackers gain unauthorized access to hosting files and replace the homepage with their own message — often political statements' },
+              { term: 'Deception attacks', def: 'e.g. phishing and spoofing, where attackers create a fake version of a site or message to trick users' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Cross-Site Request Forgery (CSRF)',
+            text: 'CSRF tricks a victim into unknowingly submitting a malicious request, exploiting the victim’s logged-in identity and privileges to perform an action they never intended.',
+          },
+        ],
+      },
+      {
+        number: '4',
+        title: 'Strengths, Weaknesses & Best Practice',
+        sections: [
+          {
+            type: 'bullets',
+            heading: 'Strengths of a Website',
+            items: [
+              'Universally accessible from any device with an internet connection and a browser, ensuring broad accessibility and ease of use',
+              'Supports dynamic and interactive content',
+              'Easier to deploy than installed applications',
+              'Updates and maintenance are simple and instant, since developers update directly on the server',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Static vs dynamic websites: a static website shows the same fixed content to every visitor (just HTML/CSS), while a dynamic website generates content based on user input, database queries, or other variables — most modern web apps (social media, banking, e-commerce) are dynamic.',
+          },
+          {
+            type: 'proscons',
+            heading: 'Web App — Advantages & Disadvantages',
+            advantages: [
+              'Accessibility',
+              'Convenience',
+              'Less cost-effective to maintain across platforms',
+              'Usability',
+              'Security',
+              'Collaboration',
+            ],
+            disadvantages: [
+              'Cannot be used without an internet connection',
+              'Performance depends on the speed and reliability of the user’s internet connection',
+              'Browser compatibility issues',
+              'Extra development effort required to ensure cross-browser/cross-device compatibility',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Solutions to These Challenges',
+            items: ['Regular security audits', 'Regular software updates'],
+          },
+          {
+            type: 'text',
+            heading: 'Best Practice — Defending Web & Mobile Apps',
+            text: 'There are two broad approaches to defense: testing methodologies that find vulnerabilities before or during runtime, and protective mechanisms that actively block attacks in real time.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Testing Methodologies',
+            items: [
+              { term: 'Static Application Security Testing (SAST)', def: 'analyzes the app’s source code during development, before the app is running' },
+              { term: 'Software Composition Analysis (SCA)', def: 'identifies known vulnerabilities in third-party libraries and open-source components used in the app' },
+              { term: 'Interactive Application Security Testing (IAST)', def: 'observes app behavior — input, output, data flow, and logic — to conduct run-time analysis from inside the running application' },
+              { term: 'Dynamic Application Security Testing (DAST)', def: 'analyzes the app while it is running, including servers, and typically requires manual configuration' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The SCA definition was cut off in the original class document (“It identifies…”). The fuller definition above — identifying known vulnerabilities in third-party/open-source components — is standard industry usage.',
+              'IAST is often described as combining SAST and DAST: it runs during testing like DAST, but has visibility into the actual code like SAST.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Protective Mechanisms',
+            items: [
+              { term: 'Web Application Firewall (WAF)', def: 'protects a web app against malicious attacks by filtering and monitoring HTTP traffic' },
+              { term: 'Runtime Application Self-Protection (RASP)', def: 'detects, protects against, and blocks attacks by employing app instrumentation directly inside the running application' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Additional Best Practices',
+            items: [
+              'Execute input validation & authorization',
+              'Enhance authentication',
+              'Record code changes',
+              'Track API usage',
+              'Employ dynamic testing for application testing',
+            ],
+          },
+        ],
+      },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════════════

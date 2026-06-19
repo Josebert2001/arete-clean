@@ -126,6 +126,28 @@ function CaseStudy({ title, prompt, tasks }) {
   );
 }
 
+function NoteBox({ text, items }) {
+  return (
+    <div className="bg-moss/10 border border-moss/25 rounded-xl p-4 mb-5">
+      <div className="flex items-center gap-2 mb-2">
+        <Lightbulb size={14} className="text-moss shrink-0" />
+        <span className="text-xs font-mono font-bold text-moss uppercase tracking-wider">Added for clarity</span>
+      </div>
+      {text && <p className="text-sm text-coffee-700 leading-relaxed">{text}</p>}
+      {items && (
+        <ul className={`space-y-1.5 ${text ? 'mt-2' : ''}`}>
+          {items.map((item, i) => (
+            <li key={i} className="flex gap-2.5 text-sm text-coffee-700">
+              <span className="w-1.5 h-1.5 rounded-full bg-moss shrink-0 mt-2" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function FiveVs({ items }) {
   const colors = ['bg-moss', 'bg-ink', 'bg-rust', 'bg-ember-500', 'bg-coffee-700'];
   return (
@@ -159,6 +181,7 @@ function Section({ section }) {
       {section.type === 'table' && <ComparisonTable title={section.heading} headers={section.headers} rows={section.rows} />}
       {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
       {section.type === 'text' && <p className="text-sm text-coffee-700 leading-relaxed mb-3">{section.text}</p>}
+      {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
     </div>
   );
 }
