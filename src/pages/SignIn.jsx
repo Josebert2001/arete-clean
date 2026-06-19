@@ -11,15 +11,28 @@ const VALUE_PROPS = [
   { icon: Shield,        text: '4 years of content — 100L to 400L — always with you' },
 ];
 
+// Google's brand "G" — lucide has no brand icons, so inline the official mark.
+function GoogleIcon({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 18 18" aria-hidden focusable="false">
+      <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" />
+      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z" />
+      <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z" />
+      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.47.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
+    </svg>
+  );
+}
+
 export default function SignIn() {
   usePageTitle('Sign In');
-  const { user, profileComplete, authLoading, signInWithEmail, verifyEmailOtp } = useAuth();
+  const { user, profileComplete, authLoading, signInWithEmail, verifyEmailOtp, signInWithGoogle } = useAuth();
   const [email,  setEmail]  = useState('');
   const [code,   setCode]   = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [verifying,   setVerifying]   = useState(false);
   const [resending,   setResending]   = useState(false);
   const [verifyError, setVerifyError] = useState('');
+  const [googleStatus, setGoogleStatus] = useState('idle'); // idle | redirecting | error
 
   if (!authLoading && user && profileComplete)  return <Navigate to="/" replace />;
   if (!authLoading && user && !profileComplete) return <Navigate to="/setup-profile" replace />;
@@ -47,6 +60,15 @@ export default function SignIn() {
     }
     // Success: auth state updates and the redirects above (plus the resume
     // watcher) take over; keep "Verifying…" until this component unmounts.
+  };
+
+  const google = async () => {
+    if (googleStatus === 'redirecting') return;
+    setGoogleStatus('redirecting');
+    const { error } = await signInWithGoogle();
+    // On success the browser navigates away to Google; we only land here on
+    // failure (e.g. provider not enabled, network), so re-enable the button.
+    if (error) setGoogleStatus('error');
   };
 
   const resend = async () => {
@@ -174,9 +196,32 @@ export default function SignIn() {
           <div>
             <h1 className="font-display text-4xl font-bold text-ink mb-2">Welcome.</h1>
             <p className="text-coffee-700 mb-10 leading-relaxed">
-              Enter your email and we'll send you a 6-digit sign-in code.
+              Continue with Google, or get a 6-digit code by email.
               No password. No fuss.
             </p>
+
+            <button
+              type="button"
+              onClick={google}
+              disabled={googleStatus === 'redirecting'}
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl bg-paper border border-coffee-200 text-sm font-semibold text-ink hover:border-coffee-400 hover:bg-cream transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <GoogleIcon size={17} />
+              {googleStatus === 'redirecting' ? 'Redirecting to Google…' : 'Continue with Google'}
+            </button>
+
+            {googleStatus === 'error' && (
+              <p className="text-xs text-rust leading-relaxed mt-3">
+                Could not start Google sign-in — please try again, or use your email below.
+              </p>
+            )}
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 my-6" aria-hidden>
+              <div className="h-px flex-1 bg-coffee-100" />
+              <span className="text-xs text-coffee-500">or</span>
+              <div className="h-px flex-1 bg-coffee-100" />
+            </div>
 
             <form onSubmit={send} className="space-y-4">
               <div>

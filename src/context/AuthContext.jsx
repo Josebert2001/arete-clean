@@ -10,6 +10,7 @@ const AuthContext = createContext({
   authEnabled: false,
   signInWithEmail: async () => {},
   verifyEmailOtp: async () => {},
+  signInWithGoogle: async () => {},
   signOut: async () => {},
   refreshProfile: async () => {},
 });
@@ -72,6 +73,16 @@ export function AuthProvider({ children }) {
   const verifyEmailOtp = (email, token) =>
     supabase.auth.verifyOtp({ email, token, type: 'email' });
 
+  // Google OAuth. Supabase redirects the user to Google, then back to its own
+  // /auth/v1/callback, then here to /signin — whose route guards forward a
+  // returning user to /setup-profile (new) or / (existing profile). The
+  // redirect target must be in the Supabase Auth "Redirect URLs" allow-list.
+  const signInWithGoogle = () =>
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/signin` },
+    });
+
   const signOut = () => supabase.auth.signOut();
 
   const refreshProfile = () => loadProfile(user);
@@ -86,6 +97,7 @@ export function AuthProvider({ children }) {
       authEnabled: isConfigured,
       signInWithEmail,
       verifyEmailOtp,
+      signInWithGoogle,
       signOut,
       refreshProfile,
     }}>
