@@ -36,9 +36,11 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-coffee-200 bg-paper/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <Link to="/" className="group flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-ink transition-colors group-hover:bg-coffee-700">
-            <span className="font-display text-[1.35rem] font-bold leading-none text-coffee-300">a</span>
-          </div>
+          <img
+            src="/arete.svg"
+            alt="Arete logo"
+            className="h-10 w-10 rounded-lg transition-transform group-hover:scale-105"
+          />
           <div className="min-w-0 leading-tight">
             <div className="font-display text-lg font-bold tracking-tight text-ink sm:text-xl">
               Arete

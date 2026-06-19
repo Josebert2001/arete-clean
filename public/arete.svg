@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="8" fill="#1C1814"/>
-  <text x="16" y="23" font-family="Georgia, serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#CFA665">a</text>
+  <g fill="none" stroke="#CFA665" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7.5 24 L13.5 8 L19.5 24"/>
+    <path d="M9.4 19 H17.6"/>
+  </g>
+  <g fill="none" stroke="#E07A2C" stroke-width="2.4" stroke-linecap="round">
+    <path d="M23.7 10.5 H28.3"/>
+    <path d="M26 8.2 V12.8"/>
+  </g>
 </svg>

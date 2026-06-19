@@ -8,9 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 rounded-md bg-ink flex items-center justify-center">
-                <span className="font-display font-bold text-coffee-300 text-[1.1rem] leading-none">a</span>
-              </div>
+              <img src="/arete.svg" alt="Arete logo" className="w-8 h-8 rounded-md" />
               <span className="font-display text-lg font-bold text-ink">Arete</span>
             </div>
             <p className="text-sm text-coffee-700 leading-relaxed">

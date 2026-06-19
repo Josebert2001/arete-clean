@@ -1,0 +1,19 @@
+{
+  "name": "Arete — Code Your Excellence",
+  "short_name": "Arete",
+  "description": "Academic companion for B.Sc. Cybersecurity at the University of Uyo — every course from 100L to 400L, interactive Java, Python & C tracks, and an AI tutor that knows the curriculum.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF6EC",
+  "theme_color": "#FAF6EC",
+  "icons": [
+    { "src": "/arete.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "/icon-192-maskable.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
+    { "src": "/icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}
