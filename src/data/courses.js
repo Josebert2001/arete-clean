@@ -920,6 +920,412 @@ export const courses = [
       'Normalisation (1NF, 2NF, 3NF) has a logical pattern — understand it conceptually before memorising rules',
       'Relate everything to a real system you interact with (a bank app, university portal) to aid understanding',
     ],
+    lectureNotes: [
+      {
+        number: '1',
+        title: 'Software Development Models — Overview',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'Software development models provide structured approaches to managing the complexity of building software systems. This unit covers the main models studied in System Analysis and Design: the Waterfall, Spiral, V-Model, Incremental, Evolutionary, and Prototype models — including the phases, advantages, disadvantages, and when each one is best used.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Models Covered',
+            items: [
+              'Waterfall Model — linear, sequential',
+              'Spiral Model — risk-driven and iterative',
+              'V-Model — verification and validation',
+              'Incremental Model — delivered in functional increments',
+              'Evolutionary Model — software that evolves with feedback',
+              'Prototyping Model — refine a working model with the user',
+            ],
+          },
+        ],
+      },
+      {
+        number: '2',
+        title: 'The Waterfall Model',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'The Waterfall Model',
+            text: 'A traditional, linear-sequential approach where each phase must be completed and reviewed before the next can begin. The output of one phase is the input to the next, giving a structured, phase-by-phase progression.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/ins-224/waterfall.png',
+            caption: 'Figure 1: Waterfall Model — linear sequential phases',
+          },
+          {
+            type: 'bullets',
+            heading: 'Phases',
+            items: [
+              'Requirements Analysis and Specification',
+              'Design',
+              'Development (Implementation / Coding)',
+              'Testing and Deployment',
+              'Maintenance',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Phases in Detail',
+            items: [
+              { term: 'Requirements Analysis and Specification', def: 'gather, analyse, and validate all functional and non-functional requirements, producing a formal Software Requirement Specification (SRS) that acts as the project blueprint' },
+              { term: 'Design', def: 'translate the SRS into a system design — High-Level Design (HLD) for the overall architecture and Low-Level Design (LLD) for each component — documented in a Software Design Document (SDD)' },
+              { term: 'Development (Coding)', def: 'convert the design into working source code; individual modules are built and unit-tested in isolation' },
+              { term: 'Testing and Deployment', def: 'integration, system, and acceptance testing confirm the software meets requirements, after which it is released to the production environment with setup and user training' },
+              { term: 'Maintenance', def: 'keep the software working after release — corrective (fixing bugs), perfective (enhancing features), and adaptive (adjusting to new environments) maintenance' },
+            ],
+          },
+          {
+            type: 'proscons',
+            heading: 'Advantages & Disadvantages',
+            advantages: [
+              'Simple to understand and manage due to its clear structure',
+              'Works well when requirements are well understood and stable',
+              'Produces extensive documentation, useful for knowledge transfer and maintenance',
+              'Easy to estimate time and cost at the outset',
+            ],
+            disadvantages: [
+              'Very inflexible — accommodating changes mid-project is costly and disruptive',
+              'Customer sees the working product only at the very end, risking misalignment',
+              'Defects discovered late (during testing) are expensive to fix',
+              'Not suitable for complex or long-duration projects where requirements evolve',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'When to Use',
+            items: [
+              'When requirements are constant and not changed regularly',
+              'When the application is small, simple, and not complicated',
+              'When the tools and technology used are consistent and stable',
+            ],
+          },
+        ],
+      },
+      {
+        number: '3',
+        title: 'The Spiral Model',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'The Spiral Model',
+            text: 'Proposed by Barry Boehm in 1986, the Spiral Model is a risk-driven, iterative process that combines the Waterfall Model with iterative prototyping, emphasising risk analysis at each stage. It is well suited to large, complex projects where risks are high and requirements may evolve. Each loop of the spiral is a complete development cycle divided into four quadrants.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/ins-224/spiral.png',
+            caption: 'Figure 2: Spiral Model — risk-driven iterative development (Boehm, 1986)',
+          },
+          {
+            type: 'bullets',
+            heading: 'Quadrants (Phases)',
+            items: [
+              'Objectives Determination and Planning',
+              'Risk Analysis and Resolution',
+              'Development and Testing (Engineering)',
+              'Review and Planning (Evaluation)',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Quadrants in Detail',
+            items: [
+              { term: 'Objectives Determination and Planning', def: 'define the goals, requirements, and constraints for this iteration and produce a detailed plan of tasks, schedules, and responsibilities' },
+              { term: 'Risk Analysis and Resolution', def: 'the most critical quadrant — identify, analyse, and mitigate technical and management risks, using prototypes, simulations, or feasibility studies before major investment' },
+              { term: 'Development and Testing (Engineering)', def: 'design, code, and thoroughly test the selected features, producing a working version (prototype, module, or incremental release)' },
+              { term: 'Review and Planning (Evaluation)', def: 'stakeholders (including the customer) evaluate the increment; feedback decides whether to continue, modify the plan, or stop, and the next iteration is planned' },
+            ],
+          },
+          {
+            type: 'proscons',
+            heading: 'Advantages & Disadvantages',
+            advantages: [
+              'Effective risk handling at every phase',
+              'Suitable for large, mission-critical, and complex projects',
+              'Changing requirements can be accommodated, even at later stages',
+              'Early customer feedback through extensive use of prototypes',
+              'Iterative development allows gradual refinement',
+              'Regular reviews foster better communication between stakeholders',
+            ],
+            disadvantages: [
+              'Complex to manage and requires highly particular risk-analysis expertise',
+              'Can be a costly model to use',
+              'Does not work well for smaller, low-risk projects',
+              'The spiral may continue indefinitely if not properly managed',
+              'A large number of spiral stages requires excessive documentation',
+            ],
+          },
+        ],
+      },
+      {
+        number: '4',
+        title: 'The V-Model',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'The V-Model',
+            text: 'Also called the Verification and Validation Model, the V-Model is an extension of the Waterfall Model that pairs each development phase with a corresponding testing phase. The V-shape shows testing activities being planned in parallel with development, with coding at the bottom joining the two sides.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/ins-224/vmodel.png',
+            caption: 'Figure 3: V-Model — verification and validation lifecycle',
+          },
+          {
+            type: 'bullets',
+            heading: 'Verification Phases (Left Side)',
+            items: [
+              'Business Requirement Analysis — overall system requirements from a business perspective',
+              'System Design — business requirements translated into system-level specifications',
+              'Architectural Design — high-level design: modules and their interactions',
+              'Module Design — detailed design of each individual module',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Validation Phases (Right Side)',
+            items: [
+              'Unit Testing — tests individual modules',
+              'Integration Testing — tests interaction between integrated modules',
+              'System Testing — tests the complete system against the system design',
+              'Acceptance Testing — tests the system against business requirements with user involvement',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Connecting Phase — Coding',
+            text: 'At the bottom of the V, the detailed module designs are converted into actual source code by developers, joining the verification (left) and validation (right) branches.',
+          },
+          {
+            type: 'note',
+            text: 'Each validation (testing) phase verifies its matching design phase: Unit Testing ↔ Module Design, Integration Testing ↔ Architectural Design, System Testing ↔ System Design, and Acceptance Testing ↔ Business Requirement Analysis.',
+          },
+          {
+            type: 'proscons',
+            heading: 'Advantages & Disadvantages',
+            advantages: [
+              'Proactive defect tracking — defects are found at an early stage',
+              'Each phase has a corresponding test phase, giving a clearer understanding of requirements and design',
+              'Test cases are designed early, increasing the chance of a successful product',
+            ],
+            disadvantages: [
+              'Inflexible to changes once development has started',
+              'Limited for large, complex projects with unclear or changing requirements',
+              'Produces no early prototypes, delaying customer feedback',
+            ],
+          },
+        ],
+      },
+      {
+        number: '5',
+        title: 'The Incremental Model',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'The Incremental Model',
+            text: 'Software is built and delivered in small, functional increments. Requirements are divided into standalone modules; each module passes through requirement, design, implementation, and testing phases, and every subsequent release adds functionality to the previous one until the complete system is achieved.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/ins-224/incremental.png',
+            caption: 'Figure 4: Incremental Model — phased delivery per increment',
+          },
+          {
+            type: 'bullets',
+            heading: 'Phases (per increment)',
+            items: [
+              'Requirement Gathering and Analysis',
+              'Design',
+              'Implementation',
+              'Testing',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Phases in Detail',
+            items: [
+              { term: 'Requirement Gathering and Analysis', def: 'collect and analyse all functional and non-functional requirements, then prioritise and divide them into manageable sets for each increment' },
+              { term: 'Design', def: 'design the architecture and detailed design for the current increment — algorithms, DFDs, activity/class diagrams, and database design' },
+              { term: 'Implementation', def: 'translate the design into source code using programming frameworks and languages' },
+              { term: 'Testing', def: 'test the performance of each existing feature plus the newly added functionality, ensuring new features do not break existing ones' },
+            ],
+          },
+          {
+            type: 'proscons',
+            heading: 'Advantages & Disadvantages',
+            advantages: [
+              'Easier to test and debug smaller increments',
+              'Risks are handled during each iteration',
+              'Changes are easier and less expensive to implement',
+              'Early delivery of operational software lets customers use core functions sooner',
+            ],
+            disadvantages: [
+              'May require more resources due to continuous iterations',
+              'Needs well-defined module interfaces and a clear architectural vision',
+              'Architectural problems can arise if requirements are not collected upfront',
+              'Project completion dates can be uncertain as requirements evolve',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'When to Use',
+            items: [
+              'When core requirements are clearly understood but quick releases of prioritised features are needed',
+              'For projects with long development schedules',
+              'Common for web applications and product-based companies',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'In the source notes one disadvantages list is labelled “Iterative Model” even though it appears under the Incremental Model — the Iterative and Incremental models are closely related, which explains the overlap.',
+          },
+        ],
+      },
+      {
+        number: '6',
+        title: 'The Evolutionary Process Model',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'The Evolutionary Process Model',
+            text: 'A general term for iterative models that let software evolve over time — also called the successive version model. The requirement is first broken into several parts that are built incrementally, taking customer feedback at each stage, on the understanding that requirements often change and the software must change with them.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/ins-224/evolutionary.png',
+            caption: 'Figure 5: Evolutionary Process Model — iterative refinement cycle',
+          },
+          {
+            type: 'bullets',
+            heading: 'Types of Evolutionary Models',
+            items: [
+              'The Prototyping Model',
+              'The Spiral Model (see Topic 3)',
+              'The Incremental and Iterative models are also commonly grouped here',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Characteristics',
+            items: [
+              'Iterative and incremental — each iteration adds or refines functionality',
+              'Actively incorporates customer feedback throughout',
+              'Highly adaptable to changing requirements and evolving needs',
+              'Manages risk by refining the system in smaller, manageable steps',
+            ],
+          },
+          {
+            type: 'proscons',
+            heading: 'Advantages & Disadvantages',
+            advantages: [
+              'Useful for very large products with unclear upfront requirements',
+              'Continuous user involvement builds customer confidence',
+              'Users gain early experience with partially developed software',
+              'Thorough testing of core modules reduces errors and overall cost',
+            ],
+            disadvantages: [
+              'Managing multiple iterations and evolving requirements is complex',
+              'Requires careful resource management and coordination across iterations',
+              'Scope can expand indefinitely without proper control',
+            ],
+          },
+        ],
+      },
+      {
+        number: '7',
+        title: 'The Prototyping Model',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'The Prototyping Model',
+            text: 'An evolutionary approach where a working model (prototype) of the system is built to understand requirements better, then refined through iterations based on user feedback until the final system is developed.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/ins-224/prototyping.png',
+            caption: 'Figure 6: Prototyping Model — iterative prototype refinement',
+          },
+          {
+            type: 'bullets',
+            heading: 'Phases',
+            items: [
+              'Requirement Gathering',
+              'Quick Design',
+              'Build Prototype',
+              'Customer Evaluation of Prototype',
+              'Refinement and Iteration',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Phases in Detail',
+            items: [
+              { term: 'Requirement Gathering', def: 'gather basic requirements, focusing on core functionality and UI needs rather than exhaustive detail' },
+              { term: 'Quick Design', def: 'create a preliminary, non-final blueprint representing the key aspects of the system' },
+              { term: 'Build Prototype', def: 'build a working prototype, possibly with limited functionality or low fidelity, to demonstrate key features' },
+              { term: 'Customer Evaluation', def: 'the customer interacts with the prototype and gives feedback on functionality, usability, and missing or incorrect features' },
+              { term: 'Refinement and Iteration', def: 'refine the prototype and repeat until the customer is satisfied; the result either evolves into the final system or is discarded and rebuilt from the refined requirements' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Types of Prototyping',
+            items: [
+              { term: 'Throwaway Prototyping', def: 'a prototype built quickly to elicit requirements, then discarded; the final system is built from scratch' },
+              { term: 'Evolutionary Prototyping', def: 'the prototype is progressively refined until it becomes the final system' },
+              { term: 'Incremental Prototyping', def: 'multiple prototypes are built for different subsystems and then integrated into the complete product' },
+              { term: 'Extreme Prototyping', def: 'common in web development — three layers built in sequence: static prototype, simulated services, then real services' },
+            ],
+          },
+          {
+            type: 'proscons',
+            heading: 'Advantages & Disadvantages',
+            advantages: [
+              'Does not require full upfront knowledge of inputs, outputs, and processes',
+              'Good where requirements are changing',
+              'Customers are actively involved, improving satisfaction',
+              'Errors and design flaws are detected much earlier',
+              'Flexible design and effective communication among the team',
+            ],
+            disadvantages: [
+              'Requires significant client involvement, which is not always feasible',
+              'Can be costly and time-consuming, especially with frequent changes',
+              'Documentation is often poor as requirements change frequently',
+              'Users may confuse the prototype with the final system',
+              'Developers may become overly attached to the prototype',
+            ],
+          },
+        ],
+      },
+      {
+        number: '8',
+        title: 'Conclusion & References',
+        sections: [
+          {
+            type: 'text',
+            heading: 'Conclusion',
+            text: 'Each model suits different situations: Waterfall for stable requirements, Spiral for complex high-risk projects, the V-Model for strong verification and validation, Incremental and Evolutionary models for staged delivery and changing requirements, and Prototyping for clarifying requirements through early working models. Choosing a model depends on project size, complexity, risk, clarity of requirements, and the flexibility needed.',
+          },
+          {
+            type: 'bullets',
+            heading: 'References',
+            items: [
+              'GeeksforGeeks — Waterfall Model (Software Engineering)',
+              'GeeksforGeeks — Spiral Model in Software Engineering',
+              'GeeksforGeeks — SDLC V-Model (Software Engineering)',
+              'GeeksforGeeks — Incremental Process Model (Software Engineering)',
+              'GeeksforGeeks — What are Evolutionary Process Models?',
+              'GeeksforGeeks — Prototyping Model (Software Engineering)',
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     code: 'CYB 224',

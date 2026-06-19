@@ -126,6 +126,19 @@ function CaseStudy({ title, prompt, tasks }) {
   );
 }
 
+function Figure({ src, alt, caption }) {
+  return (
+    <figure className="mb-5">
+      <div className="rounded-xl border border-coffee-200 bg-paper p-3">
+        <img src={src} alt={alt || caption || ''} loading="lazy" className="w-full h-auto rounded-lg" />
+      </div>
+      {caption && (
+        <figcaption className="mt-2 text-xs font-mono text-coffee-500 text-center">{caption}</figcaption>
+      )}
+    </figure>
+  );
+}
+
 function NoteBox({ text, items }) {
   return (
     <div className="bg-moss/10 border border-moss/25 rounded-xl p-4 mb-5">
@@ -182,6 +195,7 @@ function Section({ section }) {
       {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
       {section.type === 'text' && <p className="text-sm text-coffee-700 leading-relaxed mb-3">{section.text}</p>}
       {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
+      {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} />}
     </div>
   );
 }
