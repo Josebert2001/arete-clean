@@ -151,9 +151,15 @@ async function main() {
     ok('Bucket created');
   }
 
-  // 6. Storage policy — uploads require a signed-in student; reads stay public
+  // 6. Storage policy — uploads require a signed-in student; reads are served
+  //    via the bucket's public object URLs (getPublicUrl in CourseMaterials.jsx),
+  //    so NO SELECT policy on storage.objects is created. A broad SELECT policy
+  //    would let clients enumerate every file in the bucket (flagged by the
+  //    Supabase security advisor: public_bucket_allows_listing) without being
+  //    needed for downloads. The legacy "Public read" policy is dropped here.
   step('5. Setting storage upload policy…');
   await sql(`DROP POLICY IF EXISTS "Public upload to course-materials" ON storage.objects;`);
+  await sql(`DROP POLICY IF EXISTS "Public read from course-materials" ON storage.objects;`);
   await sql(`
     DO $$ BEGIN
       IF NOT EXISTS (
@@ -163,18 +169,6 @@ async function main() {
         CREATE POLICY "Authenticated upload to course-materials"
           ON storage.objects FOR INSERT TO authenticated
           WITH CHECK (bucket_id = 'course-materials');
-      END IF;
-    END $$;
-  `);
-  await sql(`
-    DO $$ BEGIN
-      IF NOT EXISTS (
-        SELECT 1 FROM pg_policies
-        WHERE tablename = 'objects' AND policyname = 'Public read from course-materials'
-      ) THEN
-        CREATE POLICY "Public read from course-materials"
-          ON storage.objects FOR SELECT
-          USING (bucket_id = 'course-materials');
       END IF;
     END $$;
   `);
