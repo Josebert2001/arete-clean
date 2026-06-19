@@ -5,19 +5,19 @@
 // the surrounding text color, and Tailwind tokens (ink, coffee, ember, moss)
 // via inline CSS vars defined in index.css.
 
-// Hexes mirror the Tailwind theme tokens in tailwind.config.js exactly, since
-// raw SVG fill/stroke can't use Tailwind classes. Keep these in sync with the
-// palette there: coffeeDark = coffee-700, coffee = coffee-500, coffeeLight = coffee-200.
+// Resolve to the same CSS variables as the Tailwind palette (defined in
+// index.css) so diagrams re-theme with the rest of the app under `.dark`.
+// SVG fill/stroke presentation attributes accept CSS custom properties.
 const palette = {
-  ink: '#1C1814',
-  paper: '#FAF6EC',
-  cream: '#F5EFE0',
-  coffeeDark: '#52310F',
-  coffee: '#8E5A1F',
-  coffeeLight: '#E1C89A',
-  ember: '#C9531C',
-  moss: '#5C6B3F',
-  rust: '#A04020',
+  ink: 'rgb(var(--ink))',
+  paper: 'rgb(var(--paper))',
+  cream: 'rgb(var(--cream))',
+  coffeeDark: 'rgb(var(--coffee-700))',
+  coffee: 'rgb(var(--coffee-500))',
+  coffeeLight: 'rgb(var(--coffee-200))',
+  ember: 'rgb(var(--ember-500))',
+  moss: 'rgb(var(--moss))',
+  rust: 'rgb(var(--rust))',
 };
 
 function Frame({ title, caption, children, height = 220 }) {

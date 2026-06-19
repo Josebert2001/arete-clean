@@ -2,6 +2,7 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import AuthButton from './AuthButton';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -52,6 +53,7 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
           <AuthButton />
           <button
             ref={toggleRef}
@@ -80,6 +82,7 @@ export default function Navbar() {
               {l.label}
             </NavLink>
           ))}
+          <ThemeToggle className="ml-1" />
           <AuthButton />
         </div>
       </div>

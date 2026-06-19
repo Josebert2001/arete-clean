@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
@@ -141,6 +142,7 @@ function RouteLoading() {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
     <div className="min-h-screen flex flex-col paper-texture">
       <a
@@ -182,5 +184,6 @@ export default function App() {
       <FloatingHelp />
     </div>
     </AuthProvider>
+    </ThemeProvider>
   );
 }

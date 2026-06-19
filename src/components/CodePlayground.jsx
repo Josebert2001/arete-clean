@@ -206,7 +206,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
               color: kind === 'success' ? 'var(--syntax-str)'
                 : kind === 'not_configured' || kind === 'limit' ? 'var(--syntax-num)'
                   : kind === 'compile_error' || kind === 'runtime_error' ? 'var(--syntax-err)'
-                    : 'var(--cream)',
+                    : 'var(--syntax-plain)',
             }}
           >
             {running ? 'Compiling and running...' : output}

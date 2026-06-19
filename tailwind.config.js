@@ -1,30 +1,35 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
+  // Theme is toggled by adding/removing the `dark` class on <html>.
+  // Colors below resolve to CSS variables (defined in index.css) so every
+  // existing `bg-paper` / `text-ink` / `text-coffee-700` utility re-themes
+  // automatically when the variables are swapped under `.dark`.
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        cream: '#F5EFE0',
-        paper: '#FAF6EC',
-        ink: '#1C1814',
+        cream: 'rgb(var(--cream) / <alpha-value>)',
+        paper: 'rgb(var(--paper) / <alpha-value>)',
+        ink: 'rgb(var(--ink) / <alpha-value>)',
         coffee: {
-          50:  '#FBF6EF',
-          100: '#F0E4CD',
-          200: '#E1C89A',
-          300: '#CFA665',
-          400: '#B68340',
-          500: '#8E5A1F',
-          600: '#6E4216',
-          700: '#52310F',
-          800: '#3A220A',
-          900: '#231406',
+          50:  'rgb(var(--coffee-50) / <alpha-value>)',
+          100: 'rgb(var(--coffee-100) / <alpha-value>)',
+          200: 'rgb(var(--coffee-200) / <alpha-value>)',
+          300: 'rgb(var(--coffee-300) / <alpha-value>)',
+          400: 'rgb(var(--coffee-400) / <alpha-value>)',
+          500: 'rgb(var(--coffee-500) / <alpha-value>)',
+          600: 'rgb(var(--coffee-600) / <alpha-value>)',
+          700: 'rgb(var(--coffee-700) / <alpha-value>)',
+          800: 'rgb(var(--coffee-800) / <alpha-value>)',
+          900: 'rgb(var(--coffee-900) / <alpha-value>)',
         },
         ember: {
-          400: '#E07A2C',
-          500: '#C9531C',
+          400: 'rgb(var(--ember-400) / <alpha-value>)',
+          500: 'rgb(var(--ember-500) / <alpha-value>)',
         },
-        moss: '#5C6B3F',
-        rust: '#A04020',
+        moss: 'rgb(var(--moss) / <alpha-value>)',
+        rust: 'rgb(var(--rust) / <alpha-value>)',
       },
       fontFamily: {
         display: ['"Fraunces"', 'Georgia', 'serif'],

@@ -2,15 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Palette as space-separated RGB channels so Tailwind's `<alpha-value>`
+ * modifiers (e.g. `bg-paper/80`) keep working. The `.dark` block below swaps
+ * these same variables, which re-themes every `bg-*`/`text-*` utility at once.
+ * The coffee scale is intentionally INVERTED in dark mode (low numbers become
+ * dark surfaces, high numbers become light text) so text utilities like
+ * `text-coffee-700` stay readable and `bg-coffee-100` stays a subtle surface.
+ */
 :root {
-  --cream: #F5EFE0;
-  --paper: #FAF6EC;
-  --ink: #1C1814;
-  --coffee-500: #8E5A1F;
-  --coffee-700: #52310F;
-  --ember: #C9531C;
+  --cream: 245 239 224;   /* #F5EFE0 */
+  --paper: 250 246 236;   /* #FAF6EC */
+  --ink:    28  24  20;   /* #1C1814 */
 
-  /* Syntax highlighting tokens */
+  --coffee-50:  251 246 239;
+  --coffee-100: 240 228 205;
+  --coffee-200: 225 200 154;
+  --coffee-300: 207 166 101;
+  --coffee-400: 182 131  64;
+  --coffee-500: 142  90  31;
+  --coffee-600: 110  66  22;
+  --coffee-700:  82  49  15;
+  --coffee-800:  58  34  10;
+  --coffee-900:  35  20   6;
+
+  --ember-400: 224 122 44;
+  --ember-500: 201  83 28;
+  --ember: var(--ember-500);
+
+  --moss: 92 107 63;
+  --rust: 160 64 32;
+
+  /* Syntax highlighting tokens — code blocks stay dark in both themes */
   --syntax-kw:    #E07A2C;
   --syntax-str:   #B6D178;
   --syntax-num:   #CFA665;
@@ -18,6 +41,35 @@
   --syntax-fn:    #F0E4CD;
   --syntax-plain: #F5EFE0;
   --syntax-err:   #E8927C;
+}
+
+.dark {
+  /*
+   * Pure-black dark theme. Page background is true black; cards sit on a
+   * slightly elevated near-black. Text is near-white and the coffee scale is a
+   * neutral grey ramp (low = dark surfaces, high = light text). The ember
+   * orange is kept as the brand accent so the app still reads as Arete.
+   */
+  --cream:  20  20  20;   /* card / elevated surface (#141414) */
+  --paper:   0   0   0;   /* page background (#000000) */
+  --ink:   240 240 243;   /* primary text + inverted button fills (#F0F0F3) */
+
+  --coffee-50:   15  15  15;
+  --coffee-100:  26  26  26;
+  --coffee-200:  42  42  44;   /* borders / dividers */
+  --coffee-300:  62  62  66;
+  --coffee-400:  92  92  98;
+  --coffee-500: 130 130 138;   /* muted */
+  --coffee-600: 162 162 170;   /* secondary text */
+  --coffee-700: 200 200 206;   /* body text */
+  --coffee-800: 222 222 226;
+  --coffee-900: 242 242 245;
+
+  --ember-400: 240 150 80;
+  --ember-500: 232 122 60;
+
+  --moss: 124 186 120;
+  --rust: 230 120 92;
 }
 
 * {
@@ -31,11 +83,12 @@ html {
 }
 
 body {
-  background: var(--paper);
+  background: rgb(var(--paper));
   background-image:
-    radial-gradient(at 12% 8%,  rgba(142, 90, 31, 0.07) 0px, transparent 50%),
-    radial-gradient(at 88% 92%, rgba(201, 83, 28, 0.05) 0px, transparent 50%);
-  color: var(--ink);
+    radial-gradient(at 12% 8%,  rgb(var(--coffee-500) / 0.07) 0px, transparent 50%),
+    radial-gradient(at 88% 92%, rgb(var(--ember-500) / 0.05) 0px, transparent 50%);
+  color: rgb(var(--ink));
+  transition: background-color 0.3s ease, color 0.3s ease;
   font-family: 'Inter', system-ui, sans-serif;
   font-feature-settings: 'ss01', 'cv11';
   min-width: 320px;
@@ -47,13 +100,13 @@ body {
 }
 
 ::selection {
-  background: rgba(142, 90, 31, 0.25);
-  color: var(--coffee-700);
+  background: rgb(var(--coffee-500) / 0.25);
+  color: rgb(var(--coffee-700));
 }
 
 /* Visible focus ring for keyboard navigation */
 :focus-visible {
-  outline: 2px solid var(--ember);
+  outline: 2px solid rgb(var(--ember));
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -116,17 +169,22 @@ body {
   box-shadow: 0 1px 0 rgba(82, 49, 15, 0.08), 0 4px 12px rgba(82, 49, 15, 0.04);
   transform: rotate(-0.3deg);
 }
+.dark .sticky-note {
+  background: rgb(var(--coffee-100));
+  border-color: rgb(var(--coffee-200));
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
 
 /* Smooth scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(--cream); }
-::-webkit-scrollbar-thumb { background: var(--coffee-500); border-radius: 4px; border: 2px solid var(--cream); }
-::-webkit-scrollbar-thumb:hover { background: var(--coffee-700); }
+::-webkit-scrollbar-track { background: rgb(var(--cream)); }
+::-webkit-scrollbar-thumb { background: rgb(var(--coffee-500)); border-radius: 4px; border: 2px solid rgb(var(--cream)); }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--coffee-700)); }
 
 /* Button styles */
 .btn-primary {
-  background: var(--ink);
-  color: var(--cream);
+  background: rgb(var(--ink));
+  color: rgb(var(--cream));
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
   font-weight: 600;
@@ -134,17 +192,17 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid var(--ink);
+  border: 1px solid rgb(var(--ink));
 }
 .btn-primary:hover {
-  background: var(--coffee-700);
-  border-color: var(--coffee-700);
+  background: rgb(var(--coffee-700));
+  border-color: rgb(var(--coffee-700));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(28, 24, 20, 0.15);
+  box-shadow: 0 4px 12px rgb(var(--ink) / 0.15);
 }
 
 .btn-ghost {
-  color: var(--ink);
+  color: rgb(var(--ink));
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
   font-weight: 600;
@@ -152,22 +210,22 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid rgba(28, 24, 20, 0.2);
+  border: 1px solid rgb(var(--ink) / 0.2);
 }
-.btn-ghost:hover { background: rgba(28, 24, 20, 0.05); border-color: var(--ink); }
+.btn-ghost:hover { background: rgb(var(--ink) / 0.05); border-color: rgb(var(--ink)); }
 
 /* Tab style */
 .tab-active {
-  background: var(--ink);
-  color: var(--cream);
-  box-shadow: 0 1px 4px rgba(28, 24, 20, 0.18);
+  background: rgb(var(--ink));
+  color: rgb(var(--cream));
+  box-shadow: 0 1px 4px rgb(var(--ink) / 0.18);
 }
 .tab-inactive {
   background: transparent;
-  color: var(--ink);
+  color: rgb(var(--ink));
   transition: background 0.15s ease, color 0.15s ease;
 }
-.tab-inactive:hover { background: rgba(28, 24, 20, 0.07); }
+.tab-inactive:hover { background: rgb(var(--ink) / 0.07); }
 
 /* Progress dot */
 .progress-dot {
