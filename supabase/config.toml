@@ -227,17 +227,19 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Email a 6-digit code (via {{ .Token }}) instead of a magic link — the app's
-# sign-in flow asks the user to type this code. magic_link is sent to existing
-# users; confirmation is sent on a new user's first sign-in (signup). Both must
-# show the code, or first-time users get a link they can't use in the code UI.
-[auth.email.template.magic_link]
-subject = "Your Arete sign-in code"
-content_path = "./supabase/templates/magic_link.html"
+# Custom email templates (6-digit code via {{ .Token }}) are DEFERRED: the free
+# tier with the default email provider rejects template overrides (HTTP 400),
+# which fails the entire [auth] config push. Until a custom SMTP provider (Brevo)
+# is configured, these stay commented so the rest of the auth config can push and
+# emails fall back to Supabase's default magic-link templates. Re-enable both
+# blocks once [auth.email.smtp] is set up.
+# [auth.email.template.magic_link]
+# subject = "Your Arete sign-in code"
+# content_path = "./supabase/templates/magic_link.html"
 
-[auth.email.template.confirmation]
-subject = "Confirm your email — your Arete code"
-content_path = "./supabase/templates/confirmation.html"
+# [auth.email.template.confirmation]
+# subject = "Confirm your email — your Arete code"
+# content_path = "./supabase/templates/confirmation.html"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
