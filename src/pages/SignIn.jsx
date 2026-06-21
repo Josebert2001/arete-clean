@@ -242,7 +242,7 @@ export default function SignIn() {
 
               {status === 'error' && (
                 <p className="text-xs text-rust leading-relaxed">
-                  Could not send the link — check the address and try again.
+                  Could not send the code — check the address and try again.
                 </p>
               )}
 
