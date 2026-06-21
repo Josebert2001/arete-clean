@@ -217,13 +217,26 @@ export default async function handler(req, res) {
     // sentinel instead of silently ending with a truncated answer.
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    let wroteText = false;
+    let streamFailed = false;
     try {
       for await (const chunk of result.textStream) {
-        res.write(chunk);
+        if (chunk) {
+          res.write(chunk);
+          wroteText = true;
+        }
       }
     } catch (streamErr) {
       console.error('Groq tutor stream error:', streamErr);
+      streamFailed = true;
       res.write(STREAM_ERROR_MARKER);
+    }
+    // The model can finish a run without emitting any text (e.g. it ended on a
+    // tool call). Without this floor the client receives an empty 200 and shows
+    // "No response received" — give the student something actionable instead.
+    if (!wroteText && !streamFailed) {
+      console.error('Groq tutor produced no text output (likely a terminal tool call).');
+      res.write("I couldn't quite put that answer together — please ask again or rephrase your question.");
     }
     return res.end();
   } catch (err) {

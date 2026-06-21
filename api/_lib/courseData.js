@@ -581,17 +581,26 @@ export const MODULE_INDEX = MODULE_KNOWLEDGE
 
 const normalizeCode = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
 
-// Full catalogue entry for one course code, plus uploaded lecture notes when
-// they exist for it. Returns null when nothing matches.
-export function findCourse(courseCode) {
+// Resolves a (possibly loosely-formatted) course code to its catalogue entry.
+// Returns { code, outline } where `code` is the CANONICAL course code exactly
+// as stored in courses.js / course_materials.course_code (e.g. "CYB 222"),
+// so callers can do an exact-match DB lookup that agrees with this resolver's
+// fuzzy matching. `code` is null when only lecture notes matched (no catalogue
+// block to take a canonical code from). Returns null when nothing matches.
+export function findCourseEntry(courseCode) {
   const target = normalizeCode(courseCode);
   if (!target) return null;
 
   const blocks = COURSE_KNOWLEDGE.split(/\n\n+/).filter(b => b.includes('|'));
-  const matches = blocks.filter(block => {
-    const code = normalizeCode(block.trim().split('\n')[0].split('|')[0]);
-    return code === target || code.endsWith(target);
-  });
+  const firstLineCode = (block) => block.trim().split('\n')[0].split('|')[0].trim();
+  const codeOf = (block) => normalizeCode(firstLineCode(block));
+
+  // Exact code matches take precedence. Only fall back to suffix matches
+  // (e.g. typing "CYB 424" to reach "UUY-CYB 424") when nothing matches the
+  // code exactly — otherwise "CYB 222" wrongly also drags in the distinct
+  // course "UUY-CYB 222".
+  let matches = blocks.filter(b => codeOf(b) === target);
+  if (!matches.length) matches = blocks.filter(b => codeOf(b).endsWith(target));
 
   const noteSections = LECTURE_NOTES_KNOWLEDGE
     .split(/\n(?=── )/)
@@ -599,10 +608,18 @@ export function findCourse(courseCode) {
 
   if (!matches.length && !noteSections.length) return null;
 
-  return [
+  const outline = [
     ...matches.map(b => b.trim()),
     ...noteSections.map(s => `LECTURE NOTES (authoritative, from the lecturer):\n${s.trim()}`),
   ].join('\n\n');
+
+  return { code: matches.length ? firstLineCode(matches[0]) : null, outline };
+}
+
+// Full catalogue entry text for one course code, plus uploaded lecture notes
+// when they exist for it. Returns null when nothing matches.
+export function findCourse(courseCode) {
+  return findCourseEntry(courseCode)?.outline ?? null;
 }
 
 const TRACK_SECTION_HEADERS = {

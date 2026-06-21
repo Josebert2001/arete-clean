@@ -8,7 +8,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
-import { findCourse, findModule } from './courseData.js';
+import { findCourseEntry, findModule } from './courseData.js';
 import { trackMeta } from '../../src/data/trackMeta.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
@@ -79,25 +79,32 @@ export function buildTutorTools(student) {
           };
         }
 
-        const { data, error } = await student.db
-          .from('user_progress')
-          .select('storage_key, progress, updated_at');
+        // A thrown rejection here (network/runtime) would otherwise end the
+        // model's text stream silently — surface it as a value instead.
+        try {
+          const { data, error } = await student.db
+            .from('user_progress')
+            .select('storage_key, progress, updated_at');
 
-        if (error) {
+          if (error) {
+            return { signedIn: true, error: 'Progress could not be loaded right now.' };
+          }
+
+          const tracks = (data || [])
+            .filter(row => TRACK_BY_STORAGE_KEY[row.storage_key])
+            .map(row => summarizeTrackProgress(TRACK_BY_STORAGE_KEY[row.storage_key], row.progress || {}));
+
+          return {
+            signedIn: true,
+            tracks,
+            ...(tracks.length === 0 && {
+              note: 'No saved progress yet — the student has not completed any modules or quizzes while signed in.',
+            }),
+          };
+        } catch (err) {
+          console.error('getStudentProgress tool error:', err);
           return { signedIn: true, error: 'Progress could not be loaded right now.' };
         }
-
-        const tracks = (data || [])
-          .filter(row => TRACK_BY_STORAGE_KEY[row.storage_key])
-          .map(row => summarizeTrackProgress(TRACK_BY_STORAGE_KEY[row.storage_key], row.progress || {}));
-
-        return {
-          signedIn: true,
-          tracks,
-          ...(tracks.length === 0 && {
-            note: 'No saved progress yet — the student has not completed any modules or quizzes while signed in.',
-          }),
-        };
       },
     }),
 
@@ -108,21 +115,36 @@ export function buildTutorTools(student) {
         courseCode: z.string().describe('Course code, e.g. "CYB 224", "COS 111", "MTH 121"'),
       }),
       execute: async ({ courseCode }) => {
-        const outline = findCourse(courseCode);
-        if (!outline) {
+        const entry = findCourseEntry(courseCode);
+        if (!entry) {
           return `No course found matching "${courseCode}". Use a course code from the catalogue index.`;
         }
+        const { code: canonicalCode, outline } = entry;
 
         const db = getAnonDb();
-        if (!db) return outline;
+        // Without a canonical code there's no reliable key to match uploads on
+        // (notes-only match) — return the outline as-is.
+        if (!db || !canonicalCode) return outline;
 
-        const { data } = await db
-          .from('course_materials')
-          .select('display_name, description, extracted_text')
-          .eq('course_code', courseCode)
-          .not('extracted_text', 'is', null)
-          .order('uploaded_at', { ascending: false })
-          .limit(MAX_NOTES);
+        // The catalogue outline is the source of truth; uploaded notes are a
+        // bonus. Match on the CANONICAL code (e.g. "CYB 222") rather than the
+        // model's raw argument, so notes attach even when it passes "cyb 222"
+        // or "CYB222" — course_materials.course_code is an exact, case-sensitive
+        // column. A thrown rejection must not kill the model's text stream — on
+        // any failure, fall back to the outline.
+        let data;
+        try {
+          ({ data } = await db
+            .from('course_materials')
+            .select('display_name, description, extracted_text')
+            .eq('course_code', canonicalCode)
+            .not('extracted_text', 'is', null)
+            .order('uploaded_at', { ascending: false })
+            .limit(MAX_NOTES));
+        } catch (err) {
+          console.error('getCourseOutline note lookup error:', err);
+          return outline;
+        }
 
         if (!data || data.length === 0) return outline;
 

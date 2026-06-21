@@ -1,4 +1,5 @@
-import { BookOpen, Lightbulb, Table2, CheckSquare, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, XCircle, ChevronDown } from 'lucide-react';
 
 function DefinitionBox({ text }) {
   return (
@@ -126,11 +127,14 @@ function CaseStudy({ title, prompt, tasks }) {
   );
 }
 
-function Figure({ src, alt, caption }) {
+function Figure({ src, alt, caption, width, height }) {
   return (
     <figure className="mb-5">
       <div className="rounded-xl border border-coffee-200 bg-paper p-3">
-        <img src={src} alt={alt || caption || ''} loading="lazy" className="w-full h-auto rounded-lg" />
+        {/* width/height are the intrinsic pixel size — with w-full h-auto the
+            browser uses them only to reserve aspect-ratio space, preventing
+            layout shift as the lazy image loads. */}
+        <img src={src} alt={alt || caption || ''} loading="lazy" width={width} height={height} className="w-full h-auto rounded-lg" />
       </div>
       {caption && (
         <figcaption className="mt-2 text-xs font-mono text-coffee-500 text-center">{caption}</figcaption>
@@ -195,39 +199,113 @@ function Section({ section }) {
       {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
       {section.type === 'text' && <p className="text-sm text-coffee-700 leading-relaxed mb-3">{section.text}</p>}
       {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
-      {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} />}
+      {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} />}
+    </div>
+  );
+}
+
+function TopicAccordion({ topic, index, isOpen, onToggle }) {
+  const panelId = `lecture-panel-${index}`;
+  const buttonId = `lecture-header-${index}`;
+
+  return (
+    <div className="border border-coffee-200 rounded-xl bg-paper overflow-hidden">
+      {/* Header — heading wraps a real button (WAI-ARIA accordion pattern) */}
+      <h3 className="m-0">
+        <button
+          id={buttonId}
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={panelId}
+          onClick={onToggle}
+          className={`w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4 text-left transition-colors ${
+            isOpen ? 'bg-coffee-50' : 'hover:bg-coffee-50'
+          }`}
+        >
+          <span className="bg-ink text-cream font-mono text-xs font-bold px-2.5 py-1.5 rounded-lg shrink-0">
+            Topic {topic.number}
+          </span>
+          <span className="display-heading text-base sm:text-lg text-ink leading-snug flex-1">
+            {topic.title}
+          </span>
+          {topic.date && (
+            <span className="hidden sm:block text-xs font-mono text-coffee-500 shrink-0">{topic.date}</span>
+          )}
+          <ChevronDown
+            size={18}
+            className={`text-coffee-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+      </h3>
+
+      {/* Panel */}
+      {isOpen && (
+        <div
+          id={panelId}
+          role="region"
+          aria-labelledby={buttonId}
+          className="px-4 sm:px-5 pt-2 pb-5 border-t border-coffee-100"
+        >
+          {topic.date && (
+            <span className="sm:hidden text-xs font-mono text-coffee-500 mb-4 block">Lecture date: {topic.date}</span>
+          )}
+          {topic.sections.map((section, si) => (
+            <Section key={si} section={section} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 export default function LectureNotes({ topics }) {
+  // First topic open by default; rest collapsed.
+  const [openSet, setOpenSet] = useState(() => new Set([0]));
+
   if (!topics?.length) return null;
 
+  const allOpen = openSet.size === topics.length;
+
+  const toggle = (i) =>
+    setOpenSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+
+  const toggleAll = () =>
+    setOpenSet(allOpen ? new Set() : new Set(topics.map((_, i) => i)));
+
   return (
-    <div className="space-y-10">
-      {topics.map((topic, ti) => (
-        <div key={ti}>
-          {/* Topic header */}
-          <div className="flex items-start gap-4 mb-6 pb-4 border-b border-coffee-200">
-            <span className="bg-ink text-cream font-mono text-xs font-bold px-2.5 py-1.5 rounded-lg shrink-0 mt-0.5">
-              Topic {topic.number}
-            </span>
-            <div>
-              <h3 className="display-heading text-2xl text-ink leading-snug">{topic.title}</h3>
-              {topic.date && (
-                <span className="text-xs font-mono text-coffee-500 mt-0.5 block">Lecture date: {topic.date}</span>
-              )}
-            </div>
-          </div>
+    <div>
+      {/* Expand / collapse all */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-mono text-coffee-500">
+          {topics.length} {topics.length === 1 ? 'topic' : 'topics'}
+        </span>
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="text-xs font-mono font-medium text-coffee-600 hover:text-ink transition-colors"
+        >
+          {allOpen ? 'Collapse all' : 'Expand all'}
+        </button>
+      </div>
 
-          {/* Sections */}
-          {topic.sections.map((section, si) => (
-            <Section key={si} section={section} />
-          ))}
-        </div>
-      ))}
+      <div className="space-y-3">
+        {topics.map((topic, ti) => (
+          <TopicAccordion
+            key={ti}
+            topic={topic}
+            index={ti}
+            isOpen={openSet.has(ti)}
+            onToggle={() => toggle(ti)}
+          />
+        ))}
+      </div>
 
-      <div className="flex items-center gap-2 text-xs text-coffee-500 font-mono pt-2 border-t border-coffee-100">
+      <div className="flex items-center gap-2 text-xs text-coffee-500 font-mono pt-5 mt-2">
         <BookOpen size={11} />
         End of uploaded lecture notes · More topics will appear as notes are added
       </div>

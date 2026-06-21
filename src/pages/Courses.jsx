@@ -419,6 +419,14 @@ export default function Courses() {
     } catch { /* private mode — picker shows again next visit */ }
   }, [activeLevel]);
 
+  // Stepping through the picker (level → semester → courses) only changes the
+  // query string, so App's pathname-based ScrollToTop never fires. Without this,
+  // tapping a semester card lower on a phone screen opens the next view already
+  // scrolled past its heading, mid-list. Reset to the top on each step.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeLevel, activeSemester]);
+
   const totalCourses = courses.length;
   const totalUnits = courses.reduce((s, c) => s + c.units, 0);
   const interactiveCourses = courses.filter(c => c.hasInteractiveModules).length;
