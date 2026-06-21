@@ -11,3 +11,7 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .vercel
+
+# LLM council generated artifacts
+council-report-*.html
+council-transcript-*.md
