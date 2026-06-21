@@ -227,12 +227,15 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Custom email templates (6-digit code via {{ .Token }}) are DEFERRED: the free
-# tier with the default email provider rejects template overrides (HTTP 400),
-# which fails the entire [auth] config push. Until a custom SMTP provider (Brevo)
-# is configured, these stay commented so the rest of the auth config can push and
-# emails fall back to Supabase's default magic-link templates. Re-enable both
-# blocks once [auth.email.smtp] is set up.
+# Custom email templates (6-digit code via {{ .Token }}) are configured in the
+# HOSTED Supabase DASHBOARD, not here: the free tier with the default email
+# provider rejects template overrides via the CLI (HTTP 400), which fails the
+# entire [auth] config push. So the live "Magic Link" (returning users) and
+# "Confirm signup" (first-time users) templates are pasted manually in the
+# dashboard from supabase/templates/magic_link.html and confirmation.html —
+# email OTP IS set up, despite these blocks staying commented. Once a custom SMTP
+# provider (Brevo) is configured under [auth.email.smtp], uncomment both blocks
+# below to manage the templates from this file instead of the dashboard.
 # [auth.email.template.magic_link]
 # subject = "Your Arete sign-in code"
 # content_path = "./supabase/templates/magic_link.html"
