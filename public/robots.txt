@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /signin
+Disallow: /setup-profile
+Disallow: /welcome
+
+Sitemap: https://www.aretecyb.tech/sitemap.xml
