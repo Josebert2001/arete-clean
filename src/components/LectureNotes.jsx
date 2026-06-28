@@ -77,8 +77,10 @@ function ProsCons({ advantages, disadvantages }) {
 
 function ComparisonTable({ title, headers, rows }) {
   return (
-    <div className="mb-5 overflow-x-auto rounded-xl border border-coffee-200">
-      <table className="w-full text-sm">
+    <div className="mb-5">
+      {title && <h4 className="font-display font-bold text-ink mb-2">{title}</h4>}
+      <div className="overflow-x-auto rounded-xl border border-coffee-200">
+        <table className="w-full text-sm">
         <thead>
           <tr className="bg-ink text-cream">
             {headers.map((h, i) => (
@@ -99,7 +101,8 @@ function ComparisonTable({ title, headers, rows }) {
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }

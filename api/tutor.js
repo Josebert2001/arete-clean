@@ -70,7 +70,7 @@ const STREAM_ERROR_MARKER = '<<arete:stream-error>>';
 // Accepts either { messages: [{role, content}...] } (multi-turn) or the
 // legacy { question } shape. Returns a clean ModelMessage array, or a string
 // describing the validation error.
-function normalizeMessages(body) {
+export function normalizeMessages(body) {
   const { question, messages } = body || {};
 
   if (Array.isArray(messages)) {
@@ -101,7 +101,7 @@ function normalizeMessages(body) {
 
 // Strip newlines, brackets, and control chars before interpolating profile
 // values into the system prompt — same injection guard used for moduleContext.
-function sanitizeContextValue(value, max = 60) {
+export function sanitizeContextValue(value, max = 60) {
   return String(value || '')
     .replace(/[\r\n[\]]/g, ' ')
     // eslint-disable-next-line no-control-regex -- deliberately strip control chars to block prompt injection

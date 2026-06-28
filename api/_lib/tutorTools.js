@@ -29,7 +29,7 @@ const MAX_NOTES = 3;
 // display_name/description are set by students at upload time. Strip newlines,
 // "=" (so a crafted name can't forge a "=== ... ===" note boundary), and
 // control chars before interpolating them into the note header.
-function sanitizeLabel(value) {
+export function sanitizeLabel(value) {
   return String(value || '')
     .replace(/[\r\n]+/g, ' ')
     .replace(/=/g, '')

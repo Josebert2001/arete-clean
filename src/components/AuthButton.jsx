@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { LogIn, LogOut, UserCircle2, CloudUpload } from 'lucide-react';
+import { LogIn, LogOut, CloudUpload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
