@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, PlayCircle, TrendingUp } from 'lucide-react';
+import { ArrowRight, CheckCircle2, PlayCircle, TrendingUp, CloudUpload, LogIn } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useAuth } from '../context/AuthContext';
 import { useProgress } from './useProgress';
@@ -15,7 +15,7 @@ function getTrackProgress(track, progress) {
 }
 
 export default function ProgressDashboard() {
-  const { user } = useAuth();
+  const { user, authEnabled } = useAuth();
   // useProgress merges cloud-synced progress for signed-in students, so the
   // dashboard matches the track pages on any device — not just this one.
   const progressBySlug = {
@@ -31,6 +31,12 @@ export default function ProgressDashboard() {
   const started = tracks.filter(t => t.completed > 0);
   if (started.length === 0) return null;
 
+  const totalCompleted = started.reduce((sum, t) => sum + t.completed, 0);
+  // A signed-out student with real progress is the moment signing in pays off:
+  // their work currently lives only in this browser. Only nudge when auth is
+  // actually configured — otherwise there's nothing to sign in to.
+  const showGuestNudge = !user && authEnabled;
+
   return (
     <section className="max-w-6xl mx-auto px-6 pb-8">
       <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8">
@@ -41,6 +47,26 @@ export default function ProgressDashboard() {
             {user ? 'synced to your account' : 'saved on this device'}
           </span>
         </div>
+
+        {showGuestNudge && (
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-moss/8 border border-moss/20 rounded-xl px-4 py-3.5">
+            <CloudUpload size={20} className="text-moss shrink-0" />
+            <p className="text-sm text-coffee-800 flex-1 leading-snug">
+              You&rsquo;ve completed{' '}
+              <span className="font-bold text-ink">
+                {totalCompleted} module{totalCompleted !== 1 ? 's' : ''}
+              </span>
+              {' '}&mdash; but only on this device. Sign in (one tap, no password) to keep your progress
+              safe, pick up on your phone, and let the AI Tutor tailor help to where you are.
+            </p>
+            <Link
+              to="/signin"
+              className="btn-primary shrink-0 text-sm inline-flex items-center gap-1.5 whitespace-nowrap"
+            >
+              <LogIn size={14} /> Sign in to save
+            </Link>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {started.map(({ track, completed, total, percent, nextModule }) => (

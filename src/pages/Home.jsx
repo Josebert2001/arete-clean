@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Sparkles, GraduationCap, Shield, X } from 'lucide-react';
 import ProgressDashboard from '../components/ProgressDashboard';
+import { LevelGatePrompt } from '../components/LevelGatePrompt';
+import { useLevelGate } from '../components/useLevelGate';
 
 // Only the two active levels
 const levelCards = [
@@ -66,6 +68,12 @@ function OnboardingBanner() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const navigate = useNavigate();
+  // Picking a level here routes through the same soft sign-in prompt as the
+  // Course Hub; signed-in students and confirmed guests go straight to the year.
+  const { gateLevel, requestLevel, continueAsGuest, gateSignIn, closeGate } =
+    useLevelGate((level) => navigate(`/courses?level=${level}`));
+
   return (
     <div>
 
@@ -111,9 +119,9 @@ export default function Home() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {levelCards.map(({ level, icon: Icon, color, text, description }) => (
-                <Link
+                <button
                   key={level}
-                  to={`/courses?level=${level}`}
+                  onClick={() => requestLevel(level)}
                   className={`${color} ${text} rounded-2xl p-5 text-left group transition-all duration-200 flex flex-col gap-3 hover:scale-[1.03] hover:shadow-xl ring-2 ring-transparent hover:ring-white/20`}
                 >
                   <Icon size={22} className="opacity-80" />
@@ -124,7 +132,7 @@ export default function Home() {
                   <span className="inline-flex items-center gap-1 text-xs font-medium mt-auto opacity-80 group-hover:opacity-100 transition-opacity">
                     Browse courses <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
                   </span>
-                </Link>
+                </button>
               ))}
             </div>
 
@@ -194,6 +202,15 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {gateLevel !== null && (
+        <LevelGatePrompt
+          level={gateLevel}
+          onSignIn={gateSignIn}
+          onGuest={continueAsGuest}
+          onClose={closeGate}
+        />
+      )}
 
     </div>
   );

@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield, Search, X } from 'lucide-react';
 import { courses, getCoursesByLevelAndSemester, LEVELS, levelMeta } from '../data/courses';
 import { trackMeta } from '../data/trackMeta';
+import { LevelGatePrompt } from '../components/LevelGatePrompt';
+import { useLevelGate, LEVEL_STORAGE_KEY } from '../components/useLevelGate';
 import { usePageTitle } from '../utils/usePageTitle';
 
 const trackIcons = { java: Coffee, python: Code2, c: Terminal };
@@ -338,8 +340,6 @@ function SemesterCoursesView({ level, semester, onBack, onSwitchSemester, onShow
   );
 }
 
-const LEVEL_STORAGE_KEY = 'arete-selected-level';
-
 // 'all' | 100 | 200 | 300 | 400 | null (invalid/absent)
 function parseLevel(value) {
   if (value === 'all') return 'all';
@@ -391,6 +391,11 @@ export default function Courses() {
   function selectLevel(level) {
     setSearchParams({ level: String(level) });
   }
+
+  // Clicking a specific year while signed out shows a dismissible sign-in nudge
+  // first. "All years" and internal navigation pass straight through. The gating
+  // logic (and per-session guest memory) is shared with the Home level cards.
+  const { gateLevel, requestLevel, continueAsGuest, gateSignIn, closeGate } = useLevelGate(selectLevel);
 
   function selectSemester(sem) {
     setSearchParams({ level: String(activeLevel), semester: String(sem) });
@@ -564,7 +569,7 @@ export default function Courses() {
           return (
             <button
               key={level}
-              onClick={() => selectLevel(level)}
+              onClick={() => requestLevel(level)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                 activeLevel === level ? 'bg-ink text-cream' : 'bg-coffee-100 text-coffee-700 hover:bg-coffee-200'
               }`}
@@ -639,7 +644,7 @@ export default function Courses() {
       {/* Course listings — level picker → semester picker → that semester's courses */}
       {!isFiltering && (
         activeLevel === null ? (
-          <LevelPicker onSelect={selectLevel} />
+          <LevelPicker onSelect={requestLevel} />
         ) : activeLevel === 'all' ? (
           <div>
             <div className="flex items-center gap-3 mb-10">
@@ -695,6 +700,15 @@ export default function Courses() {
           Ask AI Tutor <ArrowRight size={14} />
         </Link>
       </div>
+
+      {gateLevel !== null && (
+        <LevelGatePrompt
+          level={gateLevel}
+          onSignIn={gateSignIn}
+          onGuest={continueAsGuest}
+          onClose={closeGate}
+        />
+      )}
     </div>
   );
 }
