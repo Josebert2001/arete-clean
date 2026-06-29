@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap } from 'lucide-react';
 import { getCourseBySlug, courses } from '../data/courses';
 import LectureNotes from '../components/LectureNotes';
+import CourseQuiz from '../components/CourseQuiz';
 import CourseMaterials from '../components/CourseMaterials';
 import CourseAIChat from '../components/CourseAIChat';
 import Breadcrumbs from '../components/Breadcrumbs';
@@ -51,6 +52,7 @@ export default function CourseDetail() {
   const prev = courseIndex > 0 ? courses[courseIndex - 1] : null;
   const next = courseIndex < courses.length - 1 ? courses[courseIndex + 1] : null;
   const hasNotes = course.lectureNotes?.length > 0;
+  const hasQuiz = course.quiz?.length > 0;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
@@ -120,6 +122,7 @@ export default function CourseDetail() {
         {[
           { key: 'resources', label: 'Study Resources', icon: BookOpen },
           ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} topics` }] : []),
+          ...(hasQuiz ? [{ key: 'quiz', label: 'Practice Quiz', icon: GraduationCap, badge: `${course.quiz.length} Q` }] : []),
           { key: 'materials', label: 'Materials', icon: Paperclip },
         ].map(({ key, label, icon: Icon, badge }) => (
           <button
@@ -144,6 +147,13 @@ export default function CourseDetail() {
       {activeTab === 'notes' && hasNotes && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
           <LectureNotes topics={course.lectureNotes} />
+        </div>
+      )}
+
+      {/* Practice Quiz tab */}
+      {activeTab === 'quiz' && hasQuiz && (
+        <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <CourseQuiz course={course} />
         </div>
       )}
 

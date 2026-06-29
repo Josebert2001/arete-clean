@@ -7,6 +7,7 @@ import { modules } from '../src/data/modules.js';
 import { pythonModules } from '../src/data/pythonModules.js';
 import { cModules } from '../src/data/cModules.js';
 import { trackMeta } from '../src/data/trackMeta.js';
+import { courses } from '../src/data/courses.js';
 
 const tracks = [
   { name: 'java',   modules },
@@ -112,6 +113,32 @@ for (const { name, modules: list } of tracks) {
     if (idx.id !== m.id || idx.number !== m.number || idx.title !== m.title) {
       errors.push(`[${name}] trackMeta.moduleIndex[${i}] (${idx.id} #${idx.number} "${idx.title}") does not match module (${m.id} #${m.number} "${m.title}")`);
     }
+  });
+}
+
+// Some courses ship a practice-quiz bank (course.quiz). Students pick how many
+// questions to draw, so there is no fixed count — but every question must still
+// be well-formed, with an in-range correctIndex, or a quiz could break silently.
+for (const c of courses) {
+  if (!c.quiz) continue;
+  const where = (qi, suffix) => `[course ${c.code ?? c.slug ?? '?'}] quiz[${qi}]: ${suffix}`;
+  if (!Array.isArray(c.quiz) || c.quiz.length === 0) {
+    errors.push(`[course ${c.code ?? c.slug}] quiz must be a non-empty array`);
+    continue;
+  }
+  c.quiz.forEach((q, qi) => {
+    check(isNonEmptyString(q?.question), where(qi, 'question missing'));
+    check(Array.isArray(q?.options) && q.options.length >= 2,
+          where(qi, 'options must have at least 2 entries'));
+    check(typeof q?.correctIndex === 'number', where(qi, 'correctIndex missing'));
+    if (Array.isArray(q?.options) && typeof q?.correctIndex === 'number') {
+      check(q.correctIndex >= 0 && q.correctIndex < q.options.length,
+            where(qi, `correctIndex out of range (got ${q.correctIndex}, ${q.options.length} options)`));
+    }
+    (q?.options || []).forEach((opt, oi) => {
+      check(isNonEmptyString(opt), where(qi, `options[${oi}] empty`));
+    });
+    check(isNonEmptyString(q?.explanation), where(qi, 'explanation missing'));
   });
 }
 
