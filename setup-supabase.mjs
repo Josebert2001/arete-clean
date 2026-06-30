@@ -211,6 +211,22 @@ async function main() {
       updated_at  TIMESTAMPTZ DEFAULT NOW()
     );
   `);
+  // Mirror the SetupProfile.jsx form rule at the database level so direct
+  // Supabase writes or future clients can't persist a junk reg_number: it must
+  // contain at least one letter and one digit and be ≥4 chars (e.g. CYB/21/1234).
+  // Added as a named constraint via an idempotent guard so re-running the script
+  // — and existing databases created before this rule — both end up with it.
+  await sql(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'profiles_reg_number_valid'
+      ) THEN
+        ALTER TABLE profiles
+          ADD CONSTRAINT profiles_reg_number_valid
+          CHECK (reg_number ~ '[A-Za-z]' AND reg_number ~ '[0-9]' AND char_length(reg_number) >= 4);
+      END IF;
+    END $$;
+  `);
   await sql(`ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;`);
   await sql(`
     DO $$ BEGIN

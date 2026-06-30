@@ -216,19 +216,17 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-# Kept OFF: this is a passwordless 6-digit OTP app — typing the emailed code
-# already proves inbox ownership, so a separate confirmation step is redundant.
-# With confirmations ON, first-time signups received Supabase's default
-# "Confirm signup" LINK email instead of the custom 6-digit code, leaving new
-# users stuck at the code-entry screen. Mirrors the live project setting
-# (mailer_autoconfirm = true).
+# Kept OFF: this app uses passwordless magic links, so clicking the emailed
+# sign-in link proves inbox ownership without a separate confirmation email.
+# Mirrors the live project setting (mailer_autoconfirm = true).
 enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
 max_frequency = "1m0s"
-# Number of characters used in the email OTP. Must stay 6 to match the SignIn
-# code-entry UI (src/pages/SignIn.jsx requires exactly 6 digits).
+# Number of characters in the email OTP token embedded in the magic-link.
+# Supabase's default of 6 is fine — the user clicks the link rather than
+# typing the code, so this value isn't surfaced in the SignIn UI.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
