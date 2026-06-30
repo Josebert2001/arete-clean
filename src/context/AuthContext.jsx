@@ -9,7 +9,6 @@ const AuthContext = createContext({
   profileComplete: false,
   authEnabled: false,
   signInWithEmail: async () => {},
-  verifyEmailOtp: async () => {},
   signInWithGoogle: async () => {},
   signOut: async () => {},
   refreshProfile: async () => {},
@@ -61,17 +60,22 @@ export function AuthProvider({ children }) {
     return () => sub.subscription.unsubscribe();
   }, [loadProfile]);
 
-  // Passwordless sign-in via a 6-digit email code (not a magic link). The code
-  // is shown only if the Supabase "Magic Link" email template includes the
-  // {{ .Token }} variable; the user then enters it via verifyEmailOtp.
+  // Passwordless sign-in via a magic link emailed to the student. Supabase's
+  // free tier + default email provider only supports its built-in *link*
+  // template — custom 6-digit-code templates require a paid plan or custom
+  // SMTP — so we use the link flow: the student clicks the emailed link, lands
+  // back on /signin, and the PKCE code in the URL is exchanged for a session
+  // automatically (detectSessionInUrl). shouldCreateUser registers first-time
+  // students. Note: PKCE ties the link to the browser that requested it, so it
+  // must be opened on the same device.
   const signInWithEmail = (email) =>
     supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: true },
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: `${window.location.origin}/signin`,
+      },
     });
-
-  const verifyEmailOtp = (email, token) =>
-    supabase.auth.verifyOtp({ email, token, type: 'email' });
 
   // Google OAuth. Supabase redirects the user to Google, then back to its own
   // /auth/v1/callback, then here to /signin — whose route guards forward a
@@ -96,7 +100,6 @@ export function AuthProvider({ children }) {
       profileComplete: !!profile,
       authEnabled: isConfigured,
       signInWithEmail,
-      verifyEmailOtp,
       signInWithGoogle,
       signOut,
       refreshProfile,
