@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle2, CloudUpload, BookOpen, BrainCircuit, Shield } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle2, CloudUpload, BookOpen, BrainCircuit, Shield, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
 
@@ -25,7 +25,7 @@ function GoogleIcon({ size = 16 }) {
 
 export default function SignIn() {
   usePageTitle('Sign In');
-  const { user, profileComplete, authLoading, signInWithEmail, verifyEmailOtp, signInWithGoogle } = useAuth();
+  const { user, profileComplete, profileLoading, authLoading, authEnabled, signInWithEmail, verifyEmailOtp, signInWithGoogle } = useAuth();
   const [email,  setEmail]  = useState('');
   const [code,   setCode]   = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
@@ -34,8 +34,40 @@ export default function SignIn() {
   const [verifyError, setVerifyError] = useState('');
   const [googleStatus, setGoogleStatus] = useState('idle'); // idle | redirecting | error
 
-  if (!authLoading && user && profileComplete)  return <Navigate to="/" replace />;
-  if (!authLoading && user && !profileComplete) return <Navigate to="/setup-profile" replace />;
+  if (!authLoading && user && profileComplete) return <Navigate to="/" replace />;
+  // Only route an incomplete-profile user to setup once their profile has
+  // actually been fetched — otherwise a returning user whose profile is still
+  // loading (e.g. right after a Google redirect) flashes through /setup-profile
+  // before being bounced back. While it loads, show a spinner, not the form.
+  if (!authLoading && user && !profileLoading && !profileComplete) return <Navigate to="/setup-profile" replace />;
+  if (!authLoading && user) {
+    return (
+      <div className="min-h-[calc(100vh-4.5rem)] flex items-center justify-center" role="status" aria-label="Signing in">
+        <Loader2 size={22} className="animate-spin text-coffee-500" />
+        <span className="sr-only">Signing you in…</span>
+      </div>
+    );
+  }
+
+  // Supabase not configured (missing env vars): the auth actions would call
+  // into a null client and throw, so surface an unavailable state instead of
+  // rendering a form that crashes on submit. Mirrors how AuthButton hides the
+  // sign-in link when auth is disabled.
+  if (!authLoading && !authEnabled) {
+    return (
+      <div className="min-h-[calc(100vh-4.5rem)] flex flex-col items-center justify-center px-6 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-coffee-100 flex items-center justify-center mb-6">
+          <Shield size={22} className="text-coffee-600" />
+        </div>
+        <h1 className="font-display text-2xl font-bold text-ink mb-2">Sign-in is unavailable</h1>
+        <p className="text-coffee-700 max-w-sm leading-relaxed mb-8">
+          Accounts aren't configured for this deployment yet. You can still browse the
+          curriculum, code lab, and tutor as a guest.
+        </p>
+        <Link to="/" className="btn-primary text-sm">Back to Arete</Link>
+      </div>
+    );
+  }
 
   const send = async (e) => {
     e.preventDefault();

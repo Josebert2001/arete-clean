@@ -27,6 +27,12 @@ export default function SetupProfile() {
     const reg  = reg_number.trim().toUpperCase();
     if (!name || !reg || !level) { setError('Please fill in all fields.'); return; }
     if (reg.length < 4)          { setError('Enter a valid reg number.'); return; }
+    // A real reg number always mixes letters and digits (e.g. CYB/21/1234);
+    // reject obvious junk before it lands in the department record.
+    if (!/[A-Z]/.test(reg) || !/[0-9]/.test(reg)) {
+      setError('Enter a valid reg number — it should contain both letters and digits.');
+      return;
+    }
 
     setSaving(true);
     setError('');
