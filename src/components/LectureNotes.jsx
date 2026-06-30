@@ -198,7 +198,8 @@ function Section({ section }) {
       {section.type === 'termlist' && <TermList items={section.items} />}
       {section.type === 'bullets' && <BulletList items={section.items} />}
       {section.type === 'proscons' && <ProsCons advantages={section.advantages} disadvantages={section.disadvantages} />}
-      {section.type === 'table' && <ComparisonTable title={section.heading} headers={section.headers} rows={section.rows} />}
+      {/* heading is rendered by the section-level <h4> above, like every other type — don't repeat it inside the table */}
+      {section.type === 'table' && <ComparisonTable headers={section.headers} rows={section.rows} />}
       {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
       {section.type === 'text' && <p className="text-sm text-coffee-700 leading-relaxed mb-3">{section.text}</p>}
       {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
