@@ -14,22 +14,9 @@
     <title>Arete — Code Your Excellence</title>
     <meta name="description" content="Academic companion for B.Sc. Cybersecurity at the University of Uyo — every course from 100L to 400L, interactive Java, Python & C tracks, and an AI tutor that knows the curriculum." />
     <meta name="theme-color" content="#FAF6EC" />
-    <!-- Apply the saved/system theme before first paint to avoid a flash. -->
-    <script>
-      (function () {
-        try {
-          var stored = localStorage.getItem('arete-theme');
-          var dark = stored
-            ? stored === 'dark'
-            : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (dark) {
-            document.documentElement.classList.add('dark');
-            var m = document.querySelector('meta[name="theme-color"]');
-            if (m) m.setAttribute('content', '#000000');
-          }
-        } catch (e) { /* ignore */ }
-      })();
-    </script>
+    <!-- Apply the saved/system theme before first paint to avoid a flash.
+         External (not inline) so it satisfies the strict CSP without a hash. -->
+    <script src="/theme-init.js"></script>
     <link rel="canonical" href="https://www.aretecyb.tech/" />
 
     <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
