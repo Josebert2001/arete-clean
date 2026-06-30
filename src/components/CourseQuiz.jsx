@@ -19,18 +19,6 @@ function sample(arr, n) {
   return copy.slice(0, n);
 }
 
-// Shuffle a question's options so the correct answer isn't always in the same
-// position (authored banks can skew toward one index). correctIndex is remapped
-// to wherever the right option lands, and every attempt re-randomises.
-function shuffleOptions(q) {
-  const opts = q.options.map((text, i) => ({ text, correct: i === q.correctIndex }));
-  for (let i = opts.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [opts[i], opts[j]] = [opts[j], opts[i]];
-  }
-  return { ...q, options: opts.map((o) => o.text), correctIndex: opts.findIndex((o) => o.correct) };
-}
-
 export default function CourseQuiz({ course }) {
   const bank = course.quiz || [];
   const { progress, setQuizScore } = useProgress(STORAGE_KEY);
@@ -45,7 +33,7 @@ export default function CourseQuiz({ course }) {
 
   const start = (count) => {
     const n = Math.max(1, Math.min(count, bank.length));
-    setQuestions(sample(bank, n).map(shuffleOptions));
+    setQuestions(sample(bank, n));
     setAttempt((a) => a + 1);
     setError('');
   };

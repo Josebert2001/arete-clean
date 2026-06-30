@@ -3,7 +3,23 @@ import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 
 const PASS_MARK = 70;
 
+// Shuffle a question's options so the correct answer isn't always in the same
+// position — authored banks tend to skew correctIndex toward one or two slots,
+// which makes the answer guessable when options render in declared order.
+// correctIndex is remapped to wherever the right option lands.
+function shuffleOptions(q) {
+  const opts = q.options.map((text, i) => ({ text, correct: i === q.correctIndex }));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return { ...q, options: opts.map((o) => o.text), correctIndex: opts.findIndex((o) => o.correct) };
+}
+
 export default function Quiz({ questions, onComplete }) {
+  // Options are shuffled once per attempt (mount), and again on retake. The
+  // prop stays stable for a given mount, so this initializer runs exactly once.
+  const [items, setItems] = useState(() => questions.map(shuffleOptions));
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answered, setAnswered] = useState(false);
@@ -11,7 +27,7 @@ export default function Quiz({ questions, onComplete }) {
   const [answers, setAnswers] = useState([]);
   const [finished, setFinished] = useState(false);
 
-  const q = questions[current];
+  const q = items[current];
 
   const handleSelect = (idx) => {
     if (answered) return;
@@ -22,18 +38,19 @@ export default function Quiz({ questions, onComplete }) {
   };
 
   const next = () => {
-    if (current + 1 < questions.length) {
+    if (current + 1 < items.length) {
       setCurrent(c => c + 1);
       setSelected(null);
       setAnswered(false);
     } else {
       setFinished(true);
       const finalScore = score;
-      if (onComplete) onComplete(finalScore, questions.length);
+      if (onComplete) onComplete(finalScore, items.length);
     }
   };
 
   const restart = () => {
+    setItems(questions.map(shuffleOptions));
     setCurrent(0);
     setSelected(null);
     setAnswered(false);
@@ -43,7 +60,7 @@ export default function Quiz({ questions, onComplete }) {
   };
 
   if (finished) {
-    const percent = Math.round((score / questions.length) * 100);
+    const percent = Math.round((score / items.length) * 100);
     const passed = percent >= PASS_MARK;
     return (
       <div className="bg-paper border border-coffee-200 rounded-xl p-6 sm:p-8">
@@ -54,7 +71,7 @@ export default function Quiz({ questions, onComplete }) {
               : <RotateCcw size={36} className="text-rust" />}
           </div>
           <h3 className="display-heading text-3xl text-ink mb-1">
-            {score} / {questions.length} <span className="text-coffee-500 text-xl">({percent}%)</span>
+            {score} / {items.length} <span className="text-coffee-500 text-xl">({percent}%)</span>
           </h3>
           <p className="text-xs font-mono text-coffee-500 mb-3">Pass mark: {PASS_MARK}%</p>
           <p className="text-coffee-700">
@@ -67,7 +84,7 @@ export default function Quiz({ questions, onComplete }) {
         {/* Per-question breakdown */}
         <div className="space-y-2 mb-6 text-left">
           <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-2">Question breakdown</p>
-          {questions.map((question, i) => {
+          {items.map((question, i) => {
             const correct = answers[i] === question.correctIndex;
             return (
               <div
@@ -106,12 +123,12 @@ export default function Quiz({ questions, onComplete }) {
       {/* Progress */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-xs font-mono uppercase tracking-wider text-coffee-700">
-          Question {current + 1} of {questions.length}
+          Question {current + 1} of {items.length}
           <span className="mx-2 text-coffee-300">|</span>
           Pass mark: {PASS_MARK}%
         </span>
         <div className="flex flex-wrap gap-1.5 sm:justify-end">
-          {questions.map((_, i) => (
+          {items.map((_, i) => (
             <div
               key={i}
               className={`progress-dot ${
@@ -180,7 +197,7 @@ export default function Quiz({ questions, onComplete }) {
 
       {answered && (
         <button onClick={next} className="btn-primary w-full justify-center">
-          {current + 1 < questions.length ? 'Next Question' : 'See Results'}
+          {current + 1 < items.length ? 'Next Question' : 'See Results'}
         </button>
       )}
     </div>
