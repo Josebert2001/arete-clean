@@ -77,6 +77,16 @@ Every external service this project calls. Check here before adding any new API 
 
 ---
 
+## Text Extraction (`api/extract.js` — mammoth + pdf-parse)
+
+- **What it does:** Downloads a just-uploaded file from the public-read `course-materials` Supabase Storage bucket and extracts its plain text (`.txt` native, `.docx` via mammoth, `.pdf` via pdf-parse) so the AI Tutor can reference it as lecture notes. Other file types return `{ text: null }` — non-fatal, the upload still succeeds.
+- **When to use:** Called by `CourseMaterials.jsx` right after a file upload; adding support for a new extractable file type
+- **How to call it:** `POST /api/extract` with `{ filePath, fileType }` and the user's Bearer token. `filePath` must match `<courseSlug>/<uploadedAtMs>-<rand>.<ext>` with a timestamp less than 10 minutes old — this scopes extraction to files the caller just uploaded.
+- **What NOT to do:** Don't loosen the file-path regex or the 10-minute upload-age window (they stop signed-in users from re-extracting arbitrary bucket paths); don't raise the 50,000-char text cap without checking the tutor's context budget; don't add new parser dependencies without asking first
+- **Rate limits:** 20 req/10min/IP (in-memory, namespace `extract`); sign-in required
+
+---
+
 ## Vercel AI SDK (`ai` package)
 
 - **What it does:** Provides `streamText`, `generateText`, and streaming response helpers that work with Vercel's edge/serverless runtime
