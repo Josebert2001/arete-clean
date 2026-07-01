@@ -68,20 +68,20 @@ public class Greeter {
     practiceQuestions: [
       {
         question: 'Which data type would you use to store the price of a textbook (e.g. 4500.50)?',
-        options: ['int', 'double', 'String', 'boolean'],
-        correctIndex: 1,
+        options: ['double', 'int', 'String', 'boolean'],
+        correctIndex: 0,
         explanation: 'double is used for decimal numbers. int only stores whole numbers, so it would lose the .50.'
       },
       {
         question: 'What does System.out.println() do?',
-        options: ['Reads input from the user', 'Prints text and moves to a new line', 'Creates a new variable', 'Deletes a file'],
+        options: ['Reads a line of input typed in by the user', 'Prints text and moves to a new line', 'Creates a new variable', 'Deletes a file'],
         correctIndex: 1,
         explanation: 'println prints whatever you pass to it AND moves the cursor to a new line. print() prints without a new line.'
       },
       {
         question: 'Which of these is a valid Java variable declaration?',
-        options: ['int 2age = 20;', 'String name = "Amaka";', 'double = 4.5;', 'boolean is-student = true;'],
-        correctIndex: 1,
+        options: ['int 2age = 20;', 'double = 4.5;', 'String name = "Amaka";', 'boolean is-student = true;'],
+        correctIndex: 2,
         explanation: 'Variable names cannot start with numbers, must have a name, and cannot contain hyphens.'
       },
     ],
@@ -172,20 +172,20 @@ switch (day) {
     practiceQuestions: [
       {
         question: 'What does the && operator do?',
-        options: ['Returns true if either condition is true', 'Returns true only if BOTH conditions are true', 'Flips true to false', 'Joins two strings'],
-        correctIndex: 1,
+        options: ['Returns true if either one of the conditions is true', 'Flips true to false', 'Joins two strings', 'Returns true only if BOTH conditions are true'],
+        correctIndex: 3,
         explanation: '&& is the logical AND — both sides must be true. || is OR (either side).'
       },
       {
         question: 'What happens if you forget the break in a switch case?',
-        options: ['The program crashes', 'Nothing — it works the same', 'Execution falls through to the next case', 'The compiler removes it automatically'],
-        correctIndex: 2,
+        options: ['Execution falls through to the next case', 'The program crashes', 'Nothing — it works the same', 'The compiler removes the case labels automatically'],
+        correctIndex: 0,
         explanation: 'Without break, Java continues running the next case too. This is called "fall-through" and is a common bug.'
       },
       {
         question: 'Given: int x = 50; if (x > 40) { ... } else if (x > 60) { ... } — which block runs?',
-        options: ['The first one (x > 40)', 'The second one (x > 60)', 'Both run', 'Neither runs'],
-        correctIndex: 0,
+        options: ['The second one (x > 60)', 'The first one (x > 40)', 'Both run', 'Neither runs'],
+        correctIndex: 1,
         explanation: 'Java stops at the first true condition. Even though x is not > 60, the first condition already matched so the second is skipped.'
       },
     ],
@@ -284,20 +284,20 @@ System.out.println("Goodbye!");`,
     practiceQuestions: [
       {
         question: 'Which loop ALWAYS runs at least once, even if the condition is false?',
-        options: ['for', 'while', 'do-while', 'forever'],
+        options: ['for', 'while loop', 'do-while', 'forever'],
         correctIndex: 2,
         explanation: 'do-while checks the condition AFTER running the body, so the body always runs at least once.'
       },
       {
         question: 'What does i++ mean in a for loop?',
-        options: ['i is doubled', 'i is increased by 1', 'i is set to 1', 'i is compared to 1'],
-        correctIndex: 1,
+        options: ['i is doubled', 'i is set to 1', 'i is compared with the value 1', 'i is increased by 1'],
+        correctIndex: 3,
         explanation: 'i++ is shorthand for i = i + 1. It increases i by 1 each round.'
       },
       {
         question: 'What does break do in a loop?',
-        options: ['Pauses the loop', 'Skips one iteration', 'Exits the loop completely', 'Restarts the loop'],
-        correctIndex: 2,
+        options: ['Exits the loop completely', 'Pauses the loop', 'Skips the current iteration', 'Restarts the loop'],
+        correctIndex: 0,
         explanation: 'break exits the entire loop immediately. continue skips one iteration. There is no "pause" in Java loops.'
       },
     ],
@@ -411,8 +411,8 @@ for (int i = 0; i < grid.length; i++) {
       },
       {
         question: 'Can you change the size of an array after creating it?',
-        options: ['Yes, just assign new values', 'Yes, using .resize()', 'No, arrays have fixed size', 'Only if it is an int array'],
-        correctIndex: 2,
+        options: ['Yes, just assign new values', 'Yes, using .resize()', 'Only if it is an int array', 'No, arrays have fixed size'],
+        correctIndex: 3,
         explanation: 'Arrays in Java are fixed-size. To resize, you create a new array and copy values. ArrayList (later) solves this.'
       },
     ],
@@ -519,13 +519,13 @@ System.out.println(factorial(5));  // Output: 120`,
     practiceQuestions: [
       {
         question: 'What does void mean in a method declaration?',
-        options: ['The method has no name', 'The method returns nothing', 'The method takes no parameters', 'The method is empty'],
-        correctIndex: 1,
+        options: ['The method returns nothing', 'The method has no name', 'The method takes no parameters', 'The method is empty'],
+        correctIndex: 0,
         explanation: 'void means the method performs an action but does not return a value to the caller.'
       },
       {
         question: 'What is method overloading?',
-        options: ['When a method calls itself', 'Multiple methods with the same name but different parameters', 'When a method has too many parameters', 'When a method is too long'],
+        options: ['When a method calls itself', 'Multiple methods with the same name but different parameters', 'When a single method accepts too many parameters', 'When a method is too long'],
         correctIndex: 1,
         explanation: 'Overloading lets you have several versions of the same method, distinguished by their parameters.'
       },
@@ -659,19 +659,19 @@ Student s1 = new Student("Josebert", "22/CYB/001", 4.85);`,
     practiceQuestions: [
       {
         question: 'What is the difference between a class and an object?',
-        options: ['No difference', 'A class is a blueprint, an object is built from it', 'An object is a blueprint, a class is built from it', 'Classes are for numbers, objects are for text'],
-        correctIndex: 1,
+        options: ['No difference', 'An object is a blueprint, a class is built from it', 'Classes are for numbers, objects are for text', 'A class is a blueprint, an object is built from it'],
+        correctIndex: 3,
         explanation: 'Think of a class like an architectural plan, and objects as the actual buildings constructed from that plan.'
       },
       {
         question: 'What is a constructor?',
-        options: ['A method that destroys objects', 'A method that runs when an object is created', 'A method that calculates math', 'A type of variable'],
-        correctIndex: 1,
+        options: ['A method that runs when an object is created', 'A method that destroys an object and frees its memory', 'A method that calculates math', 'A type of variable'],
+        correctIndex: 0,
         explanation: 'Constructors run automatically when you use "new" to create an object. They set up initial values.'
       },
       {
         question: 'Why do we use private fields with getters and setters?',
-        options: ['To make code longer', 'To hide and protect data with controlled access', 'Java requires it', 'For better performance'],
+        options: ['To make code longer', 'To hide and protect data with controlled access', 'Java requires it', 'Because it noticeably improves runtime performance'],
         correctIndex: 1,
         explanation: 'This is encapsulation. It prevents outside code from setting invalid values and gives you control over how fields are accessed.'
       },
@@ -826,20 +826,20 @@ public class Report implements Printable, Saveable {
     practiceQuestions: [
       {
         question: 'Which keyword is used for inheritance in Java?',
-        options: ['inherits', 'extends', 'implements', 'super'],
-        correctIndex: 1,
+        options: ['inherits', 'implements', 'extends', 'super'],
+        correctIndex: 2,
         explanation: 'extends is for class inheritance. implements is for interfaces.'
       },
       {
         question: 'What does @Override do?',
-        options: ['Required to override methods', 'Tells Java this method replaces a parent method (helps catch errors)', 'Makes the method run faster', 'Hides the method from child classes'],
-        correctIndex: 1,
+        options: ['Required to override methods', 'Makes the method run faster', 'Hides the method so that child classes cannot see it', 'Tells Java this method replaces a parent method (helps catch errors)'],
+        correctIndex: 3,
         explanation: '@Override is not strictly required but strongly recommended. If the method signature does not match the parent, the compiler will catch your mistake.'
       },
       {
         question: 'Can a class extend multiple classes in Java?',
-        options: ['Yes, no limit', 'Yes, up to 3', 'No, only one parent class', 'Only if the parents are abstract'],
-        correctIndex: 2,
+        options: ['No, only one parent class', 'Yes, no limit', 'Yes, up to 3', 'Only if the parents are abstract'],
+        correctIndex: 0,
         explanation: 'Java supports single inheritance for classes. But a class CAN implement multiple interfaces.'
       },
     ],
@@ -956,20 +956,20 @@ public class Account {
     practiceQuestions: [
       {
         question: 'What block runs whether or not an exception occurs?',
-        options: ['try', 'catch', 'finally', 'throw'],
-        correctIndex: 2,
+        options: ['try', 'finally', 'catch block', 'throw'],
+        correctIndex: 1,
         explanation: 'finally always runs. It is used for cleanup that must happen regardless of success or failure.'
       },
       {
         question: 'What exception is thrown when you divide an int by zero?',
-        options: ['NullPointerException', 'ArithmeticException', 'NumberFormatException', 'IOException'],
-        correctIndex: 1,
+        options: ['NullPointerException', 'NumberFormatException', 'ArithmeticException', 'IOException'],
+        correctIndex: 2,
         explanation: 'Integer division by zero throws ArithmeticException. Note: dividing a double by zero gives Infinity, not an exception.'
       },
       {
         question: 'What does the throws keyword do?',
-        options: ['Throws an exception immediately', 'Declares that a method might throw certain exceptions', 'Catches exceptions', 'Ignores exceptions'],
-        correctIndex: 1,
+        options: ['Immediately throws an exception at that exact point in the code', 'Catches exceptions', 'Ignores exceptions', 'Declares that a method might throw certain exceptions'],
+        correctIndex: 3,
         explanation: 'throws goes in the method signature to warn callers that they need to handle certain exceptions.'
       },
     ],
@@ -1093,8 +1093,8 @@ for (Student s : students) {
     practiceQuestions: [
       {
         question: 'Which collection rejects duplicates?',
-        options: ['ArrayList', 'HashSet', 'HashMap', 'LinkedList'],
-        correctIndex: 1,
+        options: ['HashSet', 'ArrayList', 'HashMap', 'LinkedList'],
+        correctIndex: 0,
         explanation: 'HashSet only stores unique values. ArrayList allows duplicates.'
       },
       {
@@ -1105,8 +1105,8 @@ for (Student s : students) {
       },
       {
         question: 'What does ArrayList<Integer> mean?',
-        options: ['An array of integers', 'A list that holds only Integer objects', 'A list of unknown type', 'A fixed-size integer container'],
-        correctIndex: 1,
+        options: ['An array of integers', 'A list of unknown type', 'A list that holds only Integer objects', 'A fixed-size container of primitive integers'],
+        correctIndex: 2,
         explanation: 'The <Integer> tells Java this list specifically holds Integer objects. Trying to add a String would fail to compile.'
       },
     ],
@@ -1234,19 +1234,19 @@ public static void main(String[] args) {
     practiceQuestions: [
       {
         question: 'What does the second argument "true" in new FileWriter("log.txt", true) do?',
-        options: ['Makes the file read-only', 'Opens in append mode (adds to existing content)', 'Creates the file if missing', 'Encrypts the file'],
-        correctIndex: 1,
+        options: ['Makes the file read-only', 'Creates the file only if it does not already exist', 'Encrypts the file', 'Opens in append mode (adds to existing content)'],
+        correctIndex: 3,
         explanation: 'true means append. Without it (or with false), each write overwrites the file from scratch.'
       },
       {
         question: 'Which method starts a thread?',
-        options: ['t.run()', 't.start()', 't.begin()', 't.execute()'],
-        correctIndex: 1,
+        options: ['t.start()', 't.run()', 't.begin()', 't.execute()'],
+        correctIndex: 0,
         explanation: 'start() launches a new thread that calls run(). If you call run() directly, it just runs on the current thread — no parallelism.'
       },
       {
         question: 'Why use synchronized?',
-        options: ['To make code faster', 'To prevent multiple threads from interfering with shared data', 'To compress files', 'To debug code'],
+        options: ['To make the program run noticeably faster on multi-core processors', 'To prevent multiple threads from interfering with shared data', 'To compress files', 'To debug code'],
         correctIndex: 1,
         explanation: 'synchronized ensures thread-safety when multiple threads access the same resource.'
       },
@@ -1348,20 +1348,20 @@ System.out.println(joined);  // Josebert | Amaka | Salome | Sammy`,
     practiceQuestions: [
       {
         question: 'How do you correctly compare two strings in Java?',
-        options: ['str1 == str2', 'str1.equals(str2)', 'str1.compareTo(str2) > 0', 'str1 = str2'],
-        correctIndex: 1,
+        options: ['str1 == str2', 'str1.compareTo(str2) > 0', 'str1.equals(str2)', 'str1 = str2'],
+        correctIndex: 2,
         explanation: '.equals() compares content. == compares references and can give wrong results unpredictably.'
       },
       {
         question: 'What does "hello".substring(1, 4) return?',
-        options: ['"hell"', '"ell"', '"ello"', '"hel"'],
-        correctIndex: 1,
+        options: ['"hell"', '"ello"', '"hel"', '"ell"'],
+        correctIndex: 3,
         explanation: 'substring(start, end) starts at index start (inclusive) and ends BEFORE index end (exclusive). So 1-3 = "ell".'
       },
       {
         question: 'Why use StringBuilder instead of regular string concatenation?',
-        options: ['It looks shorter', 'It is much faster for many concatenations', 'It supports more characters', 'It is required by Java'],
-        correctIndex: 1,
+        options: ['It is much faster for many concatenations', 'It looks shorter', 'It supports many more characters than a String', 'It is required by Java'],
+        correctIndex: 0,
         explanation: 'StringBuilder modifies a single buffer; regular concatenation creates a new String object every time, which is slow in loops.'
       },
     ],
@@ -1475,20 +1475,20 @@ del.executeUpdate();`,
     practiceQuestions: [
       {
         question: 'Why should you use PreparedStatement instead of Statement?',
-        options: ['It is shorter', 'It prevents SQL injection and is more efficient', 'It is required by Java', 'It runs faster'],
+        options: ['It is shorter', 'It prevents SQL injection and is more efficient', 'It is a strict requirement of the core Java language', 'It runs faster'],
         correctIndex: 1,
         explanation: 'PreparedStatement properly escapes user input, blocking SQL injection. It also pre-compiles the query, which is faster for repeated execution.'
       },
       {
         question: 'What does rs.next() do?',
-        options: ['Closes the ResultSet', 'Moves to the next row, returns true if one exists', 'Skips a row', 'Counts the rows'],
-        correctIndex: 1,
+        options: ['Closes the ResultSet and releases its database resources', 'Skips a row', 'Moves to the next row, returns true if one exists', 'Counts the rows'],
+        correctIndex: 2,
         explanation: 'rs.next() advances the cursor. Returns true if there is another row, false at the end.'
       },
       {
         question: 'What goes wrong if you forget the WHERE clause in an UPDATE?',
-        options: ['Syntax error', 'Updates only the first row', 'Updates EVERY row in the table', 'Nothing — Java prevents it'],
-        correctIndex: 2,
+        options: ['Syntax error', 'Updates only the very first matching row', 'Nothing — Java prevents it', 'Updates EVERY row in the table'],
+        correctIndex: 3,
         explanation: 'Without WHERE, the update applies to all rows. Always double-check WHERE clauses before executing UPDATE or DELETE.'
       },
     ],
@@ -1632,8 +1632,8 @@ System.out.println("Hello, " + name);`,
     practiceQuestions: [
       {
         question: 'Which method makes a JFrame visible?',
-        options: ['frame.show()', 'frame.display()', 'frame.setVisible(true)', 'frame.open()'],
-        correctIndex: 2,
+        options: ['frame.setVisible(true)', 'frame.show()', 'frame.displayOnScreen()', 'frame.open()'],
+        correctIndex: 0,
         explanation: 'setVisible(true) shows the window. setVisible(false) hides it.'
       },
       {
@@ -1644,8 +1644,8 @@ System.out.println("Hello, " + name);`,
       },
       {
         question: 'What does GridLayout(3, 2) create?',
-        options: ['3 columns, 2 rows', '3 rows, 2 columns', 'A 3x2 image', 'A grid of 3 by 2 pixels'],
-        correctIndex: 1,
+        options: ['3 columns, 2 rows', 'A 3x2 image', '3 rows, 2 columns', 'A grid of 3 by 2 pixels'],
+        correctIndex: 2,
         explanation: 'GridLayout(rows, columns). So (3, 2) is 3 rows × 2 columns = 6 cells.'
       },
     ],

@@ -80,20 +80,20 @@ print(f"Your height is {height:.2f} metres.")`,
     practiceQuestions: [
       {
         question: 'What does the type() function return for the value 3.14?',
-        options: ["<class 'int'>", "<class 'float'>", "<class 'str'>", "<class 'double'>"],
-        correctIndex: 1,
+        options: ["<class 'int'>", "<class 'str'>", "<class 'double'>", "<class 'float'>"],
+        correctIndex: 3,
         explanation: '3.14 has a decimal point, so Python classifies it as a float. There is no "double" type in Python.'
       },
       {
         question: 'Which operator gives the remainder of a division in Python?',
-        options: ['/', '//', '**', '%'],
-        correctIndex: 3,
+        options: ['%', '/', '//', '**'],
+        correctIndex: 0,
         explanation: '% is the modulus operator. 10 % 3 gives 1 because 10 divided by 3 leaves a remainder of 1.'
       },
       {
         question: 'What does input() always return?',
-        options: ['An integer', 'A float', 'A string', 'A boolean'],
-        correctIndex: 2,
+        options: ['An integer', 'A string', 'A float', 'A boolean'],
+        correctIndex: 1,
         explanation: 'input() always returns a str, even if the user types a number. You must convert it with int() or float() if you need arithmetic.'
       },
       {
@@ -104,20 +104,20 @@ print(f"Your height is {height:.2f} metres.")`,
       },
       {
         question: 'What is the result of 10 // 3 in Python?',
-        options: ['3.333', '1', '3', '0'],
-        correctIndex: 2,
+        options: ['3.333', '1', '0', '3'],
+        correctIndex: 3,
         explanation: '// is integer (floor) division. It discards the decimal portion, so 10 // 3 = 3.'
       },
       {
         question: 'Which data type stores True or False in Python?',
-        options: ['int', 'str', 'bit', 'bool'],
-        correctIndex: 3,
+        options: ['bool', 'int', 'str', 'binary'],
+        correctIndex: 0,
         explanation: 'The bool type holds exactly two values: True or False (capital first letter). Internally, True equals 1 and False equals 0.'
       },
       {
         question: 'What will print(2 ** 8) output?',
-        options: ['16', '64', '256', '28'],
-        correctIndex: 2,
+        options: ['16', '256', '64', '1024'],
+        correctIndex: 1,
         explanation: '** is the exponentiation operator. 2 ** 8 means 2 to the power of 8, which equals 256.'
       }
     ],
@@ -243,25 +243,25 @@ if username:
     practiceQuestions: [
       {
         question: 'What is the output of: x = 10; print(x > 5 and x < 20)?',
-        options: ['True', 'False', 'Error', '10'],
-        correctIndex: 0,
+        options: ['False', 'Error', 'True', '10'],
+        correctIndex: 2,
         explanation: 'x > 5 is True and x < 20 is True. True and True evaluates to True.'
       },
       {
         question: 'Which of these values is FALSY in Python?',
-        options: ['"hello"', '1', '[]', 'True'],
-        correctIndex: 2,
+        options: ['"hello"', '1', 'True', '[]'],
+        correctIndex: 3,
         explanation: 'An empty list [] is falsy. Non-empty strings, non-zero numbers, and True are all truthy.'
       },
       {
         question: 'What does the "not" operator do?',
-        options: ['Combines two conditions', 'Returns True only if both are True', 'Flips True to False and False to True', 'Checks if a value is None'],
-        correctIndex: 2,
+        options: ['Flips True to False and False to True', 'Combines two conditions', 'Returns True only if both conditions are True', 'Checks if a value is None'],
+        correctIndex: 0,
         explanation: '"not" is a unary operator that inverts a boolean. not True gives False, and not False gives True.'
       },
       {
         question: 'What is the difference between = and == in Python?',
-        options: ['No difference', '= assigns a value, == compares for equality', '== assigns, = compares', 'Both are for comparison'],
+        options: ['No difference', '= assigns a value, == compares for equality', '== assigns, = compares', 'Both symbols are used for comparison operations'],
         correctIndex: 1,
         explanation: '= is the assignment operator that stores a value in a variable. == is the equality operator that compares two values and returns True or False.'
       },
@@ -273,14 +273,14 @@ if username:
       },
       {
         question: 'What does "or" return when both sides are False?',
-        options: ['True', 'False', 'None', 'Error'],
-        correctIndex: 1,
+        options: ['True', 'None', 'Error', 'False'],
+        correctIndex: 3,
         explanation: '"or" returns True only when at least one side is True. If both sides are False, the result is False.'
       },
       {
         question: 'Which comparison operator checks "not equal to"?',
-        options: ['<>', '!=', '=/=', 'not =='],
-        correctIndex: 1,
+        options: ['!=', '<>', '=/=', 'not =='],
+        correctIndex: 0,
         explanation: '!= is the not-equal operator in Python 3. The old <> syntax from Python 2 is no longer valid.'
       }
     ],
@@ -413,38 +413,38 @@ for index, fruit in enumerate(fruits):
       },
       {
         question: 'What does break do inside a loop?',
-        options: ['Skips the current iteration', 'Exits the loop immediately', 'Restarts the loop', 'Pauses until input'],
-        correctIndex: 1,
+        options: ['Skips the current iteration', 'Restarts the loop', 'Exits the loop immediately', 'Pauses until input'],
+        correctIndex: 2,
         explanation: 'break terminates the loop entirely and execution continues after the loop body. Use continue to skip just one iteration.'
       },
       {
         question: 'What does enumerate(["a", "b", "c"]) yield?',
-        options: ['("a", 0), ("b", 1), ("c", 2)', '(0, "a"), (1, "b"), (2, "c")', '[0, 1, 2]', '["a", "b", "c"]'],
-        correctIndex: 1,
+        options: ['("a", 0), ("b", 1), ("c", 2)', '[0, 1, 2]', '["a", "b", "c"]', '(0, "a"), (1, "b"), (2, "c")'],
+        correctIndex: 3,
         explanation: 'enumerate() yields (index, value) tuples, starting at index 0 by default. You can change the start with enumerate(seq, start=1).'
       },
       {
         question: 'Which loop type is best when you do not know the number of iterations in advance?',
-        options: ['for', 'while', 'do-while', 'range'],
-        correctIndex: 1,
+        options: ['while', 'for', 'do-while', 'range'],
+        correctIndex: 0,
         explanation: 'while loops are best for open-ended repetition where you keep going until a condition changes. for loops are cleaner when you know the count or are iterating a sequence.'
       },
       {
         question: 'What is the output of: for i in range(0, 10, 3): print(i, end=" ")?',
-        options: ['0 3 6 9', '0 3 6', '1 4 7', '0 3 6 9 12'],
-        correctIndex: 0,
+        options: ['0 3 6', '0 3 6 9', '1 4 7', '0 3 6 9 12'],
+        correctIndex: 1,
         explanation: 'range(0, 10, 3) starts at 0, adds 3 each step, and stops before 10: 0, 3, 6, 9.'
       },
       {
         question: 'What does continue do in a loop?',
-        options: ['Exits the entire loop', 'Skips the rest of the current iteration and goes to the next', 'Repeats the current iteration', 'Does nothing'],
-        correctIndex: 1,
+        options: ['Exits the entire loop', 'Immediately repeats the current iteration from the beginning', 'Skips the rest of the current iteration and goes to the next', 'Does nothing'],
+        correctIndex: 2,
         explanation: 'continue jumps back to the loop header, skipping remaining code in the current iteration but keeping the loop running.'
       },
       {
         question: 'How do you iterate over every character in the string "hello" using a for loop?',
-        options: ['for i in len("hello"):', 'for ch in "hello":', 'for ch = "hello":', 'while "hello":'],
-        correctIndex: 1,
+        options: ['for i in len("hello"):', 'for ch = "hello":', 'while "hello":', 'for ch in "hello":'],
+        correctIndex: 3,
         explanation: 'In Python, strings are iterable sequences of characters. "for ch in string:" gives you one character per iteration directly.'
       }
     ],
@@ -573,38 +573,38 @@ print(doubled)  # [2, 4, 6, 8, 10, 12]`,
     practiceQuestions: [
       {
         question: 'What does a function return if it has no return statement?',
-        options: ['0', 'False', 'None', 'An empty string'],
-        correctIndex: 2,
+        options: ['None', '0', 'False', 'An empty string'],
+        correctIndex: 0,
         explanation: 'Python functions implicitly return None when there is no return statement or when return is used without a value.'
       },
       {
         question: 'What does *args do in a function definition?',
-        options: ['Makes all arguments optional', 'Collects extra positional arguments into a tuple', 'Passes a list to the function', 'Creates keyword arguments'],
+        options: ['Makes all arguments optional', 'Collects extra positional arguments into a tuple', 'Passes an existing list straight into the function as one argument', 'Creates keyword arguments'],
         correctIndex: 1,
         explanation: '*args (the asterisk is what matters) packs any extra positional arguments into a tuple. The name args is convention, not required.'
       },
       {
         question: 'What is a lambda function?',
-        options: ['A function defined with class', 'A small anonymous function written in one expression', 'A recursive function', 'A function with no parameters'],
-        correctIndex: 1,
+        options: ['A function that is defined inside a class body using def', 'A recursive function', 'A small anonymous function written in one expression', 'A function with no parameters'],
+        correctIndex: 2,
         explanation: 'lambda parameters: expression creates a small nameless function. It is limited to one expression and is typically used for short callbacks.'
       },
       {
         question: 'What is the output of: f = lambda x, y: x + y; print(f(3, 4))?',
-        options: ['34', '7', 'Error', 'None'],
-        correctIndex: 1,
+        options: ['34', 'Error', 'None', '7'],
+        correctIndex: 3,
         explanation: 'The lambda adds its two arguments. f(3, 4) evaluates 3 + 4 = 7.'
       },
       {
         question: 'What is variable scope?',
-        options: ['The size of a variable', 'The type of a variable', 'Where in the program a variable is accessible', 'How fast a variable is accessed'],
-        correctIndex: 2,
+        options: ['Where in the program a variable is accessible', 'The size of a variable', 'The type of a variable', 'How quickly a variable can be read from memory'],
+        correctIndex: 0,
         explanation: 'Scope defines where a variable can be seen and used. A variable defined inside a function is local and invisible outside it.'
       },
       {
         question: 'Which keyword is used to define a function in Python?',
-        options: ['function', 'func', 'define', 'def'],
-        correctIndex: 3,
+        options: ['function', 'def', 'func', 'define'],
+        correctIndex: 1,
         explanation: 'def is the keyword. A function definition looks like: def function_name(parameters):'
       },
       {
@@ -739,44 +739,44 @@ print(f"x={x}, y={y}")
     practiceQuestions: [
       {
         question: 'What does scores[-1] return for scores = [10, 20, 30, 40]?',
-        options: ['10', '30', '40', 'Error'],
-        correctIndex: 2,
+        options: ['10', '30', 'Error', '40'],
+        correctIndex: 3,
         explanation: 'Negative indices count from the end. -1 is the last element, which is 40.'
       },
       {
         question: 'What is the difference between a list and a tuple?',
-        options: ['Lists use (), tuples use []', 'Lists are mutable; tuples are immutable', 'Tuples can hold more items', 'There is no difference'],
-        correctIndex: 1,
+        options: ['Lists are mutable; tuples are immutable', 'Lists are written with (), while tuples use []', 'Tuples can hold more items', 'There is no difference'],
+        correctIndex: 0,
         explanation: 'Lists (square brackets) can be changed after creation. Tuples (parentheses) are immutable — you cannot add, remove, or modify their elements.'
       },
       {
         question: 'What does append() do?',
-        options: ['Inserts at index 0', 'Adds an item to the end of the list', 'Removes the last item', 'Sorts the list'],
+        options: ['Inserts at index 0', 'Adds an item to the end of the list', 'Removes and returns the very last item', 'Sorts the list'],
         correctIndex: 1,
         explanation: 'append(item) adds the item to the end of the list. It modifies the list in place and returns None.'
       },
       {
         question: 'What does [x**2 for x in range(4)] produce?',
-        options: ['[1, 4, 9, 16]', '[0, 1, 4, 9]', '[0, 2, 4, 6]', '[1, 2, 3, 4]'],
-        correctIndex: 1,
+        options: ['[1, 4, 9, 16]', '[0, 2, 4, 6]', '[0, 1, 4, 9]', '[1, 2, 3, 4]'],
+        correctIndex: 2,
         explanation: 'range(4) gives 0, 1, 2, 3. Squaring each: 0, 1, 4, 9. So the result is [0, 1, 4, 9].'
       },
       {
         question: 'What does list.pop() return?',
-        options: ['The first element, removing it', 'The last element, removing it', 'The length of the list', 'None'],
-        correctIndex: 1,
+        options: ['The first element, removing it', 'The length of the list', 'None', 'The last element, removing it'],
+        correctIndex: 3,
         explanation: 'pop() with no argument removes and returns the last element. pop(index) removes and returns the element at that index.'
       },
       {
         question: 'What does scores[1:4] return for scores = [10, 20, 30, 40, 50]?',
-        options: ['[10, 20, 30]', '[20, 30, 40]', '[20, 30, 40, 50]', '[10, 20, 30, 40]'],
-        correctIndex: 1,
+        options: ['[20, 30, 40]', '[10, 20, 30]', '[20, 30, 40, 50]', '[10, 20, 30, 40]'],
+        correctIndex: 0,
         explanation: 'Slicing is start-inclusive, stop-exclusive. [1:4] returns indices 1, 2, 3 which are 20, 30, 40.'
       },
       {
         question: 'Which expression checks if a value exists in a list?',
-        options: ['list.find(value)', 'list.exists(value)', 'value in list', 'list.contains(value)'],
-        correctIndex: 2,
+        options: ['list.find(value)', 'value in list', 'list.exists(value)', 'list.contains(value)'],
+        correctIndex: 1,
         explanation: 'The "in" operator is the Pythonic way to test membership. It returns True or False and works on lists, strings, tuples, and more.'
       }
     ],
@@ -906,26 +906,26 @@ print(unique)  # [1, 2, 3, 4]`,
     practiceQuestions: [
       {
         question: 'What does dict.get("key", "default") return if "key" is not in the dictionary?',
-        options: ['KeyError', 'None', '"default"', '0'],
+        options: ['Raises a KeyError', 'None', '"default"', '0'],
         correctIndex: 2,
         explanation: '.get(key, default) returns the specified default value when the key is not found, instead of raising KeyError.'
       },
       {
         question: 'What is the result of {1, 2, 3} & {2, 3, 4}?',
-        options: ['{1, 2, 3, 4}', '{2, 3}', '{1, 4}', '{1, 2, 3, 2, 3, 4}'],
-        correctIndex: 1,
+        options: ['{1, 2, 3, 4}', '{1, 4}', '{1, 2, 3, 2, 3, 4}', '{2, 3}'],
+        correctIndex: 3,
         explanation: '& is the intersection operator — it returns only elements that appear in both sets. 2 and 3 appear in both, so the result is {2, 3}.'
       },
       {
         question: 'How do you create an empty set in Python?',
-        options: ['{}', 'set()', '[]', 'dict()'],
-        correctIndex: 1,
+        options: ['set()', '{}', '[]', 'dict()'],
+        correctIndex: 0,
         explanation: '{} creates an empty dictionary, not an empty set. To create an empty set you must use set().'
       },
       {
         question: 'Which method returns all keys of a dictionary?',
-        options: ['.items()', '.values()', '.keys()', '.all()'],
-        correctIndex: 2,
+        options: ['.items()', '.keys()', '.values()', '.all()'],
+        correctIndex: 1,
         explanation: '.keys() returns a view of all dictionary keys. .values() returns values, and .items() returns (key, value) pairs.'
       },
       {
@@ -936,14 +936,14 @@ print(unique)  # [1, 2, 3, 4]`,
       },
       {
         question: 'What does {k: v*2 for k, v in {"a": 1, "b": 2}.items()} produce?',
-        options: ["{'a': 1, 'b': 2}", "{'a': 2, 'b': 4}", "{'a': 2, 'b': 2}", "{'aa': 1, 'bb': 2}"],
-        correctIndex: 1,
+        options: ["{'a': 1, 'b': 2}", "{'a': 2, 'b': 2}", "{'aa': 1, 'bb': 2}", "{'a': 2, 'b': 4}"],
+        correctIndex: 3,
         explanation: 'The dict comprehension iterates over items, doubling each value. "a" maps to 1*2=2, "b" maps to 2*2=4.'
       },
       {
         question: 'What is the | operator for sets?',
-        options: ['Intersection', 'Difference', 'Union', 'Symmetric difference'],
-        correctIndex: 2,
+        options: ['Union', 'Intersection', 'Difference', 'Symmetric difference'],
+        correctIndex: 0,
         explanation: '| is the union operator — it returns all elements from both sets combined, with no duplicates. & is intersection, - is difference, ^ is symmetric difference.'
       }
     ],
@@ -1085,32 +1085,32 @@ print(f"{name:<12} {score:>8.2f}")`,
       },
       {
         question: 'Why are strings called immutable?',
-        options: ['They cannot contain numbers', 'They cannot be stored in variables', 'Their characters cannot be changed after creation', 'They expire after use'],
-        correctIndex: 2,
+        options: ['They cannot contain numbers', 'They cannot be stored inside variables or data structures', 'They expire after use', 'Their characters cannot be changed after creation'],
+        correctIndex: 3,
         explanation: 'Strings are immutable — you cannot modify individual characters. All methods return new strings. Trying s[0] = "X" on a string raises TypeError.'
       },
       {
         question: 'What does "-".join(["a", "b", "c"]) produce?',
-        options: ['["a", "b", "c"]', '"a-b-c"', '"abc"', '"-a-b-c-"'],
-        correctIndex: 1,
+        options: ['"a-b-c"', '["a", "b", "c"]', '"abc"', '"-a-b-c-"'],
+        correctIndex: 0,
         explanation: 'join() concatenates the list elements with the separator string between each pair. "-".join(["a","b","c"]) gives "a-b-c".'
       },
       {
         question: 'What does "  hello  ".strip() return?',
-        options: ['"  hello  "', '"hello  "', '"hello"', '"  hello"'],
-        correctIndex: 2,
+        options: ['"  hello  "', '"hello"', '"hello  "', '"  hello"'],
+        correctIndex: 1,
         explanation: 'strip() removes whitespace from BOTH ends of the string. lstrip() removes from the left only; rstrip() from the right only.'
       },
       {
         question: 'What is the f-string syntax to print a float to 2 decimal places?',
-        options: ['f"{value, 2f}"', 'f"{value:.2f}"', 'f"{value:2.f}"', 'f"{value(2f)}"'],
-        correctIndex: 1,
+        options: ['f"{value, 2f}"', 'f"{value:2.f}"', 'f"{value:.2f}"', 'f"{value(2f)}"'],
+        correctIndex: 2,
         explanation: 'Format specs come after a colon inside the braces: {value:.2f}. The . means decimal, 2 is the number of places, f is for float.'
       },
       {
         question: 'What does "abcdef"[2:5] return?',
-        options: ['"abc"', '"bcde"', '"cde"', '"bcd"'],
-        correctIndex: 2,
+        options: ['"abc"', '"bcde"', '"bcd"', '"cde"'],
+        correctIndex: 3,
         explanation: 'String slicing [start:stop] is start-inclusive, stop-exclusive. [2:5] gives characters at indices 2, 3, 4 which are c, d, e.'
       }
     ],
@@ -1259,38 +1259,38 @@ print(Counter.count)  # 3 — total instances created`,
     practiceQuestions: [
       {
         question: 'What is the purpose of __init__ in a Python class?',
-        options: ['To destroy an object', 'To initialise an object when it is created', 'To define class variables', 'To inherit from another class'],
-        correctIndex: 1,
+        options: ['To initialise an object when it is created', 'To destroy an object', 'To define class variables', 'To inherit attributes from another parent class'],
+        correctIndex: 0,
         explanation: '__init__ is the initialiser called automatically by Python when you create a new instance. It sets up the object\'s initial state.'
       },
       {
         question: 'What does "self" refer to in a method?',
-        options: ['The class itself', 'The specific object the method is called on', 'The parent class', 'The return value'],
+        options: ['The class itself', 'The specific object the method is called on', 'The immediate parent class of the current object', 'The return value'],
         correctIndex: 1,
         explanation: 'self is a reference to the current instance. Every instance method receives it as the first argument so it can access and modify that object\'s data.'
       },
       {
         question: 'What is the difference between a class attribute and an instance attribute?',
-        options: ['No difference', 'Class attributes are shared; instance attributes belong to one object', 'Instance attributes are faster', 'Class attributes cannot be changed'],
-        correctIndex: 1,
+        options: ['No difference', 'Instance attributes are faster', 'Class attributes are shared; instance attributes belong to one object', 'Class attributes can never be modified after the class has first been defined'],
+        correctIndex: 2,
         explanation: 'Class attributes live on the class and are shared by all instances. Instance attributes (set with self.name) are unique to each object.'
       },
       {
         question: 'What does __str__ control?',
-        options: ['How the object is stored in memory', 'The string returned when print() is called on the object', 'How the object is deleted', 'The name of the class'],
-        correctIndex: 1,
+        options: ['How the object is laid out and stored in the computer memory', 'How the object is deleted', 'The name of the class', 'The string returned when print() is called on the object'],
+        correctIndex: 3,
         explanation: '__str__ is called by print() and str() to get a human-readable string for the object. Without it, you see something like <__main__.Student object at 0x...>.'
       },
       {
         question: 'How do you create an instance of a class called Dog?',
-        options: ['Dog.new()', 'new Dog()', 'Dog()', 'create Dog()'],
-        correctIndex: 2,
+        options: ['Dog()', 'Dog.new()', 'new Dog()', 'create Dog()'],
+        correctIndex: 0,
         explanation: 'You call the class like a function: Dog(). This triggers __init__ and returns the new object. There is no "new" keyword in Python.'
       },
       {
         question: 'What happens if you define two methods with the same name in a class?',
-        options: ['Both run when called', 'The first one runs', 'The second one overrides the first', 'A syntax error occurs'],
-        correctIndex: 2,
+        options: ['Both run when called', 'The second one overrides the first', 'The first one runs', 'A syntax error occurs immediately at definition'],
+        correctIndex: 1,
         explanation: 'Python uses the last definition. Unlike Java, Python does not support method overloading — defining the same name twice simply replaces the first definition.'
       },
       {
@@ -1477,38 +1477,38 @@ print(boiling.celsius)                  # 100.0`,
     practiceQuestions: [
       {
         question: 'What does super().__init__() do in a child class?',
-        options: ['Creates a new parent object', 'Calls the parent class\'s __init__ method', 'Deletes the parent class', 'Copies all parent methods'],
-        correctIndex: 1,
+        options: ['Creates a brand new object of the parent class', 'Deletes the parent class', 'Copies all parent methods', 'Calls the parent class\'s __init__ method'],
+        correctIndex: 3,
         explanation: 'super() returns a proxy to the parent class. super().__init__() runs the parent\'s initialiser, ensuring inherited attributes are set up properly.'
       },
       {
         question: 'What is polymorphism in Python?',
-        options: ['Having multiple classes in one file', 'The ability to call the same method on different objects and get type-appropriate behaviour', 'Inheriting from multiple parents', 'Using decorators'],
-        correctIndex: 1,
+        options: ['The ability to call the same method on different objects and get type-appropriate behaviour', 'Having several classes defined in the same Python source file', 'Inheriting from multiple parents', 'Using decorators'],
+        correctIndex: 0,
         explanation: 'Polymorphism means "many forms" — the same interface (method name) works across different types, with each type providing its own implementation.'
       },
       {
         question: 'What does the @property decorator do?',
-        options: ['Makes a method private', 'Allows a method to be called like an attribute', 'Prevents the method from being overridden', 'Makes the attribute read-only by default'],
+        options: ['Makes a method private', 'Allows a method to be called like an attribute', 'Prevents the method from ever being overridden by a subclass', 'Makes the attribute read-only by default'],
         correctIndex: 1,
         explanation: '@property lets you define getter logic inside a method but access it as if it were a plain attribute, without parentheses.'
       },
       {
         question: 'What is the difference between @staticmethod and @classmethod?',
-        options: ['No difference', '@staticmethod receives cls; @classmethod receives self', '@staticmethod receives neither self nor cls; @classmethod receives cls', '@classmethod is faster'],
+        options: ['No difference', '@staticmethod always receives cls, while @classmethod always receives self', '@staticmethod receives neither self nor cls; @classmethod receives cls', '@classmethod is faster'],
         correctIndex: 2,
         explanation: '@staticmethod is a plain function scoped to the class — no automatic first argument. @classmethod receives cls (the class) so it can access class-level data or create instances.'
       },
       {
         question: 'In Python inheritance, can a child class override a parent method?',
-        options: ['No, inherited methods are final', 'Yes, by defining a method with the same name', 'Only with the @override decorator', 'Only if the parent method is marked as virtual'],
-        correctIndex: 1,
+        options: ['No, inherited methods are final', 'Only with the @override decorator', 'Only if the parent method is marked as virtual', 'Yes, by defining a method with the same name'],
+        correctIndex: 3,
         explanation: 'Simply define a method with the same name in the child class. Python will call the child\'s version when invoked on a child instance. No special decorator is required.'
       },
       {
         question: 'What does self.__class__.__name__ return inside a method?',
-        options: ['The method name', 'The name of the actual class of the object', 'The module name', 'The parent class name'],
-        correctIndex: 1,
+        options: ['The name of the actual class of the object', 'The method name', 'The module name', 'The name of the immediate parent class of the object'],
+        correctIndex: 0,
         explanation: '__class__ is a reference to the class of the current object. __name__ is the string name. For a Dog instance it returns "Dog", not "Animal".'
       },
       {
@@ -1652,44 +1652,44 @@ print(txt_files)`,
     practiceQuestions: [
       {
         question: 'What does open("data.txt", "w") do if data.txt already exists?',
-        options: ['Appends to it', 'Raises an error', 'Overwrites it, starting empty', 'Opens it read-only'],
+        options: ['Appends to it', 'Raises an error', 'Overwrites it, starting empty', 'Opens the file in read-only mode'],
         correctIndex: 2,
         explanation: 'Mode "w" creates the file if it does not exist, or truncates (empties) it if it does. Use "a" to append without overwriting.'
       },
       {
         question: 'What is the main advantage of using "with open()" over just "open()"?',
-        options: ['It is faster', 'It automatically closes the file when the block exits', 'It supports more modes', 'It allows reading and writing simultaneously'],
-        correctIndex: 1,
+        options: ['It is faster', 'It supports more modes', 'It allows reading from and writing to the file simultaneously', 'It automatically closes the file when the block exits'],
+        correctIndex: 3,
         explanation: 'The with statement is a context manager that guarantees the file is closed when the block ends, even if an exception is raised — preventing resource leaks.'
       },
       {
         question: 'What does f.readlines() return?',
-        options: ['A single string with all content', 'A list of all lines as strings', 'One line at a time', 'The number of lines'],
-        correctIndex: 1,
+        options: ['A list of all lines as strings', 'A single string with all content', 'One line at a time', 'The number of lines'],
+        correctIndex: 0,
         explanation: 'readlines() returns a list where each element is one line from the file, including the \\n newline character at the end of each line.'
       },
       {
         question: 'How do you write a newline when writing to a text file?',
-        options: ['f.newline()', 'f.write(endl)', 'f.write("\\n")', 'The file adds it automatically'],
-        correctIndex: 2,
+        options: ['f.newline()', 'f.write("\\n")', 'f.write(endl)', 'The file adds it automatically'],
+        correctIndex: 1,
         explanation: 'Python\'s write() does not add newlines automatically. You must include "\\n" in your string explicitly to create line breaks in the file.'
       },
       {
         question: 'What does os.path.exists("file.txt") return?',
-        options: ['The file size', 'True or False', 'The file contents', 'The file path'],
-        correctIndex: 1,
+        options: ['The file size', 'The file contents', 'True or False', 'The file path'],
+        correctIndex: 2,
         explanation: 'os.path.exists() returns True if the path points to an existing file or directory, and False otherwise.'
       },
       {
         question: 'Which mode opens a file for reading AND writing without truncating it?',
-        options: ['"rw"', '"w"', '"r+"', '"wr"'],
-        correctIndex: 2,
+        options: ['"rw"', '"w"', '"wr"', '"r+"'],
+        correctIndex: 3,
         explanation: '"r+" opens for both reading and writing with the file pointer at the start, without truncating. "a+" opens for reading and appending.'
       },
       {
         question: 'What is the correct way to iterate over every line in a file object f?',
-        options: ['for line in f.read():', 'while f.read():', 'for line in f:', 'foreach line in f:'],
-        correctIndex: 2,
+        options: ['for line in f:', 'for line in f.read():', 'while f.read():', 'foreach line in f:'],
+        correctIndex: 0,
         explanation: 'File objects are iterable — "for line in f:" is the cleanest, most memory-efficient way to read a file line by line.'
       }
     ],
@@ -1835,26 +1835,26 @@ except ValueError as e:
       },
       {
         question: 'When does the else block in a try/except run?',
-        options: ['Always', 'Only when an exception was raised', 'Only when NO exception was raised in try', 'After finally'],
+        options: ['Always', 'Only when an exception was actually raised inside try', 'Only when NO exception was raised in try', 'After finally'],
         correctIndex: 2,
         explanation: 'The else block runs only when the try block completed without raising any exception. It is a clean way to write "success-only" code.'
       },
       {
         question: 'What does the finally block guarantee?',
-        options: ['The code never raises an exception', 'It runs only if an exception occurs', 'It always runs, exception or not', 'It catches all exceptions'],
-        correctIndex: 2,
+        options: ['The code never raises an exception', 'It runs only if an exception occurs', 'It catches all exceptions', 'It always runs, exception or not'],
+        correctIndex: 3,
         explanation: 'finally is guaranteed to execute whether or not an exception occurred, and even if a return statement is hit. Use it for cleanup that must happen regardless.'
       },
       {
         question: 'How do you create a custom exception class in Python?',
-        options: ['class MyError(Error):', 'class MyError(Exception):', 'def MyError(Exception):', 'exception MyError:'],
-        correctIndex: 1,
+        options: ['class MyError(Exception):', 'class MyError(Error):', 'def MyError(Exception): pass', 'exception MyError:'],
+        correctIndex: 0,
         explanation: 'Custom exceptions inherit from Exception (or a more specific built-in like ValueError). This gives them all standard exception behaviour.'
       },
       {
         question: 'What does "except Exception as e" do?',
-        options: ['Catches only ValueError', 'Ignores all exceptions', 'Catches any exception and binds it to the variable e', 'Creates a new exception'],
-        correctIndex: 2,
+        options: ['Catches only a ValueError exception and nothing else', 'Catches any exception and binds it to the variable e', 'Ignores all exceptions', 'Creates a new exception'],
+        correctIndex: 1,
         explanation: 'Exception is the base class for almost all built-in exceptions. "as e" binds the caught exception to variable e so you can inspect its message.'
       },
       {
@@ -1865,8 +1865,8 @@ except ValueError as e:
       },
       {
         question: 'What does a bare "raise" (with no argument) do inside an except block?',
-        options: ['Creates a new exception', 'Re-raises the currently caught exception', 'Exits the function', 'Does nothing'],
-        correctIndex: 1,
+        options: ['Creates a brand new exception object from scratch', 'Exits the function', 'Does nothing', 'Re-raises the currently caught exception'],
+        correctIndex: 3,
         explanation: 'A bare raise re-raises the exception that was just caught, passing it up the call stack. Useful when you want to log or partially handle an error but still propagate it.'
       }
     ],
@@ -2028,44 +2028,44 @@ print(primes)`,
     practiceQuestions: [
       {
         question: 'What does "import math as m" allow you to do?',
-        options: ['Import only part of math', 'Use m.sqrt() instead of math.sqrt()', 'Make math faster', 'Import math twice'],
-        correctIndex: 1,
+        options: ['Use m.sqrt() instead of math.sqrt()', 'Import only a small part of the math module', 'Make math faster', 'Import math twice'],
+        correctIndex: 0,
         explanation: '"as" creates an alias. After "import math as m", you write m.sqrt() instead of math.sqrt(). This is useful for modules with long names.'
       },
       {
         question: 'What is pip used for?',
-        options: ['Running Python scripts', 'Debugging Python code', 'Installing third-party Python packages', 'Formatting Python code'],
-        correctIndex: 2,
+        options: ['Running and executing Python script files', 'Installing third-party Python packages', 'Debugging Python code', 'Formatting Python code'],
+        correctIndex: 1,
         explanation: 'pip is Python\'s package installer. You use it to install packages not in the standard library, such as requests, numpy, or flask, from the command line.'
       },
       {
         question: 'What does random.choice(["a", "b", "c"]) do?',
-        options: ['Returns all three items', 'Returns a random item from the list', 'Sorts the list randomly', 'Returns the index of a random item'],
-        correctIndex: 1,
+        options: ['Returns all three items', 'Sorts the list randomly', 'Returns a random item from the list', 'Returns the index position of a random item'],
+        correctIndex: 2,
         explanation: 'random.choice(seq) returns one randomly selected element from the sequence. It works on any non-empty sequence.'
       },
       {
         question: 'What does math.floor(4.9) return?',
-        options: ['5', '4', '4.9', '0'],
-        correctIndex: 1,
+        options: ['5', '4.9', '0', '4'],
+        correctIndex: 3,
         explanation: 'math.floor() rounds DOWN to the nearest integer. 4.9 becomes 4. math.ceil() would give 5.'
       },
       {
         question: 'What is the difference between "import os" and "from os import getcwd"?',
-        options: ['No difference', '"import os" loads the module; "from os import getcwd" imports just that function into the current namespace', '"from os import getcwd" is slower', '"import os" is deprecated'],
-        correctIndex: 1,
+        options: ['"import os" loads the module; "from os import getcwd" imports just that function into the current namespace', 'No difference', '"import os" and "from os import getcwd" are exactly identical in every possible way and can always be used interchangeably', '"import os" is deprecated'],
+        correctIndex: 0,
         explanation: '"import os" makes the whole module available as os. "from os import getcwd" imports just that one function directly, so you call getcwd() instead of os.getcwd().'
       },
       {
         question: 'What does datetime.now().strftime("%Y-%m-%d") produce?',
-        options: ['The current time in seconds', 'A formatted date string like "2026-06-01"', 'A datetime object', 'The timezone name'],
+        options: ['The current time measured in whole seconds since the epoch', 'A formatted date string like "2026-06-01"', 'A datetime object', 'The timezone name'],
         correctIndex: 1,
         explanation: 'strftime() formats a datetime object as a string. %Y is the 4-digit year, %m is the 2-digit month, %d is the 2-digit day.'
       },
       {
         question: 'What guard prevents module-level code from running when the file is imported?',
-        options: ['if __module__ == "__main__":', 'if __name__ == "__main__":', 'if __file__ == "__main__":', 'import __main__'],
-        correctIndex: 1,
+        options: ['if __module__ == "__main__":', 'if __file__ == "__main__":', 'if __name__ == "__main__":', 'import __main__'],
+        correctIndex: 2,
         explanation: 'When a Python file is run directly, __name__ equals "__main__". When it is imported, __name__ equals the module\'s filename. This guard lets you have runnable demo code that does not execute on import.'
       }
     ],

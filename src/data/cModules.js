@@ -77,38 +77,38 @@ int main() {
     practiceQuestions: [
       {
         question: 'Which GCC command compiles hello.c into an executable named hello?',
-        options: ['gcc hello', 'gcc hello.c -o hello', 'compile hello.c hello', 'gcc -run hello.c'],
-        correctIndex: 1,
+        options: ['gcc hello', 'compile hello.c hello', 'gcc -run hello.c', 'gcc hello.c -o hello'],
+        correctIndex: 3,
         explanation: 'gcc hello.c -o hello tells GCC to compile hello.c and output (-o) an executable named hello.'
       },
       {
         question: 'What does #include <stdio.h> do?',
-        options: ['Starts the main function', 'Imports the standard input/output library', 'Declares a variable', 'Ends the program'],
-        correctIndex: 1,
+        options: ['Imports the standard input/output library', 'Starts running the program from the main function', 'Declares a variable', 'Ends the program'],
+        correctIndex: 0,
         explanation: '#include <stdio.h> includes the Standard I/O header, which provides printf, scanf, and other I/O functions.'
       },
       {
         question: 'Which format specifier is used to print an integer with printf()?',
-        options: ['%f', '%s', '%d', '%c'],
-        correctIndex: 2,
+        options: ['%f', '%d', '%s', '%c'],
+        correctIndex: 1,
         explanation: '%d is the format specifier for integers. %f is for floats, %s for strings, %c for characters.'
       },
       {
         question: 'What does return 0; at the end of main() indicate?',
-        options: ['The program will restart', 'The program finished successfully', 'There was an error', 'Nothing — it is optional syntax'],
-        correctIndex: 1,
+        options: ['The program will restart', 'There was an error', 'The program finished successfully', 'Nothing — it is purely optional decorative syntax'],
+        correctIndex: 2,
         explanation: 'By convention, returning 0 from main tells the operating system that the program exited normally without errors. Non-zero values indicate errors.'
       },
       {
         question: 'Which of the following is a valid single-line comment in C?',
-        options: ['# this is a comment', '-- this is a comment', '// this is a comment', '** this is a comment'],
-        correctIndex: 2,
+        options: ['# this is a comment', '-- this is a comment', '** this is a comment', '// this is a comment'],
+        correctIndex: 3,
         explanation: '// starts a single-line comment in C. /* ... */ is used for multi-line comments.'
       },
       {
         question: 'Which format specifier MUST be used with scanf() to read a double-precision floating point value?',
-        options: ['%d', '%f', '%lf', '%c'],
-        correctIndex: 2,
+        options: ['%lf', '%d', '%f', '%lld'],
+        correctIndex: 0,
         explanation: '%lf is required for scanf when reading a double — using %f tells scanf to read a float and storing it through a double* is undefined behaviour. In printf, both %f and %lf work for double because float is promoted to double in variadic calls.'
       },
       {
@@ -234,20 +234,20 @@ int main() {
     practiceQuestions: [
       {
         question: 'Which data type would you use to store the value 3.14159265358979 with maximum precision?',
-        options: ['int', 'float', 'double', 'char'],
+        options: ['int', 'float', 'double', 'boolean'],
         correctIndex: 2,
         explanation: 'double provides 64-bit double-precision floating point, giving about 15-17 significant digits. float only gives about 6-7 significant digits.'
       },
       {
         question: 'What is the correct way to read an integer from the user into a variable called age?',
-        options: ['scanf("%d", age)', 'scanf("%d", &age)', 'scanf(age)', 'input("%d", &age)'],
-        correctIndex: 1,
+        options: ['scanf("%d", age)', 'scanf(age)', 'input("%d", &age)', 'scanf("%d", &age)'],
+        correctIndex: 3,
         explanation: 'scanf needs the address of the variable (&age) so it knows where in memory to store the value. Passing age without & passes the value, not the address.'
       },
       {
         question: 'What happens if you read an uninitialised int variable in C?',
-        options: ['It returns 0 automatically', 'The program refuses to compile', 'You get a garbage/undefined value', 'It returns -1'],
-        correctIndex: 2,
+        options: ['You get a garbage/undefined value', 'It returns 0 automatically', 'The program refuses to compile at all', 'It returns -1'],
+        correctIndex: 0,
         explanation: 'Uninitialised variables in C contain whatever bytes are already in that memory location — effectively a garbage value. Always initialise variables before use.'
       },
       {
@@ -258,20 +258,20 @@ int main() {
       },
       {
         question: 'What does #define PI 3.14159 do?',
-        options: ['Declares a float variable PI', 'Instructs the preprocessor to replace PI with 3.14159 everywhere in the code', 'Creates a constant integer', 'Imports a math library'],
-        correctIndex: 1,
+        options: ['Declares a floating-point variable named PI and immediately assigns it a value', 'Creates a constant integer', 'Instructs the preprocessor to replace PI with 3.14159 everywhere in the code', 'Imports a math library'],
+        correctIndex: 2,
         explanation: '#define is a preprocessor directive. Before compilation, every occurrence of PI in the source code is textually replaced with 3.14159.'
       },
       {
         question: 'Which format specifier reads a float with scanf()?',
-        options: ['%lf', '%d', '%f', '%c'],
-        correctIndex: 2,
+        options: ['%lf', '%d', '%c', '%f'],
+        correctIndex: 3,
         explanation: '%f is used with scanf() to read a float. For double with scanf you must use %lf, not %f.'
       },
       {
         question: 'How many bytes does a char typically occupy in C?',
-        options: ['4', '2', '8', '1'],
-        correctIndex: 3,
+        options: ['1', '4', '2', '8'],
+        correctIndex: 0,
         explanation: 'A char is guaranteed to be exactly 1 byte (8 bits) in C. It can store values from -128 to 127 (signed) or 0 to 255 (unsigned).'
       }
     ],
@@ -392,26 +392,26 @@ int main() {
     practiceQuestions: [
       {
         question: 'What is the result of 15 % 4 in C?',
-        options: ['3', '3.75', '4', '1'],
-        correctIndex: 0,
+        options: ['3.75', '3', '4', '1'],
+        correctIndex: 1,
         explanation: '15 % 4 gives the remainder when 15 is divided by 4. 4 goes into 15 three times (12), leaving a remainder of 3.'
       },
       {
         question: 'What does the expression (double)7 / 2 evaluate to?',
-        options: ['3', '3.5', '4', '0'],
-        correctIndex: 1,
+        options: ['3', '4', '3.5', '3.50'],
+        correctIndex: 2,
         explanation: 'Casting 7 to double makes it 7.0, so the division becomes 7.0 / 2 = 3.5. Without the cast, integer division gives 3.'
       },
       {
         question: 'Which operator is the bitwise XOR in C?',
-        options: ['&', '|', '^', '~'],
-        correctIndex: 2,
+        options: ['&', '|', '~', '^'],
+        correctIndex: 3,
         explanation: '^ is the bitwise XOR operator. & is AND, | is OR, and ~ is the bitwise NOT (one\'s complement).'
       },
       {
         question: 'What does the ternary expression (x > 0) ? "positive" : "non-positive" do?',
-        options: ['Always returns "positive"', 'Returns "positive" if x > 0, otherwise "non-positive"', 'Returns 1 or 0', 'This is invalid syntax in C'],
-        correctIndex: 1,
+        options: ['Returns "positive" if x > 0, otherwise "non-positive"', 'Always returns "positive"', 'Returns 1 or 0', 'This is invalid syntax and will not compile in C'],
+        correctIndex: 0,
         explanation: 'The ternary operator evaluates the condition and returns the first value if true, the second if false. It is a compact alternative to if-else.'
       },
       {
@@ -428,8 +428,8 @@ int main() {
       },
       {
         question: 'In C, what integer value represents "true" in a logical expression?',
-        options: ['Only the literal 1', 'Any non-zero value', 'Only positive values', 'Only the keyword true'],
-        correctIndex: 1,
+        options: ['Only the literal 1', 'Only positive values', 'Only the keyword true', 'Any non-zero value'],
+        correctIndex: 3,
         explanation: 'C has no built-in boolean type (before stdbool.h). Any non-zero integer is treated as true; 0 is false. This includes negative numbers.'
       }
     ],
@@ -575,14 +575,14 @@ int main() {
     practiceQuestions: [
       {
         question: 'What is the bug in: if (score = 100) { printf("Perfect!"); }',
-        options: ['score should be a double', 'The condition uses = (assignment) instead of == (comparison)', 'printf needs a newline', 'There is no bug'],
-        correctIndex: 1,
+        options: ['The condition uses = (assignment) instead of == (comparison)', 'The score variable should really have been declared as a double', 'printf needs a newline', 'There is no bug'],
+        correctIndex: 0,
         explanation: 'if (score = 100) assigns 100 to score and evaluates to true because 100 is non-zero. This always executes the block, regardless of the original value of score.'
       },
       {
         question: 'What happens if you forget break at the end of a switch case?',
-        options: ['Compilation fails', 'The program skips to default', 'Execution falls through into the next case', 'The program terminates'],
-        correctIndex: 2,
+        options: ['Compilation fails', 'Execution falls through into the next case', 'The program immediately skips straight to the default case', 'The program terminates'],
+        correctIndex: 1,
         explanation: 'Without break, C continues executing the code in the next case — this is called fall-through. It can be intentional or a hard-to-find bug.'
       },
       {
@@ -593,26 +593,26 @@ int main() {
       },
       {
         question: 'What does the default case in a switch statement do?',
-        options: ['It is required and must be first', 'It runs when no case label matches the switch expression', 'It runs always before other cases', 'It only runs if no break statements are present'],
-        correctIndex: 1,
+        options: ['It is required and must be first', 'It runs always before other cases', 'It runs only if there are no break statements in the switch', 'It runs when no case label matches the switch expression'],
+        correctIndex: 3,
         explanation: 'default is optional and typically placed last. It executes when none of the case values match the switch expression.'
       },
       {
         question: 'Which condition correctly checks if score is between 50 and 59 inclusive?',
-        options: ['if (50 < score < 59)', 'if (score >= 50 && score <= 59)', 'if (score >= 50 || score <= 59)', 'if (score == 50-59)'],
-        correctIndex: 1,
+        options: ['if (score >= 50 && score <= 59)', 'if (50 < score < 59)', 'if (score >= 50 || score <= 59)', 'if (score == 50-59)'],
+        correctIndex: 0,
         explanation: 'C does not support chained comparisons like 50 < score < 59. Use && to combine two separate conditions.'
       },
       {
         question: 'What does: char *msg = (x % 2 == 0) ? "even" : "odd"; do?',
-        options: ['Calls a function named even or odd', 'Assigns "even" to msg if x is divisible by 2, else "odd"', 'Always assigns "even"', 'This is a compile error'],
+        options: ['Calls a function that is named either even or odd depending on x', 'Assigns "even" to msg if x is divisible by 2, else "odd"', 'Always assigns "even"', 'This is a compile error'],
         correctIndex: 1,
         explanation: 'x % 2 == 0 checks for even numbers. The ternary operator selects "even" if true, "odd" if false, and stores the result in msg.'
       },
       {
         question: 'How many else if blocks can you chain after an if statement in C?',
-        options: ['Only 1', 'Only 3', 'Up to 10', 'As many as needed'],
-        correctIndex: 3,
+        options: ['Only 1', 'Only 3', 'As many as needed', 'Up to a maximum of 10'],
+        correctIndex: 2,
         explanation: 'There is no language limit on the number of else if branches. In practice, more than 4-5 branches often suggests a switch or lookup table would be cleaner.'
       }
     ],
@@ -753,44 +753,44 @@ int main() {
     practiceQuestions: [
       {
         question: 'How many times does this loop execute: for (int i = 0; i < 5; i++)?',
-        options: ['4', '5', '6', '0'],
-        correctIndex: 1,
+        options: ['4', '6', '0', '5'],
+        correctIndex: 3,
         explanation: 'i starts at 0 and increments to 4 (while i < 5). Values: 0, 1, 2, 3, 4 — that is 5 iterations.'
       },
       {
         question: 'Which loop guarantees its body runs at least once?',
-        options: ['for', 'while', 'do-while', 'infinite loop'],
-        correctIndex: 2,
+        options: ['do-while', 'for', 'while', 'infinite loop'],
+        correctIndex: 0,
         explanation: 'do-while checks the condition after the body, so the body always executes at least once regardless of the condition.'
       },
       {
         question: 'What does continue do inside a for loop?',
-        options: ['Exits the loop', 'Restarts the whole program', 'Skips the rest of the current iteration and goes to the update step', 'Pauses execution'],
-        correctIndex: 2,
+        options: ['Exits the loop', 'Skips the rest of the current iteration and goes to the update step', 'Restarts execution of the whole program again from the very beginning', 'Pauses execution'],
+        correctIndex: 1,
         explanation: 'continue skips the remaining code in the current iteration and jumps to the for loop\'s update expression (e.g., i++), then re-checks the condition.'
       },
       {
         question: 'What is an infinite loop in C?',
-        options: ['A loop that never compiles', 'A loop whose condition never becomes false', 'A loop that runs exactly 1000 times', 'A loop inside another loop'],
-        correctIndex: 1,
+        options: ['A loop that never compiles', 'A loop that always runs exactly one thousand times', 'A loop whose condition never becomes false', 'A loop inside another loop'],
+        correctIndex: 2,
         explanation: 'An infinite loop occurs when the condition is always true (such as while(1)). It loops forever unless exited with break or return.'
       },
       {
         question: 'In nested loops, what does break affect?',
-        options: ['All loops at once', 'Only the outermost loop', 'Only the innermost loop containing the break', 'The entire program'],
-        correctIndex: 2,
+        options: ['All loops at once', 'Only the single outermost enclosing loop of them all', 'The entire program', 'Only the innermost loop containing the break'],
+        correctIndex: 3,
         explanation: 'break only exits the immediately enclosing loop. To break out of multiple nested levels you need multiple breaks or a flag variable.'
       },
       {
         question: 'What is the output of: for (int i = 1; i <= 3; i++) printf("%d\\n", i * i);',
-        options: ['1 2 3', '1 4 9', '3 6 9', '0 1 4'],
-        correctIndex: 1,
+        options: ['1 4 9', '1 2 3', '3 6 9', '0 1 4'],
+        correctIndex: 0,
         explanation: 'i takes values 1, 2, 3. i*i gives 1, 4, 9. Each is printed on its own line due to \\n.'
       },
       {
         question: 'Which loop type is best when the number of iterations is known in advance?',
-        options: ['while', 'do-while', 'for', 'switch'],
-        correctIndex: 2,
+        options: ['while', 'for', 'do-while', 'switch'],
+        correctIndex: 1,
         explanation: 'The for loop is designed for counted iteration — its header neatly packages initialisation, condition, and update, making the count obvious at a glance.'
       }
     ],
@@ -933,44 +933,44 @@ int main() {
     practiceQuestions: [
       {
         question: 'What is the purpose of a function prototype in C?',
-        options: ['It runs the function immediately', 'It tells the compiler the return type and parameter types before the full definition', 'It prevents the function from being called more than once', 'It is required only for void functions'],
-        correctIndex: 1,
+        options: ['It runs the function immediately', 'It prevents the function from being called more than once', 'It tells the compiler the return type and parameter types before the full definition', 'It is required only for void functions'],
+        correctIndex: 2,
         explanation: 'A prototype (forward declaration) lets you call a function that is defined later in the file. The compiler uses it to type-check all calls.'
       },
       {
         question: 'What happens to the original variable when passed to a function by value?',
-        options: ['It is deleted', 'It is modified by the function', 'It is unchanged — the function gets a copy', 'It is converted to a pointer automatically'],
-        correctIndex: 2,
+        options: ['It is deleted', 'It is modified by the function', 'It is converted to a pointer automatically', 'It is unchanged — the function gets a copy'],
+        correctIndex: 3,
         explanation: 'C passes by value: the function receives a copy. Changes to the parameter inside the function do not affect the original variable.'
       },
       {
         question: 'What is the base case in a recursive function?',
-        options: ['The first call to the function', 'The condition where the function returns without calling itself again', 'The parameter with the largest value', 'The return type declaration'],
-        correctIndex: 1,
+        options: ['The condition where the function returns without calling itself again', 'The first call to the function', 'The particular parameter that happens to hold the single largest value overall', 'The return type declaration'],
+        correctIndex: 0,
         explanation: 'The base case stops the recursion. Without it, the function calls itself forever until the stack overflows.'
       },
       {
         question: 'What return type should a function have if it performs an action but returns nothing?',
-        options: ['int', 'null', 'void', 'empty'],
-        correctIndex: 2,
+        options: ['int', 'void', 'null', 'empty'],
+        correctIndex: 1,
         explanation: 'void is used as the return type when a function does not return a value. You can write return; with no value in a void function.'
       },
       {
         question: 'What is the value of factorial(0) by mathematical convention?',
-        options: ['0', '1', 'undefined', '-1'],
-        correctIndex: 1,
+        options: ['0', 'undefined', '1', '-1'],
+        correctIndex: 2,
         explanation: '0! = 1 by mathematical definition. The base case if (n <= 1) return 1; correctly handles both n=0 and n=1.'
       },
       {
         question: 'Which of the following is a valid C function prototype?',
-        options: ['function int add(a, b)', 'int add(int a, int b);', 'add(int, int) -> int', 'def add(int a, int b):'],
-        correctIndex: 1,
+        options: ['function int add(a, b)', 'add(int, int) -> int', 'def add(int a, int b):', 'int add(int a, int b);'],
+        correctIndex: 3,
         explanation: 'A C prototype ends with a semicolon and specifies the return type and parameter types. Parameter names are optional in a prototype but the types are required.'
       },
       {
         question: 'What happens if a recursive function has no base case?',
-        options: ['It returns 0 automatically', 'It runs once', 'It causes a stack overflow crash', 'The compiler refuses to compile it'],
-        correctIndex: 2,
+        options: ['It causes a stack overflow crash', 'It returns 0 automatically', 'It runs once', 'The compiler refuses to compile it'],
+        correctIndex: 0,
         explanation: 'Without a base case, the function calls itself indefinitely. Each call consumes stack memory; eventually the stack is exhausted and the program crashes.'
       }
     ],
@@ -1114,44 +1114,44 @@ int main() {
     practiceQuestions: [
       {
         question: 'What is the index of the first element in a C array?',
-        options: ['1', '-1', '0', 'depends on the type'],
-        correctIndex: 2,
+        options: ['1', '0', '-1', 'depends on the type'],
+        correctIndex: 1,
         explanation: 'All C arrays are zero-indexed. The first element is always at index 0, the last is at index (size - 1).'
       },
       {
         question: 'What character marks the end of a C string?',
-        options: ["'\\n'", "'\\0'", "'\\t'", "'$'"],
-        correctIndex: 1,
+        options: ["'\\n'", "'\\t'", "'\\0'", "'$'"],
+        correctIndex: 2,
         explanation: 'The null character \'\\0\' (ASCII value 0) terminates every C string. All string library functions rely on this sentinel to know where the string ends.'
       },
       {
         question: 'What does strlen("Hello") return?',
-        options: ['6', '5', '4', '0'],
-        correctIndex: 1,
+        options: ['6', '4', '0', '5'],
+        correctIndex: 3,
         explanation: 'strlen returns the number of characters NOT including the null terminator. "Hello" has 5 characters: H, e, l, l, o.'
       },
       {
         question: 'What does strcmp(a, b) return when strings a and b are equal?',
-        options: ['1', '-1', 'true', '0'],
-        correctIndex: 3,
+        options: ['0', '1', '-1', 'true'],
+        correctIndex: 0,
         explanation: 'strcmp returns 0 for equal strings, a negative value if a comes before b lexicographically, and a positive value if a comes after b.'
       },
       {
         question: 'A char array is declared as char name[10]. How many characters can it store as a string?',
-        options: ['10', '11', '9', '8'],
-        correctIndex: 2,
+        options: ['10', '9', '11', '8'],
+        correctIndex: 1,
         explanation: 'One slot must be reserved for the null terminator \'\\0\'. So a char array of size 10 can hold a string of at most 9 characters.'
       },
       {
         question: 'How do you declare a 2D int array with 4 rows and 3 columns?',
-        options: ['int arr[3][4]', 'int arr[4][3]', 'int arr(4, 3)', 'int[4][3] arr'],
-        correctIndex: 1,
+        options: ['int arr[3][4]', 'int arr(4, 3)', 'int arr[4][3]', 'int[4][3] arr'],
+        correctIndex: 2,
         explanation: 'The syntax is type name[rows][cols]. So int arr[4][3] has 4 rows and 3 columns. arr[row][col] accesses individual elements.'
       },
       {
         question: 'Which function safely copies at most n characters from source to destination?',
-        options: ['strcpy', 'strcat', 'strncpy', 'strcmp'],
-        correctIndex: 2,
+        options: ['strcpy', 'strcat', 'strcasecmp', 'strncpy'],
+        correctIndex: 3,
         explanation: 'strncpy(dest, src, n) copies at most n characters, preventing buffer overflow. strcpy copies without a length limit and is unsafe for untrusted input.'
       }
     ],
@@ -1287,14 +1287,14 @@ int main() {
     practiceQuestions: [
       {
         question: 'What does the & operator do when applied to a variable?',
-        options: ['Dereferences the variable', 'Returns the value of the variable', 'Returns the memory address of the variable', 'Performs bitwise AND on the variable'],
-        correctIndex: 2,
+        options: ['Returns the memory address of the variable', 'Dereferences the variable', 'Returns the value of the variable', 'Performs a bitwise AND operation on the variable'],
+        correctIndex: 0,
         explanation: '& is the address-of operator. &x gives the memory address where x is stored. This is used to create pointers and to pass variables to functions by reference.'
       },
       {
         question: 'What does *ptr do when ptr is a pointer to an int?',
-        options: ['Returns the address stored in ptr', 'Multiplies ptr by something', 'Returns the int value at the address stored in ptr', 'Declares a new pointer'],
-        correctIndex: 2,
+        options: ['Returns the raw memory address that is stored inside ptr', 'Returns the int value at the address stored in ptr', 'Multiplies ptr by something', 'Declares a new pointer'],
+        correctIndex: 1,
         explanation: '* in this context is the dereference operator. *ptr reads the value stored at the memory address held by ptr.'
       },
       {
@@ -1305,14 +1305,14 @@ int main() {
       },
       {
         question: 'What is a NULL pointer?',
-        options: ['A pointer that holds the address 0 (points to nothing valid)', 'A pointer with value -1', 'A pointer that points to itself', 'A pointer that has not been declared yet'],
-        correctIndex: 0,
+        options: ['A pointer with value -1', 'A pointer that points to itself', 'A pointer variable that has not actually been declared anywhere yet', 'A pointer that holds the address 0 (points to nothing valid)'],
+        correctIndex: 3,
         explanation: 'NULL is defined as 0 (or (void*)0). A NULL pointer does not point to any valid memory location. Dereferencing NULL causes a segmentation fault.'
       },
       {
         question: 'Which of the following correctly declares a pointer to a double?',
-        options: ['double ptr;', 'pointer double *ptr;', 'double *ptr;', '*double ptr;'],
-        correctIndex: 2,
+        options: ['double *ptr;', 'double ptr;', 'pointer double *ptr;', '*double ptr;'],
+        correctIndex: 0,
         explanation: 'The asterisk goes between the type and the variable name: double *ptr; This declares ptr as a variable that holds the address of a double.'
       },
       {
@@ -1323,7 +1323,7 @@ int main() {
       },
       {
         question: 'In C, an array name like arr used in an expression is equivalent to:',
-        options: ['The size of the array', 'The last element of the array', 'A pointer to the first element (&arr[0])', 'A copy of the entire array'],
+        options: ['The size of the array', 'The value of the very last element of the array', 'A pointer to the first element (&arr[0])', 'A copy of the entire array'],
         correctIndex: 2,
         explanation: 'When used in most expressions, an array name decays to a pointer to its first element. arr == &arr[0] holds true, and arr[i] == *(arr + i).'
       }
@@ -1481,44 +1481,44 @@ int main() {
     practiceQuestions: [
       {
         question: 'How do you access the member "age" of a struct variable named person?',
-        options: ['person->age', 'person::age', 'person.age', 'age(person)'],
-        correctIndex: 2,
+        options: ['person->age', 'person::age', 'age(person)', 'person.age'],
+        correctIndex: 3,
         explanation: 'The dot operator (.) accesses members of a struct variable directly. The arrow operator (->) is used when you have a pointer to a struct.'
       },
       {
         question: 'When do you use the -> operator instead of the . operator?',
-        options: ['When the struct has more than 3 members', 'When accessing a member through a pointer to a struct', 'When the member is a string', 'When the struct is declared with typedef'],
-        correctIndex: 1,
+        options: ['When accessing a member through a pointer to a struct', 'When the struct has more than 3 members', 'When the member is a string', 'When the struct has been declared using a typedef alias name'],
+        correctIndex: 0,
         explanation: '-> dereferences the pointer and accesses the member in one step. ptr->member is equivalent to (*ptr).member.'
       },
       {
         question: 'What does typedef struct { int x; int y; } Point; allow you to do?',
-        options: ['Declare a variable named typedef', 'Use Point as a type name without writing struct each time', 'Create a class with methods', 'Define a function called Point'],
+        options: ['Declare a brand new variable that is actually named typedef', 'Use Point as a type name without writing struct each time', 'Create a class with methods', 'Define a function called Point'],
         correctIndex: 1,
         explanation: 'typedef creates an alias. Without it you would write struct Point p1;. With it, Point p1; works directly.'
       },
       {
         question: 'What are the default values assigned to enum members if not specified?',
-        options: ['All are -1', 'All are 1', 'Starting from 0, incrementing by 1', 'Random values'],
+        options: ['All are -1', 'All are 1', 'Starting from 0, incrementing by 1', 'Random, unpredictable values'],
         correctIndex: 2,
         explanation: 'By default, the first enum member is 0 and each subsequent one is 1 more than the previous. You can override any value with an explicit assignment.'
       },
       {
         question: 'Why is it more efficient to pass a large struct to a function using a pointer?',
-        options: ['Pointers are small (4-8 bytes) regardless of struct size', 'It is not more efficient — pointers are slower', 'Structs cannot be passed without pointers', 'The compiler requires pointer passing for structs'],
-        correctIndex: 0,
+        options: ['It is not more efficient — pointers are slower', 'Structs cannot be passed without pointers', 'The C compiler strictly requires pointer passing for all structs', 'Pointers are small (4-8 bytes) regardless of struct size'],
+        correctIndex: 3,
         explanation: 'Passing a struct by value copies all its bytes onto the call stack. A pointer is always 4 or 8 bytes regardless of how large the struct is.'
       },
       {
         question: 'How do you correctly assign a string to a char array member of a struct named s?',
-        options: ['s.name = "Alice"', 'strcpy(s.name, "Alice")', 's.name == "Alice"', 'strset(s.name, "Alice")'],
-        correctIndex: 1,
+        options: ['strcpy(s.name, "Alice")', 's.name = "Alice"', 's.name == "Alice"', 'strset(s.name, "Alice")'],
+        correctIndex: 0,
         explanation: 'You cannot assign strings with = in C after declaration. Use strcpy() from <string.h> to copy a string into a char array member.'
       },
       {
         question: 'What is the value of BLUE in: enum Color { RED, GREEN=5, BLUE }?',
-        options: ['1', '2', '5', '6'],
-        correctIndex: 3,
+        options: ['1', '6', '2', '5'],
+        correctIndex: 1,
         explanation: 'RED=0 (default), GREEN=5 (explicit), BLUE=6 (auto-increments from GREEN). Each enum value is one more than the previous unless explicitly set.'
       }
     ],
@@ -1691,20 +1691,20 @@ int main() {
       },
       {
         question: 'Which file mode opens a file for writing, creating it if needed and erasing existing content?',
-        options: ['"r"', '"a"', '"w"', '"r+"'],
-        correctIndex: 2,
+        options: ['"r"', '"a"', '"r+"', '"w"'],
+        correctIndex: 3,
         explanation: '"w" opens for writing, creating the file if it does not exist and truncating (erasing) it if it already exists. "a" appends without erasing.'
       },
       {
         question: 'What is the key difference between fgets() and fscanf() when reading strings?',
-        options: ['No difference', 'fgets reads a whole line including spaces; fscanf with %s stops at whitespace', 'fscanf reads a whole line; fgets stops at spaces', 'fgets only works on binary files'],
-        correctIndex: 1,
+        options: ['fgets reads a whole line including spaces; fscanf with %s stops at whitespace', 'No difference', 'fscanf always reads an entire line of input, whereas fgets stops at spaces', 'fgets only works on binary files'],
+        correctIndex: 0,
         explanation: 'fgets reads up to the newline or buffer limit and handles spaces. fscanf with %s stops at any whitespace, reading only one word at a time.'
       },
       {
         question: 'What does fclose() do?',
-        options: ['Deletes the file', 'Resets the file pointer to the beginning', 'Flushes buffered data and releases the file resource', 'Opens the file for reading'],
-        correctIndex: 2,
+        options: ['Deletes the file', 'Flushes buffered data and releases the file resource', 'Resets the internal file position pointer back to the very beginning', 'Opens the file for reading'],
+        correctIndex: 1,
         explanation: 'fclose flushes any data still in the I/O buffer to disk and releases the FILE* resource. Forgetting fclose can result in data loss or resource leaks.'
       },
       {
@@ -1715,14 +1715,14 @@ int main() {
       },
       {
         question: 'What does feof(fp) return when the end of file has been reached?',
-        options: ['0', '-1', 'NULL', 'A non-zero value'],
+        options: ['0', '-1', 'The NULL pointer value', 'A non-zero value'],
         correctIndex: 3,
         explanation: 'feof returns a non-zero (true) value once EOF has been reached. It returns 0 (false) while there is still data available to read.'
       },
       {
         question: 'Which mode should you use to add data to the end of an existing file without erasing it?',
-        options: ['"w"', '"r"', '"a"', '"rw"'],
-        correctIndex: 2,
+        options: ['"a"', '"w"', '"r"', '"rw"'],
+        correctIndex: 0,
         explanation: '"a" (append mode) positions the write pointer at the end of the file. Existing content is preserved. If the file does not exist, it is created.'
       }
     ],
@@ -1886,44 +1886,44 @@ int main() {
     practiceQuestions: [
       {
         question: 'What is the key difference between malloc() and calloc()?',
-        options: ['malloc is faster and calloc is always safer', 'calloc initialises allocated memory to zero; malloc does not', 'malloc allocates on the heap; calloc allocates on the stack', 'calloc is for arrays only; malloc is for single variables'],
+        options: ['malloc is faster and calloc is always safer', 'calloc initialises allocated memory to zero; malloc does not', 'malloc allocates on the heap, while calloc allocates on the stack', 'calloc is for arrays only; malloc is for single variables'],
         correctIndex: 1,
         explanation: 'calloc zeroes out all allocated bytes, preventing reads of uninitialised memory. malloc leaves the bytes at whatever value they already have.'
       },
       {
         question: 'What should you do immediately after calling malloc()?',
-        options: ['Call realloc()', 'Free the memory', 'Check if the return value is NULL', 'Print the address'],
+        options: ['Call realloc()', 'Free the memory', 'Check if the return value is NULL', 'Print out the returned memory address'],
         correctIndex: 2,
         explanation: 'malloc returns NULL if the system cannot allocate the requested memory. Dereferencing NULL causes a crash, so always check before using the pointer.'
       },
       {
         question: 'What is a memory leak in C?',
-        options: ['When a pointer variable is declared but not initialised', 'When heap memory is allocated but never freed', 'When a stack variable goes out of scope', 'When two pointers point to the same address'],
-        correctIndex: 1,
+        options: ['When a pointer variable is declared but not initialised', 'When a stack variable goes out of scope', 'When two pointers point to the same address', 'When heap memory is allocated but never freed'],
+        correctIndex: 3,
         explanation: 'A memory leak occurs when heap memory is allocated but never freed with free(). Over time, the program consumes ever-increasing amounts of memory.'
       },
       {
         question: 'Why should you assign realloc\'s return to a temporary pointer instead of directly to the original?',
-        options: ['realloc always returns NULL', 'If realloc fails, the original pointer is still valid and must be freed', 'realloc requires a second pointer by definition', 'C does not allow overwriting a pointer directly'],
-        correctIndex: 1,
+        options: ['If realloc fails, the original pointer is still valid and must be freed', 'realloc always returns NULL', 'realloc requires a second pointer by definition', 'The C language does not allow you to overwrite an existing pointer'],
+        correctIndex: 0,
         explanation: 'If realloc fails it returns NULL but the original allocation remains valid. Assigning directly to the original pointer would overwrite it with NULL, causing a memory leak.'
       },
       {
         question: 'Which header file must you include to use malloc, calloc, realloc, and free?',
-        options: ['<stdio.h>', '<string.h>', '<stdlib.h>', '<memory.h>'],
-        correctIndex: 2,
+        options: ['<stdio.h>', '<stdlib.h>', '<string.h>', '<memory.h>'],
+        correctIndex: 1,
         explanation: 'malloc, calloc, realloc, and free are all declared in <stdlib.h>. Always include it when doing dynamic memory allocation.'
       },
       {
         question: 'What happens if you call free() on the same pointer twice?',
-        options: ['Nothing — it is harmless', 'The memory is freed twice as fast', 'Undefined behaviour — typically a crash or heap corruption', 'The pointer is set to NULL automatically'],
+        options: ['Nothing — it is harmless', 'The memory is freed twice as fast', 'Undefined behaviour — typically a crash or heap corruption', 'The freed pointer is automatically reset to NULL for you by the C runtime'],
         correctIndex: 2,
         explanation: 'Double-free is undefined behaviour. It often corrupts the heap\'s internal data structures and can cause crashes or security vulnerabilities. Setting ptr = NULL after free() prevents this.'
       },
       {
         question: 'How many bytes does malloc(10 * sizeof(int)) allocate when int is 4 bytes?',
-        options: ['10', '4', '40', '14'],
-        correctIndex: 2,
+        options: ['10', '4', '14', '40'],
+        correctIndex: 3,
         explanation: '10 * sizeof(int) = 10 * 4 = 40 bytes. This pattern is the portable way to allocate space for 10 integers across platforms where int size may vary.'
       }
     ],
@@ -2072,43 +2072,43 @@ int main() {
     practiceQuestions: [
       {
         question: 'Why are parentheses around macro arguments important, as in #define SQUARE(x) ((x)*(x))?',
-        options: ['They are optional style choices', 'They prevent operator-precedence bugs when the argument is an expression', 'They make the macro run faster', 'They are required by the preprocessor syntax'],
-        correctIndex: 1,
+        options: ['They prevent operator-precedence bugs when the argument is an expression', 'They are optional style choices', 'They make the macro run faster', 'They are strictly required by the C preprocessor macro definition syntax rules'],
+        correctIndex: 0,
         explanation: 'Without parentheses, SQUARE(1+2) expands to 1+2*1+2 = 5 (wrong). With them: (1+2)*(1+2) = 9 (correct). Always parenthesise macro parameters and the whole expression.'
       },
       {
         question: 'When should you use #include "file.h" instead of #include <file.h>?',
-        options: ['For faster compilation', 'For your own header files in the project directory', 'For standard library headers only', 'When the file is larger than 100 lines'],
+        options: ['For faster compilation', 'For your own header files in the project directory', 'For standard library headers only', 'Only when the header file is larger than one hundred lines total'],
         correctIndex: 1,
         explanation: 'Double-quotes search the current directory first (for your own headers). Angle brackets search system include directories (for standard library headers like stdio.h).'
       },
       {
         question: 'What problem do include guards solve?',
-        options: ['Slow compilation', 'Duplicate declarations from including a header multiple times', 'Missing function prototypes', 'Incompatible types between files'],
-        correctIndex: 1,
+        options: ['Slow compilation', 'Missing function prototypes', 'Duplicate declarations from including a header multiple times', 'Incompatible mismatched data types declared between different files'],
+        correctIndex: 2,
         explanation: 'Without guards, if two source files both include the same header, the compiler sees its declarations twice and reports redefinition errors.'
       },
       {
         question: 'What does the predefined macro __LINE__ expand to?',
-        options: ['The name of the current function', 'The current line number in the source file', 'The compilation date', 'The number of lines in the file'],
-        correctIndex: 1,
+        options: ['The full name of the current enclosing function body', 'The compilation date', 'The number of lines in the file', 'The current line number in the source file'],
+        correctIndex: 3,
         explanation: '__LINE__ is replaced by the integer line number at the point it appears. It is useful for debug messages: printf("Error at line %d\\n", __LINE__);'
       },
       {
         question: 'What happens to code between #ifdef DEBUG and #endif if DEBUG is not defined?',
-        options: ['It causes a compile error', 'The code is included as normal', 'The code is excluded from compilation entirely', 'DEBUG is automatically defined as 0'],
-        correctIndex: 2,
+        options: ['The code is excluded from compilation entirely', 'It causes a compile error', 'The code is included as normal', 'DEBUG then gets automatically defined as zero for you'],
+        correctIndex: 0,
         explanation: '#ifdef checks if a macro is defined. If it is not, the preprocessor skips everything up to #endif before the compiler ever sees it.'
       },
       {
         question: 'Which of the following is a correct include guard for a file named "math_utils.h"?',
-        options: ['#include_guard MATH_UTILS_H', '#ifndef MATH_UTILS_H\n#define MATH_UTILS_H\n...\n#endif', '#define MATH_UTILS_H\n#ifdef MATH_UTILS_H\n#endif', '#pragma once (only valid option)'],
+        options: ['#include_guard MATH_UTILS_H', '#ifndef MATH_UTILS_H\n#define MATH_UTILS_H\n...\n#endif', '#define MATH_UTILS_H\n#ifdef MATH_UTILS_H\n#endif', '#pragma once is the only valid way to guard a header'],
         correctIndex: 1,
         explanation: 'The standard pattern is: #ifndef NAME_H / #define NAME_H / (header content) / #endif. The first include defines the macro; subsequent includes see it is already defined and skip the content.'
       },
       {
         question: 'What is the key difference between #define PI 3.14 and const double PI = 3.14?',
-        options: ['They are identical', '#define creates a typed constant; const does not', '#define is a preprocessor text substitution with no type; const is a typed, compiler-checked variable', 'const is faster at runtime than #define'],
+        options: ['They are identical', '#define creates a typed constant that the compiler type-checks, whereas const does not', '#define is a preprocessor text substitution with no type; const is a typed, compiler-checked variable', 'const is faster at runtime than #define'],
         correctIndex: 2,
         explanation: '#define PI is replaced textually before compilation — it has no type, no address, and no scope. const double PI has a type, can be debugged with a debugger, and the compiler performs type checking on it.'
       }
