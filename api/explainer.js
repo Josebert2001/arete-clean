@@ -92,8 +92,11 @@ export default async function handler(req, res) {
       model: groq('openai/gpt-oss-120b'),
       system: SYSTEM_PROMPT,
       prompt: `Explain this ${lang ? lang.label : ''} code${lang ? '' : ' (detect the language first)'}:\n\n\`\`\`${lang ? lang.fence : ''}\n${code}\n\`\`\``,
-      maxOutputTokens: 1000,
+      // gpt-oss-120b reasons before answering; reasoning tokens share this
+      // budget. Low effort + headroom keeps the explanation from being cut off.
+      maxOutputTokens: 1500,
       temperature: 0.5,
+      providerOptions: { groq: { reasoningEffort: 'low' } },
     });
 
     const explanation = text || 'No explanation received.';

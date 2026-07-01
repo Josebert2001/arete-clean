@@ -1,6 +1,6 @@
 // ============================================================================
 //  Arete — AI Tutor Serverless Function (Vercel)
-//  Agentic tutor on the Vercel AI SDK + Groq (Llama 3.3 70B): multi-turn
+//  Agentic tutor on the Vercel AI SDK + Groq (gpt-oss-120b): multi-turn
 //  conversations, streamed answers, and read-only tools for the student's
 //  saved progress and on-demand course/module detail.
 //
@@ -208,8 +208,13 @@ export default async function handler(req, res) {
       messages,
       tools: buildTutorTools(student),
       stopWhen: stepCountIs(5),
-      maxOutputTokens: 1000,
+      // gpt-oss-120b is a reasoning model: reasoning tokens share the output
+      // budget and add latency. Keep effort low (enough for good tutoring, not
+      // enough to stall) and give the visible answer headroom so it isn't
+      // truncated — or emptied — by reasoning spend.
+      maxOutputTokens: 2000,
       temperature: 0.65,
+      providerOptions: { groq: { reasoningEffort: 'low' } },
     });
 
     // Stream plain text so the frontend renders chunks as they arrive. We pump

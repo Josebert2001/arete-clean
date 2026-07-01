@@ -10,12 +10,18 @@ Every external service this project calls. Check here before adding any new API 
 - **When to use:** User asks AI Tutor (`/tutor`), Code Explainer (`/explainer`), or Explain-this (`api/research.js`) features; adding new AI-driven endpoints
 - **How to call it:**
   ```js
-  // api/tutor.js pattern (streaming)
+  // api/tutor.js pattern (streaming) — gpt-oss-120b is a reasoning model, so
+  // keep reasoningEffort low and leave output-token headroom for the answer.
   import { createGroq } from '@ai-sdk/groq';
   import { streamText } from 'ai';
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-  const result = streamText({ model: groq('openai/gpt-oss-120b'), messages, tools });
-  return result.toDataStreamResponse();
+  const result = streamText({
+    model: groq('openai/gpt-oss-120b'), messages, tools,
+    maxOutputTokens: 2000,
+    providerOptions: { groq: { reasoningEffort: 'low' } },
+  });
+  // tutor.js pumps result.textStream manually (to append an error sentinel);
+  // for simple cases result.toDataStreamResponse() also works.
   ```
   ```js
   // api/research.js pattern (web search, non-streaming — compound-mini)
