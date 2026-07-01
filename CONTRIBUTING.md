@@ -34,7 +34,7 @@ npm run lint         # ESLint
 | Frontend | React 18, React Router v6, Tailwind, Vite |
 | Backend | Vercel serverless functions in `api/` (Node ESM) |
 | Auth + DB | Supabase (email OTP, Postgres with RLS) |
-| AI | Groq (`llama-3.3-70b-versatile`) via Vercel AI SDK, streaming |
+| AI | Groq (`openai/gpt-oss-120b`) via Vercel AI SDK, streaming |
 | Code exec | JDoodle, proxied through `api/run.js` |
 
 Architecture and the full file map live in `CLAUDE.md` — don't duplicate it here, read it there.

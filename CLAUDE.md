@@ -7,7 +7,7 @@ Arete is an interactive learning platform for B.Sc. Cybersecurity students at th
 - **Frontend:** React 18, React Router v6, Tailwind CSS (custom theme), Vite (port 5173)
 - **Backend:** Vercel serverless functions in `api/` (Node.js ESM)
 - **Auth + DB:** Supabase (email OTP, PostgreSQL — profiles + user_progress + course_materials tables)
-- **AI:** Groq API via Vercel AI SDK (`llama-3.3-70b-versatile`), streaming responses
+- **AI:** Groq API via Vercel AI SDK (`openai/gpt-oss-120b`), streaming responses
 - **Code execution:** JDoodle API (proxied through `api/run.js`)
 - **Language:** JavaScript/JSX throughout — no TypeScript
 - **Icons:** lucide-react | **Fonts:** Fraunces (display), Inter (body), JetBrains Mono (code)
@@ -73,13 +73,15 @@ JDOODLE_CLIENT_SECRET     # Code Playground execution
 VITE_SUPABASE_URL         # Supabase project URL (exposed to browser)
 VITE_SUPABASE_ANON_KEY    # Supabase anon key (exposed to browser)
 ALLOWED_ORIGIN            # CORS restriction for /api/* (set to your domain)
+VITE_SENTRY_DSN           # Sentry error monitoring — frontend (optional; no-op if unset)
+SENTRY_DSN                # Sentry error monitoring — /api/* serverless (optional)
 ```
 For Vercel deployment, set all of the above in the Vercel dashboard — not in code.
 For Supabase setup script only: also need `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_PAT`.
 
 ## External API Quirks
 - **JDoodle:** Free plan = 20 executions/day total across ALL users. Do not add new language versions without checking JDoodle docs for version strings. Never expose `JDOODLE_CLIENT_ID` or `JDOODLE_CLIENT_SECRET` to the browser.
-- **Groq:** Model is `llama-3.3-70b-versatile`. Rate limits are enforced in-memory per IP (not persistent across function cold starts). The tutor uses Vercel AI SDK streaming — response format is different from a plain `fetch`.
+- **Groq:** Model is `openai/gpt-oss-120b`. Rate limits are enforced in-memory per IP (not persistent across function cold starts). The tutor uses Vercel AI SDK streaming — response format is different from a plain `fetch`.
 - **Supabase RLS:** Server-side functions (`api/_lib/supabase.js`) must forward the user's Bearer token for row-level security to apply. Never use the service role key in frontend code.
 
 ## Static Rules (always follow these)

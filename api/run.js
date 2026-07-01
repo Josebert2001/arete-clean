@@ -35,6 +35,7 @@ const LANGUAGES = {
 };
 
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { captureApiError } from './_lib/sentry.js';
 
 const RATE_LIMIT = {
   namespace: 'run',
@@ -164,6 +165,7 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('Code runner error:', err);
+    await captureApiError(err, { route: 'run' });
     return res.status(500).json({ error: 'Internal error running code. Please try again.' });
   }
 }

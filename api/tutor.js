@@ -14,6 +14,7 @@
 import { createGroq } from '@ai-sdk/groq';
 import { streamText, stepCountIs } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { COURSE_INDEX, MODULE_INDEX } from './_lib/courseData.js';
 import { buildTutorTools } from './_lib/tutorTools.js';
@@ -202,7 +203,7 @@ export default async function handler(req, res) {
       : '\n\nSTUDENT CONTEXT: The student is browsing anonymously, so no saved progress is available. If they ask about tracking or saving progress, mention that signing in keeps it synced across devices.';
 
     const result = streamText({
-      model: groq('llama-3.3-70b-versatile'),
+      model: groq('openai/gpt-oss-120b'),
       system: SYSTEM_PROMPT + studentContext,
       messages,
       tools: buildTutorTools(student),
@@ -228,6 +229,7 @@ export default async function handler(req, res) {
       }
     } catch (streamErr) {
       console.error('Groq tutor stream error:', streamErr);
+      await captureApiError(streamErr, { route: 'tutor', phase: 'stream' });
       streamFailed = true;
       res.write(STREAM_ERROR_MARKER);
     }
@@ -243,6 +245,8 @@ export default async function handler(req, res) {
     console.error('Groq tutor error:', err);
 
     const isRateLimit = err?.statusCode === 429 || err?.status === 429;
+    // A busy-AI 429 is expected load, not a bug — only report real failures.
+    if (!isRateLimit) await captureApiError(err, { route: 'tutor' });
     return res.status(200).json({
       error: isRateLimit
         ? 'Too many requests — the AI is busy. Wait a moment and try again.'

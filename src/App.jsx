@@ -1,5 +1,6 @@
 import { Component, lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, Link, useLocation, useNavigate, useParams as useRouteParams } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
@@ -28,6 +29,14 @@ class ErrorBoundary extends Component {
 
   static getDerivedStateFromError() {
     return { hasError: true };
+  }
+
+  // Report the crash to Sentry (no-op when Sentry isn't configured) while still
+  // showing the friendly fallback UI below.
+  componentDidCatch(error, info) {
+    Sentry.captureException(error, {
+      contexts: { react: { componentStack: info?.componentStack } },
+    });
   }
 
   render() {

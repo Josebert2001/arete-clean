@@ -6,7 +6,7 @@ Every external service this project calls. Check here before adding any new API 
 
 ## Groq (AI Tutor + Code Explainer)
 
-- **What it does:** LLM inference via `llama-3.3-70b-versatile`; used for streaming tutor conversations and one-shot code explanations
+- **What it does:** LLM inference via `openai/gpt-oss-120b`; used for streaming tutor conversations and one-shot code explanations
 - **When to use:** User asks AI Tutor (`/tutor`) or Code Explainer (`/explainer`) features; adding new AI-driven endpoints
 - **How to call it:**
   ```js
@@ -14,7 +14,7 @@ Every external service this project calls. Check here before adding any new API 
   import { createGroq } from '@ai-sdk/groq';
   import { streamText } from 'ai';
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-  const result = streamText({ model: groq('llama-3.3-70b-versatile'), messages, tools });
+  const result = streamText({ model: groq('openai/gpt-oss-120b'), messages, tools });
   return result.toDataStreamResponse();
   ```
 - **What NOT to do:** Never call Groq directly from the browser; never expose `GROQ_API_KEY` in `VITE_*` env vars; don't use a different model without confirming it's available on the free Groq plan

@@ -9,6 +9,7 @@
 import { createGroq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { captureApiError } from './_lib/sentry.js';
 
 const SYSTEM_PROMPT = `You are Arete's code explainer for beginner Cybersecurity students.
 When given code in any language (Java, Python, C, or C++), explain it clearly and simply.
@@ -88,7 +89,7 @@ export default async function handler(req, res) {
     const groq = createGroq({ apiKey: GROQ_API_KEY });
 
     const { text } = await generateText({
-      model: groq('llama-3.3-70b-versatile'),
+      model: groq('openai/gpt-oss-120b'),
       system: SYSTEM_PROMPT,
       prompt: `Explain this ${lang ? lang.label : ''} code${lang ? '' : ' (detect the language first)'}:\n\n\`\`\`${lang ? lang.fence : ''}\n${code}\n\`\`\``,
       maxOutputTokens: 1000,
@@ -101,6 +102,8 @@ export default async function handler(req, res) {
     console.error('Groq explainer error:', err);
 
     const isRateLimit = err?.statusCode === 429 || err?.status === 429;
+    // A busy-AI 429 is expected load, not a bug — only report real failures.
+    if (!isRateLimit) await captureApiError(err, { route: 'explainer' });
     return res.status(200).json({
       error: isRateLimit
         ? 'Too many requests — the AI is busy. Wait a moment and try again.'
