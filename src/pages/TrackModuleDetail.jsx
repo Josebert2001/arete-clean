@@ -7,6 +7,7 @@ import CodeBlock from '../components/CodeBlock';
 import CodePlayground from '../components/CodePlayground';
 import Quiz from '../components/Quiz';
 import Diagram from '../components/Diagram';
+import ExplainSelection from '../components/ExplainSelection';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { usePageTitle } from '../utils/usePageTitle';
 
@@ -142,15 +143,17 @@ export default function TrackModuleDetail() {
       <div className="min-h-[300px]">
 
         {tab === 'theory' && (
-          <div className="space-y-6 animate-fade-in">
-            {mod.theory.map((section, i) => (
-              <div key={i} className="bg-paper border border-coffee-200 rounded-xl p-6">
-                <h3 className="font-display text-xl font-bold text-ink mb-3">{section.heading}</h3>
-                <p className="text-coffee-700 leading-relaxed">{section.body}</p>
-                {section.diagram && <Diagram name={section.diagram} />}
-              </div>
-            ))}
-          </div>
+          <ExplainSelection context={{ courseCode: track.label, courseTitle: mod.title }}>
+            <div className="space-y-6 animate-fade-in">
+              {mod.theory.map((section, i) => (
+                <div key={i} className="bg-paper border border-coffee-200 rounded-xl p-6">
+                  <h3 className="font-display text-xl font-bold text-ink mb-3">{section.heading}</h3>
+                  <p className="text-coffee-700 leading-relaxed">{section.body}</p>
+                  {section.diagram && <Diagram name={section.diagram} />}
+                </div>
+              ))}
+            </div>
+          </ExplainSelection>
         )}
 
         {tab === 'code' && (

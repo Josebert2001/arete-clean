@@ -4,10 +4,10 @@ Every external service this project calls. Check here before adding any new API 
 
 ---
 
-## Groq (AI Tutor + Code Explainer)
+## Groq (AI Tutor + Code Explainer + Explain-this)
 
-- **What it does:** LLM inference via `openai/gpt-oss-120b`; used for streaming tutor conversations and one-shot code explanations
-- **When to use:** User asks AI Tutor (`/tutor`) or Code Explainer (`/explainer`) features; adding new AI-driven endpoints
+- **What it does:** LLM inference via `openai/gpt-oss-120b` (streaming tutor conversations, one-shot code explanations) and `groq/compound-mini` (web-search-backed "Explain-this" over a highlighted passage)
+- **When to use:** User asks AI Tutor (`/tutor`), Code Explainer (`/explainer`), or Explain-this (`api/research.js`) features; adding new AI-driven endpoints
 - **How to call it:**
   ```js
   // api/tutor.js pattern (streaming)
@@ -17,8 +17,13 @@ Every external service this project calls. Check here before adding any new API 
   const result = streamText({ model: groq('openai/gpt-oss-120b'), messages, tools });
   return result.toDataStreamResponse();
   ```
-- **What NOT to do:** Never call Groq directly from the browser; never expose `GROQ_API_KEY` in `VITE_*` env vars; don't use a different model without confirming it's available on the free Groq plan
-- **Rate limits:** In-memory IP rate limiting applied in each API function — tutor: 8 req/10min/IP; explainer: 8 req/10min/IP
+  ```js
+  // api/research.js pattern (web search, non-streaming — compound-mini)
+  const result = await generateText({ model: groq('groq/compound-mini'), system, prompt });
+  // cited URLs come back on result.sources
+  ```
+- **What NOT to do:** Never call Groq directly from the browser; never expose `GROQ_API_KEY` in `VITE_*` env vars; don't use a different model without confirming it's available on the free Groq plan; don't attach custom AI SDK `tools` to `groq/compound-mini` — it runs its own tools server-side
+- **Rate limits:** In-memory IP rate limiting applied in each API function — tutor: 8 req/10min/IP; explainer: 8 req/10min/IP; research: 4 req/10min/IP (signed-in only). compound-mini itself: 200 RPM, 8K max output
 
 ---
 

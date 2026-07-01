@@ -6,6 +6,7 @@ import LectureNotes from '../components/LectureNotes';
 import CourseQuiz from '../components/CourseQuiz';
 import CourseMaterials from '../components/CourseMaterials';
 import CourseAIChat from '../components/CourseAIChat';
+import ExplainSelection from '../components/ExplainSelection';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { usePageTitle } from '../utils/usePageTitle';
 
@@ -146,7 +147,9 @@ export default function CourseDetail() {
       {/* Lecture Notes tab */}
       {activeTab === 'notes' && hasNotes && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
-          <LectureNotes topics={course.lectureNotes} />
+          <ExplainSelection context={{ courseCode: course.code, courseTitle: course.title }}>
+            <LectureNotes topics={course.lectureNotes} />
+          </ExplainSelection>
         </div>
       )}
 

@@ -41,6 +41,7 @@ Browser → React SPA (Vite)
            └── /api/* (Vercel serverless)
                 ├── api/tutor.js   → Groq streaming (AI Tutor, rate: 8/10min/IP)
                 ├── api/explainer.js → Groq (Code Explainer, rate: 8/10min/IP)
+                ├── api/research.js → Groq compound-mini web search (Explain-this, signed-in, rate: 4/10min/IP)
                 └── api/run.js     → JDoodle (code execution, 20 runs/day free)
 ```
 
@@ -59,6 +60,8 @@ Browser → React SPA (Vite)
 | `src/data/trackConfig.js` | Track metadata config (java/python/c) |
 | `api/tutor.js` | Groq streaming tutor with tools: getStudentProgress, getCourseOutline, getModuleDetail |
 | `api/explainer.js` | Groq code explanation endpoint |
+| `api/research.js` | Explain-this — `groq/compound-mini` web search over a highlighted passage; signed-in only, returns explanation + sources |
+| `src/components/ExplainSelection.jsx` | Wraps readable content; shows "Explain this" on text selection, renders inline explanation card |
 | `api/run.js` | JDoodle proxy — runs Java/C/C++/Python code |
 | `api/_lib/supabase.js` | Server-side Supabase client using Bearer token from request |
 | `vercel.json` | CSP, CORS headers, SPA rewrite rule |
@@ -82,6 +85,7 @@ For Supabase setup script only: also need `SUPABASE_SERVICE_ROLE_KEY` and `SUPAB
 ## External API Quirks
 - **JDoodle:** Free plan = 20 executions/day total across ALL users. Do not add new language versions without checking JDoodle docs for version strings. Never expose `JDOODLE_CLIENT_ID` or `JDOODLE_CLIENT_SECRET` to the browser.
 - **Groq:** Model is `openai/gpt-oss-120b`. Rate limits are enforced in-memory per IP (not persistent across function cold starts). The tutor uses Vercel AI SDK streaming — response format is different from a plain `fetch`.
+- **Groq compound-mini (`api/research.js`):** A Groq *system* with built-in web search — it manages its own tools server-side, so don't wire custom AI SDK `tools` into it (they'd conflict). Lower limits than plain models (200 RPM, 8K max output). Cited web results come back on `result.sources`.
 - **Supabase RLS:** Server-side functions (`api/_lib/supabase.js`) must forward the user's Bearer token for row-level security to apply. Never use the service role key in frontend code.
 
 ## Static Rules (always follow these)
