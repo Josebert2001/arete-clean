@@ -150,6 +150,11 @@ function RouteLoading() {
 }
 
 export default function App() {
+  // The tutor chat owns the full viewport below the navbar — the footer and
+  // floating help chip would sit under (or overlap) its pinned composer.
+  const { pathname } = useLocation();
+  const isChatPage = pathname === '/tutor';
+
   return (
     <ThemeProvider>
     <AuthProvider>
@@ -189,8 +194,8 @@ export default function App() {
         </Suspense>
         </ErrorBoundary>
       </main>
-      <Footer />
-      <FloatingHelp />
+      {!isChatPage && <Footer />}
+      {!isChatPage && <FloatingHelp />}
     </div>
     </AuthProvider>
     </ThemeProvider>

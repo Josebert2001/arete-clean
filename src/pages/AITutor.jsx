@@ -174,27 +174,15 @@ export default function AITutor() {
 
   const stop = () => abortRef.current?.abort();
 
-  return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
+  if (showComingSoon) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-12">
+        <div className="mb-8">
           <h1 className="display-heading text-5xl text-ink mb-3">AI Tutor</h1>
           <p className="text-lg text-coffee-700">
             Stuck on a concept or an error? Ask in plain English and get a clear explanation.
           </p>
         </div>
-        {!showComingSoon && messages.length > 1 && (
-          <button
-            onClick={newChat}
-            className="btn-ghost text-sm shrink-0"
-            aria-label="Start a new chat"
-          >
-            <Plus size={15} /> New chat
-          </button>
-        )}
-      </div>
-
-      {showComingSoon ? (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-8 sm:p-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-ember-500 animate-pulse" />
@@ -222,35 +210,53 @@ export default function AITutor() {
               <Link to="/lab" className="btn-ghost text-sm">
                 Read the modules <ArrowRight size={14} />
               </Link>
-            </div>
           </div>
-      ) : (
-        <>
-          {/* Module context selector */}
-          <div className="mb-4">
-            <label className="text-xs font-medium text-coffee-700 block mb-1.5">Focus on a language or module (optional)</label>
-            <select
-              value={selectedModule}
-              onChange={e => setSelectedModule(e.target.value)}
-              className="w-full bg-paper border border-coffee-200 rounded-lg px-3 py-2 text-sm text-ink focus:border-coffee-500 outline-none"
-            >
-              <option value="">General — any language or topic</option>
-              {FOCUS_GROUPS.map(group => (
-                <optgroup key={group.label} label={group.label}>
-                  {group.options.map(o => (
-                    <option key={o.key} value={o.value}>{o.value}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </div>
+        </div>
+      </div>
+    );
+  }
 
-          {/* Chat window */}
-          <div className="bg-paper border border-coffee-200 rounded-xl overflow-hidden">
+  return (
+    // Chat owns the viewport below the sticky navbar (~69px mobile / ~77px
+    // desktop): compact header row, log takes the remaining height, composer
+    // pinned at the bottom. dvh keeps the composer visible above mobile
+    // keyboards.
+    <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-4 h-[calc(100dvh-69px)] sm:h-[calc(100dvh-77px)]">
+      {/* Compact header: title, focus selector, new chat */}
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <h1 className="display-heading text-2xl text-ink">AI Tutor</h1>
+        <select
+          value={selectedModule}
+          onChange={e => setSelectedModule(e.target.value)}
+          aria-label="Focus on a language or module (optional)"
+          className="ml-auto min-w-0 max-w-[240px] flex-1 sm:flex-none bg-paper border border-coffee-200 rounded-lg px-2.5 py-1.5 text-xs text-ink focus:border-coffee-500 outline-none"
+        >
+          <option value="">General — any language or topic</option>
+          {FOCUS_GROUPS.map(group => (
+            <optgroup key={group.label} label={group.label}>
+              {group.options.map(o => (
+                <option key={o.key} value={o.value}>{o.value}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        {messages.length > 1 && (
+          <button
+            onClick={newChat}
+            className="btn-ghost text-sm shrink-0"
+            aria-label="Start a new chat"
+          >
+            <Plus size={15} /> New chat
+          </button>
+        )}
+      </div>
+
+      {/* Chat window */}
+      <div className="flex min-h-0 flex-1 flex-col bg-paper border border-coffee-200 rounded-xl overflow-hidden">
             <div
               ref={logRef}
               onScroll={handleLogScroll}
-              className="h-[60vh] min-h-[360px] max-h-[640px] overflow-y-auto p-5 space-y-4"
+              className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4"
               role="log"
               aria-label="Chat messages"
             >
@@ -261,7 +267,7 @@ export default function AITutor() {
                   }`}>
                     {m.role === 'user' ? <User size={15} /> : <Bot size={15} />}
                   </div>
-                  <div className={`max-w-[90%] sm:max-w-[80%] ${m.role === 'user' ? 'text-right' : ''}`}>
+                  <div className={`max-w-[92%] sm:max-w-[85%] ${m.role === 'user' ? 'text-right' : ''}`}>
                     <span className={`block text-[10px] font-mono uppercase tracking-wider mb-1 ${
                       m.role === 'user' ? 'text-ember-500' : 'text-coffee-500'
                     }`}>
@@ -271,7 +277,7 @@ export default function AITutor() {
                       m.role === 'user'
                         ? 'bg-ember-500 text-cream rounded-tr-sm whitespace-pre-wrap'
                         : m.error
-                        ? 'bg-red-50 border border-red-200 text-red-700 rounded-tl-sm'
+                        ? 'bg-rust/10 border border-rust/25 text-rust rounded-tl-sm'
                         : 'bg-cream border border-coffee-200 text-ink rounded-tl-sm'
                     }`}>
                       {m.role === 'user' ? m.text : <RichText text={m.text} />}
@@ -279,6 +285,20 @@ export default function AITutor() {
                   </div>
                 </div>
               ))}
+              {messages.length <= 1 && (
+                <div className="flex flex-wrap gap-2 pl-11">
+                  {SUGGESTED.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => send(s)}
+                      aria-label={`Ask: ${s}`}
+                      className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-2 text-coffee-700 hover:bg-coffee-100 hover:text-ink hover:border-coffee-500 transition-all"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
               {loading && (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-lg bg-ink text-cream flex items-center justify-center flex-shrink-0">
@@ -296,25 +316,10 @@ export default function AITutor() {
               )}
             </div>
 
-            {/* Suggested prompts */}
-            {messages.length <= 1 && (
-              <div className="px-5 pb-3 flex flex-wrap gap-2">
-                {SUGGESTED.map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => send(s)}
-                    aria-label={`Ask: ${s}`}
-                    className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-2 text-coffee-700 hover:bg-coffee-100 hover:text-ink hover:border-coffee-500 transition-all"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-
             {/* Input — textarea so pasted errors/code keep their line breaks;
                 Enter sends, Shift+Enter inserts a newline. */}
-            <div className="border-t border-coffee-200 p-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="border-t border-coffee-200 p-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
               <textarea
                 ref={inputRef}
                 rows={1}
@@ -348,10 +353,12 @@ export default function AITutor() {
                   <Send size={16} />
                 </button>
               )}
+              </div>
+              <p className="hidden sm:block pt-1.5 px-1 text-[10px] font-mono text-coffee-400">
+                Enter to send · Shift+Enter for a new line
+              </p>
             </div>
           </div>
-        </>
-      )}
     </div>
   );
 }
