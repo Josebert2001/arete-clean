@@ -43,6 +43,7 @@ Browser → React SPA (Vite)
                 ├── api/explainer.js → Groq (Code Explainer, rate: 8/10min/IP)
                 ├── api/research.js → Groq compound-mini web search (Explain-this, signed-in, rate: 4/10min/IP)
                 ├── api/extract.js  → text extraction from uploaded course materials (signed-in, rate: 20/10min/IP)
+                ├── api/simplify.js → Groq plain-English rewrite of lecture-note sections (rate: 8/10min/IP)
                 └── api/run.js     → JDoodle (code execution, 20 runs/day free)
 ```
 
@@ -65,6 +66,8 @@ Browser → React SPA (Vite)
 | `src/components/ExplainSelection.jsx` | Wraps readable content; shows "Explain this" on text selection, renders inline explanation card |
 | `api/run.js` | JDoodle proxy — runs Java/C/C++/Python code |
 | `api/extract.js` | Extracts text from freshly uploaded course materials (.txt/.docx/.pdf via mammoth + pdf-parse) so the tutor can reference lecture notes; signed-in only |
+| `api/simplify.js` | "Simplify this" — Groq rewrite of a dense lecture-note section in plain English; client caches results in localStorage |
+| `src/components/LectureNotes.jsx` | Renders lecture-note sections (definition/bullets/termlist/table/mosca/…); termlists double as flashcards; hosts the Simplify button |
 | `api/_lib/supabase.js` | Server-side Supabase client using Bearer token from request |
 | `vercel.json` | CSP, CORS headers, SPA rewrite rule |
 | `scripts/validate-modules.mjs` | Pre-build module structure validator |

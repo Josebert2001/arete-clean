@@ -148,7 +148,7 @@ export default function CourseDetail() {
       {activeTab === 'notes' && hasNotes && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
           <ExplainSelection context={{ courseCode: course.code, courseTitle: course.title }}>
-            <LectureNotes topics={course.lectureNotes} />
+            <LectureNotes topics={course.lectureNotes} context={{ courseCode: course.code, courseTitle: course.title }} />
           </ExplainSelection>
         </div>
       )}

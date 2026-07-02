@@ -2233,6 +2233,10 @@ export const courses = [
             ],
           },
           {
+            type: 'note',
+            text: "Think of a hostel gateman holding a photo album of known troublemakers. Signature-based detection is him checking every face against the album — anyone not pictured strolls straight in. AI-based detection is the gateman who has watched the hostel for years: he doesn't need your photo to notice you carrying someone else's mattress out at 2 a.m. He knows what normal looks like, so the unusual stands out — even on a face he has never seen before.",
+          },
+          {
             type: 'bullets',
             heading: 'Where AI & ML Are Applied (Use Cases)',
             items: [
@@ -2332,6 +2336,10 @@ export const courses = [
               'Major breaches exploited implicit trust: Target (2013), WannaCry (2017), SolarWinds (2020)',
               'Average data breach cost reached $4.88M in 2024 (IBM), ~194 days to identify',
             ],
+          },
+          {
+            type: 'note',
+            text: "Campus analogy: perimeter security is the main gate checking your ID once — after that you can wander into any lab, office, or exam hall unchallenged. Zero Trust is every door doing its own check: the library scanner, the exam-hall invigilator, the server-room keypad — and your ID only opens rooms you are actually timetabled for, at the times you are expected. Lose your card and a thief gets one room for one hour, not the whole campus.",
           },
           {
             type: 'termlist',
@@ -2487,6 +2495,10 @@ export const courses = [
             text: "Because Shor's Algorithm solves both factorization (RSA) and the discrete logarithm problem (DSA, Diffie-Hellman, ECC) in polynomial time, larger keys add only modest linear overhead — not exponential resistance. RSA and ECC therefore require complete replacement, not reinforcement.",
           },
           {
+            type: 'note',
+            text: "Why bigger keys don't help: RSA's padlock design assumes a thief must try keys one at a time, so a bigger padlock buys decades. Shor's Algorithm is a master tool that opens that entire design of padlock in one motion — a bigger padlock of the same design just gives the tool more to grip. The design itself has to change, and that new design is post-quantum cryptography.",
+          },
+          {
             type: 'table',
             heading: "Grover's Algorithm — Symmetric Key Degradation",
             headers: ['Algorithm', 'Classical', 'After Grover', 'Status'],
@@ -2510,9 +2522,17 @@ export const courses = [
             ],
           },
           {
+            type: 'note',
+            text: "Picture a thief carting away your locked safe today, even though no machine on earth can cut its key yet. He isn't worried — he knows the machine is coming in a few years, and the documents inside will still matter then. That is Harvest Now, Decrypt Later: the stealing happens now, the opening happens later, and moving your documents to a quantum-proof safe only protects what hasn't already been carried off.",
+          },
+          {
             type: 'definition',
             heading: "Mosca's Theorem — Quantifying the Urgency",
             text: 'If (Migration Time) + (Data Secrecy Lifetime) > (Years until Q-Day), the organisation is already at risk. Applied to UNIUYO: a 7-year migration plus a 20-year record-confidentiality requirement = 27 years of protection needed against an ~8-year window. The University is already behind — planning must begin now, not on confirmation of Q-Day.',
+          },
+          {
+            type: 'mosca',
+            heading: 'Try It — Is Your Data Already at Risk?',
           },
           {
             type: 'fivers',
@@ -2631,6 +2651,10 @@ export const courses = [
             type: 'definition',
             heading: 'The Paradigm Shift in Identity Assurance',
             text: 'Legacy access control verifies identity only at the gateway — the moment of login. Once a session token or cookie is issued it stays valid for hours or days without re-verification, creating a "point-of-entry blind spot": if an attacker seizes the terminal three minutes after a valid login, the system never notices. Behavioral biometrics closes this gap by continuously verifying who is actually operating the session.',
+          },
+          {
+            type: 'note',
+            text: "A cybercafé attendant checks your ticket when you sit down, then never looks your way again — whoever slides into your seat two minutes later browses on your ticket. That is point-of-entry authentication. Behavioral biometrics is the attendant who keeps half an eye on the room: he may not know the newcomer's name, but he can tell it isn't you typing — the rhythm, the posture, the way you scroll — and he quietly walks over to ask for the ticket again.",
           },
           {
             type: 'bullets',

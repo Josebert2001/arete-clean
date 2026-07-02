@@ -4,10 +4,10 @@ Every external service this project calls. Check here before adding any new API 
 
 ---
 
-## Groq (AI Tutor + Code Explainer + Explain-this)
+## Groq (AI Tutor + Code Explainer + Explain-this + Simplify)
 
-- **What it does:** LLM inference via `openai/gpt-oss-120b` (streaming tutor conversations, one-shot code explanations) and `groq/compound-mini` (web-search-backed "Explain-this" over a highlighted passage)
-- **When to use:** User asks AI Tutor (`/tutor`), Code Explainer (`/explainer`), or Explain-this (`api/research.js`) features; adding new AI-driven endpoints
+- **What it does:** LLM inference via `openai/gpt-oss-120b` (streaming tutor conversations, one-shot code explanations, plain-English lecture-note rewrites) and `groq/compound-mini` (web-search-backed "Explain-this" over a highlighted passage)
+- **When to use:** User asks AI Tutor (`/tutor`), Code Explainer (`/explainer`), Explain-this (`api/research.js`), or Simplify-this (`api/simplify.js`, buttons in lecture notes) features; adding new AI-driven endpoints
 - **How to call it:**
   ```js
   // api/tutor.js pattern (streaming) — gpt-oss-120b is a reasoning model, so
@@ -29,7 +29,7 @@ Every external service this project calls. Check here before adding any new API 
   // cited URLs come back on result.sources
   ```
 - **What NOT to do:** Never call Groq directly from the browser; never expose `GROQ_API_KEY` in `VITE_*` env vars; don't use a different model without confirming it's available on the free Groq plan; don't attach custom AI SDK `tools` to `groq/compound-mini` — it runs its own tools server-side
-- **Rate limits:** In-memory IP rate limiting applied in each API function — tutor: 8 req/10min/IP; explainer: 8 req/10min/IP; research: 4 req/10min/IP (signed-in only). compound-mini itself: 200 RPM, 8K max output
+- **Rate limits:** In-memory IP rate limiting applied in each API function — tutor: 8 req/10min/IP; explainer: 8 req/10min/IP; research: 4 req/10min/IP (signed-in only); simplify: 8 req/10min/IP (results cached client-side in localStorage keyed by content hash, so repeat views cost nothing). compound-mini itself: 200 RPM, 8K max output
 
 ---
 
