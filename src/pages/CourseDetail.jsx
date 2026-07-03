@@ -119,7 +119,7 @@ export default function CourseDetail() {
       )}
 
       {/* Tab bar */}
-      <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0 overflow-x-auto">
+      <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0 overflow-x-auto no-scrollbar">
         {[
           { key: 'resources', label: 'Study Resources', icon: BookOpen },
           ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} topics` }] : []),
