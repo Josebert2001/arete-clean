@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, User, Bot, ArrowRight, Square, Plus } from 'lucide-react';
+import { Send, ArrowRight, Square, Plus } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useApiAvailability } from '../utils/apiClient';
 import { streamTutor } from '../utils/tutorStream';
@@ -102,6 +102,9 @@ export default function AITutor() {
     if (!el) return;
     el.style.height = 'auto';
     el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+    // Only show a scrollbar once the cap is actually hit — sub-pixel rounding
+    // otherwise paints a phantom thumb on the empty single-line input.
+    el.style.overflowY = el.scrollHeight > 128 ? 'auto' : 'hidden';
   }, [input]);
 
   const send = async (text) => {
@@ -218,13 +221,16 @@ export default function AITutor() {
 
   return (
     // Chat owns the viewport below the sticky navbar (~69px mobile / ~77px
-    // desktop): compact header row, log takes the remaining height, composer
-    // pinned at the bottom. dvh keeps the composer visible above mobile
-    // keyboards.
-    <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-4 h-[calc(100dvh-69px)] sm:h-[calc(100dvh-77px)]">
+    // desktop): compact header row, transcript takes the remaining height,
+    // composer pinned at the bottom. dvh keeps the composer visible above
+    // mobile keyboards.
+    <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-4 h-[calc(100dvh-69px)] sm:h-[calc(100dvh-77px)]">
       {/* Compact header: title, focus selector, new chat */}
-      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="mb-1 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-coffee-200 pb-3">
         <h1 className="display-heading text-2xl text-ink">AI Tutor</h1>
+        <span className="hidden sm:inline text-[10px] font-mono uppercase tracking-[0.15em] text-coffee-500">
+          a study transcript
+        </span>
         <select
           value={selectedModule}
           onChange={e => setSelectedModule(e.target.value)}
@@ -251,114 +257,138 @@ export default function AITutor() {
         )}
       </div>
 
-      {/* Chat window */}
-      <div className="flex min-h-0 flex-1 flex-col bg-paper border border-coffee-200 rounded-xl overflow-hidden">
-            <div
-              ref={logRef}
-              onScroll={handleLogScroll}
-              className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4"
-              role="log"
-              aria-label="Chat messages"
-            >
-              {messages.map((m, i) => (
-                <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    m.role === 'user' ? 'bg-ember-500 text-cream' : 'bg-ink text-cream'
-                  }`}>
-                    {m.role === 'user' ? <User size={15} /> : <Bot size={15} />}
-                  </div>
-                  <div className={`max-w-[92%] sm:max-w-[85%] ${m.role === 'user' ? 'text-right' : ''}`}>
-                    <span className={`block text-[10px] font-mono uppercase tracking-wider mb-1 ${
-                      m.role === 'user' ? 'text-ember-500' : 'text-coffee-500'
-                    }`}>
-                      {m.role === 'user' ? 'You' : 'Tutor'}
-                    </span>
-                    <div className={`rounded-xl px-4 py-3 text-sm leading-relaxed text-left ${
-                      m.role === 'user'
-                        ? 'bg-ember-500 text-cream rounded-tr-sm whitespace-pre-wrap'
-                        : m.error
-                        ? 'bg-rust/10 border border-rust/25 text-rust rounded-tl-sm'
-                        : 'bg-cream border border-coffee-200 text-ink rounded-tl-sm'
-                    }`}>
-                      {m.role === 'user' ? m.text : <RichText text={m.text} />}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {messages.length <= 1 && (
-                <div className="flex flex-wrap gap-2 pl-11">
-                  {SUGGESTED.map((s, i) => (
-                    <button
-                      key={i}
-                      onClick={() => send(s)}
-                      aria-label={`Ask: ${s}`}
-                      className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-2 text-coffee-700 hover:bg-coffee-100 hover:text-ink hover:border-coffee-500 transition-all"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {loading && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-ink text-cream flex items-center justify-center flex-shrink-0">
-                    <Bot size={15} />
-                  </div>
-                  <div className="bg-cream border border-coffee-200 rounded-xl px-4 py-3 flex items-center gap-2.5">
-                    <span className="text-xs text-coffee-500 italic">Thinking…</span>
-                    <span className="flex gap-1">
-                      <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Input — textarea so pasted errors/code keep their line breaks;
-                Enter sends, Shift+Enter inserts a newline. */}
-            <div className="border-t border-coffee-200 p-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-              <textarea
-                ref={inputRef}
-                rows={1}
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    send();
-                  }
-                }}
-                placeholder={availability === 'checking' ? 'Connecting to AI Tutor…' : 'Ask about Java, Python, C, or a course concept...'}
-                aria-label="Ask a programming or CS question"
-                className="flex-1 resize-none bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
-              />
-              {responding ? (
-                <button
-                  onClick={stop}
-                  aria-label="Stop response"
-                  className="btn-ghost w-full justify-center px-4 sm:w-auto"
-                >
-                  <Square size={15} /> Stop
-                </button>
-              ) : (
-                <button
-                  onClick={() => send()}
-                  disabled={!input.trim()}
-                  aria-label="Send message"
-                  className="btn-primary w-full justify-center px-4 disabled:opacity-40 disabled:cursor-not-allowed sm:w-auto"
-                >
-                  <Send size={16} />
-                </button>
-              )}
-              </div>
-              <p className="hidden sm:block pt-1.5 px-1 text-[10px] font-mono text-coffee-400">
-                Enter to send · Shift+Enter for a new line
+      {/* Transcript — an editorial Q&A, not chat bubbles. Questions are set
+          in Fraunces italic with an ember Q marker; answers read as typeset
+          prose. A hairline rule closes each exchange. */}
+      <div
+        ref={logRef}
+        onScroll={handleLogScroll}
+        className="flex-1 min-h-0 overflow-y-auto py-6"
+        role="log"
+        aria-label="Chat messages"
+      >
+        {messages.map((m, i) =>
+          m.role === 'user' ? (
+            <div key={i} className="flex items-baseline gap-3 sm:gap-4 pt-2">
+              <span
+                className="display-heading italic text-2xl leading-none text-ember-500 select-none w-5 sm:w-6 shrink-0 text-right"
+                aria-hidden
+              >
+                Q
+              </span>
+              <p className="font-display italic font-medium text-lg sm:text-xl leading-snug text-ink whitespace-pre-wrap min-w-0">
+                {m.text}
               </p>
             </div>
+          ) : i === 0 ? (
+            // Canned greeting — a standfirst that opens the session, not an answer.
+            <div key={i} className="border-b border-coffee-200 pb-6">
+              <p className="font-display text-[17px] leading-relaxed text-coffee-700">
+                {m.text}
+              </p>
+            </div>
+          ) : (
+            <div key={i} className="pl-8 sm:pl-10 mt-4 border-b border-coffee-200 pb-6 mb-2">
+              <span
+                className={`block text-[10px] font-mono uppercase tracking-[0.15em] mb-2 ${
+                  m.error ? 'text-rust' : 'text-coffee-500'
+                }`}
+              >
+                {m.error ? 'Interrupted' : 'Tutor'}
+              </span>
+              <div className={`text-[15px] leading-relaxed ${m.error ? 'text-rust' : 'text-ink'}`}>
+                <RichText text={m.text} />
+              </div>
+            </div>
+          )
+        )}
+
+        {messages.length <= 1 && (
+          <div className="pt-8">
+            <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-coffee-500 mb-4">
+              Try asking
+            </p>
+            <div className="grid sm:grid-cols-2 gap-x-10 gap-y-3">
+              {SUGGESTED.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => send(s)}
+                  aria-label={`Ask: ${s}`}
+                  className="group flex items-baseline gap-3 text-left"
+                >
+                  <span className="font-mono text-[11px] text-coffee-400 group-hover:text-ember-500 transition-colors shrink-0">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-sm text-coffee-700 group-hover:text-ink border-b border-transparent group-hover:border-ember-500 transition-all pb-0.5">
+                    {s}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
+        )}
+
+        {loading && (
+          <div className="pl-8 sm:pl-10 mt-4 flex items-baseline gap-2.5" aria-live="polite">
+            <span className="font-display italic text-sm text-coffee-500">Thinking</span>
+            <span className="flex gap-1" aria-hidden>
+              <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '0ms' }} />
+              <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '400ms' }} />
+              <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '800ms' }} />
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Composer — the next line of the transcript. Textarea so pasted
+          errors/code keep their line breaks; Enter sends, Shift+Enter inserts
+          a newline. */}
+      <div className="border-t-2 border-coffee-200 pt-3 pb-1">
+        <div className="flex items-end gap-3 sm:gap-4">
+          <span
+            className="hidden sm:block display-heading italic text-2xl leading-none text-ember-500 select-none w-6 shrink-0 text-right pb-2"
+            aria-hidden
+          >
+            Q
+          </span>
+          <textarea
+            ref={inputRef}
+            rows={1}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                send();
+              }
+            }}
+            placeholder={availability === 'checking' ? 'Connecting to AI Tutor…' : 'Ask your next question…'}
+            aria-label="Ask a programming or CS question"
+            className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-2 font-display italic text-base text-ink placeholder:text-coffee-400 outline-none transition-colors"
+          />
+          {responding ? (
+            <button
+              onClick={stop}
+              aria-label="Stop response"
+              className="btn-ghost shrink-0 justify-center px-4"
+            >
+              <Square size={15} /> Stop
+            </button>
+          ) : (
+            <button
+              onClick={() => send()}
+              disabled={!input.trim()}
+              aria-label="Send message"
+              className="btn-primary shrink-0 justify-center px-4 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Send size={16} />
+            </button>
+          )}
+        </div>
+        <p className="hidden sm:block pt-1.5 pl-10 text-[10px] font-mono text-coffee-400">
+          Enter to send · Shift+Enter for a new line
+        </p>
+      </div>
     </div>
   );
 }
