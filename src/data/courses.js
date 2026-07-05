@@ -2968,6 +2968,19 @@ export const courses = [
             ],
           },
           {
+            type: 'bullets',
+            heading: 'Features of Web Applications',
+            items: [
+              'Presentation of information to users',
+              'Built using the best available web technology, without direct access to device functionality',
+              'Support for a variety of protocols — for example HTTP (Hypertext Transfer Protocol)',
+            ],
+          },
+          {
+            type: 'note',
+            text: '“Without direct access to device functionality” means a web app runs inside the browser’s sandbox — it cannot freely reach the phone’s camera, contacts, or files the way an installed mobile app can. This is a deliberate browser security feature, and it is also why native mobile apps can feel more powerful than websites.',
+          },
+          {
             type: 'definition',
             heading: 'Mobile Application',
             text: 'A mobile application is software installed directly on a user’s device (iOS or Android), designed to run on a mobile device or tablet. Some mobile apps can also be accessed via an internet connection and a web browser. Mobile apps typically require a version built for each platform, and can provide a more dynamic, interactive user experience with strong collaboration and fast sharing features.',
@@ -2982,6 +2995,15 @@ export const courses = [
             type: 'definition',
             heading: 'Mobile App Risks',
             text: 'Mobile app risk refers to attacks associated with the device and OS features — vulnerabilities, threats, and security flaws that occur when mobile apps connect to the internet for data exchange, such as data leakage, spyware, cryptographic issues, and phishing attacks.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Data leakage: sensitive information escaping the device unintentionally — e.g. an app quietly copying your contacts or location history to its own server.',
+              'Spyware: malicious software that secretly monitors what you do on the device (messages, calls, location) and reports it back to an attacker.',
+              'Cryptographic issues: weak or wrongly implemented encryption — such as using an outdated algorithm, or hardcoding the encryption key inside the app where a reverse engineer can find it.',
+              'Phishing attacks: fake login screens or messages that trick you into typing your password into an attacker-controlled form.',
+            ],
           },
           {
             type: 'bullets',
@@ -3075,6 +3097,10 @@ export const courses = [
             ],
           },
           {
+            type: 'note',
+            text: 'The “network of compromised devices” used in a DDoS attack has a name: a botnet — thousands of infected computers, phones, and even smart-home gadgets that an attacker remotely commands to fire traffic at a single target at the same time. The “Distributed” in DDoS refers to the traffic coming from many places at once, which makes it much harder to block than a flood from one machine.',
+          },
+          {
             type: 'termlist',
             heading: 'Defacement and Deception Attacks',
             items: [
@@ -3085,7 +3111,11 @@ export const courses = [
           {
             type: 'definition',
             heading: 'Cross-Site Request Forgery (CSRF)',
-            text: 'CSRF tricks a victim into unknowingly submitting a malicious request, exploiting the victim’s logged-in identity and privileges to perform an action they never intended.',
+            text: 'CSRF tricks a victim into unknowingly submitting a malicious request, exploiting the victim’s logged-in identity and privileges to perform an action they never intended — enabling attacks such as financial theft, data breaches, and identity theft.',
+          },
+          {
+            type: 'note',
+            text: 'CSRF in practice: imagine you are logged in to your bank in one tab and open a malicious link in another. That page silently submits a transfer request to the bank — and because your browser automatically attaches your logged-in session cookie to every request to that site, the bank believes you made the request yourself. Common defences are CSRF tokens (a secret the malicious page cannot know) and re-confirming sensitive actions.',
           },
         ],
       },
@@ -3113,8 +3143,8 @@ export const courses = [
             advantages: [
               'Accessibility',
               'Convenience',
-              'Less cost-effective to maintain across platforms',
-              'Usability',
+              'Cost-effective — one version works across platforms, no separate iOS/Android builds to maintain',
+              'Updatability — changes go live for everyone the moment the server is updated',
               'Security',
               'Collaboration',
             ],
@@ -3148,7 +3178,7 @@ export const courses = [
           {
             type: 'note',
             items: [
-              'The SCA definition was cut off in the original class document (“It identifies…”). The fuller definition above — identifying known vulnerabilities in third-party/open-source components — is standard industry usage.',
+              'An easy way to keep SAST and DAST apart: SAST is like proofreading a recipe before you cook (reading the source code); DAST is like tasting the finished dish (probing the running app from the outside, the way an attacker would).',
               'IAST is often described as combining SAST and DAST: it runs during testing like DAST, but has visibility into the actual code like SAST.',
             ],
           },
@@ -3159,6 +3189,10 @@ export const courses = [
               { term: 'Web Application Firewall (WAF)', def: 'protects a web app against malicious attacks by filtering and monitoring HTTP traffic' },
               { term: 'Runtime Application Self-Protection (RASP)', def: 'detects, protects against, and blocks attacks by employing app instrumentation directly inside the running application' },
             ],
+          },
+          {
+            type: 'note',
+            text: 'WAF vs RASP in one line: a WAF stands guard in front of the application, inspecting HTTP traffic before it arrives; RASP lives inside the running application and stops an attack at the exact moment the code would execute it. They complement each other rather than compete.',
           },
           {
             type: 'bullets',
@@ -3432,6 +3466,48 @@ export const courses = [
         options: ['Disable all authentication', 'Store API keys in the frontend', 'Avoid recording any code changes', 'Execute input validation and authorization'],
         correctIndex: 3,
         explanation: 'Additional best practices include input validation & authorization, enhanced authentication, recording code changes, and tracking API usage.',
+      },
+      {
+        question: "Why can a web app NOT freely use the phone's camera or contacts the way an installed mobile app can?",
+        options: ['Because HTTP forbids any use of hardware', "Because web apps run inside the browser's sandbox, without direct access to device functionality", 'Because web servers cannot process images', 'Because HTML automatically encrypts the camera feed'],
+        correctIndex: 1,
+        explanation: "Web apps run inside the browser's sandbox and lack direct access to device functionality — a deliberate browser security feature.",
+      },
+      {
+        question: 'The "network of compromised devices" used to launch a DDoS attack is known as:',
+        options: ['A botnet', 'A firewall', 'A sandbox', 'A honeypot'],
+        correctIndex: 0,
+        explanation: 'A botnet is a network of infected computers, phones, and smart devices that an attacker remotely commands to flood a target with traffic.',
+      },
+      {
+        question: 'In the CSRF example, why does the bank accept the forged transfer request?',
+        options: ['Because the bank has no database', 'Because the attacker guessed the password', "Because the victim's browser automatically attaches their logged-in session cookie to the request", 'Because DDoS traffic overloaded the bank'],
+        correctIndex: 2,
+        explanation: 'The browser automatically attaches the logged-in session cookie to every request to that site, so the bank believes the victim made the request.',
+      },
+      {
+        question: 'Spyware on a mobile device is best described as:',
+        options: ['A firewall that filters HTTP traffic', 'A tool for testing app source code', 'An app update delivered through the official store', 'Malicious software that secretly monitors your activity and reports it to an attacker'],
+        correctIndex: 3,
+        explanation: 'Spyware secretly monitors what you do on the device (messages, calls, location) and reports it back to an attacker.',
+      },
+      {
+        question: '"Cryptographic issues" in mobile apps refer to:',
+        options: ['Using too much encryption', 'Weak or wrongly implemented encryption, such as outdated algorithms or hardcoded keys', 'Encrypting data with a WAF', 'Refusing to store any data on the device'],
+        correctIndex: 1,
+        explanation: 'Cryptographic issues are weak or wrongly implemented encryption — like outdated algorithms or hardcoding the key inside the app where a reverse engineer can find it.',
+      },
+      {
+        question: 'In the recipe analogy for security testing, "tasting the finished dish" corresponds to:',
+        options: ['SAST — reading the source code', 'SCA — scanning third-party libraries', 'DAST — probing the running app from the outside', 'WAF — filtering HTTP traffic'],
+        correctIndex: 2,
+        explanation: 'DAST probes the running application from the outside, like tasting the finished dish; SAST is proofreading the recipe (source code) before cooking.',
+      },
+      {
+        question: 'Why are web apps described as cost-effective compared to mobile apps?',
+        options: ['One version works across platforms, so there is no need to maintain separate iOS and Android builds', 'They never need a server', 'They require no developers at all', 'Browsers pay for the hosting'],
+        correctIndex: 0,
+        explanation: 'A single web version works across platforms, avoiding the cost of building and maintaining separate iOS and Android apps.',
       },
     ],
   },
