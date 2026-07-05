@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { X, LogIn, CloudUpload, BrainCircuit, BookOpen } from 'lucide-react';
-import { levelMeta } from '../data/courses';
 
 const GATE_BENEFITS = [
   { icon: CloudUpload,  text: 'Your progress saves and follows you across your phone and laptop' },
@@ -13,7 +12,10 @@ const GATE_BENEFITS = [
 // informed rather than a blank wall.
 
 export function LevelGatePrompt({ level, onSignIn, onGuest, onClose }) {
-  const meta = levelMeta[level];
+  // The label is just the year tag ("100L"). Deriving it here rather than
+  // reading levelMeta from courses.js keeps this dialog — and the whole landing
+  // page that renders it — from statically pulling in the 240 kB course catalog.
+  const label = `${level}L`;
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -44,7 +46,7 @@ export function LevelGatePrompt({ level, onSignIn, onGuest, onClose }) {
           </div>
 
           <h2 id="level-gate-title" className="display-heading text-2xl text-ink mb-2">
-            Sign in to save your {meta.label} progress
+            Sign in to save your {label} progress
           </h2>
           <p className="text-sm text-coffee-700 leading-relaxed mb-5">
             Arete is free to browse — signing in (one tap, no password) just unlocks a few things worth having:
