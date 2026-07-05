@@ -11,6 +11,7 @@ const loaders = {
   java: () => import('./modules').then(m => ({ modules: m.modules, getModuleById: m.getModuleById })),
   python: () => import('./pythonModules').then(m => ({ modules: m.pythonModules, getModuleById: m.getPythonModuleById })),
   c: () => import('./cModules').then(m => ({ modules: m.cModules, getModuleById: m.getCModuleById })),
+  security: () => import('./securityModules').then(m => ({ modules: m.securityModules, getModuleById: m.getSecurityModuleById })),
 };
 
 // Resolves to the full track (metadata + module content) for a known slug, or

@@ -1,7 +1,7 @@
 # Arete — CLAUDE.md
 
 ## Project Identity
-Arete is an interactive learning platform for B.Sc. Cybersecurity students at the University of Uyo. It delivers a full 4-year curriculum browser, programming tracks (Java, Python, C — 37 modules total), an AI tutor, a code explainer, and an in-browser code playground.
+Arete is an interactive learning platform for B.Sc. Cybersecurity students at the University of Uyo. It delivers a full 4-year curriculum browser, programming tracks (Java, Python, C — 37 modules) plus a hands-on Security track (12 CTF-style capture-the-flag rooms; 49 modules total), an AI tutor, a code explainer, and an in-browser code playground.
 
 ## Stack
 - **Frontend:** React 18, React Router v6, Tailwind CSS (custom theme), Vite (port 5173)
@@ -58,6 +58,8 @@ Browser → React SPA (Vite)
 | `src/data/modules.js` | 13 Java modules (theory, code, quiz, project) |
 | `src/data/pythonModules.js` | 12 Python modules |
 | `src/data/cModules.js` | 12 C modules |
+| `src/data/securityModules.js` | 12 Security "rooms" (theory + quiz + an embedded CTF `challenge`); flags stored as SHA-256 hashes |
+| `src/components/FlagChallenge.jsx` | Renders a module's CTF challenge; validates the flag client-side via Web Crypto SHA-256 (no backend); escalating hints, marks the module complete on solve |
 | `src/data/courses.js` | ~2131 lines — all 29 courses (100L–400L), topics, textbooks, exam tips |
 | `src/data/trackConfig.js` | Track metadata config (java/python/c) |
 | `api/tutor.js` | Groq streaming tutor with tools: getStudentProgress, getCourseOutline, getModuleDetail |
@@ -120,7 +122,7 @@ The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-
 - Do not add new test tooling (e.g. coverage providers, Playwright) without asking first.
 
 ## Common Tasks
-- **Adding a module:** Edit the relevant data file (`modules.js`, `pythonModules.js`, `cModules.js`), run `npm run validate` to confirm structure
+- **Adding a module:** Edit the relevant data file (`modules.js`, `pythonModules.js`, `cModules.js`, `securityModules.js`), run `npm run validate` to confirm structure. A track is registered in `trackMeta.js` (metadata + `moduleIndex`) and `trackConfig.js` (lazy loader); the generic `/tracks/:lang/:id` route picks it up automatically. Security modules add a `challenge` object (validated by `validate-modules.mjs`) and render a Challenge tab; they omit the JDoodle playground.
 - **Adding a course:** Edit `src/data/courses.js` — read the existing structure first, it is large
 - **Changing UI:** Use Tailwind with the custom color palette only; check Fraunces/Inter/JetBrains Mono for typography
 - **Adding an API feature:** Add a new file in `api/`, add rate limiting matching the existing pattern in `api/tutor.js`, register it in tools registry

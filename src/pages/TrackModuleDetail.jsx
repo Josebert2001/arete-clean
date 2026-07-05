@@ -1,10 +1,11 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Code2, CheckSquare, Rocket, CheckCircle2, Circle, Lightbulb, Play } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Code2, CheckSquare, Rocket, CheckCircle2, Circle, Lightbulb, Play, Flag } from 'lucide-react';
 import { useTrack } from '../data/useTrack';
 import { useProgress } from '../components/useProgress';
 import CodeBlock from '../components/CodeBlock';
 import CodePlayground from '../components/CodePlayground';
+import FlagChallenge from '../components/FlagChallenge';
 import Quiz from '../components/Quiz';
 import Diagram from '../components/Diagram';
 import ExplainSelection from '../components/ExplainSelection';
@@ -61,13 +62,19 @@ export default function TrackModuleDetail() {
   const next = track.modules[currentIndex + 1];
   const done = isComplete(mod.id);
 
+  // Tabs vary by track: the Security track ships a hands-on flag Challenge and
+  // no live JDoodle playground, so those tabs are conditional on the module's
+  // own fields rather than hard-coded.
+  const hasCode = Array.isArray(mod.codeExamples) && mod.codeExamples.length > 0;
+  const hasPlayground = typeof mod.playground === 'string' && mod.playground.length > 0;
   const tabs = [
-    { key: 'theory',     label: 'Theory',       icon: BookOpen },
-    { key: 'code',       label: 'Code Examples', icon: Code2 },
-    { key: 'playground', label: 'Try It',        icon: Play },
+    { key: 'theory',     label: 'Theory',        icon: BookOpen },
+    mod.challenge && { key: 'challenge', label: 'Challenge', icon: Flag },
+    hasCode &&       { key: 'code',       label: 'Code Examples', icon: Code2 },
+    hasPlayground && { key: 'playground', label: 'Try It',        icon: Play },
     { key: 'quiz',       label: 'Practice',      icon: CheckSquare },
-    { key: 'project',    label: 'Mini Project',  icon: Rocket },
-  ];
+    { key: 'project',    label: mod.challenge ? 'Go Further' : 'Mini Project', icon: Rocket },
+  ].filter(Boolean);
 
   const playgroundTip = {
     java:   'Try changing a value and running again. Cause an error on purpose — error messages are how you learn to debug.',
@@ -156,6 +163,20 @@ export default function TrackModuleDetail() {
           </ExplainSelection>
         )}
 
+        {tab === 'challenge' && mod.challenge && (
+          <FlagChallenge
+            challenge={mod.challenge}
+            moduleId={mod.id}
+            onSolve={() => {
+              if (!done) {
+                markComplete(mod.id);
+                setJustCompleted(true);
+                setTimeout(() => setJustCompleted(false), 600);
+              }
+            }}
+          />
+        )}
+
         {tab === 'code' && (
           <div className="space-y-8 animate-fade-in">
             {mod.codeExamples.map((ex, i) => (
@@ -164,7 +185,7 @@ export default function TrackModuleDetail() {
                   <span className="text-coffee-500 font-mono text-sm">{String(i + 1).padStart(2, '0')}</span>
                   {ex.title}
                 </h3>
-                <CodeBlock code={ex.code} language={track.language} />
+                <CodeBlock code={ex.code} language={ex.language || track.language} />
                 <div className="bg-coffee-50 border-l-[3px] border-coffee-500 rounded-r-lg p-4 mt-2">
                   <p className="text-sm text-coffee-700 leading-relaxed">
                     <span className="font-bold text-ink">What's happening: </span>

@@ -36,6 +36,15 @@ function CMark() {
   );
 }
 
+function SecurityMark() {
+  return (
+    <svg viewBox="0 0 64 64" className="w-7 h-7" aria-hidden>
+      <path d="M32 8 L52 16 V32 C52 44 43 52 32 56 C21 52 12 44 12 32 V16 Z" fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M24 32 l6 6 l11 -13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 // Presentation extras for the track cards (logos + why-learn-this copy).
 const trackExtras = {
   java: {
@@ -52,6 +61,11 @@ const trackExtras = {
     Mark: CMark,
     why: 'Teaches how computers actually work: memory, pointers, and systems thinking. Foundation of every lower-level language.',
     bullets: ['12 full modules', 'C playground', 'Practice quizzes', 'Mini projects'],
+  },
+  security: {
+    Mark: SecurityMark,
+    why: 'The hands-on core of your degree. 12 CTF-style rooms — crypto, web attacks, forensics, phishing — each ending in a flag you capture right in the browser.',
+    bullets: ['12 capture-the-flag rooms', 'Solve in-browser', 'Maps to CYB courses', 'No setup needed'],
   },
 };
 
@@ -126,7 +140,7 @@ const WORKFLOW = [
     num: '02',
     icon: GraduationCap,
     title: 'Learn',
-    description: '37 interactive modules across three languages — theory, annotated code, playgrounds, quizzes, mini projects.',
+    description: '49 interactive modules — three programming languages plus a hands-on Security track with capture-the-flag rooms.',
     label: 'Pick a track',
     href: '#tracks',
   },
@@ -184,7 +198,7 @@ export default function CodeLab() {
       <div className="mb-14">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-5">
           <Sparkles size={12} />
-          <span>Practical programming · Java · Python · C</span>
+          <span>Practical programming · Java · Python · C · Security</span>
         </div>
         <h1 className="display-heading text-5xl sm:text-6xl text-ink mb-4 leading-tight">Code Lab</h1>
         <p className="text-lg text-coffee-700 max-w-2xl leading-relaxed mb-8">
@@ -215,9 +229,9 @@ export default function CodeLab() {
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
           <h2 className="display-heading text-2xl sm:text-3xl text-ink shrink-0">Learning tracks</h2>
           <div className="h-px flex-1 bg-coffee-200" />
-          <span className="text-xs font-mono text-coffee-700 shrink-0">37 modules · 3 languages</span>
+          <span className="text-xs font-mono text-coffee-700 shrink-0">49 modules · 4 tracks</span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {Object.values(trackMeta).map(track => (
             <TrackCard key={track.slug} track={track} />
           ))}

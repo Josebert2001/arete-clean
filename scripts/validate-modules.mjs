@@ -6,14 +6,19 @@
 import { modules } from '../src/data/modules.js';
 import { pythonModules } from '../src/data/pythonModules.js';
 import { cModules } from '../src/data/cModules.js';
+import { securityModules } from '../src/data/securityModules.js';
 import { trackMeta } from '../src/data/trackMeta.js';
 import { courses } from '../src/data/courses.js';
 
 const tracks = [
-  { name: 'java',   modules },
-  { name: 'python', modules: pythonModules },
-  { name: 'c',      modules: cModules },
+  { name: 'java',     modules },
+  { name: 'python',   modules: pythonModules },
+  { name: 'c',        modules: cModules },
+  { name: 'security', modules: securityModules },
 ];
+
+const isHex64 = (v) => typeof v === 'string' && /^[0-9a-f]{64}$/.test(v);
+const VALID_MATERIAL_TYPES = new Set(['code', 'terminal', 'text', 'table']);
 
 const errors = [];
 const isNonEmptyString = (v) => typeof v === 'string' && v.trim().length > 0;
@@ -85,6 +90,35 @@ for (const { name, modules: list } of tracks) {
             where(m, 'miniProject.hints must be a non-empty array'));
       (m.miniProject.hints || []).forEach((h, hi) => {
         check(isNonEmptyString(h), where(m, `miniProject.hints[${hi}] empty`));
+      });
+    }
+
+    // Security-track CTF challenge (optional field). If present, the flag hash
+    // must be a valid SHA-256 hex string or the challenge can never be solved.
+    if (m.challenge) {
+      const c = m.challenge;
+      check(isNonEmptyString(c.title), where(m, 'challenge.title missing'));
+      check(isNonEmptyString(c.brief), where(m, 'challenge.brief missing'));
+      check(isHex64(c.flagHash), where(m, `challenge.flagHash must be a 64-char SHA-256 hex string (got "${c.flagHash}")`));
+      check(isNonEmptyString(c.writeup), where(m, 'challenge.writeup missing'));
+      check(Array.isArray(c.hints) && c.hints.length > 0, where(m, 'challenge.hints must be a non-empty array'));
+      (c.hints || []).forEach((h, hi) => {
+        check(isNonEmptyString(h), where(m, `challenge.hints[${hi}] empty`));
+      });
+      check(Array.isArray(c.material) && c.material.length > 0, where(m, 'challenge.material must be a non-empty array'));
+      (c.material || []).forEach((b, bi) => {
+        check(b && VALID_MATERIAL_TYPES.has(b.type),
+              where(m, `challenge.material[${bi}].type must be one of ${[...VALID_MATERIAL_TYPES].join(', ')} (got "${b?.type}")`));
+        if (b?.type === 'table') {
+          check(Array.isArray(b.columns) && b.columns.length > 0, where(m, `challenge.material[${bi}] (table) needs columns`));
+          check(Array.isArray(b.rows) && b.rows.length > 0, where(m, `challenge.material[${bi}] (table) needs rows`));
+          (b.rows || []).forEach((row, ri) => {
+            check(Array.isArray(row) && row.length === (b.columns || []).length,
+                  where(m, `challenge.material[${bi}] (table) row ${ri} has ${row?.length} cells, expected ${(b.columns || []).length}`));
+          });
+        } else {
+          check(isNonEmptyString(b?.content), where(m, `challenge.material[${bi}].content missing`));
+        }
       });
     }
   }

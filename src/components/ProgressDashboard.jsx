@@ -22,6 +22,7 @@ export default function ProgressDashboard() {
     java: useProgress(trackMeta.java.storageKey).progress,
     python: useProgress(trackMeta.python.storageKey).progress,
     c: useProgress(trackMeta.c.storageKey).progress,
+    security: useProgress(trackMeta.security.storageKey).progress,
   };
   const tracks = Object.values(trackMeta).map(track => ({
     track,

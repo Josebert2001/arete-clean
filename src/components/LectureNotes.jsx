@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, XCircle, ChevronDown, Layers, List, Sparkles } from 'lucide-react';
+import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink } from 'lucide-react';
 import MoscaCalculator from './MoscaCalculator';
 import RichText from './RichText';
 import { useApiAvailability } from '../utils/apiClient';
@@ -236,6 +236,37 @@ function NoteBox({ text, items }) {
   );
 }
 
+// A download card linking to the full source document a topic was summarised
+// from (e.g. a student group's uploaded .docx). Self-contained — it carries its
+// own label, so the section usually omits `heading`.
+function ResourceLink({ href, label, filename, meta }) {
+  if (!href) return null;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-center gap-3 rounded-xl border border-coffee-200 bg-paper p-4 mb-5 transition-all hover:border-ink hover:shadow-sm"
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-coffee-100 transition-colors group-hover:bg-ink/5">
+        <FileDown size={18} className="text-coffee-600 group-hover:text-ink" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-ink">{label || 'Read the full documentation'}</span>
+        {(filename || meta) && (
+          <span className="block truncate text-xs text-coffee-600">
+            {filename}{filename && meta ? ' · ' : ''}{meta}
+          </span>
+        )}
+      </span>
+      <span className="inline-flex shrink-0 items-center gap-1 font-mono text-xs font-medium text-coffee-600 transition-colors group-hover:text-ink">
+        Open
+        <ExternalLink size={12} />
+      </span>
+    </a>
+  );
+}
+
 function FiveVs({ items }) {
   const colors = ['bg-moss', 'bg-ink', 'bg-rust', 'bg-ember-500', 'bg-coffee-700'];
   return (
@@ -347,6 +378,7 @@ function Section({ section, simplifyReady, context }) {
       {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
       {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} />}
       {section.type === 'mosca' && <MoscaCalculator />}
+      {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
     </div>
   );
 }
