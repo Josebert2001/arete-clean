@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { HelpCircle, X, MessageCircle, Mail, Bot, Send, User, ChevronLeft, Square } from 'lucide-react';
+import { HelpCircle, X, MessageCircle, Mail, Bot, Send, ChevronLeft, Square } from 'lucide-react';
 import { streamTutor } from '../utils/tutorStream';
 import RichText from './RichText';
 
@@ -280,63 +280,90 @@ export default function FloatingHelp() {
                   const log = logRef.current;
                   if (log) stickToBottom.current = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
                 }}
-                className="h-72 overflow-y-auto p-3 space-y-3 bg-paper"
+                className="h-72 overflow-y-auto px-3 py-2.5 bg-paper"
                 role="log"
                 aria-label="AI chat messages"
               >
-                {messages.map((m, i) => (
-                  <div key={i} className={`flex gap-2 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                    <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
-                      m.role === 'user' ? 'bg-ember-500 text-cream' : 'bg-ink text-cream'
-                    }`}>
-                      {m.role === 'user' ? <User size={12} /> : <Bot size={12} />}
+                {messages.map((m, i) =>
+                  m.role === 'user' ? (
+                    <div key={i} className="flex items-baseline gap-2 pt-2">
+                      <span
+                        className="display-heading italic text-lg leading-none text-ember-500 select-none w-3.5 shrink-0 text-right"
+                        aria-hidden
+                      >
+                        Q
+                      </span>
+                      <p className="font-display italic font-medium text-[15px] leading-snug text-ink whitespace-pre-wrap min-w-0">
+                        {m.text}
+                      </p>
                     </div>
-                    <div className={`max-w-[85%] ${m.role === 'user' ? 'text-right' : ''}`}>
-                      <div className={`rounded-xl px-3 py-2 text-xs leading-relaxed text-left ${
-                        m.role === 'user'
-                          ? 'bg-ember-500 text-cream rounded-tr-sm whitespace-pre-wrap'
-                          : m.error
-                          ? 'bg-red-50 border border-red-200 text-red-700 rounded-tl-sm'
-                          : 'bg-cream border border-coffee-200 text-ink rounded-tl-sm'
-                      }`}>
-                        {m.role === 'user' ? m.text : <RichText text={m.text} />}
+                  ) : i === 0 ? (
+                    // Canned greeting — a standfirst that opens the session, not an answer.
+                    <div key={i} className="border-b border-coffee-200 pb-3">
+                      <p className="font-display text-[13px] leading-relaxed text-coffee-700">
+                        {m.text}
+                      </p>
+                    </div>
+                  ) : (
+                    <div key={i} className="pl-5 mt-2.5 border-b border-coffee-200 pb-3 mb-1">
+                      <span
+                        className={`block text-[9px] font-mono uppercase tracking-[0.15em] mb-1 ${
+                          m.error ? 'text-rust' : 'text-coffee-500'
+                        }`}
+                      >
+                        {m.error ? 'Interrupted' : 'Tutor'}
+                      </span>
+                      <div className={`text-xs leading-relaxed ${m.error ? 'text-rust' : 'text-ink'}`}>
+                        <RichText text={m.text} />
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
 
                 {loading && (
-                  <div className="flex gap-2">
-                    <div className="w-6 h-6 rounded-md bg-ink text-cream flex items-center justify-center shrink-0">
-                      <Bot size={12} />
-                    </div>
-                    <div className="bg-cream border border-coffee-200 rounded-xl px-3 py-2 flex items-center gap-2">
-                      <span className="text-xs text-coffee-500 italic">Thinking…</span>
-                      <span className="flex gap-1">
-                        <span className="w-1 h-1 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-1 h-1 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-1 h-1 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </span>
-                    </div>
+                  <div className="pl-5 mt-2.5 flex items-baseline gap-2" aria-live="polite">
+                    <span className="font-display italic text-xs text-coffee-500">Thinking</span>
+                    <span className="flex gap-1" aria-hidden>
+                      <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '400ms' }} />
+                      <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '800ms' }} />
+                    </span>
                   </div>
                 )}
 
                 {messages.length <= 1 && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {MINI_SUGGESTED.map((s, i) => (
-                      <button
-                        key={i}
-                        onClick={() => send(s)}
-                        className="text-[11px] bg-coffee-50 border border-coffee-200 rounded-full px-2.5 py-1 text-coffee-700 hover:bg-coffee-100 hover:text-ink hover:border-coffee-500 transition-all"
-                      >
-                        {s}
-                      </button>
-                    ))}
+                  <div className="pt-3.5">
+                    <p className="text-[9px] font-mono uppercase tracking-[0.15em] text-coffee-500 mb-2.5">
+                      Try asking
+                    </p>
+                    <div className="space-y-2">
+                      {MINI_SUGGESTED.map((s, i) => (
+                        <button
+                          key={i}
+                          onClick={() => send(s)}
+                          aria-label={`Ask: ${s}`}
+                          className="group flex w-full items-baseline gap-2 text-left"
+                        >
+                          <span className="font-mono text-[10px] text-coffee-400 group-hover:text-ember-500 transition-colors shrink-0">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <span className="text-[11px] text-coffee-700 group-hover:text-ink border-b border-transparent group-hover:border-ember-500 transition-all pb-0.5">
+                            {s}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="border-t border-coffee-200 p-2.5 flex items-end gap-2">
+              <div className="border-t-2 border-coffee-200 p-2.5 flex items-end gap-2">
+                <span
+                  className="display-heading italic text-lg leading-none text-ember-500 select-none w-3.5 shrink-0 text-right pb-2"
+                  aria-hidden
+                >
+                  Q
+                </span>
                 <textarea
                   ref={inputRef}
                   rows={1}
@@ -350,7 +377,7 @@ export default function FloatingHelp() {
                   }}
                   placeholder="Ask anything about your courses…"
                   aria-label="Ask the AI tutor"
-                  className="flex-1 resize-none bg-paper border border-coffee-200 rounded-lg px-3 py-2 text-xs text-ink focus:border-coffee-500 outline-none"
+                  className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-1.5 font-display italic text-xs text-ink placeholder:text-coffee-400 outline-none transition-colors"
                 />
                 {responding ? (
                   <button

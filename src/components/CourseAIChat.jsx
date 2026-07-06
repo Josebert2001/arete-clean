@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, User, ChevronDown, ChevronUp, Square } from 'lucide-react';
+import { Bot, Send, ChevronDown, ChevronUp, Square } from 'lucide-react';
 import { streamTutor } from '../utils/tutorStream';
 import RichText from './RichText';
 
@@ -141,77 +141,101 @@ export default function CourseAIChat({ course }) {
 
       {open && (
         <div className="border-t border-coffee-200">
-          {/* Message log */}
+          {/* Transcript — an editorial Q&A, mirroring the full AI Tutor page:
+              questions in Fraunces italic with an ember Q marker, answers as
+              typeset prose under a "Tutor" label, a hairline closing each. */}
           <div
             ref={logRef}
             onScroll={() => {
               const log = logRef.current;
               if (log) stickToBottom.current = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
             }}
-            className="h-80 overflow-y-auto p-4 space-y-4 bg-paper"
+            className="h-80 overflow-y-auto px-4 py-3 bg-paper"
             role="log"
             aria-label="AI chat messages"
           >
-            {messages.map((m, i) => (
-              <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                  m.role === 'user' ? 'bg-ember-500 text-cream' : 'bg-ink text-cream'
-                }`}>
-                  {m.role === 'user' ? <User size={13} /> : <Bot size={13} />}
-                </div>
-                <div className={`max-w-[88%] ${m.role === 'user' ? 'text-right' : ''}`}>
-                  <span className={`block text-[10px] font-mono uppercase tracking-wider mb-1 ${
-                    m.role === 'user' ? 'text-ember-500' : 'text-coffee-500'
-                  }`}>
-                    {m.role === 'user' ? 'You' : 'Tutor'}
+            {messages.map((m, i) =>
+              m.role === 'user' ? (
+                <div key={i} className="flex items-baseline gap-2.5 pt-2">
+                  <span
+                    className="display-heading italic text-xl leading-none text-ember-500 select-none w-4 shrink-0 text-right"
+                    aria-hidden
+                  >
+                    Q
                   </span>
-                  <div className={`rounded-xl px-4 py-3 text-sm leading-relaxed text-left ${
-                    m.role === 'user'
-                      ? 'bg-ember-500 text-cream rounded-tr-sm whitespace-pre-wrap'
-                      : m.error
-                      ? 'bg-red-50 border border-red-200 text-red-700 rounded-tl-sm'
-                      : 'bg-cream border border-coffee-200 text-ink rounded-tl-sm'
-                  }`}>
-                    {m.role === 'user' ? m.text : <RichText text={m.text} />}
+                  <p className="font-display italic font-medium text-base leading-snug text-ink whitespace-pre-wrap min-w-0">
+                    {m.text}
+                  </p>
+                </div>
+              ) : i === 0 ? (
+                // Canned greeting — a standfirst that opens the session, not an answer.
+                <div key={i} className="border-b border-coffee-200 pb-4">
+                  <p className="font-display text-[15px] leading-relaxed text-coffee-700">
+                    {m.text}
+                  </p>
+                </div>
+              ) : (
+                <div key={i} className="pl-6 mt-3 border-b border-coffee-200 pb-4 mb-1">
+                  <span
+                    className={`block text-[10px] font-mono uppercase tracking-[0.15em] mb-1.5 ${
+                      m.error ? 'text-rust' : 'text-coffee-500'
+                    }`}
+                  >
+                    {m.error ? 'Interrupted' : 'Tutor'}
+                  </span>
+                  <div className={`text-sm leading-relaxed ${m.error ? 'text-rust' : 'text-ink'}`}>
+                    <RichText text={m.text} />
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
 
             {loading && (
-              <div className="flex gap-3">
-                <div className="w-7 h-7 rounded-lg bg-ink text-cream flex items-center justify-center shrink-0">
-                  <Bot size={13} />
-                </div>
-                <div className="bg-cream border border-coffee-200 rounded-xl px-4 py-3 flex items-center gap-2.5">
-                  <span className="text-xs text-coffee-500 italic">Thinking…</span>
-                  <span className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 bg-coffee-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </span>
-                </div>
+              <div className="pl-6 mt-3 flex items-baseline gap-2.5" aria-live="polite">
+                <span className="font-display italic text-sm text-coffee-500">Thinking</span>
+                <span className="flex gap-1" aria-hidden>
+                  <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '400ms' }} />
+                  <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '800ms' }} />
+                </span>
               </div>
             )}
 
-            {/* Suggested prompts */}
+            {/* Suggested prompts — the numbered opening list from the Tutor page */}
             {messages.length <= 1 && (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {prompts.map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => send(s)}
-                    className="text-xs bg-coffee-50 border border-coffee-200 rounded-full px-3 py-1.5 text-coffee-700 hover:bg-coffee-100 hover:text-ink hover:border-coffee-500 transition-all text-left"
-                  >
-                    {s}
-                  </button>
-                ))}
+              <div className="pt-4">
+                <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-coffee-500 mb-3">
+                  Try asking
+                </p>
+                <div className="space-y-2.5">
+                  {prompts.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => send(s)}
+                      aria-label={`Ask: ${s}`}
+                      className="group flex w-full items-baseline gap-2.5 text-left"
+                    >
+                      <span className="font-mono text-[11px] text-coffee-400 group-hover:text-ember-500 transition-colors shrink-0">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-xs text-coffee-700 group-hover:text-ink border-b border-transparent group-hover:border-ember-500 transition-all pb-0.5">
+                        {s}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Input */}
-          <div className="border-t border-coffee-200 p-3 flex items-end gap-2.5 bg-cream/40">
+          {/* Composer — the next line of the transcript, matching the Tutor page */}
+          <div className="border-t-2 border-coffee-200 p-3 flex items-end gap-2.5 bg-cream/40">
+            <span
+              className="display-heading italic text-xl leading-none text-ember-500 select-none w-4 shrink-0 text-right pb-2.5"
+              aria-hidden
+            >
+              Q
+            </span>
             <textarea
               ref={inputRef}
               rows={1}
@@ -225,7 +249,7 @@ export default function CourseAIChat({ course }) {
               }}
               placeholder={`Ask about ${course.code}…`}
               aria-label="Ask the AI about this course"
-              className="flex-1 resize-none bg-paper border border-coffee-200 rounded-lg px-4 py-2.5 text-sm text-ink focus:border-coffee-500 outline-none"
+              className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-2 font-display italic text-sm text-ink placeholder:text-coffee-400 outline-none transition-colors"
             />
             {responding ? (
               <button
