@@ -15,7 +15,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.8",
+    "@ai-sdk/google": "^3.0.89",
     "@ai-sdk/groq": "^3.0.39",
     "@openrouter/ai-sdk-provider": "^2.10.0",
     "@sentry/node": "^10.62.0",

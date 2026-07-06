@@ -91,25 +91,28 @@ export async function streamTextWithFallback({ chain, ...options }, onText, onTo
       ? { ...(options.providerOptions || {}), ...provider.providerOptions }
       : options.providerOptions;
 
-    const result = streamText({
-      ...options,
-      ...(provider.options || {}), // per-provider overrides (e.g. temperature)
-      model: provider.model,
-      ...(providerOptions ? { providerOptions } : {}),
-      onError: ({ error }) => { capturedError = error; },
-      // Surface tool activity, but only before the answer text starts — a tool
-      // call mid-answer must not interrupt the streamed prose.
-      onChunk: onToolCall
-        ? ({ chunk }) => { if (!wroteText && chunk?.type === 'tool-call') onToolCall(chunk); }
-        : undefined,
-    });
-
     try {
+      const result = streamText({
+        ...options,
+        ...(provider.options || {}), // per-provider overrides (e.g. temperature)
+        model: provider.model,
+        ...(providerOptions ? { providerOptions } : {}),
+        onError: ({ error }) => { capturedError = error; },
+        // Surface tool activity, but only before the answer text starts — a tool
+        // call mid-answer must not interrupt the streamed prose.
+        onChunk: onToolCall
+          ? ({ chunk }) => { if (!wroteText && chunk?.type === 'tool-call') onToolCall(chunk); }
+          : undefined,
+      });
+
       for await (const chunk of result.textStream) {
         if (chunk) { onText(chunk); wroteText = true; }
       }
     } catch (err) {
-      // Some provider errors surface as a throw here rather than via onError.
+      // Catches both async stream errors AND synchronous provider errors thrown
+      // at streamText() construction (e.g. an incompatible model-spec version).
+      // Either way, no text was sent yet, so we fall through to the next
+      // provider instead of letting the whole request abort.
       capturedError = err;
     }
 
