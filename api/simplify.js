@@ -80,8 +80,6 @@ export default async function handler(req, res) {
   const setting = [courseCode, topicTitle].filter(Boolean).join(' — ');
 
   try {
-    // temperature / reasoningEffort come from the per-provider entries in
-    // buildModelChain(); we pass only provider-agnostic options here.
     const outcome = await generateTextWithFallback({
       chain,
       system: SYSTEM_PROMPT,
@@ -89,6 +87,9 @@ export default async function handler(req, res) {
       // Reasoning tokens share this budget; the chain keeps effort low so the
       // rewrite isn't cut off.
       maxOutputTokens: 900,
+      // Low temperature keeps the rewrite faithful ("simplify, don't expand");
+      // applied to Groq/OpenRouter only, never to Gemini (see model.js).
+      temperature: 0.4,
     });
 
     if (outcome.text) {

@@ -137,19 +137,33 @@ export async function streamTextWithFallback({ chain, ...options }, onText, onTo
  * that were previously hardwired to Groq and had no recovery from its free-tier
  * 413 / 429s. Tries each provider in chain order until one returns text.
  *
- * Temperature and reasoningEffort come from the per-provider entries in
- * buildModelChain() (Gemini deliberately gets none), so callers pass only
- * provider-agnostic options (system, prompt, maxOutputTokens). The `result` is
- * returned too, so a caller that needs provider extras (e.g. `.sources`) can
- * reach them — though web-search endpoints stay Groq-only (compound-mini).
+ * reasoningEffort comes from the per-provider entries in buildModelChain(), so
+ * callers pass only provider-agnostic options (system, prompt, maxOutputTokens).
+ * The `result` is returned too, so a caller that needs provider extras (e.g.
+ * `.sources`) can reach them — though web-search endpoints stay Groq-only
+ * (compound-mini).
  *
- * @param {Object} opts  { chain, ...any generateText options }
+ * An optional `temperature` is applied ONLY to providers whose chain entry
+ * already carries a temperature (Groq/OpenRouter) — never to Gemini 3.x, whose
+ * entry deliberately omits it (Google tunes it for its defaults). This lets a
+ * faithfulness-sensitive caller (e.g. simplify) pin a low temperature without
+ * violating the Gemini rule.
+ *
+ * @param {Object} opts  { chain, temperature?, ...any generateText options }
  * @returns {Promise<{ text: string, provider: string|null, result: unknown, error: unknown }>}
  */
-export async function generateTextWithFallback({ chain, ...options }) {
+export async function generateTextWithFallback({ chain, temperature, ...options }) {
   let lastError = null;
 
   for (const provider of chain) {
+    // Start from the provider's own overrides, then let the caller's temperature
+    // replace it — but only when this provider already opts into a temperature,
+    // so Gemini (no temperature key) is left untouched.
+    const perProvider = { ...(provider.options || {}) };
+    if (temperature != null && Object.prototype.hasOwnProperty.call(perProvider, 'temperature')) {
+      perProvider.temperature = temperature;
+    }
+
     const providerOptions = provider.providerOptions
       ? { ...(options.providerOptions || {}), ...provider.providerOptions }
       : options.providerOptions;
@@ -157,7 +171,7 @@ export async function generateTextWithFallback({ chain, ...options }) {
     try {
       const result = await generateText({
         ...options,
-        ...(provider.options || {}), // per-provider overrides (e.g. temperature)
+        ...perProvider, // per-provider overrides (temperature, etc.)
         model: provider.model,
         ...(providerOptions ? { providerOptions } : {}),
       });
