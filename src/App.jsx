@@ -17,6 +17,7 @@ const Install = lazy(() => import('./pages/Install'));
 const AITutor = lazy(() => import('./pages/AITutor'));
 const CodeExplainer = lazy(() => import('./pages/CodeExplainer'));
 const Cheatsheet = lazy(() => import('./pages/Cheatsheet'));
+const Planner = lazy(() => import('./pages/Planner'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SetupProfile = lazy(() => import('./pages/SetupProfile'));
 const Welcome = lazy(() => import('./pages/Welcome'));
@@ -186,6 +187,7 @@ export default function App() {
             <Route path="/tutor" element={<AITutor />} />
             <Route path="/explainer" element={<CodeExplainer />} />
             <Route path="/cheatsheet" element={<Cheatsheet />} />
+            <Route path="/planner" element={<Planner />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
             <Route path="/welcome" element={<Welcome />} />
