@@ -3,12 +3,18 @@
 //  Shared by the AI endpoints so provider selection lives in ONE place.
 //
 //  Order (for the agentic tutor, which needs tool calling):
-//    1. Gemini 2.5 Flash — free tier is ~250K TPM + 1,500 req/day and supports
-//       tools, so the big requests that 413 Groq's 8K/req free tier fit here.
+//    1. Gemini 3.1 Flash-Lite — a GA model that's on Google's free tier (15 RPM,
+//       1,500 req/day), supports tools, defaults to `minimal` thinking (fast +
+//       cheap), and is the cheapest Gemini if you ever exceed the free tier.
+//       Its generous limits mean the requests that 413 Groq's 8K/req cap fit here.
 //    2. Groq gpt-oss-120b — fast fallback.
 //    3. OpenRouter's free router — best-effort last resort (no SLA; free models
 //       can be slow/removed). `openrouter/free` auto-selects a free model that
 //       supports the requested features, including tool calling.
+//
+//  NOTE: Gemini 3.x is a reasoning model tuned for its defaults — Google
+//  recommends NOT sending temperature/top_p/top_k. So temperature is set
+//  per-provider (Groq/OpenRouter) via `options`, and omitted for Gemini.
 //
 //  Each provider is included only when its key is set, so the app degrades
 //  gracefully and you can run locally with just one key.
@@ -26,7 +32,9 @@ export function buildModelChain() {
   const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   if (geminiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-    chain.push({ name: 'gemini', model: google('gemini-2.5-flash') });
+    // No temperature/top_p/top_k — Gemini 3.x is optimized for its defaults.
+    // Leaving thinkingLevel unset uses flash-lite's `minimal` default (fast).
+    chain.push({ name: 'gemini', model: google('gemini-3.1-flash-lite') });
   }
 
   if (process.env.GROQ_API_KEY) {
@@ -34,6 +42,7 @@ export function buildModelChain() {
     chain.push({
       name: 'groq',
       model: groq('openai/gpt-oss-120b'),
+      options: { temperature: 0.65 },
       // gpt-oss-120b is a reasoning model; keep effort low so reasoning tokens
       // don't eat the answer budget or stall the stream.
       providerOptions: { groq: { reasoningEffort: 'low' } },
@@ -42,7 +51,7 @@ export function buildModelChain() {
 
   if (process.env.OPENROUTER_API_KEY) {
     const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY });
-    chain.push({ name: 'openrouter', model: openrouter('openrouter/free') });
+    chain.push({ name: 'openrouter', model: openrouter('openrouter/free'), options: { temperature: 0.65 } });
   }
 
   return chain;
@@ -82,6 +91,7 @@ export async function streamTextWithFallback({ chain, ...options }, onText) {
 
     const result = streamText({
       ...options,
+      ...(provider.options || {}), // per-provider overrides (e.g. temperature)
       model: provider.model,
       ...(providerOptions ? { providerOptions } : {}),
       onError: ({ error }) => { capturedError = error; },

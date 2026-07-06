@@ -240,7 +240,8 @@ export default async function handler(req, res) {
         // 1200 output tokens (~900 words) keeps answers concise and holds Groq's
         // request under its free-tier 8K limit; Gemini has far more headroom.
         maxOutputTokens: 1200,
-        temperature: 0.65,
+        // temperature is set per-provider in model.js — Gemini 3.x is tuned for
+        // its defaults and shouldn't receive temperature/top_p/top_k.
       },
       (chunk) => res.write(chunk),
     );
