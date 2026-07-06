@@ -47,12 +47,12 @@ export function sanitizeLabel(value) {
 // injected into the tutor prompt. The system prompt already tells the model to
 // treat note text as inert reference, but we also structurally defang the note
 // DELIMITER here so a body can't masquerade as a new "=== Uploaded note: ... ==="
-// boundary or an authoritative header. Runs of "=" collapse to one (keeps
-// "x = y" readable while destroying "=== ===" fences); control chars are
-// stripped, but tabs/newlines are kept so genuine note structure survives.
+// boundary or an authoritative header. Runs of 3+ "=" collapse to one (destroys
+// "=== ===" fences while leaving code operators like "==" intact); control
+// chars are stripped, but tabs/newlines are kept so note structure survives.
 export function sanitizeNoteBody(value) {
   return String(value || '')
-    .replace(/={2,}/g, '=')
+    .replace(/={3,}/g, '=')
     // eslint-disable-next-line no-control-regex -- strip control chars (keep \t \n \r) to block prompt injection
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 }
