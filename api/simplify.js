@@ -2,15 +2,16 @@
 //  Arete — Lecture-Note Simplifier Serverless Function (Vercel)
 //  Takes a dense lecture-note section and rewrites it in plain English for a
 //  200-level student. Client caches results in localStorage, so each section
-//  costs one Groq call per device.
+//  costs one model call per device.
 //
-//  Uses the same GROQ_API_KEY environment variable as api/tutor.js.
+//  Uses the shared multi-provider chain (Gemini → Groq → OpenRouter, see
+//  _lib/model.js) so a provider that rejects the request (e.g. Groq's free-tier
+//  413/429) is transparently retried on the next one.
 // ============================================================================
 
-import { createGroq } from '@ai-sdk/groq';
-import { generateText } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
+import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 const SYSTEM_PROMPT = `You are Arete's lecture-note simplifier for B.Sc. Cybersecurity students at the University of Uyo, Nigeria. You will be given a dense excerpt from lecture notes. Rewrite it so a 200-level student understands it on first read.
 
@@ -41,9 +42,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Availability probe — lets the UI hide the Simplify buttons on page load
-  // when the key is missing. Skips rate limiting.
+  // when no provider is configured. Skips rate limiting.
   if (req.body?.probe) {
-    return res.status(200).json({ configured: Boolean(process.env.GROQ_API_KEY) });
+    return res.status(200).json({ configured: hasAnyProvider() });
   }
 
   logRequest(req, 'simplify');
@@ -57,11 +58,11 @@ export default async function handler(req, res) {
     });
   }
 
-  const GROQ_API_KEY = process.env.GROQ_API_KEY;
-  if (!GROQ_API_KEY) {
+  const chain = buildModelChain();
+  if (chain.length === 0) {
     return res.status(200).json({
       notConfigured: true,
-      error: "Simplify isn't connected yet — the GROQ_API_KEY environment variable is missing.",
+      error: "Simplify isn't connected yet — no model provider key is set (GEMINI_API_KEY / GROQ_API_KEY / OPENROUTER_API_KEY).",
     });
   }
 
@@ -79,33 +80,33 @@ export default async function handler(req, res) {
   const setting = [courseCode, topicTitle].filter(Boolean).join(' — ');
 
   try {
-    const groq = createGroq({ apiKey: GROQ_API_KEY });
-
-    const { text: simplified } = await generateText({
-      model: groq('openai/gpt-oss-120b'),
+    // temperature / reasoningEffort come from the per-provider entries in
+    // buildModelChain(); we pass only provider-agnostic options here.
+    const outcome = await generateTextWithFallback({
+      chain,
       system: SYSTEM_PROMPT,
       prompt: `${setting ? `Course context: ${setting}\n\n` : ''}Lecture-note excerpt:\n\n${text}`,
-      // gpt-oss-120b reasons before answering; reasoning tokens share this
-      // budget. Low effort + headroom keeps the rewrite from being cut off.
+      // Reasoning tokens share this budget; the chain keeps effort low so the
+      // rewrite isn't cut off.
       maxOutputTokens: 900,
-      temperature: 0.4,
-      providerOptions: { groq: { reasoningEffort: 'low' } },
     });
 
-    if (!simplified) {
-      return res.status(200).json({ error: 'No simplification received. Please try again.' });
+    if (outcome.text) {
+      return res.status(200).json({ simplified: outcome.text });
     }
-    return res.status(200).json({ simplified });
-  } catch (err) {
-    console.error('Groq simplify error:', err);
 
+    // Every provider failed (or produced no text). Distinguish load from bugs.
+    const err = outcome.error;
     const isRateLimit = err?.statusCode === 429 || err?.status === 429;
-    // A busy-AI 429 is expected load, not a bug — only report real failures.
-    if (!isRateLimit) await captureApiError(err, { route: 'simplify' });
+    if (err && !isRateLimit) await captureApiError(err, { route: 'simplify', phase: 'all-providers-failed' });
     return res.status(200).json({
       error: isRateLimit
         ? 'Too many requests — the AI is busy. Wait a moment and try again.'
         : 'Failed to simplify this section. Please try again.',
     });
+  } catch (err) {
+    console.error('Simplify error:', err);
+    await captureApiError(err, { route: 'simplify' });
+    return res.status(200).json({ error: 'Failed to simplify this section. Please try again.' });
   }
 }

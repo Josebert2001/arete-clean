@@ -20,7 +20,7 @@
 //  gracefully and you can run locally with just one key.
 // ============================================================================
 
-import { streamText } from 'ai';
+import { streamText, generateText } from 'ai';
 import { createGroq } from '@ai-sdk/groq';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
@@ -126,4 +126,46 @@ export async function streamTextWithFallback({ chain, ...options }, onText, onTo
   }
 
   return { wroteText: false, provider: null, error: lastError };
+}
+
+/**
+ * One-shot (non-streaming) text generation with the same provider fallback as
+ * streamTextWithFallback — for the non-agentic endpoints (explainer, simplify)
+ * that were previously hardwired to Groq and had no recovery from its free-tier
+ * 413 / 429s. Tries each provider in chain order until one returns text.
+ *
+ * Temperature and reasoningEffort come from the per-provider entries in
+ * buildModelChain() (Gemini deliberately gets none), so callers pass only
+ * provider-agnostic options (system, prompt, maxOutputTokens). The `result` is
+ * returned too, so a caller that needs provider extras (e.g. `.sources`) can
+ * reach them — though web-search endpoints stay Groq-only (compound-mini).
+ *
+ * @param {Object} opts  { chain, ...any generateText options }
+ * @returns {Promise<{ text: string, provider: string|null, result: unknown, error: unknown }>}
+ */
+export async function generateTextWithFallback({ chain, ...options }) {
+  let lastError = null;
+
+  for (const provider of chain) {
+    const providerOptions = provider.providerOptions
+      ? { ...(options.providerOptions || {}), ...provider.providerOptions }
+      : options.providerOptions;
+
+    try {
+      const result = await generateText({
+        ...options,
+        ...(provider.options || {}), // per-provider overrides (e.g. temperature)
+        model: provider.model,
+        ...(providerOptions ? { providerOptions } : {}),
+      });
+      const text = (result?.text || '').trim();
+      if (text) return { text, provider: provider.name, result, error: null };
+      lastError = new Error('Model produced no text output');
+    } catch (err) {
+      lastError = err;
+      console.error(`Provider "${provider.name}" failed, falling back:`, err);
+    }
+  }
+
+  return { text: '', provider: null, result: null, error: lastError };
 }

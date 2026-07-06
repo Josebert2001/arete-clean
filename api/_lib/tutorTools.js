@@ -42,6 +42,21 @@ export function sanitizeLabel(value) {
     .trim();
 }
 
+// Uploaded note bodies are student-submitted and unmoderated (any signed-in
+// student can insert a course_materials row for any course), and they're
+// injected into the tutor prompt. The system prompt already tells the model to
+// treat note text as inert reference, but we also structurally defang the note
+// DELIMITER here so a body can't masquerade as a new "=== Uploaded note: ... ==="
+// boundary or an authoritative header. Runs of "=" collapse to one (keeps
+// "x = y" readable while destroying "=== ===" fences); control chars are
+// stripped, but tabs/newlines are kept so genuine note structure survives.
+export function sanitizeNoteBody(value) {
+  return String(value || '')
+    .replace(/={2,}/g, '=')
+    // eslint-disable-next-line no-control-regex -- strip control chars (keep \t \n \r) to block prompt injection
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+}
+
 const TRACK_BY_STORAGE_KEY = Object.fromEntries(
   Object.values(trackMeta).map(t => [t.storageKey, t])
 );
@@ -156,8 +171,10 @@ export function buildTutorTools(student) {
             const name = sanitizeLabel(m.display_name) || 'Untitled note';
             const desc = sanitizeLabel(m.description);
             const label = desc ? `${name} — ${desc}` : name;
-            const body = m.extracted_text.slice(0, MAX_NOTE_CHARS);
-            const truncated = m.extracted_text.length > MAX_NOTE_CHARS ? ' [truncated]' : '';
+            // Defang forged delimiters/control chars in the body before slicing.
+            const clean = sanitizeNoteBody(m.extracted_text);
+            const body = clean.slice(0, MAX_NOTE_CHARS);
+            const truncated = clean.length > MAX_NOTE_CHARS ? ' [truncated]' : '';
             return `=== Uploaded note: ${label}${truncated} ===\n${body}`;
           })
           .join('\n\n');

@@ -1,15 +1,16 @@
 // ============================================================================
 //  Arete — Code Explainer Serverless Function (Vercel)
-//  Sends pasted code (Java, Python, C, or C++) to Groq and returns a
-//  plain-English breakdown.
+//  Sends pasted code (Java, Python, C, or C++) to the model chain and returns
+//  a plain-English breakdown.
 //
-//  Uses the same GROQ_API_KEY environment variable as api/tutor.js.
+//  Uses the shared multi-provider chain (Gemini → Groq → OpenRouter, see
+//  _lib/model.js) so a provider that rejects the request (e.g. Groq's free-tier
+//  413/429) is transparently retried on the next one.
 // ============================================================================
 
-import { createGroq } from '@ai-sdk/groq';
-import { generateText } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
+import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 const SYSTEM_PROMPT = `You are Arete's code explainer for beginner Cybersecurity students.
 When given code in any language (Java, Python, C, or C++), explain it clearly and simply.
@@ -52,7 +53,7 @@ export default async function handler(req, res) {
   // Availability probe — lets the UI show the unconfigured state on page load
   // instead of after the student has typed code. Skips rate limiting.
   if (req.body?.probe) {
-    return res.status(200).json({ configured: Boolean(process.env.GROQ_API_KEY) });
+    return res.status(200).json({ configured: hasAnyProvider() });
   }
 
   logRequest(req, 'explainer');
@@ -66,11 +67,11 @@ export default async function handler(req, res) {
     });
   }
 
-  const GROQ_API_KEY = process.env.GROQ_API_KEY;
-  if (!GROQ_API_KEY) {
+  const chain = buildModelChain();
+  if (chain.length === 0) {
     return res.status(200).json({
       notConfigured: true,
-      explanation: "The Code Explainer isn't connected yet — the GROQ_API_KEY environment variable is missing. Add it in your Vercel project settings and redeploy.",
+      explanation: "The Code Explainer isn't connected yet — no model provider key is set. Add GEMINI_API_KEY (or GROQ_API_KEY / OPENROUTER_API_KEY) in your Vercel project settings and redeploy.",
     });
   }
 
@@ -86,31 +87,33 @@ export default async function handler(req, res) {
   const lang = LANGUAGES[language]; // undefined => let the model auto-detect
 
   try {
-    const groq = createGroq({ apiKey: GROQ_API_KEY });
-
-    const { text } = await generateText({
-      model: groq('openai/gpt-oss-120b'),
+    // temperature / reasoningEffort come from the per-provider entries in
+    // buildModelChain(); we pass only provider-agnostic options here.
+    const outcome = await generateTextWithFallback({
+      chain,
       system: SYSTEM_PROMPT,
       prompt: `Explain this ${lang ? lang.label : ''} code${lang ? '' : ' (detect the language first)'}:\n\n\`\`\`${lang ? lang.fence : ''}\n${code}\n\`\`\``,
-      // gpt-oss-120b reasons before answering; reasoning tokens share this
-      // budget. Low effort + headroom keeps the explanation from being cut off.
+      // Reasoning tokens share this budget; the chain keeps effort low so the
+      // explanation isn't cut off.
       maxOutputTokens: 1500,
-      temperature: 0.5,
-      providerOptions: { groq: { reasoningEffort: 'low' } },
     });
 
-    const explanation = text || 'No explanation received.';
-    return res.status(200).json({ explanation });
-  } catch (err) {
-    console.error('Groq explainer error:', err);
+    if (outcome.text) {
+      return res.status(200).json({ explanation: outcome.text });
+    }
 
+    // Every provider failed (or produced no text). Distinguish load from bugs.
+    const err = outcome.error;
     const isRateLimit = err?.statusCode === 429 || err?.status === 429;
-    // A busy-AI 429 is expected load, not a bug — only report real failures.
-    if (!isRateLimit) await captureApiError(err, { route: 'explainer' });
+    if (err && !isRateLimit) await captureApiError(err, { route: 'explainer', phase: 'all-providers-failed' });
     return res.status(200).json({
       error: isRateLimit
         ? 'Too many requests — the AI is busy. Wait a moment and try again.'
         : 'Failed to analyze the code. Please try again.',
     });
+  } catch (err) {
+    console.error('Explainer error:', err);
+    await captureApiError(err, { route: 'explainer' });
+    return res.status(200).json({ error: 'Failed to analyze the code. Please try again.' });
   }
 }
