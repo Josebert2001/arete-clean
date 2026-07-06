@@ -76,9 +76,11 @@ export function hasAnyProvider() {
  * @param {Array}    opts.chain      provider chain from buildModelChain()
  * @param {...}      opts.*          any streamText options (system, messages, tools, …)
  * @param {Function} onText          called with each text chunk; should write to the response
+ * @param {Function} [onToolCall]    called with each tool-call chunk BEFORE text starts,
+ *                                   so the caller can surface "what the AI is doing"
  * @returns {Promise<{ wroteText: boolean, provider: string|null, error: unknown }>}
  */
-export async function streamTextWithFallback({ chain, ...options }, onText) {
+export async function streamTextWithFallback({ chain, ...options }, onText, onToolCall) {
   let lastError = null;
 
   for (const provider of chain) {
@@ -95,6 +97,11 @@ export async function streamTextWithFallback({ chain, ...options }, onText) {
       model: provider.model,
       ...(providerOptions ? { providerOptions } : {}),
       onError: ({ error }) => { capturedError = error; },
+      // Surface tool activity, but only before the answer text starts — a tool
+      // call mid-answer must not interrupt the streamed prose.
+      onChunk: onToolCall
+        ? ({ chunk }) => { if (!wroteText && chunk?.type === 'tool-call') onToolCall(chunk); }
+        : undefined,
     });
 
     try {

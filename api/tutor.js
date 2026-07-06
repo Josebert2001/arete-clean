@@ -87,6 +87,44 @@ const MAX_TOTAL_CHARS = 8000;
 // on the error path, at the very end. MUST match src/utils/tutorStream.js.
 const STREAM_ERROR_MARKER = '<<arete:stream-error>>';
 
+// Inline markers that tell the client "what the AI is doing" (which tool it's
+// calling) before the answer text starts. The client strips these out and shows
+// them as a live status. Written only before the first text byte. Format and
+// delimiters MUST match src/utils/tutorStream.js.
+const STATUS_MARKER_OPEN = '<<arete:status:';
+const STATUS_MARKER_CLOSE = '>>';
+
+// Turn a tool-call chunk into a short, friendly status line. Tool args are
+// model-provided, so strip anything that could break the marker (angle
+// brackets, newlines, control chars) before interpolating.
+function sanitizeStatusLabel(value, max = 24) {
+  return String(value || '')
+    .replace(/[\r\n<>]/g, ' ')
+    // eslint-disable-next-line no-control-regex -- strip control chars from model output
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .slice(0, max)
+    .trim();
+}
+
+function toolStatusLabel(chunk) {
+  const input = chunk?.input || chunk?.args || {};
+  switch (chunk?.toolName) {
+    case 'getStudentProgress':
+      return 'Checking your progress';
+    case 'getCourseOutline': {
+      const code = sanitizeStatusLabel(input.courseCode, 16);
+      return code ? `Looking up ${code}` : 'Looking up course details';
+    }
+    case 'getModuleDetail': {
+      const track = sanitizeStatusLabel(input.track, 8);
+      const num = Number.isFinite(input.moduleNumber) ? ` module ${input.moduleNumber}` : '';
+      return track ? `Reading ${track}${num} notes` : 'Reading the module notes';
+    }
+    default:
+      return 'Working on it';
+  }
+}
+
 // Accepts either { messages: [{role, content}...] } (multi-turn) or the
 // legacy { question } shape. Returns a clean ModelMessage array, or a string
 // describing the validation error.
@@ -244,6 +282,9 @@ export default async function handler(req, res) {
         // its defaults and shouldn't receive temperature/top_p/top_k.
       },
       (chunk) => res.write(chunk),
+      // Emit a status marker each time the model reaches for a tool, so the UI
+      // can show "Looking up CYB 224…" while the student waits.
+      (toolChunk) => res.write(`${STATUS_MARKER_OPEN}${toolStatusLabel(toolChunk)}${STATUS_MARKER_CLOSE}`),
     );
 
     // A failure AFTER text started streaming can't be retried on another

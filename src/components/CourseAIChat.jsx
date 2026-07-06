@@ -16,6 +16,7 @@ export default function CourseAIChat({ course }) {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('');
   const [responding, setResponding] = useState(false);
   const logRef = useRef(null);
   const inputRef = useRef(null);
@@ -64,6 +65,7 @@ export default function CourseAIChat({ course }) {
     setMessages(m => [...m, { role: 'user', text: question }]);
     setInput('');
     setLoading(true);
+    setStatus('');
     setResponding(true);
     stickToBottom.current = true;
 
@@ -87,6 +89,7 @@ export default function CourseAIChat({ course }) {
         moduleContext,
         signal: controller.signal,
         onChunk,
+        onStatus: setStatus,
       });
       if (data.aborted) return;          // user stopped — keep the partial answer
       if (data.notConfigured || data.error) {
@@ -106,6 +109,7 @@ export default function CourseAIChat({ course }) {
       setMessages(m => [...m, { role: 'bot', text: errText, error: true }]);
     } finally {
       setLoading(false);
+      setStatus('');
       setResponding(false);
       abortRef.current = null;
     }
@@ -192,7 +196,7 @@ export default function CourseAIChat({ course }) {
 
             {loading && (
               <div className="pl-6 mt-3 flex items-baseline gap-2.5" aria-live="polite">
-                <span className="font-display italic text-sm text-coffee-500">Thinking</span>
+                <span className="font-display italic text-sm text-coffee-500">{status || 'Thinking'}</span>
                 <span className="flex gap-1" aria-hidden>
                   <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '0ms' }} />
                   <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '400ms' }} />

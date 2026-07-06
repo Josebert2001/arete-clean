@@ -56,6 +56,7 @@ export default function AITutor() {
   const [messages, setMessages] = useState(loadStoredMessages);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('');
   const [responding, setResponding] = useState(false);
   const [selectedModule, setSelectedModule] = useState('');
   const [comingSoon, setComingSoon] = useState(false);
@@ -124,6 +125,7 @@ export default function AITutor() {
     setMessages(m => [...m, { role: 'user', text: question }]);
     setInput('');
     setLoading(true);
+    setStatus('');
     setResponding(true);
     stickToBottom.current = true;
 
@@ -147,6 +149,7 @@ export default function AITutor() {
         moduleContext: selectedModule,
         signal: controller.signal,
         onChunk,
+        onStatus: setStatus,
         unavailableMessage: UNAVAILABLE_MESSAGE,
       });
       if (data.aborted) return;          // user stopped — keep the partial answer
@@ -170,6 +173,7 @@ export default function AITutor() {
       setMessages(m => [...m, { role: 'bot', text, error: true }]);
     } finally {
       setLoading(false);
+      setStatus('');
       setResponding(false);
       abortRef.current = null;
     }
@@ -330,7 +334,7 @@ export default function AITutor() {
 
         {loading && (
           <div className="pl-8 sm:pl-10 mt-4 flex items-baseline gap-2.5" aria-live="polite">
-            <span className="font-display italic text-sm text-coffee-500">Thinking</span>
+            <span className="font-display italic text-sm text-coffee-500">{status || 'Thinking'}</span>
             <span className="flex gap-1" aria-hidden>
               <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '0ms' }} />
               <span className="w-1 h-1 bg-coffee-400 rounded-full steam" style={{ animationDelay: '400ms' }} />
