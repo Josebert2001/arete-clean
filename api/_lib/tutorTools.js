@@ -22,9 +22,12 @@ function getAnonDb() {
   });
 }
 
-// Truncate each note to keep the AI prompt within safe limits.
-const MAX_NOTE_CHARS = 6_000;
-const MAX_NOTES = 3;
+// Truncate each note to keep the AI prompt within safe limits. These are sized
+// for Groq's free tier (8K tokens/request): a fat getCourseOutline result gets
+// resent on every agentic step, so keeping it small is what prevents 413s. Bump
+// both up once on Groq's Developer tier (higher TPM). See api/tutor.js limits.
+const MAX_NOTE_CHARS = 2_500;
+const MAX_NOTES = 2;
 
 // display_name/description are set by students at upload time. Strip newlines,
 // "=" (so a crafted name can't forge a "=== ... ===" note boundary), and

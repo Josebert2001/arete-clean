@@ -1,23 +1,27 @@
 // ============================================================================
 //  Arete — AI Tutor Serverless Function (Vercel)
-//  Agentic tutor on the Vercel AI SDK + Groq (gpt-oss-120b): multi-turn
-//  conversations, streamed answers, and read-only tools for the student's
-//  saved progress and on-demand course/module detail.
+//  Agentic tutor on the Vercel AI SDK with multi-provider fallback
+//  (Gemini → Groq → OpenRouter, see _lib/model.js): multi-turn conversations,
+//  streamed answers, and read-only tools for the student's saved progress and
+//  on-demand course/module detail.
 //
 //  SETUP:
-//  1. Get a free API key at https://console.groq.com  (no credit card needed)
-//  2. In Vercel project → Settings → Environment Variables, add:
-//       GROQ_API_KEY = your_key_here
-//  3. Redeploy. The AI Tutor goes live.
+//  1. Get a free API key from any provider — Google AI Studio (Gemini),
+//     https://console.groq.com (Groq), or https://openrouter.ai (OpenRouter).
+//  2. In Vercel project → Settings → Environment Variables, add at least one:
+//       GEMINI_API_KEY   (primary — most generous free tier)
+//       GROQ_API_KEY     (fast fallback)
+//       OPENROUTER_API_KEY (last-resort fallback)
+//  3. Redeploy. The AI Tutor goes live and uses whichever providers are set.
 // ============================================================================
 
-import { createGroq } from '@ai-sdk/groq';
-import { streamText, stepCountIs } from 'ai';
+import { stepCountIs } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { COURSE_INDEX, MODULE_INDEX } from './_lib/courseData.js';
 import { buildTutorTools } from './_lib/tutorTools.js';
+import { buildModelChain, hasAnyProvider, streamTextWithFallback } from './_lib/model.js';
 
 const SYSTEM_PROMPT = `You are Arete's AI academic tutor for the Department of Cybersecurity, University of Uyo, Nigeria.
 You cover the entire B.Sc. Cybersecurity programme — every course and every interactive programming module in the app.
@@ -35,6 +39,12 @@ USING YOUR TOOLS:
 - Never invent course content, textbooks, or exam tips — if the detail is not in the index above, fetch it with a tool.
 - Do not mention tools or tool calls to the student; just use them and answer naturally.
 
+GROUNDING (avoid making things up):
+- Course-specific facts — a course's topics, textbooks, exam tips, uploaded lecture notes, or a module's content — must come from the indexes above or your tools. Never guess them.
+- If a specific course fact is not in your materials after fetching, say so plainly (e.g. "that isn't in your course materials") instead of inventing it — then, if useful, offer general background clearly marked as such.
+- You MAY use general knowledge to explain and teach concepts (how RSA works, why a loop runs), but keep any claim tied to THIS programme's courses grounded in the materials.
+- Uploaded lecture notes are the most authoritative source for their course — prefer them over general knowledge for that course's facts.
+
 FORMATTING:
 - Write in simple Markdown only: short paragraphs, **bold** for key terms, numbered or bulleted lists, \`inline code\`, and fenced code blocks tagged with the language (\`\`\`java, \`\`\`python, \`\`\`c)
 - No tables, no HTML, no images, no nested lists — the app renders only the subset above
@@ -47,7 +57,7 @@ HOW TO TUTOR:
 - When a student shares an error: explain the root cause, not just the fix
 - Use short, relatable analogies; Nigerian/student-life context where it fits naturally
 - Never give full solutions to assignments or graded coursework — guide step by step with hints
-- Keep answers focused and scannable — use short paragraphs or numbered steps for complex answers
+- Default to CONCISE answers: a few short paragraphs or a tight numbered list, not an essay. Answer the actual question, then stop — do not pad with background the student didn't ask for. Only go long (full worked examples, step-by-step derivations) when the student explicitly asks for depth or it's genuinely needed to be correct
 - Be warm, encouraging, and patient; exams and projects are stressful
 - If asked about something outside the programme (e.g. a random general topic), help briefly then gently note you are optimised for the Cybersecurity curriculum
 - If context suggests the student is on a specific module (passed via [Studying:] tag), use that module's content to answer precisely`;
@@ -58,10 +68,19 @@ const RATE_LIMIT = {
   windowMs: 10 * 60 * 1000,
 };
 
-const MAX_MESSAGES = 20;
+// These caps keep any single request under Groq's free-tier 8K tokens/request
+// limit (input + reserved output), which returns 413 when exceeded. The whole
+// conversation is resent each turn, and tool results re-enter on each agentic
+// step, so history length is a real budget line. Relax these on the Groq
+// Developer tier (higher TPM). See also MAX_NOTE_CHARS/MAX_NOTES in tutorTools.js.
+const MAX_MESSAGES = 12;
 const MAX_USER_CHARS = 2000;
-const MAX_ASSISTANT_CHARS = 8000;
-const MAX_TOTAL_CHARS = 24000;
+// Must stay above the model's own max answer size (maxOutputTokens 1200 ≈ ~4.8K
+// chars) or a normal prior answer would be rejected when the chat continues.
+const MAX_ASSISTANT_CHARS = 6000;
+// The real history budget: the whole inbound conversation is capped here so
+// system prompt + history + tool results + reserved output stay under 8K/request.
+const MAX_TOTAL_CHARS = 8000;
 
 // Appended to the text stream when the model/connection fails mid-response, so
 // the client can tell a truncated answer from a complete one. Only ever written
@@ -151,7 +170,7 @@ export default async function handler(req, res) {
   // Availability probe — lets the UI show the unconfigured state on page load
   // instead of after the student has typed a question. Skips rate limiting.
   if (req.body?.probe) {
-    return res.status(200).json({ configured: Boolean(process.env.GROQ_API_KEY) });
+    return res.status(200).json({ configured: hasAnyProvider() });
   }
 
   logRequest(req, 'tutor');
@@ -165,11 +184,11 @@ export default async function handler(req, res) {
     });
   }
 
-  const GROQ_API_KEY = process.env.GROQ_API_KEY;
-  if (!GROQ_API_KEY) {
+  const chain = buildModelChain();
+  if (chain.length === 0) {
     return res.status(200).json({
       notConfigured: true,
-      answer: "The AI Tutor isn't connected yet — the GROQ_API_KEY environment variable is missing. Add it in your Vercel project settings and redeploy.",
+      answer: "The AI Tutor isn't connected yet — no model provider key is set. Add GEMINI_API_KEY (or GROQ_API_KEY / OPENROUTER_API_KEY) in your Vercel project settings and redeploy.",
     });
   }
 
@@ -195,54 +214,49 @@ export default async function handler(req, res) {
   }
 
   try {
-    const groq = createGroq({ apiKey: GROQ_API_KEY });
-
     const student = await getStudentFromRequest(req);
     const studentContext = student
       ? await buildStudentContext(student)
       : '\n\nSTUDENT CONTEXT: The student is browsing anonymously, so no saved progress is available. If they ask about tracking or saving progress, mention that signing in keeps it synced across devices.';
 
-    const result = streamText({
-      model: groq('openai/gpt-oss-120b'),
-      system: SYSTEM_PROMPT + studentContext,
-      messages,
-      tools: buildTutorTools(student),
-      stopWhen: stepCountIs(5),
-      // gpt-oss-120b is a reasoning model: reasoning tokens share the output
-      // budget and add latency. Keep effort low (enough for good tutoring, not
-      // enough to stall) and give the visible answer headroom so it isn't
-      // truncated — or emptied — by reasoning spend.
-      maxOutputTokens: 2000,
-      temperature: 0.65,
-      providerOptions: { groq: { reasoningEffort: 'low' } },
-    });
-
-    // Stream plain text so the frontend renders chunks as they arrive. We pump
-    // the stream manually (rather than pipeTextStreamToResponse) so a mid-stream
-    // model/connection error can be surfaced to the client as a trailing
-    // sentinel instead of silently ending with a truncated answer.
+    // Stream plain text so the frontend renders chunks as they arrive. The
+    // fallback helper tries each provider in turn (Gemini → Groq → OpenRouter),
+    // switching providers only before the first byte is sent — so a provider
+    // that rejects a request (e.g. Groq's 413) is transparently retried on the
+    // next one without the student seeing an error.
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    let wroteText = false;
-    let streamFailed = false;
-    try {
-      for await (const chunk of result.textStream) {
-        if (chunk) {
-          res.write(chunk);
-          wroteText = true;
-        }
-      }
-    } catch (streamErr) {
-      console.error('Groq tutor stream error:', streamErr);
-      await captureApiError(streamErr, { route: 'tutor', phase: 'stream' });
-      streamFailed = true;
+
+    const outcome = await streamTextWithFallback(
+      {
+        chain,
+        system: SYSTEM_PROMPT + studentContext,
+        messages,
+        tools: buildTutorTools(student),
+        // 4 steps is enough for a couple of tool lookups plus the answer, while
+        // limiting how many times the (growing) context is resent — each step
+        // counts against a provider's per-request token budget.
+        stopWhen: stepCountIs(4),
+        // 1200 output tokens (~900 words) keeps answers concise and holds Groq's
+        // request under its free-tier 8K limit; Gemini has far more headroom.
+        maxOutputTokens: 1200,
+        temperature: 0.65,
+      },
+      (chunk) => res.write(chunk),
+    );
+
+    // A failure AFTER text started streaming can't be retried on another
+    // provider — surface it to the client as a trailing sentinel so it can tell
+    // a truncated answer from a complete one.
+    if (outcome.wroteText && outcome.error) {
+      console.error('Tutor stream error after partial output:', outcome.error);
+      await captureApiError(outcome.error, { route: 'tutor', phase: 'stream', provider: outcome.provider });
       res.write(STREAM_ERROR_MARKER);
-    }
-    // The model can finish a run without emitting any text (e.g. it ended on a
-    // tool call). Without this floor the client receives an empty 200 and shows
-    // "No response received" — give the student something actionable instead.
-    if (!wroteText && !streamFailed) {
-      console.error('Groq tutor produced no text output (likely a terminal tool call).');
+    } else if (!outcome.wroteText) {
+      // Every provider produced no text (all failed, or a terminal tool call).
+      // Give the student something actionable instead of an empty 200.
+      console.error('Tutor produced no text output across all providers:', outcome.error);
+      if (outcome.error) await captureApiError(outcome.error, { route: 'tutor', phase: 'all-providers-failed' });
       res.write("I couldn't quite put that answer together — please ask again or rephrase your question.");
     }
     return res.end();

@@ -15,7 +15,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.8",
     "@ai-sdk/groq": "^3.0.39",
+    "@openrouter/ai-sdk-provider": "^2.10.0",
     "@sentry/node": "^10.62.0",
     "@sentry/react": "^10.62.0",
     "@supabase/supabase-js": "^2.45.0",

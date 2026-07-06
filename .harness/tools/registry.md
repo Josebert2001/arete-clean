@@ -4,10 +4,21 @@ Every external service this project calls. Check here before adding any new API 
 
 ---
 
-## Groq (AI Tutor + Code Explainer + Explain-this + Simplify)
+## Model Provider Chain (`api/_lib/model.js`) — used by the AI Tutor
 
-- **What it does:** LLM inference via `openai/gpt-oss-120b` (streaming tutor conversations, one-shot code explanations, plain-English lecture-note rewrites) and `groq/compound-mini` (web-search-backed "Explain-this" over a highlighted passage)
-- **When to use:** User asks AI Tutor (`/tutor`), Code Explainer (`/explainer`), Explain-this (`api/research.js`), or Simplify-this (`api/simplify.js`, buttons in lecture notes) features; adding new AI-driven endpoints
+- **What it does:** Multi-provider fallback for the agentic tutor. `buildModelChain()` returns the providers whose keys are set, in order **Gemini 2.5 Flash → Groq gpt-oss-120b → OpenRouter `openrouter/free`**. `streamTextWithFallback({ chain, ...streamTextOpts }, onText)` streams text and, if a provider rejects a request *before the first byte*, transparently retries on the next one.
+- **Why:** Groq's free tier caps at 8K tokens/request → `413` on big/agentic requests. Gemini's free tier (~250K TPM, 1,500 req/day, supports tools) absorbs those; Groq stays a fast fallback; OpenRouter free is a best-effort last resort (no SLA, models can vanish).
+- **When to use:** The tutor (`api/tutor.js`). Any new agentic/streaming endpoint that wants provider resilience should reuse this helper rather than calling a single provider directly.
+- **Key detail:** The AI SDK can end a stream *without throwing* when a provider rejects the request, so the helper captures errors via `onError` and treats "no text produced" as a fallback trigger. Fallback is only possible before the first streamed byte — a mid-stream failure is reported to the caller (which appends the error sentinel).
+- **Env vars:** `GEMINI_API_KEY` (or `GOOGLE_GENERATIVE_AI_API_KEY`), `GROQ_API_KEY`, `OPENROUTER_API_KEY` — at least one required; missing ones are skipped. **Gemini's free tier may use inputs for training** — acceptable for now, revisit if handling sensitive data.
+- **Deps:** `@ai-sdk/google`, `@openrouter/ai-sdk-provider` (added 2026-07-06, both on `ai@6` core).
+
+---
+
+## Groq (AI Tutor fallback + Code Explainer + Explain-this + Simplify)
+
+- **What it does:** LLM inference via `openai/gpt-oss-120b` (tutor conversations — now the *fallback* tier behind Gemini, see chain above; plus one-shot code explanations and plain-English lecture-note rewrites) and `groq/compound-mini` (web-search-backed "Explain-this" over a highlighted passage)
+- **When to use:** User asks AI Tutor (`/tutor`), Code Explainer (`/explainer`), Explain-this (`api/research.js`), or Simplify-this (`api/simplify.js`, buttons in lecture notes) features; adding new AI-driven endpoints. The tutor calls Groq **through the model chain**, not directly.
 - **How to call it:**
   ```js
   // api/tutor.js pattern (streaming) — gpt-oss-120b is a reasoning model, so
