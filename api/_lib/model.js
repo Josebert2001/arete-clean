@@ -25,16 +25,34 @@ import { createGroq } from '@ai-sdk/groq';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 
-// Build the ordered provider chain from whatever keys are configured.
-export function buildModelChain() {
+// Two Gemini tiers, both env-overridable. STRONG handles hard reasoning and
+// coding; LIGHT (flash-lite) is fast/cheap for simple turns AND doubles as the
+// proven fallback if the strong model id is ever unavailable. The task router
+// (api/_lib/taskRouter.js) picks the tier per tutor turn.
+// gemini-3.5-flash is GA/stable and Google's most capable Flash model — strong
+// at the tutor's agentic tool loop and coding, while staying fast/affordable.
+const GEMINI_STRONG_MODEL = process.env.GEMINI_MODEL_STRONG || 'gemini-3.5-flash';
+const GEMINI_LIGHT_MODEL = process.env.GEMINI_MODEL_LIGHT || 'gemini-3.1-flash-lite';
+
+/**
+ * Build the ordered provider chain from whatever keys are configured.
+ *
+ * @param {'strong'|'light'} [tier='strong'] which Gemini model leads the chain.
+ *   'strong' prepends the strong Gemini model; BOTH tiers then keep flash-lite
+ *   as the next Gemini step, so an unavailable strong-model id degrades to
+ *   flash-lite (still Gemini) rather than dropping to Groq's tighter free tier.
+ */
+export function buildModelChain(tier = 'strong') {
   const chain = [];
 
   const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   if (geminiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
     // No temperature/top_p/top_k — Gemini 3.x is optimized for its defaults.
-    // Leaving thinkingLevel unset uses flash-lite's `minimal` default (fast).
-    chain.push({ name: 'gemini', model: google('gemini-3.1-flash-lite') });
+    if (tier === 'strong') {
+      chain.push({ name: 'gemini-strong', model: google(GEMINI_STRONG_MODEL) });
+    }
+    chain.push({ name: 'gemini-lite', model: google(GEMINI_LIGHT_MODEL) });
   }
 
   if (process.env.GROQ_API_KEY) {

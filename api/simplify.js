@@ -58,7 +58,8 @@ export default async function handler(req, res) {
     });
   }
 
-  const chain = buildModelChain();
+  // A plain-English rewrite is a simple task — the fast light tier is enough.
+  const chain = buildModelChain('light');
   if (chain.length === 0) {
     return res.status(200).json({
       notConfigured: true,
