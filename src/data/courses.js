@@ -1914,6 +1914,61 @@ export const courses = [
           },
         ],
       },
+      {
+        number: '14',
+        title: 'Requirement Analysis',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'What is Requirement Analysis?',
+            text: 'Requirement analysis is the second phase of every SDLC model. It determines what a software system must do before any design or coding begins.',
+          },
+          {
+            type: 'table',
+            heading: 'SDLC Phases, Key Questions, and Primary Outputs',
+            headers: ['SDLC Phase', 'Key Question Answered', 'Primary Output'],
+            rows: [
+              ['Planning / preliminary investigation', 'Is the project feasible and worth pursuing?', 'Feasibility report, project charter'],
+              ['Requirement analysis', 'What must the software system do?', 'Requirement specification'],
+              ['System design', 'How will the system be built?', 'Architecture, data and interface design'],
+              ['Implementation', 'How is the design translated into code?', 'Working software modules'],
+              ['Testing', 'Does the system meet the requirement?', 'Test report, defect logs'],
+              ['Maintenance', 'How is the system kept useful over time?', 'Change request set, patches, upgrades'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Types of System Requirement',
+            items: [
+              { term: 'Functional requirement', def: 'Describes what the system must do — its features, its behaviour, the data manipulation expected of it, and the rules it must support.' },
+              { term: 'Non-functional requirement', def: 'Also called a quality attribute. Deals with how well the system must perform its functions, setting measurable targets for qualities such as performance, usability, reliability, and security.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Non-Functional Requirement Categories',
+            headers: ['Category', 'Description', 'Example'],
+            rows: [
+              ['Performance', 'Speed, throughput, response time', 'The system shall return search results within 2 seconds under normal load.'],
+              ['Reliability', 'Availability, fault tolerance, MTBF', 'The system shall be available 99.5% of the time during business hours.'],
+              ['Usability', 'Ease of learning', 'A first-time user shall be able to complete registration without training.'],
+              ['Security', 'Protection of data and access control', 'The system shall enforce role-based access control for all administrative functions.'],
+              ['Scalability', 'Ability to grow with demand', 'The system shall support up to 10,000 concurrent users with graceful degradation.'],
+              ['Maintainability', 'Ease of modification and support', 'Modules shall follow a documented coding standard to ease future maintenance.'],
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Requirement Analysis Process',
+            items: [
+              'Requirement elicitation',
+              'Requirement analysis and negotiation',
+              'Requirement specification (documentation)',
+              'Requirement validation',
+            ],
+          },
+        ],
+      },
     ],
     quiz: [
       { question: "The word 'system' originates from the Greek word 'systema'. What does a system most accurately describe?", options: ["A single isolated component", "Any individual piece of physical computer hardware", "A list of unrelated tasks", "An orderly grouping of interdependent components linked to achieve a specific goal"], correctIndex: 3, explanation: "A system is an orderly grouping of interdependent components working together toward a specific goal." },
