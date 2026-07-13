@@ -847,6 +847,283 @@ export const courses = [
       'Nigeria\'s NITDA and other agencies offer technology grants — research them as part of your learning',
       'This course matters for your career: many cybersecurity professionals eventually consult or freelance',
     ],
+    lectureNotes: [
+      {
+        number: '1',
+        title: 'The Concept of Entrepreneurship',
+        sections: [
+          {
+            type: 'text',
+            text: 'Authors: Prof. Ntiedo J. Umoren and Sunday S. Akpan, Ph.D',
+          },
+          {
+            type: 'definition',
+            heading: '1.1 Introduction',
+            text: "The concept of entrepreneurship has evolved over several centuries, reflecting the changing nature of economic activity and the role of individuals in driving innovation and growth. Historically, the term \"entrepreneur\" originated from the French word \"entreprendre,\" which means \"to undertake.\" In the early 18th century, the term was used to describe individuals who undertook the risk of new enterprise. Over time, the definition of entrepreneurship has expanded to encompass a wide range of activities, from starting small businesses to leading large-scale innovations in established corporations. Entrepreneurship is often associated with the creation of new ventures, but it also involves the identification and exploitation of opportunities within existing organizations. This broader perspective recognizes that entrepreneurial activity can take many forms and occur in diverse contexts. Whether it's a solo entrepreneur starting a tech company or a corporate manager spearheading a new product line, the essence of entrepreneurship lies in the ability to recognize value and take the necessary steps to realize it. In today's rapidly changing global economy, entrepreneurship is more important than ever. It is a key driver of economic development, job creation, and social change. By challenging the status quo and introducing new ideas, entrepreneurs play a vital role in shaping the future. This chapter explores the fundamental concepts of entrepreneurship, including the characteristics of entrepreneurs, the different types of entrepreneurial activity, and the challenges and opportunities associated with this dynamic field.",
+          },
+          {
+            type: 'definition',
+            heading: '1.2 Who is an “Entrepreneur?”',
+            text: 'An entrepreneur is an individual who identifies an opportunity and organizes the necessary resources to exploit it. This definition highlights two key aspects of entrepreneurship: opportunity recognition and resource mobilization. Entrepreneurs are often seen as risk-takers, as they are willing to invest their time, money, and effort into ventures with uncertain outcomes. However, successful entrepreneurs are also adept at managing and mitigating risk through careful planning and strategic decision-making. The characteristics of entrepreneurs have been a subject of much study and debate. While there is no single "entrepreneurial personality," several traits are commonly associated with successful entrepreneurs. These include:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Creativity and Innovation', def: 'The ability to think outside the box and develop new solutions to problems.' },
+              { term: 'Resilience and Perseverance', def: 'The capacity to bounce back from failure and keep going in the face of obstacles.' },
+              { term: 'Self-Confidence', def: "A strong belief in one's abilities and the value of one's ideas." },
+              { term: 'Vision', def: 'The ability to see the big picture and anticipate future trends.' },
+              { term: 'Need for Achievement', def: "A strong drive to succeed and reach one's goals." },
+            ],
+          },
+          {
+            type: 'text',
+            text: 'In addition to these personal traits, entrepreneurs also possess a unique set of skills, such as leadership, communication, and problem-solving. These skills enable them to build and lead teams, attract investors, and navigate the complexities of the business world. Ultimately, an entrepreneur is someone who is not afraid to take the lead and make things happen.',
+          },
+          {
+            type: 'definition',
+            heading: '1.3 The Concept and Meaning of Entrepreneurship',
+            text: 'Entrepreneurship is a multifaceted concept that can be understood from various perspectives. At its core, it is the process of creating value by bringing together a unique package of resources to exploit an opportunity. This process involves several stages, from the initial spark of an idea to the successful launch and growth of a venture.',
+          },
+          {
+            type: 'text',
+            text: 'One way to think about entrepreneurship is as a mindset. This mindset is characterized by a proactive and innovative approach to problem-solving and a willingness to embrace change. It involves looking at the world through a lens of opportunity rather than limitation. This entrepreneurial mindset is not limited to those who start their own businesses; it can also be found in individuals working within established organizations, non-profits, and government agencies.',
+          },
+          {
+            type: 'text',
+            text: 'Another perspective on entrepreneurship focuses on the economic role of the entrepreneur. In this view, entrepreneurs are seen as "agents of change" who drive economic growth by introducing new products, services, and processes. By challenging existing markets and creating new ones, they foster competition and innovation, which ultimately benefits consumers and society as a whole. This economic perspective highlights the importance of entrepreneurship in promoting efficiency and progress.',
+          },
+          {
+            type: 'text',
+            text: "Entrepreneurship can also be seen as a social process. It involves building relationships and networks, and it often has a significant impact on communities and society. Social entrepreneurship, in particular, focuses on using entrepreneurial principles to solve social and environmental problems. Whether it's providing clean water to rural communities or developing sustainable energy solutions, social entrepreneurs are driven by a desire to make a positive difference in the world.",
+          },
+          {
+            type: 'definition',
+            heading: '1.4 The Concept of Intrapreneurship',
+            text: 'Intrapreneurship, also known as corporate entrepreneurship, refers to the practice of fostering an entrepreneurial mindset and behaviors within an established organization. It involves encouraging employees to think and act like entrepreneurs, identifying and pursuing new opportunities that can drive growth and innovation for the company. Intrapreneurs are individuals who take the initiative to develop new products, services, or processes within the context of their existing jobs.',
+          },
+          {
+            type: 'text',
+            text: 'The concept of intrapreneurship recognizes that large organizations can often become bureaucratic and resistant to change. By empowering employees to be intrapreneurial, companies can tap into the creativity and talent of their workforce and stay competitive in a rapidly changing market. Intrapreneurship can take many forms, from formal innovation programs to more informal efforts to encourage employee-led initiatives.',
+          },
+          {
+            type: 'text',
+            text: 'Successful intrapreneurship requires a supportive organizational culture that values innovation and risk-taking. This involves providing employees with the resources, autonomy, and incentives they need to pursue new ideas. It also requires a willingness on the part of management to embrace failure as a learning opportunity and to support projects that may not have immediate or certain outcomes. By fostering an intrapreneurial environment, companies can create a more dynamic and resilient organization that is better equipped to navigate the challenges of the future.',
+          },
+          {
+            type: 'definition',
+            heading: '1.5 Corporate Entrepreneurship Defined',
+            text: "Corporate entrepreneurship is a broad term that encompasses a variety of activities aimed at fostering innovation and growth within an established firm. It can be defined as the process by which teams within an established company conceive, foster, launch and manage a new business that is distinct from the parent company but leverages the parent's assets, market position, capabilities or other resources. There are several different types of corporate entrepreneurship, including:",
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Corporate Venturing', def: 'This involves the creation of new businesses by an established firm. This can be done through internal corporate venturing, where the new business is developed within the company, or external corporate venturing, where the company invests in or partners with outside startups.' },
+              { term: 'Strategic Entrepreneurship', def: "This refers to a firm's efforts to achieve creativity and innovation in its strategic areas, such as its business model, product services, or served markets. It involves using entrepreneurial thinking to gain a competitive advantage and drive long-term growth." },
+            ],
+          },
+          {
+            type: 'text',
+            text: "Corporate entrepreneurship is not just about starting new businesses; it's also about transforming the existing organization. It involves challenging the status quo and introducing new ways of thinking and acting throughout the company. By embracing corporate entrepreneurship, firms can become more agile, innovative, and better able to respond to the changing needs of their customers and the market.",
+          },
+          {
+            type: 'definition',
+            heading: '1.6 Entrepreneurial Mindset and Behaviours',
+            text: 'It is not a big idea alone that paves the path to ultimate entrepreneurial success; the mindset and behaviour of the "would-be" entrepreneur plays a crucial role. Entrepreneurs are often seen as innovators, risk-takers, and visionaries who create value and solve problems in the world, but what makes them different from other people and how they think and act in ways that enable them to achieve their goals lies in their mindset, which is a set of beliefs, attitudes, and habits that shape their behavior and influence their actions. In other words, entrepreneurial mindset encompasses a unique set of attitudes and behaviors that drive individuals to innovate, take risks, and create opportunities. This mindset is characterized by a strong desire to solve problems, think creatively, and constantly seek new challenges.',
+          },
+          {
+            type: 'text',
+            text: 'Thus, entrepreneurial mindset is a combination of creativity, resilience, and a relentless drive to succeed. The entrepreneurial mindset is unique in that one must be creative, communicative, and highly motivated to succeed, yet open to risk and failure. Opportunity recognition, self-efficacy, proactivity, resourcefulness and value creation constitute the basic aspects of entrepreneurial mindset. Having an entrepreneurial mindset is not only essential for starting and growing a business, but also for personal and professional development in any field or context. This mindset is not limited to starting a business; it can be applied in various contexts, including within established organizations, non-profits, or personal projects.',
+          },
+          {
+            type: 'text',
+            text: 'Entrepreneurial behaviors refer to the actions and characteristics exhibited by individuals who are venturing into new business opportunities. These behaviors include a high level of risk-taking, creativity, innovation, leadership, and persistence. Moreover, entrepreneurial behaviors also involve strong networking skills, adaptability, and a willingness to learn from failures. Building a successful business often requires forming strong relationships with other industry professionals, potential clients, and investors. Entrepreneurs must be able to adapt to changing market conditions and consumer preferences in order to stay competitive and relevant.',
+          },
+          {
+            type: 'definition',
+            heading: '1.7 Challenges in Developing an Entrepreneurial Mindset',
+            text: 'The mind is often regarded as the most powerful attribute and weapon every human has. Whatever we become is always attributed to the state of our mind. Thus, developing an enterprise is chiefly a function of the state of our mind and that is where the battle for life and success began. Here, few of the challenges and how entrepreneurial mindset can be developed:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Overcoming the Fear of Failure', def: 'One of the primary hurdles to fostering an entrepreneurial mindset is surmounting the fear of failure. Many individuals shy away from taking risks and initiating their ventures due to concerns about potential negative consequences. Overcoming this fear requires a shift in perspective, recognizing failures as valuable learning experiences that contribute to personal and professional growth.' },
+              { term: 'Cultivating Self-Confidence', def: 'Entrepreneurs must possess unwavering self-confidence in their abilities to navigate the uncertainties of the business world. A lack of self-confidence can impede decision-making processes and create obstacles to pursuing new opportunities. Cultivating self-confidence involves recognizing strengths, acknowledging achievements, and embracing challenges as opportunities for skill development.' },
+              { term: 'Embracing Change', def: 'Entrepreneurship is synonymous with change, innovation, and continuous learning. Those resistant to change may find it challenging to adapt to new situations and acquire the necessary skills for success. Embracing change involves fostering a mindset that welcomes innovation, values adaptability, and views challenges as catalysts for growth.' },
+              { term: 'Managing Uncertainty', def: 'The inherent uncertainty of entrepreneurship makes decision-making challenging without knowing the outcome. Developing a tolerance for uncertainty is crucial, requiring the ability to make informed decisions despite limited information. Entrepreneurial individuals must hone skills in risk assessment, strategic planning, and adapting to unforeseen circumstances.' },
+              { term: 'Financial Stability Concerns', def: 'Commencing a new venture often involves financial risks, and the apprehension of financial instability can hinder the development of an entrepreneurial mindset. Mitigating these concerns involves careful financial planning, risk assessment, and a strategic approach to resource allocation. Developing financial literacy is integral to navigating the entrepreneurial landscape with confidence.' },
+              { term: 'Building a Supportive Ecosystem', def: 'Entrepreneurs thrive in supportive environments with access to resources like funding, mentorship, and networking opportunities. The absence of such support can hinder the development of necessary skills and knowledge for success. Building a robust support network involves seeking mentorship, engaging in networking activities, and accessing resources that foster entrepreneurial growth.' },
+              { term: 'Balancing Work and Life', def: 'Entrepreneurs often grapple with long working hours and challenges in maintaining a healthy work-life balance. Managing personal well-being and relationships while pursuing a new venture requires intentional efforts to prioritize self-care, set boundaries, and cultivate resilience amidst the demands of entrepreneurship.' },
+              { term: 'Resilience to Criticism and Rejection', def: 'Entrepreneurs frequently encounter criticism, rejection, and skepticism from others. Developing resilience and the ability to persevere despite criticism is crucial for success. Fortifying mental strength involves reframing criticism as constructive feedback, learning from setbacks, and maintaining a steadfast focus on long-term goals.' },
+              { term: 'Sustaining Motivation and Perseverance', def: 'The entrepreneurial journey is a protracted and challenging endeavor. Sustaining motivation, focus, and perseverance is vital, especially during setbacks and obstacles. Entrepreneurs must cultivate a resilient mindset, set achievable milestones, and celebrate small victories to stay motivated on the path to long-term success.' },
+              { term: 'Fostering Creative and Innovative Thinking', def: 'Entrepreneurship demands creative problem-solving and innovative thinking. Developing these skills can be challenging, particularly for individuals with traditional educational or professional backgrounds. Fostering creative thinking involves embracing curiosity, experimenting with diverse perspectives, and fostering an environment that encourages unconventional ideas and solutions.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: '1.8 Rationale and Relevance of Entrepreneurship',
+            text: 'Entrepreneurship as we see has to do with the persistent of opportunity to create wealth through innovative creation of product or service that meets a need of customers, using scarce resources in any way that result in enterprise development and growth which satisfies the expectation of stakeholders whose roles sustain the business. It is therefore a process which involves a vision of a future state regarding an idea, product or service. This process has played vital roles in the economic development of any nation, amongst which are:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Creation of Employment', def: 'It has been pointed out at various times and with varying degrees of emphasis that entrepreneurship creates employment for the teaming population of any nation. In Nigeria, for instance, it is documented that small and medium scale business, the catalyst of entrepreneurship employs about 30% of the entire labour force (Acquah, 1986).' },
+              { term: 'Transformation of Traditional Industry', def: "Entrepreneurial activities help to transform the traditional sector thereby helping in the economic development of a nation. In one respect, it helps in modernizing the people's perception of life, and in another, it modernizes the traditional handicraft prevalent in the rural economies, by introducing the use of anarchies instead of manual labour in most economics. Again, the skills of traditional craftsmen are modernized and synchronized with the developments in entrepreneurial activities." },
+              { term: 'Utilization of Resources', def: 'Entrepreneurship helps to mobilize resources that would otherwise remain idle in the lands of people and employ them productively. By so doing, capital formation which is a vital engine of economic growth is encouraged.' },
+              { term: 'Better Standard of Living', def: "As a result of their numerous economic activities, entrepreneurship activities make large quantities of goods and services available to people. With increased supply of goods and services individual's demands increase as well. This increase in demand, in turn, results in a better standard of living for the people." },
+              { term: 'Rural-Urban Migration', def: 'Majority of the small business, which constitute the bedrock for entrepreneurship are found in the rural areas- Nigeria is still a rural economy. By providing employment for the rural population, these business enterprises reduce the incidence of urban migration, thereby, thereby enhancing the economic growth of such rural areas.' },
+              { term: 'Innovation', def: 'Unless there are individuals who are willing to assume the risks of introducing new techniques of production, there would be no major breakthrough in technological development. This can be made possible through the activities in entrepreneurial pursuits. These individuals (entrepreneurs) provide the major sources of new ideas and inventions which result in the production of quality goods and services which are needed to improve the standard of living of the citizenry. This in turn enhances the economic growth and development of such nation.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: '1.9 Summary and Conclusion',
+            text: 'The concept of entrepreneurship has evolved significantly, yet its definition remains a topic of scholarly debate. From this chapter, the essence of entrepreneurship can be distilled into a simpler framework focused on the development and validation of ideas. This perspective highlights the importance of opportunity recognition and innovation, proposing a coherent understanding that separates entrepreneurship from management practices. The multifaceted nature of entrepreneurship encompasses both positive contributions to economic growth and potential negative societal impacts, revealing its complex role in contemporary economies. Similarly, the concept of intrapreneurship, corporate entrepreneurship, entrepreneurial mindset and behaviours, challenges in developing an entrepreneurial mindset, rationale and relevance of entrepreneurship have all been discussed in this chapter. By emphasizing these fundamental elements, the definition of entrepreneurship presented above and other conceptual definitions / explanations allows for a more accessible approach to understanding entrepreneurial activities. As scholars continue to explore this dynamic field, it is essential to consider both individual skills and broader environmental factors that shape entrepreneurial success.',
+          },
+        ],
+      },
+      {
+        number: '2',
+        title: 'Classification and Biographical Study of Entrepreneur',
+        sections: [
+          {
+            type: 'text',
+            text: 'Authors: Prof. Essien E. Akpanuko and Ekwere R. Enang, Ph.D',
+          },
+          {
+            type: 'definition',
+            heading: '2.1 Introduction',
+            text: 'The study of entrepreneurship involves understanding the diverse ways in which individuals identify and exploit opportunities. This chapter focuses on the classification of entrepreneurs and the biographical study of their characteristics. By categorizing entrepreneurs based on various criteria, we can gain a deeper understanding of the different types of entrepreneurial activity and the factors that contribute to their success. Classification of entrepreneurs is essential for several reasons. First, it helps researchers and policymakers to identify and support different types of entrepreneurial ventures. Second, it provides a framework for understanding the diverse motivations and characteristics of entrepreneurs. Finally, it enables us to analyze the impact of different types of entrepreneurship on economic growth and development. The biographical study of entrepreneurs involves examining their backgrounds, experiences, and personal traits. This approach recognizes that the individual entrepreneur is at the heart of the entrepreneurial process. By studying the lives and careers of successful entrepreneurs, we can identify common patterns and insights that can inform our understanding of entrepreneurship more broadly.',
+          },
+          {
+            type: 'text',
+            heading: '2.2 Classification and Types of Entrepreneurships',
+            text: 'Entrepreneurs can be classified into several different types based on various criteria, such as their motivation, level of innovation, and the scale of their operations. These classifications are not mutually exclusive, and many entrepreneurs may fall into multiple categories.',
+          },
+          {
+            type: 'text',
+            heading: '2.2.1 Clarence Danhof Classifications',
+            text: 'Clarence Danhof (1949) classified entrepreneurs into four categories based on their level of innovation and willingness to embrace change:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Innovating Entrepreneurs', def: 'These are individuals who introduce new products, services, or processes to the market. They are often seen as the "true" entrepreneurs, as they drive economic growth and progress through their creativity and vision.' },
+              { term: 'Imitative (Adoptive) Entrepreneurs', def: 'These individuals do not innovate themselves but instead adopt and adapt successful innovations from others. They play an important role in spreading innovation and increasing competition in the market.' },
+              { term: 'Fabian Entrepreneurs', def: 'These individuals are cautious and skeptical of change. They only adopt new innovations when they are forced to do so by market pressure or when the success of the innovation has been clearly demonstrated by others.' },
+              { term: 'Drone Entrepreneurs', def: 'These individuals are resistant to change and refuse to adopt new innovations, even when they are facing significant challenges or competition. They are often associated with traditional or declining industries.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '2.2.2 Classification by Arthur H. Cole',
+            text: 'Arthur H. Cole classified entrepreneurs based on their role in the economy:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Empirical Entrepreneurs', def: 'These individuals rely on their experience and intuition to make decisions. They are often found in traditional or small-scale businesses.' },
+              { term: 'Rational Entrepreneurs', def: 'These individuals use formal analysis and planning to make decisions. They are more likely to be found in larger or more complex organizations.' },
+              { term: 'Cognitive Entrepreneurs', def: 'These individuals are driven by their vision and their ability to recognize and exploit new opportunities. They are the primary drivers of innovation and change in the economy.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '2.2.3 Classification by Naidu and Rao (2008)',
+            text: 'Naidu and Rao (2008) provided several classifications based on different dimensions:',
+          },
+          {
+            type: 'termlist',
+            heading: 'Motivational Classification',
+            items: [
+              { term: 'First-generation entrepreneur', def: 'Starts from scratch without family business background.' },
+              { term: 'Self-actualizer entrepreneurs', def: 'Driven by the desire for autonomy and personal fulfillment.' },
+              { term: 'Dissatisfied entrepreneurs', def: 'Start a business because they are unhappy with their previous employment.' },
+              { term: 'Family business entrepreneurs', def: "Inherit and develop their family's business." },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Classification Based on Entrepreneurial Experience',
+            items: [
+              { term: 'Novice Entrepreneurs', def: 'Individuals with no prior business ownership experience.' },
+              { term: 'Habitual Entrepreneurs', def: 'Individuals who have owned at least two or more separate businesses at the same time.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Classification Based on Technical Experience',
+            items: [
+              { term: '"Research" Technical entrepreneur', def: 'Has prior expertise in technological research.' },
+              { term: '"Producer" technological entrepreneur', def: 'Has a background in direct commercial production.' },
+              { term: '"User" technical entrepreneur', def: 'Has experience as an end user of the relevant product/technology.' },
+              { term: '"Opportunist" technical entrepreneur', def: 'Has found and imagined a technology-based opportunity and seized it.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '2.2.4 Classification Based on Ownership',
+            items: [
+              { term: 'Private entrepreneurship', def: 'Independent entrepreneurs engaging in business where the entrepreneurial process is dominant. These are often small, simple, and economical to set up, motivated by profit.' },
+              { term: 'Public entrepreneurship', def: 'In developing countries, the government may take the initiative in businesses, leading to government-linked corporations (GLCs) or state-owned firms. Popular examples include State Economic Development Corporations (SEDCs).' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '2.3.5 Classification Based on Scale of Enterprise',
+            items: [
+              { term: 'Small scale entrepreneurship', def: 'Particularly popular in developing nations. Small business owners often face obstacles such as maintaining consistent cash balance, balancing family time, keeping up with trends, and brand management.' },
+              { term: 'Scalable startup', def: 'Rarer but garner significant media interest. These begin on a small scale as the "germ" of an idea and are nurtured and scaled up, often with venture funding.' },
+              { term: 'A big corporation', def: 'Entrepreneurs can function within larger, existing organizations to expand into new consumer segments and broaden the scope of a well-established enterprise.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '2.3.6 New Entrepreneurial Classifications',
+            text: 'In recent years, various new classifications have emerged:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Solo entrepreneurs', def: 'Prefer to start and run their businesses on their own, providing their own cash and skills.' },
+              { term: 'Active partners', def: 'Entrepreneurs who work together by pooling their resources and participating in daily operations.' },
+              { term: 'Inventors', def: 'Involved mostly in R&D, having a creative personality for developing new goods and technologies.' },
+              { term: 'Challengers', def: 'Take on obstacles to develop a commercial enterprise as a symbol of success.' },
+              { term: 'Buyers (entrepreneurs)', def: 'Look for possibilities to acquire existing units that may be seized or are in working condition, using their knowledge to repair them.' },
+              { term: 'Life timers', def: 'Think of business as an integral part of their lives, driven by a strong desire to take personal responsibility.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: '2.4 Biographical Study of Entrepreneurs',
+            text: 'This addresses the characteristics or attributes of an entrepreneur from sociological, psychological, and economic perspectives. Key traits include:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Self Confidence', def: 'High internal locus of control; believing in oneself rather than fate.' },
+              { term: 'Risk Taking Ability', def: 'Propelled by the idea that higher risk often leads to higher profit.' },
+              { term: 'Task (Result) Oriented', def: 'Setting clear and measurable goals with persistence and determination.' },
+              { term: 'Leadership', def: 'Important for successful discharge of duties; not being too rigid or dogmatic.' },
+              { term: 'Future Oriented (Visionary)', def: 'Possessing foresight and perception of the future.' },
+              { term: 'Creativity (Innovative Behaviour)', def: 'Making the business outlive the entrepreneur through flexible changes.' },
+              { term: 'Originality (Uniqueness)', def: 'Being original in thoughts and innovations rather than merely copying.' },
+              { term: 'Need for Achievement', def: "Driven by the psychologist David C. McClelland's theory of \"acquired need.\"" },
+              { term: 'Drive and Energy', def: 'Ability to handle complex and demanding entrepreneurial jobs.' },
+              { term: 'Taking Initiative (Conceptual Ability)', def: "Being one's own boss and taking initiatives as needs arise." },
+              { term: 'Long-term Involvement', def: 'Setting eyes on tomorrow to build a business that outlives them.' },
+              { term: 'Deviant Behaviour', def: "A high propensity to leave other's employment to open their own business." },
+              { term: 'Taking Personal Responsibility', def: "Assuming control for one's own decisions and actions." },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: '2.5 Summary and Conclusion',
+            text: 'Classification of entrepreneurs can be done based on various criteria such as motivation, level of innovation, scale of operation, and industry focus. By categorizing entrepreneurs based on these criteria, researchers and policymakers can better understand the diverse motivations and characteristics that drive entrepreneurial activity. Biographical study of entrepreneurs involves examining their backgrounds, experiences, and personal traits that have shaped their entrepreneurial journey. By studying the biographies of successful entrepreneurs, researchers can gain insights into the factors that contribute to entrepreneurial success, such as passion, resilience, and resourcefulness.',
+          },
+        ],
+      },
+    ],
   },
   {
     code: 'COS 221',
