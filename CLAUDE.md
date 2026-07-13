@@ -1,7 +1,7 @@
-# Arete — CLAUDE.md
+# Areté — CLAUDE.md
 
 ## Project Identity
-Arete is an interactive learning platform for B.Sc. Cybersecurity students at the University of Uyo. It delivers a full 4-year curriculum browser, programming tracks (Java, Python, C — 37 modules) plus a hands-on Security track (12 CTF-style capture-the-flag rooms; 49 modules total), an AI tutor, a code explainer, and an in-browser code playground.
+Areté is an interactive learning platform for B.Sc. Cybersecurity students at the University of Uyo. It delivers a full 4-year curriculum browser, programming tracks (Java, Python, C — 37 modules) plus a hands-on Security track (12 CTF-style capture-the-flag rooms; 49 modules total), an AI tutor, a code explainer, and an in-browser code playground.
 
 ## Stack
 - **Frontend:** React 18, React Router v6, Tailwind CSS (custom theme), Vite (port 5173)

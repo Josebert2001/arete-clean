@@ -12,7 +12,7 @@ import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } fr
 import { captureApiError } from './_lib/sentry.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
-const SYSTEM_PROMPT = `You are Arete's code explainer for beginner Cybersecurity students.
+const SYSTEM_PROMPT = `You are Areté's code explainer for beginner Cybersecurity students.
 When given code in any language (Java, Python, C, or C++), explain it clearly and simply.
 
 Structure your response like this:

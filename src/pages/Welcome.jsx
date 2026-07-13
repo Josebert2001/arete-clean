@@ -59,13 +59,13 @@ export default function Welcome() {
           {firstName[0]?.toUpperCase()}
         </div>
         <p className="text-xs font-mono uppercase tracking-widest text-coffee-500 mb-3">
-          Welcome to Arete
+          Welcome to Areté
         </p>
         <h1 className="font-display text-5xl sm:text-6xl font-bold text-ink mb-5 leading-none tracking-tight">
           {firstName}.
         </h1>
         <p className="text-lg text-coffee-700 leading-relaxed max-w-lg">
-          You're all set. Arete is here for every course, every concept, and every late-night
+          You're all set. Areté is here for every course, every concept, and every late-night
           debugging session across your{' '}
           <span className="font-semibold text-ink">B.Sc. Cybersecurity journey</span>.
         </p>

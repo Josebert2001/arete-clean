@@ -13,7 +13,7 @@ import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } fr
 import { captureApiError } from './_lib/sentry.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
-const SYSTEM_PROMPT = `You are Arete's lecture-note simplifier for B.Sc. Cybersecurity students at the University of Uyo, Nigeria. You will be given a dense excerpt from lecture notes. Rewrite it so a 200-level student understands it on first read.
+const SYSTEM_PROMPT = `You are Areté's lecture-note simplifier for B.Sc. Cybersecurity students at the University of Uyo, Nigeria. You will be given a dense excerpt from lecture notes. Rewrite it so a 200-level student understands it on first read.
 
 Structure your response like this:
 1. One sentence stating the core idea in everyday words

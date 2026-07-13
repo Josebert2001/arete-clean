@@ -8,8 +8,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <img src="/arete.svg" alt="Arete logo" className="w-8 h-8 rounded-md" />
-              <span className="font-display text-lg font-bold text-ink">Arete</span>
+              <img src="/arete.svg" alt="Areté logo" className="w-8 h-8 rounded-md" />
+              <span className="font-display text-lg font-bold text-ink">Areté</span>
             </div>
             <p className="text-sm text-coffee-700 leading-relaxed">
               Academic companion for B.Sc. Cybersecurity students at the University of Uyo — courses, interactive programming tracks, and an AI tutor, all four years.
@@ -44,7 +44,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-coffee-200 pt-6 text-xs text-coffee-700">
-          <p>© {new Date().getFullYear()} Arete by JRsolvy. Built for learners, everywhere.</p>
+          <p>© {new Date().getFullYear()} Areté by JRsolvy. Built for learners, everywhere.</p>
         </div>
       </div>
     </footer>

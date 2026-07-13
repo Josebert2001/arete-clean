@@ -1,6 +1,6 @@
-# Contributing to Arete
+# Contributing to Areté
 
-Arete is an interactive learning platform for B.Sc. Cybersecurity students at the
+Areté is an interactive learning platform for B.Sc. Cybersecurity students at the
 University of Uyo — a curriculum browser, programming tracks (Java/Python/C), an AI
 tutor, a code explainer, and an in-browser playground.
 
@@ -88,7 +88,7 @@ shared dev environment; **don't** ask for the production keys to paste locally.
 
 ## Start here: security audit (first task)
 
-Arete is pre-launch and most of the app is untested. The highest-leverage first
+Areté is pre-launch and most of the app is untested. The highest-leverage first
 contribution is a security pass over the request path. These are the files that matter,
 with what to look at:
 
@@ -107,7 +107,7 @@ severity-tagged the way you would for a bounty. PoC where it helps. Fixes go in 
 one concern each. The security section of `.harness/evals/checklist.md` is the baseline to
 hold the code to.
 
-This plays to your strengths and tells us fast where Arete is weak before it goes public.
+This plays to your strengths and tells us fast where Areté is weak before it goes public.
 
 ---
 

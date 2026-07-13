@@ -1,4 +1,4 @@
-# Arete — Academic Companion for the Department of Cybersecurity
+# Areté — Academic Companion for the Department of Cybersecurity
 
 > ἀρετή (ar-eh-TAY) · Greek · "excellence achieved through practice"
 
@@ -155,4 +155,4 @@ React 18 · Vite · Tailwind CSS · React Router v6 · Lucide Icons · Vercel AI
 
 ---
 
-© 2026 Arete · Department of Cybersecurity, University of Uyo.
+© 2026 Areté · Department of Cybersecurity, University of Uyo.

@@ -52,7 +52,7 @@ Tips: Frame answers in the cybercrime/digital-policy context to score higher —
 COS 121 | Problem Solving — Python | 3 units
 Skills: algorithm design, pseudocode, flowcharts, programming fundamentals using Python 3 — variables, control flow, loops, functions, lists, dictionaries, file I/O, basic OOP.
 Textbooks: "Python Crash Course" (Eric Matthes, 3rd ed); "Automate the Boring Stuff with Python" (Al Sweigart — free online).
-Tips: Code every day, even 20 minutes. The Python interactive programming track on Arete covers COS 121 in full — use it. Typing code yourself beats copy-paste.
+Tips: Code every day, even 20 minutes. The Python interactive programming track on Areté covers COS 121 in full — use it. Typing code yourself beats copy-paste.
 
 MTH 121 | General Mathematics II | 2 units
 Skills: trigonometry, differentiation (chain/product/quotient rules), integration (substitution, by parts), differential equations (first and second order), coordinate geometry.
@@ -89,7 +89,7 @@ Tips: Truth tables come up in COS 211 boolean logic. Apply ethical frameworks to
 COS 211 | Computer Programming I — Java | 3 units
 Skills: Java OOP (classes, objects, constructors, encapsulation, inheritance, polymorphism, abstraction, interfaces), exception handling, Java Collections Framework (ArrayList, HashSet, HashMap), file I/O (FileReader, FileWriter, BufferedWriter), JDBC and database connectivity, Swing GUI programming, event handling.
 Textbooks: "Head First Java" (Sierra & Bates, 3rd ed); "Java: The Complete Reference" (Herbert Schildt).
-Tips: Use the Java interactive track on Arete (13 modules) — it covers COS 211 completely. Do not memorise syntax; understand the concepts. Build the mini projects for every module.
+Tips: Use the Java interactive track on Areté (13 modules) — it covers COS 211 completely. Do not memorise syntax; understand the concepts. Build the mini projects for every module.
 
 CYB 211 | Introduction to Cybersecurity and Strategy | 2 units
 Skills: threat landscape (malware types, social engineering, phishing, ransomware), attack lifecycle, NIST Cybersecurity Framework (Identify, Protect, Detect, Respond, Recover), cybersecurity governance, national and international cybersecurity strategies, zero-trust architecture introduction.

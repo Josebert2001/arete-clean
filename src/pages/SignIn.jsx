@@ -62,7 +62,7 @@ export default function SignIn() {
           Accounts aren't configured for this deployment yet. You can still browse the
           curriculum, code lab, and tutor as a guest.
         </p>
-        <Link to="/" className="btn-primary text-sm">Back to Arete</Link>
+        <Link to="/" className="btn-primary text-sm">Back to Areté</Link>
       </div>
     );
   }
@@ -101,9 +101,9 @@ export default function SignIn() {
       <div className="hidden md:flex flex-col justify-between bg-ink px-10 py-16">
         <div>
           <div className="flex items-center gap-3 mb-16">
-            <img src="/arete.svg" alt="Arete logo" className="w-10 h-10 rounded-xl" />
+            <img src="/arete.svg" alt="Areté logo" className="w-10 h-10 rounded-xl" />
             <div className="leading-tight">
-              <div className="font-display text-xl font-bold text-cream">Arete</div>
+              <div className="font-display text-xl font-bold text-cream">Areté</div>
               <div className="text-xs text-coffee-500 tracking-wide">Dept of Cybersecurity · UniUyo</div>
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function SignIn() {
           to="/"
           className="inline-flex items-center gap-1.5 text-sm text-coffee-600 hover:text-ink transition-colors mb-12 w-fit"
         >
-          <ArrowLeft size={14} /> Back to Arete
+          <ArrowLeft size={14} /> Back to Areté
         </Link>
 
         {status === 'sent' ? (

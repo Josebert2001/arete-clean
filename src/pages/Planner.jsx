@@ -72,7 +72,7 @@ export default function Planner() {
 
   const handleDownload = () => {
     if (!plan?.events.length) return;
-    const ics = buildIcs(plan.events, { calendarName: `Arete ${level}L Sem ${semester} — ${session}` });
+    const ics = buildIcs(plan.events, { calendarName: `Areté ${level}L Sem ${semester} — ${session}` });
     downloadIcs(`arete-study-plan-${level}L-sem${semester}.ics`, ics);
   };
 
@@ -98,7 +98,7 @@ export default function Planner() {
           Build your semester study timetable
         </h1>
         <p className="text-coffee-700 leading-relaxed max-w-2xl">
-          Pick your session, level, and semester — Arete lays out weekly study blocks from your
+          Pick your session, level, and semester — Areté lays out weekly study blocks from your
           courses, weighted by credit units, and adds them straight to your calendar.
           Works with Google, Apple, and Outlook.
         </p>

@@ -19,7 +19,7 @@ function InteractiveTracks() {
         <span className="text-xs font-mono text-coffee-700">Java · Python · C</span>
       </div>
       <p className="text-sm text-coffee-700 max-w-2xl mb-6 leading-relaxed">
-        Three programming courses have full interactive tracks on Arete — theory, annotated code, a
+        Three programming courses have full interactive tracks on Areté — theory, annotated code, a
         live in-browser playground, 7-question quizzes, and mini projects. Every other course has
         curated study resources below.
       </p>

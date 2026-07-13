@@ -66,7 +66,7 @@ export default function SetupProfile() {
           </span>
           <h1 className="font-display text-3xl font-bold text-ink mb-3">One last step.</h1>
           <p className="text-coffee-700 leading-relaxed">
-            Set up your profile so Arete knows who you are.
+            Set up your profile so Areté knows who you are.
             This links your progress and uploads to your department record.
           </p>
         </div>

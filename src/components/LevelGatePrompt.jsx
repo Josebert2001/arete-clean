@@ -49,7 +49,7 @@ export function LevelGatePrompt({ level, onSignIn, onGuest, onClose }) {
             Sign in to save your {label} progress
           </h2>
           <p className="text-sm text-coffee-700 leading-relaxed mb-5">
-            Arete is free to browse — signing in (one tap, no password) just unlocks a few things worth having:
+            Areté is free to browse — signing in (one tap, no password) just unlocks a few things worth having:
           </p>
 
           <ul className="space-y-3 mb-7">

@@ -93,7 +93,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap items-end gap-2 sm:gap-4 mb-3">
-              <h1 className="display-heading text-4xl sm:text-7xl lg:text-8xl text-ink tracking-tight">Arete</h1>
+              <h1 className="display-heading text-4xl sm:text-7xl lg:text-8xl text-ink tracking-tight">Areté</h1>
               <span className="font-display text-lg text-coffee-600 italic hidden sm:inline">ἀρετή</span>
             </div>
 

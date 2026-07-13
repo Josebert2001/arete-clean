@@ -141,7 +141,7 @@ function buildVEvent(ev, dtstamp) {
 }
 
 // Build the full .ics document from plan events.
-export function buildIcs(events, { calendarName = 'Arete Timetable' } = {}) {
+export function buildIcs(events, { calendarName = 'Areté Timetable' } = {}) {
   const dtstamp = utcStamp(new Date());
   const lines = [
     'BEGIN:VCALENDAR',

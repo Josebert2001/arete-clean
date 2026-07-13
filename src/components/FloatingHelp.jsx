@@ -44,7 +44,7 @@ export default function FloatingHelp() {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState('help'); // 'help' | 'chat'
   const [messages, setMessages] = useState([
-    { role: 'bot', text: "Hi! I'm your Arete tutor. Ask me anything about your cybersecurity courses, programming tracks, or any concept you're studying." },
+    { role: 'bot', text: "Hi! I'm your Areté tutor. Ask me anything about your cybersecurity courses, programming tracks, or any concept you're studying." },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -217,7 +217,7 @@ export default function FloatingHelp() {
                       {c.phone ? (
                         <a
                           href={`https://wa.me/${c.phone}?text=${encodeURIComponent(
-                            `Hi ${c.name}, I'm stuck on the ${c.track} track on Arete and need help.`
+                            `Hi ${c.name}, I'm stuck on the ${c.track} track on Areté and need help.`
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -237,7 +237,7 @@ export default function FloatingHelp() {
                       )}
                       {c.email && (
                         <a
-                          href={`mailto:${c.email}?subject=${encodeURIComponent(`Arete ${c.track} track — need help`)}`}
+                          href={`mailto:${c.email}?subject=${encodeURIComponent(`Areté ${c.track} track — need help`)}`}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-coffee-300 text-ink text-xs font-medium hover:bg-coffee-100 transition-colors"
                         >
                           <Mail size={14} />

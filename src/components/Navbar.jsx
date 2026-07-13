@@ -39,12 +39,12 @@ export default function Navbar() {
         <Link to="/" className="group flex items-center gap-3">
           <img
             src="/arete.svg"
-            alt="Arete logo"
+            alt="Areté logo"
             className="h-10 w-10 rounded-lg transition-transform group-hover:scale-105"
           />
           <div className="min-w-0 leading-tight">
             <div className="font-display text-lg font-bold tracking-tight text-ink sm:text-xl">
-              Arete
+              Areté
             </div>
             <div className="max-w-[12rem] truncate text-[11px] tracking-wide text-coffee-700 sm:max-w-none sm:text-xs sm:tracking-wider">
               Dept of Cybersecurity · UniUyo

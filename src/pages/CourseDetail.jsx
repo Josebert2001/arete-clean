@@ -100,7 +100,7 @@ export default function CourseDetail() {
               {course.interactiveModuleCount || 13} Full Interactive Modules
             </div>
             <h2 className="font-display font-bold text-2xl text-cream mb-1">
-              This course has its own learning track on Arete.
+              This course has its own learning track on Areté.
             </h2>
             <p className="text-sm text-coffee-400 leading-relaxed max-w-lg">
               Theory, annotated code examples, a runnable {course.interactiveLabel || 'Java'} playground,

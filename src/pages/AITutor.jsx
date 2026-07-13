@@ -37,7 +37,7 @@ const SUGGESTED = [
   'What is Big-O notation, in plain English?',
 ];
 
-const GREETING = { role: 'bot', text: "Hi! I'm your Arete tutor. I know the full B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks (Java, Python, C), cryptography, networking, ethical hacking, digital forensics, and more. Ask me anything. What are you working on?" };
+const GREETING = { role: 'bot', text: "Hi! I'm your Areté tutor. I know the full B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks (Java, Python, C), cryptography, networking, ethical hacking, digital forensics, and more. Ask me anything. What are you working on?" };
 
 // Persist the conversation for the browser session so a reload doesn't wipe it.
 const CHAT_STORAGE_KEY = 'arete-tutor-chat-v1';

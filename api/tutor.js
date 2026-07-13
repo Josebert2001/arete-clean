@@ -24,7 +24,7 @@ import { buildTutorTools } from './_lib/tutorTools.js';
 import { buildModelChain, hasAnyProvider, streamTextWithFallback } from './_lib/model.js';
 import { classifyTaskTier } from './_lib/taskRouter.js';
 
-const SYSTEM_PROMPT = `You are Arete's AI academic tutor for the Department of Cybersecurity, University of Uyo, Nigeria.
+const SYSTEM_PROMPT = `You are Areté's AI academic tutor for the Department of Cybersecurity, University of Uyo, Nigeria.
 You cover the entire B.Sc. Cybersecurity programme — every course and every interactive programming module in the app.
 
 COURSE CATALOGUE (index only — call getCourseOutline with a course code for full topics, textbooks, and exam tips):

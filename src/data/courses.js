@@ -347,7 +347,7 @@ export const courses = [
       'CS50P Introduction to Programming with Python Harvard free',
     ],
     studyTips: [
-      'Arete has 12 full interactive Python modules for this course — use them from day one',
+      'Areté has 12 full interactive Python modules for this course — use them from day one',
       'Never copy-paste code examples — type every line yourself so your fingers learn the syntax',
       'Solve at least one coding problem daily, even if small; consistency beats cramming',
       'Harvard CS50P (Introduction to Programming with Python) is free and excellent',
@@ -629,7 +629,7 @@ export const courses = [
       'Java Swing GUI tutorial beginner',
     ],
     studyTips: [
-      'Arete has 13 full interactive modules for this course with live playgrounds and quizzes — use them every day',
+      'Areté has 13 full interactive modules for this course with live playgrounds and quizzes — use them every day',
       'Type every code example yourself; copying and pasting prevents your brain from building muscle memory',
       'Java OOP is the most exam-critical section — understand inheritance diagrams and method overriding',
       'The AI Tutor on this app can explain any Java concept or debug your code any time',
@@ -1160,7 +1160,7 @@ export const courses = [
       'VisuAlgo (visualgo.net) provides free visual animations for every data structure — use it constantly',
       'Implement every data structure from scratch at least once — never just read about it',
       'Trace sorting algorithms step by step on a 5-element array by hand before every exam',
-      'Arete Java modules cover the programming foundation; use them for the Java component of this course',
+      'Areté Java modules cover the programming foundation; use them for the Java component of this course',
     ],
   },
   {
