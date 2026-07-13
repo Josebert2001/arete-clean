@@ -2541,7 +2541,7 @@ export const courses = [
     ],
     lectureNotes: [
       {
-        number: '1',
+        number: '0',
         title: 'AI & Machine Learning in Threat Detection',
         sections: [
           {
@@ -2653,7 +2653,7 @@ export const courses = [
         ],
       },
       {
-        number: '2',
+        number: '1',
         title: 'Zero Trust Architecture',
         sections: [
           {
@@ -2791,7 +2791,7 @@ export const courses = [
         ],
       },
       {
-        number: '3',
+        number: '2',
         title: 'Post-Quantum Cryptography & Migration Frameworks',
         sections: [
           {
@@ -2993,7 +2993,7 @@ export const courses = [
         ],
       },
       {
-        number: '4',
+        number: '3',
         title: 'Behavioral Biometrics & Continuous Authentication',
         sections: [
           {
@@ -3134,6 +3134,521 @@ export const courses = [
           },
         ],
       },
+      {
+        number: '4',
+        title: 'Blockchain Technology',
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 4 research project — by Bisong Malachi Obanghe, Archibong Samuel Samuel, Ekpo Blessing Edidiong, Francis Kalu, Akpan Ikouwem Albert and Uwemedimoh Anthony Ayah. An assigned project topic for CYB 222, examining blockchain technology and its role in cyber security.',
+          },
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'A blockchain is a distributed, shared and continuously synchronised digital ledger that records transactions across many computers such that no single record can be altered retroactively without altering every subsequent record and gaining the agreement of the network. This idea — a record of events that many parties can trust without needing to trust each other or any single central authority — has expanded far beyond its original use in cryptocurrency into finance, healthcare, supply chain management, voting systems and, increasingly, cyber security.',
+          },
+          {
+            type: 'definition',
+            heading: 'Why Cyber Security Cares About Blockchain',
+            text: 'Cyber security professionals are interested in blockchain not because it replaces existing security tools, but because it solves a particular problem well: establishing trust and verifying integrity in environments where a central authority is undesirable, unavailable, or itself a point of failure. This report builds a technical understanding of what blockchain is, how it works, and relates it directly to cyber security — how its properties strengthen digital defences, where it introduces new attack surfaces, and how the field is converging with emerging threats such as quantum computing.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Early Foundations (1980s–1990s)',
+            items: [
+              { term: '1982 — David Chaum', def: 'Proposed a blockchain-like protocol in his dissertation, introducing early ideas around cryptographically secured, tamper-evident records.' },
+              { term: '1991 — Haber & Stornetta', def: 'Described a cryptographically secured chain of blocks designed to timestamp documents so they could not be altered or backdated — the first practical work resembling a blockchain.' },
+              { term: '1998 — Nick Szabo', def: '"Bit Gold" — a precursor concept to modern cryptocurrency, never implemented but introducing ideas around decentralised digital scarcity.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Birth of Bitcoin (2008–2010)',
+            text: 'In October 2008, a person or group using the pseudonym Satoshi Nakamoto published the whitepaper "Bitcoin: A Peer-to-Peer Electronic Cash System," combining peer-to-peer networking, cryptographic hashing and proof-of-work into a single system that solved the long-standing "double-spending problem" without a trusted central authority. In January 2009, the Bitcoin network went live with the mining of the first block — the Genesis Block.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Expansion, Maturity & Diversification (2013–Present)',
+            items: [
+              '2013–2015 — Ethereum: Vitalik Buterin proposed Ethereum, introducing smart contracts and turning blockchain into a programmable platform for decentralised applications',
+              '2015 onward — Enterprise interest: banking, logistics and healthcare began exploring private/permissioned blockchains (e.g. Hyperledger Fabric, R3 Corda) for internal record-keeping',
+              'ICOs, DeFi and NFTs expanded blockchain\'s commercial applications from 2017 onward',
+              'Regulatory frameworks for digital assets and stablecoins matured significantly through the mid-2020s',
+              'Blockchain security became a dedicated discipline as value secured by smart contracts grew into the hundreds of billions of dollars, attracting sophisticated attackers',
+              'Research has shifted toward the long-term threat quantum computing poses to blockchain cryptography',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Structure of a Block',
+            items: [
+              { term: 'Block header', def: 'Metadata about the block, including a timestamp and a reference to the previous block.' },
+              { term: 'Previous block hash', def: 'A cryptographic fingerprint of the prior block that physically "chains" the blocks together — changing any block changes its hash, breaking the link to every subsequent block.' },
+              { term: 'Merkle root', def: 'A single hash summarising all transactions in the block via a Merkle tree, allowing efficient, secure verification without downloading the entire block.' },
+              { term: 'Transaction data', def: 'The actual records being stored — financial transactions, smart contract calls, or other data, depending on the blockchain\'s purpose.' },
+              { term: 'Nonce', def: 'A number used in proof-of-work systems that miners adjust repeatedly to find a valid block hash.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Cryptographic Hashing',
+            text: 'Hashing is the backbone of blockchain integrity. A hash function (such as SHA-256, used by Bitcoin) takes any input data and produces a fixed-length string of characters. Because each block contains the hash of the previous block, tampering with any historical transaction changes that block\'s hash, breaking the chain and immediately alerting the network to the tampering.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Properties of Cryptographic Hash Functions',
+            items: [
+              'Determinism — the same input always produces the same hash',
+              'Avalanche effect — changing even a single character of the input produces a completely different hash',
+              'One-way function — it is computationally infeasible to reverse a hash back into its original input',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Peer-to-Peer Network',
+            text: 'Rather than being stored on one central server, a full copy (or relevant portion) of the blockchain ledger is distributed across many independent nodes worldwide. When a new transaction occurs, it is broadcast to the network, validated by nodes according to the network\'s rules, and — once confirmed — added to a new block that is propagated to every node, keeping all copies of the ledger synchronised.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Consensus Mechanisms',
+            items: [
+              { term: 'Proof of Work (PoW)', def: 'Used by Bitcoin. Miners compete to solve a computationally difficult puzzle (finding a nonce producing a hash meeting certain criteria); the first to solve it adds the block and is rewarded. Attacking the network requires more computing power than the rest of the network combined (a "51% attack").' },
+              { term: 'Proof of Stake (PoS)', def: 'Used by Ethereum since its 2022 transition ("The Merge"). Validators stake (lock up) cryptocurrency as collateral instead of competing with computing power, and lose their stake if they act maliciously — far more energy-efficient than PoW.' },
+              { term: 'Other models', def: 'Delegated Proof of Stake, Practical Byzantine Fault Tolerance (PBFT) and Proof of Authority — often used in private/enterprise blockchains where speed and known validators are prioritised over full decentralisation.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Smart Contracts',
+            text: 'On programmable blockchains such as Ethereum, smart contracts are self-executing pieces of code stored on the blockchain that automatically run when predetermined conditions are met, removing the need for a trusted intermediary to enforce an agreement — for example, automatically releasing payment once a delivery is confirmed. They underpin most modern blockchain applications, including DeFi platforms, NFT marketplaces and decentralised identity systems, but also introduce their own security risks.',
+          },
+          {
+            type: 'note',
+            text: "Picture a class where one student keeps the only attendance register — they could quietly change a mark and no one would know. Now picture every student keeping an identical copy, comparing notes after each lecture: if one register is altered, it no longer matches the rest and the tampering is obvious immediately. That's decentralisation and immutability in one image — no single keeper to trust or corrupt, because everyone is watching everyone else's copy.",
+          },
+          {
+            type: 'table',
+            heading: 'Key Features of Blockchain',
+            headers: ['Feature', 'Description'],
+            rows: [
+              ['Decentralisation', 'No single entity controls the ledger; control and data are spread across many independent nodes'],
+              ['Immutability', 'Once data is confirmed and added to the chain, it is extremely difficult to alter or delete without network-wide consensus'],
+              ['Transparency', 'On public blockchains, all transactions are visible to every participant, enabling open verification'],
+              ['Cryptographic security', 'Hashing and digital signatures protect data integrity and verify the authenticity of transactions'],
+              ['Consensus-driven trust', 'Agreement on the state of the ledger is reached collectively, removing the need for a trusted third party'],
+              ['Traceability / auditability', 'Every transaction is timestamped and permanently recorded, creating a verifiable audit trail'],
+              ['Pseudonymity', 'Users are typically identified by cryptographic addresses rather than real-world identities (varies by network)'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Types of Blockchain',
+            items: [
+              { term: 'Public Blockchain', def: 'Open networks anyone can join, read from and submit transactions to, without permission (e.g. Bitcoin, Ethereum) — maximum decentralisation and transparency, but slower and more resource-intensive.' },
+              { term: 'Private Blockchain', def: 'Restricted networks controlled by a single organisation that decides who may participate — faster and more efficient, but sacrifices some decentralisation since the controlling organisation could alter the rules.' },
+              { term: 'Consortium (Federated) Blockchain', def: 'Controlled by a pre-selected group of organisations rather than a single entity or the public — balances decentralisation with efficiency and governance for inter-company collaboration.' },
+              { term: 'Hybrid Blockchain', def: 'Combines public and private elements, letting an organisation keep some data private while leveraging a public network\'s verifiability and transparency for other operations.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Types of Blockchain — Quick Comparison',
+            headers: ['Type', 'Access', 'Speed', 'Example Use'],
+            rows: [
+              ['Public', 'Open to all', 'Slower', 'Bitcoin, Ethereum'],
+              ['Private', 'Single organisation', 'Fast', 'Internal corporate ledgers'],
+              ['Consortium', 'Select group', 'Fast', 'Banking alliances'],
+              ['Hybrid', 'Mixed', 'Variable', 'Supply chain tracking'],
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Applications of Blockchain',
+            items: [
+              'Cryptocurrency and payments — Bitcoin, Ethereum and stablecoins enable peer-to-peer value transfer without banks',
+              'Decentralised Finance (DeFi) — lending, borrowing and trading platforms operating without traditional financial intermediaries',
+              'Supply chain management — tracking goods from origin to consumer, improving transparency and reducing fraud/counterfeiting',
+              'Healthcare — securely storing and sharing patient records across providers while maintaining data integrity and patient control',
+              'Identity management — decentralised digital identities letting individuals control their own credentials',
+              'Voting systems — experimental blockchain-based voting aims to improve transparency and reduce tampering, though challenges remain',
+              'Smart contracts and legal agreements — automating contract execution once agreed conditions are met',
+              'Education — issuing and verifying tamper-proof academic credentials and certificates',
+              'Cyber security — secure data storage, decentralised authentication, and integrity verification for IoT devices',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Advantages of Blockchain',
+            items: [
+              'Enhanced security — cryptographic hashing and decentralisation make unauthorised data tampering extremely difficult',
+              'Transparency and trust — shared, verifiable ledgers reduce reliance on a trusted intermediary',
+              'Reduced fraud — immutability and traceability make it far harder to falsify records undetected',
+              'Elimination of single points of failure — distributing data across many nodes removes the central target traditional databases present to attackers',
+              'Improved efficiency — smart contracts automate processes that previously required manual verification, reducing cost and delay',
+              'Greater traceability — every transaction is timestamped and permanently recorded, simplifying audits and compliance',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Challenges of Blockchain',
+            items: [
+              'Scalability — public blockchains process far fewer transactions per second than centralised payment systems like Visa, causing congestion and high fees at peak demand',
+              'Energy consumption — proof-of-work mining consumes significant electricity, though Proof of Stake networks have greatly reduced this',
+              'Regulatory uncertainty — laws governing crypto and blockchain assets are still evolving and vary widely between countries',
+              'Irreversibility risk — immutability is a security strength, but mistaken transactions, stolen funds or coding errors generally cannot be reversed',
+              'Smart contract vulnerabilities — bugs in contract code are permanent once deployed and have led to losses of hundreds of millions of dollars',
+              'Private key management — users are entirely responsible for safeguarding their own keys; losing one means permanently losing access, with no "forgot password" option',
+              'Interoperability — different blockchains often cannot communicate natively, complicating cross-chain transactions and data sharing',
+              '51% attacks — if a single entity gains control of the majority of a network\'s computing power (PoW) or stake (PoS), it could theoretically manipulate transaction history, though this is extremely costly on large networks',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Blockchain as a Cyber Security Tool',
+            text: 'Blockchain and cyber security intersect in two directions: blockchain as a security tool, and blockchain as a security target. Blockchain\'s core properties — decentralisation, immutability and cryptographic verification — map directly onto long-standing cyber security goals.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Blockchain-Powered Security Capabilities',
+            items: [
+              { term: 'Decentralised identity & access management', def: 'Self-sovereign identity systems where individuals control their own credentials cryptographically, reducing reliance on centralised identity databases that are common breach targets.' },
+              { term: 'Tamper-proof audit trails', def: 'Security logs, software update records and digital evidence anchored to a blockchain so any retroactive tampering is immediately detectable.' },
+              { term: 'Securing IoT devices', def: 'Authenticating the enormous number of devices in IoT networks and verifying firmware integrity without a single centralised server that, if compromised, would put every device at risk.' },
+              { term: 'DNS and domain security', def: 'Decentralised domain name systems are more resistant to the kind of centralised DNS attacks that have caused major outages in the past.' },
+              { term: 'Secure data sharing', def: 'Organisations share verified data (such as threat intelligence) across institutional boundaries without needing to fully trust each other\'s internal systems.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Blockchain as a Security Target',
+            text: 'Blockchain is not immune to attack, and the growing value secured on-chain has made it an attractive target. Ransomware, data breaches and intrusions persist across the ecosystem, and traditional blockchain security audits have struggled to keep pace with attacker sophistication — attackers increasingly target the human and infrastructural layers around the blockchain (wallets, bridges, exchanges) rather than the core protocol itself.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Attack Surfaces on Blockchain Systems',
+            items: [
+              { term: 'Smart contract exploits', def: 'Poorly written contract code remains one of the most exploited weaknesses in the blockchain ecosystem.' },
+              { term: 'Wallet and private key theft', def: 'Phishing, malware and social engineering targeting cryptocurrency wallets remain a leading cause of loss — the underlying cryptography is rarely the weak point, the user\'s key management is.' },
+              { term: 'Cross-chain bridge attacks', def: 'Bridges connecting different blockchains are a frequent target, holding large amounts of locked value while relying on more centralised or experimental security models than the chains they connect.' },
+              { term: '51% and consensus attacks', def: 'Smaller blockchains with less distributed mining or staking power remain vulnerable to attackers who can temporarily dominate the consensus process.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Quantum Computing Threat',
+            text: 'Perhaps the most significant long-term cyber security concern for blockchain is the eventual arrival of practical quantum computers. Most current blockchains rely on elliptic curve cryptography (such as ECDSA) to secure digital signatures and wallets — future quantum computers using Shor\'s algorithm may be able to break this cryptography with fewer qubits than previously estimated. In response, the industry is moving toward post-quantum cryptography (PQC), replacing vulnerable signature schemes with quantum-resistant alternatives such as lattice-based Dilithium and Falcon, though these come with trade-offs: post-quantum signatures are typically far larger, which can slow block propagation and increase storage requirements. Major networks have already begun migration roadmaps — the XRP Ledger, for example, set milestones for the first half of 2026 targeting a post-quantum transition by 2028, designing for "cryptographic agility" so the network can adopt new NIST-standardised algorithms as the landscape matures.',
+          },
+          {
+            type: 'definition',
+            heading: 'Outlook',
+            text: 'The relationship between blockchain and cyber security is likely to deepen along several lines: routine integration of zero-knowledge proofs (letting one party prove a claim is true without revealing the underlying sensitive data) into privacy and security tooling; continuous, automated smart-contract auditing rather than one-off static reviews; broader adoption of decentralised identity for authentication; and an industry-wide migration toward quantum-resistant cryptographic standards well before quantum computers become a practical threat.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Recent Developments (2026)',
+            items: [
+              { term: 'Post-Quantum Cryptography Migration', def: 'Following responsible-disclosure research from Google\'s quantum security team in early 2026 (which used a zero-knowledge proof to demonstrate quantum vulnerabilities in elliptic curve cryptography without revealing exploitable details), major blockchain ecosystems accelerated their post-quantum roadmaps, including hybrid transition models supporting both classical and post-quantum cryptography simultaneously.' },
+              { term: 'Quantum-Resistant Zero-Knowledge Proofs', def: 'Next-generation ZKP systems (zk-STARKs, lattice-based constructions) remain secure against quantum attacks, unlike older schemes depending on the discrete-logarithm assumption; new identity-centric ZK authorization frameworks aim to replace bulky post-quantum signatures with compact, cheaper-to-verify proofs.' },
+              { term: 'Real-World Asset Tokenisation', def: 'Tokenised real-world assets, including gold and other commodities, are increasingly issued on public blockchains with mechanisms for physical redemption; stablecoins remain crypto\'s most important real-world use case as regulatory clarity improves.' },
+              { term: 'AI, Blockchain & Cyber Security Convergence', def: 'AI is increasingly used to monitor blockchain networks for anomalous transaction patterns in real time, while blockchain creates tamper-evident logs of AI model decisions and data provenance — each technology reinforcing the other\'s trustworthiness.' },
+              { term: 'Enterprise-Grade Infrastructure', def: 'Blockchain development is shifting from experimental pilots toward production-grade infrastructure — hosted nodes, fast indexers, monitoring dashboards and developer APIs lower the barrier for businesses to integrate blockchain features.' },
+              { term: 'Continuous Smart Contract Security', def: 'Security researchers are pushing the industry away from static, one-time audits toward continuous, automated, always-on monitoring of deployed contracts, blending algorithmic anomaly detection with ongoing expert review.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Conclusion',
+            text: 'Blockchain technology has matured from a niche cryptographic experiment into a foundational piece of digital infrastructure with direct and growing relevance to cyber security. Its core properties — decentralisation, immutability, transparency and cryptographic integrity — make it a powerful tool for identity management, tamper-evident logging and trust between organisations that do not otherwise trust each other. At the same time it introduces its own attack surface, from smart contract vulnerabilities to the looming threat of quantum computing. For students of cyber security, blockchain is best understood not as a silver bullet but as one more tool in a broader security architecture, whose strengths and weaknesses must be evaluated as rigorously as any other technology.',
+          },
+        ],
+      },
+      {
+        number: '5',
+        title: 'Cloud Native Security',
+        sections: [],
+      },
+      {
+        number: '6',
+        title: 'Privacy Enhancing Technologies (PET)',
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 6 research project — by Mitchel Ifiok Nkan, Oto-abasi Effiok Offiong, Timothy David Richard, Felix Uwem Umoesen, Etim Ebenezer Mfon, Essien Emmanuel Festus, Essien Michael John, Ekpo Ebenezer Ime, Umoh Uyaiabasi Anthony and Igwechima Grace Chiamaka. An assigned project topic for CYB 222, examining Privacy Enhancing Technologies (PET) — mechanisms, applications and challenges in the modern digital ecosystem.',
+          },
+          {
+            type: 'definition',
+            heading: 'Abstract',
+            text: 'Privacy Enhancing Technologies (PETs) are a broad class of technical tools and methodologies designed to protect personal information while enabling useful data processing and communication. As digital systems increasingly mediate every aspect of modern life, how personal data is collected, processed and protected has become central to cybersecurity, law and human rights discourse. PETs represent a paradigm shift from reactive data protection to proactive, mathematically provable privacy guarantees. They are classified into three broad categories: Hard PETs (cryptographic mechanisms — Differential Privacy, Homomorphic Encryption, Zero-Knowledge Proofs, Secure Multi-Party Computation, Federated Learning), Soft PETs (policy-technical hybrids — anonymization, consent management, Self-Sovereign Identity), and Network PETs (communication anonymity tools — Tor, VPNs, Mix Networks).',
+          },
+          {
+            type: 'definition',
+            heading: 'What Is a Privacy Enhancing Technology?',
+            text: 'PETs are technical tools, systems and methodologies designed to protect personal information by minimizing data collection, limiting data exposure, and enabling users to control their own digital identities — while still allowing useful data processing and communication. The term was first coined in 1995, in a report co-authored by the Dutch Data Protection Authority and the Office of the Information & Privacy Commissioner of Ontario, Canada.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Three Foundational Principles of PET',
+            items: [
+              'Data Minimization — collect only what is strictly necessary for the stated purpose; nothing unnecessary is stored or exposed',
+              'User Control — individuals manage their own identity and decide what data is shared, retaining agency even after data has reached legitimate parties',
+              'Privacy by Design — privacy built into systems from the ground up, not bolted on later',
+            ],
+          },
+          {
+            type: 'note',
+            text: "Think of a landlord who asks for your full bank statement, employer letter and family history just to rent you a room, versus one who only asks whether you can pay this month's rent and keeps that answer to himself. Traditional security is the second landlord locking the gate so no burglar gets in — but he can still be the first landlord, hoarding far more of your information than the job requires. PET is the discipline of being both: locking the gate AND never asking for more than the room needs.",
+          },
+          {
+            type: 'table',
+            heading: 'Traditional Security vs Privacy Enhancing Technology',
+            headers: ['Dimension', 'Traditional Security', 'Privacy Enhancing Technology'],
+            rows: [
+              ['Protects data from', 'External attackers only', 'Even the service provider itself'],
+              ['Identity model', 'Identity-based authentication', 'Anonymous or pseudonymous access'],
+              ['Core mechanism', 'Access control', 'Data minimization — only necessary data is ever collected'],
+              ['Encryption scope', 'In transit and at rest', 'End-to-end unlinkability, mathematically guaranteed'],
+              ['Guiding model', 'CIA Triad (Confidentiality, Integrity, Availability)', 'CIA + Privacy, with provable mathematical guarantees'],
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Security vs Privacy — and Privacy by Design',
+            text: 'Security is a property of a system — how well it defends against unauthorised access, modification or destruction of data. Privacy is a property of data processing — whether that processing respects the reasonable expectations of the individuals whose data is used. A highly secure system can still be deeply privacy-invasive: a government database with state-of-the-art encryption may still violate privacy if it collects more data than necessary or links records across departments without consent. Privacy by Design (Ann Cavoukian, 1995) argues privacy must be embedded into system architecture from the start, resting on seven principles: proactive not reactive; privacy as the default setting; privacy embedded into design; full functionality; end-to-end security; visibility and transparency; and respect for user privacy.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Classification of PETs',
+            items: [
+              { term: 'Hard PETs', def: 'Cryptographic/mathematical mechanisms with provably strong privacy guarantees, not contingent on organisational trust — Differential Privacy, Homomorphic Encryption, Zero-Knowledge Proofs, Secure Multi-Party Computation, Federated Learning.' },
+              { term: 'Soft PETs', def: 'Policy + technical hybrids that combine technical controls with organisational policy and law — Anonymization & Pseudonymization, Consent Management Platforms, Access Control Frameworks, Self-Sovereign Identity, Data Minimization Policies.' },
+              { term: 'Network PETs', def: 'Communication-layer tools that anonymise identity and location as data traverses networks — Onion Routing (Tor), VPNs, Mix Networks, Private Information Retrieval, Anonymous Credentials.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Hard PET #1 — Differential Privacy (DP)',
+            text: 'Differential Privacy adds calibrated statistical noise to datasets, ensuring that including or excluding any single individual’s data does not significantly affect query results. Introduced by Cynthia Dwork in 2006. Formally, a randomized mechanism M satisfies ε-differential privacy if for any two neighboring datasets D and D’ differing by exactly one record, and for any output set S: Pr[M(D) ∈ S] ≤ e^ε × Pr[M(D’) ∈ S]. A smaller epsilon gives stronger privacy but reduces data utility.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Types of Differential Privacy',
+            items: [
+              { term: 'Global DP', def: 'Noise added at the aggregator/server — users trust the server to apply noise faithfully before publishing results.' },
+              { term: 'Local DP', def: 'Noise added on-device before data leaves the user’s device — Apple’s approach since 2016; eliminates the need to trust a central aggregator.' },
+              { term: 'Shuffle DP', def: 'Local DP combined with shuffling to reduce the noise requirement while maintaining strong privacy guarantees.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Real-World Differential Privacy Deployments',
+            items: [
+              'Apple — iOS keyboard & emoji analytics collected using Local DP since 2016',
+              'Google — Chrome RAPPOR system for browser behaviour statistics',
+              'US Census — DP applied to all published tables from the 2020 Census',
+              'Healthcare — clinical trial data sharing, preserving individual patient privacy while enabling population-level research',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Homomorphic Encryption (HE)',
+            text: 'Homomorphic Encryption allows computation on encrypted data without decrypting it first — the result, when decrypted, matches the result of the same operations on plaintext. Transformative for cloud computing and outsourced data processing. Use case: a hospital sends encrypted patient data to a cloud AI model and receives a diagnosis — the cloud never sees raw data. Libraries such as Microsoft SEAL, IBM HElib and OpenFHE are making it progressively more accessible.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Types of Homomorphic Encryption',
+            items: [
+              { term: 'PHE (Partially HE)', def: 'Supports either addition or multiplication, but not both simultaneously.' },
+              { term: 'SHE (Somewhat HE)', def: 'Supports a limited number of mixed operations.' },
+              { term: 'FHE (Fully HE)', def: 'Supports any arbitrary computation — most powerful but very computationally expensive, with overheads of 100x to 10,000x versus plaintext computation.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Zero-Knowledge Proofs (ZKP)',
+            text: 'A Zero-Knowledge Proof lets a prover convince a verifier that a statement is true without revealing any information beyond the fact of its truth. Introduced by Goldwasser, Micali and Rackoff (1985). Classic example: proving you are over 18 to a website without revealing your exact date of birth or showing your ID card — the verifier gets mathematically confirmed proof but learns nothing else.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Real-World ZKP Applications',
+            items: [
+              'Zcash — shielded cryptocurrency transactions; amount, sender and receiver all hidden via zk-SNARKs',
+              'zkSync — Ethereum Layer 2 privacy scaling protocol',
+              'W3C DID — decentralised digital identity systems built on Verifiable Credentials and Decentralised Identifiers',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Federated Learning',
+            text: 'Federated Learning is a distributed machine learning paradigm in which model training occurs across many devices or nodes, each holding local data that never leaves the device or gets centralised — only model parameters (gradients) are aggregated by a central server. Used by Apple (Siri), Google (Gboard) and healthcare AI research institutions. Key advantage: protection against breaches at a central server and regulatory compliance with data localisation requirements. Main limitation: vulnerability to model inversion and gradient leakage attacks, often requiring additional DP noise to mitigate.',
+          },
+          {
+            type: 'termlist',
+            heading: 'How Federated Learning Works',
+            items: [
+              { term: '1 · Global Model', def: 'The server sends an initial model to all participating devices.' },
+              { term: '2 · Local Training', def: 'Each device trains the model exclusively on its own local data.' },
+              { term: '3 · Gradient Sharing', def: 'Devices send only model updates (gradients), not raw data, back to the server.' },
+              { term: '4 · Aggregation', def: 'The server aggregates all updates to produce an improved global model.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Secure Multi-Party Computation (SMPC)',
+            text: 'SMPC enables multiple parties to jointly compute a function over their combined inputs without any party learning the individual inputs of the others. Rooted in Yao’s Millionaires’ Problem (1982): two billionaires determine who is richer without either revealing their actual net worth to the other.',
+          },
+          {
+            type: 'bullets',
+            heading: 'SMPC Applications',
+            items: [
+              'Privacy-preserving financial audits across institutions',
+              'Federated fraud detection networks — multiple banks train a fraud model jointly without sharing raw customer records',
+              'Joint medical research — no individual patient data is shared across hospital boundaries',
+              'Cryptographically secure electronic voting — vote tallying verifiable without revealing individual votes',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Soft PETs',
+            items: [
+              { term: 'Anonymization', def: 'Permanently removes identifiers so data cannot be re-linked to any individual; successful anonymisation falls outside GDPR/NDPA scope, but re-identification attacks using auxiliary information show naive anonymisation is often insufficient.' },
+              { term: 'Pseudonymization', def: 'Replaces direct identifiers with pseudonyms while preserving the ability to re-link records using a separately held key — GDPR Article 4(5) recognises it as a technical measure that reduces risk while keeping analytical utility.' },
+              { term: 'Data Masking', def: 'Dynamically obscures sensitive data fields — e.g. showing only the last four digits of a card number, or masking patient names for a billing officer.' },
+              { term: 'Consent Management Platforms (CMPs)', def: 'Technical systems that record, manage and enforce user consent under GDPR/NDPA — cookie consent banners are the most visible example.' },
+              { term: 'Self-Sovereign Identity (SSI)', def: 'Built on W3C Verifiable Credentials and Decentralised Identifiers; users own and fully control their credentials, issuing them on demand without a central identity provider, enabling ZKP-based selective disclosure.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Network Privacy Tools',
+            items: [
+              { term: 'Tor (Onion Routing)', def: 'Routes traffic through multiple encrypted relay nodes; each node knows only the previous and next hop, never both source and destination — anonymising IP and location.' },
+              { term: 'VPN', def: 'Encrypts all traffic between a user’s device and a VPN server, masking the user’s IP from websites, ISPs and network-level surveillance.' },
+              { term: 'Mix Networks', def: 'Collect messages from multiple senders, shuffle and re-encrypt them, then forward in a different order — preventing traffic-analysis correlation of input/output flows.' },
+              { term: 'Private Information Retrieval (PIR)', def: 'Cryptographic protocols letting a user query a database without the server learning which record was retrieved.' },
+              { term: 'Anonymous Credentials', def: 'Prove attributes (age, nationality, membership) without disclosing the holder’s identity.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Legal & Regulatory Frameworks',
+            headers: ['Regulation', 'Region', 'Core Privacy Principle', 'Direct PET Mandate'],
+            rows: [
+              ['GDPR 2018', 'EU', 'Privacy by Design (Art. 25)', 'Pseudonymization and encryption explicitly required'],
+              ['NDPA 2023', 'Nigeria', 'Appropriate technical measures', 'No specific PET prescribed — principle-based approach'],
+              ['CCPA 2020', 'California, USA', 'Right to opt-out of data sale', 'Reasonable security measures — no specific PET required'],
+              ['HIPAA', 'USA Healthcare', 'PHI protection', 'Safe Harbor and Expert Determination de-identification methods'],
+              ['ISO/IEC 27701', 'International', 'Privacy Information Management', 'Implementation guidance for GDPR/NDPA compliance'],
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'GDPR and Nigeria’s NDPA 2023',
+            text: 'GDPR Article 5 establishes data minimization; Article 25 mandates Privacy by Design and by Default, explicitly requiring pseudonymization and other technical measures; Article 17 grants the right to erasure; Article 20 establishes data portability. Nigeria’s NDPA 2023 (NITDA) requires appropriate technical measures, Data Protection Impact Assessments for high-risk processing, and cross-border transfer restrictions — directly mandating PET-equivalent controls in principle. Its critical gap: unlike GDPR Article 25, the NDPA does not prescribe particular PET methods, creating both a compliance challenge and an innovation opportunity for PET adoption in Nigeria.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Real-World Applications Across Sectors',
+            items: [
+              'Healthcare — Federated Learning enabled NHS England + Google DeepMind to train an eye-disease detection model across hospital trusts without centralising patient records; DP applied to clinical trial data sharing',
+              'Finance — SMPC enables cross-bank fraud detection on combined transaction data; Homomorphic Encryption is piloted for privacy-preserving credit scoring on encrypted financial profiles',
+              'E-Government — Estonia’s e-Residency uses cryptographic credentials for identity proof and document signing without revealing unnecessary personal information; ZKPs are emerging for next-generation national identity systems',
+              'Mobile devices — Apple’s iOS uses Local DP for emoji/keyboard analytics; Google Gboard’s next-word prediction is trained via Federated Learning',
+              'COVID-19 contact tracing — the Google/Apple Exposure Notification API computes exposure locally with rotating pseudonymous identifiers; no location data or contact lists are ever transmitted to a server',
+              'Blockchain — Zcash deploys zk-SNARKs for shielded transactions; Monero uses Ring Signatures and stealth addresses for similar anonymity at consumer scale',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Case Study — Apple’s Differential Privacy',
+            text: 'In 2016, Apple became the first major tech company to deploy Local Differential Privacy at consumer scale — collecting iOS behavioural statistics without ever compromising individual user privacy, bridging academic theory and consumer technology.',
+          },
+          {
+            type: 'termlist',
+            heading: 'The Five-Stage Pipeline',
+            items: [
+              { term: 'Stage 1 — User Device', def: 'Raw data is generated on-device (keystrokes, emoji usage, Safari crashes).' },
+              { term: 'Stage 2 — Noise Added', def: 'DP noise is applied on-device before any data leaves the device.' },
+              { term: 'Stage 3 — Data Sent', def: 'Only noisy, privacy-protected data is transmitted to Apple servers.' },
+              { term: 'Stage 4 — Aggregation', def: 'Apple aggregates millions of individually noisy records.' },
+              { term: 'Stage 5 — Insight', def: 'Useful population-level trends are extracted from the aggregated noisy data.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Key Technical Facts',
+            items: [
+              'Applied to emoji usage frequency, QuickType keyboard predictions, Safari crash reports and Health app trends',
+              'Privacy guarantee: even Apple engineers cannot determine any individual’s specific behaviour from the transmitted data',
+              'Technical approach: Local DP using randomized response protocols (CMS, HCMS, PCMS, SFP), noise added on-device before transmission',
+              'Industry impact: first major commercial Local DP deployment at global consumer scale, catalysing adoption by Google (RAPPOR, TensorFlow Privacy) and the US Census Bureau (2020 Census)',
+            ],
+          },
+          {
+            type: 'note',
+            text: "Researchers at Google and UC Berkeley found Apple's real-world epsilon values may be higher (weaker) than formally claimed, and that composing many noisy reports from the same device over time erodes the effective privacy guarantee — the fundamental tension between utility (lower epsilon = less useful data) and privacy (higher epsilon = weaker guarantee). Discussion question worth sitting with: could this Local DP model apply to Nigeria's NIN and BVN enrolment data analytics, and what would a lower-resource context require to adapt it?",
+          },
+          {
+            type: 'termlist',
+            heading: 'Technical Challenges',
+            items: [
+              { term: 'Performance overhead', def: 'FHE is 100x–1,000x slower than plaintext computation; every PET layer of cryptographic protection adds latency, challenging real-time use.' },
+              { term: 'Accuracy trade-offs', def: 'DP noise degrades accuracy at high epsilon values, particularly problematic for small populations or rare events such as medical research.' },
+              { term: 'Implementation complexity', def: 'ZKP and SMPC require advanced cryptographic expertise; incorrect implementation can silently eliminate the privacy guarantee entirely.' },
+              { term: 'Re-identification risk', def: 'The Netflix Prize dataset (2007/2008) was partially de-anonymised by correlating it with public information — naive anonymisation alone is insufficient.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Adoption Challenges',
+            items: [
+              { term: 'Low PET awareness', def: 'Particularly in developing economies including Nigeria, most organisations have limited awareness of PET beyond basic encryption.' },
+              { term: 'High implementation costs', def: 'Advanced PETs such as FHE and ZKP-based systems are unaffordable for most Nigerian SMEs without substantial external support.' },
+              { term: 'Absence of local expertise', def: 'PET expertise is largely absent from local tech ecosystems, creating a significant skills gap.' },
+              { term: 'Regulatory ambiguity', def: 'NDPA 2023 lacks specific PET mandates, reducing urgency and allowing compliance claims without meaningful technical implementation.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Ethical Challenges',
+            items: [
+              { term: 'Dual-use technology', def: 'Tor, originally built by the US Naval Research Laboratory, serves both legitimate privacy-sensitive uses (journalism, activism, abuse-victim support) and illegal marketplaces — strong anonymisation is inevitably used for both.' },
+              { term: 'Tension with law enforcement', def: 'The privacy vs. law-enforcement-access debate remains unresolved; government demands for encryption "backdoors" threaten to undermine PET security for everyone.' },
+              { term: 'Bias in synthetic data', def: 'Synthetic DP data may amplify pre-existing biases in the original dataset, adding a fairness concern alongside the privacy benefit.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Nigerian Context — Recommendations',
+            items: [
+              'Universities (including UniUyo) — integrate PET into cybersecurity curricula: Differential Privacy theory, Federated Learning frameworks and ZKP fundamentals as standard course content',
+              'NITDA and policymakers — issue clear, sector-specific PET implementation guidelines under the NDPA 2023, starting with high-risk sectors (healthcare, fintech, government identity systems)',
+              'Nigerian fintechs — adopt Federated Learning for cross-institutional fraud detection, beginning with sandbox collaborations between two or three willing partner banks',
+              'Government digital identity programmes — commission a technical feasibility study for ZKP-based selective disclosure in the NIN and BVN systems',
+              'Research community — establish PET research centres at Nigerian universities adapted for African contexts: lower computational resources, mobile-first architectures, multilingual data environments',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Conclusion',
+            text: 'PET represents the frontier where cryptography, law and human rights converge. Understanding PET is not optional for cybersecurity professionals — it is the foundation of building trustworthy digital systems in an era where data is both the most valuable and the most abused resource. PET provides mathematical privacy guarantees beyond what traditional security offers, protecting individuals even from the systems that legitimately hold their data. DP, HE, ZKP, Federated Learning and SMPC are the core Hard PETs to master; GDPR and Nigeria’s NDPA 2023 give clear legal motivation for adoption; and Nigeria’s adoption gaps present real research and innovation opportunities for the next generation of cybersecurity professionals.',
+          },
+        ],
+      },
+      {
+        number: '7',
+        title: 'Automated Vulnerability Research',
+        sections: [],
+      },
+      {
+        number: '8',
+        title: 'Agentic AI',
+        sections: [],
+      },
+      {
+        number: '9',
+        title: 'Deepfake Detection',
+        sections: [],
+      },
     ],
     quiz: [
       { question: "Which quantum algorithm breaks RSA and ECC by solving factorization and discrete logarithms in polynomial time?", options: ["Grover's Algorithm", "Shor's Algorithm", "Mosca's Theorem", "The Quantum Fourier Sieve"], correctIndex: 1, explanation: "Shor's Algorithm (1994) solves both integer factorization and the discrete logarithm problem in polynomial time, breaking RSA, ECC and Diffie-Hellman." },
@@ -3196,6 +3711,41 @@ export const courses = [
       { question: "Why is the 'desk-walk takeover' mitigated by behavioral biometrics?", options: ["It simply enforces the use of a much longer and more complex password at the initial login screen only", "It disables the mouse", "It detects the new operator's abnormal typing/cursor profile within seconds and locks the terminal", "It only checks at login"], correctIndex: 2, explanation: "Continuous monitoring spots the distinct cadence of an unauthorised operator at an unlocked desk and locks the workstation in seconds." },
       { question: "How do behavioral systems support GDPR/CCPA compliance through data minimization?", options: ["By storing raw keystrokes", "By openly sharing all of the collected raw data with various third parties", "By encrypting only passwords", "By recording abstract timing deltas and discarding raw key values"], correctIndex: 3, explanation: "Systems capture timing patterns (e.g. dwell = 42ms) rather than literal characters, avoiding accidental harvesting of passwords or messages." },
       { question: "Which technique maximises resilience by combining several behavioral channels so a drift in one is offset by others?", options: ["Multi-modal biometric fusion", "Basic single-factor matching only", "Password rotation", "Disabling sensors"], correctIndex: 0, explanation: "Multi-modal fusion samples keystroke, mouse, device and context streams together, so a temporary change in one channel does not break authentication." },
+      { question: "What is a Privacy Enhancing Technology (PET)?", options: ["A firewall configuration standard", "Technical tools/methodologies that protect personal information while still enabling useful data processing", "A type of malware scanner", "A password complexity policy"], correctIndex: 1, explanation: "PETs minimize data collection, limit exposure, and give users control over their identity, while still allowing useful data processing and communication." },
+      { question: "What is the key difference between security and privacy as properties of a system?", options: ["They are the same thing", "Security is a property of data processing; privacy is a property of the system", "Security is a property of the system; privacy is a property of data processing", "Privacy only applies to encrypted systems"], correctIndex: 2, explanation: "Security describes how well a system defends against unauthorised access; privacy describes whether data processing respects the reasonable expectations of the individuals involved." },
+      { question: "Which of the following is one of PET's three foundational principles?", options: ["Maximum data collection", "Data Minimization", "Perimeter-only defence", "Centralised identity control"], correctIndex: 1, explanation: "Data Minimization — collecting only what is strictly necessary — is one of PET's three foundational principles, alongside User Control and Privacy by Design." },
+      { question: "Into which three categories does this seminar classify PETs?", options: ["Hard, Soft, and Network PETs", "Public, Private, and Hybrid PETs", "Free, Paid, and Enterprise PETs", "Legal, Technical, and Physical PETs"], correctIndex: 0, explanation: "Hard PETs (cryptographic), Soft PETs (policy-technical hybrids), and Network PETs (communication anonymity tools) form the three-category taxonomy used." },
+      { question: "Who introduced Differential Privacy, and in what year?", options: ["Cynthia Dwork, 2006", "Ann Cavoukian, 1995", "Shafi Goldwasser, 1985", "Andrew Yao, 1982"], correctIndex: 0, explanation: "Cynthia Dwork introduced Differential Privacy in 2006, a mathematical framework adding calibrated noise to protect individual records in a dataset." },
+      { question: "In Differential Privacy, what does a smaller epsilon (ε) value mean?", options: ["Weaker privacy but higher utility", "Stronger privacy but reduced data utility", "No effect on privacy or utility", "Faster query processing only"], correctIndex: 1, explanation: "A smaller epsilon tightens the bound Pr[M(D) ∈ S] ≤ e^ε × Pr[M(D') ∈ S], giving stronger privacy at the cost of noisier, less useful results." },
+      { question: "Which type of Differential Privacy adds noise on-device before data ever leaves the user, as used by Apple since 2016?", options: ["Global DP", "Shuffle DP", "Local DP", "Aggregate DP"], correctIndex: 2, explanation: "Local DP applies noise on-device before transmission, eliminating the need to trust a central aggregator — Apple's approach since 2016." },
+      { question: "What does Homomorphic Encryption uniquely allow?", options: ["Faster key exchange over TLS", "Computation directly on encrypted data without decrypting it first", "Permanent deletion of encryption keys", "Passwordless login via biometrics"], correctIndex: 1, explanation: "Homomorphic Encryption allows operations on ciphertext whose decrypted result matches the same operations performed on plaintext." },
+      { question: "Which type of Homomorphic Encryption supports arbitrary computation but carries the heaviest performance overhead (100x–10,000x)?", options: ["PHE (Partially HE)", "SHE (Somewhat HE)", "FHE (Fully HE)", "Standard AES encryption"], correctIndex: 2, explanation: "FHE supports any arbitrary computation, unlike PHE (one operation type) or SHE (limited mixed operations), at the cost of very heavy overhead." },
+      { question: "A Zero-Knowledge Proof allows a prover to convince a verifier of a statement's truth by:", options: ["Revealing the full underlying data", "Sharing an encryption key", "Revealing nothing beyond the fact that the statement is true", "Requiring a trusted third-party escrow"], correctIndex: 2, explanation: "ZKPs (Goldwasser, Micali & Rackoff, 1985) prove a statement — e.g. being over 18 — without revealing any information beyond its truth." },
+      { question: "In Federated Learning, what is sent back to the central server after local training?", options: ["The user's raw personal data", "Only model updates (gradients), not raw data", "A copy of the entire local dataset", "The device's IP address and location"], correctIndex: 1, explanation: "Devices train on local data and share only gradients/model updates, which the server aggregates into an improved global model." },
+      { question: "Secure Multi-Party Computation (SMPC) is rooted in which classic problem?", options: ["Yao's Millionaires' Problem (1982)", "The Byzantine Generals Problem", "The Halting Problem", "Shor's factoring problem"], correctIndex: 0, explanation: "SMPC traces to Andrew Yao's 1982 Millionaires' Problem: two billionaires determine who is richer without revealing their actual net worth." },
+      { question: "Which Soft PET replaces direct identifiers with a reversible substitute, using a separately held key to re-link records if needed?", options: ["Anonymization", "Pseudonymization", "Data masking", "Federated Learning"], correctIndex: 1, explanation: "Pseudonymization replaces identifiers with pseudonyms while preserving re-linkage via a separately held key, per GDPR Article 4(5)." },
+      { question: "How does Tor (Onion Routing) protect user anonymity?", options: ["By encrypting only the final destination server", "Each relay node knows only the previous and next hop, never both source and destination", "By routing all traffic through a single trusted VPN server", "By deleting browser cookies automatically"], correctIndex: 1, explanation: "Tor routes traffic through multiple encrypted relays where no single node can see both who is asking and what they are asking for." },
+      { question: "Under GDPR, which article mandates Privacy by Design and by Default?", options: ["Article 5", "Article 17", "Article 20", "Article 25"], correctIndex: 3, explanation: "GDPR Article 25 mandates Privacy by Design and by Default, explicitly requiring pseudonymization and other technical measures." },
+      { question: "What is the key regulatory gap in Nigeria's NDPA 2023 compared to GDPR Article 25?", options: ["NDPA has no privacy law at all", "NDPA does not prescribe specific PET methods, unlike GDPR's explicit technical mandates", "NDPA bans all forms of encryption", "NDPA only applies to government agencies"], correctIndex: 1, explanation: "NDPA 2023 requires 'appropriate technical measures' in principle but, unlike GDPR Article 25, does not prescribe particular PET methods." },
+      { question: "In Apple's Local Differential Privacy pipeline, at which stage is noise added?", options: ["After aggregation on Apple's servers", "On-device, before any data leaves the device", "During data transmission over the network", "Only when a user opts in via settings"], correctIndex: 1, explanation: "Stage 2 of Apple's five-stage pipeline adds DP noise on-device, before the noisy (not raw) data is ever transmitted to Apple's servers." },
+      { question: "What did Google/UC Berkeley researchers find in their critical analysis of Apple's Differential Privacy deployment?", options: ["Apple's epsilon values may be higher (weaker) than formally claimed", "Apple's implementation had no privacy protection at all", "Apple's DP noise made the data completely useless", "Apple never actually deployed Local DP"], correctIndex: 0, explanation: "Researchers suggested Apple's real-world epsilon values may provide weaker guarantees than claimed, and that repeated reporting over time erodes the effective privacy guarantee." },
+      { question: "What did the 2007/2008 Netflix Prize dataset incident demonstrate about anonymisation?", options: ["Anonymised data can be partially de-anonymised by correlating it with public information", "Anonymisation is mathematically impossible to break", "Netflix never anonymised its data", "Homomorphic Encryption fully prevents re-identification"], correctIndex: 0, explanation: "Researchers Narayanan and Shmatikov showed 'anonymised' Netflix data could be partially de-anonymised via auxiliary public information, exposing naive anonymisation's limits." },
+      { question: "Why is Tor described as a 'dual-use technology' in the ethical challenges of PET?", options: ["It only works on mobile devices", "It serves both legitimate privacy uses (journalism, activism) and illegal marketplaces", "It requires two separate licenses to operate", "It doubles internet bandwidth usage"], correctIndex: 1, explanation: "Strong anonymisation tools like Tor inevitably serve both beneficial purposes (journalism, activism, abuse-victim support) and harmful ones (illegal marketplaces)." },
+      { question: "Which recommendation is proposed for Nigerian fintechs to advance PET adoption?", options: ["Avoid all forms of encryption to reduce cost", "Adopt Federated Learning for cross-institutional fraud detection via sandbox bank collaborations", "Wait for GDPR to become law in Nigeria before acting", "Outsource all customer data storage to unregulated third parties"], correctIndex: 1, explanation: "The seminar recommends Nigerian fintechs begin sandbox collaborations between a few partner banks to adopt Federated Learning for joint fraud detection." },
+      { question: "What is a blockchain, at its core?", options: ["A single centralized database managed by one bank", "A distributed, shared, continuously synchronised ledger recorded across many computers", "A type of firewall for cryptocurrency exchanges", "A password manager for digital wallets"], correctIndex: 1, explanation: "A blockchain records transactions across many computers such that no record can be altered retroactively without altering every subsequent record and network agreement." },
+      { question: "Which 2008 whitepaper combined peer-to-peer networking, cryptographic hashing and proof-of-work to solve the double-spending problem?", options: ["Ethereum Yellow Paper", "\"Bitcoin: A Peer-to-Peer Electronic Cash System\" by Satoshi Nakamoto", "Bit Gold by Nick Szabo", "The Byzantine Generals Problem paper"], correctIndex: 1, explanation: "Satoshi Nakamoto's 2008 whitepaper combined these ideas into a coherent system, and the Bitcoin network went live in January 2009 with the Genesis Block." },
+      { question: "What innovation did Ethereum introduce that transformed blockchain into a programmable platform?", options: ["Proof of Work mining", "Smart contracts", "The Merkle root", "51% attack resistance"], correctIndex: 1, explanation: "Vitalik Buterin's Ethereum (2013–2015) introduced smart contracts — self-executing code on the blockchain — enabling decentralised applications." },
+      { question: "What physically 'chains' blocks together in a blockchain?", options: ["The nonce alone", "A shared username across all nodes", "The previous block's cryptographic hash, stored in the next block", "A centralized timestamp server"], correctIndex: 2, explanation: "Each block stores the hash of the prior block; changing any block changes its hash and breaks the link to every subsequent block." },
+      { question: "Which property of cryptographic hash functions means changing a single character of input produces a completely different hash?", options: ["Determinism", "Avalanche effect", "One-way function", "Nonce adjustment"], correctIndex: 1, explanation: "The avalanche effect ensures even tiny input changes cascade into a completely different output hash, making tampering immediately detectable." },
+      { question: "In Proof of Work (PoW), what must an attacker control to successfully rewrite transaction history?", options: ["More than 51% of the network's computing power", "A single node's password", "The Merkle root of one block", "The DNS server for the network"], correctIndex: 0, explanation: "A '51% attack' requires an attacker to control the majority of the network's mining power, making it extremely costly on large networks like Bitcoin." },
+      { question: "How does Proof of Stake (PoS) differ from Proof of Work (PoW)?", options: ["PoS requires more electricity than PoW", "PoS has validators stake cryptocurrency as collateral instead of competing with computing power", "PoS eliminates the need for any consensus mechanism", "PoS is only used by private blockchains"], correctIndex: 1, explanation: "PoS validators lock up cryptocurrency as collateral and lose it if they act maliciously, making it far more energy-efficient than PoW mining." },
+      { question: "Which type of blockchain is open to anyone to join, read from, and submit transactions to, without permission?", options: ["Private blockchain", "Consortium blockchain", "Public blockchain", "Hybrid blockchain"], correctIndex: 2, explanation: "Public blockchains like Bitcoin and Ethereum offer maximum decentralisation and transparency but are slower and more resource-intensive." },
+      { question: "Which blockchain type is controlled by a pre-selected group of organisations, common in banking alliances?", options: ["Public blockchain", "Consortium (federated) blockchain", "Private blockchain", "None of the above"], correctIndex: 1, explanation: "Consortium blockchains balance decentralisation with the efficiency and governance control needed for inter-company collaboration." },
+      { question: "How can blockchain strengthen IoT device security?", options: ["By replacing all IoT hardware with new devices", "By authenticating devices and verifying firmware integrity without a single centralised server as a point of failure", "By disabling encryption on IoT networks", "By requiring all IoT devices to mine cryptocurrency"], correctIndex: 1, explanation: "Blockchain can authenticate the many devices in an IoT network without relying on one centralised server whose compromise would put every device at risk." },
+      { question: "According to the report, where do attackers increasingly focus their efforts in the blockchain ecosystem?", options: ["The core cryptographic protocol itself", "The human and infrastructural layers — wallets, bridges, and exchanges", "Government regulatory bodies", "Academic research papers"], correctIndex: 1, explanation: "Attackers increasingly target wallets, bridges and exchanges rather than the underlying protocol, since these layers are often the weaker link." },
+      { question: "Why are cross-chain bridges a frequent attack target?", options: ["They contain no valuable assets", "They hold large amounts of locked value while often relying on more centralised or experimental security models", "They are immune to smart contract bugs", "They only connect private blockchains"], correctIndex: 1, explanation: "Bridges connecting different blockchains hold significant locked value but often use less mature security models than the chains they connect." },
+      { question: "What long-term cryptographic threat does the report identify for blockchain's elliptic curve cryptography (ECDSA)?", options: ["Classical brute-force attacks", "Shor's algorithm on future quantum computers", "SQL injection", "DDoS flooding of mining pools"], correctIndex: 1, explanation: "Future quantum computers running Shor's algorithm may break the elliptic curve cryptography protecting digital signatures and wallets, motivating a shift to post-quantum cryptography." },
+      { question: "What design principle is the XRP Ledger following in its post-quantum migration roadmap?", options: ["Committing permanently to a single quantum-resistant algorithm", "\"Cryptographic agility\" — the ability to adopt new NIST-standardised algorithms as the landscape matures", "Ignoring quantum computing until it becomes an active threat", "Abandoning blockchain entirely in favour of centralized databases"], correctIndex: 1, explanation: "The XRP Ledger is designing for cryptographic agility so the network can adopt new NIST-standardised PQC algorithms without committing to just one scheme." },
     ],
   },
   {
