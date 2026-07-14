@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink } from 'lucide-react';
 import MoscaCalculator from './MoscaCalculator';
+import CodeBlock from './CodeBlock';
 import RichText from './RichText';
 import { useApiAvailability } from '../utils/apiClient';
 import {
@@ -177,10 +178,10 @@ function ComparisonTable({ title, headers, rows }) {
 
 function CaseStudy({ title, prompt, tasks }) {
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-5">
+    <div className="bg-ember-500/10 border border-ember-500/25 rounded-xl p-5 mb-5">
       <div className="flex items-center gap-2 mb-2">
-        <AlertTriangle size={15} className="text-amber-600 shrink-0" />
-        <span className="text-xs font-mono font-bold text-amber-700 uppercase tracking-wider">Case Study / Assignment</span>
+        <AlertTriangle size={15} className="text-ember-500 shrink-0" />
+        <span className="text-xs font-mono font-bold text-ember-500 uppercase tracking-wider">Case Study / Assignment</span>
       </div>
       {title && <h4 className="font-display font-bold text-ink mb-2">{title}</h4>}
       {prompt && <p className="text-sm text-coffee-700 mb-3 leading-relaxed">{prompt}</p>}
@@ -188,7 +189,7 @@ function CaseStudy({ title, prompt, tasks }) {
         <ol className="space-y-1.5">
           {tasks.map((task, i) => (
             <li key={i} className="flex gap-2.5 text-sm text-coffee-700">
-              <span className="font-mono font-bold text-amber-600 shrink-0">{i + 1}.</span>
+              <span className="font-mono font-bold text-ember-500 shrink-0">{i + 1}.</span>
               {task}
             </li>
           ))}
@@ -377,6 +378,7 @@ function Section({ section, simplifyReady, context }) {
       {section.type === 'text' && <p className="text-sm text-coffee-700 leading-relaxed mb-3">{section.text}</p>}
       {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
       {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} />}
+      {section.type === 'code' && <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />}
       {section.type === 'mosca' && <MoscaCalculator />}
       {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
     </div>
