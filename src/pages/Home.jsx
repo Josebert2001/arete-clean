@@ -69,9 +69,9 @@ function OnboardingBanner() {
 
 export default function Home() {
   const navigate = useNavigate();
-  // Picking a level here routes through the same soft sign-in prompt as the
-  // Course Hub; signed-in students and confirmed guests go straight to the year.
-  const { gateLevel, requestLevel, continueAsGuest, gateSignIn, closeGate } =
+  // Picking a level here routes through the same sign-in prompt as the
+  // Course Hub; signed-in students go straight to the year.
+  const { gateLevel, requestLevel, gateSignIn, closeGate } =
     useLevelGate((level) => navigate(`/courses?level=${level}`));
 
   return (
@@ -207,7 +207,6 @@ export default function Home() {
         <LevelGatePrompt
           level={gateLevel}
           onSignIn={gateSignIn}
-          onGuest={continueAsGuest}
           onClose={closeGate}
         />
       )}

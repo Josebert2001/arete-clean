@@ -392,10 +392,10 @@ export default function Courses() {
     setSearchParams({ level: String(level) });
   }
 
-  // Clicking a specific year while signed out shows a dismissible sign-in nudge
-  // first. "All years" and internal navigation pass straight through. The gating
-  // logic (and per-session guest memory) is shared with the Home level cards.
-  const { gateLevel, requestLevel, continueAsGuest, gateSignIn, closeGate } = useLevelGate(selectLevel);
+  // Clicking a specific year while signed out shows the sign-in prompt first.
+  // "All years" and internal navigation pass straight through. The gating
+  // logic is shared with the Home level cards.
+  const { gateLevel, requestLevel, gateSignIn, closeGate } = useLevelGate(selectLevel);
 
   function selectSemester(sem) {
     setSearchParams({ level: String(activeLevel), semester: String(sem) });
@@ -705,7 +705,6 @@ export default function Courses() {
         <LevelGatePrompt
           level={gateLevel}
           onSignIn={gateSignIn}
-          onGuest={continueAsGuest}
           onClose={closeGate}
         />
       )}

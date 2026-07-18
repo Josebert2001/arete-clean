@@ -7,11 +7,11 @@ const GATE_BENEFITS = [
   { icon: BookOpen,     text: 'Pick up right where you left off, every time' },
 ];
 
-// ─── The soft, dismissible sign-in prompt ─────────────────────────────────────
-// Explains *why* signing in helps and what guest mode means, so the choice is
-// informed rather than a blank wall.
+// ─── The sign-in prompt ───────────────────────────────────────────────────────
+// Study pages require an account, so this explains *why* before sending the
+// student to /signin — a warm pitch rather than a blank wall.
 
-export function LevelGatePrompt({ level, onSignIn, onGuest, onClose }) {
+export function LevelGatePrompt({ level, onSignIn, onClose }) {
   // The label is just the year tag ("100L"). Deriving it here rather than
   // reading levelMeta from courses.js keeps this dialog — and the whole landing
   // page that renders it — from statically pulling in the 240 kB course catalog.
@@ -46,10 +46,10 @@ export function LevelGatePrompt({ level, onSignIn, onGuest, onClose }) {
           </div>
 
           <h2 id="level-gate-title" className="display-heading text-2xl text-ink mb-2">
-            Sign in to save your {label} progress
+            Sign in to start your {label} courses
           </h2>
           <p className="text-sm text-coffee-700 leading-relaxed mb-5">
-            Areté is free to browse — signing in (one tap, no password) just unlocks a few things worth having:
+            Areté is free — you just need an account (one tap, no password) so your work stays yours:
           </p>
 
           <ul className="space-y-3 mb-7">
@@ -65,18 +65,12 @@ export function LevelGatePrompt({ level, onSignIn, onGuest, onClose }) {
 
           <button
             onClick={onSignIn}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-ink text-cream text-sm font-semibold hover:bg-coffee-700 transition-colors mb-3"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-ink text-cream text-sm font-semibold hover:bg-coffee-700 transition-colors"
           >
             <LogIn size={15} /> Sign in or sign up
           </button>
-          <button
-            onClick={onGuest}
-            className="w-full px-4 py-2.5 rounded-xl text-sm font-medium text-coffee-700 hover:bg-coffee-100 transition-colors"
-          >
-            Continue without signing in
-          </button>
           <p className="text-xs text-coffee-500 text-center mt-3 leading-relaxed">
-            No account needed to read — your progress just stays on this one device.
+            Free for UniUyo students — sign in with Google or a one-tap email link.
           </p>
         </div>
       </div>

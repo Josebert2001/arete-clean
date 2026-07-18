@@ -117,6 +117,19 @@ function AuthStateWatcher() {
   return null;
 }
 
+// Hard auth gate for study pages: every active learner must be a signed-in,
+// known user. The landing page stays public as the marketing front door. When
+// Supabase isn't configured (authEnabled false) the gate stands down — locking
+// the app behind a sign-in that can't work would brick local/keyless deploys.
+// LastLocationTracker records the attempted page before this redirect commits,
+// so AuthStateWatcher returns the user to it right after they sign in.
+function RequireAuth({ children }) {
+  const { user, authLoading, authEnabled } = useAuth();
+  if (authLoading) return <RouteLoading />;
+  if (authEnabled && !user) return <Navigate to="/signin" replace />;
+  return children;
+}
+
 function NotFound() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-24 text-center">
@@ -175,19 +188,19 @@ export default function App() {
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route path="/courses/:slug" element={<CourseDetail />} />
-            <Route path="/lab" element={<CodeLab />} />
+            <Route path="/courses" element={<RequireAuth><Courses /></RequireAuth>} />
+            <Route path="/courses/:slug" element={<RequireAuth><CourseDetail /></RequireAuth>} />
+            <Route path="/lab" element={<RequireAuth><CodeLab /></RequireAuth>} />
             <Route path="/tracks" element={<Navigate to="/lab" replace />} />
-            <Route path="/tracks/:lang" element={<TrackModules />} />
-            <Route path="/tracks/:lang/:id" element={<TrackModuleDetail />} />
+            <Route path="/tracks/:lang" element={<RequireAuth><TrackModules /></RequireAuth>} />
+            <Route path="/tracks/:lang/:id" element={<RequireAuth><TrackModuleDetail /></RequireAuth>} />
             <Route path="/modules" element={<Navigate to="/tracks/java" replace />} />
             <Route path="/modules/:id" element={<JavaModuleRedirect />} />
             <Route path="/install" element={<Install />} />
-            <Route path="/tutor" element={<AITutor />} />
-            <Route path="/explainer" element={<CodeExplainer />} />
-            <Route path="/cheatsheet" element={<Cheatsheet />} />
-            <Route path="/planner" element={<Planner />} />
+            <Route path="/tutor" element={<RequireAuth><AITutor /></RequireAuth>} />
+            <Route path="/explainer" element={<RequireAuth><CodeExplainer /></RequireAuth>} />
+            <Route path="/cheatsheet" element={<RequireAuth><Cheatsheet /></RequireAuth>} />
+            <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
             <Route path="/welcome" element={<Welcome />} />

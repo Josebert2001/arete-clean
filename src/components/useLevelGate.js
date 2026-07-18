@@ -7,38 +7,23 @@ import { useAuth } from '../context/AuthContext';
 // to this stored level). Shared so Home and the Course Hub agree.
 export const LEVEL_STORAGE_KEY = 'arete-selected-level';
 
-// Once a student chooses to keep browsing as a guest, we don't nag them again
-// for the rest of the tab session — even as they move between Home and the hub.
-const GUEST_BROWSING_KEY = 'arete-guest-browsing';
-
 // ─── Shared gating logic ──────────────────────────────────────────────────────
-// Wraps a level pick: signed-out students see the prompt first; signed-in users
-// (Supabase restores their session automatically, so they're never re-asked) and
-// confirmed guests pass straight through. `onProceed(level)` runs when the
-// student should actually go to that year.
+// Wraps a level pick: signed-out students see a sign-in prompt (study pages
+// require an account); signed-in users (Supabase restores their session
+// automatically, so they're never re-asked) pass straight through.
+// `onProceed(level)` runs when the student should actually go to that year.
 
 export function useLevelGate(onProceed) {
   const navigate = useNavigate();
   const { user, authEnabled } = useAuth();
   const [gateLevel, setGateLevel] = useState(null);
-  const [guest, setGuest] = useState(() => {
-    try { return sessionStorage.getItem(GUEST_BROWSING_KEY) === '1'; } catch { return false; }
-  });
 
   function requestLevel(level) {
-    if (typeof level === 'number' && authEnabled && !user && !guest) {
+    if (typeof level === 'number' && authEnabled && !user) {
       setGateLevel(level);
       return;
     }
     onProceed(level);
-  }
-
-  function continueAsGuest() {
-    const level = gateLevel;
-    setGuest(true);
-    try { sessionStorage.setItem(GUEST_BROWSING_KEY, '1'); } catch { /* private mode — prompt may reappear */ }
-    setGateLevel(null);
-    if (level !== null) onProceed(level);
   }
 
   function gateSignIn() {
@@ -52,5 +37,5 @@ export function useLevelGate(onProceed) {
     setGateLevel(null);
   }
 
-  return { gateLevel, requestLevel, continueAsGuest, gateSignIn, closeGate };
+  return { gateLevel, requestLevel, gateSignIn, closeGate };
 }
