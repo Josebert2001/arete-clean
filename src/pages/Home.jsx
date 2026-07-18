@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles, GraduationCap, Shield, X } from 'lucide-react';
+import { ArrowRight, Sparkles, GraduationCap, Shield, X, LogIn } from 'lucide-react';
 import ProgressDashboard from '../components/ProgressDashboard';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
 import { useLevelGate } from '../components/useLevelGate';
+import { useAuth } from '../context/AuthContext';
 
 // Only the two active levels
 const levelCards = [
@@ -51,7 +52,7 @@ function OnboardingBanner() {
         <Sparkles size={16} className="text-moss shrink-0" />
         <p className="text-ink flex-1 leading-snug">
           <span className="font-bold">New here?</span> Pick your level below → choose a course → start learning.
-          Your progress is saved automatically as you complete modules.
+          Sign in once (free, no password) and your progress follows you on every device.
         </p>
         <button
           onClick={dismiss}
@@ -69,10 +70,15 @@ function OnboardingBanner() {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user, authEnabled } = useAuth();
   // Picking a level here routes through the same sign-in prompt as the
   // Course Hub; signed-in students go straight to the year.
   const { gateLevel, requestLevel, gateSignIn, closeGate } =
     useLevelGate((level) => navigate(`/courses?level=${level}`));
+
+  // Study pages require an account, so a signed-out visitor's primary action
+  // is creating one — signed-in students go straight to the course hub.
+  const signedOut = authEnabled && !user;
 
   return (
     <div>
@@ -106,9 +112,20 @@ export default function Home() {
               Every course from 100L to 400L — topic outlines, textbooks, study tips, interactive programming tracks, and an AI tutor that knows the full curriculum.
             </p>
 
-            <Link to="/courses" className="btn-ghost text-sm">
-              Browse all courses <ArrowRight size={14} />
-            </Link>
+            {signedOut ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <Link to="/signin" className="btn-primary text-sm inline-flex items-center gap-1.5">
+                  <LogIn size={14} /> Get started — it&rsquo;s free
+                </Link>
+                <span className="text-xs text-coffee-500">
+                  One-tap sign in · Google or email · no password
+                </span>
+              </div>
+            ) : (
+              <Link to="/courses" className="btn-ghost text-sm">
+                Browse all courses <ArrowRight size={14} />
+              </Link>
+            )}
           </div>
 
           {/* Right — level picker */}
@@ -157,10 +174,12 @@ export default function Home() {
 
         <div className="border-t border-coffee-200">
           {[
-            { num: '01', title: 'All 4 Years', body: 'Every course from 100L to 400L — study resources, topic outlines, recommended textbooks, and search terms for free online materials.' },
+            { num: '01', title: 'All 4 Years', body: 'Every course from 100L to 400L — topic outlines, recommended textbooks, exam tips, and full lecture notes for a growing set of courses, with flashcards and plain-English rewrites built in.' },
             { num: '02', title: '37 Modules', body: 'Java (COS 211), Python (COS 121), and C — full interactive tracks with theory, annotated code, live playgrounds, quizzes, and mini projects.' },
-            { num: '03', title: 'AI Tutor', body: 'Ask any question about any course in the programme. Knows the full curriculum from 100L to 400L and explains concepts at the right level for your year.' },
-            { num: '04', title: 'Code Explainer', body: "Paste Java, Python, C, or C++ code and get a plain-English breakdown. Useful when a lecturer's example isn't clicking or you're debugging your own code." },
+            { num: '03', title: '12 CTF Rooms', body: 'A hands-on Security track of capture-the-flag challenges with escalating hints — practice real attack-and-defend thinking right in the browser, no setup needed.' },
+            { num: '04', title: 'AI Tutor', body: 'Ask any question about any course in the programme. Knows the full curriculum from 100L to 400L and explains concepts at the right level for your year.' },
+            { num: '05', title: 'Code Explainer', body: "Paste Java, Python, C, or C++ code and get a plain-English breakdown. Useful when a lecturer's example isn't clicking or you're debugging your own code." },
+            { num: '06', title: 'Study Planner', body: 'Build a personal study timetable around your courses and export it straight to your phone calendar. Cheatsheets keep exam-week revision fast.' },
           ].map((f, i) => (
             <div key={i} className="py-7 border-b border-coffee-200 flex gap-5 group">
               <span className="font-mono text-xs text-coffee-400 tabular-nums pt-1.5 w-6 shrink-0">{f.num}</span>
