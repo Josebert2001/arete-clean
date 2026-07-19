@@ -75,16 +75,17 @@ export default async function handler(req, res) {
   // or expired tokens (and when Supabase isn't configured) — all mean "no".
   const student = await getStudentFromRequest(req);
   if (!student) {
+    logRequest(req, 'research', { denied: 'unauthorized' });
     return res.status(401).json({
       error: 'Please sign in to use Explain-this.',
       kind: 'unauthorized',
     });
   }
 
-  logRequest(req, 'research');
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {
+    logRequest(req, 'research');
     res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
     return res.status(429).json({
       error: 'You’ve used your Explain-this lookups for now. Please wait a few minutes and try again.',
@@ -115,13 +116,19 @@ export default async function handler(req, res) {
     ? `\n\nCourse context: ${[courseCode, courseTitle].filter(Boolean).join(' — ')}.`
     : '';
 
+  // The selection can include text authored by other students (uploaded lecture
+  // notes rendered on the page), so collapse runs of 3+ quotes — a crafted
+  // passage must not be able to forge the """ fence and smuggle instructions
+  // out of the quoted block. Same defanging idea as tutorTools' "===" collapse.
+  const safeSelection = selection.trim().replace(/"{3,}/g, '"');
+
   try {
     const groq = createGroq({ apiKey: GROQ_API_KEY });
 
     const result = await generateText({
       model: groq('groq/compound-mini'),
       system: SYSTEM_PROMPT,
-      prompt: `Explain this passage simply for a student:${courseLine}\n\n"""\n${selection.trim()}\n"""`,
+      prompt: `Explain this passage simply for a student:${courseLine}\n\n"""\n${safeSelection}\n"""`,
       maxOutputTokens: 800,
       temperature: 0.4,
     });

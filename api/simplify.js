@@ -47,10 +47,10 @@ export default async function handler(req, res) {
     return res.status(200).json({ configured: hasAnyProvider() });
   }
 
-  logRequest(req, 'simplify');
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {
+    logRequest(req, 'simplify');
     res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
     return res.status(429).json({
       error: 'Too many simplify requests from this device. Please wait a few minutes and try again.',

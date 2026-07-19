@@ -29,15 +29,35 @@ function getAnonDb() {
 const MAX_NOTE_CHARS = 2_500;
 const MAX_NOTES = 2;
 
+// Removes every occurrence of the "<<arete:" stream-marker prefix the client
+// parses for status/error markers (see src/utils/tutorStream.js), so note text
+// the model echoes can't spoof them. Repeats until stable — a nested fragment
+// like "<<are<<arete:te:" reassembles a marker after a single pass. Targeted at
+// the prefix so C++ code like `cout << x` survives. Must run AFTER the other
+// strips: removing "=" or control chars can itself splice a marker together
+// (e.g. "<<arete=:").
+function stripStreamMarkers(value) {
+  let out = value;
+  let prev;
+  do {
+    prev = out;
+    out = out.replace(/<<arete:/gi, '');
+  } while (out !== prev);
+  return out;
+}
+
 // display_name/description are set by students at upload time. Strip newlines,
-// "=" (so a crafted name can't forge a "=== ... ===" note boundary), and
-// control chars before interpolating them into the note header.
+// "=" (so a crafted name can't forge a "=== ... ===" note boundary), control
+// chars, and the "<<arete:" stream-marker prefix before interpolating them
+// into the note header.
 export function sanitizeLabel(value) {
-  return String(value || '')
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/=/g, '')
-    // eslint-disable-next-line no-control-regex -- deliberately strip control chars to block prompt injection
-    .replace(/[\x00-\x1F\x7F]/g, '')
+  return stripStreamMarkers(
+    String(value || '')
+      .replace(/[\r\n]+/g, ' ')
+      .replace(/=/g, '')
+      // eslint-disable-next-line no-control-regex -- deliberately strip control chars to block prompt injection
+      .replace(/[\x00-\x1F\x7F]/g, '')
+  )
     .slice(0, 120)
     .trim();
 }
@@ -49,12 +69,16 @@ export function sanitizeLabel(value) {
 // DELIMITER here so a body can't masquerade as a new "=== Uploaded note: ... ==="
 // boundary or an authoritative header. Runs of 3+ "=" collapse to one (destroys
 // "=== ===" fences while leaving code operators like "==" intact); control
-// chars are stripped, but tabs/newlines are kept so note structure survives.
+// chars are stripped, but tabs/newlines are kept so note structure survives;
+// finally the "<<arete:" stream-marker prefix is removed (stripStreamMarkers)
+// so an echoed note can't spoof the client's status/error markers.
 export function sanitizeNoteBody(value) {
-  return String(value || '')
-    .replace(/={3,}/g, '=')
-    // eslint-disable-next-line no-control-regex -- strip control chars (keep \t \n \r) to block prompt injection
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  return stripStreamMarkers(
+    String(value || '')
+      .replace(/={3,}/g, '=')
+      // eslint-disable-next-line no-control-regex -- strip control chars (keep \t \n \r) to block prompt injection
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+  );
 }
 
 const TRACK_BY_STORAGE_KEY = Object.fromEntries(
