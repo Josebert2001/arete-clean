@@ -39,12 +39,13 @@ Browser → React SPA (Vite)
            ├── AuthContext (Supabase OTP auth, profile state)
            ├── useProgress hook (localStorage + Supabase dual sync, 1s debounce)
            └── /api/* (Vercel serverless)
-                ├── api/tutor.js   → Groq streaming (AI Tutor, rate: 8/10min/IP)
+                ├── api/tutor.js   → model-chain streaming: Gemini 3.5 Flash → Flash-Lite → Groq → OpenRouter (AI Tutor, rate: 8/10min/IP)
                 ├── api/explainer.js → Groq (Code Explainer, rate: 8/10min/IP)
                 ├── api/research.js → Groq compound-mini web search (Explain-this, signed-in, rate: 4/10min/IP)
                 ├── api/extract.js  → text extraction from uploaded course materials (signed-in, rate: 20/10min/IP)
                 ├── api/simplify.js → Groq plain-English rewrite of lecture-note sections (rate: 8/10min/IP)
-                └── api/run.js     → JDoodle (code execution, 20 runs/day free)
+                ├── api/run.js     → JDoodle (code execution, 20 runs/day free)
+                └── api/google/*   → Google OAuth (Calendar sync + Drive import); see api/_lib/googleAuth.js
 ```
 
 ## Key Files Map
@@ -62,7 +63,7 @@ Browser → React SPA (Vite)
 | `src/components/FlagChallenge.jsx` | Renders a module's CTF challenge; validates the flag client-side via Web Crypto SHA-256 (no backend); escalating hints, marks the module complete on solve |
 | `src/data/courses.js` | ~2131 lines — all 29 courses (100L–400L), topics, textbooks, exam tips |
 | `src/data/trackConfig.js` | Track metadata config (java/python/c) |
-| `api/tutor.js` | Groq streaming tutor with tools: getStudentProgress, getCourseOutline, getModuleDetail |
+| `api/tutor.js` | Streaming tutor on the multi-provider chain (`api/_lib/model.js`) with tools: getStudentProgress, getCourseOutline, getModuleDetail |
 | `api/explainer.js` | Groq code explanation endpoint |
 | `api/research.js` | Explain-this — `groq/compound-mini` web search over a highlighted passage; signed-in only, returns explanation + sources |
 | `src/components/ExplainSelection.jsx` | Wraps readable content; shows "Explain this" on text selection, renders inline explanation card |
@@ -71,6 +72,12 @@ Browser → React SPA (Vite)
 | `api/simplify.js` | "Simplify this" — Groq rewrite of a dense lecture-note section in plain English; client caches results in localStorage |
 | `src/components/LectureNotes.jsx` | Renders lecture-note sections (definition/bullets/termlist/table/mosca/…); termlists double as flashcards; hosts the Simplify button |
 | `api/_lib/supabase.js` | Server-side Supabase client using Bearer token from request |
+| `api/_lib/googleAuth.js` | Google OAuth2 client, signed `state` (CSRF), service-role client — the only file allowed to use `SUPABASE_SERVICE_ROLE_KEY` |
+| `api/_lib/googleEvents.js` | PlanEvent → Google Calendar event resource (duplicates `src/utils/ics.js`'s date/RRULE math for the Node context — keep both in sync by hand) |
+| `api/google/connect.js` \| `callback.js` \| `status.js` \| `disconnect.js` | "Connect Google" OAuth flow (Calendar + Drive scopes), independent of Supabase's own Google sign-in |
+| `api/google/calendar-sync.js` | Pushes a generated study plan into a dedicated secondary Google Calendar (idempotent re-sync) |
+| `src/utils/googleApi.js` \| `src/components/useGoogleConnection.js` \| `src/components/GoogleConnectButton.jsx` | Frontend Google-connection plumbing, used by `src/pages/Planner.jsx` |
+| `supabase/migrations/20260719000000_google_connections.sql` | `google_connections` table + RLS — run manually in the Supabase SQL editor, never via Claude |
 | `vercel.json` | CSP, CORS headers, SPA rewrite rule |
 | `scripts/validate-modules.mjs` | Pre-build module structure validator |
 
@@ -85,15 +92,22 @@ VITE_SUPABASE_ANON_KEY    # Supabase anon key (exposed to browser)
 ALLOWED_ORIGIN            # CORS restriction for /api/* (set to your domain)
 VITE_SENTRY_DSN           # Sentry error monitoring — frontend (optional; no-op if unset)
 SENTRY_DSN                # Sentry error monitoring — /api/* serverless (optional)
+GOOGLE_CLIENT_ID          # Google OAuth (Calendar sync + Drive import) — api/google/*
+GOOGLE_CLIENT_SECRET      # Google OAuth — also keys the signed `state` HMAC, never expose to the browser
+GOOGLE_REDIRECT_URI       # Must exactly match a redirect URI registered on the Google OAuth client
+SUPABASE_SERVICE_ROLE_KEY # Now also a live runtime secret for api/_lib/googleAuth.js (was previously local-shell-only, for setup-supabase.mjs)
 ```
 For Vercel deployment, set all of the above in the Vercel dashboard — not in code.
-For Supabase setup script only: also need `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_PAT`.
+For Supabase setup script only: also need `SUPABASE_PAT`.
+
+Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOOGLE_API_KEY` and `VITE_GOOGLE_APP_ID` for the Google Picker widget.
 
 ## External API Quirks
 - **JDoodle:** Free plan = 20 executions/day total across ALL users. Do not add new language versions without checking JDoodle docs for version strings. Never expose `JDOODLE_CLIENT_ID` or `JDOODLE_CLIENT_SECRET` to the browser.
 - **Groq:** Model is `openai/gpt-oss-120b`. Rate limits are enforced in-memory per IP (not persistent across function cold starts). The tutor uses Vercel AI SDK streaming — response format is different from a plain `fetch`.
 - **Groq compound-mini (`api/research.js`):** A Groq *system* with built-in web search — it manages its own tools server-side, so don't wire custom AI SDK `tools` into it (they'd conflict). Lower limits than plain models (200 RPM, 8K max output). Cited web results come back on `result.sources`.
 - **Supabase RLS:** Server-side functions (`api/_lib/supabase.js`) must forward the user's Bearer token for row-level security to apply. Never use the service role key in frontend code.
+- **Google OAuth (`api/google/*`):** Separate from Supabase's own Google sign-in (`AuthContext.jsx`'s `signInWithGoogle`) — that's a login method with no extra scopes; this is a feature-level grant (Calendar + Drive) requested once via `api/google/connect.js` regardless of how the student logged in. Uses `drive.file` (not `drive.readonly`) deliberately — it's a non-sensitive scope so it skips Google's OAuth verification review, but it only grants access to files the user picks through Google's Picker widget, never a server-side listing of their existing Drive. The Picker widget (Phase 4/Drive import) needs a scoped `vercel.json` CSP addition (`apis.google.com`, `docs.google.com`, `googleapis.com`) — confirm with the user before touching it, same as any other CSP change. Calendar sync needs no CSP change (plain OAuth redirect).
 
 ## Static Rules (always follow these)
 - Read the relevant files before editing anything

@@ -1,10 +1,16 @@
-import { useMemo, useState } from 'react';
-import { CalendarDays, Download, GraduationCap, Sparkles, ExternalLink, Clock, Info } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  CalendarDays, Download, GraduationCap, Sparkles, ExternalLink, Clock, Info,
+  RefreshCw, CheckCircle2, AlertCircle, Loader2,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
 import { levelMeta, LEVELS } from '../data/courses';
 import { generateStudyPlan, DEFAULT_STUDY_DAYS, DEFAULT_SLOT_TIMES } from '../utils/studyPlan';
 import { buildIcs, downloadIcs, googleCalendarLink } from '../utils/ics';
+import { syncPlanToGoogleCalendar } from '../utils/googleApi';
+import { useGoogleConnection } from '../components/useGoogleConnection';
+import GoogleConnectButton from '../components/GoogleConnectButton';
 
 const DAY_CHIPS = [
   { code: 'MO', label: 'Mon' },
@@ -44,13 +50,38 @@ function levelFromProfile(profile) {
 
 export default function Planner() {
   usePageTitle('Study Planner');
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const google = useGoogleConnection();
 
   const [session, setSession]   = useState(currentSession());
   const [level, setLevel]       = useState(() => levelFromProfile(profile));
   const [semester, setSemester] = useState(1);
   const [startISO, setStartISO] = useState(nextMondayISO());
   const [studyDays, setStudyDays] = useState(DEFAULT_STUDY_DAYS);
+  const [syncing, setSyncing]   = useState(false);
+  const [syncResult, setSyncResult] = useState(null); // { success, message, htmlLink }
+
+  // Google's OAuth redirect lands back here with ?google=connected|denied|error.
+  // Surface it once, then clean the URL so a refresh doesn't re-show it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('google');
+    if (!status) return;
+    window.history.replaceState({}, '', window.location.pathname);
+    // Deferred to a microtask so setState isn't called synchronously from
+    // the effect body — same pattern as useGoogleConnection.js.
+    Promise.resolve().then(() => {
+      if (status === 'connected') {
+        setSyncResult({ success: true, message: 'Google account connected. You can now sync your plan.' });
+        google.refresh();
+      } else if (status === 'denied') {
+        setSyncResult({ success: false, message: 'Google connection was cancelled.' });
+      } else {
+        setSyncResult({ success: false, message: 'Could not connect Google. Please try again.' });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sessionStart = useMemo(() => {
     // Parse as local midnight so weekday maths matches the picker.
@@ -74,6 +105,36 @@ export default function Planner() {
     if (!plan?.events.length) return;
     const ics = buildIcs(plan.events, { calendarName: `Areté ${level}L Sem ${semester} — ${session}` });
     downloadIcs(`arete-study-plan-${level}L-sem${semester}.ics`, ics);
+  };
+
+  const handleSync = async () => {
+    if (!plan?.events.length) return;
+    setSyncResult(null);
+
+    if (!google.connected) {
+      try { await google.connect('/planner'); } catch {
+        setSyncResult({ success: false, message: 'Could not start the Google connection.' });
+      }
+      return;
+    }
+
+    setSyncing(true);
+    try {
+      const calendarName = `${level}L Sem ${semester} — ${session}`;
+      const data = await syncPlanToGoogleCalendar(plan.events, calendarName);
+      if (data.success) {
+        setSyncResult({ success: true, message: `Synced ${data.eventCount} weekly blocks to Google Calendar.`, htmlLink: data.htmlLink });
+      } else if (data.kind === 'reconnect_required') {
+        setSyncResult({ success: false, message: 'Your Google connection expired. Reconnecting…' });
+        google.refresh();
+      } else {
+        setSyncResult({ success: false, message: data.error || 'Could not sync to Google Calendar.' });
+      }
+    } catch {
+      setSyncResult({ success: false, message: 'Could not sync to Google Calendar. Please try again.' });
+    } finally {
+      setSyncing(false);
+    }
   };
 
   // Group the plan's events by day for a readable weekly preview.
@@ -209,13 +270,40 @@ export default function Planner() {
                   </p>
                   <p className="text-xs text-coffee-500 mt-0.5">{plan.meta.totalUnits} credit units this semester</p>
                 </div>
-                <button
-                  onClick={handleDownload}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-ink text-cream text-sm font-semibold hover:bg-coffee-700 transition-colors shrink-0"
-                >
-                  <Download size={15} /> Add to calendar
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={handleSync}
+                    disabled={syncing || !user}
+                    title={!user ? 'Sign in to sync with Google Calendar' : undefined}
+                    className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-coffee-200 text-ink text-sm font-semibold hover:border-coffee-400 transition-colors disabled:opacity-50"
+                  >
+                    {syncing ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
+                    {google.connected ? 'Sync to Google' : 'Connect & sync'}
+                  </button>
+                  <button
+                    onClick={handleDownload}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-ink text-cream text-sm font-semibold hover:bg-coffee-700 transition-colors"
+                  >
+                    <Download size={15} /> Add to calendar
+                  </button>
+                </div>
               </div>
+
+              {syncResult && (
+                <div className={`px-5 py-3 border-b border-coffee-100 flex items-start gap-2 ${syncResult.success ? 'bg-moss/5' : 'bg-rust/5'}`}>
+                  {syncResult.success
+                    ? <CheckCircle2 size={14} className="text-moss mt-0.5 shrink-0" />
+                    : <AlertCircle size={14} className="text-rust mt-0.5 shrink-0" />}
+                  <p className={`text-xs ${syncResult.success ? 'text-moss' : 'text-rust'}`}>
+                    {syncResult.message}
+                    {syncResult.htmlLink && (
+                      <a href={syncResult.htmlLink} target="_blank" rel="noopener noreferrer" className="ml-1.5 underline">
+                        Open in Google Calendar
+                      </a>
+                    )}
+                  </p>
+                </div>
+              )}
 
               <div className="divide-y divide-coffee-100 max-h-[28rem] overflow-y-auto">
                 {orderedDays.map(day => (
@@ -267,8 +355,11 @@ export default function Planner() {
             <span>
               "Add to calendar" downloads an <span className="font-mono">.ics</span> file — open it to import the whole
               semester at once. The per-row <span className="font-medium">Google</span> links add a single block.
+              "Sync to Google" pushes the whole plan straight into a dedicated calendar on your Google account.
             </span>
           </p>
+
+          {user && <GoogleConnectButton returnTo="/planner" className="mt-3" />}
         </div>
       </div>
     </div>
