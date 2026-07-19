@@ -3,16 +3,7 @@ import { ArrowRight, CheckCircle2, PlayCircle, TrendingUp, CloudUpload, LogIn } 
 import { trackMeta } from '../data/trackMeta';
 import { useAuth } from '../context/AuthContext';
 import { useProgress } from './useProgress';
-
-function getTrackProgress(track, progress) {
-  const completed = (progress.completedModules || []).filter(id =>
-    track.moduleIndex.some(m => m.id === id)
-  );
-  const total = track.moduleIndex.length;
-  const percent = total > 0 ? Math.round((completed.length / total) * 100) : 0;
-  const nextModule = track.moduleIndex.find(m => !completed.includes(m.id)) || null;
-  return { completed: completed.length, total, percent, nextModule };
-}
+import { getTrackProgress } from '../utils/trackProgress';
 
 export default function ProgressDashboard() {
   const { user, authEnabled } = useAuth();

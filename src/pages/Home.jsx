@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Sparkles, GraduationCap, Shield, X, LogIn } from 'lucide-react';
 import ProgressDashboard from '../components/ProgressDashboard';
+import StudentDashboard from '../components/StudentDashboard';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
 import { useLevelGate } from '../components/useLevelGate';
 import { useAuth } from '../context/AuthContext';
@@ -70,7 +71,7 @@ function OnboardingBanner() {
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user, authEnabled } = useAuth();
+  const { user, authEnabled, authLoading } = useAuth();
   // Picking a level here routes through the same sign-in prompt as the
   // Course Hub; signed-in students go straight to the year.
   const { gateLevel, requestLevel, gateSignIn, closeGate } =
@@ -79,6 +80,11 @@ export default function Home() {
   // Study pages require an account, so a signed-out visitor's primary action
   // is creating one — signed-in students go straight to the course hub.
   const signedOut = authEnabled && !user;
+
+  // Signed-in students get their daily dashboard, not the marketing page.
+  // Wait out the session restore so the landing page never flashes first.
+  if (authLoading) return null;
+  if (authEnabled && user) return <StudentDashboard />;
 
   return (
     <div>

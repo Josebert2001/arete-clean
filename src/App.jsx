@@ -7,6 +7,7 @@ import FloatingHelp from './components/FloatingHelp';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
+import { recordStudyActivity } from './utils/streak';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -74,10 +75,14 @@ function ScrollToTop() {
   return null;
 }
 
-// Records the current study page so a returning user can resume it next login.
+// Records the current study page so a returning user can resume it next login,
+// and marks today as a study day for the dashboard's streak counter.
 function LastLocationTracker() {
   const { pathname } = useLocation();
-  useEffect(() => { recordLocation(pathname); }, [pathname]);
+  useEffect(() => {
+    recordLocation(pathname);
+    recordStudyActivity(pathname);
+  }, [pathname]);
   return null;
 }
 
