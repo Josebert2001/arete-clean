@@ -1,16 +1,20 @@
-<!-- Arete first-time sign-in (signup confirmation) — emails a 6-digit code, not a link. -->
+<!-- Areté first-time sign-in (signup confirmation) — magic link, matching the
+     app's link-based flow. -->
 <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1C1814;">
-  <h2 style="font-family: Georgia, serif; color: #1C1814; margin-bottom: 8px;">Welcome to Arete</h2>
-  <p style="color: #52310F; line-height: 1.6; margin: 0 0 20px;">
-    Use this 6-digit code to confirm your email and sign in:
+  <h2 style="font-family: Georgia, serif; color: #1C1814; margin-bottom: 8px;">Welcome to Aret&eacute;</h2>
+  <p style="color: #52310F; line-height: 1.6; margin: 0 0 24px;">
+    Tap the button below on this device to confirm your email and start learning. No password needed.
   </p>
-  <p style="font-size: 30px; font-weight: bold; letter-spacing: 8px; font-family: 'JetBrains Mono', Menlo, monospace; color: #1C1814; background: #F5EFE0; border: 1px solid #E1C89A; border-radius: 10px; padding: 16px 0; text-align: center; margin: 0 0 20px;">
-    {{ .Token }}
+  <p style="text-align: center; margin: 0 0 24px;">
+    <a href="{{ .ConfirmationURL }}"
+       style="display: inline-block; background: #1C1814; color: #F5EFE0; text-decoration: none; font-weight: bold; font-size: 16px; padding: 14px 36px; border-radius: 10px;">
+      Confirm &amp; sign in
+    </a>
   </p>
   <p style="color: #6E4216; font-size: 14px; line-height: 1.6; margin: 0 0 4px;">
-    This code expires in 1 hour. If you didn't request it, you can safely ignore this email.
+    This link expires in 1 hour and can only be used once. If you didn&rsquo;t request it, you can safely ignore this email.
   </p>
   <p style="color: #8E5A1F; font-size: 12px; margin-top: 24px;">
-    Arete · Department of Cybersecurity, University of Uyo
+    Aret&eacute; &middot; Department of Cybersecurity, University of Uyo &middot; aretecyb.tech
   </p>
 </div>

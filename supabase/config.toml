@@ -96,7 +96,8 @@ openai_api_key = "env(OPENAI_API_KEY)"
 
 # Email testing server. Emails sent with the local dev setup are not actually sent - rather, they
 # are monitored, and you can view the emails that would have been sent from the web interface.
-[inbucket]
+# (Renamed from [inbucket], deprecated as of CLI 2.109.)
+[local_smtp]
 enabled = true
 # Port to use for the email testing server web interface.
 port = 54324
@@ -188,8 +189,10 @@ password_requirements = ""
 # rp_origins = ["http://127.0.0.1:3000"]
 
 [auth.rate_limit]
-# Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
-email_sent = 2
+# Number of emails that can be sent per hour. Requires auth.email.smtp to be
+# enabled. 20/hour handles real signup bursts while keeping a runaway loop from
+# burning Brevo's 300/day free cap in a single hour.
+email_sent = 20
 # Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
 sms_sent = 30
 # Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
@@ -231,32 +234,30 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Custom email templates (6-digit code via {{ .Token }}) are configured in the
-# HOSTED Supabase DASHBOARD, not here: the free tier with the default email
-# provider rejects template overrides via the CLI (HTTP 400), which fails the
-# entire [auth] config push. So the live "Magic Link" (returning users) and
-# "Confirm signup" (first-time users) templates are pasted manually in the
-# dashboard from supabase/templates/magic_link.html and confirmation.html —
-# email OTP IS set up, despite these blocks staying commented. Once a custom SMTP
-# provider (Brevo) is configured under [auth.email.smtp], uncomment both blocks
-# below to manage the templates from this file instead of the dashboard.
-# [auth.email.template.magic_link]
-# subject = "Your Arete sign-in code"
-# content_path = "./supabase/templates/magic_link.html"
+# Branded email templates, managed from this file now that custom SMTP (Brevo)
+# is enabled — the default email provider used to reject template overrides via
+# CLI (HTTP 400). Both templates are magic-LINK styled ({{ .ConfirmationURL }})
+# to match the app's link-based sign-in flow; do not switch them to {{ .Token }}
+# codes unless SignIn.jsx grows a code-entry UI first.
+[auth.email.template.magic_link]
+subject = "Your Areté sign-in link"
+content_path = "./supabase/templates/magic_link.html"
 
-# [auth.email.template.confirmation]
-# subject = "Confirm your email — your Arete code"
-# content_path = "./supabase/templates/confirmation.html"
+[auth.email.template.confirmation]
+subject = "Welcome to Areté — confirm your email"
+content_path = "./supabase/templates/confirmation.html"
 
-# Use a production-ready SMTP server
-# [auth.email.smtp]
-# enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# Production SMTP: Brevo free tier (300 emails/day). The SMTP key is generated
+# in the Brevo dashboard (SMTP & API → SMTP) and injected from the environment
+# at push time — it is never stored in this file or the repo.
+[auth.email.smtp]
+enabled = true
+host = "smtp-relay.brevo.com"
+port = 587
+user = "8ed8f1002@smtp-brevo.com"
+pass = "env(BREVO_SMTP_KEY)"
+admin_email = "no-reply@aretecyb.tech"
+sender_name = "Areté"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
