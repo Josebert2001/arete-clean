@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { trackMeta } from '../data/trackMeta';
 
 export default function Footer() {
@@ -43,8 +44,12 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-coffee-200 pt-6 text-xs text-coffee-700">
+        <div className="border-t border-coffee-200 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-coffee-700">
           <p>© {new Date().getFullYear()} Areté by JRsolvy. Built for learners, everywhere.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy" className="hover:text-ink transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-ink transition-colors">Terms of Service</Link>
+          </div>
         </div>
       </div>
     </footer>
