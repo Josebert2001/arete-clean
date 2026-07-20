@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink } from 'lucide-react';
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
@@ -288,10 +288,11 @@ const SIMPLIFIABLE_TYPES = new Set(['definition', 'bullets', 'termlist', 'table'
 const MIN_SIMPLIFY_CHARS = 260;
 const MAX_SIMPLIFY_CHARS = 4000;
 
-function Section({ section, simplifyReady, context }) {
+function Section({ section, simplifyReady, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
   const [simplify, setSimplify] = useState({ status: 'idle', text: '', error: '' });
   const abortRef = useRef(null);
   useEffect(() => () => abortRef.current?.abort(), []);
+  const open = !collapsible || isOpen;
 
   const plain = sectionToPlainText(section);
   const canSimplify =
@@ -325,14 +326,37 @@ function Section({ section, simplifyReady, context }) {
   };
 
   return (
-    <div className="mb-6">
+    <div className={open ? 'mb-6' : 'mb-1'}>
       {section.heading && (
-        <h4 className="font-display font-bold text-ink text-lg mb-3 flex items-center gap-2">
-          {section.heading}
-          {section.date && (
-            <span className="text-xs font-mono font-normal text-coffee-500 ml-1">— {section.date}</span>
+        <h4
+          id={anchorId}
+          className={`font-display font-bold text-ink text-lg flex items-center gap-2 scroll-mt-24 ${open ? 'mb-3' : 'mb-0'}`}
+        >
+          {collapsible ? (
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-expanded={isOpen}
+              className="flex flex-1 items-center gap-2 py-1 text-left transition-colors hover:text-coffee-600"
+            >
+              <ChevronDown
+                size={15}
+                className={`text-coffee-400 shrink-0 transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`}
+              />
+              <span className="flex-1">{section.heading}</span>
+              {section.date && (
+                <span className="text-xs font-mono font-normal text-coffee-500">— {section.date}</span>
+              )}
+            </button>
+          ) : (
+            <>
+              {section.heading}
+              {section.date && (
+                <span className="text-xs font-mono font-normal text-coffee-500 ml-1">— {section.date}</span>
+              )}
+            </>
           )}
-          {canSimplify && (
+          {canSimplify && open && (
             <button
               type="button"
               onClick={onSimplify}
@@ -349,45 +373,101 @@ function Section({ section, simplifyReady, context }) {
         </h4>
       )}
 
-      {simplify.status === 'error' && (
-        <p className="rounded-lg border border-rust/25 bg-rust/10 px-3 py-2 text-sm text-rust mb-3">
-          {simplify.error}
-        </p>
-      )}
+      {open && (
+        <>
+          {simplify.status === 'error' && (
+            <p className="rounded-lg border border-rust/25 bg-rust/10 px-3 py-2 text-sm text-rust mb-3">
+              {simplify.error}
+            </p>
+          )}
 
-      {simplify.status === 'done' && (
-        <div className="bg-coffee-50 border border-coffee-200 rounded-xl p-4 mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles size={13} className="text-ember-500 shrink-0" />
-            <span className="text-xs font-mono font-bold text-coffee-600 uppercase tracking-wider">In plain English</span>
-          </div>
-          <div className="text-sm text-ink">
-            <RichText text={simplify.text} />
-          </div>
-        </div>
-      )}
+          {simplify.status === 'done' && (
+            <div className="bg-coffee-50 border border-coffee-200 rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles size={13} className="text-ember-500 shrink-0" />
+                <span className="text-xs font-mono font-bold text-coffee-600 uppercase tracking-wider">In plain English</span>
+              </div>
+              <div className="text-sm text-ink">
+                <RichText text={simplify.text} />
+              </div>
+            </div>
+          )}
 
-      {section.type === 'definition' && section.text && <DefinitionBox text={section.text} />}
-      {section.type === 'fivers' && <FiveVs items={section.items} />}
-      {section.type === 'termlist' && <TermList items={section.items} />}
-      {section.type === 'bullets' && <BulletList items={section.items} />}
-      {section.type === 'proscons' && <ProsCons advantages={section.advantages} disadvantages={section.disadvantages} />}
-      {/* heading is rendered by the section-level <h4> above, like every other type — don't repeat it inside the table */}
-      {section.type === 'table' && <ComparisonTable headers={section.headers} rows={section.rows} />}
-      {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
-      {section.type === 'text' && <p className="text-sm text-coffee-700 leading-relaxed mb-3">{section.text}</p>}
-      {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
-      {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} />}
-      {section.type === 'code' && <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />}
-      {section.type === 'mosca' && <MoscaCalculator />}
-      {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
+          {section.type === 'definition' && section.text && <DefinitionBox text={section.text} />}
+          {section.type === 'fivers' && <FiveVs items={section.items} />}
+          {section.type === 'termlist' && <TermList items={section.items} />}
+          {section.type === 'bullets' && <BulletList items={section.items} />}
+          {section.type === 'proscons' && <ProsCons advantages={section.advantages} disadvantages={section.disadvantages} />}
+          {/* heading is rendered by the section-level <h4> above, like every other type — don't repeat it inside the table */}
+          {section.type === 'table' && <ComparisonTable headers={section.headers} rows={section.rows} />}
+          {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
+          {section.type === 'text' && <p className="text-sm text-coffee-700 leading-relaxed mb-3">{section.text}</p>}
+          {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
+          {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} />}
+          {section.type === 'code' && <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />}
+          {section.type === 'mosca' && <MoscaCalculator />}
+          {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
+        </>
+      )}
     </div>
   );
+}
+
+// Splits a topic's flat section list into an outline: each heading-bearing
+// section starts a collapsible group that absorbs the headingless sections
+// after it. `resource` download cards stay standalone (always visible) so a
+// collapsed last section can't bury them.
+function buildOutline(sections) {
+  const items = [];
+  let lastGroup = null;
+  for (const s of sections) {
+    if (s.type === 'resource') {
+      items.push({ standalone: s });
+    } else if (s.heading) {
+      lastGroup = { head: s, tail: [] };
+      items.push(lastGroup);
+    } else if (lastGroup) {
+      lastGroup.tail.push(s);
+    } else {
+      items.push({ standalone: s });
+    }
+  }
+  return items;
 }
 
 function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, context }) {
   const panelId = `lecture-panel-${index}`;
   const buttonId = `lecture-header-${index}`;
+
+  const items = useMemo(() => buildOutline(topic.sections), [topic.sections]);
+  const firstGroupIdx = items.findIndex((it) => it.head);
+  const headedIndices = items.reduce((acc, it, ii) => (it.head ? [...acc, ii] : acc), []);
+  // Sub-sections collapse only when there are enough of them to feel like a
+  // wall of text; the first one starts open so the topic never looks empty.
+  const collapsibleSections = headedIndices.length >= 2;
+  const [openSections, setOpenSections] = useState(() => new Set(firstGroupIdx >= 0 ? [firstGroupIdx] : []));
+  const allSectionsOpen = headedIndices.every((ii) => openSections.has(ii));
+
+  const sectionContext = { ...context, topicTitle: topic.title };
+
+  const toggleSection = (ii) =>
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(ii)) next.delete(ii);
+      else next.add(ii);
+      return next;
+    });
+
+  const toggleAllSections = () =>
+    setOpenSections(allSectionsOpen ? new Set() : new Set(headedIndices));
+
+  const jumpToSection = (ii) => {
+    setOpenSections((prev) => new Set(prev).add(ii));
+    document.getElementById(`${panelId}-sec-${ii}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const lead = firstGroupIdx === -1 ? items : items.slice(0, firstGroupIdx);
+  const rest = firstGroupIdx === -1 ? [] : items.slice(firstGroupIdx);
 
   return (
     <div className="border border-coffee-200 rounded-xl bg-paper overflow-hidden">
@@ -430,14 +510,76 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, context
           {topic.date && (
             <span className="sm:hidden text-xs font-mono text-coffee-500 mb-4 block">Lecture date: {topic.date}</span>
           )}
-          {topic.sections.map((section, si) => (
-            <Section
-              key={si}
-              section={section}
-              simplifyReady={simplifyReady}
-              context={{ ...context, topicTitle: topic.title }}
-            />
-          ))}
+
+          {collapsibleSections ? (
+            <>
+              {lead.map((it, ii) => (
+                <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} context={sectionContext} />
+              ))}
+
+              {headedIndices.length >= 4 && (
+                <nav aria-label={`Sections in ${topic.title}`} className="mb-5 rounded-xl border border-coffee-100 bg-coffee-50/60 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-mono font-bold text-coffee-500 uppercase tracking-widest">On this topic</span>
+                    <button
+                      type="button"
+                      onClick={toggleAllSections}
+                      className="text-xs font-mono font-medium text-coffee-600 hover:text-ink transition-colors"
+                    >
+                      {allSectionsOpen ? 'Collapse all sections' : 'Expand all sections'}
+                    </button>
+                  </div>
+                  <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5">
+                    {rest.map((it, i) => {
+                      if (!it.head) return null;
+                      const ii = firstGroupIdx + i;
+                      return (
+                        <li key={ii}>
+                          <button
+                            type="button"
+                            onClick={() => jumpToSection(ii)}
+                            className="py-0.5 text-left text-sm leading-snug text-coffee-600 hover:text-ink transition-colors"
+                          >
+                            {it.head.heading}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </nav>
+              )}
+
+              {rest.map((it, i) => {
+                const ii = firstGroupIdx + i;
+                if (it.standalone) {
+                  return (
+                    <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} context={sectionContext} />
+                  );
+                }
+                const openG = openSections.has(ii);
+                return (
+                  <div key={ii}>
+                    <Section
+                      section={it.head}
+                      simplifyReady={simplifyReady}
+                      context={sectionContext}
+                      collapsible
+                      isOpen={openG}
+                      onToggle={() => toggleSection(ii)}
+                      anchorId={`${panelId}-sec-${ii}`}
+                    />
+                    {openG && it.tail.map((s, si) => (
+                      <Section key={si} section={s} simplifyReady={simplifyReady} context={sectionContext} />
+                    ))}
+                  </div>
+                );
+              })}
+            </>
+          ) : (
+            topic.sections.map((section, si) => (
+              <Section key={si} section={section} simplifyReady={simplifyReady} context={sectionContext} />
+            ))
+          )}
         </div>
       )}
     </div>
