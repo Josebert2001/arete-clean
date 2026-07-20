@@ -5,8 +5,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { levelMeta, LEVELS } from '../data/courses';
+import { levelMeta, LEVELS, getCoursesByLevelAndSemester } from '../data/courses';
 import { generateStudyPlan, DEFAULT_STUDY_DAYS, DEFAULT_SLOT_TIMES } from '../utils/studyPlan';
+import { collectCourseSignals } from '../utils/planSignals';
 import { buildIcs, downloadIcs, googleCalendarLink } from '../utils/ics';
 import { syncPlanToGoogleCalendar } from '../utils/googleApi';
 import { useGoogleConnection } from '../components/useGoogleConnection';
@@ -89,14 +90,22 @@ export default function Planner() {
     return new Date(y, m - 1, d);
   }, [startISO]);
 
+  // Quiz scores + track completion recorded on this device (useProgress mirrors
+  // them to Supabase). Empty for new/signed-out students — the plan then falls
+  // back to plain units weighting.
+  const courseSignals = useMemo(
+    () => collectCourseSignals(getCoursesByLevelAndSemester(level, semester)),
+    [level, semester]
+  );
+
   const plan = useMemo(() => {
     try {
       const days = studyDays.length ? studyDays : DEFAULT_STUDY_DAYS;
-      return generateStudyPlan({ level, semester, sessionStart, studyDays: days, slotTimes: DEFAULT_SLOT_TIMES });
+      return generateStudyPlan({ level, semester, sessionStart, studyDays: days, slotTimes: DEFAULT_SLOT_TIMES, courseSignals });
     } catch {
       return null;
     }
-  }, [level, semester, sessionStart, studyDays]);
+  }, [level, semester, sessionStart, studyDays, courseSignals]);
 
   const toggleDay = (code) =>
     setStudyDays(prev => (prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]));
@@ -289,6 +298,22 @@ export default function Planner() {
                 </div>
               </div>
 
+              {plan.adjustments.length > 0 && (
+                <div className="px-5 py-3 border-b border-coffee-100 bg-moss/5">
+                  <p className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-moss mb-1.5">
+                    <Sparkles size={11} /> Personalized to your progress
+                  </p>
+                  <ul className="space-y-1">
+                    {plan.adjustments.map(a => (
+                      <li key={a.code} className="text-xs text-coffee-700">
+                        <span className="font-semibold text-ink">{a.code}</span>{' '}
+                        {a.delta > 0 ? `+${a.delta}` : a.delta} block — {a.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {syncResult && (
                 <div className={`px-5 py-3 border-b border-coffee-100 flex items-start gap-2 ${syncResult.success ? 'bg-moss/5' : 'bg-rust/5'}`}>
                   {syncResult.success
@@ -358,6 +383,16 @@ export default function Planner() {
               "Sync to Google" pushes the whole plan straight into a dedicated calendar on your Google account.
             </span>
           </p>
+
+          {plan && plan.adjustments.length === 0 && (
+            <p className="text-xs text-coffee-500 mt-2 leading-relaxed flex items-start gap-1.5">
+              <Sparkles size={12} className="mt-0.5 shrink-0 text-ember" />
+              <span>
+                Take course practice quizzes and the planner adapts automatically — courses with low
+                scores earn extra weekly time, and mostly-finished tracks free time up.
+              </span>
+            </p>
+          )}
 
           {user && <GoogleConnectButton returnTo="/planner" className="mt-3" />}
         </div>

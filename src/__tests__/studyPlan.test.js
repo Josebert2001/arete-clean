@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateStudyPlan, DEFAULT_STUDY_DAYS, DEFAULT_SLOT_TIMES } from '../utils/studyPlan';
+import { generateStudyPlan, DEFAULT_STUDY_DAYS } from '../utils/studyPlan';
 
 const MONDAY = new Date(2026, 0, 5); // a Monday
 
@@ -63,5 +63,76 @@ describe('generateStudyPlan', () => {
     });
     expect(plan.meta.capacity).toBe(1);
     expect(plan.events.length).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('progress-aware weighting', () => {
+  // A roomy grid so adjusted blocks never spill into `unplaced`.
+  const ROOMY = {
+    level: 100, semester: 1, sessionStart: MONDAY,
+    studyDays: ['MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
+    slotTimes: ['08:00', '09:15', '10:30', '11:45'],
+  };
+
+  const blocksByCode = (plan) => {
+    const map = {};
+    for (const ev of plan.events) {
+      const code = ev.title.split(' — ')[0];
+      map[code] = (map[code] || 0) + 1;
+    }
+    return map;
+  };
+
+  it('gives a weak-quiz course an extra weekly block, with a reason', () => {
+    const base = generateStudyPlan(ROOMY);
+    const course = base.courses[0];
+    const plan = generateStudyPlan({ ...ROOMY, courseSignals: { [course.slug]: { quizPercent: 40 } } });
+
+    expect(blocksByCode(plan)[course.code]).toBe(blocksByCode(base)[course.code] + 1);
+    expect(plan.adjustments).toEqual([
+      { code: course.code, delta: 1, reason: expect.stringContaining('40%') },
+    ]);
+    expect(plan.meta.personalized).toBe(true);
+  });
+
+  it('frees a block from a strong-quiz multi-block course, never below one', () => {
+    const base = generateStudyPlan(ROOMY);
+    const counts = blocksByCode(base);
+    const multi = base.courses.find(c => counts[c.code] >= 2);
+    const single = base.courses.find(c => counts[c.code] === 1);
+    const signals = {
+      [multi.slug]: { quizPercent: 95 },
+      ...(single && { [single.slug]: { quizPercent: 95 } }),
+    };
+    const plan = generateStudyPlan({ ...ROOMY, courseSignals: signals });
+
+    expect(blocksByCode(plan)[multi.code]).toBe(counts[multi.code] - 1);
+    if (single) expect(blocksByCode(plan)[single.code]).toBe(1); // floor holds
+  });
+
+  it('frees a block when the linked track is mostly complete', () => {
+    const base = generateStudyPlan(ROOMY);
+    const counts = blocksByCode(base);
+    const multi = base.courses.find(c => counts[c.code] >= 2);
+    const plan = generateStudyPlan({
+      ...ROOMY,
+      courseSignals: { [multi.slug]: { trackPercent: 92, trackLabel: 'Python' } },
+    });
+
+    expect(blocksByCode(plan)[multi.code]).toBe(counts[multi.code] - 1);
+    expect(plan.adjustments[0].reason).toContain('Python track 92%');
+  });
+
+  it('leaves middling scores alone and stays deterministic with signals', () => {
+    const base = generateStudyPlan(ROOMY);
+    const course = base.courses[0];
+    const signals = { [course.slug]: { quizPercent: 70 } };
+    const a = generateStudyPlan({ ...ROOMY, courseSignals: signals });
+    const b = generateStudyPlan({ ...ROOMY, courseSignals: signals });
+
+    expect(a.adjustments).toEqual([]);
+    expect(a.meta.personalized).toBe(false);
+    expect(blocksByCode(a)).toEqual(blocksByCode(base));
+    expect(a.events.map(e => e.uid)).toEqual(b.events.map(e => e.uid));
   });
 });
