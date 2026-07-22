@@ -40,6 +40,36 @@ describe('findCourseEntry — canonical code resolution', () => {
   });
 });
 
+describe('findCourseEntry — lecture-note grounding', () => {
+  // The tutor was answering course questions from the model's general knowledge
+  // because getCourseOutline never saw courses.js's lectureNotes. The outline
+  // must now carry the real topic list + content so answers are grounded.
+  it('includes the real lecture-note topic titles for CYB 222', () => {
+    const { outline } = findCourseEntry('CYB 222');
+    expect(outline).toContain('LECTURE NOTES');
+    expect(outline).toContain('ALL TOPICS');
+    // The exact topics rendered on the course page, not a generic grouping.
+    expect(outline).toContain('Zero Trust Architecture');
+    expect(outline).toContain('Post-Quantum Cryptography');
+    expect(outline).toContain('Deepfake Detection');
+  });
+
+  it('lists every topic title even when body content is truncated', () => {
+    const { outline } = findCourseEntry('CYB 222');
+    const allTopicsBlock = outline.slice(outline.indexOf('ALL TOPICS'), outline.indexOf('TOPIC DETAIL'));
+    // CYB 222 has 10 topics (numbered 0–9); all must appear in the title list.
+    for (let n = 0; n <= 9; n++) {
+      expect(allTopicsBlock).toContain(`Topic ${n}:`);
+    }
+  });
+
+  it('omits the lecture-notes block for a course that has none', () => {
+    // CYB 211 has a catalogue entry but no lectureNotes in courses.js.
+    const { outline } = findCourseEntry('CYB 211');
+    expect(outline).not.toContain('LECTURE NOTES');
+  });
+});
+
 describe('findModule — track module lookup', () => {
   it('returns the requested Java module block', () => {
     const block = findModule('java', 1);

@@ -1,6 +1,8 @@
 // Compact knowledge base for the Arete AI Tutor.
 // Consumed only by api/tutor.js — not bundled into the frontend.
 
+import { courses } from '../../src/data/courses.js';
+
 export const COURSE_KNOWLEDGE = `
 === B.Sc. CYBERSECURITY — UNIVERSITY OF UYO — FULL COURSE CATALOGUE ===
 
@@ -265,70 +267,6 @@ Skills: multimedia elements and storage formats, streaming traffic techniques, V
 Tips: Draw the SIP call-setup flow from memory. Understand why NAT breaks VoIP before learning STUN/TURN/ICE as the fix. Connect VoIP encryption back to CYB 311 (Cryptography).
 `;
 
-export const LECTURE_NOTES_KNOWLEDGE = `
-=== UPLOADED LECTURE NOTES (AUTHORITATIVE CONTENT FROM LECTURERS) ===
-
-── CYB 224: Information and Big Data Security ───────────────────────────────
-
-TOPIC 1: Introduction to Big Data Security
-
-Definition: Big Data Security = tools, policies, and measures to protect large volumes of data from unauthorized access, breaches, and misuse throughout its lifecycle (collection → processing → storage).
-
-The 5 Vs of Big Data:
-  Volume   — the large amount of data generated and stored
-  Velocity — the speed at which data is generated and processed
-  Variety  — the different types and formats of data (structured, semi-structured, unstructured)
-  Veracity — the quality, accuracy, and reliability of the data
-  Value    — the ultimate goal: turning data into meaningful insight
-
-Sources of Big Data:
-  M2M (Machine to Machine) — data exchanged between connected devices
-  People to Machine — data generated through human interactions with technology
-  Organisational Data — data produced by businesses and institutions
-
-TOPIC 2: Operational and Analytical Big Data (Lecture: 02/06/2026)
-
-Operational Big Data — real or nearly real-time data supporting daily business operations.
-  Characteristics: processes data immediately, supports transactional systems, requires fast processing, continuously updated.
-  Sources: social media, online transactions, ATM transactions, IoT sensors, mobile apps, GPS.
-  Examples: online banking transactions, e-commerce orders, hospital patient monitoring, airline reservations, traffic management.
-  Technologies: Apache Kafka, Apache Storm, Apache Flink.
-  Advantages: real-time decision making, faster customer response, improved operational efficiency, enhanced customer experience.
-  Disadvantages: high infrastructure cost, data security concerns, complex management.
-
-Analytical Big Data — historical and accumulated data for analysis, forecasting, and strategic decisions.
-  Characteristics: focuses on past/current data, supports BI and analytics, used for trend analysis, stored in data warehouses.
-  Sources: historical transaction records, customer databases, business reports, data warehouses, web logs.
-  Examples: sales trends, customer behaviour analysis, market forecasting, fraud detection, academic research.
-  Technologies: Apache Spark, BI tools, machine learning platforms.
-  Challenges: large storage requirements, data integration difficulties, complex analysis, privacy concerns.
-
-Comparison Table — Operational vs Analytical:
-  Nature:      Real-time / near real-time           vs  Historical / accumulated
-  Purpose:     Daily operations & decisions         vs  Analysis, forecasting, strategy
-  Freshness:   Continuously updated                 vs  Stored in data warehouses
-  Focus:       Transactional systems                vs  Business intelligence & trends
-  Tech:        Kafka, Storm, Flink                  vs  Spark, BI tools, ML platforms
-  Examples:    ATM txn, GPS, e-commerce             vs  Sales trends, fraud detection
-
-TOPIC 3: Big Data Skills (Lecture: 09/06/2026)
-
-Definition: Big Data Skills = knowledge, abilities, and competencies required to collect, process, store, analyze, visualize, and interpret large amounts of data.
-
-5 Categories:
-  1. Technical Skills — programming (Python, Java), database management (MySQL, Oracle), big data frameworks (Hadoop, Spark, Kafka)
-  2. Analytical Skills — data transformation, statistical analysis, pattern recognition; tools: Python, Excel, Spark
-  3. Business Skills — translating analysis into actionable business insights and strategic decisions
-  4. Communication Skills — report writing, presentation, team collaboration, storytelling with data
-  5. Problem Solving Skills — data-driven approach to complex business problems
-
-Problem Solving Steps: Identify problem → Collect data → Analyse data → Generate insights → Recommend solutions
-
-Case Study (Assignment): UniUyo wants to improve student performance using big data analytics.
-  Tasks: (1) identify data sources, (2) explain collection and storage, (3) determine analytics type,
-         (4) recommend tools, (5) discuss benefits and challenges.
-`;
-
 export const MODULE_KNOWLEDGE = `
 === INTERACTIVE PROGRAMMING TRACKS — FULL MODULE CATALOGUE ===
 
@@ -590,6 +528,101 @@ export const MODULE_INDEX = MODULE_KNOWLEDGE
 
 const normalizeCode = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
 
+// courses.js is the single source of truth for lecture-note content (it's what
+// LectureNotes.jsx renders on the course page) — read it directly rather than
+// hand-copying notes into a second knowledge base here, which drifts the
+// moment someone edits courses.js and forgets the copy.
+//
+// A few course codes are duplicated in courses.js (e.g. "CYB 311" is both
+// Cryptography and SIWES I). For note lookup, an entry that actually HAS
+// lecture notes wins over one that doesn't — otherwise plain insertion order
+// could resolve "CYB 311" to the notes-less sibling and silently drop real
+// notes once they're added.
+const courseByNormalizedCode = new Map();
+for (const c of courses) {
+  const key = normalizeCode(c.code);
+  const existing = courseByNormalizedCode.get(key);
+  if (!existing || (!existing.lectureNotes?.length && c.lectureNotes?.length)) {
+    courseByNormalizedCode.set(key, c);
+  }
+}
+
+function lectureNoteItemLine(item) {
+  if (item && typeof item === 'object') return item.def ? `${item.term} — ${item.def}` : String(item.term ?? '');
+  return String(item ?? '');
+}
+
+// Flattens one lecture-note section (see LectureNotes.jsx for the shape) to
+// plain text. Types with no textual content for the model (image, code, mosca,
+// resource) are skipped.
+function flattenLectureNoteSection(section) {
+  if (!section) return '';
+  const parts = [];
+  switch (section.type) {
+    case 'text':
+    case 'definition':
+    case 'note':
+      if (section.text) parts.push(section.text);
+      if (Array.isArray(section.items)) parts.push(section.items.map(lectureNoteItemLine).join('; '));
+      break;
+    case 'bullets':
+    case 'termlist':
+    case 'fivers':
+      if (Array.isArray(section.items)) parts.push(section.items.map(lectureNoteItemLine).join('; '));
+      break;
+    case 'table':
+      if (Array.isArray(section.rows)) parts.push(section.rows.map(r => r.join(' | ')).join('; '));
+      break;
+    case 'proscons':
+      if (Array.isArray(section.advantages)) parts.push(`Advantages: ${section.advantages.join('; ')}`);
+      if (Array.isArray(section.disadvantages)) parts.push(`Disadvantages: ${section.disadvantages.join('; ')}`);
+      break;
+    case 'casestudy':
+      if (section.prompt) parts.push(section.prompt);
+      if (Array.isArray(section.tasks)) parts.push(`Tasks: ${section.tasks.join('; ')}`);
+      break;
+    default:
+      return '';
+  }
+  const body = parts.filter(Boolean).join(' ');
+  if (!body) return '';
+  return section.heading ? `${section.heading}: ${body}` : body;
+}
+
+// Per-topic content cap keeps one dense topic (e.g. a full student seminar
+// writeup) from crowding out the rest; the total cap keeps the whole course's
+// notes within the tutor's per-request token budget (see MAX_NOTE_CHARS in
+// tutorTools.js for the sibling limit on uploaded notes).
+const MAX_LECTURE_TOPIC_CHARS = 500;
+const MAX_LECTURE_NOTES_CHARS = 3500;
+
+// Every topic title, in order, so "list the topics" is always answerable
+// exactly — even once the truncated content below cuts a later topic off.
+function lectureNotesText(course) {
+  const topics = course?.lectureNotes;
+  if (!topics?.length) return '';
+
+  const titleLine = topics.map(t => `Topic ${t.number}: ${t.title}`).join('\n');
+
+  const blocks = topics.map(topic => {
+    const body = (topic.sections || [])
+      .map(flattenLectureNoteSection)
+      .filter(Boolean)
+      .join(' ')
+      .slice(0, MAX_LECTURE_TOPIC_CHARS);
+    return body
+      ? `Topic ${topic.number}: ${topic.title} — ${body}`
+      : `Topic ${topic.number}: ${topic.title} (no notes uploaded yet)`;
+  });
+
+  let details = blocks.join('\n\n');
+  if (details.length > MAX_LECTURE_NOTES_CHARS) {
+    details = `${details.slice(0, MAX_LECTURE_NOTES_CHARS)}\n[...truncated — ask about a specific topic by name for more detail]`;
+  }
+
+  return `ALL TOPICS:\n${titleLine}\n\nTOPIC DETAIL:\n${details}`;
+}
+
 // Resolves a (possibly loosely-formatted) course code to its catalogue entry.
 // Returns { code, outline } where `code` is the CANONICAL course code exactly
 // as stored in courses.js / course_materials.course_code (e.g. "CYB 222"),
@@ -611,18 +644,24 @@ export function findCourseEntry(courseCode) {
   let matches = blocks.filter(b => codeOf(b) === target);
   if (!matches.length) matches = blocks.filter(b => codeOf(b).endsWith(target));
 
-  const noteSections = LECTURE_NOTES_KNOWLEDGE
-    .split(/\n(?=── )/)
-    .filter(s => s.startsWith('── ') && normalizeCode(s.split('\n')[0]).includes(target));
+  // Same exact-then-suffix precedence as the catalogue block match above, so
+  // "CYB 222" resolves lecture notes for CYB 222 and not UUY-CYB 222.
+  let courseObj = courseByNormalizedCode.get(target);
+  if (!courseObj) {
+    for (const [code, c] of courseByNormalizedCode) {
+      if (code.endsWith(target)) { courseObj = c; break; }
+    }
+  }
+  const notes = courseObj ? lectureNotesText(courseObj) : '';
 
-  if (!matches.length && !noteSections.length) return null;
+  if (!matches.length && !notes) return null;
 
   const outline = [
     ...matches.map(b => b.trim()),
-    ...noteSections.map(s => `LECTURE NOTES (authoritative, from the lecturer):\n${s.trim()}`),
-  ].join('\n\n');
+    notes && `LECTURE NOTES (authoritative, from the lecturer):\n${notes}`,
+  ].filter(Boolean).join('\n\n');
 
-  return { code: matches.length ? firstLineCode(matches[0]) : null, outline };
+  return { code: matches.length ? firstLineCode(matches[0]) : (courseObj?.code ?? null), outline };
 }
 
 // Full catalogue entry text for one course code, plus uploaded lecture notes
