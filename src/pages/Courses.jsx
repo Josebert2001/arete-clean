@@ -361,6 +361,41 @@ function getStoredLevel() {
   }
 }
 
+// Last semester picked per level, so a returning student isn't re-asked
+// "which semester are you in?" every time — only shown once per level.
+const SEMESTER_STORAGE_KEY = 'arete-selected-semester';
+
+function getStoredSemesterMap() {
+  try {
+    return JSON.parse(localStorage.getItem(SEMESTER_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function getStoredSemester(level) {
+  if (typeof level !== 'number') return null;
+  return parseSemester(getStoredSemesterMap()[level]);
+}
+
+function setStoredSemester(level, semester) {
+  try {
+    const map = getStoredSemesterMap();
+    map[level] = semester;
+    localStorage.setItem(SEMESTER_STORAGE_KEY, JSON.stringify(map));
+  } catch { /* private mode — picker shows again next visit */ }
+}
+
+// Forget a level's remembered semester so the picker shows again for it.
+function clearStoredSemester(level) {
+  if (typeof level !== 'number') return;
+  try {
+    const map = getStoredSemesterMap();
+    delete map[level];
+    localStorage.setItem(SEMESTER_STORAGE_KEY, JSON.stringify(map));
+  } catch { /* private mode — nothing stored anyway */ }
+}
+
 const TYPE_FILTERS = [
   { id: 'all', label: 'All types' },
   { id: 'interactive', label: 'Interactive tracks' },
@@ -380,13 +415,14 @@ export default function Courses() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [semesterFilter, setSemesterFilter] = useState(0);
 
-  // The URL is the source of truth; the last remembered level fills in when
-  // the param is absent. null level = show the level picker. The semester is
-  // deliberately not remembered — picking a level always asks for it, one
-  // question at a time.
+  // The URL is the source of truth; the last remembered level/semester fill
+  // in when their params are absent. null level = show the level picker;
+  // null semester (for a returning level) = show the semester picker — but
+  // only once per level, since it's remembered after that.
   const paramLevel = parseLevel(searchParams.get('level'));
   const activeLevel = paramLevel !== null ? paramLevel : getStoredLevel();
-  const activeSemester = typeof activeLevel === 'number' ? parseSemester(searchParams.get('semester')) : null;
+  const paramSemester = typeof activeLevel === 'number' ? parseSemester(searchParams.get('semester')) : null;
+  const activeSemester = paramSemester !== null ? paramSemester : getStoredSemester(activeLevel);
 
   function selectLevel(level) {
     setSearchParams({ level: String(level) });
@@ -408,6 +444,14 @@ export default function Courses() {
     setSearchParams({});
   }
 
+  // "Change semester" needs to forget the stored choice for this level too,
+  // otherwise the URL-normalisation effect below would just restore it and
+  // the picker would never show.
+  function clearSemester() {
+    clearStoredSemester(activeLevel);
+    selectLevel(activeLevel);
+  }
+
   // Normalise a bare /courses URL to the remembered level so back/forward and
   // link sharing always reflect what is on screen.
   useEffect(() => {
@@ -417,12 +461,28 @@ export default function Courses() {
     }
   }, [paramLevel, setSearchParams]);
 
+  // Same for the semester once a level is known (e.g. a dashboard link that
+  // only sets ?level=): fill in the remembered semester so a returning
+  // student lands straight on their courses instead of the picker.
+  useEffect(() => {
+    if (typeof activeLevel === 'number' && paramSemester === null) {
+      const stored = getStoredSemester(activeLevel);
+      if (stored !== null) setSearchParams({ level: String(activeLevel), semester: String(stored) }, { replace: true });
+    }
+  }, [activeLevel, paramSemester, setSearchParams]);
+
   useEffect(() => {
     if (activeLevel === null) return;
     try {
       localStorage.setItem(LEVEL_STORAGE_KEY, String(activeLevel));
     } catch { /* private mode — picker shows again next visit */ }
   }, [activeLevel]);
+
+  useEffect(() => {
+    if (typeof activeLevel === 'number' && activeSemester !== null) {
+      setStoredSemester(activeLevel, activeSemester);
+    }
+  }, [activeLevel, activeSemester]);
 
   // Stepping through the picker (level → semester → courses) only changes the
   // query string, so App's pathname-based ScrollToTop never fires. Without this,
@@ -681,7 +741,7 @@ export default function Courses() {
           <SemesterCoursesView
             level={activeLevel}
             semester={activeSemester}
-            onBack={() => selectLevel(activeLevel)}
+            onBack={clearSemester}
             onSwitchSemester={selectSemester}
             onShowAll={() => selectLevel('all')}
           />
