@@ -5082,14 +5082,17 @@ export const courses = [
     description: 'Attacking and defending web and mobile applications. Covers the OWASP Top 10 in depth, secure coding practices for Java/Python/Kotlin/Swift, audit and QA testing, and mobile-specific threats on iOS and Android platforms.',
     topics: [
       'Impact of the Internet and web applications on the business world',
+      'Principles and strategies for designing and implementing secure applications',
+      'Secure program development for mobile (Android, iOS) and web platforms',
+      'Web-based risks, common website attacks, weaknesses and security best practices',
       'OWASP Top 10: in-depth review of each vulnerability',
-      'SQL injection: manual and automated exploitation, mitigation',
-      'Cross-Site Scripting (XSS): reflected, stored, DOM-based',
-      'Authentication attacks: brute force, credential stuffing, CSRF',
+      'SQL injection, Cross-Site Scripting (XSS), and CSRF: exploitation and mitigation',
       'Broken access control, IDOR, SSRF and XXE',
-      'Secure coding practices in Java, Python, Kotlin (Android) and Swift (iOS)',
-      'Vulnerability/security assessments, audit and compliance, and QA testing',
-      'Next-generation challenges and a comprehensive lifecycle approach to web/mobile security',
+      'Attributes and qualities of secure coding practices (Java, Python, Kotlin, Swift)',
+      'Value and importance of vulnerability and security assessment',
+      'Role of audit compliance and quality assurance (QA) testing',
+      'Next-generation challenges in securing web/mobile applications and data',
+      'A lifecycle approach to web/mobile application security',
     ],
     textbooks: [
       { title: 'The Web Application Hacker\'s Handbook', authors: 'Stuttard & Pinto', note: '2nd ed. — the definitive reference; highly detailed' },
@@ -5163,6 +5166,153 @@ export const courses = [
       },
       {
         number: '2',
+        title: 'Impact of the Internet & Web Applications on Business',
+        date: '8 Jul 2026',
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'The internet and web applications have a significant impact on business operations, enabling new models of commerce, communication, and marketing. The sections below outline the key areas of impact: e-commerce, teleconferencing and remote collaboration, marketing and customer engagement, and supply chain and logistics.',
+          },
+          {
+            type: 'definition',
+            heading: 'E-commerce',
+            text: 'E-commerce refers to markets enabled by the internet — the buying and selling of goods and services online.',
+          },
+          {
+            type: 'table',
+            heading: 'Types of E-commerce Models',
+            headers: ['Model', 'Description', 'Example'],
+            rows: [
+              ['Business-to-Business (B2B)', 'Businesses dealing with other businesses, including manufacturers. Big businesses connect with smaller businesses.', 'Alibaba.com'],
+              ['Business-to-Consumer (B2C)', 'A business sells directly to consumers; the manufacturer sends products straight to the customer.', 'Konga, Jumia, Temu'],
+              ['Consumer-to-Business (C2B)', 'The reverse of B2C — a consumer offers products or services to businesses, and often advertises those businesses themselves.', '—'],
+              ['Consumer-to-Consumer (C2C)', 'Consumers provide goods and services to other consumers, usually through a platform that connects them.', '—'],
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'An easy way to keep the models apart is to read each one left-to-right as “seller-to-buyer”: B2B is a business selling to a business, B2C a business selling to a consumer, C2B a consumer selling to a business, and C2C a consumer selling to another consumer.',
+              'The examples matter for exams: Alibaba is the classic B2B marketplace, while Jumia, Konga and Temu are B2C stores that sell straight to the shopper.',
+              'C2B and C2C are the two students most often forget — anchor them to platforms you already use (a paid gig on Fiverr is C2B; a Jiji listing between two individuals is C2C).',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Benefits of E-commerce to Business',
+            items: [
+              'Reduces operational cost',
+              'Extends the operating hours of the business — an online store never closes',
+              'Increases sales conversion',
+              'Optimises business processes',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Teleconferencing & Remote Collaboration',
+            text: 'Teleconferencing is the use of digital technology to communicate between businesses or individuals located in different geographical areas.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Types of Teleconferencing / Remote Collaboration',
+            items: [
+              { term: 'Audio Conferencing', def: 'communication by voice only, with no video — e.g. a conference phone call' },
+              { term: 'Video Conferencing', def: 'participants see and hear each other in real time — e.g. Zoom or Google Meet' },
+              { term: 'Web Conferencing', def: 'online meetings that add shared screens, slides and documents to the call' },
+              { term: 'Hybrid Conferencing', def: 'combines in-person and remote participants in the same meeting' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Benefits of Teleconferencing & Remote Collaboration',
+            items: [
+              'Fosters faster decision-making',
+              'Lowers or eliminates travel and transport costs',
+              'Gives a business access to a wider pool of talent, regardless of location',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Marketing, Advertising & Customer Engagement',
+            text: 'The internet lets businesses reach and engage customers directly, and much of it is powered by tracking. When a cookie is dropped on a platform, it records that a person searched for a particular item — which lets the business show that person targeted adverts later.',
+          },
+          {
+            type: 'note',
+            text: 'A cookie is a small text file a website stores in your browser to remember you — which items you viewed, whether you are logged in, what is in your cart. Advertisers use these to build a picture of your interests and serve “targeted” ads. It is also why the same product seems to follow you around the web after you look at it once, and it is exactly the kind of tracking that the data-privacy laws mentioned under the challenges below try to regulate.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Types of Marketing / Advertising',
+            items: [
+              'Search Engine Optimization (SEO) — researching and using the right keywords so a page attracts relevant search traffic',
+              'Content and social media marketing',
+              'Email marketing',
+              'Affiliate marketing',
+              'Advertising by SMS',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Benefits of Marketing, Advertising & Customer Engagement',
+            items: [
+              'Cost-effective, with a higher return on investment',
+              'Precise targeting and optimisation',
+              'Geographic flexibility — reach customers anywhere',
+              'Enables two-way communication with customers',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Supply Chain & Logistics',
+            text: 'Logistics and supply chain management benefit significantly from internet connectivity and web applications, which coordinate the flow of goods, information and resources.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Types of Logistics Coordination',
+            items: [
+              'Flow-based coordination model',
+              'Mechanism-based coordination',
+              'Technology and data',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Benefits of Deploying Supply Chain & Logistics Online',
+            items: [
+              'Reduces operational cost',
+              'Improves customer satisfaction and loyalty',
+              'Increases efficiency and productivity',
+              'Enhances data visibility across the chain',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Challenges of Businesses Impacted by the Internet',
+            items: [
+              'Cybersecurity threats',
+              'Data privacy and compliance',
+              'High cost',
+              'Bandwidth management of internet services',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Solutions',
+            items: [
+              'Avoid service providers that do not offer reliable internet service',
+              'Implement an automatic failover system',
+              'Install a firewall and antivirus on your devices',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Notice that the very first challenge listed is “cybersecurity threats.” Every benefit on this page — an always-open store, remote meetings, customer tracking, connected logistics — also widens the attack surface a business must defend. That is exactly why this course exists: the topics that follow look at how these web and mobile channels are attacked, and how to secure them.',
+          },
+        ],
+      },
+      {
+        number: '3',
         title: 'Risks & Threats',
         sections: [
           {
@@ -5240,7 +5390,7 @@ export const courses = [
         ],
       },
       {
-        number: '3',
+        number: '4',
         title: 'Website Attacks',
         sections: [
           {
@@ -5294,7 +5444,7 @@ export const courses = [
         ],
       },
       {
-        number: '4',
+        number: '5',
         title: 'Strengths, Weaknesses & Best Practice',
         sections: [
           {
@@ -5378,6 +5528,49 @@ export const courses = [
               'Track API usage',
               'Employ dynamic testing for application testing',
             ],
+          },
+        ],
+      },
+      {
+        number: '6',
+        title: 'Audit, Compliance & Quality Assurance',
+        date: '8 Jul 2026',
+        sections: [
+          {
+            type: 'text',
+            heading: 'Overview',
+            text: 'Beyond the testing methodologies and protective mechanisms in the previous topic, keeping a web or mobile application secure is an ongoing operational discipline. The following are practical measures for maintaining audit compliance and quality assurance in day-to-day operation.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Practical Measures for Audit Compliance & QA',
+            items: [
+              'Ensure devices are properly secured',
+              'Apply regular updates and patches',
+              'Train staff on threat awareness',
+              'Implement Multi-Factor Authentication (MFA)',
+              'Allocate bandwidth to your devices and monitor them regularly',
+              'Organise regular maintenance',
+              'Make sure data is encrypted',
+              'Implement compliance management tools',
+              'Perform regular audits',
+              'Have a technical expert available for support',
+              'Set up an in-house IT team within your staff',
+              'Keep proper documentation for all system and network configurations',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Audit, compliance and QA are easy to confuse: an audit is a check of what you actually did (reviewing logs and configurations after the fact), compliance means meeting the rules a standard or law requires, and quality assurance (QA) is testing that the app behaves correctly and securely before and after release.',
+              'MFA (Multi-Factor Authentication) asks for a second proof of identity — a one-time code, a phone prompt, or a fingerprint — on top of the password, so a stolen password alone is not enough to log in.',
+              'Encrypting data “at rest and in transit” means scrambling it both while it is stored and while it travels over the network, so that intercepted or stolen data is unreadable without the key.',
+              'Proper documentation is a security control in its own right: you cannot audit, patch, or recover a system whose configuration nobody has written down.',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'These operational measures complement the testing methodologies from the previous topic — SAST, DAST, IAST and SCA find flaws in the code, while audits, patching, staff training and documentation keep the running system secure over time. Exam questions often ask you to connect the two: a vulnerability found in testing is only truly fixed once the patch is deployed and the change is documented and audited.',
           },
         ],
       },
@@ -5682,6 +5875,96 @@ export const courses = [
         options: ['One version works across platforms, so there is no need to maintain separate iOS and Android builds', 'They never need a server', 'They require no developers at all', 'Browsers pay for the hosting'],
         correctIndex: 0,
         explanation: 'A single web version works across platforms, avoiding the cost of building and maintaining separate iOS and Android apps.',
+      },
+      {
+        question: 'What is e-commerce?',
+        options: ['A programming language for online stores', 'Markets enabled by the internet — the buying and selling of goods and services online', 'A type of teleconferencing', 'A firewall for retail websites'],
+        correctIndex: 1,
+        explanation: 'E-commerce refers to markets enabled by the internet, involving the buying and selling of goods and services online.',
+      },
+      {
+        question: 'Alibaba.com is given as an example of which e-commerce model?',
+        options: ['Business-to-Consumer (B2C)', 'Consumer-to-Business (C2B)', 'Business-to-Business (B2B)', 'Consumer-to-Consumer (C2C)'],
+        correctIndex: 2,
+        explanation: 'Alibaba.com is the classic B2B example — businesses dealing with other businesses, including manufacturers.',
+      },
+      {
+        question: 'Konga, Jumia and Temu are examples of which e-commerce model?',
+        options: ['Business-to-Consumer (B2C)', 'Business-to-Business (B2B)', 'Consumer-to-Business (C2B)', 'Consumer-to-Consumer (C2C)'],
+        correctIndex: 0,
+        explanation: 'They sell directly to consumers — the business (or manufacturer) sends products straight to the customer, which is B2C.',
+      },
+      {
+        question: 'In the Consumer-to-Consumer (C2C) model:',
+        options: ['A manufacturer ships directly to shoppers', 'Consumers provide goods and services to other consumers', 'Big businesses connect with smaller businesses', 'A consumer offers services to a business'],
+        correctIndex: 1,
+        explanation: 'C2C deals with the process by which some consumers provide goods and services to other consumers.',
+      },
+      {
+        question: 'Which of these is listed as a benefit of e-commerce to business?',
+        options: ['It shortens the operating hours of the business', 'It guarantees zero cybersecurity risk', 'It removes the need for marketing', 'It reduces operational cost and extends the operating hours of the business'],
+        correctIndex: 3,
+        explanation: 'E-commerce reduces operational cost, extends operating hours (an online store never closes), increases sales conversion, and optimises processes.',
+      },
+      {
+        question: 'What is teleconferencing?',
+        options: ['Using digital technology to communicate between businesses or individuals in different geographical areas', 'A method of encrypting phone calls', 'Selling goods to other businesses online', 'A search-engine keyword strategy'],
+        correctIndex: 0,
+        explanation: 'Teleconferencing is the use of digital technology to communicate between businesses or individuals located in different geographical areas.',
+      },
+      {
+        question: 'Audio conferencing differs from video conferencing in that it:',
+        options: ['Requires participants to be in the same room', 'Uses voice communication only, with nothing shown visually', 'Always includes shared screens and slides', 'Combines in-person and remote participants'],
+        correctIndex: 1,
+        explanation: 'Audio conferencing is communication by voice only; video conferencing lets participants see and hear each other; hybrid combines in-person and remote.',
+      },
+      {
+        question: 'When a cookie is "dropped" on a platform after a user searches for an item, what does it enable?',
+        options: ['Automatic virus scanning of the device', 'Free products for the user', 'Targeted advertising and customer engagement based on what the person searched for', 'Faster internet bandwidth'],
+        correctIndex: 2,
+        explanation: 'The cookie records that the person searched for a particular item, letting the business show targeted adverts later.',
+      },
+      {
+        question: 'Search Engine Optimization (SEO) involves:',
+        options: ['Optimising activities and research so that keywords attract relevant traffic', 'Sending bulk advertising by SMS', 'Paying consumers to advertise a business', 'Encrypting search results'],
+        correctIndex: 0,
+        explanation: 'SEO is about researching and using the right keywords so a page attracts relevant search traffic.',
+      },
+      {
+        question: 'Which of these is listed as a CHALLENGE for businesses impacted by the internet?',
+        options: ['Two-way communication with customers', 'Cybersecurity threats and data privacy/compliance', 'Faster decision making', 'Higher return on investment'],
+        correctIndex: 1,
+        explanation: 'The challenges listed are cybersecurity threats, data privacy and compliance, high cost, and bandwidth management of internet services.',
+      },
+      {
+        question: 'Why does Multi-Factor Authentication (MFA) improve security?',
+        options: ['It makes passwords longer', 'It encrypts data at rest', 'It removes the need for passwords entirely', 'A stolen password alone is not enough to log in — a second proof of identity is required'],
+        correctIndex: 3,
+        explanation: 'MFA asks for a second proof of identity (a one-time code, phone prompt, or fingerprint) on top of the password.',
+      },
+      {
+        question: 'Which of these is among the practical measures for audit compliance and quality assurance?',
+        options: ['Perform regular audits and keep proper documentation of all system and network configurations', 'Disable software updates to keep systems stable', 'Share one admin password across the team', 'Avoid staff training to save costs'],
+        correctIndex: 0,
+        explanation: 'The measures include regular audits, proper documentation, regular updates and patches, staff threat-awareness training, MFA, and encryption.',
+      },
+      {
+        question: 'What is the difference between an audit and quality assurance (QA)?',
+        options: ['They are the same activity', 'An audit blocks attacks in real time; QA is a type of firewall', 'An audit reviews what was actually done (logs, configurations) after the fact; QA tests that the app behaves correctly and securely', 'QA is only for mobile apps; audits are only for web apps'],
+        correctIndex: 2,
+        explanation: 'An audit is a check of what you actually did; compliance means meeting required rules; QA is testing that the app behaves correctly and securely.',
+      },
+      {
+        question: 'Why is proper documentation of system and network configurations a security control in its own right?',
+        options: ['It replaces the need for encryption', 'You cannot audit, patch, or recover a system whose configuration nobody has written down', 'It makes the system run faster', 'Auditors are only allowed to read documents, not systems'],
+        correctIndex: 1,
+        explanation: 'Without documented configurations there is nothing reliable to audit against, patch consistently, or rebuild from after an incident.',
+      },
+      {
+        question: 'How do operational measures like patching and audits relate to testing methodologies like SAST and DAST?',
+        options: ['They replace testing entirely', 'Testing finds flaws in the code, while audits, patching and documentation keep the running system secure over time', 'Operational measures only apply before release', 'SAST and DAST are operational measures'],
+        correctIndex: 1,
+        explanation: 'A vulnerability found in testing is only truly fixed once the patch is deployed and the change is documented and audited.',
       },
     ],
   },
