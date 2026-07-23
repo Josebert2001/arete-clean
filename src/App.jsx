@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
+import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
@@ -220,6 +221,7 @@ export default function App() {
       </main>
       {!isChatPage && <Footer />}
       {!isChatPage && <FloatingHelp />}
+      <PWAUpdatePrompt />
     </div>
     </AuthProvider>
     </ThemeProvider>
