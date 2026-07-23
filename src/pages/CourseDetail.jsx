@@ -55,6 +55,21 @@ export default function CourseDetail() {
   const hasNotes = course.lectureNotes?.length > 0;
   const hasQuiz = course.quiz?.length > 0;
 
+  // Which outline topics the lecture notes actually reach. A note topic opts in
+  // with `covers: [n]` (fully) or `partial: [n]` (touched only). Courses whose
+  // notes declare neither produce an empty map and render as they always have.
+  const topicCoverage = new Map();
+  (course.lectureNotes || []).forEach((note) => {
+    const mark = (n, level) => {
+      const entry = topicCoverage.get(n) || { chapters: [], level: 'partial' };
+      entry.chapters.push(note.number);
+      if (level === 'full') entry.level = 'full';
+      topicCoverage.set(n, entry);
+    };
+    (note.covers || []).forEach(n => mark(n, 'full'));
+    (note.partial || []).forEach(n => mark(n, 'partial'));
+  });
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
 
@@ -180,15 +195,45 @@ export default function CourseDetail() {
               <CheckCircle2 size={16} className="text-moss" />
               Topics Covered
             </h2>
+            {topicCoverage.size > 0 && (
+              <p className="text-xs text-coffee-500 leading-snug mb-4">
+                Course outline, with the lecture-note topic that covers each item.
+              </p>
+            )}
             <ol className="space-y-2">
-              {course.topics.map((topic, i) => (
-                <li key={i} className="flex gap-3 text-sm">
-                  <span className="font-mono text-xs text-coffee-400 tabular-nums mt-0.5 w-5 shrink-0">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span className="text-coffee-700 leading-snug">{topic}</span>
-                </li>
-              ))}
+              {course.topics.map((topic, i) => {
+                const coverage = topicCoverage.get(i + 1);
+                return (
+                  <li key={i} className="flex gap-3 text-sm">
+                    <span className="font-mono text-xs text-coffee-400 tabular-nums mt-0.5 w-5 shrink-0">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="leading-snug">
+                      <span className="text-coffee-700">{topic}</span>
+                      {topicCoverage.size > 0 && (
+                        coverage ? (
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('notes')}
+                            className={`ml-2 align-middle font-mono text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap transition-colors ${
+                              coverage.level === 'full'
+                                ? 'bg-moss/10 text-moss hover:bg-moss/20'
+                                : 'bg-ember-500/10 text-ember-500 hover:bg-ember-500/20'
+                            }`}
+                            title={`Lecture note ${coverage.chapters.join(', ')}`}
+                          >
+                            {coverage.level === 'full' ? 'notes' : 'partial'} · {coverage.chapters.join(', ')}
+                          </button>
+                        ) : (
+                          <span className="ml-2 align-middle font-mono text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap bg-coffee-100 text-coffee-400">
+                            no notes yet
+                          </span>
+                        )
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
           </div>
         </div>
