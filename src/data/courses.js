@@ -5080,19 +5080,19 @@ export const courses = [
     units: 2, level: 200, semester: 2, lh: 15, ph: 45,
     subject: 'cyb',
     description: 'Attacking and defending web and mobile applications. Covers the OWASP Top 10 in depth, secure coding practices for Java/Python/Kotlin/Swift, audit and QA testing, and mobile-specific threats on iOS and Android platforms.',
+    // The lecturer's official course content outline, in its given order.
+    // Lecture-note topics declare which of these numbers they cover via
+    // `covers` / `partial`, so CourseDetail can flag the gaps.
     topics: [
-      'Impact of the Internet and web applications on the business world',
-      'Principles and strategies for designing and implementing secure applications',
-      'Secure program development for mobile (Android, iOS) and web platforms',
-      'Web-based risks, common website attacks, weaknesses and security best practices',
-      'OWASP Top 10: in-depth review of each vulnerability',
-      'SQL injection, Cross-Site Scripting (XSS), and CSRF: exploitation and mitigation',
-      'Broken access control, IDOR, SSRF and XXE',
-      'Attributes and qualities of secure coding practices (Java, Python, Kotlin, Swift)',
-      'Value and importance of vulnerability and security assessment',
-      'Role of audit compliance and quality assurance (QA) testing',
+      'The impact of the internet and web applications on the business world',
+      'Principles and strategies for the design and implementation of secure applications — writing software that makes it difficult for intruders to exploit security loopholes in applications/code',
+      'Secure program development for mobile (Android, iOS) and web',
+      'Delineation of web-based risks, common website attacks, weaknesses, and security best practices',
+      'Value and importance of vulnerability and security assessment for web and mobile applications',
+      'Attributes and qualities of secure coding practices',
+      'Role and importance of audit compliance and quality assurance testing for web/mobile applications',
       'Next-generation challenges in securing web/mobile applications and data',
-      'A lifecycle approach to web/mobile application security',
+      'Lifecycle approach to web/mobile application security',
     ],
     textbooks: [
       { title: 'The Web Application Hacker\'s Handbook', authors: 'Stuttard & Pinto', note: '2nd ed. — the definitive reference; highly detailed' },
@@ -5114,6 +5114,7 @@ export const courses = [
       {
         number: '1',
         title: 'Foundations: Web & Mobile Applications',
+        covers: [],  // groundwork for the outline, not an outline item itself
         sections: [
           {
             type: 'definition',
@@ -5168,6 +5169,7 @@ export const courses = [
         number: '2',
         title: 'Impact of the Internet & Web Applications on Business',
         date: '8 Jul 2026',
+        covers: [1],
         sections: [
           {
             type: 'definition',
@@ -5313,7 +5315,212 @@ export const courses = [
       },
       {
         number: '3',
+        title: 'Principles & Strategies for Secure Design',
+        covers: [2],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'These notes cover the design principles and practical strategies used to secure web and mobile applications against unauthorized access and data compromise, with an emphasis on writing systems and software that make it difficult for intruders to exploit security loopholes. By the end of this topic you should be able to explain why systems are targeted, describe the categories of people who attempt unauthorized access, and identify the design-level security controls that can be layered together to protect an application.',
+          },
+          {
+            type: 'text',
+            heading: 'Understanding the Threat Landscape',
+            text: 'Before a system can be secured, it is important to understand who attacks systems and why. Motive shapes method: an attacker seeking financial gain behaves differently from one motivated by activism or curiosity, and a well-designed system anticipates this range of behaviour rather than defending against a single type of adversary.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Why Systems Are Attacked',
+            items: [
+              { term: 'Recreational / “for fun”', def: 'curiosity or a technical challenge, without intent to cause damage' },
+              { term: 'Fame', def: 'the desire for recognition within a hacking community' },
+              { term: 'Activism (“hacktivism”)', def: 'pursuing a political, social, or ideological cause' },
+              { term: 'Financial gain', def: 'the most common driver of serious cybercrime — fraud, extortion, data resale' },
+              { term: 'Coercion', def: 'an individual is forced or blackmailed into compromising a system' },
+              { term: 'Destruction', def: 'intent to disrupt, delete, or disable systems and data' },
+              { term: 'Espionage', def: 'gathering confidential information for competitive, corporate, or state advantage' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Threat Actor Profiles',
+            items: [
+              { term: 'Hobbyists', def: 'informal, curiosity-driven individuals, often with limited resources' },
+              { term: 'Government & law-enforcement agencies', def: 'acting under legal authority, though their tools and techniques mirror those of attackers' },
+              { term: 'Activists', def: 'acting in pursuit of a cause rather than personal gain' },
+              { term: 'Cyberterrorists', def: 'seeking to cause fear, disruption, or harm at scale' },
+              { term: 'Criminal actors', def: 'organized groups pursuing financial gain' },
+              { term: 'Insiders', def: 'employees or contractors who already hold legitimate access, making them uniquely positioned to cause damage' },
+              { term: 'AI-augmented hackers', def: 'an emerging category using automated and AI-assisted tools to scale reconnaissance and attacks' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Design implication: because insiders already hold valid credentials, controls such as time/volume-constrained access and input/request filtering matter as much as authentication controls that only stop outsiders. An authentication-only strategy is defeated by anyone who is already legitimately logged in.',
+          },
+          {
+            type: 'text',
+            heading: 'Core Principles for Securing a System',
+            text: 'The controls that follow are layered, not alternatives — a well-designed system combines several of them so that if one layer fails, another still limits the damage an intruder can do. This is the principle known as defence in depth.',
+          },
+          {
+            type: 'definition',
+            heading: 'Password Security & Creation',
+            text: 'Password policy is the most basic layer of access control, and it should be enforced at the point a user or account is created, not applied after the fact.',
+          },
+          {
+            type: 'bullets',
+            heading: 'What a Strong Password Policy Requires',
+            items: [
+              'A minimum length — at least six characters, though longer is stronger',
+              'Mixed case (“camel casing”) — at least one uppercase letter combined with lowercase letters',
+              'At least one special character or symbol — e.g. @, #, comma, full stop, hyphen, underscore, forward slash, or backslash',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Beyond the lecture: current guidelines such as NIST SP 800-63B now favour length and passphrase uniqueness over forced complexity, and recommend checking new passwords against known breached-password lists. The point worth holding on to is that complexity rules alone do not guarantee a password has not been reused somewhere else that has already been breached.',
+          },
+          {
+            type: 'definition',
+            heading: 'Two-Factor Authentication (2FA)',
+            text: '2FA adds a second, independently generated credential on top of the known password. During registration the system collects an alternative contact point — typically a phone number or email address — and at login it sends a one-time code (commonly 4–8 digits) to that channel. The correct password alone is not sufficient; the generated code must also be supplied. Banking systems commonly trigger 2FA for transactions above a customer’s normal threshold, for example requiring an OTP only once a transfer exceeds a set amount, even when the PIN entered is correct.',
+          },
+          {
+            type: 'note',
+            text: 'The classic social-engineering attack on 2FA: a criminal who already has a card’s PIN or CVV calls the victim, fabricates an urgent story, and asks them to read out the OTP that was just sent to their phone — completing the second factor for the attacker. Be ready to explain why a legitimate institution never needs a customer to read back an OTP over the phone.',
+          },
+          {
+            type: 'definition',
+            heading: 'Three-Factor Authentication (3FA)',
+            text: '3FA differs from 2FA in requiring authorization from two or more distinct devices, rather than allowing a single device to both request and approve access. A request initiated on a phone may need to be approved from a separate computer, or a transaction started on one workstation may need sign-off from another. This is typical of banking-sector workflows, where a transaction is initiated by one staff member, reviewed by a second, and authorized by a branch manager before it completes — sometimes with a deliberate delay built in while approvals are finalized.',
+          },
+          {
+            type: 'definition',
+            heading: 'Multi-Party Authentication',
+            text: 'In multi-party authentication, the individual originating a request must wait for a second individual with higher-level credentials to approve it before access is granted. A familiar consumer example is location- or device-based step-up verification: if a user’s VPN shows them logging in from one country and, within an implausibly short time, a new login attempt appears from a different country, providers such as Google or Apple may require verification from another trusted device or person before granting access — precisely because the same credentials used from two “impossible” locations in a short window is a strong signal of compromise.',
+          },
+          {
+            type: 'definition',
+            heading: 'Time- or Volume-Constrained Access',
+            text: 'Even after legitimate access is granted, a system should limit how long a session may run and how much data may be retrieved within a given period. When a session exceeds its allotted time or volume threshold, the system should automatically terminate it and require re-authentication.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Why Constrain Time and Volume',
+            items: [
+              'Large-scale data theft takes time — the larger the dataset, the longer it takes to copy over a network, so a session that runs unusually long or transfers unusually large volumes is a red flag',
+              'Idle sessions are a liability — an authenticated session left open, such as a banking app left unattended, is an opportunity for someone else to act on the user’s behalf',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Everyday examples: open-access academic databases such as IEEE Xplore cap the number of downloads or views in a period, and banking apps expire a session after a period of inactivity or a set duration.',
+          },
+          {
+            type: 'definition',
+            heading: 'Graceful Degradation',
+            text: 'Graceful degradation is the practice of designing a system so that, if part of it is compromised or attacked, only the affected component is isolated or shut down while the rest continues to function. The goal is to contain a breach to the smallest possible part of the system, buying time to resolve it while the service remains available to legitimate users.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Practices That Support Graceful Degradation',
+            items: [
+              'Migrating data that is not needed for real-time operations offline, so it is not exposed to a live attack surface',
+              'Designing fallback functionality so that a compromised data table or module can be cut off and shut down temporarily without taking the entire application offline',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Biometric Authentication & Liveness Detection',
+            text: 'Biometric authentication verifies identity using a physical characteristic rather than — or in addition to — a password. Liveness detection is used alongside it to confirm that the biometric sample comes from a live person and not a photograph, mask, or other spoof.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Common Biometric Modalities',
+            items: [
+              'Facial recognition',
+              'Iris recognition',
+              'Fingerprint recognition',
+              'Full palm recognition',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Typical liveness checks prompt the user to blink (the eye blinks involuntarily within roughly 60 seconds) or to open their mouth (the tongue and soft tissue cannot be held perfectly still). Financial platforms use this during tiered KYC verification in mobile money apps, as part of onboarding a customer to a higher access level.',
+          },
+          {
+            type: 'definition',
+            heading: 'Input & Request Filtering',
+            text: 'Every request or input directed at a system — a login attempt, a save operation, a data request — carries a “signature” that can be inspected for consistency. A common check is whether the requesting device’s IP address remains stable within a short window, for example 60 seconds. If the IP address changes unexpectedly within that window it may indicate the use of a VPN or another anomaly, and the system can flag or restrict the request rather than granting it outright. The same principle underlies geo-gating, where access from IP ranges associated with certain regions is blocked, and VPN detection, where traffic identified as coming from a VPN is denied access to protected resources.',
+          },
+          {
+            type: 'definition',
+            heading: 'Cryptography & Encryption',
+            text: 'Encryption converts data into a form that cannot easily be read by anyone who does not hold the means to reverse the process. It is essential whenever data is transmitted between two devices over a network, particularly where only part of a system’s data is meant to be shared externally.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Categories of Cryptographic Protection',
+            items: [
+              { term: 'Symmetric encryption', def: 'the same key encrypts and decrypts the data — fast, but the key itself must be shared securely between both parties (e.g. AES)' },
+              { term: 'Asymmetric encryption', def: 'uses a mathematically linked key pair; the public key encrypts data that only the corresponding private key can decrypt, removing the need to share a single secret (e.g. RSA)' },
+              { term: 'Hash functions', def: 'produce a fixed-length, one-way “fingerprint” of data that cannot practically be reversed — used to verify integrity, not to conceal and later recover the original (e.g. SHA-256)' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Steganography',
+            text: 'Steganography hides data or a message inside an ordinary-looking file — commonly an image — rather than encrypting it into obviously unreadable ciphertext. A sensitive text file describing a security vulnerability could be embedded within an innocuous photograph and transmitted over a public channel.',
+          },
+          {
+            type: 'note',
+            text: 'Encryption and steganography solve different problems and can be combined: encryption protects the confidentiality of a message but signals that something is being protected, while steganography conceals the very existence of the message from anyone intercepting the file.',
+          },
+          {
+            type: 'table',
+            heading: 'Summary: Layered Security Controls at a Glance',
+            headers: ['Control', 'What It Protects Against', 'Typical Real-World Example'],
+            rows: [
+              ['Password policy', 'Weak or easily guessed credentials', 'Account sign-up requirements'],
+              ['2FA', 'Stolen or guessed password used alone', 'Bank OTP on large transfers'],
+              ['3FA', 'Single-device compromise', 'Multi-officer transaction approval'],
+              ['Multi-party authentication', 'Anomalous access patterns', 'Impossible-travel login alerts'],
+              ['Time/volume-constrained access', 'Bulk data exfiltration; idle-session hijack', 'Auto session timeout; download caps'],
+              ['Graceful degradation', 'Full-system outage during an attack', 'Isolating a compromised module'],
+              ['Biometrics + liveness', 'Impersonation; spoofed credentials', 'Facial/fingerprint login with blink check'],
+              ['Input/request filtering', 'Anomalous or automated requests', 'Geo-gating; VPN detection'],
+              ['Cryptography/encryption', 'Interception of data in transit', 'TLS-protected network traffic'],
+              ['Steganography', 'Detection of the message itself', 'Data hidden inside an image file'],
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Key Takeaways',
+            items: [
+              'No single control is sufficient on its own — secure design relies on layering multiple, independent controls (defence in depth)',
+              'Understanding attacker motive and profile shapes which controls matter most; insiders in particular defeat authentication-only strategies',
+              'Authentication controls (password, 2FA, 3FA, multi-party) address who is let in; behavioural controls (time/volume limits, input filtering) address what happens after access is granted',
+              'Graceful degradation accepts that a breach may happen and focuses on containing its impact rather than assuming perfect prevention',
+              'Encryption protects the confidentiality of data; steganography protects the existence of data — they solve different problems and can be combined',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Suggested Further Study',
+            items: [
+              'OWASP Top 10 web application security risks',
+              'NIST SP 800-63B — Digital Identity Guidelines (authentication and password policy)',
+              'Basic principles of symmetric vs asymmetric cryptography (AES vs RSA) and common hash algorithms (SHA-256)',
+              'Mobile app security guidance from the OWASP Mobile Application Security Project',
+            ],
+          },
+        ],
+      },
+      {
+        number: '4',
         title: 'Risks & Threats',
+        covers: [4],
         sections: [
           {
             type: 'definition',
@@ -5390,8 +5597,9 @@ export const courses = [
         ],
       },
       {
-        number: '4',
+        number: '5',
         title: 'Website Attacks',
+        covers: [4],
         sections: [
           {
             type: 'definition',
@@ -5444,8 +5652,9 @@ export const courses = [
         ],
       },
       {
-        number: '5',
+        number: '6',
         title: 'Strengths, Weaknesses & Best Practice',
+        covers: [4, 5],
         sections: [
           {
             type: 'bullets',
@@ -5532,9 +5741,10 @@ export const courses = [
         ],
       },
       {
-        number: '6',
+        number: '7',
         title: 'Audit, Compliance & Quality Assurance',
         date: '8 Jul 2026',
+        covers: [7],
         sections: [
           {
             type: 'text',
@@ -5965,6 +6175,96 @@ export const courses = [
         options: ['They replace testing entirely', 'Testing finds flaws in the code, while audits, patching and documentation keep the running system secure over time', 'Operational measures only apply before release', 'SAST and DAST are operational measures'],
         correctIndex: 1,
         explanation: 'A vulnerability found in testing is only truly fixed once the patch is deployed and the change is documented and audited.',
+      },
+      {
+        question: 'Which motive is described as the most common driver of serious cybercrime?',
+        options: ['Fame', 'Recreational curiosity', 'Financial gain', 'Coercion'],
+        correctIndex: 2,
+        explanation: 'Financial gain — fraud, extortion and data resale — is the most common driver of serious cybercrime.',
+      },
+      {
+        question: 'Why are insiders a uniquely dangerous category of threat actor?',
+        options: ['They have the most advanced hacking tools', 'They already hold legitimate access, so authentication controls alone do not stop them', 'They always act for financial gain', 'They can only attack from outside the network'],
+        correctIndex: 1,
+        explanation: 'Insiders are employees or contractors who already hold valid credentials — which is why behavioural controls like time/volume limits and request filtering matter as much as authentication.',
+      },
+      {
+        question: 'What does "hacktivism" refer to as a motive for attack?',
+        options: ['Attacking systems for a political, social or ideological cause', 'Attacking systems purely for the technical challenge', 'Being blackmailed into compromising a system', 'Gathering confidential information for a state'],
+        correctIndex: 0,
+        explanation: 'Activism, or "hacktivism", means attacking in pursuit of a political, social or ideological cause rather than for personal gain.',
+      },
+      {
+        question: 'The principle of layering several independent security controls, so that one failure does not expose the whole system, is known as:',
+        options: ['Graceful degradation', 'Defence in depth', 'Multi-party authentication', 'Steganography'],
+        correctIndex: 1,
+        explanation: 'Defence in depth means combining controls so that if one layer fails, another still limits the damage.',
+      },
+      {
+        question: 'According to the password policy in the notes, "camel casing" in a password means:',
+        options: ['Using at least six characters', 'Using a special character such as @ or #', 'Mixing at least one uppercase letter with lowercase letters', 'Never reusing a password across sites'],
+        correctIndex: 2,
+        explanation: 'Camel casing refers to mixed case — at least one uppercase letter combined with lowercase letters.',
+      },
+      {
+        question: 'What distinguishes Three-Factor Authentication (3FA) from Two-Factor Authentication (2FA) in these notes?',
+        options: ['3FA requires a biometric as the third factor', '3FA requires authorization from two or more distinct devices rather than one', '3FA sends a longer one-time code', '3FA applies only to mobile applications'],
+        correctIndex: 1,
+        explanation: '3FA requires authorization from two or more distinct devices — a request initiated on a phone may need approval from a separate computer.',
+      },
+      {
+        question: 'A criminal who already has a victim\'s PIN calls them with an urgent story and asks them to read out the code just sent to their phone. This attack targets:',
+        options: ['The password layer', 'The 2FA one-time code', 'The biometric liveness check', 'The encryption key'],
+        correctIndex: 1,
+        explanation: 'This is the classic social-engineering attack on 2FA — the attacker needs the victim to hand over the OTP to complete the second factor. A legitimate institution never asks a customer to read back an OTP.',
+      },
+      {
+        question: 'Why should a system limit how long a session runs or how much data it can retrieve?',
+        options: ['To reduce server hosting costs', 'Because large-scale data theft takes time, and idle authenticated sessions can be hijacked', 'Because encryption slows down long sessions', 'To comply with browser cookie limits'],
+        correctIndex: 1,
+        explanation: 'Copying a large dataset over a network takes time, so unusually long or high-volume sessions are a red flag; and a session left open is an opportunity for someone else to act on the user\'s behalf.',
+      },
+      {
+        question: 'Graceful degradation means designing a system so that:',
+        options: ['Performance slowly declines as more users log in', 'A compromised component is isolated or shut down while the rest of the system keeps running', 'Old data is deleted automatically after a set period', 'The system reverts to an earlier version after an attack'],
+        correctIndex: 1,
+        explanation: 'Graceful degradation contains a breach to the smallest possible part of the system, keeping the service available to legitimate users while the issue is resolved.',
+      },
+      {
+        question: 'What is the purpose of liveness detection alongside biometric authentication?',
+        options: ['To speed up fingerprint matching', 'To confirm the biometric sample comes from a live person and not a photo, mask or other spoof', 'To store the biometric template securely', 'To allow login without an internet connection'],
+        correctIndex: 1,
+        explanation: 'Liveness checks — such as prompting a blink or an open mouth — confirm a real person is present rather than a spoofed image.',
+      },
+      {
+        question: 'In input and request filtering, why does a device\'s IP address changing within about 60 seconds raise a flag?',
+        options: ['It always means the device is infected with malware', 'It may indicate VPN use or another anomaly, so the request can be restricted rather than granted outright', 'It proves the password has been stolen', 'It shows the encryption key has expired'],
+        correctIndex: 1,
+        explanation: 'A request signature that shifts unexpectedly within a short window suggests a VPN or other anomaly — the same principle behind geo-gating and VPN detection.',
+      },
+      {
+        question: 'Which cryptographic category uses a mathematically linked key pair, so no single secret key has to be shared?',
+        options: ['Symmetric encryption', 'Asymmetric encryption', 'Hash functions', 'Steganography'],
+        correctIndex: 1,
+        explanation: 'Asymmetric encryption uses a public/private key pair — the public key encrypts data that only the private key can decrypt.',
+      },
+      {
+        question: 'What are hash functions used for?',
+        options: ['Concealing data so it can later be recovered', 'Producing a fixed-length, one-way fingerprint used to verify integrity', 'Sharing a secret key between two parties', 'Hiding a message inside an image'],
+        correctIndex: 1,
+        explanation: 'A hash is one-way and cannot practically be reversed — it verifies that data has not been altered, rather than concealing and later recovering it.',
+      },
+      {
+        question: 'How does steganography differ from encryption?',
+        options: ['It is faster than encryption', 'It hides the existence of the message rather than making it unreadable', 'It uses a longer key than encryption', 'It only works on text files'],
+        correctIndex: 1,
+        explanation: 'Encryption signals that a message is protected; steganography conceals the very existence of the message by hiding it inside an ordinary-looking file such as an image.',
+      },
+      {
+        question: 'Authentication controls and behavioural controls differ in that:',
+        options: ['Authentication controls address who is let in, while behavioural controls address what happens after access is granted', 'Behavioural controls apply only to mobile apps', 'Authentication controls run on the server and behavioural controls run in the browser', 'They are two names for the same thing'],
+        correctIndex: 0,
+        explanation: 'Password, 2FA, 3FA and multi-party authentication govern entry; time/volume limits and input filtering govern conduct once inside.',
       },
     ],
   },
