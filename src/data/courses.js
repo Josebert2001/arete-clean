@@ -5127,6 +5127,10 @@ export const courses = [
       'For every vulnerability, know: how it works, how to exploit it, and how to fix it',
       'Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies',
     ],
+    // Topics 1–7 are the class lecture notes. Topics 8–9, and the additions
+    // marked as exam wording throughout, come from the lecturer's handout
+    // "Cybersecurity Concepts: Web and Mobile Application Security" plus the
+    // exam guidance he gave in class (the six flagged questions in Topic 9).
     lectureNotes: [
       {
         number: '1',
@@ -5163,6 +5167,11 @@ export const courses = [
             ],
           },
           {
+            type: 'text',
+            heading: 'How a Web Application Works',
+            text: 'A web application functions using a combination of server-side and client-side scripts. Server-side scripts, written in languages like PHP or ASP.NET, manage the storage and retrieval of data, ensuring the application’s core functions are executed on the server. Client-side scripts — typically HTML, CSS and JavaScript — handle the presentation of that information and build the user interface. When a user interacts with a web application, their browser sends a request to the server; the server processes it and returns the necessary data; the browser then uses client-side scripts to display that data in a readable, interactive format. This request–response cycle is what allows a web application to serve dynamic content.',
+          },
+          {
             type: 'bullets',
             heading: 'Features of Web Applications',
             items: [
@@ -5179,6 +5188,28 @@ export const courses = [
             type: 'definition',
             heading: 'Mobile Application',
             text: 'A mobile application is software installed directly on a user’s device (iOS or Android), designed to run on a mobile device or tablet. Some mobile apps can also be accessed via an internet connection and a web browser. Mobile apps typically require a version built for each platform, and can provide a more dynamic, interactive user experience with strong collaboration and fast sharing features.',
+          },
+          {
+            type: 'table',
+            heading: 'Comparison: Web App vs Mobile App',
+            headers: ['Aspect', 'Web Application', 'Mobile Application'],
+            rows: [
+              ['Access', 'Runs in a web browser and can be reached from any device with an internet connection', 'Designed for a specific platform and must be downloaded and installed on the device before use'],
+              ['Development', 'Uses a combination of server-side and client-side scripts to process and present data', 'Uses server-side and client-side scripts as well as native code that reaches the device’s own features'],
+              ['Cost', 'Easier and cheaper to develop and maintain — a single version works across all platforms and devices', 'More complex and expensive to develop and update — it must be built for each platform separately'],
+              ['Convenience', 'Universally accessible; nothing to download or install, which saves the user time and storage', 'Must be downloaded and installed, consuming time and storage space on the device'],
+              ['Performance', 'Depends on the speed and reliability of the user’s internet connection and browser', 'Offers offline access and faster performance, which can improve the user experience'],
+              ['Compatibility', 'Faces browser-compatibility issues, since browsers differ in how they interpret code', 'No browser-compatibility issues — it is built for specific platforms and devices'],
+              ['Security', 'More exposed to attacks such as XSS and SQL injection, because it depends on the internet and web servers', 'Data is stored on the device and protected with encryption and authentication methods'],
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Read the Security row alongside the “Web Risk vs Mobile App Risk” table in Topic 4 — it is the same distinction the lecturer expects in the exam: web risk is centralised on the server, mobile risk is decentralised onto individual devices.',
+              'A mobile app is not automatically “more secure”. Storing data on the device removes the single-server blast radius, but it hands the data to a device an attacker may physically hold — which is why Topic 4 lists insecure data storage and reverse engineering as the top mobile risks.',
+              'Watch the Performance and Access rows: a mobile app can work offline, a web app cannot. Several of the guaranteed exam answers turn on exactly that point.',
+            ],
           },
         ],
       },
@@ -5382,6 +5413,19 @@ export const courses = [
           },
           {
             type: 'definition',
+            heading: 'Authentication vs Authorization',
+            text: 'Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information. Authentication answers “who are you?”; authorization answers “what are you allowed to do, now that we know who you are?”',
+          },
+          {
+            type: 'note',
+            items: [
+              'The banking example used in class: every teller and every manager authenticates the same way when signing in, but they are authorized differently — a teller can only approve transactions up to a set limit, while the branch manager holds higher clearance.',
+              'Authentication always comes first. A system cannot decide what you are permitted to do until it has established who you are.',
+              'These two are what the course calls the security/tracking models. Expect a question asking you to define each and distinguish them — the marks are on the two definitions plus one example of differing permission levels.',
+            ],
+          },
+          {
+            type: 'definition',
             heading: 'Password Security & Creation',
             text: 'Password policy is the most basic layer of access control, and it should be enforced at the point a user or account is created, not applied after the fact.',
           },
@@ -5486,6 +5530,14 @@ export const courses = [
             ],
           },
           {
+            type: 'note',
+            items: [
+              'Exam wording for the definition: encryption is the conversion of information into ciphertext — text that is unreadable to unauthorised users.',
+              'Exam wording for the distinction: symmetrical encryption uses a single key to both lock and unlock the data; asymmetrical encryption uses two keys — a public key and a private key.',
+              'Write those two sentences first, then add the trade-off if the question asks you to explain: the single symmetric key is fast but must itself be shared securely, while the asymmetric pair removes the need to share a secret at all.',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Steganography',
             text: 'Steganography hides data or a message inside an ordinary-looking file — commonly an image — rather than encrypting it into obviously unreadable ciphertext. A sensitive text file describing a security vulnerability could be embedded within an innocuous photograph and transmitted over a public channel.',
@@ -5541,6 +5593,15 @@ export const courses = [
         sections: [
           {
             type: 'definition',
+            heading: 'Web-Based Risk',
+            text: 'Web-based risk is any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption.',
+          },
+          {
+            type: 'note',
+            text: 'Learn that sentence exactly as written — “define web-based risk” is one of the questions the lecturer flagged as certain to appear, and the marks are on the three consequences: data breaches, financial losses, service disruption.',
+          },
+          {
+            type: 'definition',
             heading: 'Mobile App Risks',
             text: 'Mobile app risk refers to attacks associated with the device and OS features — vulnerabilities, threats, and security flaws that occur when mobile apps connect to the internet for data exchange, such as data leakage, spyware, cryptographic issues, and phishing attacks.',
           },
@@ -5575,6 +5636,21 @@ export const courses = [
             ],
           },
           {
+            type: 'text',
+            heading: 'Why Mobile Risk Is Different',
+            text: 'Mobile applications send processing out into “the wild” — onto user devices. They do benefit from built-in operating-system protections such as biometrics and sandboxing, but the attacker may have physical access to the device and to its runtime memory, and the developer has surrendered control of the environment the code runs in.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Four Core Mobile Application Risks',
+            items: [
+              { term: 'Insecure data storage', def: 'unencrypted data written to the local file system — cached passwords or personal information — can be read by physically acquiring the device, or by another malicious app on it' },
+              { term: 'Reverse engineering & tampering', def: 'bad actors decompile the application binary to extract hardcoded API keys, or alter the original app’s code' },
+              { term: 'Man-in-the-Middle (MitM) attacks', def: 'devices frequently switch networks — from secure home Wi-Fi to a spoofed public hotspot — which makes unencrypted network traffic highly vulnerable to interception' },
+              { term: 'Unpatched vulnerabilities', def: 'developers must surrender control of the operating environment, so security teams depend heavily on end users actually updating their apps and OS' },
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Web App Risks / Threats',
             text: 'Web app threats refer to vulnerabilities and attacks that exploit weaknesses in web-based systems. These threats lead to unauthorized access, data breaches, and service disruption — driven especially by the growth of online banking and e-commerce transactions. This historical progression has driven an ever-increasing sophistication among cybercriminals, alongside a continuous need for advancement in IT security measures.',
@@ -5600,16 +5676,41 @@ export const courses = [
             ],
           },
           {
+            type: 'termlist',
+            heading: 'Top Web Application Security Risks',
+            items: [
+              { term: 'Injection', def: 'untrusted data is sent to an interpreter inside a command or query; the injected code looks like normal code and tricks the interpreter into executing unexpected commands or returning data without proper permission, which can bypass authorization entirely. Common flaws are SQL, NoSQL and LDAP injection' },
+              { term: 'Denial of Service (DoS) / Distributed Denial of Service (DDoS)', def: 'attackers generate fake traffic through different vectors to overload the target server until it slows down and stops serving legitimate users; DDoS is the same attack at far larger scale, using botnets of thousands or millions of controlled devices' },
+              { term: 'Cross-Site Request Forgery (CSRF)', def: 'victims are tricked into making unwanted requests, and the attacker leverages their existing authentication to impersonate them and act on their behalf' },
+              { term: 'Cross-Site Scripting (XSS)', def: 'client-side scripts are injected into web pages to intercept sessions, impersonate users, read sensitive information, tamper with the site, or redirect to malicious URLs; it occurs whenever an application embeds untrusted data in a page without proper validation' },
+              { term: 'Security misconfiguration', def: 'security controls set incorrectly in the application or surrounding infrastructure — unpatched known vulnerabilities, cloud storage exposed to the internet with no authentication, insecure defaults left as-is, misconfigured HTTP headers, or error messages detailed enough to leak information to an attacker' },
+              { term: 'XML External Entities (XXE)', def: 'a misconfigured XML processor evaluates external entity references in XML files, letting an attacker expose internal server files, scan internal ports, use the web server for DoS, or achieve remote code execution' },
+              { term: 'Vulnerable (insecure) deserialization', def: 'untrusted, attacker-authored data is rebuilt into objects by the language’s deserialization mechanism; in severe cases this enables remote code execution, and otherwise privilege escalation, code injection, and replay attacks' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Deserialization is the reverse of serialization: an object is flattened into a stream of bytes so it can be stored or sent, then rebuilt at the other end. If those bytes came from an attacker, the rebuild step is running on attacker-controlled input.',
+              'Security misconfiguration is one of the most common risks precisely because it needs no clever exploit — an unpatched server or a public storage bucket is enough on its own.',
+              'Note where the boundary sits: injection, XSS and XXE are input-handling failures; DoS/DDoS is an availability failure; misconfiguration is an operational failure. Grouping them this way makes them much easier to recall under exam pressure.',
+            ],
+          },
+          {
             type: 'table',
             heading: 'Comparison: Web Risk vs Mobile App Risk',
             headers: ['Feature', 'Web Risk', 'Mobile App Risk'],
             rows: [
-              ['Centralization', 'Risk is centralized', 'Attacks are on the client side'],
-              ['Attack location', 'Attack is on the server; distributed across users', 'Attack is directly on the victim’s device'],
-              ['Data breach impact', 'Data breach affects the whole database/server', 'Data leakage from the device, often due to a lost or stolen phone'],
-              ['Connectivity', 'Requires internet connection', 'Some functionality may work offline, but data-exchange risk applies when connected'],
+              ['Centralization', 'Centralized risk — concentrated on the server', 'Decentralized risk — spread across individual devices'],
+              ['Attack location', 'Client–server attacks; the attack lands on the server and is distributed across users', 'The attack lands directly on the victim’s own device'],
+              ['Data breach impact', 'A breach affects the entire database, and therefore every user in it', 'Data leakage from a single device, usually following physical loss or theft of the phone'],
+              ['Connectivity', 'Requires an internet connection to function at all', 'Can work offline; data-exchange risk applies once it connects'],
               ['Common attack types', 'SQL injection, DDoS, CSRF', 'Reverse engineering, code tampering, permission abuse'],
             ],
+          },
+          {
+            type: 'note',
+            text: '“Differentiate between web application risk and mobile application risk” is a guaranteed question. Answer it with these five contrasts in this order — centralized vs decentralized, server vs device, whole database vs physical loss of one device, internet required vs works offline — and name one or two attack types on each side. Do not pad it with best-practice material; that is a separate question with a separate mark scheme.',
           },
         ],
       },
@@ -5643,6 +5744,7 @@ export const courses = [
             heading: 'Integrity and Availability Attacks',
             items: [
               { term: 'Distributed Denial of Service (DDoS)', def: 'attackers use a network of compromised devices to flood a website with excessive traffic, overloading the server and making the site unavailable to legitimate users' },
+              { term: 'Brute force & credential stuffing', def: 'automated bots test thousands of username and password combinations to break into administrative dashboards or user accounts' },
             ],
           },
           {
@@ -5666,12 +5768,36 @@ export const courses = [
             type: 'note',
             text: 'CSRF in practice: imagine you are logged in to your bank in one tab and open a malicious link in another. That page silently submits a transfer request to the bank — and because your browser automatically attaches your logged-in session cookie to every request to that site, the bank believes you made the request yourself. Common defences are CSRF tokens (a secret the malicious page cannot know) and re-confirming sensitive actions.',
           },
+          {
+            type: 'definition',
+            heading: 'Buffer Overflow',
+            text: 'A buffer overflow is a type of vulnerability where a program, while writing data to a buffer, overruns the buffer’s boundary and overwrites adjacent memory, leading to a system crash.',
+          },
+          {
+            type: 'note',
+            text: 'A buffer is simply a block of memory set aside to hold a fixed amount of data. If the program never checks that the incoming data fits, the excess spills into whatever memory sits next to it. A crash is the visible outcome, but the dangerous case is quieter: if the overwritten memory held the address the program was going to jump to next, a careful attacker can steer execution into code of their own choosing.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Five Website Attacks to Name in an Exam',
+            items: [
+              'SQL Injection (SQLi) — malicious input in a search bar, login form or other field manipulates the backend database, giving unauthorized access, data theft, or compromise of the host system',
+              'Cross-Site Scripting (XSS) — a harmful script is injected into a page and executes in another user’s browser, hijacking their session or stealing cookies',
+              'Malware / backdoor attacks — malicious code, or a hidden route back into the site, is planted on the server',
+              'Brute-force login attacks — automated bots test thousands of credential combinations against admin dashboards or user accounts',
+              'Phishing — a fake copy of a legitimate site tricks visitors into giving up credit card numbers or login credentials',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'This is the exact list to give when a question says “define a website attack and give five examples”. Open with the definition — any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions — then name the five. The marks are on those terms, not on the length of the prose around them.',
+          },
         ],
       },
       {
         number: '6',
         title: 'Strengths, Weaknesses & Best Practice',
-        covers: [4, 5],
+        covers: [4, 5, 6],
         sections: [
           {
             type: 'bullets',
@@ -5745,14 +5871,22 @@ export const courses = [
             text: 'WAF vs RASP in one line: a WAF stands guard in front of the application, inspecting HTTP traffic before it arrives; RASP lives inside the running application and stops an attack at the exact moment the code would execute it. They complement each other rather than compete.',
           },
           {
-            type: 'bullets',
-            heading: 'Additional Best Practices',
+            type: 'termlist',
+            heading: 'Web Application Security Best Practices',
             items: [
-              'Execute input validation & authorization',
-              'Enhance authentication',
-              'Record code changes',
-              'Track API usage',
-              'Employ dynamic testing for application testing',
+              { term: 'Execute input validation', def: 'verify all data submitted to the application for type, length, format and range before processing it, so attackers cannot inject malicious code — the primary mitigation for SQL injection and XSS' },
+              { term: 'Employ up-to-date encryption', def: 'use Transport Layer Security (TLS) with current recommended cipher suites and protocols for data in transit, and store user passwords using strong cryptographic hash functions such as SHA-256 or SHA-512 before they go into the database' },
+              { term: 'Enhance authentication and authorization', def: 'implement multi-factor authentication (MFA), set complex password requirements, limit failed login attempts to blunt brute-force attacks, and use role-based access control (RBAC) so each user holds only the permissions their role needs' },
+              { term: 'Track API usage', def: 'ensure every API the application uses has adequate authentication and authorization and communicates over encrypted channels; monitor usage routinely and analyse access logs for unusual activity' },
+              { term: 'Record code changes', def: 'keep accurate records of updates, bug fixes and new features using a version control system such as Git, so a security problem introduced by a recent modification can be traced quickly' },
+              { term: 'Employ dynamic testing for security validation', def: 'run DAST across every stage of the development lifecycle — early testing, staging and production — to catch injection, XSS, broken authentication and session management, and insecure direct object references; this is what “shifting security left” means in practice' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'These six are their own exam question. Keep them separate from the web/mobile risk answers — the lecturer specifically warned against mixing the two, because a best-practice question earns no marks for describing risks.',
+              'Each best practice pairs with a risk from Topic 4: input validation answers injection and XSS, up-to-date encryption answers interception, stronger authentication answers brute force, API tracking and change records answer misconfiguration. If a question asks you to justify a practice, name the risk it closes.',
             ],
           },
         ],
@@ -5767,6 +5901,27 @@ export const courses = [
             type: 'text',
             heading: 'Overview',
             text: 'Beyond the testing methodologies and protective mechanisms in the previous topic, keeping a web or mobile application secure is an ongoing operational discipline. The following are practical measures for maintaining audit compliance and quality assurance in day-to-day operation.',
+          },
+          {
+            type: 'definition',
+            heading: 'Quality Assurance (QA)',
+            text: 'Quality assurance ensures that software products meet the desired standard. It is measured against a fixed set of evaluation metrics, so that “the product is good” becomes a claim that can actually be tested and evidenced.',
+          },
+          {
+            type: 'termlist',
+            heading: 'QA Evaluation Metrics',
+            items: [
+              { term: 'Functionality', def: 'the product does what it was specified to do' },
+              { term: 'Performance', def: 'it responds and processes within acceptable time and load limits' },
+              { term: 'Reliability', def: 'it behaves consistently and remains available over time' },
+              { term: 'Usability', def: 'users can operate it correctly, without confusion' },
+              { term: 'Compatibility', def: 'it works across the intended browsers, devices and platforms' },
+              { term: 'Security', def: 'it protects data and withstands attack' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Memorise the six as a list — Functionality, Performance, Reliability, Usability, Compatibility, Security. “Write short notes on quality assurance” and “list the evaluation metrics” are the same question in this course, and the marks are awarded for naming all six, not for describing any of them at length. Lead with the one-line definition, then the list.',
           },
           {
             type: 'bullets',
@@ -5798,6 +5953,97 @@ export const courses = [
           {
             type: 'note',
             text: 'These operational measures complement the testing methodologies from the previous topic — SAST, DAST, IAST and SCA find flaws in the code, while audits, patching, staff training and documentation keep the running system secure over time. Exam questions often ask you to connect the two: a vulnerability found in testing is only truly fixed once the patch is deployed and the change is documented and audited.',
+          },
+        ],
+      },
+      {
+        number: '8',
+        title: 'Web Application Security & the Security Lifecycle',
+        covers: [5],
+        partial: [9],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Web Application Security',
+            text: 'Web application security is the practice of detecting and preventing cyber attacks on websites and web applications — building websites that are secure to begin with. It is the set of security controls built into a web application to protect it from a growing variety of cyber threats.',
+          },
+          {
+            type: 'text',
+            heading: 'A Lifecycle, Not a Stage',
+            text: 'Web applications inevitably contain bugs and misconfigurations, and some of those are security vulnerabilities an attacker can exploit. Web application security addresses them by leveraging secure development practices, implementing security testing throughout the software development lifecycle (SDLC), resolving design-level defects, and avoiding security problems during deployment and at runtime. Security is therefore not a phase bolted on before release — it runs from design through development, testing, deployment and live operation.',
+          },
+          {
+            type: 'note',
+            text: 'This is the “lifecycle approach” item on the course outline. A design-level defect — say, an application that was architected to trust input from its own mobile client — cannot be patched away later by a firewall rule; it has to be caught in design. That is the whole argument for spreading security across the lifecycle rather than testing once at the end.',
+          },
+          {
+            type: 'definition',
+            heading: 'Why Web Security Testing Is Important',
+            text: 'Web security testing focuses on identifying security vulnerabilities in web applications and their configurations, and its primary objective is the application layer. Testing typically involves delivering various input types to provoke errors and cause unexpected system behaviour. These “negative tests” investigate whether the system is performing tasks it was never designed to execute.',
+          },
+          {
+            type: 'note',
+            items: [
+              'A positive test asks “does the login form accept a valid password?” A negative test asks “what happens if I put a quote mark, 10,000 characters, or a script tag in the username field?” Security lives almost entirely in the second question.',
+              'The value of vulnerability and security assessment is that it converts an unknown risk into a known, prioritised defect that can be scheduled, fixed and verified — which is precisely what the audit and QA discipline in Topic 7 then has to evidence.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Two Ways to Defend',
+            items: [
+              'Prevention — find and remove the vulnerability before an attacker reaches it, using SAST, SCA, IAST and DAST',
+              'Blocking — stop the attack in real time as it arrives, using a Web Application Firewall (WAF) or Runtime Application Self-Protection (RASP)',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Ideally an organisation employs both methods, not one. The individual tools are defined in Topic 6 — this topic is about where each of them sits in the lifecycle: SAST and SCA during development, IAST and DAST during testing and staging, WAF and RASP in production.',
+          },
+        ],
+      },
+      {
+        number: '9',
+        title: 'Exam Focus — The Lecturer’s Guaranteed Questions',
+        covers: [],  // revision aid over the topics above, not an outline item
+        sections: [
+          {
+            type: 'text',
+            heading: 'How to Use This Topic',
+            text: 'These are the questions the lecturer flagged in class as certain to appear, with the answers in the wording he gave. Each one is set out in full in the topic named beside it — this page is a revision checklist, not a substitute for the notes.',
+          },
+          {
+            type: 'bullets',
+            heading: 'The Golden Rules He Gave',
+            items: [
+              'Hit the marking points. Pages of prose that never name the technical terms score nothing — the marks sit on the terms themselves.',
+              'Do not mix the answers up. Keep the best-practices answer separate from the web/mobile risk answers; they are different questions with different mark schemes.',
+              'Get the class rep’s photos of the board notes, especially the short notes on SQL injection and cross-site scripting.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Model Answers at a Glance',
+            items: [
+              { term: 'Write short notes on quality assurance / list the evaluation metrics', def: 'QA ensures software products meet the desired standard. The metrics are Functionality, Performance, Reliability, Usability, Compatibility and Security. (Topic 7)' },
+              { term: 'Define web-based risk', def: 'Any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption. (Topic 4)' },
+              { term: 'Differentiate web application risk from mobile application risk', def: 'Web: centralized risk, client–server attacks landing on the server, a breach affecting the entire database, and an internet connection required. Mobile: decentralized risk, attacks on the individual device, data leakage usually following physical loss of the device, and the ability to work offline. (Topic 4)' },
+              { term: 'Explain the security/tracking models — authentication vs authorization', def: 'Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information — a bank teller has a transaction limit, while the branch manager holds higher clearance. (Topic 3)' },
+              { term: 'Distinguish symmetrical from asymmetrical encryption', def: 'Encryption converts information into ciphertext, which is unreadable to unauthorized users. Symmetrical encryption uses a single key to both lock and unlock; asymmetrical encryption uses two keys — a public key and a private key. (Topic 3)' },
+              { term: 'Define a website attack and give five examples', def: 'Any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions. Five examples: SQL injection (SQLi), cross-site scripting (XSS), malware/backdoor attacks, brute-force login attacks, and phishing. (Topic 5)' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Use the “Study as cards” button above to drill these six — the question is the front of the card, the model answer is the back.',
+          },
+          {
+            type: 'note',
+            items: [
+              'A structure that protects your marks: one sentence of definition using the question’s own keywords, then the list, then one line per item only if the question asks you to explain. Writing the list before the explanation means a shortage of time costs you the elaboration, not the marks.',
+              'Where a question says “differentiate” or “distinguish”, answer in contrasting pairs rather than describing one side and then the other — it makes each contrast visible to whoever is marking.',
+              'These six are the flagged questions, not the whole syllabus. Topics 1–8 remain examinable, and the outline items on secure mobile/web development and next-generation challenges are not yet covered by any topic here.',
+            ],
           },
         ],
       },
