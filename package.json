@@ -49,5 +49,11 @@
     "tailwindcss": "^3.4.6",
     "vite": "^8.0.16",
     "vitest": "^4.1.9"
+  },
+  "overridesReason": {
+    "gaxios": "googleapis-common pins gaxios to exactly 7.1.3, which drags in rimraf -> glob -> minimatch -> brace-expansion@2.x. brace-expansion 2.x has no patch for GHSA-3jxr-9vmj-r5cp / GHSA-mh99-v99m-4gvg (the 1.x line was patched at 1.1.16, the 2.x line never was). gaxios 7.3.0 dropped the rimraf dependency outright, so this bump removes the vulnerable chain instead of patching it. google-auth-library@10.9.0 already resolves gaxios 7.3.0 in this same tree."
+  },
+  "overrides": {
+    "gaxios": "^7.3.0"
   }
 }
