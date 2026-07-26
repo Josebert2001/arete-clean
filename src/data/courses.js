@@ -1,5 +1,6 @@
 // Extension is required: scripts/validate-modules.mjs imports this file through
 // plain Node ESM, which does not do Vite's extensionless resolution.
+import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
 import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
 
 export const courses = [
@@ -949,6 +950,10 @@ export const courses = [
       'Inspect real websites using browser DevTools (F12) to see how professional sites are structured',
       'Learn the web security concepts early — XSS and CSRF from this course appear in later security courses',
     ],
+    // Transcribed from the departmental Laboratory Manual (printed under the
+    // code CSC 121) — see src/data/lectureNotes/cyb123.js for provenance and the
+    // coverage mapping. Topic 7 (XSS/CSRF) is not covered by the manual.
+    lectureNotes: cyb123LectureNotes,
   },
   {
     code: 'UUY-CYB 122',
