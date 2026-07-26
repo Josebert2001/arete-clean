@@ -199,14 +199,25 @@ function CaseStudy({ title, prompt, tasks }) {
   );
 }
 
-function Figure({ src, alt, caption, width, height }) {
+function Figure({ src, alt, caption, width, height, maxWidth }) {
   return (
     <figure className="mb-5">
       <div className="rounded-xl border border-coffee-200 bg-paper p-3">
         {/* width/height are the intrinsic pixel size — with w-full h-auto the
             browser uses them only to reserve aspect-ratio space, preventing
-            layout shift as the lazy image loads. */}
-        <img src={src} alt={alt || caption || ''} loading="lazy" width={width} height={height} className="w-full h-auto rounded-lg" />
+            layout shift as the lazy image loads.
+            `maxWidth` caps how wide a figure may render, for tall portrait
+            diagrams that would otherwise be stretched to several screens of
+            height by w-full. Capped figures centre themselves. */}
+        <img
+          src={src}
+          alt={alt || caption || ''}
+          loading="lazy"
+          width={width}
+          height={height}
+          style={maxWidth ? { maxWidth: `${maxWidth}px` } : undefined}
+          className="w-full h-auto rounded-lg mx-auto"
+        />
       </div>
       {caption && (
         <figcaption className="mt-2 text-xs font-mono text-coffee-500 text-center">{caption}</figcaption>
@@ -403,7 +414,7 @@ function Section({ section, simplifyReady, context, collapsible = false, isOpen 
           {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
           {section.type === 'text' && <p className="text-sm text-coffee-700 leading-relaxed mb-3">{section.text}</p>}
           {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
-          {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} />}
+          {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} maxWidth={section.maxWidth} />}
           {section.type === 'code' && <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />}
           {section.type === 'mosca' && <MoscaCalculator />}
           {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}

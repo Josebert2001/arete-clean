@@ -1,3 +1,7 @@
+// Extension is required: scripts/validate-modules.mjs imports this file through
+// plain Node ESM, which does not do Vite's extensionless resolution.
+import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
+
 export const courses = [
 
   // ═══════════════════════════════════════════════════════════════
@@ -5072,6 +5076,9 @@ export const courses = [
       'Know the difference between IDS (detect only) and IPS (detect + block) — exam-critical',
       'Relate every defence mechanism to a specific attack from UUY-CYB 212 — show the attack/defence pairing',
     ],
+    // Transcribed from the departmental Laboratory Manual — see
+    // src/data/lectureNotes/cyb221.js for provenance and the coverage mapping.
+    lectureNotes: cyb221LectureNotes,
   },
   {
     code: 'UUY-CYB 222',
