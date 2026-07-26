@@ -2,6 +2,7 @@
 // plain Node ESM, which does not do Vite's extensionless resolution.
 import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
 import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
+import { gst121LectureNotes } from './lectureNotes/gst121.js';
 
 export const courses = [
 
@@ -319,6 +320,10 @@ export const courses = [
       'Cybercrime topics connect directly to your degree — pay extra attention there',
       'Past questions drive most of the exam content for GST courses — collect and study them',
     ],
+    // Transcribed from the Directorate of General Studies' official GST 121
+    // textbook (May 2024) — see src/data/lectureNotes/gst121.js for provenance,
+    // the full 17-chapter table of contents, and the coverage mapping.
+    lectureNotes: gst121LectureNotes,
   },
   {
     code: 'COS 121',
