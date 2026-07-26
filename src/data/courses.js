@@ -3854,6 +3854,17 @@ export const courses = [
             text: 'Group 0 research project — by Amasi Rhema. An assigned project topic for CYB 222, examining how Artificial Intelligence (AI) and Machine Learning (ML) are transforming cybersecurity threat detection.',
           },
           {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Signature-based detection only catches attacks it has already seen — zero-days, polymorphic malware and insider abuse walk straight past it',
+              'AI and ML detect by behaviour instead: baseline what normal looks like, flag the deviation, adapt in real time',
+              'Three ML families do the work — supervised (spam, malware classification), unsupervised (anomaly detection), and deep learning (CNN, RNN, LSTM)',
+              'Applied across IDS, malware and phishing detection, fraud, IoT monitoring and automated incident response',
+              'The cost: false positives, model bias, adversarial attacks, privacy exposure and heavy compute — which is why human oversight and Explainable AI remain essential',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Abstract',
             text: 'Traditional security relied on signature-based detection, matching known attack patterns against incoming data — an approach that fails against the rapid evolution of cyberattacks. AI and ML fundamentally change threat detection by letting systems learn from data, recognise behavioural anomalies, and adapt to emerging threats in real time. The trade-off is a new set of challenges — false positives, adversarial attacks, privacy concerns, computational cost, and a lack of interpretability — which is why human oversight and ethical frameworks remain essential.',
@@ -3964,6 +3975,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 1 research project. An assigned project topic for CYB 222 — a comprehensive study of Zero Trust Architecture (ZTA), from its origins to its future directions.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              '“Never trust, always verify” — coined by John Kindervag at Forrester in 2010, after cloud, remote work and BYOD dissolved the castle-and-moat perimeter',
+              'Four principles: never trust/always verify, least privilege, assume breach, and micro-segmentation to contain lateral movement',
+              'Assembled from IAM, MFA, ZTNA (which replaces the VPN), device trust and EDR, pervasive encryption, and SIEM/UEBA monitoring',
+              'Standardised by NIST SP 800-207 (Policy Decision Point + Policy Enforcement Point) and CISA’s maturity model; rollout runs Visualise → Mitigate → Optimise',
+              'Real limits: cost and complexity, authentication fatigue, insider threats, and “Zero Trust washing” — partial rollouts that buy false confidence',
+            ],
           },
           {
             type: 'definition',
@@ -4102,6 +4124,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 2 research project — by Sunday Robert, Iwok Abigail Sylvester, Onyejiaka Patrick Chiemerie, James Joseph Essien, Samuel Emmanuel Ette and Ndem Dennis Victor. An assigned project topic for CYB 222: an assessment of post-quantum cryptography (PQC) encryptions and migration frameworks for cyber defense.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Shor’s algorithm breaks RSA, ECC and Diffie-Hellman in polynomial time the moment a Cryptographically Relevant Quantum Computer exists — consensus puts Q-Day between 2030 and 2035',
+              'Bigger keys do not help: the design itself must change. Grover only halves symmetric security, so AES-128 → AES-256 and SHA-256 → SHA-384/512 is sufficient there',
+              '“Harvest Now, Decrypt Later” means traffic captured today is already at risk. Mosca’s Theorem makes it concrete: migration time + data secrecy lifetime > years to Q-Day = already exposed',
+              'The NIST standards are ML-KEM (FIPS 203), ML-DSA (204), SLH-DSA (205), Falcon (206) and HQC — drawn from five mathematical families for structural diversity',
+              'Migration is hybrid-first (X25519 + ML-KEM-768, already Chrome’s default), then hardware refit, then quantum-native — set out as a four-phase plan for UNIUYO',
+            ],
           },
           {
             type: 'definition',
@@ -4306,6 +4339,17 @@ export const courses = [
             text: 'Group 3 research project. An assigned project topic for CYB 222 — examining behavioral biometrics as a shift from point-in-time login checks to continuous, frictionless identity assurance.',
           },
           {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Legacy MFA verifies once at the gate and then trusts the session for hours — behavioural biometrics verifies continuously, closing that point-of-entry blind spot',
+              'What defeats static MFA: adversary-in-the-middle proxy phishing, MFA fatigue prompt-bombing, and stolen session tokens — all of which survive a perfectly valid login',
+              'It validates how you act, not what you know or hold: keystroke dynamics, mouse paths, touch gestures, device kinematics, navigation habits and context',
+              'Four-stage pipeline — collection → processing → analysis (LSTM baseline compared by cosine similarity) → response in under 0.5 seconds',
+              'The output is a 0.0–1.0 anomaly score, not a yes/no: below 0.3 allow, 0.3–0.7 step-up challenge, 0.7 and above block. Privacy-by-design and adaptive baselines are what keep it workable',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'The Paradigm Shift in Identity Assurance',
             text: 'Legacy access control verifies identity only at the gateway — the moment of login. Once a session token or cookie is issued it stays valid for hours or days without re-verification, creating a "point-of-entry blind spot": if an attacker seizes the terminal three minutes after a valid login, the system never notices. Behavioral biometrics closes this gap by continuously verifying who is actually operating the session.',
@@ -4446,6 +4490,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 4 research project — by Bisong Malachi Obanghe, Archibong Samuel Samuel, Ekpo Blessing Edidiong, Francis Kalu, Akpan Ikouwem Albert and Uwemedimoh Anthony Ayah. An assigned project topic for CYB 222, examining blockchain technology and its role in cyber security.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'A distributed ledger in which every block carries the previous block’s hash — so altering any historical record breaks every link after it and the whole network notices',
+              'Three moving parts: cryptographic hashing (SHA-256), a peer-to-peer network of nodes holding copies, and a consensus mechanism (Proof of Work, Proof of Stake, PBFT). Smart contracts make it programmable',
+              'Four types — public, private, consortium and hybrid — each trading decentralisation against speed and control',
+              'As a security tool: decentralised identity, tamper-proof audit trails, IoT device authentication, DNS resilience, and threat-intel sharing between organisations that do not trust each other',
+              'As a security target: smart contract bugs, wallet and private-key theft, cross-chain bridge attacks and 51% attacks — plus the quantum threat to ECDSA now driving post-quantum migration roadmaps',
+            ],
           },
           {
             type: 'definition',
@@ -4679,6 +4734,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 6 research project — by Mitchel Ifiok Nkan, Oto-abasi Effiok Offiong, Timothy David Richard, Felix Uwem Umoesen, Etim Ebenezer Mfon, Essien Emmanuel Festus, Essien Michael John, Ekpo Ebenezer Ime, Umoh Uyaiabasi Anthony and Igwechima Grace Chiamaka. An assigned project topic for CYB 222, examining Privacy Enhancing Technologies (PET) — mechanisms, applications and challenges in the modern digital ecosystem.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'PETs protect personal data while still allowing useful processing, resting on three principles: data minimisation, user control, and privacy by design',
+              'Security defends against outsiders; privacy constrains what the service provider itself may collect and link — a highly secure system can still be deeply privacy-invasive',
+              'Three classes: Hard PETs (Differential Privacy, Homomorphic Encryption, Zero-Knowledge Proofs, SMPC, Federated Learning), Soft PETs (anonymisation, consent management, Self-Sovereign Identity), and Network PETs (Tor, VPNs, mix networks)',
+              'Already deployed at scale — Apple’s Local DP since 2016, Google Gboard’s federated learning, Zcash’s zk-SNARKs, Estonia’s e-Residency, the COVID-19 exposure-notification API',
+              'The barriers: fully homomorphic encryption runs 100–1,000× slower than plaintext, DP trades accuracy for privacy, and Nigeria’s NDPA 2023 mandates no specific PET — both an adoption gap and a research opening',
+            ],
           },
           {
             type: 'definition',
@@ -4951,6 +5017,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 8 seminar presentation — by Charles Prosper Obot, Abasiakara Bassey Samuel, Victor Gregory Tom, Edikan Amaowoh Joseph, Victor Archibong Akaninyene and Uwaoma Eze Ebisike. An assigned project topic for CYB 222, examining Agentic AI — autonomous systems that plan, decide and act with minimal human supervision, and what that autonomy means for cybersecurity.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Agentic AI is given a goal rather than a command — it plans, acts and adapts toward that goal with minimal human intervention',
+              'Perceive → reason and plan → act → monitor and adapt is the loop that separates an agent from a model that merely answers when spoken to',
+              'Assembled from five components: machine learning, natural language processing, a memory system, a reasoning engine, and a planning/execution module',
+              'In cybersecurity it drives threat detection, incident response, vulnerability management, malware detection and continuous monitoring',
+              'Strictly dual-use — the same autonomy lets attackers run sophisticated campaigns at scale. Black-box decisions, privacy exposure and cost are why human oversight stays mandatory',
+            ],
           },
           {
             type: 'definition',
