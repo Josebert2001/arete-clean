@@ -16,15 +16,30 @@
  * `width`/`height` props on an `image` section need so the browser can reserve
  * aspect-ratio space and avoid layout shift.
  *
+ * sharp is deliberately NOT a tracked devDependency. It ships ~30 platform
+ * binaries whose optional sub-trees do not survive a lockfile generated on a
+ * different OS, which breaks `npm ci` on CI. This script runs about once per
+ * lecture manual, so install it on demand and drop it again afterwards:
+ *
+ *   npm i --no-save sharp
+ *   node scripts/optimize-lecture-images.mjs ./raw public/lecture-notes/cyb-221 1400
+ *
  * Usage:
  *   node scripts/optimize-lecture-images.mjs <srcDir> <destDir> [maxWidth]
- *
- * Example:
- *   node scripts/optimize-lecture-images.mjs ./raw public/lecture-notes/cyb-221 1400
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import sharp from 'sharp';
+
+let sharp;
+try {
+  ({ default: sharp } = await import('sharp'));
+} catch {
+  console.error(
+    'This script needs sharp, which is not a tracked dependency.\n' +
+      'Install it just for this run with:  npm i --no-save sharp'
+  );
+  process.exit(1);
+}
 
 const [srcDir, destDir, maxWidthArg] = process.argv.slice(2);
 
