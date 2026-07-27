@@ -6,8 +6,8 @@ import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { StudyDaysProvider, useStudyDays } from './context/StudyDaysContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
-import { recordStudyActivity } from './utils/streak';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -81,10 +81,11 @@ function ScrollToTop() {
 // and marks today as a study day for the dashboard's streak counter.
 function LastLocationTracker() {
   const { pathname } = useLocation();
+  const { recordToday } = useStudyDays();
   useEffect(() => {
     recordLocation(pathname);
-    recordStudyActivity(pathname);
-  }, [pathname]);
+    recordToday(pathname);
+  }, [pathname, recordToday]);
   return null;
 }
 
@@ -179,6 +180,7 @@ export default function App() {
   return (
     <ThemeProvider>
     <AuthProvider>
+    <StudyDaysProvider>
     <div className="min-h-screen flex flex-col paper-texture">
       <a
         href="#main"
@@ -221,6 +223,7 @@ export default function App() {
       {!isChatPage && <Footer />}
       {!isChatPage && <FloatingHelp />}
     </div>
+    </StudyDaysProvider>
     </AuthProvider>
     </ThemeProvider>
   );
