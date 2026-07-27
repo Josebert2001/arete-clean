@@ -3854,6 +3854,17 @@ export const courses = [
             text: 'Group 0 research project — by Amasi Rhema. An assigned project topic for CYB 222, examining how Artificial Intelligence (AI) and Machine Learning (ML) are transforming cybersecurity threat detection.',
           },
           {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Signature-based detection only catches attacks it has already seen — zero-days, polymorphic malware and insider abuse walk straight past it',
+              'AI and ML detect by behaviour instead: baseline what normal looks like, flag the deviation, adapt in real time',
+              'Three ML families do the work — supervised (spam, malware classification), unsupervised (anomaly detection), and deep learning (CNN, RNN, LSTM)',
+              'Applied across IDS, malware and phishing detection, fraud, IoT monitoring and automated incident response',
+              'The cost: false positives, model bias, adversarial attacks, privacy exposure and heavy compute — which is why human oversight and Explainable AI remain essential',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Abstract',
             text: 'Traditional security relied on signature-based detection, matching known attack patterns against incoming data — an approach that fails against the rapid evolution of cyberattacks. AI and ML fundamentally change threat detection by letting systems learn from data, recognise behavioural anomalies, and adapt to emerging threats in real time. The trade-off is a new set of challenges — false positives, adversarial attacks, privacy concerns, computational cost, and a lack of interpretability — which is why human oversight and ethical frameworks remain essential.',
@@ -3964,6 +3975,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 1 research project. An assigned project topic for CYB 222 — a comprehensive study of Zero Trust Architecture (ZTA), from its origins to its future directions.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              '“Never trust, always verify” — coined by John Kindervag at Forrester in 2010, after cloud, remote work and BYOD dissolved the castle-and-moat perimeter',
+              'Four principles: never trust/always verify, least privilege, assume breach, and micro-segmentation to contain lateral movement',
+              'Assembled from IAM, MFA, ZTNA (which replaces the VPN), device trust and EDR, pervasive encryption, and SIEM/UEBA monitoring',
+              'Standardised by NIST SP 800-207 (Policy Decision Point + Policy Enforcement Point) and CISA’s maturity model; rollout runs Visualise → Mitigate → Optimise',
+              'Real limits: cost and complexity, authentication fatigue, insider threats, and “Zero Trust washing” — partial rollouts that buy false confidence',
+            ],
           },
           {
             type: 'definition',
@@ -4102,6 +4124,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 2 research project — by Sunday Robert, Iwok Abigail Sylvester, Onyejiaka Patrick Chiemerie, James Joseph Essien, Samuel Emmanuel Ette and Ndem Dennis Victor. An assigned project topic for CYB 222: an assessment of post-quantum cryptography (PQC) encryptions and migration frameworks for cyber defense.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Shor’s algorithm breaks RSA, ECC and Diffie-Hellman in polynomial time the moment a Cryptographically Relevant Quantum Computer exists — consensus puts Q-Day between 2030 and 2035',
+              'Bigger keys do not help: the design itself must change. Grover only halves symmetric security, so AES-128 → AES-256 and SHA-256 → SHA-384/512 is sufficient there',
+              '“Harvest Now, Decrypt Later” means traffic captured today is already at risk. Mosca’s Theorem makes it concrete: migration time + data secrecy lifetime > years to Q-Day = already exposed',
+              'The NIST standards are ML-KEM (FIPS 203), ML-DSA (204), SLH-DSA (205), Falcon (206) and HQC — drawn from five mathematical families for structural diversity',
+              'Migration is hybrid-first (X25519 + ML-KEM-768, already Chrome’s default), then hardware refit, then quantum-native — set out as a four-phase plan for UNIUYO',
+            ],
           },
           {
             type: 'definition',
@@ -4306,6 +4339,17 @@ export const courses = [
             text: 'Group 3 research project. An assigned project topic for CYB 222 — examining behavioral biometrics as a shift from point-in-time login checks to continuous, frictionless identity assurance.',
           },
           {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Legacy MFA verifies once at the gate and then trusts the session for hours — behavioural biometrics verifies continuously, closing that point-of-entry blind spot',
+              'What defeats static MFA: adversary-in-the-middle proxy phishing, MFA fatigue prompt-bombing, and stolen session tokens — all of which survive a perfectly valid login',
+              'It validates how you act, not what you know or hold: keystroke dynamics, mouse paths, touch gestures, device kinematics, navigation habits and context',
+              'Four-stage pipeline — collection → processing → analysis (LSTM baseline compared by cosine similarity) → response in under 0.5 seconds',
+              'The output is a 0.0–1.0 anomaly score, not a yes/no: below 0.3 allow, 0.3–0.7 step-up challenge, 0.7 and above block. Privacy-by-design and adaptive baselines are what keep it workable',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'The Paradigm Shift in Identity Assurance',
             text: 'Legacy access control verifies identity only at the gateway — the moment of login. Once a session token or cookie is issued it stays valid for hours or days without re-verification, creating a "point-of-entry blind spot": if an attacker seizes the terminal three minutes after a valid login, the system never notices. Behavioral biometrics closes this gap by continuously verifying who is actually operating the session.',
@@ -4446,6 +4490,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 4 research project — by Bisong Malachi Obanghe, Archibong Samuel Samuel, Ekpo Blessing Edidiong, Francis Kalu, Akpan Ikouwem Albert and Uwemedimoh Anthony Ayah. An assigned project topic for CYB 222, examining blockchain technology and its role in cyber security.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'A distributed ledger in which every block carries the previous block’s hash — so altering any historical record breaks every link after it and the whole network notices',
+              'Three moving parts: cryptographic hashing (SHA-256), a peer-to-peer network of nodes holding copies, and a consensus mechanism (Proof of Work, Proof of Stake, PBFT). Smart contracts make it programmable',
+              'Four types — public, private, consortium and hybrid — each trading decentralisation against speed and control',
+              'As a security tool: decentralised identity, tamper-proof audit trails, IoT device authentication, DNS resilience, and threat-intel sharing between organisations that do not trust each other',
+              'As a security target: smart contract bugs, wallet and private-key theft, cross-chain bridge attacks and 51% attacks — plus the quantum threat to ECDSA now driving post-quantum migration roadmaps',
+            ],
           },
           {
             type: 'definition',
@@ -4679,6 +4734,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 6 research project — by Mitchel Ifiok Nkan, Oto-abasi Effiok Offiong, Timothy David Richard, Felix Uwem Umoesen, Etim Ebenezer Mfon, Essien Emmanuel Festus, Essien Michael John, Ekpo Ebenezer Ime, Umoh Uyaiabasi Anthony and Igwechima Grace Chiamaka. An assigned project topic for CYB 222, examining Privacy Enhancing Technologies (PET) — mechanisms, applications and challenges in the modern digital ecosystem.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'PETs protect personal data while still allowing useful processing, resting on three principles: data minimisation, user control, and privacy by design',
+              'Security defends against outsiders; privacy constrains what the service provider itself may collect and link — a highly secure system can still be deeply privacy-invasive',
+              'Three classes: Hard PETs (Differential Privacy, Homomorphic Encryption, Zero-Knowledge Proofs, SMPC, Federated Learning), Soft PETs (anonymisation, consent management, Self-Sovereign Identity), and Network PETs (Tor, VPNs, mix networks)',
+              'Already deployed at scale — Apple’s Local DP since 2016, Google Gboard’s federated learning, Zcash’s zk-SNARKs, Estonia’s e-Residency, the COVID-19 exposure-notification API',
+              'The barriers: fully homomorphic encryption runs 100–1,000× slower than plaintext, DP trades accuracy for privacy, and Nigeria’s NDPA 2023 mandates no specific PET — both an adoption gap and a research opening',
+            ],
           },
           {
             type: 'definition',
@@ -4947,7 +5013,184 @@ export const courses = [
       {
         number: '8',
         title: 'Agentic AI',
-        sections: [],
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 8 seminar presentation — by Charles Prosper Obot, Abasiakara Bassey Samuel, Victor Gregory Tom, Edikan Amaowoh Joseph, Victor Archibong Akaninyene and Uwaoma Eze Ebisike. An assigned project topic for CYB 222, examining Agentic AI — autonomous systems that plan, decide and act with minimal human supervision, and what that autonomy means for cybersecurity.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Agentic AI is given a goal rather than a command — it plans, acts and adapts toward that goal with minimal human intervention',
+              'Perceive → reason and plan → act → monitor and adapt is the loop that separates an agent from a model that merely answers when spoken to',
+              'Assembled from five components: machine learning, natural language processing, a memory system, a reasoning engine, and a planning/execution module',
+              'In cybersecurity it drives threat detection, incident response, vulnerability management, malware detection and continuous monitoring',
+              'Strictly dual-use — the same autonomy lets attackers run sophisticated campaigns at scale. Black-box decisions, privacy exposure and cost are why human oversight stays mandatory',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Abstract',
+            text: 'Agentic AI refers to autonomous systems that can plan, decide, and act toward specific goals with little to no human supervision. Unlike traditional AI that simply responds to inputs, agentic systems continuously perceive, reason, and adapt — making them fundamentally different from conventional models. Tracing back to the early expert systems of the 1950s, through the BDI architectures of the 1990s, to today’s LLM-powered agents, agentic AI has grown into a critical force in modern technology. In cybersecurity this cuts both ways: defenders use it to automate threat detection and incident response, while attackers exploit the same autonomy to launch sophisticated, large-scale campaigns. This dual nature makes agentic AI one of the most consequential developments in the cybersecurity landscape today, demanding careful oversight, governance, and responsible deployment.',
+          },
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'Artificial Intelligence has evolved significantly over the years, progressing from simple rule-based systems to intelligent technologies capable of learning, reasoning, and making decisions. One of the latest developments in this field is Agentic AI, a new generation of AI systems that can plan, act, and solve problems with minimal human intervention. Unlike traditional AI, which performs specific tasks based on predefined instructions, Agentic AI can perceive its environment, make autonomous decisions, adapt to changing situations, and work toward achieving defined goals. It combines machine learning, natural language processing, reasoning models and memory systems to perform complex tasks more efficiently. It is being adopted across healthcare, finance, education, robotics and cybersecurity — and in cybersecurity specifically it automates threat detection, incident response and security monitoring, helping organisations respond more quickly to evolving threats.',
+          },
+          {
+            type: 'definition',
+            heading: 'History of Artificial Intelligence and Agentic AI',
+            text: 'The history of Artificial Intelligence dates back to the 1950s, when scientists began exploring the idea of creating machines capable of performing tasks that normally require human intelligence. In 1956 the term “Artificial Intelligence” was officially introduced by computer scientist John McCarthy during the Dartmouth Conference, widely regarded as the birth of AI as a field of study. Agentic AI is the modern stage of that development — systems designed not only to respond to commands but to reason, plan, adapt and act autonomously, completing tasks, interacting with tools and analysing situations with minimal supervision.',
+          },
+          {
+            type: 'termlist',
+            heading: 'From Rule-Based Programs to Agentic AI — the Timeline',
+            items: [
+              { term: '1950s', def: 'Scientists begin exploring machines capable of tasks that normally require human intelligence. Early systems are rule-based programs that solve mathematical problems, play simple games and perform basic reasoning — but cannot learn and are inflexible.' },
+              { term: '1956 — Dartmouth Conference', def: 'John McCarthy formally introduces the term “Artificial Intelligence”. This is widely regarded as the birth of AI as a field of study.' },
+              { term: '1960s–1970s', def: 'AI research expands into natural language processing, robotics and expert systems.' },
+              { term: '1980s — expert systems', def: 'Systems that use stored knowledge and rules to imitate human decision-making in specialised fields such as medicine and engineering become popular. Limitations in computing power and data then cause a slowdown known as the “AI Winter”.' },
+              { term: '1990s–early 2000s — resurgence', def: 'Improvements in processing power, internet growth and the availability of large datasets revive the field. Machine learning and neural networks advance, letting systems learn patterns from data instead of relying only on fixed rules.' },
+              { term: '2010s — deep learning and LLMs', def: 'Deep learning and large language models transform AI capability: speech recognition, image analysis, translation, recommendation systems and intelligent conversation. Virtual assistants, autonomous vehicles and advanced chatbots emerge.' },
+              { term: 'Intelligent agents → Agentic AI', def: 'Researchers introduce intelligent agents — systems that perceive environments, make decisions and take actions to achieve goals. This leads directly to Agentic AI, now applied in cybersecurity, healthcare, finance, education, robotics and business automation.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'What Is Agentic AI?',
+            text: 'Agentic AI is a type of Artificial Intelligence that can independently make decisions, plan actions, solve problems and complete tasks with minimal human intervention. Unlike traditional AI systems, which mainly respond to specific commands or perform predefined tasks, Agentic AI acts as an intelligent agent that can reason, adapt to changing situations and work toward achieving a defined goal. It combines machine learning (ML), natural language processing (NLP), reasoning models, memory systems and automation tools to analyse information, make informed decisions and execute multi-step tasks. It can also learn from previous interactions and adjust its actions based on new information, making it more flexible and efficient than conventional AI.',
+          },
+          {
+            type: 'table',
+            heading: 'Traditional AI vs Agentic AI',
+            headers: ['Dimension', 'Traditional AI', 'Agentic AI'],
+            rows: [
+              ['Trigger', 'Responds to a specific command or input', 'Receives a goal, then decides for itself what to do'],
+              ['Task scope', 'Performs predefined, single-step tasks', 'Plans and executes complex, multi-step tasks'],
+              ['Instructions', 'Depends heavily on human instructions', 'Operates with minimal human intervention'],
+              ['Response to change', 'Fixed behaviour — rules must be rewritten', 'Adapts its behaviour to changing situations and new information'],
+              ['Learning', 'Learns only where the model is explicitly retrained', 'Learns from previous interactions and feedback, improving over time'],
+              ['Security use', 'Relies on predefined detection rules', 'Reasons about new attack patterns and decides in real time'],
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Evolution of Agentic AI',
+            text: 'The evolution of Agentic AI is closely linked to the advancement of Artificial Intelligence generally. Early AI systems were rule-based and could only perform tasks according to predefined instructions. As machine learning and deep learning developed, AI gained the ability to learn from data, recognise patterns and improve its performance over time. The emergence of large language models (LLMs), advanced reasoning techniques and automation tools transformed these systems further, enabling AI to understand complex instructions, retain context, plan multiple steps and interact with other software and digital environments. Agentic AI represents the next stage: rather than simply responding to user commands, it independently plans, decides, adapts and completes tasks with minimal human intervention.',
+          },
+          {
+            type: 'bullets',
+            heading: 'How Agentic AI Works',
+            items: [
+              'Receive — the system is given a goal or instruction by a user',
+              'Perceive — it gathers relevant information from its environment or available data sources',
+              'Reason and plan — it analyses that information, reasons through possible solutions, and creates a plan to accomplish the task',
+              'Act — it executes the required actions, interacting with software, databases or other digital tools',
+              'Monitor and adapt — it continuously monitors the results, learns from feedback, and adjusts its actions when necessary to improve performance',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The difference between traditional AI and an agent is the difference between a calculator and an accountant. You hand a calculator two numbers and an operation, and it returns one answer — it does exactly and only what you typed. You hand an accountant a goal ("file this year’s returns"), and they go and find the receipts, decide what still needs checking, do the work in whatever order makes sense, and come back if something does not add up. The perceive → reason → plan → act → adapt loop above is what turns the calculator into the accountant — and it is also precisely why an agent that is compromised or badly aimed can do far more damage than a compromised calculator ever could.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Characteristics of Agentic AI',
+            items: [
+              { term: 'Autonomy', def: 'Performs tasks and makes decisions with minimal human intervention.' },
+              { term: 'Goal-oriented', def: 'Focuses on achieving specific objectives by planning and executing actions.' },
+              { term: 'Adaptability', def: 'Adjusts its behaviour based on changes in its environment or new information.' },
+              { term: 'Reasoning', def: 'Analyses situations and selects the most appropriate course of action.' },
+              { term: 'Learning ability', def: 'Improves its performance over time through experience and feedback.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Components of Agentic AI',
+            items: [
+              { term: 'Machine Learning (ML)', def: 'Enables the system to learn from data and improve accuracy.' },
+              { term: 'Natural Language Processing (NLP)', def: 'Allows the AI to understand and communicate using human language.' },
+              { term: 'Memory system', def: 'Stores and retrieves information from previous interactions.' },
+              { term: 'Reasoning engine', def: 'Evaluates information and supports intelligent decision-making.' },
+              { term: 'Planning and execution module', def: 'Creates action plans and carries out tasks to achieve defined goals.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Applications of Agentic AI',
+            items: [
+              { term: 'Cybersecurity', def: 'Detects cyber threats, automates incident response, and strengthens security monitoring.' },
+              { term: 'Healthcare', def: 'Assists in disease diagnosis, patient monitoring and treatment recommendations.' },
+              { term: 'Finance', def: 'Detects fraudulent transactions, manages risk and supports investment decisions.' },
+              { term: 'Education', def: 'Provides personalised learning experiences and intelligent tutoring systems.' },
+              { term: 'Business automation', def: 'Automates customer service, workflow management and administrative tasks.' },
+              { term: 'Manufacturing', def: 'Optimises production processes, predictive maintenance and quality control.' },
+              { term: 'Robotics', def: 'Enables autonomous robots to navigate, make decisions and perform complex tasks in dynamic environments.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Agentic AI in Cybersecurity',
+            text: 'Agentic AI is transforming cybersecurity by enabling security systems to detect, analyse and respond to cyber threats with minimal human intervention. Unlike traditional security tools that rely on predefined rules, Agentic AI can reason, adapt to new attack patterns, and make real-time decisions to protect digital systems. The same autonomy, however, is available to attackers — who can use it to launch sophisticated, large-scale campaigns — which is why the technology is described as dual-use and why governance and human oversight remain essential.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Key Security Applications',
+            items: [
+              { term: 'Threat detection', def: 'Identifies suspicious activities and emerging cyber threats in real time.' },
+              { term: 'Incident response', def: 'Automatically investigates and responds to security incidents, reducing response time.' },
+              { term: 'Vulnerability management', def: 'Scans systems for weaknesses and recommends or applies appropriate security measures.' },
+              { term: 'Malware detection', def: 'Detects and analyses malicious software using intelligent learning techniques.' },
+              { term: 'Security monitoring', def: 'Continuously monitors networks and systems to identify unusual behaviour.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Benefits of Agentic AI',
+            items: [
+              { term: 'Increased automation', def: 'Performs repetitive and complex tasks with little human intervention, improving operational efficiency and reducing manual workload.' },
+              { term: 'Faster decision-making', def: 'Analyses large volumes of data in real time and decides much faster than humans, especially in time-sensitive situations.' },
+              { term: 'Improved productivity', def: 'Automates multi-step workflows, allowing employees to focus on strategic and creative tasks rather than routine activities.' },
+              { term: 'Enhanced cybersecurity', def: 'Continuously monitors systems, detects threats, investigates suspicious activity and responds to incidents more quickly than traditional security tools.' },
+              { term: 'Adaptability', def: 'Unlike rule-based systems, learns from new information, adapts to changing environments and improves its performance over time.' },
+              { term: 'Scalability', def: 'Manages multiple tasks simultaneously across large and complex systems without a significant increase in human resources.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Challenges of Agentic AI',
+            items: [
+              { term: 'Security risks', def: 'If compromised by attackers, an autonomous AI system could make harmful decisions or be manipulated into performing malicious actions.' },
+              { term: 'Privacy concerns', def: 'Agentic AI often requires access to large amounts of personal or organisational data, raising data-protection and unauthorised-access concerns.' },
+              { term: 'Lack of transparency', def: 'Some agentic systems operate as “black boxes”, making it difficult to understand how they reached a particular decision.' },
+              { term: 'Ethical issues', def: 'Autonomous decision-making creates ethical dilemmas, especially in healthcare, finance and law enforcement where AI decisions significantly affect people’s lives.' },
+              { term: 'High development and implementation costs', def: 'Building, deploying and maintaining agentic systems requires significant investment in computing resources, skilled professionals and infrastructure.' },
+              { term: 'Dependence on data quality', def: 'Effectiveness depends on the accuracy and quality of the data received — poor or biased data leads to incorrect decisions and unreliable outcomes.' },
+              { term: 'Human oversight', def: 'Despite its autonomy, Agentic AI still requires human supervision to ensure its actions remain safe, ethical and aligned with organisational objectives.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Conclusion',
+            text: 'Agentic AI represents the next stage in the evolution of Artificial Intelligence, enabling systems to make decisions, adapt to changing situations and perform tasks with minimal human intervention. Its ability to combine reasoning, learning, planning and automation makes it more efficient than traditional AI systems. As adoption continues to grow across industries — particularly in cybersecurity — Agentic AI is improving threat detection, incident response and overall operational efficiency. Although challenges such as security, privacy and ethical concerns remain, responsible development and human oversight can help maximise its benefits. Overall, Agentic AI has the potential to transform the future of intelligent systems and drive innovation across many sectors.',
+          },
+          {
+            type: 'bullets',
+            heading: 'References',
+            items: [
+              'Russell, S., & Norvig, P. (2021). Artificial Intelligence: A Modern Approach (4th ed.). Pearson.',
+              'NIST. (2024). Artificial Intelligence Risk Management Framework (AI RMF 1.0).',
+              'OWASP. (2025). Top 10 Risks for Large Language Model Applications.',
+              'Microsoft. (2024). Security Copilot Documentation.',
+              'OpenAI. (2025–2026). ChatGPT and AI Agent documentation.',
+              'IBM. (2024). What Is Agentic AI?',
+              'Google Cloud. (2025). Agentic AI Explained.',
+              'Gartner. (2025). Top Strategic Technology Trends.',
+            ],
+          },
+        ],
       },
       {
         number: '9',
@@ -5127,6 +5370,10 @@ export const courses = [
       'For every vulnerability, know: how it works, how to exploit it, and how to fix it',
       'Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies',
     ],
+    // Topics 1–7 are the class lecture notes. Topics 8–9, and the additions
+    // marked as exam wording throughout, come from the lecturer's handout
+    // "Cybersecurity Concepts: Web and Mobile Application Security" plus the
+    // exam guidance he gave in class (the six flagged questions in Topic 9).
     lectureNotes: [
       {
         number: '1',
@@ -5163,6 +5410,11 @@ export const courses = [
             ],
           },
           {
+            type: 'text',
+            heading: 'How a Web Application Works',
+            text: 'A web application functions using a combination of server-side and client-side scripts. Server-side scripts, written in languages like PHP or ASP.NET, manage the storage and retrieval of data, ensuring the application’s core functions are executed on the server. Client-side scripts — typically HTML, CSS and JavaScript — handle the presentation of that information and build the user interface. When a user interacts with a web application, their browser sends a request to the server; the server processes it and returns the necessary data; the browser then uses client-side scripts to display that data in a readable, interactive format. This request–response cycle is what allows a web application to serve dynamic content.',
+          },
+          {
             type: 'bullets',
             heading: 'Features of Web Applications',
             items: [
@@ -5179,6 +5431,28 @@ export const courses = [
             type: 'definition',
             heading: 'Mobile Application',
             text: 'A mobile application is software installed directly on a user’s device (iOS or Android), designed to run on a mobile device or tablet. Some mobile apps can also be accessed via an internet connection and a web browser. Mobile apps typically require a version built for each platform, and can provide a more dynamic, interactive user experience with strong collaboration and fast sharing features.',
+          },
+          {
+            type: 'table',
+            heading: 'Comparison: Web App vs Mobile App',
+            headers: ['Aspect', 'Web Application', 'Mobile Application'],
+            rows: [
+              ['Access', 'Runs in a web browser and can be reached from any device with an internet connection', 'Designed for a specific platform and must be downloaded and installed on the device before use'],
+              ['Development', 'Uses a combination of server-side and client-side scripts to process and present data', 'Uses server-side and client-side scripts as well as native code that reaches the device’s own features'],
+              ['Cost', 'Easier and cheaper to develop and maintain — a single version works across all platforms and devices', 'More complex and expensive to develop and update — it must be built for each platform separately'],
+              ['Convenience', 'Universally accessible; nothing to download or install, which saves the user time and storage', 'Must be downloaded and installed, consuming time and storage space on the device'],
+              ['Performance', 'Depends on the speed and reliability of the user’s internet connection and browser', 'Offers offline access and faster performance, which can improve the user experience'],
+              ['Compatibility', 'Faces browser-compatibility issues, since browsers differ in how they interpret code', 'No browser-compatibility issues — it is built for specific platforms and devices'],
+              ['Security', 'More exposed to attacks such as XSS and SQL injection, because it depends on the internet and web servers', 'Data is stored on the device and protected with encryption and authentication methods'],
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Read the Security row alongside the “Web Risk vs Mobile App Risk” table in Topic 4 — it is the same distinction the lecturer expects in the exam: web risk is centralised on the server, mobile risk is decentralised onto individual devices.',
+              'A mobile app is not automatically “more secure”. Storing data on the device removes the single-server blast radius, but it hands the data to a device an attacker may physically hold — which is why Topic 4 lists insecure data storage and reverse engineering as the top mobile risks.',
+              'Watch the Performance and Access rows: a mobile app can work offline, a web app cannot. Several of the guaranteed exam answers turn on exactly that point.',
+            ],
           },
         ],
       },
@@ -5382,6 +5656,19 @@ export const courses = [
           },
           {
             type: 'definition',
+            heading: 'Authentication vs Authorization',
+            text: 'Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information. Authentication answers “who are you?”; authorization answers “what are you allowed to do, now that we know who you are?”',
+          },
+          {
+            type: 'note',
+            items: [
+              'The banking example used in class: every teller and every manager authenticates the same way when signing in, but they are authorized differently — a teller can only approve transactions up to a set limit, while the branch manager holds higher clearance.',
+              'Authentication always comes first. A system cannot decide what you are permitted to do until it has established who you are.',
+              'These two are what the course calls the security/tracking models. Expect a question asking you to define each and distinguish them — the marks are on the two definitions plus one example of differing permission levels.',
+            ],
+          },
+          {
+            type: 'definition',
             heading: 'Password Security & Creation',
             text: 'Password policy is the most basic layer of access control, and it should be enforced at the point a user or account is created, not applied after the fact.',
           },
@@ -5486,6 +5773,14 @@ export const courses = [
             ],
           },
           {
+            type: 'note',
+            items: [
+              'Exam wording for the definition: encryption is the conversion of information into ciphertext — text that is unreadable to unauthorised users.',
+              'Exam wording for the distinction: symmetrical encryption uses a single key to both lock and unlock the data; asymmetrical encryption uses two keys — a public key and a private key.',
+              'Write those two sentences first, then add the trade-off if the question asks you to explain: the single symmetric key is fast but must itself be shared securely, while the asymmetric pair removes the need to share a secret at all.',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Steganography',
             text: 'Steganography hides data or a message inside an ordinary-looking file — commonly an image — rather than encrypting it into obviously unreadable ciphertext. A sensitive text file describing a security vulnerability could be embedded within an innocuous photograph and transmitted over a public channel.',
@@ -5541,6 +5836,15 @@ export const courses = [
         sections: [
           {
             type: 'definition',
+            heading: 'Web-Based Risk',
+            text: 'Web-based risk is any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption.',
+          },
+          {
+            type: 'note',
+            text: 'Learn that sentence exactly as written — “define web-based risk” is one of the questions the lecturer flagged as certain to appear, and the marks are on the three consequences: data breaches, financial losses, service disruption.',
+          },
+          {
+            type: 'definition',
             heading: 'Mobile App Risks',
             text: 'Mobile app risk refers to attacks associated with the device and OS features — vulnerabilities, threats, and security flaws that occur when mobile apps connect to the internet for data exchange, such as data leakage, spyware, cryptographic issues, and phishing attacks.',
           },
@@ -5575,6 +5879,21 @@ export const courses = [
             ],
           },
           {
+            type: 'text',
+            heading: 'Why Mobile Risk Is Different',
+            text: 'Mobile applications send processing out into “the wild” — onto user devices. They do benefit from built-in operating-system protections such as biometrics and sandboxing, but the attacker may have physical access to the device and to its runtime memory, and the developer has surrendered control of the environment the code runs in.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Four Core Mobile Application Risks',
+            items: [
+              { term: 'Insecure data storage', def: 'unencrypted data written to the local file system — cached passwords or personal information — can be read by physically acquiring the device, or by another malicious app on it' },
+              { term: 'Reverse engineering & tampering', def: 'bad actors decompile the application binary to extract hardcoded API keys, or alter the original app’s code' },
+              { term: 'Man-in-the-Middle (MitM) attacks', def: 'devices frequently switch networks — from secure home Wi-Fi to a spoofed public hotspot — which makes unencrypted network traffic highly vulnerable to interception' },
+              { term: 'Unpatched vulnerabilities', def: 'developers must surrender control of the operating environment, so security teams depend heavily on end users actually updating their apps and OS' },
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Web App Risks / Threats',
             text: 'Web app threats refer to vulnerabilities and attacks that exploit weaknesses in web-based systems. These threats lead to unauthorized access, data breaches, and service disruption — driven especially by the growth of online banking and e-commerce transactions. This historical progression has driven an ever-increasing sophistication among cybercriminals, alongside a continuous need for advancement in IT security measures.',
@@ -5600,16 +5919,41 @@ export const courses = [
             ],
           },
           {
+            type: 'termlist',
+            heading: 'Top Web Application Security Risks',
+            items: [
+              { term: 'Injection', def: 'untrusted data is sent to an interpreter inside a command or query; the injected code looks like normal code and tricks the interpreter into executing unexpected commands or returning data without proper permission, which can bypass authorization entirely. Common flaws are SQL, NoSQL and LDAP injection' },
+              { term: 'Denial of Service (DoS) / Distributed Denial of Service (DDoS)', def: 'attackers generate fake traffic through different vectors to overload the target server until it slows down and stops serving legitimate users; DDoS is the same attack at far larger scale, using botnets of thousands or millions of controlled devices' },
+              { term: 'Cross-Site Request Forgery (CSRF)', def: 'victims are tricked into making unwanted requests, and the attacker leverages their existing authentication to impersonate them and act on their behalf' },
+              { term: 'Cross-Site Scripting (XSS)', def: 'client-side scripts are injected into web pages to intercept sessions, impersonate users, read sensitive information, tamper with the site, or redirect to malicious URLs; it occurs whenever an application embeds untrusted data in a page without proper validation' },
+              { term: 'Security misconfiguration', def: 'security controls set incorrectly in the application or surrounding infrastructure — unpatched known vulnerabilities, cloud storage exposed to the internet with no authentication, insecure defaults left as-is, misconfigured HTTP headers, or error messages detailed enough to leak information to an attacker' },
+              { term: 'XML External Entities (XXE)', def: 'a misconfigured XML processor evaluates external entity references in XML files, letting an attacker expose internal server files, scan internal ports, use the web server for DoS, or achieve remote code execution' },
+              { term: 'Vulnerable (insecure) deserialization', def: 'untrusted, attacker-authored data is rebuilt into objects by the language’s deserialization mechanism; in severe cases this enables remote code execution, and otherwise privilege escalation, code injection, and replay attacks' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Deserialization is the reverse of serialization: an object is flattened into a stream of bytes so it can be stored or sent, then rebuilt at the other end. If those bytes came from an attacker, the rebuild step is running on attacker-controlled input.',
+              'Security misconfiguration is one of the most common risks precisely because it needs no clever exploit — an unpatched server or a public storage bucket is enough on its own.',
+              'Note where the boundary sits: injection, XSS and XXE are input-handling failures; DoS/DDoS is an availability failure; misconfiguration is an operational failure. Grouping them this way makes them much easier to recall under exam pressure.',
+            ],
+          },
+          {
             type: 'table',
             heading: 'Comparison: Web Risk vs Mobile App Risk',
             headers: ['Feature', 'Web Risk', 'Mobile App Risk'],
             rows: [
-              ['Centralization', 'Risk is centralized', 'Attacks are on the client side'],
-              ['Attack location', 'Attack is on the server; distributed across users', 'Attack is directly on the victim’s device'],
-              ['Data breach impact', 'Data breach affects the whole database/server', 'Data leakage from the device, often due to a lost or stolen phone'],
-              ['Connectivity', 'Requires internet connection', 'Some functionality may work offline, but data-exchange risk applies when connected'],
+              ['Centralization', 'Centralized risk — concentrated on the server', 'Decentralized risk — spread across individual devices'],
+              ['Attack location', 'Client–server attacks; the attack lands on the server and is distributed across users', 'The attack lands directly on the victim’s own device'],
+              ['Data breach impact', 'A breach affects the entire database, and therefore every user in it', 'Data leakage from a single device, usually following physical loss or theft of the phone'],
+              ['Connectivity', 'Requires an internet connection to function at all', 'Can work offline; data-exchange risk applies once it connects'],
               ['Common attack types', 'SQL injection, DDoS, CSRF', 'Reverse engineering, code tampering, permission abuse'],
             ],
+          },
+          {
+            type: 'note',
+            text: '“Differentiate between web application risk and mobile application risk” is a guaranteed question. Answer it with these five contrasts in this order — centralized vs decentralized, server vs device, whole database vs physical loss of one device, internet required vs works offline — and name one or two attack types on each side. Do not pad it with best-practice material; that is a separate question with a separate mark scheme.',
           },
         ],
       },
@@ -5643,6 +5987,7 @@ export const courses = [
             heading: 'Integrity and Availability Attacks',
             items: [
               { term: 'Distributed Denial of Service (DDoS)', def: 'attackers use a network of compromised devices to flood a website with excessive traffic, overloading the server and making the site unavailable to legitimate users' },
+              { term: 'Brute force & credential stuffing', def: 'automated bots test thousands of username and password combinations to break into administrative dashboards or user accounts' },
             ],
           },
           {
@@ -5666,12 +6011,36 @@ export const courses = [
             type: 'note',
             text: 'CSRF in practice: imagine you are logged in to your bank in one tab and open a malicious link in another. That page silently submits a transfer request to the bank — and because your browser automatically attaches your logged-in session cookie to every request to that site, the bank believes you made the request yourself. Common defences are CSRF tokens (a secret the malicious page cannot know) and re-confirming sensitive actions.',
           },
+          {
+            type: 'definition',
+            heading: 'Buffer Overflow',
+            text: 'A buffer overflow is a type of vulnerability where a program, while writing data to a buffer, overruns the buffer’s boundary and overwrites adjacent memory, leading to a system crash.',
+          },
+          {
+            type: 'note',
+            text: 'A buffer is simply a block of memory set aside to hold a fixed amount of data. If the program never checks that the incoming data fits, the excess spills into whatever memory sits next to it. A crash is the visible outcome, but the dangerous case is quieter: if the overwritten memory held the address the program was going to jump to next, a careful attacker can steer execution into code of their own choosing.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Five Website Attacks to Name in an Exam',
+            items: [
+              'SQL Injection (SQLi) — malicious input in a search bar, login form or other field manipulates the backend database, giving unauthorized access, data theft, or compromise of the host system',
+              'Cross-Site Scripting (XSS) — a harmful script is injected into a page and executes in another user’s browser, hijacking their session or stealing cookies',
+              'Malware / backdoor attacks — malicious code, or a hidden route back into the site, is planted on the server',
+              'Brute-force login attacks — automated bots test thousands of credential combinations against admin dashboards or user accounts',
+              'Phishing — a fake copy of a legitimate site tricks visitors into giving up credit card numbers or login credentials',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'This is the exact list to give when a question says “define a website attack and give five examples”. Open with the definition — any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions — then name the five. The marks are on those terms, not on the length of the prose around them.',
+          },
         ],
       },
       {
         number: '6',
         title: 'Strengths, Weaknesses & Best Practice',
-        covers: [4, 5],
+        covers: [4, 5, 6],
         sections: [
           {
             type: 'bullets',
@@ -5745,14 +6114,22 @@ export const courses = [
             text: 'WAF vs RASP in one line: a WAF stands guard in front of the application, inspecting HTTP traffic before it arrives; RASP lives inside the running application and stops an attack at the exact moment the code would execute it. They complement each other rather than compete.',
           },
           {
-            type: 'bullets',
-            heading: 'Additional Best Practices',
+            type: 'termlist',
+            heading: 'Web Application Security Best Practices',
             items: [
-              'Execute input validation & authorization',
-              'Enhance authentication',
-              'Record code changes',
-              'Track API usage',
-              'Employ dynamic testing for application testing',
+              { term: 'Execute input validation', def: 'verify all data submitted to the application for type, length, format and range before processing it, so attackers cannot inject malicious code — the primary mitigation for SQL injection and XSS' },
+              { term: 'Employ up-to-date encryption', def: 'use Transport Layer Security (TLS) with current recommended cipher suites and protocols for data in transit, and store user passwords using strong cryptographic hash functions such as SHA-256 or SHA-512 before they go into the database' },
+              { term: 'Enhance authentication and authorization', def: 'implement multi-factor authentication (MFA), set complex password requirements, limit failed login attempts to blunt brute-force attacks, and use role-based access control (RBAC) so each user holds only the permissions their role needs' },
+              { term: 'Track API usage', def: 'ensure every API the application uses has adequate authentication and authorization and communicates over encrypted channels; monitor usage routinely and analyse access logs for unusual activity' },
+              { term: 'Record code changes', def: 'keep accurate records of updates, bug fixes and new features using a version control system such as Git, so a security problem introduced by a recent modification can be traced quickly' },
+              { term: 'Employ dynamic testing for security validation', def: 'run DAST across every stage of the development lifecycle — early testing, staging and production — to catch injection, XSS, broken authentication and session management, and insecure direct object references; this is what “shifting security left” means in practice' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'These six are their own exam question. Keep them separate from the web/mobile risk answers — the lecturer specifically warned against mixing the two, because a best-practice question earns no marks for describing risks.',
+              'Each best practice pairs with a risk from Topic 4: input validation answers injection and XSS, up-to-date encryption answers interception, stronger authentication answers brute force, API tracking and change records answer misconfiguration. If a question asks you to justify a practice, name the risk it closes.',
             ],
           },
         ],
@@ -5767,6 +6144,27 @@ export const courses = [
             type: 'text',
             heading: 'Overview',
             text: 'Beyond the testing methodologies and protective mechanisms in the previous topic, keeping a web or mobile application secure is an ongoing operational discipline. The following are practical measures for maintaining audit compliance and quality assurance in day-to-day operation.',
+          },
+          {
+            type: 'definition',
+            heading: 'Quality Assurance (QA)',
+            text: 'Quality assurance ensures that software products meet the desired standard. It is measured against a fixed set of evaluation metrics, so that “the product is good” becomes a claim that can actually be tested and evidenced.',
+          },
+          {
+            type: 'termlist',
+            heading: 'QA Evaluation Metrics',
+            items: [
+              { term: 'Functionality', def: 'the product does what it was specified to do' },
+              { term: 'Performance', def: 'it responds and processes within acceptable time and load limits' },
+              { term: 'Reliability', def: 'it behaves consistently and remains available over time' },
+              { term: 'Usability', def: 'users can operate it correctly, without confusion' },
+              { term: 'Compatibility', def: 'it works across the intended browsers, devices and platforms' },
+              { term: 'Security', def: 'it protects data and withstands attack' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Memorise the six as a list — Functionality, Performance, Reliability, Usability, Compatibility, Security. “Write short notes on quality assurance” and “list the evaluation metrics” are the same question in this course, and the marks are awarded for naming all six, not for describing any of them at length. Lead with the one-line definition, then the list.',
           },
           {
             type: 'bullets',
@@ -5798,6 +6196,97 @@ export const courses = [
           {
             type: 'note',
             text: 'These operational measures complement the testing methodologies from the previous topic — SAST, DAST, IAST and SCA find flaws in the code, while audits, patching, staff training and documentation keep the running system secure over time. Exam questions often ask you to connect the two: a vulnerability found in testing is only truly fixed once the patch is deployed and the change is documented and audited.',
+          },
+        ],
+      },
+      {
+        number: '8',
+        title: 'Web Application Security & the Security Lifecycle',
+        covers: [5],
+        partial: [9],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Web Application Security',
+            text: 'Web application security is the practice of detecting and preventing cyber attacks on websites and web applications — building websites that are secure to begin with. It is the set of security controls built into a web application to protect it from a growing variety of cyber threats.',
+          },
+          {
+            type: 'text',
+            heading: 'A Lifecycle, Not a Stage',
+            text: 'Web applications inevitably contain bugs and misconfigurations, and some of those are security vulnerabilities an attacker can exploit. Web application security addresses them by leveraging secure development practices, implementing security testing throughout the software development lifecycle (SDLC), resolving design-level defects, and avoiding security problems during deployment and at runtime. Security is therefore not a phase bolted on before release — it runs from design through development, testing, deployment and live operation.',
+          },
+          {
+            type: 'note',
+            text: 'This is the “lifecycle approach” item on the course outline. A design-level defect — say, an application that was architected to trust input from its own mobile client — cannot be patched away later by a firewall rule; it has to be caught in design. That is the whole argument for spreading security across the lifecycle rather than testing once at the end.',
+          },
+          {
+            type: 'definition',
+            heading: 'Why Web Security Testing Is Important',
+            text: 'Web security testing focuses on identifying security vulnerabilities in web applications and their configurations, and its primary objective is the application layer. Testing typically involves delivering various input types to provoke errors and cause unexpected system behaviour. These “negative tests” investigate whether the system is performing tasks it was never designed to execute.',
+          },
+          {
+            type: 'note',
+            items: [
+              'A positive test asks “does the login form accept a valid password?” A negative test asks “what happens if I put a quote mark, 10,000 characters, or a script tag in the username field?” Security lives almost entirely in the second question.',
+              'The value of vulnerability and security assessment is that it converts an unknown risk into a known, prioritised defect that can be scheduled, fixed and verified — which is precisely what the audit and QA discipline in Topic 7 then has to evidence.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Two Ways to Defend',
+            items: [
+              'Prevention — find and remove the vulnerability before an attacker reaches it, using SAST, SCA, IAST and DAST',
+              'Blocking — stop the attack in real time as it arrives, using a Web Application Firewall (WAF) or Runtime Application Self-Protection (RASP)',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Ideally an organisation employs both methods, not one. The individual tools are defined in Topic 6 — this topic is about where each of them sits in the lifecycle: SAST and SCA during development, IAST and DAST during testing and staging, WAF and RASP in production.',
+          },
+        ],
+      },
+      {
+        number: '9',
+        title: 'Exam Focus — The Lecturer’s Guaranteed Questions',
+        covers: [],  // revision aid over the topics above, not an outline item
+        sections: [
+          {
+            type: 'text',
+            heading: 'How to Use This Topic',
+            text: 'These are the questions the lecturer flagged in class as certain to appear, with the answers in the wording he gave. Each one is set out in full in the topic named beside it — this page is a revision checklist, not a substitute for the notes.',
+          },
+          {
+            type: 'bullets',
+            heading: 'The Golden Rules He Gave',
+            items: [
+              'Hit the marking points. Pages of prose that never name the technical terms score nothing — the marks sit on the terms themselves.',
+              'Do not mix the answers up. Keep the best-practices answer separate from the web/mobile risk answers; they are different questions with different mark schemes.',
+              'Get the class rep’s photos of the board notes, especially the short notes on SQL injection and cross-site scripting.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Model Answers at a Glance',
+            items: [
+              { term: 'Write short notes on quality assurance / list the evaluation metrics', def: 'QA ensures software products meet the desired standard. The metrics are Functionality, Performance, Reliability, Usability, Compatibility and Security. (Topic 7)' },
+              { term: 'Define web-based risk', def: 'Any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption. (Topic 4)' },
+              { term: 'Differentiate web application risk from mobile application risk', def: 'Web: centralized risk, client–server attacks landing on the server, a breach affecting the entire database, and an internet connection required. Mobile: decentralized risk, attacks on the individual device, data leakage usually following physical loss of the device, and the ability to work offline. (Topic 4)' },
+              { term: 'Explain the security/tracking models — authentication vs authorization', def: 'Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information — a bank teller has a transaction limit, while the branch manager holds higher clearance. (Topic 3)' },
+              { term: 'Distinguish symmetrical from asymmetrical encryption', def: 'Encryption converts information into ciphertext, which is unreadable to unauthorized users. Symmetrical encryption uses a single key to both lock and unlock; asymmetrical encryption uses two keys — a public key and a private key. (Topic 3)' },
+              { term: 'Define a website attack and give five examples', def: 'Any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions. Five examples: SQL injection (SQLi), cross-site scripting (XSS), malware/backdoor attacks, brute-force login attacks, and phishing. (Topic 5)' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Use the “Study as cards” button above to drill these six — the question is the front of the card, the model answer is the back.',
+          },
+          {
+            type: 'note',
+            items: [
+              'A structure that protects your marks: one sentence of definition using the question’s own keywords, then the list, then one line per item only if the question asks you to explain. Writing the list before the explanation means a shortage of time costs you the elaboration, not the marks.',
+              'Where a question says “differentiate” or “distinguish”, answer in contrasting pairs rather than describing one side and then the other — it makes each contrast visible to whoever is marking.',
+              'These six are the flagged questions, not the whole syllabus. Topics 1–8 remain examinable, and the outline items on secure mobile/web development and next-generation challenges are not yet covered by any topic here.',
+            ],
           },
         ],
       },
