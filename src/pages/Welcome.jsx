@@ -2,15 +2,11 @@ import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight, BookOpen, BrainCircuit, CalendarDays, CloudUpload, Code2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { useCatalogue } from '../data/useCatalogue';
-
-// How many course codes to name before collapsing into "+N more".
-const CODES_SHOWN = 5;
+import { getDepartment } from '../data/departments';
 
 export default function Welcome() {
   usePageTitle('Welcome');
   const { user, profile, authLoading } = useAuth();
-  const { catalogue, department } = useCatalogue();
 
   if (!authLoading && !user) return <Navigate to="/signin" replace />;
 
@@ -26,23 +22,17 @@ export default function Welcome() {
   }
 
   const firstName = profile.full_name.split(' ')[0];
+  // Read from the lightweight department registry, never useCatalogue: Welcome
+  // is a one-time hand-off screen shown once right after signup, and pulling
+  // the ~800 kB course catalogue here would cost every new student that
+  // download for decoration. The real course list is one click away on
+  // /courses, which needs the catalogue anyway.
+  const department = getDepartment(profile.department);
   const isFoundation = department.status === 'foundation';
   const ownDepartment = profile.department_other?.trim();
   const journeyLabel = isFoundation
     ? (ownDepartment || 'academic')
     : department.degree || department.name;
-
-  // The student's real courses for their year, read from their own department
-  // catalogue. This used to be a hardcoded per-level string that had drifted
-  // badly from courses.js — 8 of its 12 course codes named courses that do not
-  // exist. Deriving it means it stays true for every department automatically,
-  // and foundation students finally get a real list instead of nothing.
-  const level = parseInt(String(profile.level ?? ''), 10);
-  const yearCourses = catalogue && Number.isFinite(level)
-    ? catalogue.getCoursesByLevel(level)
-    : [];
-  const yearUnits = yearCourses.reduce((sum, c) => sum + c.units, 0);
-  const extraCourses = yearCourses.length - CODES_SHOWN;
 
   const quickLinks = [
     {
@@ -108,21 +98,8 @@ export default function Welcome() {
           </span>
         </div>
 
-        {yearCourses.length > 0 && (
-          <div className="px-5 py-4">
-            <p className="text-xs text-coffee-600 leading-relaxed">
-              <span className="font-medium text-coffee-700">This year: </span>
-              {yearCourses.length} courses · {yearUnits} units
-            </p>
-            <p className="text-xs font-mono text-coffee-500 mt-1.5 leading-relaxed">
-              {yearCourses.slice(0, CODES_SHOWN).map(c => c.code).join(' · ')}
-              {extraCourses > 0 && ` +${extraCourses} more`}
-            </p>
-          </div>
-        )}
-
         {isFoundation && (
-          <div className="px-5 py-4 border-t border-coffee-100">
+          <div className="px-5 py-4">
             <p className="text-xs text-coffee-600 leading-relaxed mb-2">
               <span className="font-medium text-coffee-700">Foundation mode: </span>
               You have all 4 interactive tracks and the courses shared across University of Uyo
