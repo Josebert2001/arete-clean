@@ -1,27 +1,48 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles, GraduationCap, Shield, X, LogIn } from 'lucide-react';
+import { ArrowRight, Sparkles, GraduationCap, Code2, Briefcase, Award, X, LogIn } from 'lucide-react';
 import ProgressDashboard from '../components/ProgressDashboard';
 import StudentDashboard from '../components/StudentDashboard';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
 import { useLevelGate } from '../components/useLevelGate';
 import { useAuth } from '../context/AuthContext';
 
-// Only the two active levels
+// All four years, described by what every University of Uyo science programme
+// shares at that stage — not by one department's syllabus. This is the first
+// thing a signed-out visitor reads, so naming Cybersecurity topics here would
+// tell every other department the app isn't for them.
 const levelCards = [
   {
     level: 100,
+    year: 'First year',
     icon: GraduationCap,
     color: 'bg-moss',
     text: 'text-cream',
-    description: 'Mathematics, Physics, Computing foundations, Intro Security',
+    description: 'Mathematics, physics, statistics, and computing foundations.',
   },
   {
     level: 200,
-    icon: Shield,
+    year: 'Second year',
+    icon: Code2,
     color: 'bg-ink',
     text: 'text-cream',
-    description: 'Programming, Cybersecurity, Networking, Ethical Hacking',
+    description: 'Core programming, logic, and systems analysis.',
+  },
+  {
+    level: 300,
+    year: 'Third year',
+    icon: Briefcase,
+    color: 'bg-coffee-700',
+    text: 'text-cream',
+    description: 'Specialist courses and the SIWES industrial placement.',
+  },
+  {
+    level: 400,
+    year: 'Final year',
+    icon: Award,
+    color: 'bg-ember-500',
+    text: 'text-cream',
+    description: 'Advanced electives, research methods, and the final project.',
   },
 ];
 
@@ -101,7 +122,7 @@ export default function Home() {
           <div className="animate-fade-up">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
               <Sparkles size={12} />
-              <span>University of Uyo · Student Learning Platform · 100L – 400L</span>
+              <span>University of Uyo · 100L – 400L</span>
             </div>
 
             <div className="flex flex-wrap items-end gap-2 sm:gap-4 mb-3">
@@ -141,13 +162,16 @@ export default function Home() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {levelCards.map(({ level, icon: Icon, color, text, description }) => (
+              {levelCards.map(({ level, year, icon: Icon, color, text, description }) => (
                 <button
                   key={level}
                   onClick={() => requestLevel(level)}
                   className={`${color} ${text} rounded-2xl p-5 text-left group transition-all duration-200 flex flex-col gap-3 hover:scale-[1.03] hover:shadow-xl ring-2 ring-transparent hover:ring-white/20`}
                 >
-                  <Icon size={22} className="opacity-80" />
+                  <div className="flex items-center justify-between gap-2">
+                    <Icon size={20} className="opacity-80" />
+                    <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">{year}</span>
+                  </div>
                   <div>
                     <div className="font-display font-bold text-2xl leading-none mb-1">{level}L</div>
                     <div className="text-xs opacity-70 leading-relaxed">{description}</div>
@@ -159,8 +183,9 @@ export default function Home() {
               ))}
             </div>
 
-            <p className="text-xs text-coffee-500 mt-3 font-mono">
-              300L and 400L interactive track modules are planned
+            <p className="text-xs text-coffee-500 mt-3 leading-relaxed">
+              All four years include topic outlines, textbooks, and exam tips. The interactive
+              coding tracks run at 100L and 200L.
             </p>
           </div>
 
