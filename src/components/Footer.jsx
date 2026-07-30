@@ -13,7 +13,7 @@ export default function Footer() {
               <span className="font-display text-lg font-bold text-ink">Areté</span>
             </div>
             <p className="text-sm text-coffee-700 leading-relaxed">
-              Academic companion for B.Sc. Cybersecurity students at the University of Uyo — courses, interactive programming tracks, and an AI tutor, all four years.
+              Academic companion for University of Uyo students — courses, interactive programming tracks, and an AI tutor, all four years.
             </p>
             <p className="text-xs text-coffee-600 mt-3 italic font-display">ἀρετή · Greek for "excellence through practice"</p>
           </div>

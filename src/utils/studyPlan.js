@@ -8,7 +8,7 @@
 //
 // Pure and deterministic: same inputs → same plan, which keeps it unit-testable.
 
-import { getCoursesByLevelAndSemester } from '../data/courses';
+import { getCoursesByLevelAndSemester as getCyberCoursesByLevelAndSemester } from '../data/courses';
 
 // A typical Nigerian university teaching semester runs ~15 weeks.
 export const DEFAULT_WEEKS = 15;
@@ -89,6 +89,10 @@ function buildSlotGrid(studyDays, slotTimes) {
  * @param {Object} [opts.courseSignals] per-slug progress signals from
  *   collectCourseSignals() — quiz averages and linked-track completion used to
  *   personalize the block weighting. Omit for the plain units-only plan.
+ * @param {Function} [opts.getCoursesByLevelAndSemester] override for which
+ *   catalogue to pull courses from — defaults to the Cybersecurity catalogue.
+ *   A department's catalogue (see data/departments.js) passes its own here so
+ *   foundation-mode students get a plan built from their own course list.
  * @returns {{ events: Array, courses: Array, unplaced: Array, adjustments: Array, meta: Object }}
  */
 export function generateStudyPlan({
@@ -100,6 +104,7 @@ export function generateStudyPlan({
   slotTimes = DEFAULT_SLOT_TIMES,
   alarmMinutes = 30,
   courseSignals = {},
+  getCoursesByLevelAndSemester = getCyberCoursesByLevelAndSemester,
 }) {
   if (!level || !semester || !(sessionStart instanceof Date) || Number.isNaN(sessionStart.getTime())) {
     throw new Error('generateStudyPlan requires level, semester, and a valid sessionStart date');

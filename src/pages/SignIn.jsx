@@ -7,7 +7,7 @@ import { usePageTitle } from '../utils/usePageTitle';
 const VALUE_PROPS = [
   { icon: CloudUpload,   text: 'Progress syncs across all your devices automatically' },
   { icon: BookOpen,      text: 'Upload and access course materials shared by your class' },
-  { icon: BrainCircuit,  text: 'AI Tutor calibrated to the UniUyo Cybersecurity curriculum' },
+  { icon: BrainCircuit,  text: 'AI Tutor calibrated to your University of Uyo curriculum' },
   { icon: Shield,        text: '4 years of content — 100L to 400L — always with you' },
 ];
 
@@ -104,12 +104,12 @@ export default function SignIn() {
             <img src="/arete.svg" alt="Areté logo" className="w-10 h-10 rounded-xl" />
             <div className="leading-tight">
               <div className="font-display text-xl font-bold text-cream">Areté</div>
-              <div className="text-xs text-coffee-500 tracking-wide">Dept of Cybersecurity · UniUyo</div>
+              <div className="text-xs text-coffee-500 tracking-wide">University of Uyo · Student Learning Platform</div>
             </div>
           </div>
 
           <p className="font-display text-4xl font-bold text-cream leading-tight mb-4">
-            The academic aid<br />built for UniUyo<br />Cybersecurity.
+            The academic aid<br />built for<br />University of Uyo.
           </p>
           <p className="text-coffee-400 leading-relaxed mb-12 max-w-xs">
             Sign in once. Your progress, materials, and AI tutor follow you everywhere.
@@ -128,7 +128,7 @@ export default function SignIn() {
         </div>
 
         <p className="text-xs text-coffee-700 mt-16">
-          University of Uyo · Department of Cybersecurity
+          University of Uyo · Student Learning Platform
         </p>
       </div>
 

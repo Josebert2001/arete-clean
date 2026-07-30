@@ -101,7 +101,7 @@ export default function Home() {
           <div className="animate-fade-up">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-6">
               <Sparkles size={12} />
-              <span>Dept of Cybersecurity · University of Uyo · 100L – 400L</span>
+              <span>University of Uyo · Student Learning Platform · 100L – 400L</span>
             </div>
 
             <div className="flex flex-wrap items-end gap-2 sm:gap-4 mb-3">

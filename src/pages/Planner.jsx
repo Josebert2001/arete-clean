@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { levelMeta, LEVELS, getCoursesByLevelAndSemester } from '../data/courses';
+import { useCatalogue } from '../data/useCatalogue';
 import { generateStudyPlan, DEFAULT_STUDY_DAYS, DEFAULT_SLOT_TIMES } from '../utils/studyPlan';
 import { collectCourseSignals } from '../utils/planSignals';
 import { buildIcs, downloadIcs, googleCalendarLink } from '../utils/ics';
@@ -43,6 +43,11 @@ function nextMondayISO() {
   return d.toISOString().slice(0, 10);
 }
 
+// The four year levels are the same shape for every department's catalogue
+// (see buildCatalogue in data/departments.js) — safe to use as a constant
+// here, before the async catalogue has resolved.
+const LEVELS = [100, 200, 300, 400];
+
 // Parse a stored profile level like "200L" → 200; fall back to 100.
 function levelFromProfile(profile) {
   const n = parseInt(String(profile?.level ?? ''), 10);
@@ -52,6 +57,7 @@ function levelFromProfile(profile) {
 export default function Planner() {
   usePageTitle('Study Planner');
   const { profile, user } = useAuth();
+  const { catalogue } = useCatalogue();
   const google = useGoogleConnection();
 
   const [session, setSession]   = useState(currentSession());
@@ -90,22 +96,37 @@ export default function Planner() {
     return new Date(y, m - 1, d);
   }, [startISO]);
 
+  // Foundation-mode students who've picked their own courses (see
+  // CoursePicker.jsx) get a plan built from just that subset; everyone else
+  // (including every CYB student) keeps the full level+semester list.
+  const selectedCourses = profile?.selected_courses;
+  const getCoursesForPlan = useMemo(() => {
+    if (!catalogue) return null;
+    if (!selectedCourses?.length) return catalogue.getCoursesByLevelAndSemester;
+    const selectedSet = new Set(selectedCourses);
+    return (lvl, sem) => catalogue.getCoursesByLevelAndSemester(lvl, sem).filter(c => selectedSet.has(c.slug));
+  }, [catalogue, selectedCourses]);
+
   // Quiz scores + track completion recorded on this device (useProgress mirrors
   // them to Supabase). Empty for new/signed-out students — the plan then falls
   // back to plain units weighting.
   const courseSignals = useMemo(
-    () => collectCourseSignals(getCoursesByLevelAndSemester(level, semester)),
-    [level, semester]
+    () => getCoursesForPlan ? collectCourseSignals(getCoursesForPlan(level, semester)) : {},
+    [getCoursesForPlan, level, semester]
   );
 
   const plan = useMemo(() => {
+    if (!getCoursesForPlan) return null;
     try {
       const days = studyDays.length ? studyDays : DEFAULT_STUDY_DAYS;
-      return generateStudyPlan({ level, semester, sessionStart, studyDays: days, slotTimes: DEFAULT_SLOT_TIMES, courseSignals });
+      return generateStudyPlan({
+        level, semester, sessionStart, studyDays: days, slotTimes: DEFAULT_SLOT_TIMES, courseSignals,
+        getCoursesByLevelAndSemester: getCoursesForPlan,
+      });
     } catch {
       return null;
     }
-  }, [level, semester, sessionStart, studyDays, courseSignals]);
+  }, [getCoursesForPlan, level, semester, sessionStart, studyDays, courseSignals]);
 
   const toggleDay = (code) =>
     setStudyDays(prev => (prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]));
@@ -224,7 +245,7 @@ export default function Planner() {
                       : 'bg-cream border-coffee-200 text-coffee-700 hover:border-coffee-400 hover:text-ink'
                   }`}
                 >
-                  {levelMeta[l].label}
+                  {l}L
                 </button>
               ))}
             </div>
@@ -277,7 +298,10 @@ export default function Planner() {
                   <p className="text-sm font-semibold text-ink">
                     {plan.courses.length} courses · {plan.meta.blocksPerWeek} blocks/week
                   </p>
-                  <p className="text-xs text-coffee-500 mt-0.5">{plan.meta.totalUnits} credit units this semester</p>
+                  <p className="text-xs text-coffee-500 mt-0.5">
+                    {plan.meta.totalUnits} credit units this semester
+                    {selectedCourses?.length > 0 && ' · scoped to your picked courses'}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
@@ -368,9 +392,11 @@ export default function Planner() {
           ) : (
             <div className="bg-paper border border-dashed border-coffee-300 rounded-2xl px-6 py-16 text-center">
               <p className="text-sm text-coffee-600">
-                {studyDays.length === 0
-                  ? 'Pick at least one study day to build your plan.'
-                  : 'No courses found for this level and semester yet.'}
+                {!catalogue
+                  ? 'Loading your courses…'
+                  : studyDays.length === 0
+                    ? 'Pick at least one study day to build your plan.'
+                    : 'No courses found for this level and semester yet.'}
               </p>
             </div>
           )}

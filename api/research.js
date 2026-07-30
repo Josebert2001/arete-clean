@@ -18,7 +18,7 @@ import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } fr
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { captureApiError } from './_lib/sentry.js';
 
-const SYSTEM_PROMPT = `You are Areté's study helper for beginner B.Sc. Cybersecurity students at the University of Uyo.
+const SYSTEM_PROMPT = `You are Areté's study helper for beginner university students at the University of Uyo.
 
 A student has highlighted a passage from their course notes and wants it explained simply. Use web search to add current, accurate context, then explain the passage in plain language.
 

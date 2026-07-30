@@ -2,7 +2,11 @@ import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight, BookOpen, BrainCircuit, CloudUpload, Code2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
+import { getDepartment } from '../data/departments';
 
+// Only meaningful for the Cybersecurity catalogue — foundation-mode students
+// get a department-neutral note instead (their course codes differ per
+// programme, so naming specific CYB courses here would be misleading).
 const LEVEL_FOCUS = {
   '100L': 'CSC 101, MTH 101, GST 111 — foundations of computing and mathematics.',
   '200L': 'CYB 201, CSC 201, MTH 202 — core cybersecurity principles and data structures.',
@@ -49,6 +53,11 @@ export default function Welcome() {
   }
 
   const firstName = profile.full_name.split(' ')[0];
+  const department = getDepartment(profile.department);
+  const isFoundation = department.status === 'foundation';
+  const journeyLabel = isFoundation
+    ? (profile.department_other?.trim() || 'academic')
+    : department.degree || department.name;
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16 sm:py-24 animate-fade-in">
@@ -67,7 +76,7 @@ export default function Welcome() {
         <p className="text-lg text-coffee-700 leading-relaxed max-w-lg">
           You're all set. Areté is here for every course, every concept, and every late-night
           debugging session across your{' '}
-          <span className="font-semibold text-ink">B.Sc. Cybersecurity journey</span>.
+          <span className="font-semibold text-ink">{journeyLabel} journey</span>.
         </p>
       </div>
 
@@ -82,7 +91,19 @@ export default function Welcome() {
             {profile.level}
           </span>
         </div>
-        {LEVEL_FOCUS[profile.level] && (
+        {isFoundation ? (
+          <div className="px-5 py-4">
+            <p className="text-xs text-coffee-600 leading-relaxed mb-2">
+              <span className="font-medium text-coffee-700">Foundation mode: </span>
+              You have all 4 interactive tracks (Java, Python, C, Security) and the shared
+              foundation courses (GST, MTH, PHY, COS, and more). Your full{' '}
+              {profile.department_other?.trim() || 'department'} curriculum is on the way.
+            </p>
+            <Link to="/courses" className="text-xs font-medium text-moss hover:text-ink transition-colors">
+              Pick the courses that match your programme →
+            </Link>
+          </div>
+        ) : LEVEL_FOCUS[profile.level] && (
           <div className="px-5 py-4">
             <p className="text-xs text-coffee-600 leading-relaxed">
               <span className="font-medium text-coffee-700">This year: </span>
