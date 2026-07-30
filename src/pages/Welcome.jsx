@@ -1,43 +1,16 @@
 import { Link, Navigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, BrainCircuit, CloudUpload, Code2 } from 'lucide-react';
+import { ArrowRight, BookOpen, BrainCircuit, CalendarDays, CloudUpload, Code2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { getDepartment } from '../data/departments';
+import { useCatalogue } from '../data/useCatalogue';
 
-// Only meaningful for the Cybersecurity catalogue — foundation-mode students
-// get a department-neutral note instead (their course codes differ per
-// programme, so naming specific CYB courses here would be misleading).
-const LEVEL_FOCUS = {
-  '100L': 'CSC 101, MTH 101, GST 111 — foundations of computing and mathematics.',
-  '200L': 'CYB 201, CSC 201, MTH 202 — core cybersecurity principles and data structures.',
-  '300L': 'CYB 301, CYB 311, CSC 301 — networks, cryptography, and ethical hacking.',
-  '400L': 'CYB 401, CYB 411, CYB 421 — digital forensics, advanced security, and final year project.',
-};
-
-const QUICK_LINKS = [
-  {
-    to: '/courses',
-    icon: BookOpen,
-    label: 'Browse Courses',
-    desc: 'Your full curriculum — every course from 100L to 400L.',
-  },
-  {
-    to: '/tutor',
-    icon: BrainCircuit,
-    label: 'Open AI Tutor',
-    desc: 'Ask anything. Get curriculum-aligned answers, instantly.',
-  },
-  {
-    to: '/lab',
-    icon: Code2,
-    label: 'Explore Code Lab',
-    desc: 'Java, Python, C — write and run code right in your browser.',
-  },
-];
+// How many course codes to name before collapsing into "+N more".
+const CODES_SHOWN = 5;
 
 export default function Welcome() {
   usePageTitle('Welcome');
   const { user, profile, authLoading } = useAuth();
+  const { catalogue, department } = useCatalogue();
 
   if (!authLoading && !user) return <Navigate to="/signin" replace />;
 
@@ -53,11 +26,54 @@ export default function Welcome() {
   }
 
   const firstName = profile.full_name.split(' ')[0];
-  const department = getDepartment(profile.department);
   const isFoundation = department.status === 'foundation';
+  const ownDepartment = profile.department_other?.trim();
   const journeyLabel = isFoundation
-    ? (profile.department_other?.trim() || 'academic')
+    ? (ownDepartment || 'academic')
     : department.degree || department.name;
+
+  // The student's real courses for their year, read from their own department
+  // catalogue. This used to be a hardcoded per-level string that had drifted
+  // badly from courses.js — 8 of its 12 course codes named courses that do not
+  // exist. Deriving it means it stays true for every department automatically,
+  // and foundation students finally get a real list instead of nothing.
+  const level = parseInt(String(profile.level ?? ''), 10);
+  const yearCourses = catalogue && Number.isFinite(level)
+    ? catalogue.getCoursesByLevel(level)
+    : [];
+  const yearUnits = yearCourses.reduce((sum, c) => sum + c.units, 0);
+  const extraCourses = yearCourses.length - CODES_SHOWN;
+
+  const quickLinks = [
+    {
+      to: '/courses',
+      icon: BookOpen,
+      label: 'Browse Courses',
+      // Promising a "full curriculum" to a foundation student contradicts the
+      // note directly below this card — they have the shared courses only.
+      desc: isFoundation
+        ? 'The foundation courses shared across programmes — pick the ones you take.'
+        : 'Your full curriculum — every course from 100L to 400L.',
+    },
+    {
+      to: '/tutor',
+      icon: BrainCircuit,
+      label: 'Open AI Tutor',
+      desc: 'Ask anything. Get curriculum-aligned answers, instantly.',
+    },
+    {
+      to: '/lab',
+      icon: Code2,
+      label: 'Explore Code Lab',
+      desc: 'Java, Python and C tracks, plus 12 capture-the-flag security rooms.',
+    },
+    {
+      to: '/planner',
+      icon: CalendarDays,
+      label: 'Build a Study Plan',
+      desc: 'A weekly timetable from your courses, synced to your calendar.',
+    },
+  ];
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16 sm:py-24 animate-fade-in">
@@ -91,26 +107,33 @@ export default function Welcome() {
             {profile.level}
           </span>
         </div>
-        {isFoundation ? (
+
+        {yearCourses.length > 0 && (
           <div className="px-5 py-4">
+            <p className="text-xs text-coffee-600 leading-relaxed">
+              <span className="font-medium text-coffee-700">This year: </span>
+              {yearCourses.length} courses · {yearUnits} units
+            </p>
+            <p className="text-xs font-mono text-coffee-500 mt-1.5 leading-relaxed">
+              {yearCourses.slice(0, CODES_SHOWN).map(c => c.code).join(' · ')}
+              {extraCourses > 0 && ` +${extraCourses} more`}
+            </p>
+          </div>
+        )}
+
+        {isFoundation && (
+          <div className="px-5 py-4 border-t border-coffee-100">
             <p className="text-xs text-coffee-600 leading-relaxed mb-2">
               <span className="font-medium text-coffee-700">Foundation mode: </span>
-              You have all 4 interactive tracks (Java, Python, C, Security) and the shared
-              foundation courses (GST, MTH, PHY, COS, and more). Your full{' '}
-              {profile.department_other?.trim() || 'department'} curriculum is on the way.
+              You have all 4 interactive tracks and the courses shared across University of Uyo
+              programmes. Your full {ownDepartment || 'department'} curriculum is on the way.
             </p>
             <Link to="/courses" className="text-xs font-medium text-moss hover:text-ink transition-colors">
               Pick the courses that match your programme →
             </Link>
           </div>
-        ) : LEVEL_FOCUS[profile.level] && (
-          <div className="px-5 py-4">
-            <p className="text-xs text-coffee-600 leading-relaxed">
-              <span className="font-medium text-coffee-700">This year: </span>
-              {LEVEL_FOCUS[profile.level]}
-            </p>
-          </div>
         )}
+
         <div className="flex items-center gap-2.5 px-5 py-3.5 bg-moss/5 border-t border-moss/10">
           <CloudUpload size={13} className="text-moss shrink-0" />
           <p className="text-xs text-moss">Progress is syncing to the cloud automatically.</p>
@@ -123,7 +146,7 @@ export default function Welcome() {
           Where to start
         </p>
         <div className="space-y-3">
-          {QUICK_LINKS.map(({ to, icon: Icon, label, desc }) => (
+          {quickLinks.map(({ to, icon: Icon, label, desc }) => (
             <Link
               key={to}
               to={to}
