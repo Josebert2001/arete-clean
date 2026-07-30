@@ -65,6 +65,13 @@ describe('Welcome — no invented course codes', () => {
     expect(container.textContent).not.toContain('This year');
   });
 
+  it('deep-links into the student\'s own year on the Course Hub', async () => {
+    renderWelcome();
+    const link = await screen.findByRole('link', { name: /See your 100L courses/ });
+    // Derived from profile.level alone — no catalogue lookup needed.
+    expect(link).toHaveAttribute('href', '/courses?level=100');
+  });
+
   it('stays lightweight — must not pull the course catalogue', async () => {
     // Guards the deliberate choice above: Welcome reads the small
     // departments.js registry, never useCatalogue/courses.js. If someone
@@ -95,6 +102,12 @@ describe('Welcome — foundation mode', () => {
     await waitFor(() =>
       expect(screen.getByText(/Pick the courses that match your programme/)).toBeInTheDocument()
     );
+  });
+
+  it('does not also show the year deep link — the picker is the better action', async () => {
+    const { container } = renderWelcome();
+    await waitFor(() => expect(screen.getByText(/Foundation mode/)).toBeInTheDocument());
+    expect(container.textContent).not.toContain('See your 100L courses');
   });
 });
 

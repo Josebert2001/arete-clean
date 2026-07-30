@@ -33,6 +33,12 @@ export default function Welcome() {
   const journeyLabel = isFoundation
     ? (ownDepartment || 'academic')
     : department.degree || department.name;
+  // "100L" → 100, for a deep link straight into their own year on the Course
+  // Hub. Derived from the profile alone, so it costs nothing — unlike naming
+  // the actual courses, which would need the catalogue. Guarded because
+  // /courses?level=NaN would just drop the student on the level picker.
+  const levelNumber = parseInt(String(profile.level ?? ''), 10);
+  const hasLevelLink = Number.isFinite(levelNumber);
 
   const quickLinks = [
     {
@@ -97,6 +103,22 @@ export default function Welcome() {
             {profile.level}
           </span>
         </div>
+
+        {/* Foundation students get the picker link below instead — a second
+            route into /courses here would just be redundant. */}
+        {!isFoundation && hasLevelLink && (
+          <div className="px-5 py-4">
+            <p className="text-xs text-coffee-600 leading-relaxed mb-2">
+              Your {profile.level} topic outlines, textbooks, and exam tips are ready.
+            </p>
+            <Link
+              to={`/courses?level=${levelNumber}`}
+              className="text-xs font-medium text-moss hover:text-ink transition-colors"
+            >
+              See your {profile.level} courses →
+            </Link>
+          </div>
+        )}
 
         {isFoundation && (
           <div className="px-5 py-4">
