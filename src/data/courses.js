@@ -4961,6 +4961,10 @@ from sklearn.metrics import (classification_report, confusion_matrix,
 # 1. Load the dataset
 df = pd.read_csv('UNSW_NB15_dataset.csv')
 
+# Drop rows with missing values - the real file has blank service entries,
+# and StandardScaler passes NaN straight through to LinearSVC.fit()
+df = df.dropna()
+
 # 2. Preprocessing - drop non-predictive columns and the multiclass target
 X = df.drop(['id', 'attack_cat', 'label'], axis=1)
 y = df['label']
@@ -5025,6 +5029,10 @@ from sklearn.metrics import (classification_report, confusion_matrix,
 
 # 1. Load data
 df = pd.read_csv('UNSW_NB15_dataset.csv')
+
+# Drop rows with missing values - StandardScaler passes NaN through and
+# KNeighborsClassifier.fit() then raises ValueError: Input X contains NaN
+df = df.dropna()
 
 # 2. Preprocessing
 X = df.drop(['id', 'attack_cat', 'label'], axis=1)
@@ -5406,7 +5414,7 @@ traffic = np.array([[10, 100],
                     [200, 1000],
                     [9, 95]])
 
-model = IsolationForest(contamination=0.2)
+model = IsolationForest(contamination=0.2, random_state=42)
 model.fit(traffic)
 
 anomalies = model.predict(traffic)
@@ -5504,7 +5512,6 @@ plt.yscale('log')
 plt.show()
 
 # PCA features (V1-V28) - density plots, fraud vs non-fraud
-v_cols = [f'V{i}' for i in range(1, 29)]
 selected = ['V3', 'V4', 'V10', 'V11', 'V12', 'V14', 'V17']   # often the most discriminative
 
 plt.figure(figsize=(14, 10))
@@ -5545,11 +5552,6 @@ from sklearn.metrics import (classification_report, confusion_matrix,
 # Load data
 df = pd.read_csv('creditcard.csv')
 
-# Preprocessing: scale Amount and Time
-scaler = StandardScaler()
-df['Amount'] = scaler.fit_transform(df['Amount'].values.reshape(-1, 1))
-df['Time'] = scaler.fit_transform(df['Time'].values.reshape(-1, 1))
-
 # Features and target
 X = df.drop('Class', axis=1)
 y = df['Class']
@@ -5560,6 +5562,15 @@ X_sample, _, y_sample, _ = train_test_split(X, y, train_size=0.1, stratify=y, ra
 # Now split the sample into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X_sample, y_sample, test_size=0.3,
                                                     stratify=y_sample, random_state=42)
+
+# Scale Amount and Time AFTER the split, fitting only on the training rows.
+# Scaling the whole frame first would let the test set's mean and standard
+# deviation influence the training data, flattering every score below.
+X_train = X_train.copy()
+X_test = X_test.copy()
+scaler = StandardScaler()
+X_train[['Amount', 'Time']] = scaler.fit_transform(X_train[['Amount', 'Time']])
+X_test[['Amount', 'Time']] = scaler.transform(X_test[['Amount', 'Time']])
 
 print(f"Training set size: {X_train.shape[0]}")
 print(f"Test set size: {X_test.shape[0]}")
