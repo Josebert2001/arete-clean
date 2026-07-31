@@ -4670,7 +4670,9 @@ plt.show()`,
 
 # df is the DataFrame loaded in the Pandas example above
 sns.countplot(x='label', data=df)             # Bar chart
-sns.heatmap(df.corr())                        # Correlation heatmap
+sns.heatmap(df.corr(numeric_only=True))       # Correlation heatmap
+                                              # (numeric_only skips text columns,
+                                              #  which corr() cannot handle)
 sns.boxplot(x='label', y='value', data=df)    # Boxplot`,
           },
         ],
