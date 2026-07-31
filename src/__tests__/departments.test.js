@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { departments, getDepartment, DEFAULT_DEPARTMENT, SELECTABLE_DEPARTMENTS } from '../data/departments';
-import { getCrossDepartmentalCourses } from '../data/courses';
+import { departments, getDepartment, DEFAULT_DEPARTMENT, SELECTABLE_DEPARTMENTS, YEAR_LEVELS } from '../data/departments';
+import { getCrossDepartmentalCourses, LEVELS as CATALOGUE_LEVELS } from '../data/courses';
 
 describe('department registry', () => {
   it('defaults to cybersecurity', () => {
@@ -16,6 +16,15 @@ describe('department registry', () => {
     expect(SELECTABLE_DEPARTMENTS.length).toBeGreaterThan(0);
     expect(SELECTABLE_DEPARTMENTS.every(d => d.status === 'full')).toBe(true);
     expect(SELECTABLE_DEPARTMENTS.some(d => d.slug === 'general')).toBe(false);
+  });
+});
+
+describe('YEAR_LEVELS — the lightweight copy of the level list', () => {
+  // Pages that only need to validate or render a level import YEAR_LEVELS
+  // instead of courses.js, whose LEVELS export drags the ~800 kB catalogue
+  // along with it. That saving is only safe while the two agree.
+  it('is identical to the catalogue\'s own LEVELS', () => {
+    expect(YEAR_LEVELS).toEqual(CATALOGUE_LEVELS);
   });
 });
 

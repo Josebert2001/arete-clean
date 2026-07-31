@@ -44,7 +44,9 @@ describe('Courses page — first render while the catalogue is still loading', (
 
   it('shows real catalogue content once the chunk resolves', async () => {
     renderAt('/courses?level=100&semester=1');
-    // A 100L first-semester course from the resolved catalogue.
-    await waitFor(() => expect(screen.getByText(/GST 111/)).toBeInTheDocument());
+    // A 100L first-semester course from the resolved catalogue. Generous
+    // timeout: this waits on a real dynamic import of the ~800 kB catalogue,
+    // which routinely exceeds waitFor's 1s default.
+    await waitFor(() => expect(screen.getByText(/GST 111/)).toBeInTheDocument(), { timeout: 15000 });
   });
 });

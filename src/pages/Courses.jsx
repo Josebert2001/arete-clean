@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield, Search, X } from 'lucide-react';
 import { useCatalogue } from '../data/useCatalogue';
+import { YEAR_LEVELS } from '../data/departments';
 import { trackMeta } from '../data/trackMeta';
 import { useAuth } from '../context/AuthContext';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
@@ -342,10 +343,6 @@ function SemesterCoursesView({ level, semester, onBack, onSwitchSemester, onShow
   );
 }
 
-// The four year levels are the same shape for every department's catalogue
-// (see buildCatalogue in data/departments.js) — safe as a module constant for
-// URL parsing and as a fallback ahead of the async catalogue resolving.
-const DEFAULT_LEVELS = [100, 200, 300, 400];
 const EMPTY_COURSES = [];
 const EMPTY_LEVEL_META = {};
 const EMPTY_LOOKUP = () => [];
@@ -354,7 +351,7 @@ const EMPTY_LOOKUP = () => [];
 function parseLevel(value) {
   if (value === 'all') return 'all';
   const n = Number(value);
-  return DEFAULT_LEVELS.includes(n) ? n : null;
+  return YEAR_LEVELS.includes(n) ? n : null;
 }
 
 // 1 | 2 | null (invalid/absent)
@@ -427,7 +424,7 @@ export default function Courses() {
   // — and therefore invalidate — on every render.
   const courses = catalogue?.courses ?? EMPTY_COURSES;
   const levelMeta = catalogue?.levelMeta ?? EMPTY_LEVEL_META;
-  const LEVELS = catalogue?.LEVELS ?? DEFAULT_LEVELS;
+  const LEVELS = catalogue?.LEVELS ?? YEAR_LEVELS;
   const getCoursesByLevelAndSemester = catalogue?.getCoursesByLevelAndSemester ?? EMPTY_LOOKUP;
   const isFoundation = department?.status === 'foundation';
   const selectedCourses = profile?.selected_courses;

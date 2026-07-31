@@ -2,7 +2,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight, BookOpen, BrainCircuit, CalendarDays, CloudUpload, Code2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { getDepartment } from '../data/departments';
+import { getDepartment, YEAR_LEVELS } from '../data/departments';
 
 export default function Welcome() {
   usePageTitle('Welcome');
@@ -35,10 +35,15 @@ export default function Welcome() {
     : department.degree || department.name;
   // "100L" → 100, for a deep link straight into their own year on the Course
   // Hub. Derived from the profile alone, so it costs nothing — unlike naming
-  // the actual courses, which would need the catalogue. Guarded because
-  // /courses?level=NaN would just drop the student on the level picker.
+  // the actual courses, which would need the catalogue.
+  //
+  // Checked against the real level list rather than just Number.isFinite: an
+  // unrecognised level (say a future '500L') parses to a perfectly finite 500,
+  // and the link would render but dead-end, since the Course Hub rejects any
+  // level outside this list and silently falls back to the level picker.
+  // Failing closed hides the link instead.
   const levelNumber = parseInt(String(profile.level ?? ''), 10);
-  const hasLevelLink = Number.isFinite(levelNumber);
+  const hasLevelLink = YEAR_LEVELS.includes(levelNumber);
 
   const quickLinks = [
     {

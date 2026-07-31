@@ -14,6 +14,13 @@
 // loadCatalogue() that imports it, then register its knowledge builder in
 // api/_lib/courseData.js. See CLAUDE.md → Common Tasks.
 
+// The four year levels, as numbers. courses.js exports the same list, but
+// importing it there costs the whole ~800 kB catalogue — so pages that only
+// need to validate or render a level (Welcome, the Course Hub's URL parsing,
+// the Planner's level buttons) read it from here instead. A test asserts this
+// stays identical to the catalogue's own LEVELS so the cheap copy can't drift.
+export const YEAR_LEVELS = [100, 200, 300, 400];
+
 // Builds the catalogue shape every consumer (Courses.jsx, CourseDetail.jsx,
 // Planner.jsx, useCatalogue) expects, from any course list — the full
 // catalogue or a department's filtered subset.

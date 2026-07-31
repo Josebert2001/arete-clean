@@ -6,6 +6,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
 import { useCatalogue } from '../data/useCatalogue';
+import { YEAR_LEVELS } from '../data/departments';
 import { generateStudyPlan, DEFAULT_STUDY_DAYS, DEFAULT_SLOT_TIMES } from '../utils/studyPlan';
 import { collectCourseSignals } from '../utils/planSignals';
 import { buildIcs, downloadIcs, googleCalendarLink } from '../utils/ics';
@@ -43,15 +44,10 @@ function nextMondayISO() {
   return d.toISOString().slice(0, 10);
 }
 
-// The four year levels are the same shape for every department's catalogue
-// (see buildCatalogue in data/departments.js) — safe to use as a constant
-// here, before the async catalogue has resolved.
-const LEVELS = [100, 200, 300, 400];
-
 // Parse a stored profile level like "200L" → 200; fall back to 100.
 function levelFromProfile(profile) {
   const n = parseInt(String(profile?.level ?? ''), 10);
-  return LEVELS.includes(n) ? n : 100;
+  return YEAR_LEVELS.includes(n) ? n : 100;
 }
 
 export default function Planner() {
@@ -234,7 +230,7 @@ export default function Planner() {
               <GraduationCap size={12} /> Your level
             </label>
             <div className="grid grid-cols-4 gap-2.5">
-              {LEVELS.map(l => (
+              {YEAR_LEVELS.map(l => (
                 <button
                   key={l}
                   type="button"

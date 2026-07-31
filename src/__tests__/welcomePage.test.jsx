@@ -72,6 +72,17 @@ describe('Welcome — no invented course codes', () => {
     expect(link).toHaveAttribute('href', '/courses?level=100');
   });
 
+  it('hides the year link for a level the Course Hub would reject', async () => {
+    // '500L' parses to a finite 500, so a Number.isFinite check would let it
+    // through and render /courses?level=500 — a link that silently dead-ends,
+    // because parseLevel only accepts the four real years. Fail closed.
+    mockAuth.current = authFor({ ...CYB_PROFILE, level: '500L' });
+    const { container } = renderWelcome();
+    await waitFor(() => expect(screen.getByText(/Ada Obi/)).toBeInTheDocument());
+    expect(container.textContent).not.toContain('See your 500L courses');
+    expect(container.querySelector('a[href*="level=500"]')).toBeNull();
+  });
+
   it('stays lightweight — must not pull the course catalogue', async () => {
     // Guards the deliberate choice above: Welcome reads the small
     // departments.js registry, never useCatalogue/courses.js. If someone

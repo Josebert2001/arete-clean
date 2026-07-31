@@ -9,7 +9,10 @@ describe('useCatalogue', () => {
     const { result } = renderHook(() => useCatalogue());
     expect(result.current.status).toBe('loading');
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    // Generous timeout: this resolves a real dynamic import of the ~800 kB
+    // catalogue, which can take well over waitFor's 1s default on a cold
+    // transform or a loaded machine.
+    await waitFor(() => expect(result.current.status).toBe('ready'), { timeout: 15000 });
     expect(result.current.department.slug).toBe('cybersecurity');
     expect(result.current.catalogue.courses.length).toBeGreaterThan(0);
   });
