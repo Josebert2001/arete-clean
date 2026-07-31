@@ -164,7 +164,7 @@ export default function CourseDetail() {
       <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0 overflow-x-auto no-scrollbar">
         {[
           { key: 'resources', label: 'Study Resources', icon: BookOpen },
-          ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} topics` }] : []),
+          ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} ${course.lectureNotes.length === 1 ? 'topic' : 'topics'}` }] : []),
           ...(hasQuiz ? [{ key: 'quiz', label: 'Practice Quiz', icon: GraduationCap, badge: `${course.quiz.length} Q` }] : []),
           { key: 'materials', label: 'Materials', icon: Paperclip },
         ].map(({ key, label, icon: Icon, badge }) => (

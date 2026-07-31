@@ -23,6 +23,7 @@
     "@supabase/supabase-js": "^2.45.0",
     "ai": "^6.0.199",
     "googleapis": "^173.0.0",
+    "katex": "^0.18.1",
     "lucide-react": "^0.400.0",
     "mammoth": "^1.8.0",
     "pdf-parse": "^1.1.1",
