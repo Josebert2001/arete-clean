@@ -1,13 +1,16 @@
-// ─── Study streak (device-local) ──────────────────────────────────────────────
+// ─── Study streak ─────────────────────────────────────────────────────────────
 // Records which local calendar days the student opened a study page, and
-// computes the current consecutive-day streak. Deliberately local-only for now:
-// a streak is a nudge, not a record — losing it on a new device is acceptable
-// and not worth a schema change yet.
+// computes the current consecutive-day streak. localStorage is the working
+// copy — writes here are synchronous, so streaks keep working offline and
+// signed out — while StudyDaysContext unions this device's days with the
+// account's, so a student studying on their phone and their laptop sees one
+// streak rather than one per browser.
 
 import { isResumable } from './lastLocation';
 
-const KEY = 'arete-study-days-v1';
+export const STUDY_DAYS_KEY = 'arete-study-days-v1';
 const MAX_DAYS = 400; // bound storage; more than a year of history is never shown
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Local calendar day as YYYY-MM-DD (not UTC — streaks follow the student's clock).
 export function toDayString(date) {
@@ -20,7 +23,7 @@ export function toDayString(date) {
 export function readStudyDays() {
   if (typeof localStorage === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(STUDY_DAYS_KEY);
     const days = raw ? JSON.parse(raw) : [];
     return Array.isArray(days) ? days : [];
   } catch {
@@ -28,17 +31,33 @@ export function readStudyDays() {
   }
 }
 
+export function writeStudyDays(days) {
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(STUDY_DAYS_KEY, JSON.stringify(days));
+    } catch { /* private mode — streaks are a nicety */ }
+  }
+  return days;
+}
+
+// A study day is an immutable fact ("this day was studied"), so two devices can
+// never disagree about one — the union is always the correct merge, whichever
+// device pushed last and whatever clocks they were on.
+export function mergeStudyDays(local, cloud) {
+  const all = [...(local || []), ...(cloud || [])].filter(d => DAY_RE.test(d));
+  return [...new Set(all)].sort().slice(-MAX_DAYS);
+}
+
 // Marks today as a study day when the student opens a study page. Non-study
 // pages (home, sign-in, …) don't count — reuses the resumable-path list.
+// Returns the new day list when a day was added, else null, so the caller can
+// sync the change without re-reading storage on every navigation.
 export function recordStudyActivity(pathname, now = new Date()) {
-  if (!isResumable(pathname) || typeof localStorage === 'undefined') return;
+  if (!isResumable(pathname) || typeof localStorage === 'undefined') return null;
   const today = toDayString(now);
   const days = readStudyDays();
-  if (days.includes(today)) return;
-  days.push(today);
-  try {
-    localStorage.setItem(KEY, JSON.stringify(days.slice(-MAX_DAYS)));
-  } catch { /* private mode — streaks are a nicety */ }
+  if (days.includes(today)) return null;
+  return writeStudyDays([...days, today].slice(-MAX_DAYS));
 }
 
 // Consecutive days ending today — or yesterday, so a streak isn't shown as

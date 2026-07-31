@@ -8,7 +8,8 @@ import { useAuth } from '../context/AuthContext';
 import { useProgress } from './useProgress';
 import { getTrackProgress } from '../utils/trackProgress';
 import { readLastLocation } from '../utils/lastLocation';
-import { readStudyDays, computeStreak } from '../utils/streak';
+import { useStudyDays } from '../context/StudyDaysContext';
+import { computeStreak } from '../utils/streak';
 import { pickDailyChallenge } from '../utils/dailyChallenge';
 
 // ─── The signed-in homepage ───────────────────────────────────────────────────
@@ -53,6 +54,7 @@ const QUICK_ACTIONS = [
 
 export default function StudentDashboard() {
   const { profile } = useAuth();
+  const { days } = useStudyDays(); // account-wide, so the streak matches on every device
   // One hook per track — cloud-merged, so the dashboard matches the track
   // pages on any device.
   const progressBySlug = {
@@ -69,7 +71,7 @@ export default function StudentDashboard() {
     Object.values(progressBySlug).flatMap(p => p.completedModules || [])
   );
   const challenge = pickDailyChallenge(Object.values(trackMeta), completedIds);
-  const streak = computeStreak(readStudyDays());
+  const streak = computeStreak(days);
   const lastPath = readLastLocation();
   const firstName = (profile?.full_name || '').trim().split(/\s+/)[0] || 'there';
   const level = parseInt(String(profile?.level ?? ''), 10) || null;
