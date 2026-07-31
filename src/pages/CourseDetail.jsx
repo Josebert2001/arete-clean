@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap } from 'lucide-react';
-import { getCourseBySlug, courses } from '../data/courses';
+import { useCatalogue } from '../data/useCatalogue';
 import LectureNotes from '../components/LectureNotes';
 import CourseQuiz from '../components/CourseQuiz';
 import CourseMaterials from '../components/CourseMaterials';
@@ -26,7 +26,8 @@ const subjectStyles = {
 
 export default function CourseDetail() {
   const { slug } = useParams();
-  const course = getCourseBySlug(slug);
+  const { catalogue, status } = useCatalogue();
+  const course = catalogue?.getCourseBySlug(slug);
   const [activeTab, setActiveTab] = useState('resources');
 
   // Reset to the default tab when moving to another course (prev/next nav)
@@ -39,6 +40,30 @@ export default function CourseDetail() {
 
   usePageTitle(course ? `${course.code} — ${course.title}` : 'Course not found');
 
+  if (status === 'error') {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-24 text-center">
+        <p className="text-coffee-700 mb-6">
+          The course catalogue didn't download — check your connection and try again.
+        </p>
+        <button onClick={() => window.location.reload()} className="btn-primary text-sm">
+          Reload page
+        </button>
+      </div>
+    );
+  }
+
+  if (status !== 'ready') {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-16 animate-pulse" role="status" aria-label="Loading course">
+        <div className="h-4 w-40 bg-coffee-100 rounded mb-6" />
+        <div className="h-12 w-2/3 max-w-lg bg-coffee-100 rounded mb-4" />
+        <div className="h-4 w-full max-w-xl bg-coffee-100 rounded" />
+        <span className="sr-only">Loading…</span>
+      </div>
+    );
+  }
+
   if (!course) {
     return (
       <div className="max-w-6xl mx-auto px-6 py-24 text-center">
@@ -47,6 +72,8 @@ export default function CourseDetail() {
       </div>
     );
   }
+
+  const courses = catalogue.courses;
 
   const style = subjectStyles[course.subject] || subjectStyles.cs;
   const courseIndex = courses.findIndex(c => c.slug === slug);

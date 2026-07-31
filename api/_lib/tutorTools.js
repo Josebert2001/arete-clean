@@ -107,7 +107,10 @@ function summarizeTrackProgress(track, progress) {
 }
 
 // student is the result of getStudentFromRequest(req) — null when anonymous.
-export function buildTutorTools(student) {
+// departmentSlug scopes getCourseOutline to the student's own department
+// catalogue (see courseData.js's getCourseIndexForDepartment) — defaults to
+// the full Cybersecurity catalogue when omitted (anonymous student).
+export function buildTutorTools(student, departmentSlug) {
   return {
     getStudentProgress: tool({
       description:
@@ -157,9 +160,9 @@ export function buildTutorTools(student) {
         courseCode: z.string().describe('Course code, e.g. "CYB 224", "COS 111", "MTH 121"'),
       }),
       execute: async ({ courseCode }) => {
-        const entry = findCourseEntry(courseCode);
+        const entry = findCourseEntry(courseCode, departmentSlug);
         if (!entry) {
-          return `No course found matching "${courseCode}". Use a course code from the catalogue index.`;
+          return `No course found matching "${courseCode}" in your programme's catalogue. Use a course code from the catalogue index.`;
         }
         const { code: canonicalCode, outline } = entry;
 

@@ -1,17 +1,24 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowRight, GraduationCap, Hash, Loader2, User } from 'lucide-react';
+import { AlertCircle, ArrowRight, GraduationCap, Hash, Loader2, School, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
+import { SELECTABLE_DEPARTMENTS } from '../data/departments';
 
 const LEVELS = ['100L', '200L', '300L', '400L'];
+
+// Sentinel for "my department isn't listed yet" — resolves to the 'general'
+// foundation-mode department, with the typed name kept for department_other
+// (see departments.js and CLAUDE.md → Common Tasks for how that becomes a
+// full department later).
+const OTHER_DEPARTMENT = '__other__';
 
 export default function SetupProfile() {
   usePageTitle('Set Up Profile');
   const { user, profileComplete, authLoading, profileLoading, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const [form,   setForm]   = useState({ full_name: '', reg_number: '', level: '' });
+  const [form,   setForm]   = useState({ full_name: '', reg_number: '', level: '', department: '', department_other: '' });
   const [error,  setError]  = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -19,13 +26,16 @@ export default function SetupProfile() {
   if (!authLoading && !profileLoading && profileComplete) return <Navigate to="/" replace />;
 
   const setField = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+  const isOtherDept = form.department === OTHER_DEPARTMENT;
 
   const submit = async (e) => {
     e.preventDefault();
-    const { full_name, reg_number, level } = form;
+    const { full_name, reg_number, level, department } = form;
     const name = full_name.trim();
     const reg  = reg_number.trim().toUpperCase();
-    if (!name || !reg || !level) { setError('Please fill in all fields.'); return; }
+    const departmentOther = form.department_other.trim();
+    if (!name || !reg || !level || !department) { setError('Please fill in all fields.'); return; }
+    if (isOtherDept && !departmentOther)         { setError('Please tell us your department.'); return; }
     if (reg.length < 4)          { setError('Enter a valid reg number.'); return; }
     // A real reg number always mixes letters and digits (e.g. CYB/21/1234);
     // reject obvious junk before it lands in the department record.
@@ -41,6 +51,8 @@ export default function SetupProfile() {
       full_name: name,
       reg_number: reg,
       level,
+      department: isOtherDept ? 'general' : department,
+      department_other: isOtherDept ? departmentOther : null,
       updated_at: new Date().toISOString(),
     });
     if (dbErr) {
@@ -52,7 +64,8 @@ export default function SetupProfile() {
     navigate('/welcome', { replace: true });
   };
 
-  const ready = form.full_name.trim() && form.reg_number.trim() && form.level;
+  const ready = form.full_name.trim() && form.reg_number.trim() && form.level && form.department
+    && (!isOtherDept || form.department_other.trim());
 
   return (
     <div className="min-h-[calc(100vh-4.5rem)] flex items-center justify-center px-6 py-14">
@@ -107,6 +120,55 @@ export default function SetupProfile() {
             <p className="text-xs text-coffee-500 mt-2 pl-0.5">
               As it appears on your university ID card or student portal.
             </p>
+          </div>
+
+          {/* Department picker */}
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-medium text-coffee-700 mb-3">
+              <School size={12} /> Your department
+            </label>
+            <div className="grid grid-cols-1 gap-2.5">
+              {SELECTABLE_DEPARTMENTS.map(dept => (
+                <button
+                  key={dept.slug}
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, department: dept.slug }))}
+                  className={`py-3 px-4 rounded-xl text-sm font-semibold border-2 text-left transition-all ${
+                    form.department === dept.slug
+                      ? 'bg-ink border-ink text-cream shadow-sm'
+                      : 'bg-cream border-coffee-200 text-coffee-700 hover:border-coffee-400 hover:text-ink'
+                  }`}
+                >
+                  {dept.name}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setForm(f => ({ ...f, department: OTHER_DEPARTMENT }))}
+                className={`py-3 px-4 rounded-xl text-sm font-semibold border-2 text-left transition-all ${
+                  isOtherDept
+                    ? 'bg-ink border-ink text-cream shadow-sm'
+                    : 'bg-cream border-coffee-200 text-coffee-700 hover:border-coffee-400 hover:text-ink'
+                }`}
+              >
+                My department isn't listed yet
+              </button>
+            </div>
+            {isOtherDept && (
+              <div className="mt-3">
+                <input
+                  type="text"
+                  value={form.department_other}
+                  onChange={setField('department_other')}
+                  maxLength={60}
+                  placeholder="e.g. Mechanical Engineering"
+                  className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
+                />
+                <p className="text-xs text-coffee-500 mt-2 pl-0.5">
+                  You'll get the shared foundation courses and every interactive track now — your full curriculum comes as we add departments.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Level picker */}

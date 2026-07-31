@@ -1,7 +1,7 @@
 // Compact knowledge base for the Arete AI Tutor.
 // Consumed only by api/tutor.js — not bundled into the frontend.
 
-import { courses } from '../../src/data/courses.js';
+import { courses, getCrossDepartmentalCourses } from '../../src/data/courses.js';
 
 export const COURSE_KNOWLEDGE = `
 === B.Sc. CYBERSECURITY — UNIVERSITY OF UYO — FULL COURSE CATALOGUE ===
@@ -506,15 +506,79 @@ Mini Project: Multi-File C Project — main.c, utils.c, utils.h with include gua
 //  the knowledge strings above on demand.
 // ─────────────────────────────────────────────────────────────────────────────
 
+function extractIndexLines(knowledgeText) {
+  return knowledgeText
+    .split('\n')
+    .filter(line =>
+      line.startsWith('===') ||
+      line.startsWith('──') ||
+      /\|.*\|\s*\d+\s*units?\b/i.test(line)
+    )
+    .join('\n');
+}
+
 // One line per course ("CODE | Title | n units") under level/semester headers.
-export const COURSE_INDEX = COURSE_KNOWLEDGE
-  .split('\n')
-  .filter(line =>
-    line.startsWith('===') ||
-    line.startsWith('──') ||
-    /\|.*\|\s*\d+\s*units?\b/i.test(line)
-  )
-  .join('\n');
+export const COURSE_INDEX = extractIndexLines(COURSE_KNOWLEDGE);
+
+const normalizeCode = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+// The ~22 courses shared across most University of Uyo science/engineering
+// programmes (see crossDepartmental in src/data/courses.js) — what a
+// foundation-mode (non-Cybersecurity) student's tutor should know about.
+// Only 'general' is restricted; every other slug (including an unrecognised
+// one) falls back to the full Cybersecurity catalogue, same as today.
+const FOUNDATION_CODES = new Set(getCrossDepartmentalCourses().map(c => normalizeCode(c.code)));
+
+function allowedCodesForDepartment(departmentSlug) {
+  return departmentSlug === 'general' ? FOUNDATION_CODES : null;
+}
+
+// Filters COURSE_KNOWLEDGE down to just the course blocks whose code is in
+// `allowed`, dropping any level/semester section header left with nothing
+// under it (e.g. 300L Second Semester is entirely SIWES — all Cybersecurity —
+// so a foundation student's catalogue has no section there at all).
+function filterKnowledgeToCodes(knowledgeText, allowed) {
+  const text = knowledgeText.trim();
+  const titleMatch = text.match(/^===[^\n]*===/);
+  const title = titleMatch ? titleMatch[0] : '';
+  const rest = titleMatch ? text.slice(titleMatch[0].length) : text;
+
+  const sections = rest
+    .split(/\n(?=── )/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(section => {
+      const headerEnd = section.indexOf('\n');
+      const rawHeader = headerEnd === -1 ? section : section.slice(0, headerEnd).trim();
+      // The header's "(N units)" counts the FULL semester, so it would lie
+      // above a filtered course list (e.g. "200 LEVEL · FIRST SEMESTER
+      // (15 units)" over the 5 units a foundation student actually sees).
+      // We can't substitute a true figure either — their real programme has
+      // courses this catalogue doesn't carry — so drop the count entirely.
+      const header = rawHeader.replace(/\s*\(\d+\s*units?\)/i, '');
+      const body = headerEnd === -1 ? '' : section.slice(headerEnd).trim();
+      const keptBlocks = body
+        .split(/\n\n+/)
+        .map(b => b.trim())
+        .filter(b => b && allowed.has(normalizeCode(b.split('\n')[0].split('|')[0].trim())));
+      return keptBlocks.length ? `${header}\n\n${keptBlocks.join('\n\n')}` : null;
+    })
+    .filter(Boolean);
+
+  return [title, ...sections].filter(Boolean).join('\n\n');
+}
+
+// Department-scoped course index for the tutor's system prompt — a
+// Cybersecurity student (or an unrecognised department) sees the full
+// catalogue index unchanged; a foundation-mode student sees only the shared
+// courses, under a neutral title instead of the Cybersecurity one.
+export function getCourseIndexForDepartment(departmentSlug) {
+  const allowed = allowedCodesForDepartment(departmentSlug);
+  if (!allowed) return COURSE_INDEX;
+  const scoped = filterKnowledgeToCodes(COURSE_KNOWLEDGE, allowed)
+    .replace(/^===.*===/, '=== SHARED FOUNDATION COURSES — UNIVERSITY OF UYO ===');
+  return extractIndexLines(scoped);
+}
 
 // One line per module ("Module NN | Title") under track headers.
 export const MODULE_INDEX = MODULE_KNOWLEDGE
@@ -525,8 +589,6 @@ export const MODULE_INDEX = MODULE_KNOWLEDGE
     /^Module \d/.test(line)
   )
   .join('\n');
-
-const normalizeCode = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
 
 // courses.js is the single source of truth for lecture-note content (it's what
 // LectureNotes.jsx renders on the course page) — read it directly rather than
@@ -629,9 +691,16 @@ function lectureNotesText(course) {
 // so callers can do an exact-match DB lookup that agrees with this resolver's
 // fuzzy matching. `code` is null when only lecture notes matched (no catalogue
 // block to take a canonical code from). Returns null when nothing matches.
-export function findCourseEntry(courseCode) {
+//
+// departmentSlug scopes the result to that department's catalogue (see
+// getCourseIndexForDepartment) — a foundation-mode student asking about a
+// Cybersecurity-only course (e.g. "CYB 311") gets null, same as an unknown
+// code, rather than an answer for a course outside their programme. Omit it
+// (or pass 'cybersecurity'/anything else) for the full, unrestricted catalogue.
+export function findCourseEntry(courseCode, departmentSlug) {
   const target = normalizeCode(courseCode);
   if (!target) return null;
+  const allowed = allowedCodesForDepartment(departmentSlug);
 
   const blocks = COURSE_KNOWLEDGE.split(/\n\n+/).filter(b => b.includes('|'));
   const firstLineCode = (block) => block.trim().split('\n')[0].split('|')[0].trim();
@@ -643,6 +712,7 @@ export function findCourseEntry(courseCode) {
   // course "UUY-CYB 222".
   let matches = blocks.filter(b => codeOf(b) === target);
   if (!matches.length) matches = blocks.filter(b => codeOf(b).endsWith(target));
+  if (allowed) matches = matches.filter(b => allowed.has(codeOf(b)));
 
   // Same exact-then-suffix precedence as the catalogue block match above, so
   // "CYB 222" resolves lecture notes for CYB 222 and not UUY-CYB 222.
@@ -652,6 +722,7 @@ export function findCourseEntry(courseCode) {
       if (code.endsWith(target)) { courseObj = c; break; }
     }
   }
+  if (allowed && courseObj && !allowed.has(normalizeCode(courseObj.code))) courseObj = null;
   const notes = courseObj ? lectureNotesText(courseObj) : '';
 
   if (!matches.length && !notes) return null;

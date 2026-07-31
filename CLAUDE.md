@@ -1,7 +1,9 @@
 # Areté — CLAUDE.md
 
 ## Project Identity
-Areté is an interactive learning platform for B.Sc. Cybersecurity students at the University of Uyo. It delivers a full 4-year curriculum browser, programming tracks (Java, Python, C — 37 modules) plus a hands-on Security track (12 CTF-style capture-the-flag rooms; 49 modules total), an AI tutor, a code explainer, and an in-browser code playground.
+Areté is an interactive learning platform for University of Uyo students. It delivers a full 4-year curriculum browser, programming tracks (Java, Python, C — 37 modules) plus a hands-on Security track (12 CTF-style capture-the-flag rooms; 49 modules total), an AI tutor, a code explainer, and an in-browser code playground.
+
+It is multi-department: Cybersecurity is the only fully-authored catalogue (`src/data/courses.js`); students from any other department sign up in **foundation mode** (`department = 'general'`) and get the ~22 cross-departmental courses (GST/MTH/PHY/STA/COS/CSC/ENT/INS) plus all four tracks. Their typed department name lands in `profiles.department_other` — the demand signal for which catalogue to author next. The registry lives in `src/data/departments.js`; pages resolve the signed-in student's catalogue through `src/data/useCatalogue.js` (lazy, code-split per department).
 
 ## Stack
 - **Frontend:** React 18, React Router v6, Tailwind CSS (custom theme), Vite (port 5173)
@@ -61,7 +63,10 @@ Browser → React SPA (Vite)
 | `src/data/cModules.js` | 12 C modules |
 | `src/data/securityModules.js` | 12 Security "rooms" (theory + quiz + an embedded CTF `challenge`); flags stored as SHA-256 hashes |
 | `src/components/FlagChallenge.jsx` | Renders a module's CTF challenge; validates the flag client-side via Web Crypto SHA-256 (no backend); escalating hints, marks the module complete on solve |
-| `src/data/courses.js` | ~2131 lines — all 29 courses (100L–400L), topics, textbooks, exam tips |
+| `src/data/courses.js` | ~7800 lines — all Cybersecurity courses (100L–400L), topics, textbooks, exam tips; the 22 shared courses carry `crossDepartmental: true` |
+| `src/data/departments.js` | Department registry (cybersecurity=full, general=foundation) + lazy catalogue loaders + `YEAR_LEVELS` (the lightweight level list — import this, not courses.js, when a page only needs to validate/render a level) |
+| `src/data/useCatalogue.js` | Hook resolving the signed-in student's department catalogue; status `loading \| ready \| error` — always handle `error` or the page hangs on a failed chunk load |
+| `src/components/CoursePicker.jsx` | Foundation-mode students pin the shared courses their programme takes → `profiles.selected_courses` (NULL = auto-derive; Planner + Courses filter respect it) |
 | `src/data/trackConfig.js` | Track metadata config (java/python/c) |
 | `api/tutor.js` | Streaming tutor on the multi-provider chain (`api/_lib/model.js`) with tools: getStudentProgress, getCourseOutline, getModuleDetail |
 | `api/explainer.js` | Groq code explanation endpoint |
@@ -78,6 +83,7 @@ Browser → React SPA (Vite)
 | `api/google/calendar-sync.js` | Pushes a generated study plan into a dedicated secondary Google Calendar (idempotent re-sync) |
 | `src/utils/googleApi.js` \| `src/components/useGoogleConnection.js` \| `src/components/GoogleConnectButton.jsx` | Frontend Google-connection plumbing, used by `src/pages/Planner.jsx` |
 | `supabase/migrations/20260719000000_google_connections.sql` | `google_connections` table + RLS — run manually in the Supabase SQL editor, never via Claude |
+| `supabase/migrations/20260728*` | Multi-department columns: `profiles.department/department_other/selected_courses`, `course_materials.department` (applied). Every migration must end with `NOTIFY pgrst, 'reload schema';` or the API rejects the new columns with PGRST204 |
 | `vercel.json` | CSP, CORS headers, SPA rewrite rule |
 | `scripts/validate-modules.mjs` | Pre-build module structure validator |
 
@@ -138,6 +144,7 @@ The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-
 ## Common Tasks
 - **Adding a module:** Edit the relevant data file (`modules.js`, `pythonModules.js`, `cModules.js`, `securityModules.js`), run `npm run validate` to confirm structure. A track is registered in `trackMeta.js` (metadata + `moduleIndex`) and `trackConfig.js` (lazy loader); the generic `/tracks/:lang/:id` route picks it up automatically. Security modules add a `challenge` object (validated by `validate-modules.mjs`) and render a Challenge tab; they omit the JDoodle playground.
 - **Adding a course:** Edit `src/data/courses.js` — read the existing structure first, it is large
+- **Adding a department:** Query demand first (`SELECT lower(trim(department_other)), count(*) FROM profiles WHERE department_other IS NOT NULL GROUP BY 1 ORDER BY 2 DESC`). Then: author `src/data/<dept>Courses.js` in the same course-object shape as `courses.js`; register it in `departments.js` with `status: 'full'` and a `loadCatalogue()` importing it; add its knowledge builder to `api/_lib/courseData.js` (mirror `getCourseIndexForDepartment`); list it in `SELECTABLE_DEPARTMENTS` copy on SetupProfile automatically via the registry. Existing foundation students of that department keep their progress — it is keyed per-user, not per-department.
 - **Changing UI:** Use Tailwind with the custom color palette only; check Fraunces/Inter/JetBrains Mono for typography
 - **Adding an API feature:** Add a new file in `api/`, add rate limiting matching the existing pattern in `api/tutor.js`, register it in tools registry
 - **Auth changes:** Touch `AuthContext.jsx` and `src/lib/supabase.js` only — do not scatter auth logic into components

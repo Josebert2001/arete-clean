@@ -15,6 +15,7 @@ export const courses = [
     title: 'Communication in English',
     units: 2, level: 100, semester: 1, lh: 15, ph: 45,
     subject: 'gst',
+    crossDepartmental: true,
     description: 'Develops the English language skills required for academic and professional success: sound patterns, word classes, sentence construction, logical/critical reasoning, and writing craft. A foundation course that improves every other course you will take.',
     topics: [
       'Sound patterns in English: vowels, consonants, phonetics and phonology',
@@ -50,6 +51,7 @@ export const courses = [
     title: 'Elementary Mathematics I (Algebra and Trigonometry)',
     units: 2, level: 100, semester: 1, lh: 30, ph: 0,
     subject: 'math',
+    crossDepartmental: true,
     description: 'Algebra and trigonometry for university-level computation: set theory, real and complex numbers, sequences and series, quadratic equations, and circular measure. Bridges secondary-school maths with the rigour needed for the programme.',
     topics: [
       'Elementary set theory: subsets, union, intersection, complements, Venn diagrams',
@@ -84,6 +86,7 @@ export const courses = [
     title: 'General Physics I (Mechanics)',
     units: 2, level: 100, semester: 1, lh: 30, ph: 0,
     subject: 'phy',
+    crossDepartmental: true,
     description: 'Classical mechanics: vectors, kinematics, Newtonian dynamics, conservation principles, rotational motion, and gravitation. Builds the physical intuition that underpins electronics, networking signals, and hardware concepts encountered in later cybersecurity courses.',
     topics: [
       'Space, time, units and dimensions; vectors and scalars',
@@ -118,6 +121,7 @@ export const courses = [
     title: 'General Practical Physics I',
     units: 1, level: 100, semester: 1, lh: 0, ph: 45,
     subject: 'phy',
+    crossDepartmental: true,
     description: 'Laboratory practicals that accompany PHY 111. Quantitative measurement, treatment of measurement errors, and graphical analysis across mechanical, electrical, light, heat, and viscosity experiments. Develops precision, scientific method, and report-writing discipline.',
     topics: [
       'Laboratory safety and quantitative measurement techniques',
@@ -152,6 +156,7 @@ export const courses = [
     title: 'Introduction to Computing Sciences',
     units: 3, level: 100, semester: 1, lh: 30, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     description: 'A broad survey of the computing field: hardware, software, human-ware, information processing, and the many specializations within computing. Lays the conceptual vocabulary and hands-on device familiarity for everything that follows in your degree.',
     topics: [
       'Brief history of computing',
@@ -187,6 +192,7 @@ export const courses = [
     title: 'Descriptive Statistics',
     units: 3, level: 100, semester: 1, lh: 45, ph: 0,
     subject: 'stats',
+    crossDepartmental: true,
     description: 'The language of data: types, sources, and methods of data collection; presentation, errors and approximations; and the core measures used to summarise a dataset. A foundation for every analysis task in cybersecurity, research, and data-driven decision-making.',
     topics: [
       'Statistical data: types, sources and methods of collection',
@@ -221,6 +227,7 @@ export const courses = [
     title: 'Computer Operations',
     units: 2, level: 100, semester: 1, lh: 30, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     description: 'Practical computer skills: laboratory safety, hardware components, operating system navigation, productivity software, internet operations, and an introduction to statistical computing with SPSS. The hands-on companion to COS 111.',
     topics: [
       'Laboratory ethics and safety precautions; basic components of a computer system',
@@ -255,6 +262,7 @@ export const courses = [
     title: 'Computer Troubleshooting',
     units: 2, level: 100, semester: 1, lh: 15, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     description: 'Diagnosing and resolving common hardware and software problems across PCs, laptops, tablets, and mobile phones. Covers network connectivity/security troubleshooting, backup and restore, and virus/anti-virus procedures — practical skills every cybersecurity professional needs.',
     topics: [
       'Fundamentals of hardware',
@@ -293,6 +301,7 @@ export const courses = [
     title: 'Nigerian Peoples and Culture',
     units: 2, level: 100, semester: 2, lh: 15, ph: 45,
     subject: 'gst',
+    crossDepartmental: true,
     description: 'An introduction to Nigeria\'s ethnic diversity, cultural heritage, colonial and political history, and nation-building challenges. Provides context for the social and policy dimensions of cybersecurity in Nigeria.',
     topics: [
       'Nigerian history, culture and art up to 1800 (Yoruba, Hausa, Igbo, and minority groups)',
@@ -331,6 +340,7 @@ export const courses = [
     title: 'Problem Solving',
     units: 3, level: 100, semester: 2, lh: 30, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     hasInteractiveModules: true,
     interactiveTrackPath: '/tracks/python',
     interactiveLabel: 'Python',
@@ -794,6 +804,7 @@ export const courses = [
     title: 'Elementary Mathematics II (Calculus)',
     units: 2, level: 100, semester: 2, lh: 30, ph: 0,
     subject: 'math',
+    crossDepartmental: true,
     description: 'Calculus and trigonometry: differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and signal theory used in cybersecurity analysis.',
     topics: [
       'Trigonometric functions and identities',
@@ -828,6 +839,7 @@ export const courses = [
     title: 'General Physics II (Electricity & Magnetism)',
     units: 2, level: 100, semester: 2, lh: 30, ph: 0,
     subject: 'phy',
+    crossDepartmental: true,
     description: 'Electrostatics, DC circuits, magnetism, and electromagnetic induction. The electromagnetic foundations of this course directly underpin networking, wireless communications, and electronics studied in later years.',
     topics: [
       "Electrostatics: electric charge, Coulomb's law and superposition",
@@ -862,6 +874,7 @@ export const courses = [
     title: 'General Practical Physics II',
     units: 1, level: 100, semester: 2, lh: 0, ph: 45,
     subject: 'phy',
+    crossDepartmental: true,
     description: 'Laboratory practicals continuing from PHY 117, covering the theoretical concepts of PHY 121 through quantitative measurement, treatment of measurement errors, and graphical analysis.',
     topics: [
       'Continuation of quantitative measurement techniques from PHY 117',
@@ -1004,6 +1017,7 @@ export const courses = [
     title: 'Philosophy, Logic and Human Existence',
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'gst',
+    crossDepartmental: true,
     description: 'An examination of philosophical reasoning, formal logic, and the human condition. The logic component — syllogism, symbolic logic, and rules of inference — directly supports discrete mathematics and the formal reasoning used in security proofs and algorithm design.',
     topics: [
       'Scope, notions, meanings, branches and problems of philosophy',
@@ -1038,6 +1052,7 @@ export const courses = [
     title: 'Computer Programming I',
     units: 3, level: 200, semester: 1, lh: 30, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     hasInteractiveModules: true,
     interactiveTrackPath: '/tracks/java',
     interactiveLabel: 'Java',
@@ -1258,6 +1273,7 @@ export const courses = [
     title: 'Entrepreneurship and Innovation',
     units: 2, level: 200, semester: 2, lh: 15, ph: 45,
     subject: 'ent',
+    crossDepartmental: true,
     description: 'Business thinking for technical students: entrepreneurship and intrapreneurship theory, entrepreneurial characteristics and thinking, innovation, enterprise formation, and e-commerce principles. Directly applicable to cybersecurity consulting, startup, and freelance careers.',
     topics: [
       'Concept of entrepreneurship and intrapreneurship/corporate entrepreneurship',
@@ -2436,6 +2452,7 @@ export const courses = [
     title: 'Computer Programming II',
     units: 3, level: 200, semester: 2, lh: 15, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     hasInteractiveModules: true,
     interactiveTrackPath: '/tracks/java',
     interactiveLabel: 'Java',
@@ -2474,6 +2491,7 @@ export const courses = [
     title: 'Systems Analysis and Design',
     units: 3, level: 200, semester: 2, lh: 15, ph: 45,
     subject: 'ins',
+    crossDepartmental: true,
     description: 'A structured approach to analysing information system needs and designing solutions: the software development lifecycle, top-down and bottom-up design, dataflow diagramming, entity-relationship modelling, and file/database and user-interface design.',
     topics: [
       'Structured approach to analysis and design of information systems for businesses',
@@ -6784,6 +6802,7 @@ export const courses = [
     title: 'Peace and Conflict Resolution',
     units: 2, level: 300, semester: 1, lh: 30, ph: 0,
     subject: 'gst',
+    crossDepartmental: true,
     description: 'The causes, dynamics, and resolution of conflict in a multi-ethnic nation: types and theories of conflict, root causes of conflict and violence in Africa, peacebuilding strategies, and the roles of international organisations, media, and traditional institutions.',
     topics: [
       'Concepts of peace, conflict, and security in a multi-ethnic nation',
@@ -6819,6 +6838,7 @@ export const courses = [
     title: 'Artificial Intelligence',
     units: 2, level: 300, semester: 1, lh: 15, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     description: 'Foundations of AI: intelligent agents, search algorithms, knowledge representation, semantic networks, natural language processing, and expert systems. Directly relevant to AI-powered threat detection, anomaly detection, and automated vulnerability analysis in cybersecurity.',
     topics: [
       'Overview, history, goals, types, branches and applications of AI',
@@ -7380,6 +7400,7 @@ export const courses = [
     title: 'Research Methodology and Technical Report Writing',
     units: 3, level: 400, semester: 1, lh: 45, ph: 0,
     subject: 'cs',
+    crossDepartmental: true,
     description: 'The rigorous methods for conducting and communicating academic and technical research: research types and approaches, scientific investigation and problem formulation, data collection instruments, and the structure of technical reports. Essential preparation for the Final Year Project.',
     topics: [
       'Foundations, types, and approaches of research; significance of research',
@@ -7488,6 +7509,7 @@ export const courses = [
     title: 'Venture Creation',
     units: 2, level: 400, semester: 2, lh: 15, ph: 45,
     subject: 'ent',
+    crossDepartmental: true,
     description: 'The practical mechanics of launching a business: opportunity identification, business planning, entrepreneurial finance, marketing and e-commerce, and applying emerging technologies to new ventures. Prepares graduates who want to start cybersecurity consultancies or technology ventures.',
     topics: [
       'Opportunity identification: sources of business opportunities in Nigeria, market gaps',
@@ -7735,6 +7757,13 @@ export function getCoursesByLevel(level) {
 
 export function getCoursesByLevelAndSemester(level, semester) {
   return courses.filter(c => c.level === level && c.semester === semester);
+}
+
+// The subset of courses shared across science/engineering programmes at
+// University of Uyo (GST, MTH, PHY, STA, COS, CSC, ENT, INS, UUY-CSC) — used
+// by the 'general' foundation-mode department for students outside Cybersecurity.
+export function getCrossDepartmentalCourses() {
+  return courses.filter(c => c.crossDepartmental);
 }
 
 export const firstSemesterCourses = courses.filter(c => c.semester === 1 && c.level === 200);
