@@ -160,6 +160,7 @@ export default function SetupProfile() {
                   type="text"
                   value={form.department_other}
                   onChange={setField('department_other')}
+                  maxLength={60}
                   placeholder="e.g. Mechanical Engineering"
                   className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
                 />

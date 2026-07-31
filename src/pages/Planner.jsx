@@ -53,7 +53,7 @@ function levelFromProfile(profile) {
 export default function Planner() {
   usePageTitle('Study Planner');
   const { profile, user } = useAuth();
-  const { catalogue } = useCatalogue();
+  const { catalogue, status: catalogueStatus } = useCatalogue();
   const google = useGoogleConnection();
 
   const [session, setSession]   = useState(currentSession());
@@ -388,11 +388,13 @@ export default function Planner() {
           ) : (
             <div className="bg-paper border border-dashed border-coffee-300 rounded-2xl px-6 py-16 text-center">
               <p className="text-sm text-coffee-600">
-                {!catalogue
-                  ? 'Loading your courses…'
-                  : studyDays.length === 0
-                    ? 'Pick at least one study day to build your plan.'
-                    : 'No courses found for this level and semester yet.'}
+                {catalogueStatus === 'error'
+                  ? 'Your courses didn\'t download — check your connection and reload the page.'
+                  : !catalogue
+                    ? 'Loading your courses…'
+                    : studyDays.length === 0
+                      ? 'Pick at least one study day to build your plan.'
+                      : 'No courses found for this level and semester yet.'}
               </p>
             </div>
           )}
