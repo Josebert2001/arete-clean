@@ -4668,6 +4668,7 @@ plt.show()`,
             language: 'python',
             code: `import seaborn as sns
 
+# df is the DataFrame loaded in the Pandas example above
 sns.countplot(x='label', data=df)             # Bar chart
 sns.heatmap(df.corr())                        # Correlation heatmap
 sns.boxplot(x='label', y='value', data=df)    # Boxplot`,
@@ -4739,6 +4740,10 @@ sns.boxplot(x='label', y='value', data=df)    # Boxplot`,
         number: '15',
         title: 'Practical — EDA on the UNSW-NB15 IDS Dataset',
         sections: [
+          {
+            type: 'note',
+            text: 'The three blocks below are one continuous script — run them in order in the same notebook. 15.2 and 15.3 reuse df and num_cols from the block before them, so running 15.3 on its own raises a NameError.',
+          },
           {
             type: 'code',
             heading: '15.1 Load and Explore',
@@ -4852,6 +4857,10 @@ print(df['label'].value_counts(normalize=True))`,
         title: 'Practical — SVM and KNN for Intrusion Detection',
         sections: [
           {
+            type: 'note',
+            text: 'A kernel SVM (SVC) scales roughly with the square of the number of samples, so 16.1 on the full UNSW-NB15 file can run for hours. Train it on a stratified subsample first — or use the LinearSVC version in 16.2, which is built for datasets this size.',
+          },
+          {
             type: 'code',
             heading: '16.1 SVM with an RBF Kernel',
             language: 'python',
@@ -4880,8 +4889,10 @@ for col in df.select_dtypes(include=['object']).columns:
     label_encoders[col] = le
 
 # Split features and target
-X = df.iloc[:, :-1]   # all columns except last
-y = df.iloc[:, -1]    # last column as target
+# Drop 'id' (a row number, not a signal) and 'attack_cat' - attack_cat
+# names the attack family, so leaving it in leaks the answer to the model
+X = df.drop(['id', 'attack_cat', 'label'], axis=1)
+y = df['label']
 
 # 4. Train-Test Split
 X_train, X_test, y_train, y_test = train_test_split(
@@ -5068,6 +5079,10 @@ plt.savefig('roc_curve_knn.png')`,
             text: 'A full Decision Tree model for intrusion detection on the UNSW-NB15 dataset: data loading, preprocessing, training, evaluation, and k-fold cross-validation. Note that feature scaling is optional for a decision tree — splits are threshold-based, so the scale of a feature does not change the tree — but it is kept here so the same preprocessing serves other models too.',
           },
           {
+            type: 'note',
+            text: '17.2 and 17.3 are one continuous script — 17.3 reuses the model and the split from 17.2. Both drop the id and attack_cat columns before training: attack_cat names the attack family, so a model that can see it is just reading the answer, and the accuracy it reports would be meaningless.',
+          },
+          {
             type: 'code',
             heading: '17.2 Load, Preprocess and Train',
             language: 'python',
@@ -5097,8 +5112,10 @@ for col in df.select_dtypes(include=['object']).columns:
     label_encoders[col] = le
 
 # Features and target
-X = df.iloc[:, :-1]  # all columns except last
-y = df.iloc[:, -1]   # last column (target)
+# Drop 'id' (a row number, not a signal) and 'attack_cat' - attack_cat
+# names the attack family, so leaving it in leaks the answer to the model
+X = df.drop(['id', 'attack_cat', 'label'], axis=1)
+y = df['label']
 
 # 4. Train-Test Split
 X_train, X_test, y_train, y_test = train_test_split(
@@ -5377,7 +5394,15 @@ plt.show()`,
             type: 'code',
             heading: '20.3 Isolation Forest — Unsupervised Anomaly Detection',
             language: 'python',
-            code: `from sklearn.ensemble import IsolationForest
+            code: `import numpy as np
+from sklearn.ensemble import IsolationForest
+
+# same simulated traffic as 18.5
+traffic = np.array([[10, 100],
+                    [12, 120],
+                    [11, 110],
+                    [200, 1000],
+                    [9, 95]])
 
 model = IsolationForest(contamination=0.2)
 model.fit(traffic)
@@ -5552,12 +5577,14 @@ results = []
 fig_cm, axes_cm = plt.subplots(2, 2, figsize=(15, 12))
 axes_cm = axes_cm.ravel()
 
-plt.figure(figsize=(10, 8))
+# Keep handles to these figures - plt.figure(1) would grab the confusion
+# matrix figure created above, drawing the curves into the wrong plot
+fig_roc = plt.figure(figsize=(10, 8))
 plt.title('ROC Curves')
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 
-plt.figure(figsize=(10, 8))
+fig_pr = plt.figure(figsize=(10, 8))
 plt.title('Precision-Recall Curves')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
@@ -5591,23 +5618,23 @@ for i, (name, model) in enumerate(models.items()):
     # ROC Curve
     fpr, tpr, _ = roc_curve(y_test, y_score)
     roc_auc = auc(fpr, tpr)
-    plt.figure(1)  # ROC figure
+    plt.figure(fig_roc.number)
     plt.plot(fpr, tpr, label=f'{name} (AUC = {roc_auc:.2f})')
 
     # PR Curve
     precision, recall, _ = precision_recall_curve(y_test, y_score)
-    plt.figure(2)  # PR figure
+    plt.figure(fig_pr.number)
     plt.plot(recall, precision, label=name)
 
 # Finalize and Save
 fig_cm.savefig('confusion_matrices.png')
 
-plt.figure(1)
+plt.figure(fig_roc.number)
 plt.plot([0, 1], [0, 1], 'k--')
 plt.legend()
 plt.savefig('roc_curves.png')
 
-plt.figure(2)
+plt.figure(fig_pr.number)
 plt.legend()
 plt.savefig('precision_recall_curves.png')
 
