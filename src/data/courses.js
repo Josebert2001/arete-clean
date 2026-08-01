@@ -3,6 +3,7 @@
 import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
 import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
 import { gst121LectureNotes } from './lectureNotes/gst121.js';
+import { mth121LectureNotes } from './lectureNotes/mth121.js';
 
 export const courses = [
 
@@ -832,6 +833,11 @@ export const courses = [
       "Understand the concept of a derivative as 'rate of change' before memorising rules",
       'Khan Academy calculus is free, self-paced, and covers this entire course',
     ],
+    // Transcribed from the Department of Mathematics' workbook ("MTH 121:
+    // General Mathematics II — Workbook Manual 2025") — see
+    // src/data/lectureNotes/mth121.js for provenance and the errata list. All
+    // five units, plus the closing tutorial questions.
+    lectureNotes: mth121LectureNotes,
   },
   {
     code: 'PHY 121',
