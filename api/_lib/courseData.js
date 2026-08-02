@@ -604,11 +604,14 @@ function effectiveSlug(departmentSlug) {
 }
 
 // Server-side mirror of materialsDepartmentFor() in src/data/departments.js —
-// keep the two in step. A course whose object we can't resolve (in the
-// knowledge text but not the catalogue array) falls back to the department's
-// own pool, which is the conservative choice: scoped, never over-shared.
+// keep the two in step, including the two-flag rule (crossDepartmental = a
+// foundation course; sharedMaterials = another department's course this one also
+// takes). A course whose object we can't resolve (in the knowledge text but not
+// the catalogue array) falls back to the department's own pool, which is the
+// conservative choice: scoped, never over-shared.
 function resolveMaterialsDepartment(course, departmentSlug) {
-  return course?.crossDepartmental ? 'general' : effectiveSlug(departmentSlug);
+  const pooled = course?.crossDepartmental || course?.sharedMaterials;
+  return pooled ? 'general' : effectiveSlug(departmentSlug);
 }
 
 export const DEPARTMENT_SLUGS = Object.keys(DEPARTMENTS);

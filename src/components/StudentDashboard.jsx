@@ -13,6 +13,7 @@ import { useStudyDays } from '../context/StudyDaysContext';
 import { computeStreak } from '../utils/streak';
 import { pickDailyChallenge } from '../utils/dailyChallenge';
 import { shouldShowGettingStarted, readDismissed, writeDismissed } from '../utils/gettingStarted';
+import { findDepartmentByName, getDepartment } from '../data/departments';
 import GettingStartedCard from './GettingStartedCard';
 
 // ─── The signed-in homepage ───────────────────────────────────────────────────
@@ -91,6 +92,14 @@ export default function StudentDashboard() {
     setDismissed(true);
   };
 
+  // A foundation student whose typed department has since been authored. Read
+  // from the lightweight registry, never useCatalogue — the dashboard renders on
+  // every visit and must not pull a course catalogue for a one-line banner.
+  const departmentNowAvailable =
+    getDepartment(profile?.department).status === 'foundation'
+      ? findDepartmentByName(profile?.department_other)
+      : null;
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
 
@@ -117,6 +126,24 @@ export default function StudentDashboard() {
           </div>
         )}
       </div>
+
+      {/* ── Their department's catalogue has landed since they signed up ── */}
+      {departmentNowAvailable && (
+        <Link
+          to="/profile"
+          className="group flex items-center gap-3 mb-6 p-4 rounded-2xl border border-moss/30 bg-moss/5 hover:border-moss/50 transition-colors animate-fade-up"
+        >
+          <GraduationCap size={18} className="text-moss shrink-0" />
+          <p className="flex-1 text-sm text-coffee-700 leading-relaxed">
+            <span className="font-semibold text-ink">
+              {departmentNowAvailable.degree || departmentNowAvailable.name} is ready.
+            </span>{' '}
+            Switch from the shared foundation courses to your own full curriculum — your progress
+            carries over.
+          </p>
+          <ArrowRight size={15} className="text-moss group-hover:translate-x-0.5 transition-transform shrink-0" />
+        </Link>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-up" style={{ animationDelay: '80ms' }}>
 

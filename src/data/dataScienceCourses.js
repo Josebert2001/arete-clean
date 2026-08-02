@@ -15,17 +15,24 @@
 // drag its whole ~800 kB payload into a Data Science student's bundle. The
 // shared courses are re-authored here with Data-Science framing instead.
 //
-// The 24 non-DTS courses — those owned by other departments and taken across
+// The non-DTS courses — those owned by other departments and taken across
 // several UniUyo programmes — carry crossDepartmental: true, matching what the
-// flag means in courses.js. Nothing consumes it here yet (a Data Science
-// student gets the whole catalogue); it is set so the two files stay
-// semantically consistent and a future shared-course view has it to work with.
+// flag means in courses.js: a foundation course every programme takes. A Data
+// Science student gets the whole catalogue either way; the flag drives which
+// course_materials pool the uploads land in (materialsDepartmentFor).
+//
+// CYB 211 is the exception and uses sharedMaterials instead — Cybersecurity owns
+// it and both departments take it, so its notes pool, but it is not a foundation
+// course and must not join the foundation catalogue. See departments.js for why
+// the two flags are separate.
 //
 // Lecture notes are the ONE thing that is shared rather than re-authored:
 // they are transcribed from the lecturer's own workbook, so GST 121 is the
 // same GST 121 whichever programme a student is enrolled on. Course prose
 // (description/topics/studyTips) stays department-specific; notes come from
 // the single copy in ./lectureNotes/ so a fix there reaches every department.
+import { cos121LectureNotes } from './lectureNotes/cos121.js';
+import { ent221LectureNotes } from './lectureNotes/ent221.js';
 import { gst121LectureNotes } from './lectureNotes/gst121.js';
 import { mth121LectureNotes } from './lectureNotes/mth121.js';
 
@@ -507,6 +514,7 @@ export const courses = [
       'Never copy-paste code examples — type every line yourself so your fingers learn the syntax',
       'Solve at least one small coding problem daily; consistency beats cramming for programming',
     ],
+    lectureNotes: cos121LectureNotes,
   },
   {
     code: 'UUY-DTS 121',
@@ -737,7 +745,12 @@ export const courses = [
     title: 'Introduction to Cybersecurity and Strategy',
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'cyb',
-    crossDepartmental: true,
+    // sharedMaterials, not crossDepartmental: Cybersecurity owns this course and
+    // both departments take it, so the uploads pool together — but it is not one
+    // of the foundation courses, so it must stay out of the foundation catalogue.
+    // The courses.js copy carries the same flag; the two must agree (see the
+    // pool-agreement test in departments.test.js).
+    sharedMaterials: true,
     description: 'The threat landscape and the frameworks used to defend against it. For a data scientist this is the course that explains why the data you hold is a liability as well as an asset — and what your obligations are when it leaks.',
     topics: [
       'Cybersecurity concepts: the CIA triad, threats, vulnerabilities, risk and controls',
@@ -911,6 +924,7 @@ export const courses = [
       'Data-driven ventures are the natural application for you — think about what a data product built on Nigerian open data could be worth',
       'This course sets up DTS 426 in final year; keep your notes',
     ],
+    lectureNotes: ent221LectureNotes,
   },
   {
     code: 'MTH 223',

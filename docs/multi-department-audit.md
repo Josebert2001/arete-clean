@@ -1,5 +1,11 @@
 # Multi-Department Implementation — Audit & Remediation Plan
 
+> **Status: all six findings resolved (2026-08-01).** F4 was fixed independently in commit
+> `99a16fa` while this audit was being written; the rest were fixed in the pass that followed.
+> Gates after the fixes: **277 tests across 25 suites**, 0 lint errors, clean build.
+> The two migrations in Step 4 remain **outstanding user actions** — the code is ready for them.
+> Per-finding detail is inline below under each heading.
+
 **Audited:** 2026-08-01 · branch `feat/data-science-department` (uncommitted working tree)
 **Scope:** the department registry, per-department catalogue resolution, the tutor's
 server-side scoping, the `course_materials` pooling model, profile/department switching, and
@@ -148,7 +154,12 @@ user like the onboarding banner.
 
 ---
 
-### 🟡 F4 — The Data Science catalogue gets no structural validation
+### ✅ F4 — The Data Science catalogue gets no structural validation — *fixed in `99a16fa`*
+
+> Resolved independently while this audit was being written. `validate-modules.mjs` now imports
+> both catalogues into a `catalogues` array and runs the course checks over each. The remaining
+> gap — that a new department must be added to that array or its courses are skipped — is now
+> step 4 of the "Adding a department" recipe in CLAUDE.md.
 
 `scripts/validate-modules.mjs` runs on every `prebuild`, but it imports `courses.js` only
 (line 11). `dataScienceCourses.js` is never validated, so a missing `units`, a duplicate slug or
@@ -196,34 +207,43 @@ is latent, not live. But the asymmetry is one line to close and the failure is s
 
 ---
 
-## 3. Plan
+## 3. Plan — as executed
 
 Ordered so each step is independently shippable and testable. Everything here is frontend/data
 plus one migration line — no schema change beyond what is already pending, no new dependencies.
 
-### Step 1 — Commit the current work first ⚠️
+### ✅ Step 1 — Commit the current work first
 
-Nothing on this branch is committed: ~900 insertions across 30 modified files and 10 new files
-live only in the working tree. **Do this before any remediation edit**, so the audit fixes are
-reviewable as a diff against a known-good baseline rather than mixed into the original work.
+Done by the user, in three commits: `fa6b9e6` (Data Science + department-agnostic app),
+`6d67f55` (onboarding), `99a16fa` (Data Science styling + catalogue validation). The audit fixes
+therefore land as a reviewable diff on top of a known-good baseline, as intended.
 
-### Step 2 — Fix the materials pool split (F1)
+### ✅ Step 2 — Fix the materials pool split (F1)
 
 `departments.js` · `courses.js` · `dataScienceCourses.js` · `api/_lib/courseData.js` ·
 `20260801…_materials_department_backfill.sql` · `departments.test.js`
 
-Implement the decoupling in F1, add `'cyb-211'` to the backfill `UPDATE`, and add the
-cross-catalogue pool-agreement invariant test. This is the only finding that silently loses
-student-visible content between two shipped departments, so it goes first.
+Done as specified: `sharedMaterials` added as a second pooling flag alongside `crossDepartmental`
+in both `materialsDepartmentFor()` and its server mirror `resolveMaterialsDepartment()`; CYB 211
+carries it in both catalogues; `'cyb-211'` added to the backfill `UPDATE`. The invariant test
+loads all three catalogues and asserts one pool per course code across every department that
+carries it — so this cannot return when department #3 is authored.
 
-### Step 3 — Close the lecture-note gap (F2)
+### ✅ Step 3 — Close the lecture-note gap (F2)
 
 `src/data/lectureNotes/cos121.js` + `ent221.js` (new) · both catalogues · `departments.test.js`
 
-Move the two inline note sets into the shared directory and import them from both catalogues.
-Replace the hardcoded note test with the generic both-or-neither invariant.
+Done. The two note sets (1,568 lines) were moved out of `courses.js` into the shared directory
+and imported by both catalogues; content verified intact (9 and 6 topics, first/last titles
+unchanged). The hardcoded note assertion was replaced with a both-or-neither invariant over every
+shared course.
 
-### Step 4 — Run the two pending migrations 🔒
+Chunking improved rather than regressed: `courses` fell 859 → 708 kB and the shared-notes chunk
+grew by the same amount, so a Cybersecurity student downloads the same total as before while a
+Data Science student now gets notes they were previously denied. Department-only notes
+(UUY-CYB 123/221) correctly stayed in the Cybersecurity chunk.
+
+### Step 4 — Run the two pending migrations 🔒 — **still outstanding**
 
 **User action, in the Supabase SQL editor, in this order:**
 
@@ -234,45 +254,64 @@ Both are idempotent and both end in `NOTIFY pgrst, 'reload schema';`. The reg-nu
 hard deploy blocker: ship the frontend without it and every signup that leaves the reg field
 blank fails on the `NOT NULL` constraint.
 
-### Step 5 — Surface the department to the students who asked for it (F3)
+### ✅ Step 5 — Surface the department to the students who asked for it (F3)
 
-`Welcome.jsx` · `StudentDashboard.jsx` · a small helper beside `getDepartment`
+`departments.js` (`findDepartmentByName`) · `Welcome.jsx` · `StudentDashboard.jsx`
 
-The switch prompt. This is what converts the demand signal into actual Data Science users — the
-catalogue is otherwise invisible to exactly the cohort it was built for.
+Done. `findDepartmentByName()` normalizes the typed name — case, spacing, punctuation, and the
+"Department of" / "B.Sc." / "Programme" wrappers students actually type — then requires an
+**exact** match. Deliberately strict: reading "Computer Science" as "Data Science" would push a
+student onto the wrong curriculum, which is far worse than missing a match, and nothing here
+mutates the profile — it only offers a link.
 
-### Step 6 — Harden the guards (F4, F5)
+Welcome swaps its "your curriculum is on the way" note for a "your curriculum is ready" one with
+the switch link; the dashboard shows a banner above the grid. Both read the lightweight registry,
+never `useCatalogue`. Covered by 5 matcher tests (including the near-miss cases) and 4 render
+tests (offer shown, offer withheld for an unauthored department, no offer for a student already
+on a full catalogue).
 
-`scripts/validate-modules.mjs` · `Planner.jsx`
+### ✅ Step 6 — Harden the guards (F4, F5)
 
-Extend the prebuild validator across every registered catalogue; gate the Planner's
-`selected_courses` filter on foundation mode.
+`scripts/validate-modules.mjs` (already done in `99a16fa`) · `Planner.jsx`
 
-### Step 7 — Housekeeping (F6)
+The Planner's `selected_courses` filter is now gated on `department.status === 'foundation'`,
+matching how `Courses.jsx` gates its "My courses" chip.
 
-`package.json` description · CLAUDE.md (add the 20260802 migration row and the
-`api/_lib/courseData.js` DEPARTMENTS registry to the "Adding a department" recipe).
+### ✅ Step 7 — Housekeeping (F6)
+
+`package.json` description rewritten for a multi-department product. CLAUDE.md gained the
+20260802 migration row, `findDepartmentByName` in the registry description, the
+`validate-modules.mjs` step in the "Adding a department" recipe, and — most importantly — an
+explicit **shared-course flags** subsection explaining when to use `crossDepartmental` vs
+`sharedMaterials` and that every catalogue carrying a course must set the same one.
 
 ### Step 8 — Verify
 
-Per-step gate: `npm test`, `npm run lint`, `npm run build`.
+Automated gates, after the fixes: **277 tests / 25 suites passing**, **0 lint errors**
+(4 pre-existing warnings), **clean build** including the prebuild validator. Both fixed defects
+were additionally re-checked on an independent path — the standalone audit scripts that first
+detected them now report empty.
 
-Manual QA once Steps 2–6 land, after the migrations are applied:
+Manual QA still to run, after the migrations are applied:
 
 1. Sign in as a Data Science student → `/courses` shows 55 courses, no Cybersecurity-only ones.
-2. Open COS 121 → lecture notes render (currently they do not).
+2. Open COS 121 and ENT 221 as a Data Science student → lecture notes render.
 3. Upload a note on CYB 211 as a Cybersecurity student → sign in as a Data Science student →
    the same note is listed, and the tutor cites it when asked about CYB 211.
 4. Sign in as a foundation student with `department_other = 'Data Science'` → the switch prompt
-   appears → following it to `/profile` and switching lands on the full catalogue with track
-   progress intact.
+   appears on both Welcome and the dashboard → following it to `/profile` and switching lands on
+   the full catalogue with track progress intact.
 5. Regression: a Cybersecurity student sees no change anywhere.
 
 ---
 
-## 4. Open decision for you
+## 4. What is left
 
-**F1 — should CYB 211 pool its notes across both departments?** The plan above assumes yes (add
-`sharedMaterials`, notes cross). If you'd rather each department keep its own CYB 211 notes,
-say so and Step 2 collapses to deleting one line from `dataScienceCourses.js` — the invariant
-test still applies either way.
+1. **Run the two migrations** (Step 4) — the only blocking item. `20260801` must be run *after*
+   the `cyb-211` line added in Step 2, and `20260802` before any deploy carrying the optional
+   reg-number frontend.
+2. **Run the manual QA script** above once they are applied.
+3. **Decision, revisitable at any time:** CYB 211 now pools its notes across both departments
+   (`sharedMaterials`). If you would rather each department kept its own CYB 211 notes, remove
+   the flag from both catalogues and drop `'cyb-211'` from the migration — the pool-agreement
+   test enforces whichever answer you choose, as long as both catalogues agree.

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   departments, getDepartment, DEFAULT_DEPARTMENT, SELECTABLE_DEPARTMENTS, YEAR_LEVELS,
-  materialsDepartmentFor,
+  materialsDepartmentFor, findDepartmentByName,
 } from '../data/departments';
 import { getCrossDepartmentalCourses, LEVELS as CATALOGUE_LEVELS } from '../data/courses';
 
@@ -143,5 +143,122 @@ describe('materialsDepartmentFor — which uploads pool a course belongs to', ()
 
   it('falls back to the default department for a missing slug', () => {
     expect(materialsDepartmentFor({}, undefined)).toBe(DEFAULT_DEPARTMENT);
+  });
+
+  it('pools a course another department also takes, without making it a foundation course', () => {
+    const shared = { sharedMaterials: true };
+    expect(materialsDepartmentFor(shared, 'cybersecurity')).toBe('general');
+    expect(materialsDepartmentFor(shared, 'dataScience')).toBe('general');
+  });
+});
+
+// Tells a foundation student their catalogue has arrived. The false-positive
+// direction is the dangerous one — pointing a Computer Science student at the
+// Data Science curriculum is worse than saying nothing — so the near-miss cases
+// matter more than the matches.
+describe('findDepartmentByName — has the student\'s typed department been authored?', () => {
+  it('matches however the student capitalised or spaced it', () => {
+    for (const typed of ['Data Science', 'data science', 'DATA SCIENCE', '  Data  Science  ', 'data-science']) {
+      expect(findDepartmentByName(typed)?.slug).toBe('dataScience');
+    }
+  });
+
+  it('sees through the wrappers students actually type', () => {
+    for (const typed of ['Department of Data Science', 'B.Sc. Data Science', 'BSc Data Science', 'Data Science Programme']) {
+      expect(findDepartmentByName(typed)?.slug).toBe('dataScience');
+    }
+    expect(findDepartmentByName('Department of Cybersecurity')?.slug).toBe('cybersecurity');
+  });
+
+  it('does NOT match a different department that merely reads alike', () => {
+    for (const typed of ['Computer Science', 'Data Management', 'Science', 'Statistics', 'Computer Engineering']) {
+      expect(findDepartmentByName(typed)).toBeNull();
+    }
+  });
+
+  it('returns null for nothing at all, so a blank field offers no switch', () => {
+    for (const typed of ['', '   ', null, undefined]) {
+      expect(findDepartmentByName(typed)).toBeNull();
+    }
+  });
+
+  it('never resolves to foundation mode, which is not a department to switch to', () => {
+    expect(findDepartmentByName('Other departments')).toBeNull();
+    expect(findDepartmentByName('general')).toBeNull();
+  });
+});
+
+// The bug this guards against: CYB 211 was crossDepartmental in the Data Science
+// catalogue but not in the Cybersecurity one, so the same course resolved to
+// 'general' for one department and 'cybersecurity' for the other — each saw an
+// empty materials list for notes the other had uploaded, with nothing to explain
+// why. Assert the invariant over the real catalogues rather than one course, so
+// authoring department #3 cannot reintroduce it.
+describe('materials pooling agrees across every catalogue carrying the same course', () => {
+  const normalize = (code) => String(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  it('resolves one pool per course code, whichever catalogue it is read from', async () => {
+    const loaded = await Promise.all(
+      Object.entries(departments).map(async ([slug, dept]) => [slug, await dept.loadCatalogue()])
+    );
+
+    const poolsByCode = new Map();
+    for (const [slug, catalogue] of loaded) {
+      for (const course of catalogue.courses) {
+        const code = normalize(course.code);
+        if (!poolsByCode.has(code)) poolsByCode.set(code, new Map());
+        poolsByCode.get(code).set(slug, materialsDepartmentFor(course, slug));
+      }
+    }
+
+    const disagreements = [];
+    for (const [code, byDepartment] of poolsByCode) {
+      const pools = new Set(byDepartment.values());
+      if (pools.size > 1) {
+        disagreements.push(
+          `${code}: ${[...byDepartment].map(([d, p]) => `${d}→${p}`).join(', ')}`
+        );
+      }
+    }
+
+    expect(disagreements).toEqual([]);
+  });
+});
+
+// Lecture notes are the one layer shared between catalogues (see the header
+// comment in departments.js): the prose is re-authored per department, but the
+// transcribed workbook content must not be. COS 121 and ENT 221 were authored
+// inline in courses.js rather than in lectureNotes/, so Data Science students
+// silently got no notes for either. Assert both-or-neither over every shared
+// course instead of naming individual ones, which is what let that slip through.
+describe('shared courses carry the same lecture notes in every catalogue', () => {
+  const normalize = (code) => String(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  it('gives every catalogue the notes for a course, or none of them', async () => {
+    const loaded = await Promise.all(
+      Object.entries(departments).map(async ([slug, dept]) => [slug, await dept.loadCatalogue()])
+    );
+
+    const notesByCode = new Map();
+    for (const [slug, catalogue] of loaded) {
+      for (const course of catalogue.courses) {
+        const code = normalize(course.code);
+        if (!notesByCode.has(code)) notesByCode.set(code, new Map());
+        // A code can repeat within a catalogue (CYB 311 is both Cryptography and
+        // SIWES I); the copy that has notes is the one that matters here.
+        const count = course.lectureNotes?.length ?? 0;
+        notesByCode.get(code).set(slug, Math.max(count, notesByCode.get(code).get(slug) ?? 0));
+      }
+    }
+
+    const gaps = [];
+    for (const [code, byDepartment] of notesByCode) {
+      const counts = [...byDepartment.values()];
+      if (counts.some(n => n > 0) && counts.some(n => n === 0)) {
+        gaps.push(`${code}: ${[...byDepartment].map(([d, n]) => `${d}=${n}`).join(', ')}`);
+      }
+    }
+
+    expect(gaps).toEqual([]);
   });
 });

@@ -53,7 +53,7 @@ function levelFromProfile(profile) {
 export default function Planner() {
   usePageTitle('Study Planner');
   const { profile, user } = useAuth();
-  const { catalogue, status: catalogueStatus } = useCatalogue();
+  const { catalogue, department, status: catalogueStatus } = useCatalogue();
   const google = useGoogleConnection();
 
   const [session, setSession]   = useState(currentSession());
@@ -95,7 +95,14 @@ export default function Planner() {
   // Foundation-mode students who've picked their own courses (see
   // CoursePicker.jsx) get a plan built from just that subset; everyone else
   // (including every CYB student) keeps the full level+semester list.
-  const selectedCourses = profile?.selected_courses;
+  //
+  // Gated on foundation mode exactly as Courses.jsx gates its "My courses"
+  // filter. The pins are slugs from the FOUNDATION list, so applying them to a
+  // full department's catalogue would filter the plan down to courses that
+  // aren't in it — an empty timetable with nothing on screen to explain why.
+  // ProfileSettings clears the pins on a department switch, so this is the
+  // belt to that braces; the failure it prevents is silent.
+  const selectedCourses = department?.status === 'foundation' ? profile?.selected_courses : null;
   const getCoursesForPlan = useMemo(() => {
     if (!catalogue) return null;
     if (!selectedCourses?.length) return catalogue.getCoursesByLevelAndSemester;

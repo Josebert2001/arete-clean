@@ -16,6 +16,11 @@
 --
 -- Every row today predates multi-department and belongs to the Cybersecurity
 -- catalogue, so only the shared-course rows move.
+--
+-- 'cyb-211' is in the list even though it is not a foundation course: Data
+-- Science takes it as well, so both catalogues mark it sharedMaterials and both
+-- read the 'general' pool. Leaving it out would strand the existing rows in the
+-- 'cybersecurity' pool where Data Science students never look.
 
 UPDATE course_materials
 SET department = 'general'
@@ -26,6 +31,7 @@ WHERE course_slug IN (
     'cos-221',
     'cos-411',
     'csc-319',
+    'cyb-211',
     'ent-221',
     'ent-321',
     'gst-111',

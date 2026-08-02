@@ -113,6 +113,32 @@ export function getDepartment(slug) {
 // ProfileForm.jsx — since it isn't a real named department.
 export const SELECTABLE_DEPARTMENTS = Object.values(departments).filter(d => d.status === 'full');
 
+// Matches the free-text department a foundation student typed at signup
+// (profiles.department_other) against the departments now fully authored, so we
+// can tell them their catalogue has arrived. Without this the demand signal is
+// write-only: the students who asked for Data Science would sit in foundation
+// mode on 22 courses and never learn the other 55 exist.
+//
+// Deliberately strict — an exact match once punctuation, spacing, case and the
+// usual "Department of" / "B.Sc." wrappers are stripped. Fuzzy matching would
+// read "Computer Science" as "Data Science" and move a student onto the wrong
+// curriculum, which is far worse than missing a match: nothing here changes the
+// profile, it only offers a link, and a missed match just leaves things as they
+// are today.
+const normalizeDepartmentName = (value) =>
+  String(value ?? '')
+    .toLowerCase()
+    .replace(/\b(department|dept\.?|of|b\.?\s*sc\.?|bachelor(?:'s)?|degree|programme|program)\b/g, '')
+    .replace(/[^a-z0-9]/g, '');
+
+export function findDepartmentByName(typedName) {
+  const target = normalizeDepartmentName(typedName);
+  if (!target) return null;
+  return SELECTABLE_DEPARTMENTS.find(d =>
+    normalizeDepartmentName(d.name) === target || normalizeDepartmentName(d.degree) === target
+  ) || null;
+}
+
 // Which materials pool a course's uploads belong to (course_materials.department).
 //
 // Courses shared across programmes pool under 'general', so lecture notes a
@@ -121,9 +147,22 @@ export const SELECTABLE_DEPARTMENTS = Object.values(departments).filter(d => d.s
 // scoped to the catalogue that owns them, which is what stops two departments'
 // distinct courses colliding when they happen to share a slug.
 //
+// TWO flags mean "pool under general", because the two questions they answer are
+// not the same one:
+//   * crossDepartmental — a foundation course (GST/MTH/PHY/…) that every UniUyo
+//     programme takes. Also what getCrossDepartmentalCourses() in courses.js
+//     selects on to build the foundation catalogue.
+//   * sharedMaterials — a course OWNED by one department that another authored
+//     department also takes (CYB 211: Cybersecurity's course, on the Data Science
+//     curriculum too). Its notes should pool, but it must NOT appear in the
+//     foundation catalogue, so it cannot borrow crossDepartmental to say so.
+// Every catalogue carrying the same course must set the same flag, or the two
+// departments silently read different pools — departments.test.js asserts this.
+//
 // Kept here rather than at the call sites so the upload path, the read path and
 // the tutor's note lookup can't drift apart. Mirrored server-side in
-// api/_lib/tutorTools.js.
+// api/_lib/courseData.js (resolveMaterialsDepartment).
 export function materialsDepartmentFor(course, departmentSlug) {
-  return course?.crossDepartmental ? 'general' : (departmentSlug || DEFAULT_DEPARTMENT);
+  const pooled = course?.crossDepartmental || course?.sharedMaterials;
+  return pooled ? 'general' : (departmentSlug || DEFAULT_DEPARTMENT);
 }

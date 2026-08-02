@@ -2,7 +2,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight, BrainCircuit, CalendarDays, CloudUpload, Code2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { getDepartment, YEAR_LEVELS } from '../data/departments';
+import { findDepartmentByName, getDepartment, YEAR_LEVELS } from '../data/departments';
 
 export default function Welcome() {
   usePageTitle('Welcome');
@@ -33,6 +33,10 @@ export default function Welcome() {
   const journeyLabel = isFoundation
     ? (ownDepartment || 'academic')
     : department.degree || department.name;
+  // A foundation student whose typed department has since been authored — the
+  // whole point of capturing department_other. Offer the switch; never perform
+  // it for them, since it resets their pinned courses.
+  const nowAvailable = isFoundation ? findDepartmentByName(ownDepartment) : null;
   // "100L" → 100, for a deep link straight into their own year on the Course
   // Hub. Derived from the profile alone, so it costs nothing — unlike naming
   // the actual courses, which would need the catalogue.
@@ -124,13 +128,30 @@ export default function Welcome() {
           </div>
         )}
 
-        {isFoundation && (
+        {isFoundation && !nowAvailable && (
           <div className="px-5 py-4">
             <p className="text-xs text-coffee-600 leading-relaxed">
               <span className="font-medium text-coffee-700">Foundation mode: </span>
               You have all 4 interactive tracks and the courses shared across University of Uyo
               programmes. Your full {ownDepartment || 'department'} curriculum is on the way.
             </p>
+          </div>
+        )}
+
+        {isFoundation && nowAvailable && (
+          <div className="px-5 py-4">
+            <p className="text-xs text-coffee-600 leading-relaxed mb-3">
+              <span className="font-medium text-ink">Your curriculum is ready. </span>
+              {nowAvailable.degree || nowAvailable.name} is now fully authored on Areté — switch to
+              it for all your own courses instead of the shared foundation list. Your track
+              progress and quiz scores carry over.
+            </p>
+            <Link
+              to="/profile"
+              className="text-xs font-semibold text-ink underline underline-offset-2 hover:text-coffee-700 transition-colors inline-flex items-center gap-1"
+            >
+              Switch to {nowAvailable.name} <ArrowRight size={12} />
+            </Link>
           </div>
         )}
 

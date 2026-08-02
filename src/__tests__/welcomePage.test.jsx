@@ -128,6 +128,46 @@ describe('Welcome — foundation mode', () => {
   });
 });
 
+// department_other is the demand signal that decides which catalogue gets
+// authored next. Before this, it was write-only: the students who asked for
+// Data Science would have stayed on the 22 foundation courses with nothing
+// telling them their own 55 had arrived.
+describe('Welcome — the student\'s department has since been authored', () => {
+  const AWAITING_DS = { ...FOUNDATION_PROFILE, department_other: 'Data Science' };
+
+  it('offers the switch, pointing at the one page that can make it', async () => {
+    mockAuth.current = authFor(AWAITING_DS);
+    renderWelcome();
+    const link = await screen.findByRole('link', { name: /Switch to Data Science/ });
+    expect(link).toHaveAttribute('href', '/profile');
+  });
+
+  it('replaces the "on the way" note rather than contradicting it', async () => {
+    mockAuth.current = authFor(AWAITING_DS);
+    const { container } = renderWelcome();
+    await waitFor(() => expect(screen.getByText(/Your curriculum is ready/)).toBeInTheDocument());
+    expect(container.textContent).not.toContain('is on the way');
+    expect(container.textContent).not.toContain('Foundation mode:');
+  });
+
+  it('leaves a student whose department is still unauthored exactly as before', async () => {
+    mockAuth.current = authFor(FOUNDATION_PROFILE); // Mechanical Engineering
+    const { container } = renderWelcome();
+    await waitFor(() => expect(screen.getByText(/Foundation mode/)).toBeInTheDocument());
+    expect(container.textContent).toContain('is on the way');
+    expect(screen.queryByRole('link', { name: /Switch to/ })).toBeNull();
+  });
+
+  it('does not offer a switch to a student already on a full catalogue', async () => {
+    // Stale department_other on a full-department profile must not resurface a
+    // switch prompt for the department they are already on.
+    mockAuth.current = authFor({ ...CYB_PROFILE, department_other: 'Cybersecurity' });
+    renderWelcome();
+    await waitFor(() => expect(screen.getByText(/Ada Obi/)).toBeInTheDocument());
+    expect(screen.queryByRole('link', { name: /Switch to/ })).toBeNull();
+  });
+});
+
 describe('Welcome — single primary CTA', () => {
   it('renders exactly one primary CTA for a full-department student', async () => {
     mockAuth.current = authFor(CYB_PROFILE);

@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Areté — interactive learning platform for the Cybersecurity Department, University of Uyo. Java, Python & C tracks plus a full Cybersecurity course hub.",
+  "description": "Areté — interactive learning platform for the University of Uyo. Multi-department course hub (Cybersecurity, Data Science, plus foundation mode) with Java, Python, C and Security tracks.",
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/validate-modules.mjs",

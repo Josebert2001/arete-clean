@@ -65,8 +65,8 @@ Browser → React SPA (Vite)
 | `src/data/cModules.js` | 12 C modules |
 | `src/data/securityModules.js` | 12 Security "rooms" (theory + quiz + an embedded CTF `challenge`); flags stored as SHA-256 hashes |
 | `src/components/FlagChallenge.jsx` | Renders a module's CTF challenge; validates the flag client-side via Web Crypto SHA-256 (no backend); escalating hints, marks the module complete on solve |
-| `src/data/courses.js` | ~7800 lines — all Cybersecurity courses (100L–400L), topics, textbooks, exam tips; the 22 shared courses carry `crossDepartmental: true` |
-| `src/data/departments.js` | Department registry (cybersecurity + dataScience = full, general = foundation) + lazy catalogue loaders + `YEAR_LEVELS` (the lightweight level list — import this, not courses.js, when a page only needs to validate/render a level) + `materialsDepartmentFor()` (which `course_materials.department` pool a course's uploads belong to) |
+| `src/data/courses.js` | ~7800 lines — all Cybersecurity courses (100L–400L), topics, textbooks, exam tips; the 22 foundation courses carry `crossDepartmental: true`, and CYB 211 carries `sharedMaterials: true` (see below) |
+| `src/data/departments.js` | Department registry (cybersecurity + dataScience = full, general = foundation) + lazy catalogue loaders + `YEAR_LEVELS` (the lightweight level list — import this, not courses.js, when a page only needs to validate/render a level) + `materialsDepartmentFor()` (which `course_materials.department` pool a course's uploads belong to) + `findDepartmentByName()` (matches a foundation student's typed `department_other` against the authored departments, so Welcome and the dashboard can offer them the switch) |
 | `src/data/useCatalogue.js` | Hook resolving the signed-in student's department catalogue; status `loading \| ready \| error` — always handle `error` or the page hangs on a failed chunk load. Stays `loading` until auth/profile settle, so a student never sees another department's catalogue flash first |
 | `src/data/dataScienceCourses.js` | ~2000 lines — the full B.Sc. Data Science catalogue (structure transcribed from the Students' Information Handbook Ch.4 §4.1). Standalone: imports only `lectureNotes/*` |
 | `src/components/ProfileForm.jsx` | Shared profile form (name, reg number, level, department picker) used by both SetupProfile and ProfileSettings, so validation can't drift |
@@ -90,6 +90,7 @@ Browser → React SPA (Vite)
 | `supabase/migrations/20260719000000_google_connections.sql` | `google_connections` table + RLS — run manually in the Supabase SQL editor, never via Claude |
 | `supabase/migrations/20260728*` | Multi-department columns: `profiles.department/department_other/selected_courses`, `course_materials.department` (applied). Every migration must end with `NOTIFY pgrst, 'reload schema';` or the API rejects the new columns with PGRST204 |
 | `supabase/migrations/20260801000000_materials_department_backfill.sql` | Sorts existing `course_materials` rows into their pool ('general' for shared courses) + indexes both lookup pairs. **Run manually in the Supabase SQL editor** |
+| `supabase/migrations/20260802000000_reg_number_optional.sql` | Drops `NOT NULL` from `profiles.reg_number`. **Run manually before deploying the optional-reg-number frontend**, or every signup that leaves the field blank fails |
 | `vercel.json` | CSP, CORS headers, SPA rewrite rule |
 | `scripts/validate-modules.mjs` | Pre-build module structure validator |
 
@@ -154,8 +155,15 @@ The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-
   1. Author `src/data/<dept>Courses.js` — **self-contained**, exporting `courses`, `LEVELS` and `levelMeta` (same shape as `courses.js`; copy `dataScienceCourses.js` as the model). Re-author the shared courses with your department's framing rather than importing another catalogue; do import the shared `./lectureNotes/*.js` for any course that has them, or students lose the transcribed workbook content. Mark SIWES courses `subject: 'siwes'` — the Course Hub keys its SIWES section off that, not off the level.
   2. Register it in `departments.js` with `status: 'full'` and a `loadCatalogue()` importing it. `SELECTABLE_DEPARTMENTS` and the SetupProfile/ProfileSettings pickers pick it up automatically.
   3. Add it to the `DEPARTMENTS` registry in `api/_lib/courseData.js` (`{ knowledge: buildKnowledgeFromCourses(...), courses }`) and to `DEPARTMENT_LABELS` in `api/tutor.js`, so the tutor scopes its catalogue index, course lookups and uploaded-note pool to that department.
+  4. Add it to the `catalogues` array in `scripts/validate-modules.mjs`, or the prebuild validator silently skips its courses.
 
-  Existing foundation students of that department keep their progress — it is keyed per-user, not per-department — and move themselves onto the new catalogue at `/profile`.
+  **Getting the shared-course flags right** (both are read by `materialsDepartmentFor()`, which decides the `course_materials.department` pool):
+  - `crossDepartmental: true` — a foundation course every UniUyo programme takes (GST/MTH/PHY/STA/…). In `courses.js` this flag *also* builds the foundation catalogue via `getCrossDepartmentalCourses()`.
+  - `sharedMaterials: true` — a course another department owns that yours also takes (e.g. CYB 211). Pools the notes without putting the course in the foundation catalogue.
+
+  Every catalogue carrying the same course **must set the same flag**, or the two departments read different pools and each sees an empty materials list for notes the other uploaded. `departments.test.js` asserts this across all catalogues, and a course whose slug newly pools under `'general'` needs a one-line `UPDATE` migration to move its existing rows.
+
+  Existing foundation students of that department keep their progress — it is keyed per-user, not per-department — and move themselves onto the new catalogue at `/profile`. `findDepartmentByName()` matches their typed `department_other` so Welcome and the dashboard offer them the switch automatically.
 - **Changing UI:** Use Tailwind with the custom color palette only; check Fraunces/Inter/JetBrains Mono for typography
 - **Adding an API feature:** Add a new file in `api/`, add rate limiting matching the existing pattern in `api/tutor.js`, register it in tools registry
 - **Auth changes:** Touch `AuthContext.jsx` and `src/lib/supabase.js` only — do not scatter auth logic into components
