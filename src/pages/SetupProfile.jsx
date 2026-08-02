@@ -1,71 +1,28 @@
-import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowRight, GraduationCap, Hash, Loader2, School, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { SELECTABLE_DEPARTMENTS } from '../data/departments';
-
-const LEVELS = ['100L', '200L', '300L', '400L'];
-
-// Sentinel for "my department isn't listed yet" — resolves to the 'general'
-// foundation-mode department, with the typed name kept for department_other
-// (see departments.js and CLAUDE.md → Common Tasks for how that becomes a
-// full department later).
-const OTHER_DEPARTMENT = '__other__';
+import ProfileForm from '../components/ProfileForm';
 
 export default function SetupProfile() {
   usePageTitle('Set Up Profile');
   const { user, profileComplete, authLoading, profileLoading, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const [form,   setForm]   = useState({ full_name: '', reg_number: '', level: '', department: '', department_other: '' });
-  const [error,  setError]  = useState('');
-  const [saving, setSaving] = useState(false);
 
-  if (!authLoading && !user)                      return <Navigate to="/signin" replace />;
+  if (!authLoading && !user)                              return <Navigate to="/signin" replace />;
   if (!authLoading && !profileLoading && profileComplete) return <Navigate to="/" replace />;
 
-  const setField = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
-  const isOtherDept = form.department === OTHER_DEPARTMENT;
-
-  const submit = async (e) => {
-    e.preventDefault();
-    const { full_name, reg_number, level, department } = form;
-    const name = full_name.trim();
-    const reg  = reg_number.trim().toUpperCase();
-    const departmentOther = form.department_other.trim();
-    if (!name || !reg || !level || !department) { setError('Please fill in all fields.'); return; }
-    if (isOtherDept && !departmentOther)         { setError('Please tell us your department.'); return; }
-    if (reg.length < 4)          { setError('Enter a valid reg number.'); return; }
-    // A real reg number always mixes letters and digits (e.g. CYB/21/1234);
-    // reject obvious junk before it lands in the department record.
-    if (!/[A-Z]/.test(reg) || !/[0-9]/.test(reg)) {
-      setError('Enter a valid reg number — it should contain both letters and digits.');
-      return;
-    }
-
-    setSaving(true);
-    setError('');
-    const { error: dbErr } = await supabase.from('profiles').upsert({
+  // Returns an error string for ProfileForm to display, or nothing on success.
+  const save = async (values) => {
+    const { error } = await supabase.from('profiles').upsert({
       id: user.id,
-      full_name: name,
-      reg_number: reg,
-      level,
-      department: isOtherDept ? 'general' : department,
-      department_other: isOtherDept ? departmentOther : null,
+      ...values,
       updated_at: new Date().toISOString(),
     });
-    if (dbErr) {
-      setError(dbErr.message ?? 'Could not save your profile. Please try again.');
-      setSaving(false);
-      return;
-    }
+    if (error) return error.message ?? 'Could not save your profile. Please try again.';
     await refreshProfile();
     navigate('/welcome', { replace: true });
   };
-
-  const ready = form.full_name.trim() && form.reg_number.trim() && form.level && form.department
-    && (!isOtherDept || form.department_other.trim());
 
   return (
     <div className="min-h-[calc(100vh-4.5rem)] flex items-center justify-center px-6 py-14">
@@ -84,135 +41,11 @@ export default function SetupProfile() {
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={submit} className="space-y-6">
-
-          {/* Full name */}
-          <div>
-            <label className="flex items-center gap-1.5 text-xs font-medium text-coffee-700 mb-2">
-              <User size={12} /> Full name
-            </label>
-            <input
-              type="text"
-              required
-              value={form.full_name}
-              onChange={setField('full_name')}
-              placeholder="e.g. Josebert Sunday"
-              autoComplete="name"
-              autoFocus
-              className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
-            />
-          </div>
-
-          {/* Reg number */}
-          <div>
-            <label className="flex items-center gap-1.5 text-xs font-medium text-coffee-700 mb-2">
-              <Hash size={12} /> Reg number
-            </label>
-            <input
-              type="text"
-              required
-              value={form.reg_number}
-              onChange={setField('reg_number')}
-              placeholder="e.g. CYB/21/1234"
-              className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all font-mono tracking-wide"
-            />
-            <p className="text-xs text-coffee-500 mt-2 pl-0.5">
-              As it appears on your university ID card or student portal.
-            </p>
-          </div>
-
-          {/* Department picker */}
-          <div>
-            <label className="flex items-center gap-1.5 text-xs font-medium text-coffee-700 mb-3">
-              <School size={12} /> Your department
-            </label>
-            <div className="grid grid-cols-1 gap-2.5">
-              {SELECTABLE_DEPARTMENTS.map(dept => (
-                <button
-                  key={dept.slug}
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, department: dept.slug }))}
-                  className={`py-3 px-4 rounded-xl text-sm font-semibold border-2 text-left transition-all ${
-                    form.department === dept.slug
-                      ? 'bg-ink border-ink text-cream shadow-sm'
-                      : 'bg-cream border-coffee-200 text-coffee-700 hover:border-coffee-400 hover:text-ink'
-                  }`}
-                >
-                  {dept.name}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => setForm(f => ({ ...f, department: OTHER_DEPARTMENT }))}
-                className={`py-3 px-4 rounded-xl text-sm font-semibold border-2 text-left transition-all ${
-                  isOtherDept
-                    ? 'bg-ink border-ink text-cream shadow-sm'
-                    : 'bg-cream border-coffee-200 text-coffee-700 hover:border-coffee-400 hover:text-ink'
-                }`}
-              >
-                My department isn't listed yet
-              </button>
-            </div>
-            {isOtherDept && (
-              <div className="mt-3">
-                <input
-                  type="text"
-                  value={form.department_other}
-                  onChange={setField('department_other')}
-                  maxLength={60}
-                  placeholder="e.g. Mechanical Engineering"
-                  className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
-                />
-                <p className="text-xs text-coffee-500 mt-2 pl-0.5">
-                  You'll get the shared foundation courses and every interactive track now — your full curriculum comes as we add departments.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Level picker */}
-          <div>
-            <label className="flex items-center gap-1.5 text-xs font-medium text-coffee-700 mb-3">
-              <GraduationCap size={12} /> Your current level
-            </label>
-            <div className="grid grid-cols-4 gap-2.5">
-              {LEVELS.map(l => (
-                <button
-                  key={l}
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, level: l }))}
-                  className={`py-3 rounded-xl text-sm font-semibold border-2 transition-all ${
-                    form.level === l
-                      ? 'bg-ink border-ink text-cream shadow-sm'
-                      : 'bg-cream border-coffee-200 text-coffee-700 hover:border-coffee-400 hover:text-ink'
-                  }`}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="flex items-center gap-2 text-sm text-rust">
-              <AlertCircle size={14} className="shrink-0" />
-              {error}
-            </div>
-          )}
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={saving || !ready}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-ink text-cream text-sm font-semibold hover:bg-coffee-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving
-              ? <><Loader2 size={15} className="animate-spin" /> Setting up…</>
-              : <>Set up my profile <ArrowRight size={15} /></>}
-          </button>
-        </form>
+        <ProfileForm
+          submitLabel="Set up my profile"
+          savingLabel="Setting up…"
+          onSave={save}
+        />
       </div>
     </div>
   );
