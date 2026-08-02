@@ -27,10 +27,11 @@
 //   16  The Role of the Courts in Upholding Peoples' Fundamental Rights
 //   17  The Ethnic Minority Groups and Agitations in Nigeria
 //
-// `covers` / `partial` refer to 1-based indices in the course's `topics` array
-// in courses.js — CourseDetail uses them to show which syllabus items the notes
-// actually reach. Chapter 1 fully covers syllabus item 8 (the 3Rs and national
-// orientation strategies) and touches items 4 and 5.
+// Which syllabus items each chapter reaches is NOT recorded here. This file is
+// imported verbatim by every department that takes GST 121, and each department
+// writes its own `topics` array, so a single set of indices cannot be right for
+// all of them. The mapping lives on each course instead, as `noteCoverage` keyed
+// by the chapter numbers above (see courses.js / dataScienceCourses.js).
 //
 // The chapter has no figures. Where the textbook contradicts itself the prose
 // has been settled to its evident intent; material genuinely added beyond the
@@ -44,8 +45,6 @@ export const gst121LectureNotes = [
   {
     number: '1',
     title: 'The 3Rs Policy and Reorientation Strategies in Nigeria: 1970–1975',
-    covers: [8],
-    partial: [4, 5],
     sections: [
       {
         type: 'text',

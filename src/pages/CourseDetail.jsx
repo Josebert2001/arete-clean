@@ -86,9 +86,16 @@ export default function CourseDetail() {
   const hasNotes = course.lectureNotes?.length > 0;
   const hasQuiz = course.quiz?.length > 0;
 
-  // Which outline topics the lecture notes actually reach. A note topic opts in
-  // with `covers: [n]` (fully) or `partial: [n]` (touched only). Courses whose
-  // notes declare neither produce an empty map and render as they always have.
+  // Which outline topics the lecture notes actually reach, as 1-based indices
+  // into `course.topics`: `covers` (fully) or `partial` (touched only).
+  //
+  // Those indices belong to the *course*, not to the notes — a note file is
+  // shared verbatim between department catalogues (see departments.js) while
+  // each department writes its own `topics` array, so one set of indices cannot
+  // be right for both. A course whose notes are shared therefore carries its own
+  // `noteCoverage` map, keyed by note number; notes used by a single catalogue
+  // still declare `covers`/`partial` inline. Declaring neither produces an empty
+  // map and renders as it always has.
   const topicCoverage = new Map();
   (course.lectureNotes || []).forEach((note) => {
     const mark = (n, level) => {
@@ -97,8 +104,9 @@ export default function CourseDetail() {
       if (level === 'full') entry.level = 'full';
       topicCoverage.set(n, entry);
     };
-    (note.covers || []).forEach(n => mark(n, 'full'));
-    (note.partial || []).forEach(n => mark(n, 'partial'));
+    const source = course.noteCoverage?.[note.number] ?? note;
+    (source.covers || []).forEach(n => mark(n, 'full'));
+    (source.partial || []).forEach(n => mark(n, 'partial'));
   });
 
   return (

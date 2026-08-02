@@ -262,3 +262,93 @@ describe('shared courses carry the same lecture notes in every catalogue', () =>
     expect(gaps).toEqual([]);
   });
 });
+
+// The bug this guards against: `covers`/`partial` are 1-based indices into a
+// course's `topics` array, and they used to sit on the note objects. Notes are
+// shared verbatim between catalogues while each department writes its own
+// topics, so Data Science students got MTH 121's badges pointing at the
+// Cybersecurity outline — Unit Four ("Integration") labelled as covering
+// "Applications of differentiation", and the two integration items reading "no
+// notes yet". A shared note file must therefore not carry indices of its own.
+describe('outline coverage indices belong to the course, not the shared notes', () => {
+  const normalize = (code) => String(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  it('never lets a course inherit another department\'s topic indices', async () => {
+    const loaded = await Promise.all(
+      Object.entries(departments).map(async ([slug, dept]) => [slug, await dept.loadCatalogue()])
+    );
+
+    // A note object reached from more than one department is shared, so any
+    // covers/partial on it can only be right for whichever catalogue authored
+    // them. The owning course must override with its own `noteCoverage`.
+    const departmentsByNotes = new Map();
+    for (const [slug, catalogue] of loaded) {
+      for (const course of catalogue.courses) {
+        if (!course.lectureNotes?.length) continue;
+        if (!departmentsByNotes.has(course.lectureNotes)) departmentsByNotes.set(course.lectureNotes, new Set());
+        departmentsByNotes.get(course.lectureNotes).add(slug);
+      }
+    }
+
+    const inherited = [];
+    for (const [slug, catalogue] of loaded) {
+      for (const course of catalogue.courses) {
+        const notes = course.lectureNotes;
+        if (!notes?.length) continue;
+        if (departmentsByNotes.get(notes).size < 2) continue;
+        for (const note of notes) {
+          const declaresInline = note.covers?.length || note.partial?.length;
+          if (declaresInline && !course.noteCoverage?.[note.number]) {
+            inherited.push(`${slug} ${normalize(course.code)} note ${note.number}`);
+          }
+        }
+      }
+    }
+
+    expect(
+      inherited,
+      `shared lecture notes carry topic indices with no per-course override:\n\n${inherited.join('\n')}`
+    ).toEqual([]);
+  });
+
+  it('keeps every declared index inside its own course outline', async () => {
+    const loaded = await Promise.all(
+      Object.entries(departments).map(async ([slug, dept]) => [slug, await dept.loadCatalogue()])
+    );
+
+    const outOfRange = [];
+    for (const [slug, catalogue] of loaded) {
+      for (const course of catalogue.courses) {
+        for (const note of course.lectureNotes || []) {
+          const source = course.noteCoverage?.[note.number] ?? note;
+          for (const n of [...(source.covers || []), ...(source.partial || [])]) {
+            if (!Number.isInteger(n) || n < 1 || n > (course.topics?.length ?? 0)) {
+              outOfRange.push(`${slug} ${normalize(course.code)} note ${note.number} → #${n} of ${course.topics?.length ?? 0}`);
+            }
+          }
+        }
+      }
+    }
+
+    expect(outOfRange, `coverage index outside the course outline:\n\n${outOfRange.join('\n')}`).toEqual([]);
+  });
+
+  it('does not leave a noteCoverage entry pointing at a note that does not exist', async () => {
+    const loaded = await Promise.all(
+      Object.entries(departments).map(async ([slug, dept]) => [slug, await dept.loadCatalogue()])
+    );
+
+    const orphans = [];
+    for (const [slug, catalogue] of loaded) {
+      for (const course of catalogue.courses) {
+        if (!course.noteCoverage) continue;
+        const numbers = new Set((course.lectureNotes || []).map(n => String(n.number)));
+        for (const key of Object.keys(course.noteCoverage)) {
+          if (!numbers.has(String(key))) orphans.push(`${slug} ${normalize(course.code)} → note ${key}`);
+        }
+      }
+    }
+
+    expect(orphans, `noteCoverage keyed to a missing note:\n\n${orphans.join('\n')}`).toEqual([]);
+  });
+});

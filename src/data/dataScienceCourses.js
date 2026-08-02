@@ -366,6 +366,14 @@ export const courses = [
       'Do not leave this course to the last week; it is easy marks that many students throw away',
     ],
     lectureNotes: gst121LectureNotes,
+    // Chapter 1 is the only chapter transcribed so far. Item 8 is `partial`
+    // rather than `covers`: the chapter's reorientation strategies are the 3Rs,
+    // indigenization and the NYSC, not the MAMSER/WAI/EFCC/ICPC ones our outline
+    // names. Cybersecurity words that item as "the 3Rs", so it marks the same
+    // chapter as full coverage — which is why these indices live per course.
+    noteCoverage: {
+      1: { partial: [5, 6, 8] },
+    },
   },
   {
     code: 'MTH 121',
@@ -403,6 +411,17 @@ export const courses = [
       'Work problems until you can do a full differentiation without looking up a rule',
     ],
     lectureNotes: mth121LectureNotes,
+    // Which of the topics above each workbook unit reaches. The indices are ours
+    // alone — the note file is shared with Cybersecurity, whose outline for the
+    // same course is worded and ordered differently. Unit 6 is the tutorial
+    // question set, so it marks nothing as taught.
+    noteCoverage: {
+      1: { covers: [1] },
+      2: { covers: [2, 3, 4] },
+      3: { covers: [5, 6] },
+      4: { covers: [7, 8] },
+      5: { covers: [9] },
+    },
   },
   {
     code: 'PHY 121',

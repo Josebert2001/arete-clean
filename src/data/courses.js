@@ -333,9 +333,16 @@ export const courses = [
       'Past questions drive most of the exam content for GST courses — collect and study them',
     ],
     // Transcribed from the Directorate of General Studies' official GST 121
-    // textbook (May 2024) — see src/data/lectureNotes/gst121.js for provenance,
-    // the full 17-chapter table of contents, and the coverage mapping.
+    // textbook (May 2024) — see src/data/lectureNotes/gst121.js for provenance
+    // and the full 17-chapter table of contents.
     lectureNotes: gst121LectureNotes,
+    // Chapter 1 is the only chapter transcribed so far. It fully covers the 3Rs
+    // and national orientation strategies, and touches the Civil War and the
+    // indigenization/self-reliance material. Kept here rather than in the shared
+    // note file because Data Science takes GST 121 against its own outline.
+    noteCoverage: {
+      1: { covers: [8], partial: [4, 5] },
+    },
   },
   {
     code: 'COS 121',
@@ -380,20 +387,24 @@ export const courses = [
   {
     code: 'MTH 121',
     slug: 'mth-121',
-    title: 'Elementary Mathematics II (Calculus)',
+    title: 'General Mathematics II (Calculus)',
     units: 2, level: 100, semester: 2, lh: 30, ph: 0,
     subject: 'math',
     crossDepartmental: true,
-    description: 'Calculus and trigonometry: differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and the signal theory used across science and engineering.',
+    description: 'Single-variable calculus: limits, continuity, differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and the signal theory used across science and engineering.',
+    // Matched to the departmental workbook the lecture notes are transcribed
+    // from. The outline previously opened with trigonometric identities and
+    // closed with ordinary differential equations; MTH 121 teaches neither, so
+    // both items sat permanently at "no notes yet".
     topics: [
-      'Trigonometric functions and identities',
+      'Functions of a real variable: domain, range, composition',
       'Limits, continuity, and the derivative',
       'Rules of differentiation: product, quotient, chain',
+      'Implicit, parametric, exponential and logarithmic differentiation',
       'Applications of derivatives: tangents, rates, max/min',
       'Definite and indefinite integrals',
-      'Techniques of integration: substitution, by parts',
+      'Techniques of integration: substitution, by parts, partial fractions',
       'Applications of integration: area, volume',
-      'Introduction to ordinary differential equations',
     ],
     textbooks: [
       { title: 'Engineering Mathematics', authors: 'K.A. Stroud', note: '8th ed. — the most student-friendly maths text for engineers' },
@@ -416,6 +427,17 @@ export const courses = [
     // src/data/lectureNotes/mth121.js for provenance and the errata list. All
     // five units, plus the closing tutorial questions.
     lectureNotes: mth121LectureNotes,
+    // Which of the topics above each workbook unit reaches. Lives here rather
+    // than in the shared note file because Data Science takes the same MTH 121
+    // against a different outline. Unit 6 is the tutorial question set, so it
+    // marks nothing as taught.
+    noteCoverage: {
+      1: { covers: [1], partial: [2] },  // functions; the limits/continuity half of 2
+      2: { covers: [2, 3, 4] },          // the derivative closes out 2
+      3: { covers: [5] },
+      4: { covers: [6, 7] },
+      5: { covers: [8] },
+    },
   },
   {
     code: 'PHY 121',
