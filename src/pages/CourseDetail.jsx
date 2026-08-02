@@ -16,6 +16,9 @@ const subjectStyles = {
   cyb:   { codeBg: 'bg-rust',       codeText: 'text-cream' },
   math:  { codeBg: 'bg-moss',       codeText: 'text-cream' },
   stats: { codeBg: 'bg-ember-500',  codeText: 'text-cream' },
+  // Kept in step with the same map in Courses.jsx — see the note there on why
+  // Data Science shares the statistics colour.
+  dts:   { codeBg: 'bg-ember-500',  codeText: 'text-cream' },
   gst:   { codeBg: 'bg-coffee-700', codeText: 'text-cream' },
   phy:   { codeBg: 'bg-moss',       codeText: 'text-cream' },
   sen:   { codeBg: 'bg-ink',        codeText: 'text-cream' },

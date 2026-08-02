@@ -64,6 +64,11 @@ const subjectStyles = {
   cyb:   { bg: 'bg-rust',       text: 'text-cream',  light: 'bg-rust/10 text-rust' },
   math:  { bg: 'bg-moss',       text: 'text-cream',  light: 'bg-moss/10 text-moss' },
   stats: { bg: 'bg-ember-500',  text: 'text-cream',  light: 'bg-ember-500/10 text-ember-500' },
+  // Data Science shares the statistics colour rather than taking a new one:
+  // the palette already pairs kindred subjects (math+phy on moss, cs+sen on
+  // ink), and ember-400 — the only unused warm tone — drops to ~2.9:1 against
+  // text-cream, below the 3:1 these badges need.
+  dts:   { bg: 'bg-ember-500',  text: 'text-cream',  light: 'bg-ember-500/10 text-ember-500' },
   gst:   { bg: 'bg-coffee-700', text: 'text-cream',  light: 'bg-coffee-100 text-coffee-700' },
   phy:   { bg: 'bg-moss',       text: 'text-cream',  light: 'bg-moss/10 text-moss' },
   sen:   { bg: 'bg-ink',        text: 'text-cream',  light: 'bg-coffee-100 text-coffee-800' },
