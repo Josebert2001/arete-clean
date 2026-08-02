@@ -156,3 +156,51 @@ describe('findModule — track module lookup', () => {
     expect(findModule('python', 99)).toBeNull();
   });
 });
+
+describe('Data Science — a second full department catalogue', () => {
+  it('builds an index from the catalogue data, in the same shape as the hand-authored one', () => {
+    const index = getCourseIndexForDepartment('dataScience');
+    expect(index).toContain('=== B.Sc. DATA SCIENCE');
+    expect(index).toContain('── 100 LEVEL · FIRST SEMESTER');
+    expect(index).toMatch(/DTS 226 \| .* \| \d+ units/);
+    // Singular unit counts must read "1 unit", matching COURSE_KNOWLEDGE.
+    expect(index).not.toMatch(/\| 1 units/);
+  });
+
+  it('advertises no Cybersecurity-only courses', () => {
+    const index = getCourseIndexForDepartment('dataScience');
+    expect(index).not.toContain('CYB 311');
+    expect(index).not.toContain('UUY-CYB');
+  });
+
+  it('resolves its own specialist courses but not another department\'s', () => {
+    expect(findCourseEntry('DTS 226', 'dataScience')).not.toBeNull();
+    expect(findCourseEntry('CYB 311', 'dataScience')).toBeNull();
+    // ...and the reverse: Cybersecurity cannot reach Data Science courses.
+    expect(findCourseEntry('DTS 226', 'cybersecurity')).toBeNull();
+  });
+
+  it('shares lecture notes with the other catalogues for a shared course', () => {
+    const { outline } = findCourseEntry('MTH 121', 'dataScience');
+    expect(outline).toContain('LECTURE NOTES');
+  });
+});
+
+describe('findCourseEntry — materials pool resolution', () => {
+  // Mirrors materialsDepartmentFor() in src/data/departments.js so the tutor's
+  // uploaded-note lookup reads exactly the pool the course page writes to.
+  it('pools a shared course under general for every department', () => {
+    for (const slug of ['cybersecurity', 'dataScience', 'general']) {
+      expect(findCourseEntry('GST 111', slug).materialsDepartment).toBe('general');
+    }
+  });
+
+  it('scopes a specialist course to its owning department', () => {
+    expect(findCourseEntry('CYB 311', 'cybersecurity').materialsDepartment).toBe('cybersecurity');
+    expect(findCourseEntry('DTS 226', 'dataScience').materialsDepartment).toBe('dataScience');
+  });
+
+  it('falls back to the default department when no slug is given', () => {
+    expect(findCourseEntry('CYB 222').materialsDepartment).toBe('cybersecurity');
+  });
+});

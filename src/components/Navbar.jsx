@@ -12,8 +12,8 @@ import { getDepartment } from '../data/departments';
 //
 // Reads the lightweight department registry directly rather than useCatalogue:
 // the Navbar renders on every route, and useCatalogue would dynamic-import the
-// ~800 kB course catalogue app-wide, undoing its per-department code splitting.
-// Only the department's NAME is needed here — no course data.
+// student's whole course catalogue app-wide, undoing the per-department code
+// splitting. Only the department's NAME is needed here — no course data.
 function useTagline() {
   const { user, profile } = useAuth();
   if (!user || !profile) return 'University of Uyo · Student Learning Platform';

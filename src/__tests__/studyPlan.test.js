@@ -1,16 +1,27 @@
 import { describe, it, expect } from 'vitest';
 import { generateStudyPlan, DEFAULT_STUDY_DAYS } from '../utils/studyPlan';
+import { getCoursesByLevelAndSemester } from '../data/courses';
 
 const MONDAY = new Date(2026, 0, 5); // a Monday
 
+// The generator is catalogue-agnostic — it takes the course lookup as an
+// option so it never imports a department's data (see studyPlan.js). These
+// tests drive it with the Cybersecurity catalogue.
+const CATALOGUE = { getCoursesByLevelAndSemester };
+
 describe('generateStudyPlan', () => {
   it('throws on missing/invalid inputs', () => {
-    expect(() => generateStudyPlan({ semester: 1, sessionStart: MONDAY })).toThrow();
-    expect(() => generateStudyPlan({ level: 100, semester: 1, sessionStart: new Date('nope') })).toThrow();
+    expect(() => generateStudyPlan({ ...CATALOGUE, semester: 1, sessionStart: MONDAY })).toThrow();
+    expect(() => generateStudyPlan({ ...CATALOGUE, level: 100, semester: 1, sessionStart: new Date('nope') })).toThrow();
+  });
+
+  it('throws when no catalogue lookup is supplied', () => {
+    expect(() => generateStudyPlan({ level: 100, semester: 1, sessionStart: MONDAY }))
+      .toThrow(/getCoursesByLevelAndSemester/);
   });
 
   it('generates study events for a real level+semester', () => {
-    const plan = generateStudyPlan({ level: 100, semester: 1, sessionStart: MONDAY });
+    const plan = generateStudyPlan({ ...CATALOGUE, level: 100, semester: 1, sessionStart: MONDAY });
     expect(plan.courses.length).toBeGreaterThan(0);
     expect(plan.events.length).toBeGreaterThan(0);
     // Every event carries the fields the ICS builder needs.
@@ -29,13 +40,13 @@ describe('generateStudyPlan', () => {
   });
 
   it('is deterministic — same inputs produce identical plans', () => {
-    const a = generateStudyPlan({ level: 200, semester: 1, sessionStart: MONDAY });
-    const b = generateStudyPlan({ level: 200, semester: 1, sessionStart: MONDAY });
+    const a = generateStudyPlan({ ...CATALOGUE, level: 200, semester: 1, sessionStart: MONDAY });
+    const b = generateStudyPlan({ ...CATALOGUE, level: 200, semester: 1, sessionStart: MONDAY });
     expect(a.events.map(e => e.uid)).toEqual(b.events.map(e => e.uid));
   });
 
   it('weights heavier courses with more weekly blocks', () => {
-    const plan = generateStudyPlan({ level: 100, semester: 1, sessionStart: MONDAY });
+    const plan = generateStudyPlan({ ...CATALOGUE, level: 100, semester: 1, sessionStart: MONDAY });
     const byCode = {};
     for (const ev of plan.events) {
       const code = ev.title.split(' — ')[0];
@@ -50,7 +61,7 @@ describe('generateStudyPlan', () => {
   });
 
   it('sets the series end ~weeks after the start', () => {
-    const plan = generateStudyPlan({ level: 100, semester: 1, sessionStart: MONDAY, weeks: 15 });
+    const plan = generateStudyPlan({ ...CATALOGUE, level: 100, semester: 1, sessionStart: MONDAY, weeks: 15 });
     const ev = plan.events[0];
     const diffDays = Math.round((ev.untilDate - ev.firstDate) / 86400000);
     expect(diffDays).toBe(14 * 7); // (weeks-1)*7
@@ -58,7 +69,7 @@ describe('generateStudyPlan', () => {
 
   it('respects a custom capacity and reports capacity in meta', () => {
     const plan = generateStudyPlan({
-      level: 100, semester: 1, sessionStart: MONDAY,
+      ...CATALOGUE, level: 100, semester: 1, sessionStart: MONDAY,
       studyDays: ['MO'], slotTimes: ['17:00'],
     });
     expect(plan.meta.capacity).toBe(1);
@@ -69,6 +80,7 @@ describe('generateStudyPlan', () => {
 describe('progress-aware weighting', () => {
   // A roomy grid so adjusted blocks never spill into `unplaced`.
   const ROOMY = {
+    ...CATALOGUE,
     level: 100, semester: 1, sessionStart: MONDAY,
     studyDays: ['MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
     slotTimes: ['08:00', '09:15', '10:30', '11:45'],

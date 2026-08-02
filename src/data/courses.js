@@ -88,7 +88,7 @@ export const courses = [
     units: 2, level: 100, semester: 1, lh: 30, ph: 0,
     subject: 'phy',
     crossDepartmental: true,
-    description: 'Classical mechanics: vectors, kinematics, Newtonian dynamics, conservation principles, rotational motion, and gravitation. Builds the physical intuition that underpins electronics, networking signals, and hardware concepts encountered in later cybersecurity courses.',
+    description: 'Classical mechanics: vectors, kinematics, Newtonian dynamics, conservation principles, rotational motion, and gravitation. Builds the physical intuition that underpins electronics, networking signals, and the hardware concepts met in later computing courses.',
     topics: [
       'Space, time, units and dimensions; vectors and scalars',
       'Differentiation of vectors: displacement, velocity, acceleration; kinematics',
@@ -194,7 +194,7 @@ export const courses = [
     units: 3, level: 100, semester: 1, lh: 45, ph: 0,
     subject: 'stats',
     crossDepartmental: true,
-    description: 'The language of data: types, sources, and methods of data collection; presentation, errors and approximations; and the core measures used to summarise a dataset. A foundation for every analysis task in cybersecurity, research, and data-driven decision-making.',
+    description: 'The language of data: types, sources, and methods of data collection; presentation, errors and approximations; and the core measures used to summarise a dataset. A foundation for every analysis task in research and data-driven decision-making.',
     topics: [
       'Statistical data: types, sources and methods of collection',
       'Presentation of data: tables, charts and graphs',
@@ -264,7 +264,7 @@ export const courses = [
     units: 2, level: 100, semester: 1, lh: 15, ph: 45,
     subject: 'cs',
     crossDepartmental: true,
-    description: 'Diagnosing and resolving common hardware and software problems across PCs, laptops, tablets, and mobile phones. Covers network connectivity/security troubleshooting, backup and restore, and virus/anti-virus procedures — practical skills every cybersecurity professional needs.',
+    description: 'Diagnosing and resolving common hardware and software problems across PCs, laptops, tablets, and mobile phones. Covers network connectivity/security troubleshooting, backup and restore, and virus/anti-virus procedures — practical skills every computing professional needs.',
     topics: [
       'Fundamentals of hardware',
       'Handling, testing and troubleshooting personal computer problems',
@@ -303,7 +303,7 @@ export const courses = [
     units: 2, level: 100, semester: 2, lh: 15, ph: 45,
     subject: 'gst',
     crossDepartmental: true,
-    description: 'An introduction to Nigeria\'s ethnic diversity, cultural heritage, colonial and political history, and nation-building challenges. Provides context for the social and policy dimensions of cybersecurity in Nigeria.',
+    description: 'An introduction to Nigeria\'s ethnic diversity, cultural heritage, colonial and political history, and nation-building challenges. Provides context for the social and policy dimensions of technology in Nigeria.',
     topics: [
       'Nigerian history, culture and art up to 1800 (Yoruba, Hausa, Igbo, and minority groups)',
       'Nigeria under colonial rule and colonial administration',
@@ -327,7 +327,7 @@ export const courses = [
     studyTips: [
       'Link course topics to current events — Nigerian news puts everything in context',
       'For the culture component, draw on your own background and community knowledge',
-      'Cybercrime topics connect directly to your degree — pay extra attention there',
+      'Cybercrime and digital-policy topics connect directly to computing degrees — pay extra attention there',
       'Past questions drive most of the exam content for GST courses — collect and study them',
     ],
     // Transcribed from the Directorate of General Studies' official GST 121
@@ -806,7 +806,7 @@ export const courses = [
     units: 2, level: 100, semester: 2, lh: 30, ph: 0,
     subject: 'math',
     crossDepartmental: true,
-    description: 'Calculus and trigonometry: differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and signal theory used in cybersecurity analysis.',
+    description: 'Calculus and trigonometry: differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and the signal theory used across science and engineering.',
     topics: [
       'Trigonometric functions and identities',
       'Limits, continuity, and the derivative',
@@ -1048,7 +1048,7 @@ export const courses = [
     studyTips: [
       'The logic component matters most for your degree — practise truth tables until they are automatic',
       'Logical validity and logical truth are different concepts — do not confuse them in exams',
-      'Ethical technology topics (privacy, AI, cybercrime) connect directly to CYB 211 and CYB 213',
+      'Ethical technology topics (privacy, AI, cybercrime) connect directly to your computing courses',
       'Argument mapping: writing out premises and conclusions explicitly prevents exam errors',
     ],
   },
@@ -1280,7 +1280,7 @@ export const courses = [
     units: 2, level: 200, semester: 2, lh: 15, ph: 45,
     subject: 'ent',
     crossDepartmental: true,
-    description: 'Business thinking for technical students: entrepreneurship and intrapreneurship theory, entrepreneurial characteristics and thinking, innovation, enterprise formation, and e-commerce principles. Directly applicable to cybersecurity consulting, startup, and freelance careers.',
+    description: 'Business thinking for technical students: entrepreneurship and intrapreneurship theory, entrepreneurial characteristics and thinking, innovation, enterprise formation, and e-commerce principles. Directly applicable to consulting, startup, and freelance careers in technology.',
     topics: [
       'Concept of entrepreneurship and intrapreneurship/corporate entrepreneurship',
       'Theories, rationale and relevance: Schumpeterian perspective, risk-taking, creative destruction',
@@ -1303,10 +1303,10 @@ export const courses = [
       'How to write a feasibility study',
     ],
     studyTips: [
-      'Apply every concept to a cybersecurity business idea — it makes abstract topics concrete and exam-ready',
+      'Apply every concept to a technology business idea from your own field — it makes abstract topics concrete and exam-ready',
       'The Business Model Canvas is the most exam-critical framework — practise filling it in for different scenarios',
       'Nigeria\'s NITDA and other agencies offer technology grants — research them as part of your learning',
-      'This course matters for your career: many cybersecurity professionals eventually consult or freelance',
+      'This course matters for your career: many technology professionals eventually consult or freelance',
     ],
     lectureNotes: [
       {
@@ -8673,7 +8673,7 @@ print(summary_df.to_string(index=False))`,
       'Nigeria conflict resolution case studies',
     ],
     studyTips: [
-      'Tie cyber conflict topics directly to CYB 211 (Cybersecurity Strategy) for cross-course reinforcement',
+      'Tie cyber-conflict topics back to your own security or computing courses for cross-course reinforcement',
       'Current events in Nigeria provide excellent case studies for conflict analysis questions',
       'Understand the UN Charter and its limitations regarding cyber operations — examined often',
       'Mediator vs arbitrator vs conciliator: know the distinctions precisely',
@@ -8686,7 +8686,7 @@ print(summary_df.to_string(index=False))`,
     units: 2, level: 300, semester: 1, lh: 15, ph: 45,
     subject: 'cs',
     crossDepartmental: true,
-    description: 'Foundations of AI: intelligent agents, search algorithms, knowledge representation, semantic networks, natural language processing, and expert systems. Directly relevant to AI-powered threat detection, anomaly detection, and automated vulnerability analysis in cybersecurity.',
+    description: 'Foundations of AI: intelligent agents, search algorithms, knowledge representation, semantic networks, natural language processing, and expert systems. Directly relevant to AI-powered anomaly detection, prediction, and automated analysis across computing.',
     topics: [
       'Overview, history, goals, types, branches and applications of AI',
       'Intelligent agents: performance, faculties, rationality, environment, architectures',
@@ -8710,7 +8710,7 @@ print(summary_df.to_string(index=False))`,
     ],
     studyTips: [
       'Understand A* search intuitively by tracing it on a grid before studying the formal algorithm',
-      'Connect AI to cybersecurity in every exam answer — your degree makes this connection valuable',
+      'Connect AI to a concrete application in your own field in every exam answer — applied answers score higher',
       'Google\'s free Machine Learning Crash Course covers supervised/unsupervised ML at the right level',
       'AI ethics questions (bias, fairness) appear frequently — develop considered, referenced arguments',
     ],
@@ -9357,7 +9357,7 @@ print(summary_df.to_string(index=False))`,
     units: 2, level: 400, semester: 2, lh: 15, ph: 45,
     subject: 'ent',
     crossDepartmental: true,
-    description: 'The practical mechanics of launching a business: opportunity identification, business planning, entrepreneurial finance, marketing and e-commerce, and applying emerging technologies to new ventures. Prepares graduates who want to start cybersecurity consultancies or technology ventures.',
+    description: 'The practical mechanics of launching a business: opportunity identification, business planning, entrepreneurial finance, marketing and e-commerce, and applying emerging technologies to new ventures. Prepares graduates who want to start consultancies or technology ventures.',
     topics: [
       'Opportunity identification: sources of business opportunities in Nigeria, market gaps',
       'New business development: business planning and market research',
@@ -9380,7 +9380,7 @@ print(summary_df.to_string(index=False))`,
     ],
     studyTips: [
       'Actually complete the CAC registration process research — knowing the real steps sets exam answers apart',
-      'Frame your venture creation around a cybersecurity service gap you identified during SIWES',
+      'Frame your venture creation around a real service gap you identified during SIWES',
       'A completed business plan is typically the coursework submission — start it week one',
       'Connect this to ENT 221 — build on the feasibility study you conceptualised in 200L',
     ],

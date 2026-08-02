@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap } from 'lucide-react';
 import { useCatalogue } from '../data/useCatalogue';
+import { materialsDepartmentFor } from '../data/departments';
 import LectureNotes from '../components/LectureNotes';
 import CourseQuiz from '../components/CourseQuiz';
 import CourseMaterials from '../components/CourseMaterials';
@@ -26,7 +27,7 @@ const subjectStyles = {
 
 export default function CourseDetail() {
   const { slug } = useParams();
-  const { catalogue, status } = useCatalogue();
+  const { catalogue, department, status } = useCatalogue();
   const course = catalogue?.getCourseBySlug(slug);
   const [activeTab, setActiveTab] = useState('resources');
 
@@ -205,7 +206,11 @@ export default function CourseDetail() {
       {/* Materials tab */}
       {activeTab === 'materials' && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
-          <CourseMaterials courseCode={course.code} courseSlug={slug} />
+          <CourseMaterials
+            courseCode={course.code}
+            courseSlug={slug}
+            department={materialsDepartmentFor(course, department?.slug)}
+          />
         </div>
       )}
 

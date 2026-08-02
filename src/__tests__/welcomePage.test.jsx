@@ -83,6 +83,13 @@ describe('Welcome — no invented course codes', () => {
     expect(container.querySelector('a[href*="level=500"]')).toBeNull();
   });
 
+  it('falls back the primary CTA to a plain browse link for a rejected level', async () => {
+    mockAuth.current = authFor({ ...CYB_PROFILE, level: '500L' });
+    renderWelcome();
+    const link = await screen.findByRole('link', { name: /Browse your courses/ });
+    expect(link).toHaveAttribute('href', '/courses');
+  });
+
   it('stays lightweight — must not pull the course catalogue', async () => {
     // Guards the deliberate choice above: Welcome reads the small
     // departments.js registry, never useCatalogue/courses.js. If someone
@@ -108,17 +115,43 @@ describe('Welcome — foundation mode', () => {
     expect(container.textContent).toContain('Mechanical Engineering');
   });
 
-  it('still offers the course picker', async () => {
+  it('still offers the course picker as the primary next step', async () => {
     renderWelcome();
-    await waitFor(() =>
-      expect(screen.getByText(/Pick the courses that match your programme/)).toBeInTheDocument()
-    );
+    const link = await screen.findByRole('link', { name: /Pick your programme's courses/ });
+    expect(link).toHaveAttribute('href', '/courses');
   });
 
   it('does not also show the year deep link — the picker is the better action', async () => {
     const { container } = renderWelcome();
     await waitFor(() => expect(screen.getByText(/Foundation mode/)).toBeInTheDocument());
     expect(container.textContent).not.toContain('See your 100L courses');
+  });
+});
+
+describe('Welcome — single primary CTA', () => {
+  it('renders exactly one primary CTA for a full-department student', async () => {
+    mockAuth.current = authFor(CYB_PROFILE);
+    const { container } = renderWelcome();
+    await waitFor(() => expect(screen.getByText(/Ada Obi/)).toBeInTheDocument());
+    expect(container.querySelectorAll('.btn-primary')).toHaveLength(1);
+  });
+
+  it('renders exactly one primary CTA for a foundation student', async () => {
+    mockAuth.current = authFor(FOUNDATION_PROFILE);
+    const { container } = renderWelcome();
+    await waitFor(() => expect(screen.getByText(/Ada Obi/)).toBeInTheDocument());
+    expect(container.querySelectorAll('.btn-primary')).toHaveLength(1);
+  });
+});
+
+describe('Welcome — optional reg number', () => {
+  it('does not render a reg-number line when the student has none', async () => {
+    mockAuth.current = authFor({ ...CYB_PROFILE, reg_number: null });
+    renderWelcome();
+    const nameEl = await screen.findByText('Ada Obi');
+    // The reg-number <p> is the name's only sibling in the profile card header
+    // — absent when there's nothing to show.
+    expect(nameEl.nextElementSibling).toBeNull();
   });
 });
 

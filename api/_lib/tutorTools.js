@@ -164,7 +164,7 @@ export function buildTutorTools(student, departmentSlug) {
         if (!entry) {
           return `No course found matching "${courseCode}" in your programme's catalogue. Use a course code from the catalogue index.`;
         }
-        const { code: canonicalCode, outline } = entry;
+        const { code: canonicalCode, outline, materialsDepartment } = entry;
 
         const db = getAnonDb();
         // Without a canonical code there's no reliable key to match uploads on
@@ -175,14 +175,19 @@ export function buildTutorTools(student, departmentSlug) {
         // bonus. Match on the CANONICAL code (e.g. "CYB 222") rather than the
         // model's raw argument, so notes attach even when it passes "cyb 222"
         // or "CYB222" — course_materials.course_code is an exact, case-sensitive
-        // column. A thrown rejection must not kill the model's text stream — on
-        // any failure, fall back to the outline.
+        // column. Scope to the course's materials pool (see
+        // materialsDepartmentFor in src/data/departments.js) so the student
+        // reads the same uploads the course page shows them, and never another
+        // department's notes for a course that merely shares a code. A thrown
+        // rejection must not kill the model's text stream — on any failure,
+        // fall back to the outline.
         let data;
         try {
           ({ data } = await db
             .from('course_materials')
             .select('display_name, description, extracted_text')
             .eq('course_code', canonicalCode)
+            .eq('department', materialsDepartment)
             .not('extracted_text', 'is', null)
             .order('uploaded_at', { ascending: false })
             .limit(MAX_NOTES));

@@ -184,18 +184,24 @@ export function sanitizeContextValue(value, max = 60) {
     .trim();
 }
 
-// Cybersecurity is the only fully-authored department catalogue today (see
-// src/data/departments.js); every other department slug means 'general'
-// (foundation mode — the shared courses), and an unrecognised/missing slug
-// falls back to the full Cybersecurity catalogue, matching the frontend's
-// DEFAULT_DEPARTMENT convention.
+// One label per fully-authored department catalogue (see src/data/departments.js
+// and the DEPARTMENTS registry in _lib/courseData.js — keep the slugs in step).
+// 'general' is foundation mode, where the student's own department name comes
+// from their profile; an unrecognised/missing slug falls back to Cybersecurity,
+// matching the frontend's DEFAULT_DEPARTMENT convention.
+//
+// Each label reads naturally in both prompt positions ("a student in X" /
+// "optimised for X's curriculum"), so avoid trailing parentheticals here.
+const DEPARTMENT_LABELS = {
+  cybersecurity: 'the B.Sc. Cybersecurity programme',
+  dataScience: 'the B.Sc. Data Science programme',
+};
+
 function departmentLabelFor(departmentSlug, departmentOther) {
   if (departmentSlug === 'general') {
-    // Reads naturally in both prompt positions ("a student in X" / "optimised
-    // for X's curriculum"), so avoid trailing parentheticals here.
     return departmentOther ? `the ${departmentOther} programme` : 'their own degree programme';
   }
-  return 'the B.Sc. Cybersecurity programme';
+  return DEPARTMENT_LABELS[departmentSlug] || DEPARTMENT_LABELS.cybersecurity;
 }
 
 // Builds the STUDENT CONTEXT line for a signed-in student, enriched with their
