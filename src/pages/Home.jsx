@@ -73,8 +73,8 @@ function OnboardingBanner() {
       <div className="bg-moss/10 border border-moss/30 rounded-xl px-4 py-3 flex items-center gap-3 text-sm animate-fade-up">
         <Sparkles size={16} className="text-moss shrink-0" />
         <p className="text-ink flex-1 leading-snug">
-          <span className="font-bold">New here?</span> Pick your level below → choose a course → start learning.
-          Sign in once (free, no password) and your progress follows you on every device.
+          <span className="font-bold">New here?</span> Sign in once (free, no password) → pick your level → start learning.
+          Your progress follows you on every device.
         </p>
         <button
           onClick={dismiss}

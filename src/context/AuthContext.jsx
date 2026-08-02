@@ -1,10 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { supabase, isConfigured } from '../lib/supabase';
 
+// Default value, used only when a consumer renders outside AuthProvider. That
+// means no auth is in flight and nobody is signed in, so authLoading is false —
+// matching profileLoading beside it. Claiming `true` here would strand any such
+// consumer that waits for auth to settle (e.g. useCatalogue) on a load that
+// never completes. Inside the provider these are always the real values.
 const AuthContext = createContext({
   user: null,
   profile: null,
-  authLoading: true,
+  authLoading: false,
   profileLoading: false,
   profileComplete: false,
   authEnabled: false,

@@ -2,6 +2,7 @@
 // Consumed only by api/tutor.js — not bundled into the frontend.
 
 import { courses, getCrossDepartmentalCourses } from '../../src/data/courses.js';
+import { courses as dataScienceCourses } from '../../src/data/dataScienceCourses.js';
 
 export const COURSE_KNOWLEDGE = `
 === B.Sc. CYBERSECURITY — UNIVERSITY OF UYO — FULL COURSE CATALOGUE ===
@@ -16,7 +17,7 @@ Tips: Writing skills affect every other course. Practise timed essays (45 min). 
 MTH 111 | General Mathematics I | 2 units
 Skills: number systems (real/rational/irrational/complex), algebra, polynomials, indices, logarithms, set theory, Venn diagrams, sequences and series, permutations and combinations, limits and continuity.
 Textbooks: "Engineering Mathematics" (K.A. Stroud, 8th ed); "Further Mathematics" (Tuttuh-Adegun et al).
-Tips: Do worked examples before attempting exercises. Logarithm rules recur in cryptography — master them now. Use past exam papers.
+Tips: Do worked examples before attempting exercises. Logarithm rules recur throughout computing — master them now. Use past exam papers.
 
 PHY 111 | General Physics I | 2 units
 Skills: vectors, kinematics, Newton's laws, work-energy-power, rotational motion, oscillations, waves (mechanical, sound), thermodynamics, ideal gas laws.
@@ -30,12 +31,12 @@ Tips: Record raw data immediately; never adjust numbers in your lab book. Sig-fi
 COS 111 | Introduction to Computing Sciences | 3 units
 Skills: computer organisation (CPU, memory, I/O), number systems (binary, hex, octal, BCD), Boolean algebra, logic gates, OS concepts (process management, memory, file systems), database fundamentals (ER diagrams, SQL basics), internet basics, computer ethics.
 Textbooks: "Computer Organisation and Design" (Patterson & Hennessy); "Introduction to the Theory of Computation" (Sipser).
-Tips: Binary/hex conversion is tested in CYB and COS exams — drill it. Draw ER diagrams for database questions; examiners reward structure.
+Tips: Binary/hex conversion is tested across the computing courses — drill it. Draw ER diagrams for database questions; examiners reward structure.
 
 STA 111 | Descriptive Statistics | 3 units
 Skills: data collection and sampling, frequency distributions, histograms, measures of central tendency (mean, median, mode), measures of dispersion (variance, standard deviation, range), probability basics, correlation.
 Textbooks: "Statistics for Management" (Levin & Rubin); "Fundamentals of Statistics" (Gupta & Kapoor).
-Tips: Statistics underpins cybersecurity anomaly detection and risk quantification — treat it seriously. Learn Excel/LibreOffice Calc for data tasks.
+Tips: Statistics underpins anomaly detection, modelling and risk quantification — treat it seriously. Learn Excel/LibreOffice Calc for data tasks.
 
 UUY-CSC 111 | Computer Operations | 2 units
 Skills: Windows/Linux file management, keyboard shortcuts, Office 365 (Word, Excel, PowerPoint), OneDrive/Google Drive, cloud storage, email etiquette, internet research skills.
@@ -49,7 +50,7 @@ Tips: Disassemble and reassemble a PC at least once before the practical exam. K
 
 GST 121 | Nigerian Peoples and Culture | 2 units
 Skills: ethnic and linguistic diversity of Nigeria, pre-colonial civilisations, colonisation, federalism, governance structures, cybercrime in the Nigerian context.
-Tips: Frame answers in the cybercrime/digital-policy context to score higher — examiners appreciate applied thinking.
+Tips: Frame answers in a digital-policy or technology context to score higher — examiners appreciate applied thinking.
 
 COS 121 | Problem Solving — Python | 3 units
 Skills: algorithm design, pseudocode, flowcharts, programming fundamentals using Python 3 — variables, control flow, loops, functions, lists, dictionaries, file I/O, basic OOP.
@@ -86,7 +87,7 @@ Tips: The CIA triad is the foundation of all CYB exams. Memorise the access cont
 
 GST 212 | Philosophy, Logic and Human Existence | 2 units
 Skills: propositional logic (truth tables, connectives), argument validity, fallacies, epistemology, ethics (utilitarianism, deontology, virtue ethics), philosophy of mind, bioethics, cyberethics.
-Tips: Truth tables come up in COS 211 boolean logic. Apply ethical frameworks to cybersecurity case studies in exam essays.
+Tips: Truth tables come up in COS 211 boolean logic. Apply ethical frameworks to technology case studies in exam essays.
 
 COS 211 | Computer Programming I — Java | 3 units
 Skills: Java OOP (classes, objects, constructors, encapsulation, inheritance, polymorphism, abstraction, interfaces), exception handling, Java Collections Framework (ArrayList, HashSet, HashMap), file I/O (FileReader, FileWriter, BufferedWriter), JDBC and database connectivity, Swing GUI programming, event handling.
@@ -119,7 +120,7 @@ Tips: Every step of a pen test requires written authorisation — always state t
 
 ENT 221 | Entrepreneurship and Innovation | 2 units
 Skills: entrepreneurial mindset, opportunity identification, business model canvas, market research, competitive analysis, feasibility studies, intellectual property (patents, trademarks, copyright), startup finance, funding options (NIRSAL, NELFUND, angel investors), pitching.
-Tips: Relate all answers to technology/cybersecurity startups — it shows applied thinking. Business Model Canvas is a common exam structure question.
+Tips: Relate all answers to technology startups in your own field — it shows applied thinking. Business Model Canvas is a common exam structure question.
 
 COS 221 | Computer Programming II — Java (Advanced) | 3 units
 Skills: data structures (linked lists, stacks, queues, binary trees), algorithms (linear/binary search, bubble/selection/insertion/merge/quick sort), Big-O notation (O(1), O(log n), O(n), O(n²)), recursion depth, graph algorithms (BFS, DFS), dynamic programming introduction.
@@ -151,12 +152,12 @@ Tips: SQL injection and XSS are the most tested web vulnerabilities. Know both h
 
 GST 312 | Peace and Conflict Resolution | 2 units
 Skills: conflict theory, conflict types, negotiation and mediation, post-conflict reconstruction, information warfare, cyber conflict as a form of modern conflict, disinformation and propaganda.
-Tips: Frame answers with Nigerian/African examples. Cyber conflict questions bridge to CYB 413.
+Tips: Frame answers with Nigerian/African examples. Cyber-conflict questions bridge to the security courses.
 
 CSC 319 | Artificial Intelligence | 2 units
 Skills: state-space search (BFS, DFS, A*, heuristics), knowledge representation (predicate logic, semantic nets, frames), expert systems (inference engines, rule bases), machine learning (supervised, unsupervised, reinforcement), neural networks (perceptrons, backpropagation, activation functions), NLP basics, AI ethics and bias.
 Textbooks: "Artificial Intelligence: A Modern Approach" (Russell & Norvig, 4th ed).
-Tips: AI search algorithms are very commonly examined — trace A* step by step. AI ethics overlaps with CYB 314 and exam essays.
+Tips: AI search algorithms are very commonly examined — trace A* step by step. AI ethics recurs in later courses and in exam essays.
 
 CYB 311 | Cryptography Techniques, Algorithms and Applications | 2 units
 Skills: classical ciphers (Caesar, Vigenère, one-time pad), symmetric encryption (DES, 3DES, AES — modes: ECB, CBC, CTR, GCM), asymmetric encryption (RSA — key generation, encryption, signing), Diffie-Hellman key exchange, elliptic curve cryptography (ECC), hash functions (MD5, SHA-1, SHA-256, SHA-3), digital signatures, certificates, PKI, TLS/SSL handshake, steganography basics.
@@ -239,7 +240,7 @@ Tips: Learn to build a basic Power BI or Tableau dashboard before the practical 
 
 ENT 321 | Venture Creation | 2 units
 Skills: business plan development, company registration (CAC Nigeria, online process), funding sources (NIRSAL, NELFUND, TEF, angel investors, VCs), intellectual property for tech startups (software copyright, trade secrets, patents), growth strategies, social entrepreneurship, pitch deck design.
-Tips: Know the CAC registration process step by step — it is specifically tested. Relate every answer to a cybersecurity or tech startup context.
+Tips: Know the CAC registration process step by step — it is specifically tested. Relate every answer to a technology startup context from your own field.
 
 CYB 421 | Ethical Hacking and Reverse Engineering | 2 units
 Skills: advanced penetration testing methodology, exploit development (buffer overflow basics — stack layout, EIP control, shellcode), return-oriented programming (ROP) introduction, reverse engineering tools (Ghidra, IDA Free, x64dbg, strings, ltrace/strace), malware analysis (static: PE headers, strings, imports; dynamic: sandbox analysis, process monitor, network captures), antivirus evasion concepts, advanced post-exploitation, lateral movement, persistence mechanisms.
@@ -524,14 +525,96 @@ const normalizeCode = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
 
 // The ~22 courses shared across most University of Uyo science/engineering
 // programmes (see crossDepartmental in src/data/courses.js) — what a
-// foundation-mode (non-Cybersecurity) student's tutor should know about.
-// Only 'general' is restricted; every other slug (including an unrecognised
-// one) falls back to the full Cybersecurity catalogue, same as today.
+// foundation-mode student's tutor should know about.
 const FOUNDATION_CODES = new Set(getCrossDepartmentalCourses().map(c => normalizeCode(c.code)));
 
-function allowedCodesForDepartment(departmentSlug) {
-  return departmentSlug === 'general' ? FOUNDATION_CODES : null;
+// ─── Generated knowledge for catalogues without a hand-authored string ───────
+//
+// Cybersecurity's COURSE_KNOWLEDGE above is hand-written and richer than
+// anything derivable from the course objects, so it stays as-is. Every other
+// department renders the same format from its catalogue data instead, which
+// keeps adding a department a one-file job (see departments.js).
+
+const ROMAN_SEMESTER = { 1: 'FIRST', 2: 'SECOND' };
+
+function knowledgeBlockForCourse(course) {
+  const lines = [`${course.code} | ${course.title} | ${course.units} unit${course.units === 1 ? '' : 's'}`];
+  if (course.topics?.length) lines.push(`Skills: ${course.topics.join('; ')}.`);
+  if (course.textbooks?.length) {
+    lines.push(`Textbooks: ${course.textbooks
+      .map(t => `"${t.title}"${t.authors ? ` (${t.authors}${t.note ? ` — ${t.note}` : ''})` : ''}`)
+      .join('; ')}.`);
+  }
+  if (course.studyTips?.length) lines.push(`Tips: ${course.studyTips.join('. ')}.`);
+  return lines.join('\n');
 }
+
+// Mirrors the layout of COURSE_KNOWLEDGE exactly — a "=== title ===" line, then
+// "── LEVEL · SEMESTER (n units)" section headers with course blocks under them
+// — because extractIndexLines() and findCourseEntry() both parse that shape.
+function buildKnowledgeFromCourses(courseList, title) {
+  const sections = [];
+  for (const level of [100, 200, 300, 400]) {
+    for (const semester of [1, 2]) {
+      const inSection = courseList.filter(c => c.level === level && c.semester === semester);
+      if (!inSection.length) continue;
+      const units = inSection.reduce((sum, c) => sum + c.units, 0);
+      const header = `── ${level} LEVEL · ${ROMAN_SEMESTER[semester]} SEMESTER (${units} units) ─────────────────────`;
+      sections.push(`${header}\n\n${inSection.map(knowledgeBlockForCourse).join('\n\n')}`);
+    }
+  }
+  return [`=== ${title} ===`, ...sections].join('\n\n');
+}
+
+// ─── Department registry ─────────────────────────────────────────────────────
+//
+// One entry per department slug in src/data/departments.js. Each carries the
+// knowledge text its students' tutor may draw on and the course list its
+// lecture-note lookups may reach — so scoping falls out of which catalogue the
+// student belongs to, with no per-department branching further down.
+//
+// This registry is deliberately separate from src/data/departments.js: that
+// module's loadCatalogue() uses extensionless dynamic imports ('./courses'),
+// which Vite resolves but plain Node ESM — how these functions run — does not.
+
+const FOUNDATION_KNOWLEDGE = filterKnowledgeToCodes(COURSE_KNOWLEDGE, FOUNDATION_CODES)
+  .replace(/^===.*===/, '=== SHARED FOUNDATION COURSES — UNIVERSITY OF UYO ===');
+
+const DATA_SCIENCE_KNOWLEDGE = buildKnowledgeFromCourses(
+  dataScienceCourses,
+  'B.Sc. DATA SCIENCE — UNIVERSITY OF UYO — FULL COURSE CATALOGUE',
+);
+
+const DEPARTMENTS = {
+  cybersecurity: { knowledge: COURSE_KNOWLEDGE, courses },
+  dataScience: { knowledge: DATA_SCIENCE_KNOWLEDGE, courses: dataScienceCourses },
+  general: { knowledge: FOUNDATION_KNOWLEDGE, courses: getCrossDepartmentalCourses() },
+};
+
+const DEFAULT_DEPARTMENT = 'cybersecurity';
+
+// An unrecognised or missing slug falls back to Cybersecurity, matching the
+// frontend's DEFAULT_DEPARTMENT convention in src/data/departments.js.
+function departmentFor(departmentSlug) {
+  return DEPARTMENTS[departmentSlug] || DEPARTMENTS[DEFAULT_DEPARTMENT];
+}
+
+function effectiveSlug(departmentSlug) {
+  return DEPARTMENTS[departmentSlug] ? departmentSlug : DEFAULT_DEPARTMENT;
+}
+
+// Server-side mirror of materialsDepartmentFor() in src/data/departments.js —
+// keep the two in step, including the two-flag rule (crossDepartmental = a
+// foundation course; sharedMaterials = another department's course this one also
+// takes). A course whose object we can't resolve (in the knowledge text but not
+// the catalogue array) falls back to the department's own pool, which is the
+// conservative choice: scoped, never over-shared.
+function resolveMaterialsDepartment(course, departmentSlug) {
+  const pooled = course?.crossDepartmental || course?.sharedMaterials;
+  return pooled ? 'general' : effectiveSlug(departmentSlug);
+}
+
+export const DEPARTMENT_SLUGS = Object.keys(DEPARTMENTS);
 
 // Filters COURSE_KNOWLEDGE down to just the course blocks whose code is in
 // `allowed`, dropping any level/semester section header left with nothing
@@ -568,16 +651,19 @@ function filterKnowledgeToCodes(knowledgeText, allowed) {
   return [title, ...sections].filter(Boolean).join('\n\n');
 }
 
-// Department-scoped course index for the tutor's system prompt — a
-// Cybersecurity student (or an unrecognised department) sees the full
-// catalogue index unchanged; a foundation-mode student sees only the shared
-// courses, under a neutral title instead of the Cybersecurity one.
+// Department-scoped course index for the tutor's system prompt. Cybersecurity
+// (and any unrecognised slug) gets the full hand-authored index by identity;
+// every other department gets the index for its own catalogue, so the prompt
+// never advertises courses the student cannot take.
+const DEPARTMENT_INDEXES = Object.fromEntries(
+  Object.entries(DEPARTMENTS).map(([slug, dept]) => [
+    slug,
+    slug === DEFAULT_DEPARTMENT ? COURSE_INDEX : extractIndexLines(dept.knowledge),
+  ])
+);
+
 export function getCourseIndexForDepartment(departmentSlug) {
-  const allowed = allowedCodesForDepartment(departmentSlug);
-  if (!allowed) return COURSE_INDEX;
-  const scoped = filterKnowledgeToCodes(COURSE_KNOWLEDGE, allowed)
-    .replace(/^===.*===/, '=== SHARED FOUNDATION COURSES — UNIVERSITY OF UYO ===');
-  return extractIndexLines(scoped);
+  return DEPARTMENT_INDEXES[departmentSlug] || DEPARTMENT_INDEXES[DEFAULT_DEPARTMENT];
 }
 
 // One line per module ("Module NN | Title") under track headers.
@@ -590,24 +676,33 @@ export const MODULE_INDEX = MODULE_KNOWLEDGE
   )
   .join('\n');
 
-// courses.js is the single source of truth for lecture-note content (it's what
-// LectureNotes.jsx renders on the course page) — read it directly rather than
-// hand-copying notes into a second knowledge base here, which drifts the
-// moment someone edits courses.js and forgets the copy.
+// The department catalogues are the single source of truth for lecture-note
+// content (they're what LectureNotes.jsx renders on the course page) — read
+// them directly rather than hand-copying notes into a second knowledge base
+// here, which drifts the moment someone edits a catalogue and forgets the copy.
 //
-// A few course codes are duplicated in courses.js (e.g. "CYB 311" is both
+// A few course codes are duplicated within a catalogue (e.g. "CYB 311" is both
 // Cryptography and SIWES I). For note lookup, an entry that actually HAS
 // lecture notes wins over one that doesn't — otherwise plain insertion order
 // could resolve "CYB 311" to the notes-less sibling and silently drop real
 // notes once they're added.
-const courseByNormalizedCode = new Map();
-for (const c of courses) {
-  const key = normalizeCode(c.code);
-  const existing = courseByNormalizedCode.get(key);
-  if (!existing || (!existing.lectureNotes?.length && c.lectureNotes?.length)) {
-    courseByNormalizedCode.set(key, c);
+function buildNoteIndex(courseList) {
+  const byCode = new Map();
+  for (const c of courseList) {
+    const key = normalizeCode(c.code);
+    const existing = byCode.get(key);
+    if (!existing || (!existing.lectureNotes?.length && c.lectureNotes?.length)) {
+      byCode.set(key, c);
+    }
   }
+  return byCode;
 }
+
+// One note index per department, so a student only ever resolves notes for a
+// course their own catalogue actually carries.
+const DEPARTMENT_NOTE_INDEXES = Object.fromEntries(
+  Object.entries(DEPARTMENTS).map(([slug, dept]) => [slug, buildNoteIndex(dept.courses)])
+);
 
 function lectureNoteItemLine(item) {
   if (item && typeof item === 'object') return item.def ? `${item.term} — ${item.def}` : String(item.term ?? '');
@@ -693,16 +788,19 @@ function lectureNotesText(course) {
 // block to take a canonical code from). Returns null when nothing matches.
 //
 // departmentSlug scopes the result to that department's catalogue (see
-// getCourseIndexForDepartment) — a foundation-mode student asking about a
-// Cybersecurity-only course (e.g. "CYB 311") gets null, same as an unknown
-// code, rather than an answer for a course outside their programme. Omit it
-// (or pass 'cybersecurity'/anything else) for the full, unrestricted catalogue.
+// getCourseIndexForDepartment) — a foundation-mode or Data Science student
+// asking about a Cybersecurity-only course (e.g. "CYB 311") gets null, same as
+// an unknown code, rather than an answer for a course outside their programme.
+// Scoping is structural: each department searches only its own knowledge text
+// and its own note index, so there is nothing to filter out afterwards. Omit
+// the slug (or pass an unrecognised one) for the full Cybersecurity catalogue.
 export function findCourseEntry(courseCode, departmentSlug) {
   const target = normalizeCode(courseCode);
   if (!target) return null;
-  const allowed = allowedCodesForDepartment(departmentSlug);
+  const department = departmentFor(departmentSlug);
+  const noteIndex = DEPARTMENT_NOTE_INDEXES[departmentSlug] || DEPARTMENT_NOTE_INDEXES[DEFAULT_DEPARTMENT];
 
-  const blocks = COURSE_KNOWLEDGE.split(/\n\n+/).filter(b => b.includes('|'));
+  const blocks = department.knowledge.split(/\n\n+/).filter(b => b.includes('|'));
   const firstLineCode = (block) => block.trim().split('\n')[0].split('|')[0].trim();
   const codeOf = (block) => normalizeCode(firstLineCode(block));
 
@@ -712,17 +810,15 @@ export function findCourseEntry(courseCode, departmentSlug) {
   // course "UUY-CYB 222".
   let matches = blocks.filter(b => codeOf(b) === target);
   if (!matches.length) matches = blocks.filter(b => codeOf(b).endsWith(target));
-  if (allowed) matches = matches.filter(b => allowed.has(codeOf(b)));
 
   // Same exact-then-suffix precedence as the catalogue block match above, so
   // "CYB 222" resolves lecture notes for CYB 222 and not UUY-CYB 222.
-  let courseObj = courseByNormalizedCode.get(target);
+  let courseObj = noteIndex.get(target);
   if (!courseObj) {
-    for (const [code, c] of courseByNormalizedCode) {
+    for (const [code, c] of noteIndex) {
       if (code.endsWith(target)) { courseObj = c; break; }
     }
   }
-  if (allowed && courseObj && !allowed.has(normalizeCode(courseObj.code))) courseObj = null;
   const notes = courseObj ? lectureNotesText(courseObj) : '';
 
   if (!matches.length && !notes) return null;
@@ -732,7 +828,15 @@ export function findCourseEntry(courseCode, departmentSlug) {
     notes && `LECTURE NOTES (authoritative, from the lecturer):\n${notes}`,
   ].filter(Boolean).join('\n\n');
 
-  return { code: matches.length ? firstLineCode(matches[0]) : (courseObj?.code ?? null), outline };
+  return {
+    code: matches.length ? firstLineCode(matches[0]) : (courseObj?.code ?? null),
+    outline,
+    // Which course_materials pool this course's uploads live in — mirrors
+    // materialsDepartmentFor() in src/data/departments.js. Resolved from the
+    // catalogue entry rather than the student, so a shared course reads the
+    // same pooled notes whichever programme is asking.
+    materialsDepartment: resolveMaterialsDepartment(courseObj, departmentSlug),
+  };
 }
 
 // Full catalogue entry text for one course code, plus uploaded lecture notes

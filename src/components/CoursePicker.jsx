@@ -8,12 +8,18 @@ import { useAuth } from '../context/AuthContext';
 // match their own programme, instead of always seeing every course for their
 // level. An empty/cleared selection saves `null`, which means "auto — show
 // everything for my level", matching today's behaviour for everyone else.
-export default function CoursePicker({ catalogue }) {
+//
+// Collapses to a one-line summary once a selection exists (or has just been
+// saved), rather than showing the full checkbox wall on every visit —
+// `onSaved(count)` lets the Course Hub react too (e.g. switch on its "My
+// courses" filter) so saving visibly does something.
+export default function CoursePicker({ catalogue, onSaved }) {
   const { user, profile, refreshProfile } = useAuth();
   const [selected, setSelected] = useState(() => new Set(profile?.selected_courses ?? []));
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [expanded, setExpanded] = useState(() => !(profile?.selected_courses?.length > 0));
 
   const groups = useMemo(() => {
     const byLevel = new Map();
@@ -52,6 +58,10 @@ export default function CoursePicker({ catalogue }) {
         return;
       }
       setSaved(true);
+      // Collapse back to the summary only on a confirmed save — an error
+      // above returns before this, so the picker stays open to retry.
+      setExpanded(false);
+      onSaved?.(list?.length ?? 0);
       await refreshProfile();
     } catch {
       setError('Could not save your courses — check your connection and try again.');
@@ -63,11 +73,31 @@ export default function CoursePicker({ catalogue }) {
   const save = () => persist(selected.size ? Array.from(selected) : null);
   const showEverything = () => { setSelected(new Set()); persist(null); };
 
+  if (!expanded) {
+    return (
+      <div className="bg-paper border border-coffee-200 rounded-2xl p-6 flex items-center justify-between gap-4">
+        <div>
+          <h3 className="font-display font-bold text-ink mb-1">My courses</h3>
+          <p className="text-sm text-coffee-700">
+            {selected.size > 0
+              ? `You've pinned ${selected.size} course${selected.size !== 1 ? 's' : ''} for your programme.`
+              : 'Showing every foundation course for your level — nothing pinned yet.'}
+            {saved && <span className="text-moss ml-2">Saved.</span>}
+          </p>
+        </div>
+        <button type="button" onClick={() => setExpanded(true)} className="btn-ghost text-sm shrink-0">
+          Edit
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-paper border border-coffee-200 rounded-2xl p-6">
       <h3 className="font-display font-bold text-ink mb-1">My courses</h3>
       <p className="text-xs text-coffee-600 leading-relaxed max-w-lg mb-5">
-        Tick the courses that match your own programme, so Areté and your study planner focus on
+        <span className="font-medium text-coffee-700">Optional — </span>
+        tick the courses that match your own programme, so Areté and your study planner focus on
         just those. Leave nothing ticked to keep seeing every foundation course for your level.
       </p>
 
@@ -118,7 +148,6 @@ export default function CoursePicker({ catalogue }) {
         <button type="button" onClick={showEverything} disabled={saving} className="btn-ghost text-sm">
           Show everything instead
         </button>
-        {saved && !error && <span className="text-xs text-moss">Saved.</span>}
       </div>
 
       {error && (

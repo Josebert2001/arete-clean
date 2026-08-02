@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap } from 'lucide-react';
 import { useCatalogue } from '../data/useCatalogue';
+import { materialsDepartmentFor } from '../data/departments';
 import LectureNotes from '../components/LectureNotes';
 import CourseQuiz from '../components/CourseQuiz';
 import CourseMaterials from '../components/CourseMaterials';
@@ -15,6 +16,9 @@ const subjectStyles = {
   cyb:   { codeBg: 'bg-rust',       codeText: 'text-cream' },
   math:  { codeBg: 'bg-moss',       codeText: 'text-cream' },
   stats: { codeBg: 'bg-ember-500',  codeText: 'text-cream' },
+  // Kept in step with the same map in Courses.jsx — see the note there on why
+  // Data Science shares the statistics colour.
+  dts:   { codeBg: 'bg-ember-500',  codeText: 'text-cream' },
   gst:   { codeBg: 'bg-coffee-700', codeText: 'text-cream' },
   phy:   { codeBg: 'bg-moss',       codeText: 'text-cream' },
   sen:   { codeBg: 'bg-ink',        codeText: 'text-cream' },
@@ -26,7 +30,7 @@ const subjectStyles = {
 
 export default function CourseDetail() {
   const { slug } = useParams();
-  const { catalogue, status } = useCatalogue();
+  const { catalogue, department, status } = useCatalogue();
   const course = catalogue?.getCourseBySlug(slug);
   const [activeTab, setActiveTab] = useState('resources');
 
@@ -82,9 +86,16 @@ export default function CourseDetail() {
   const hasNotes = course.lectureNotes?.length > 0;
   const hasQuiz = course.quiz?.length > 0;
 
-  // Which outline topics the lecture notes actually reach. A note topic opts in
-  // with `covers: [n]` (fully) or `partial: [n]` (touched only). Courses whose
-  // notes declare neither produce an empty map and render as they always have.
+  // Which outline topics the lecture notes actually reach, as 1-based indices
+  // into `course.topics`: `covers` (fully) or `partial` (touched only).
+  //
+  // Those indices belong to the *course*, not to the notes — a note file is
+  // shared verbatim between department catalogues (see departments.js) while
+  // each department writes its own `topics` array, so one set of indices cannot
+  // be right for both. A course whose notes are shared therefore carries its own
+  // `noteCoverage` map, keyed by note number; notes used by a single catalogue
+  // still declare `covers`/`partial` inline. Declaring neither produces an empty
+  // map and renders as it always has.
   const topicCoverage = new Map();
   (course.lectureNotes || []).forEach((note) => {
     const mark = (n, level) => {
@@ -93,8 +104,9 @@ export default function CourseDetail() {
       if (level === 'full') entry.level = 'full';
       topicCoverage.set(n, entry);
     };
-    (note.covers || []).forEach(n => mark(n, 'full'));
-    (note.partial || []).forEach(n => mark(n, 'partial'));
+    const source = course.noteCoverage?.[note.number] ?? note;
+    (source.covers || []).forEach(n => mark(n, 'full'));
+    (source.partial || []).forEach(n => mark(n, 'partial'));
   });
 
   return (
@@ -205,7 +217,11 @@ export default function CourseDetail() {
       {/* Materials tab */}
       {activeTab === 'materials' && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
-          <CourseMaterials courseCode={course.code} courseSlug={slug} />
+          <CourseMaterials
+            courseCode={course.code}
+            courseSlug={slug}
+            department={materialsDepartmentFor(course, department?.slug)}
+          />
         </div>
       )}
 

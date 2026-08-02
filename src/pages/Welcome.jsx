@@ -1,8 +1,8 @@
 import { Link, Navigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, BrainCircuit, CalendarDays, CloudUpload, Code2 } from 'lucide-react';
+import { ArrowRight, BrainCircuit, CalendarDays, CloudUpload, Code2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { getDepartment, YEAR_LEVELS } from '../data/departments';
+import { findDepartmentByName, getDepartment, YEAR_LEVELS } from '../data/departments';
 
 export default function Welcome() {
   usePageTitle('Welcome');
@@ -24,7 +24,7 @@ export default function Welcome() {
   const firstName = profile.full_name.split(' ')[0];
   // Read from the lightweight department registry, never useCatalogue: Welcome
   // is a one-time hand-off screen shown once right after signup, and pulling
-  // the ~800 kB course catalogue here would cost every new student that
+  // the student's whole course catalogue here would cost every new student that
   // download for decoration. The real course list is one click away on
   // /courses, which needs the catalogue anyway.
   const department = getDepartment(profile.department);
@@ -33,6 +33,10 @@ export default function Welcome() {
   const journeyLabel = isFoundation
     ? (ownDepartment || 'academic')
     : department.degree || department.name;
+  // A foundation student whose typed department has since been authored — the
+  // whole point of capturing department_other. Offer the switch; never perform
+  // it for them, since it resets their pinned courses.
+  const nowAvailable = isFoundation ? findDepartmentByName(ownDepartment) : null;
   // "100L" → 100, for a deep link straight into their own year on the Course
   // Hub. Derived from the profile alone, so it costs nothing — unlike naming
   // the actual courses, which would need the catalogue.
@@ -45,17 +49,17 @@ export default function Welcome() {
   const levelNumber = parseInt(String(profile.level ?? ''), 10);
   const hasLevelLink = YEAR_LEVELS.includes(levelNumber);
 
+  // One primary next step, chosen by department status, instead of four
+  // equally-weighted quick links competing for a confused new student's first
+  // click. Foundation students go pick which shared courses match their
+  // programme; everyone else goes straight to their own year.
+  const primaryCta = isFoundation
+    ? { to: '/courses', label: "Pick your programme's courses" }
+    : hasLevelLink
+      ? { to: `/courses?level=${levelNumber}`, label: `See your ${profile.level} courses` }
+      : { to: '/courses', label: 'Browse your courses' };
+
   const quickLinks = [
-    {
-      to: '/courses',
-      icon: BookOpen,
-      label: 'Browse Courses',
-      // Promising a "full curriculum" to a foundation student contradicts the
-      // note directly below this card — they have the shared courses only.
-      desc: isFoundation
-        ? 'The foundation courses shared across programmes — pick the ones you take.'
-        : 'Your full curriculum — every course from 100L to 400L.',
-    },
     {
       to: '/tutor',
       icon: BrainCircuit,
@@ -90,11 +94,14 @@ export default function Welcome() {
         <h1 className="font-display text-5xl sm:text-6xl font-bold text-ink mb-5 leading-none tracking-tight">
           {firstName}.
         </h1>
-        <p className="text-lg text-coffee-700 leading-relaxed max-w-lg">
+        <p className="text-lg text-coffee-700 leading-relaxed max-w-lg mb-8">
           You're all set. Areté is here for every course, every concept, and every late-night
           debugging session across your{' '}
           <span className="font-semibold text-ink">{journeyLabel} journey</span>.
         </p>
+        <Link to={primaryCta.to} className="btn-primary text-sm inline-flex items-center gap-1.5">
+          {primaryCta.label} <ArrowRight size={14} />
+        </Link>
       </div>
 
       {/* Profile card */}
@@ -102,38 +109,48 @@ export default function Welcome() {
         <div className="flex items-start justify-between gap-4 p-5 bg-ink/[0.02] border-b border-coffee-100">
           <div>
             <p className="font-semibold text-ink">{profile.full_name}</p>
-            <p className="text-xs font-mono text-coffee-600 mt-1">{profile.reg_number}</p>
+            {profile.reg_number && (
+              <p className="text-xs font-mono text-coffee-600 mt-1">{profile.reg_number}</p>
+            )}
           </div>
           <span className="text-xs font-mono px-3 py-1.5 bg-ink text-cream rounded-full font-semibold shrink-0 mt-0.5">
             {profile.level}
           </span>
         </div>
 
-        {/* Foundation students get the picker link below instead — a second
-            route into /courses here would just be redundant. */}
+        {/* The link into /courses now lives in the primary CTA above — this is
+            just context for the profile card, not a second route in. */}
         {!isFoundation && hasLevelLink && (
           <div className="px-5 py-4">
-            <p className="text-xs text-coffee-600 leading-relaxed mb-2">
+            <p className="text-xs text-coffee-600 leading-relaxed">
               Your {profile.level} topic outlines, textbooks, and exam tips are ready.
             </p>
-            <Link
-              to={`/courses?level=${levelNumber}`}
-              className="text-xs font-medium text-moss hover:text-ink transition-colors"
-            >
-              See your {profile.level} courses →
-            </Link>
           </div>
         )}
 
-        {isFoundation && (
+        {isFoundation && !nowAvailable && (
           <div className="px-5 py-4">
-            <p className="text-xs text-coffee-600 leading-relaxed mb-2">
+            <p className="text-xs text-coffee-600 leading-relaxed">
               <span className="font-medium text-coffee-700">Foundation mode: </span>
               You have all 4 interactive tracks and the courses shared across University of Uyo
               programmes. Your full {ownDepartment || 'department'} curriculum is on the way.
             </p>
-            <Link to="/courses" className="text-xs font-medium text-moss hover:text-ink transition-colors">
-              Pick the courses that match your programme →
+          </div>
+        )}
+
+        {isFoundation && nowAvailable && (
+          <div className="px-5 py-4">
+            <p className="text-xs text-coffee-600 leading-relaxed mb-3">
+              <span className="font-medium text-ink">Your curriculum is ready. </span>
+              {nowAvailable.degree || nowAvailable.name} is now fully authored on Areté — switch to
+              it for all your own courses instead of the shared foundation list. Your track
+              progress and quiz scores carry over.
+            </p>
+            <Link
+              to="/profile"
+              className="text-xs font-semibold text-ink underline underline-offset-2 hover:text-coffee-700 transition-colors inline-flex items-center gap-1"
+            >
+              Switch to {nowAvailable.name} <ArrowRight size={12} />
             </Link>
           </div>
         )}
@@ -147,7 +164,7 @@ export default function Welcome() {
       {/* Quick links */}
       <div className="mb-12">
         <p className="text-xs font-medium text-coffee-500 uppercase tracking-wider mb-4">
-          Where to start
+          Also inside Areté
         </p>
         <div className="space-y-3">
           {quickLinks.map(({ to, icon: Icon, label, desc }) => (

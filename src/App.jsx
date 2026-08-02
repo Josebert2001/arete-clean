@@ -21,6 +21,7 @@ const Cheatsheet = lazy(() => import('./pages/Cheatsheet'));
 const Planner = lazy(() => import('./pages/Planner'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SetupProfile = lazy(() => import('./pages/SetupProfile'));
+const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
 const Welcome = lazy(() => import('./pages/Welcome'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -212,6 +213,7 @@ export default function App() {
             <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
+            <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />

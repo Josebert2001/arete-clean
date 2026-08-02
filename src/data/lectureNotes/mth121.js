@@ -17,9 +17,12 @@
 // the exception — the workbook's closing tutorial set, which spans all five
 // units and so declares no `covers`/`partial` of its own.
 //
-// `covers` / `partial` refer to 1-based indices in the course's `topics` array
-// in courses.js. Unit One is groundwork plus the "limits, continuity" half of
-// syllabus item 2 — the derivative half arrives with Unit Two.
+// Which syllabus items each unit reaches is NOT recorded here. This file is
+// imported verbatim by every department that takes MTH 121, and each department
+// writes its own `topics` array, so a single set of indices cannot be right for
+// all of them — it silently pointed Data Science students at the Cybersecurity
+// outline. The mapping lives on each course instead, as `noteCoverage` keyed by
+// the unit numbers below (see courses.js / dataScienceCourses.js).
 //
 // Maths is written as LaTeX, exactly as the workbook's own source had it:
 // $...$ for inline expressions, and `math` sections for display equations.
@@ -53,9 +56,6 @@ export const mth121LectureNotes = [
   {
     number: '1',
     title: 'Unit One — Introduction: Functions, Limits and Continuity',
-    // §1.1 is groundwork for the syllabus rather than an outline item of its
-    // own; §1.2–1.3 are the "limits, continuity" half of syllabus item 2.
-    partial: [2],
     sections: [
       {
         type: 'definition',
@@ -120,15 +120,27 @@ export const mth121LectureNotes = [
         type: 'text',
         text: 'Multiply the inequality by $(x+1)^2$ and simplify to get:',
       },
-      { type: 'math', tex: '(x+1)(x-3) \\geq 0 \\iff x+1 > 0 \\text{ and } x-3 \\geq 0' },
+      { type: 'math', tex: '(x+1)(x-3) \\geq 0' },
+      {
+        type: 'text',
+        text: 'A product is non-negative exactly when its two factors share a sign, so there are two cases to take. Throughout, $x = -1$ stays excluded — it makes the original denominator zero.',
+      },
       {
         type: 'math',
-        tex: 'x+1 < 0 \\text{ and } x-3 \\leq 0 \\iff x > -1 \\text{ and } x \\geq 3 \\text{ or } x < -1 \\text{ and } x \\leq 3',
+        tex: '\\text{Case 1: } x+1 > 0 \\;\\text{ and }\\; x-3 \\geq 0 \\iff x > -1 \\;\\text{ and }\\; x \\geq 3 \\iff x \\geq 3',
+      },
+      {
+        type: 'math',
+        tex: '\\text{Case 2: } x+1 < 0 \\;\\text{ and }\\; x-3 \\leq 0 \\iff x < -1 \\;\\text{ and }\\; x \\leq 3 \\iff x < -1',
       },
       {
         type: 'math',
         tex: '\\therefore \\{x < -1\\} \\cup \\{x \\geq 3\\}',
         caption: 'or, in interval notation, (−∞, −1) ∪ [3, ∞)',
+      },
+      {
+        type: 'note',
+        text: 'The manual runs both cases together across two lines without the word "or" between them, which makes it read as one broken chain of equivalences. The two cases are separated here; the answer is the manual\'s own.',
       },
 
       {
@@ -306,10 +318,6 @@ export const mth121LectureNotes = [
   {
     number: '2',
     title: 'Unit Two — Differentiation',
-    // The whole of syllabus item 3 (product, quotient, chain). It also closes
-    // out item 2: Unit One did "limits, continuity", this unit does "the
-    // derivative", so between them the item is fully covered.
-    covers: [2, 3],
     sections: [
       {
         type: 'definition',
@@ -379,7 +387,10 @@ export const mth121LectureNotes = [
       },
       {
         type: 'note',
-        text: 'The printed manual (p.10) mistypes the chain rule as $\\frac{du}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}$. The left-hand side should be $\\frac{dy}{dx}$, as in the table above.',
+        items: [
+          'The printed manual (p.10) mistypes the chain rule as $\\frac{du}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}$. The left-hand side should be $\\frac{dy}{dx}$, as in the table above.',
+          'Throughout this manual $\\log$ means the natural logarithm — that is why the table gives $\\frac{d}{dx}(\\log x) = \\frac{1}{x}$, and why Example 16 below differentiates $\\log(x^2+1)$ to $\\frac{2x}{x^2+1}$. If $\\log$ meant $\\log_{10}$, every one of those answers would carry an extra factor of $\\frac{1}{\\ln 10}$. Read $\\log$ as $\\ln$ here, and check which convention any other textbook is using before you copy a result across.',
+        ],
       },
 
       {
@@ -641,9 +652,6 @@ export const mth121LectureNotes = [
   {
     number: '3',
     title: 'Unit Three — Extrema',
-    // Syllabus item 4, "applications of derivatives": max/min throughout, plus
-    // the projectile rate problem in Example 4. Tangents were Unit Two.
-    covers: [4],
     sections: [
       {
         type: 'definition',
@@ -882,10 +890,6 @@ export const mth121LectureNotes = [
   {
     number: '4',
     title: 'Unit Four — Integration',
-    // Syllabus items 5 and 6 in full: the indefinite and definite integral,
-    // then substitution, trigonometric substitution, partial fractions and
-    // integration by parts.
-    covers: [5, 6],
     sections: [
       {
         type: 'definition',
@@ -978,7 +982,11 @@ export const mth121LectureNotes = [
         type: 'text',
         text: 'When $n = -1$, $\\int x^n dx$ becomes $\\int x^{-1}dx$, which is $\\int \\frac{1}{x} dx$. Since $\\frac{d}{dx}(\\ln x) = \\frac{1}{x}$:',
       },
-      { type: 'math', tex: '\\int \\frac{1}{x} dx = \\ln x + c' },
+      { type: 'math', tex: '\\int \\frac{1}{x} dx = \\ln|x| + c' },
+      {
+        type: 'note',
+        text: 'The manual prints this as $\\ln x + c$, without the absolute value. $\\ln x$ is only defined for $x > 0$, while $\\frac{1}{x}$ is defined for every $x \\neq 0$, so the antiderivative is $\\ln|x|$ — which is how the manual itself writes it once it reaches partial fractions in Examples 11 and 12. Write the bars.',
+      },
 
       {
         type: 'text',
@@ -1033,7 +1041,7 @@ export const mth121LectureNotes = [
         type: 'text',
         text: 'Solution: let $u = \\ln x$, so $du = \\frac{1}{x} dx$. Hence:',
       },
-      { type: 'math', tex: '\\int \\frac{du}{u} = \\ln u = \\ln(\\ln x) + c' },
+      { type: 'math', tex: '\\int \\frac{du}{u} = \\ln|u| = \\ln|\\ln x| + c' },
 
       {
         type: 'text',
@@ -1304,9 +1312,6 @@ export const mth121LectureNotes = [
   {
     number: '5',
     title: 'Unit Five — Application of Integration to Areas and Volumes',
-    // Syllabus item 7 in full: area under a curve, area between curves, and
-    // volumes of revolution by the disc and shell methods.
-    covers: [7],
     sections: [
       {
         type: 'definition',
@@ -1499,9 +1504,9 @@ export const mth121LectureNotes = [
     number: '6',
     title: 'Tutorial Questions — whole-course revision',
     // Not a workbook unit: the closing question set, spanning units one to
-    // five. Left without `covers`/`partial` deliberately — these are practice
-    // problems, not teaching material, so they should not mark any outline
-    // item as taught.
+    // five. Deliberately left out of every course's `noteCoverage` — these are
+    // practice problems, not teaching material, so they should not mark any
+    // outline item as taught.
     sections: [
       {
         type: 'text',
