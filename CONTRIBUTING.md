@@ -31,7 +31,7 @@ npm run lint         # ESLint
 
 | Layer | What |
 |-------|------|
-| Frontend | React 18, React Router v6, Tailwind, Vite |
+| Frontend | React 18, React Router v7, Tailwind, Vite |
 | Backend | Vercel serverless functions in `api/` (Node ESM) |
 | Auth + DB | Supabase (email OTP, Postgres with RLS) |
 | AI | Groq (`openai/gpt-oss-120b`) via Vercel AI SDK, streaming |

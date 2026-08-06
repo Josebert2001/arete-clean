@@ -189,7 +189,7 @@ Server-side functions forward the user's Bearer token so Row Level Security appl
 
 ## Tech stack
 
-React 18 · React Router v6 · Vite · Tailwind CSS (custom theme, dark mode) · Vercel serverless functions (Node ESM) · Vercel AI SDK (Gemini / Groq / OpenRouter fallback chain) · Supabase (auth, Postgres, storage) · JDoodle · Sentry · Lucide Icons
+React 18 · React Router v7 · Vite · Tailwind CSS (custom theme, dark mode) · Vercel serverless functions (Node ESM) · Vercel AI SDK (Gemini / Groq / OpenRouter fallback chain) · Supabase (auth, Postgres, storage) · JDoodle · Sentry · Lucide Icons
 
 ---
 

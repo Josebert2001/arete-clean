@@ -8,7 +8,7 @@ It is multi-department. Two departments have fully-authored catalogues — **Cyb
 **Department catalogues are standalone** — they do NOT import each other's course lists. The overlap between programmes is smaller than it looks (Data Science takes GST 211/311 and MTH 211/212/223 where Cybersecurity takes GST 212/312), and each department frames its shared courses for its own students; cross-importing would also drag one department's whole payload into another's chunk. The single exception is **lecture notes**: those are transcribed from the lecturer's workbook, so every catalogue imports the one copy in `src/data/lectureNotes/`.
 
 ## Stack
-- **Frontend:** React 18, React Router v6, Tailwind CSS (custom theme), Vite (port 5173)
+- **Frontend:** React 18, React Router v7, Tailwind CSS (custom theme), Vite (port 5173)
 - **Backend:** Vercel serverless functions in `api/` (Node.js ESM)
 - **Auth + DB:** Supabase (email OTP, PostgreSQL — profiles + user_progress + course_materials tables)
 - **AI:** Groq API via Vercel AI SDK (`openai/gpt-oss-120b`), streaming responses
