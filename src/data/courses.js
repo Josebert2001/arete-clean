@@ -336,12 +336,15 @@ export const courses = [
     // textbook (May 2024) — see src/data/lectureNotes/gst121.js for provenance
     // and the full 17-chapter table of contents.
     lectureNotes: gst121LectureNotes,
-    // Chapter 1 is the only chapter transcribed so far. It fully covers the 3Rs
-    // and national orientation strategies, and touches the Civil War and the
-    // indigenization/self-reliance material. Kept here rather than in the shared
-    // note file because Data Science takes GST 121 against its own outline.
+    // Chapters 1–2 are the only ones transcribed so far. Chapter 1 fully covers
+    // the 3Rs and national orientation strategies, and touches the Civil War
+    // and the indigenization/self-reliance material; Chapter 2 fully covers the
+    // apprenticeship strand of the trade/self-reliance topic. Kept here rather
+    // than in the shared note file because Data Science takes GST 121 against
+    // its own outline.
     noteCoverage: {
       1: { covers: [8], partial: [4, 5] },
+      2: { covers: [5] },
     },
   },
   {

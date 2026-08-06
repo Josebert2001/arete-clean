@@ -4,13 +4,13 @@
 // Dr. Steiner B. Ifekwe and Dr. Esin O. Eminue, published by the Directorate of
 // General Studies (GST), University of Uyo, May 2024 (ISBN 978-978-45189-6-1).
 //
-// The textbook is 17 chapters by 17 different departmental contributors. Only
-// Chapter 1 has been transcribed so far; the remaining chapters are listed
-// below so a later pass can slot in against the same numbering (topic number =
-// chapter number):
+// The textbook is 17 chapters by 17 different departmental contributors.
+// Chapters 1–2 have been transcribed so far; the remaining chapters are
+// listed below so a later pass can slot in against the same numbering (topic
+// number = chapter number):
 //
 //    1  The 3Rs Policy and Reorientation Strategies in Nigeria: 1970–1975  ✅
-//    2  Apprenticeship System in Nigeria: Challenges and Future Prospects
+//    2  Apprenticeship System in Nigeria: Challenges and Future Prospects  ✅
 //    3  Basic Nigerian Norms and Value System
 //    4  Citizenship and Civic Responsibilities
 //    5  Linguistic Groups in Nigeria and Indigenous Language Usage
@@ -295,6 +295,198 @@ export const gst121LectureNotes = [
           'The Political Economy of Nigeria. New York: Praeger, 1983.',
           'Uche, Chibuike. "British Government, British Business and the Nigerian Indigenization Exercise in Post-Independence Nigeria." Business History Review, Vol. 86, No. 4, pp. 745–771.',
           'Ukaogo, Victor. "Gowon’s Three Rs and Yar’Adua’s General Amnesty: An Analysis of Policy Failures, Security Challenges and Consequences in the West African Atlantic Seaboard." researchgate.net, 2020. Accessed April 2024.',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  //  CHAPTER 2 — APPRENTICESHIP SYSTEM IN NIGERIA
+  // ─────────────────────────────────────────────────────────────────
+  {
+    number: '2',
+    title: 'Apprenticeship System in Nigeria: Challenges and Future Prospects',
+    sections: [
+      {
+        type: 'text',
+        text: 'Chapter 2, by Paul A. Etifit, Ph.D. and Abasienie S. Bassey, Ph.D. It surveys apprenticeship as a system of skill acquisition and knowledge transfer, traces its history and the leading ethnic-group traditions in Nigeria, then sets out the challenges facing Nigerian apprenticeship today and prospects for its future.',
+      },
+
+      {
+        type: 'definition',
+        heading: 'What Is Apprenticeship?',
+        text: 'Apprenticeship is a structured form of vocational training in which an apprentice acquires practical skills and knowledge from an experienced mentor or master craftsman within a specific trade or profession, through a combination of on-the-job learning and formal instruction. Scott (2010) describes it as a dual approach combining supervised practical training with related theoretical education; Bandura (1977) frames it as the acquisition of complex skills and norms under the guidance of skilled performers; and Seely Brown and Duguid (1991) describe it as mastery achieved through hands-on experience and interaction with domain experts. Taken together, these accounts treat apprenticeship as a cultural practice: novices take part in meaningful tasks under the guidance of experienced community members, developing expertise while specialised knowledge is transmitted to the next generation.',
+      },
+
+      {
+        type: 'termlist',
+        heading: 'Key Elements of Apprenticeship',
+        items: [
+          { term: 'Structured learning experience', def: 'A learning programme designed to impart the skills and competencies of a particular craft or profession, tailored to industry needs and combining theory with practice.' },
+          { term: 'Mentorship and guidance', def: 'The relationship between apprentice and master craftsman, who acts as role model, instructor and source of personalised feedback throughout training.' },
+          { term: 'Hands-on training', def: 'Learning by doing — apprentices engage directly in the tasks of the trade under supervision, developing proficiency through repeated practice and real-world exposure.' },
+          { term: 'Progression and skill development', def: 'Apprentices gain proficiency gradually, taking on more complex tasks and responsibilities as they demonstrate competence.' },
+          { term: 'Cultural and socio-economic context', def: 'Apprenticeship is embedded in the traditions, values and community practices of a region or ethnic group, and plays a role in preserving cultural heritage.' },
+        ],
+      },
+
+      {
+        type: 'termlist',
+        heading: 'Objectives and Benefits of Apprenticeship',
+        items: [
+          { term: 'Skill acquisition and employability', def: 'Equips apprentices with practical skills that prepare them for entry-level employment or self-employment.' },
+          { term: 'Promotion of craftsmanship and artisanship', def: 'Preserves and promotes traditional craftsmanship by passing down specialised knowledge and techniques.' },
+          { term: 'Career development and professionalism', def: 'Gives apprentices a structured pathway from novice to skilled practitioner, fostering commitment to quality standards.' },
+          { term: 'Economic growth and industry development', def: 'Addresses skills shortages, and skilled apprentices contribute to productivity, entrepreneurship and competitiveness.' },
+          { term: 'Social inclusion and community engagement', def: 'Gives marginalised groups, including youth, access to training and employment, often supported by strong community networks.' },
+        ],
+      },
+
+      {
+        type: 'text',
+        heading: 'Apprenticeship in Nigeria',
+        text: 'Apprenticeship in Nigeria is a diverse, culturally rich tradition that varies across ethnic groups and regions. Among the Hausa-Fulani, apprentices are mentored by experienced artisans in trades such as leatherwork, blacksmithing and traditional medicine; the system, though influenced by Western education introduced in the colonial period, remains vital to vocational training and economic sustainability in the north. Among the Yoruba, apprenticeship emphasises creativity and innovation alongside the preservation of traditional crafts — weaving, pottery and metalwork — promoting self-employment and cultural heritage in the south-west. In Igbo communities, apprenticeship emphasises self-reliance and entrepreneurship, contributing to economic empowerment and the preservation of indigenous crafts in the south-east. Across all these traditions, efforts to formalise apprenticeship training and integrate it with modern education are ongoing, and apprenticeship remains a cornerstone of cultural heritage and economic sustainability despite pressures such as urban migration and competition from modern industry.',
+      },
+
+      {
+        type: 'text',
+        heading: 'Historical Roots',
+        text: 'Apprenticeship in Nigeria predates colonialism and is deeply rooted in indigenous socio-economic systems, with each ethnic group developing traditions suited to its own local context and economic activities. During the colonial era, Western education systems introduced by European colonisers reshaped apprenticeship, but the practice persisted in rural areas and communities where tradition remained resilient — evidence of how adaptable apprenticeship is, evolving while retaining its cultural authenticity.',
+      },
+      {
+        type: 'note',
+        text: 'The chapter also traces the history of apprenticeship in England as a point of comparison: the Statute of Artificers of 1563 — the first national apprenticeship framework — capped a master at three apprentices and set a minimum term of seven years, before falling out of favour some two and a half centuries later as workplace conditions and the exploitation of young apprentices drew criticism. That English history (expanded under "Types of Apprenticeship" below) is a comparative aside, not a claim about Nigeria — keep it separate from the Nigeria-specific material if a question asks specifically about Nigerian apprenticeship.',
+      },
+
+      {
+        type: 'text',
+        heading: 'Key Characteristics of Apprenticeship in Nigeria',
+        text: 'Apprenticeship in Nigeria follows a structured mentorship system in which apprentices learn practical skills under the guidance of experienced artisans or craftsmen. The master–apprentice relationship extends beyond technical training to cultural values, ethics and community responsibilities, so that apprenticeship transmits not just skills but also cultural heritage. A notable feature is its role in fostering entrepreneurship and self-employment: many apprentices go on to establish their own workshops or businesses on the strength of what they learned, contributing to local economic development and job creation — particularly in rural areas where formal employment is limited.',
+      },
+
+      {
+        type: 'text',
+        heading: 'Contemporary Significance',
+        text: 'In contemporary Nigeria, apprenticeship remains an accessible pathway to skills development and economic empowerment, especially for disadvantaged youth, offering a practical alternative where unemployment is high and the formal education sector is strained. Government and non-governmental organisations increasingly recognise its potential for tackling youth unemployment and promoting sustainable development. Apprenticeship also sustains indigenous knowledge systems and cultural diversity by supporting artisans and craftsmen, and efforts are under way to revitalise and formalise apprenticeship training to keep it relevant in a fast-changing economy.',
+      },
+
+      {
+        type: 'termlist',
+        heading: 'Components of Apprenticeship',
+        items: [
+          { term: 'Business involvement', def: 'Employers are the foundation of every apprenticeship programme; the skills their workforce needs sit at its core, and businesses must be active partners at every stage of designing it.' },
+          { term: 'On-the-job training', def: 'Structured, hands-on training from an experienced mentor at the job site, typically for at least a year, built by mapping the skills and knowledge the apprentice must master to become fully proficient.' },
+          { term: 'Related instruction', def: 'Technical, workforce and academic instruction that complements on-the-job learning, delivered by a community college, technical school, apprenticeship training school, or the business itself, with education partners and employers jointly developing the curriculum and funding it.' },
+          { term: 'Rewards for skill gains', def: 'Apprentices receive progressive pay increases as they hit skill benchmarks, from an entry wage to an ending wage, rewarding and motivating advancement through training.' },
+        ],
+      },
+
+      {
+        type: 'text',
+        heading: 'Formal Apprenticeship',
+        text: 'Formal apprenticeship has a long history. At least as early as the ninth century it existed within a legislative framework — the earliest form being the medieval "time-served apprenticeship" — in contrast to purely private, informal apprenticeship that already existed alongside it.',
+      },
+      {
+        type: 'text',
+        heading: 'Time-Served Apprenticeship',
+        text: 'The time-served apprenticeship was devised not by the medieval guilds but by the medieval cities. Young men were highly mobile and free to travel between cities, yet also valuable as future draftees to defend those cities, so cities passed laws lengthening an apprentice’s term of service well beyond what a free contract would have produced. In return for committing to a town for the full term, an apprentice earned the right to open a shop and become a master; those who fled their masters lost that right. Terms varied by industry and city, but all obliged young men to serve until at least age 25, and masters could pass their privileges to their sons if the family’s attachment to the city was assured. England’s Statute of Artificers (1563) set a similar term — seven years, and until age 21 for married apprentices or 24 for unmarried ones — with the same underlying aim: to tie young people to the city and give authorities control over artisan production and social life.',
+      },
+      {
+        type: 'text',
+        heading: 'Standard-Based Apprenticeships',
+        text: 'Guilds — representing craftsmen and traders — rose to political influence in many medieval cities between the ninth and thirteenth centuries, and through their control of entry restrictions and trade examinations, drove the rise of "standard-based apprenticeships." Guilds set minimum product quality and maximum prices, enabled the invention and diffusion of technology, pursued markets abroad, helped defend cities, and kept social peace through their own jurisdiction — so a guild’s apprenticeship system aimed not only to train young people but to give them cultural and social formation. The guilds’ power began to decline in the sixteenth century, partly because consumers grew unwilling to pay for the quality guilds were built to guarantee, and partly because national states abolished them by decree; in some countries, such as Germany, monarchic authority later revived the tradition in the nineteenth century into a robust, nationally standardised apprenticeship system, while in others, such as the United Kingdom, no such restoration occurred and apprenticeship remained fragmented along more laissez-faire lines.',
+      },
+
+      {
+        type: 'termlist',
+        heading: 'Kinds of Apprenticeship',
+        items: [
+          { term: 'Agriculture', def: 'A diverse sector needing skilled labour — veterinary nursing, horticulture, animal care, game and wildlife management, and environmental conservation, spanning both outdoor and office-based roles.' },
+          { term: 'Arts and media', def: 'Skills for the media and publishing sector — journalism, live events and promotion, creative and digital media, broadcast production, costume and wardrobe, and business and administration.' },
+          { term: 'Business and administration', def: 'Typical office roles with fixed hours, requiring strong organisational and communication skills — human resource management, business innovation and growth, social media and digital marketing, project management, telemarketing and sales.' },
+          { term: 'Construction', def: 'Designing, building and maintaining roads, buildings, airports and other projects — plumbing and heating, civil engineering, construction management, electrical and electronic servicing, and education and training.' },
+          { term: 'Education and training', def: 'Working with people of all ages and needs to develop and pass on knowledge in a particular area — work-based learning practitioner development, learning and development, learning support, and supporting teaching and learning in schools or in physical education.' },
+        ],
+      },
+
+      {
+        type: 'text',
+        heading: 'The Rise and Fall of Apprenticeships',
+        text: 'Apprenticeships stayed popular with the professions and spread into newer industries such as engineering. By the early 1900s there were an estimated 340,000 apprentices, and that growth continued after both World Wars — by the 1960s, up to a third of school leavers went straight into the apprenticeship system. Yet for most of the twentieth century the system saw no major reform, drawing criticism from employers for being too restrictive, too focused on time served rather than competence gained, and unresponsive to industry’s actual needs.',
+      },
+      {
+        type: 'text',
+        heading: 'A New Scheme',
+        text: 'In 1993, "Modern Apprenticeships" were introduced and rolled out over the following two years: apprentices now counted as employees entitled to a fair wage, and the focus shifted from time served to the qualification earned — typically an NVQ Level 3, equivalent to A-Levels. Shortly after, National Traineeships were introduced at Level 2 as a stepping stone into apprenticeship for young people not yet ready for a Level 3 programme. By the end of 1998, close to a quarter of a million people had started a Modern Apprenticeship in England and Wales, most with small firms employing no more than five apprentices.',
+      },
+
+      {
+        type: 'termlist',
+        heading: 'Challenges Facing Apprenticeship in Nigeria',
+        items: [
+          { term: 'Perceived prestige of formal education', def: 'Nigerian society tends to see formal education as more prestigious and a better guarantee of career prospects than vocational apprenticeship, discouraging young people from pursuing it and contributing to a decline in skilled artisans.' },
+          { term: 'Lack of standardization and regulation', def: 'Apprenticeship programmes often lack standardised curricula, assessment procedures and certification, undermining the quality and recognition of the training.' },
+          { term: 'Urban migration and changing demographics', def: 'Rural-to-urban migration has reduced apprenticeship opportunities in traditional craft-based industries, as young people are drawn to cities in search of other employment.' },
+          { term: 'Limited access to financial resources', def: 'Apprentices often cannot afford the basic tools and materials training requires, and limited access to credit further hinders their path to entrepreneurship.' },
+          { term: 'Technological disruption and skills gap', def: 'Rapid technological change has created a mismatch between traditional apprenticeship skills and modern industry demands, and many programmes struggle to adapt.' },
+        ],
+      },
+
+      {
+        type: 'termlist',
+        heading: 'Future Prospects and Recommendations',
+        items: [
+          { term: 'Policy support and advocacy', def: 'Government initiatives and policy are needed to formalise apprenticeship training, set quality standards and provide financial incentives.' },
+          { term: 'Public awareness and perception change', def: 'Public campaigns can change attitudes toward apprenticeship by showcasing skilled artisans and entrepreneurs who came up through it.' },
+          { term: 'Integration with formal education', def: 'Collaboration between vocational and formal educational institutions, including dual-training programmes, can let apprentices earn recognised qualifications while honing practical skills.' },
+          { term: 'Technological innovation and adaptation', def: 'Apprenticeship curricula should incorporate modern technologies and digital skills so apprentices can thrive in evolving industries.' },
+          { term: 'Partnerships with the private sector and NGOs', def: 'Collaboration with private employers and NGOs can widen apprenticeship opportunities, ease access to resources, and support sustainable business models.' },
+        ],
+      },
+
+      {
+        type: 'casestudy',
+        title: 'Check Yourself — Chapter 2',
+        prompt: 'Work through these before moving on.',
+        tasks: [
+          'Give three scholarly definitions of apprenticeship cited in the chapter (Scott, Bandura, Seely Brown and Duguid) and explain what each emphasises.',
+          'List the five key elements of apprenticeship identified in the chapter.',
+          'Compare how the Hausa-Fulani, Yoruba and Igbo traditions of apprenticeship in Nigeria differ in emphasis.',
+          'Distinguish the time-served apprenticeship from the standard-based apprenticeship of the guilds.',
+          'Name the year and English statute that first codified a national apprenticeship system, and state its main terms.',
+          'What changed under the 1993 "Modern Apprenticeships" scheme, and how did National Traineeships fit alongside it?',
+          'State five challenges facing apprenticeship in Nigeria today.',
+          'Give five recommendations the chapter makes for the future of apprenticeship in Nigeria.',
+          'Explain the four components of an apprenticeship programme (business involvement, on-the-job training, related instruction, rewards for skill gains).',
+        ],
+      },
+      {
+        type: 'bullets',
+        heading: 'Works Cited by the Chapter',
+        items: [
+          'Stiglitz, J. E. (2012). The Price of Inequality: How Today’s Divided Society Endangers Our Future. W. W. Norton & Company.',
+          'Hall, P. A. (2004). "Employment Relations in the Growing Economy: Assessing the Role of Apprenticeship Programs." Industrial Relations, 43(1), 127–156.',
+          'Scott, R. A. (2010). Apprenticeship and Vocational Training in the Age of COVID. Routledge.',
+          'Bandura, A. (1977). Social Learning Theory. Prentice Hall.',
+          'Seely Brown, J., & Duguid, P. (1991). "Organizational Learning and Communities-of-Practice: Toward a Unified View of Working, Learning, and Innovation." Organization Science, 2(1), 40–57.',
+          'Rogoff, B. (1990). Apprenticeship in Thinking: Cognitive Development in Social Context. Oxford University Press.',
+          'Wenger, E. (1998). Communities of Practice: Learning, Meaning, and Identity. Cambridge University Press.',
+          'Bello, S. (2009). "Craftsmanship and Traditional Medicine among the Hausa Fulani of Northern Nigeria." African Studies Quarterly, 11(4), 76–92.',
+          'Ibrahim, J. (2012). "The Impact of Colonialism on the Development of Vocational and Technical Education in Africa: Lessons from Nigeria." European Journal of Sustainable Development, 1(1), 73–82.',
+          'Afigbo, A. E. (1981). "Apprenticeship in Pre-Colonial Igboland." In The African Diaspora in the Indian Ocean, eds. L. Villalon & T. D. Johnson, 131–150. Africa World Press.',
+          'Henderson, J. S. (2000). "Igbo Apprenticeship: Contrasts in Mobility." Africa, 70(1), 80–107.',
+          'Ottenberg, S. (1989). "Apprenticeship among the Yoruba." African Arts, 22(3), 54–63.',
+          'Adegbite, W. (2015). "Apprenticeship in Pre-Colonial and Post-Colonial Yoruba Societies: A Comparative Analysis." Journal of African History and Culture, 7(4), 50–63.',
+          'Njoku, J. C. (2012). "Apprenticeship in Traditional Nigerian Societies: A Case Study of Igbo Apprenticeship System." Journal of African Cultural Studies, 24(1), 78–93.',
+          'Adegbola, O. (2018). "The Role of Apprenticeship in Entrepreneurship Development in Nigeria: A Case Study of Selected Craft Industries." Journal of Entrepreneurship Education, 21(1), 30–45.',
+          'Ojo, O. O. (2016). "Apprenticeship Training and Youth Employment in Nigeria: Exploring Alternative Models for Skills Development." African Journal of Educational Studies, 11(2), 45–60.',
+          'Adeyemi, T. O. (2020). "Promoting Apprenticeship Training for Youth Employment in Nigeria: Challenges and Prospects." International Journal of Vocational Education and Training Research, 6(2), 18–28.',
+          'Adewuyi, T. A. (2019). "Apprenticeship and Cultural Preservation in Nigeria: The Case of Adire Textile Production in Abeokuta." International Journal of Humanities and Social Sciences, 9(3), 120–135.',
+          'Hickson and Thompson (2019); Hickson and Thompson (2020); Hickson and Thompson (1991) — cited by the chapter without full publication details.',
+          'Mocarelli (2018); Epstein (1998); Soly (2018); Haupt (2020); Seybolt (2017); Akintoye (2019); Gessler (2017b); Fuller and Unwin (1998) — cited by the chapter without full publication details.',
+          'Adepoju, O. J. (2019). "Sustaining Vocational and Apprenticeship Training in Nigeria: The Imperative of Educational Governance." International Journal of Vocational Education and Training Research, 5(2), 26–36.',
+          'Ogundele, T. (2012). "Apprenticeship and Entrepreneurial Development in Yorubaland, Nigeria." Journal of African Cultural Studies, 24(3), 345–360.',
+          'Nkamnebe, A. D. (2017). "Entrepreneurship Education, Apprenticeship and Youth Unemployment in Nigeria: Challenges and Prospects." African Journal of Economic Review, 5(1), 23–34.',
         ],
       },
     ],
