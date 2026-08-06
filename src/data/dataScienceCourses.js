@@ -366,13 +366,16 @@ export const courses = [
       'Do not leave this course to the last week; it is easy marks that many students throw away',
     ],
     lectureNotes: gst121LectureNotes,
-    // Chapter 1 is the only chapter transcribed so far. Item 8 is `partial`
-    // rather than `covers`: the chapter's reorientation strategies are the 3Rs,
-    // indigenization and the NYSC, not the MAMSER/WAI/EFCC/ICPC ones our outline
-    // names. Cybersecurity words that item as "the 3Rs", so it marks the same
-    // chapter as full coverage — which is why these indices live per course.
+    // Chapters 1–2 are the only ones transcribed so far. Chapter 1's item 8 is
+    // `partial` rather than `covers`: the chapter's reorientation strategies are
+    // the 3Rs, indigenization and the NYSC, not the MAMSER/WAI/EFCC/ICPC ones
+    // our outline names. Cybersecurity words that item as "the 3Rs", so it
+    // marks the same chapter as full coverage — which is why these indices
+    // live per course. Chapter 2 (apprenticeship) fully covers item 6, the
+    // trade/self-reliance topic.
     noteCoverage: {
       1: { partial: [5, 6, 8] },
+      2: { covers: [6] },
     },
   },
   {
