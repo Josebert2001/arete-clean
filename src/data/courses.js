@@ -916,7 +916,7 @@ export const courses = [
       'This course matters for your career: many technology professionals eventually consult or freelance',
     ],
     lectureNotes: ent221LectureNotes,
-    // Chapters 1–13 of the workbook against our outline. The indices are ours
+    // Chapters 1–15 of the workbook against our outline. The indices are ours
     // alone — Data Science takes ENT 221 too, off a differently-worded outline,
     // so it keeps its own map.
     //
@@ -924,8 +924,11 @@ export const courses = [
     // one `covers`: chapter 7 does formation/partnership/networking, 8 does the
     // ownership forms and 9 the business plan, and no single chapter carries the
     // whole item. Item 8 (entrepreneurship in Nigeria) works the same way across
-    // chapters 3 and 10–13. Item 9 (e-commerce) has no chapter at all — the
-    // workbook never reaches it.
+    // chapters 3 and 10–14 — chapter 14 adds non-governmental support
+    // institutions (incubators, accelerators, non-profits, associations) to
+    // chapter 13's governmental ones. Item 9 (e-commerce) sat uncovered through
+    // chapter 13 — chapter 15 finally reaches it, dedicated entirely to
+    // e-commerce principles.
     noteCoverage: {
       1: { covers: [1], partial: [2, 3] },
       2: { partial: [3] },
@@ -940,6 +943,8 @@ export const courses = [
       11: { partial: [8] },
       12: { partial: [8] },
       13: { partial: [8] },
+      14: { partial: [8] },
+      15: { covers: [9] },
     },
   },
   {
