@@ -33,6 +33,7 @@
 // the single copy in ./lectureNotes/ so a fix there reaches every department.
 import { cos121LectureNotes } from './lectureNotes/cos121.js';
 import { ent221LectureNotes } from './lectureNotes/ent221.js';
+import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 import { gst121LectureNotes } from './lectureNotes/gst121.js';
 import { mth121LectureNotes } from './lectureNotes/mth121.js';
 
@@ -1007,6 +1008,10 @@ export const courses = [
       17: { partial: [6, 7] },
       18: { partial: [7, 9] },
     },
+    // Shared with Cybersecurity — see src/data/lectureNotes/ent221Quiz.js.
+    // 367 questions across all 18 chapters; one bank for both catalogues
+    // since it tests the shared lecture notes, not either outline.
+    quiz: ent221Quiz,
   },
   {
     code: 'MTH 223',

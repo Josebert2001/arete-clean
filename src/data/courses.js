@@ -6,6 +6,7 @@ import { cyb122LectureNotes } from './lectureNotes/cyb122.js';
 import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
 import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
 import { ent221LectureNotes } from './lectureNotes/ent221.js';
+import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 import { gst121LectureNotes } from './lectureNotes/gst121.js';
 import { mth121LectureNotes } from './lectureNotes/mth121.js';
 
@@ -975,6 +976,10 @@ export const courses = [
       17: { partial: [7] },
       18: { covers: [7] },
     },
+    // Shared with Data Science — see src/data/lectureNotes/ent221Quiz.js.
+    // 367 questions across all 18 chapters; one bank for both catalogues
+    // since it tests the shared lecture notes, not either outline.
+    quiz: ent221Quiz,
   },
   {
     code: 'COS 221',
