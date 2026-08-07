@@ -1,6 +1,7 @@
 // Extension is required: scripts/validate-modules.mjs imports this file through
 // plain Node ESM, which does not do Vite's extensionless resolution.
 import { cos121LectureNotes } from './lectureNotes/cos121.js';
+import { cyb121LectureNotes } from './lectureNotes/cyb121.js';
 import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
 import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
 import { ent221LectureNotes } from './lectureNotes/ent221.js';
@@ -544,6 +545,12 @@ export const courses = [
       'Professor Messer\'s free Network+ course on YouTube is one of the best networking courses available',
       'Use Cisco Packet Tracer (free) to simulate and visualise network configurations hands-on',
     ],
+    // Transcribed from the CYB 121 study guide (lecture notes of Sir Robinson
+    // and Sir Ubong Ntia; practical cabling by Mr. Mike Umeh) — see
+    // src/data/lectureNotes/cyb121.js for provenance and the coverage mapping.
+    // The guide stops at the data link / physical layers, so topics 6-8
+    // (network, transport and application layers) are not covered by it.
+    lectureNotes: cyb121LectureNotes,
   },
   {
     code: 'UUY-CYB 123',
