@@ -11,6 +11,37 @@ import ExplainSelection from '../components/ExplainSelection';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { usePageTitle } from '../utils/usePageTitle';
 
+// Last tab viewed per course, so returning to a course you had open — after
+// switching tabs, minimizing, or a background reload — lands you back where
+// you were instead of always resetting to Study Resources.
+const TAB_STORAGE_KEY = 'arete-course-tab';
+
+function getStoredTabMap() {
+  try {
+    return JSON.parse(localStorage.getItem(TAB_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function getStoredTab(slug, course) {
+  const stored = getStoredTabMap()[slug];
+  const hasNotes = course?.lectureNotes?.length > 0;
+  const hasQuiz = course?.quiz?.length > 0;
+  if (stored === 'notes' && hasNotes) return 'notes';
+  if (stored === 'quiz' && hasQuiz) return 'quiz';
+  if (stored === 'materials') return 'materials';
+  return 'resources';
+}
+
+function setStoredTab(slug, tab) {
+  try {
+    const map = getStoredTabMap();
+    map[slug] = tab;
+    localStorage.setItem(TAB_STORAGE_KEY, JSON.stringify(map));
+  } catch { /* private mode — tab just resets next visit */ }
+}
+
 const subjectStyles = {
   cs:    { codeBg: 'bg-ink',        codeText: 'text-cream' },
   cyb:   { codeBg: 'bg-rust',       codeText: 'text-cream' },
@@ -32,14 +63,20 @@ export default function CourseDetail() {
   const { slug } = useParams();
   const { catalogue, department, status } = useCatalogue();
   const course = catalogue?.getCourseBySlug(slug);
-  const [activeTab, setActiveTab] = useState('resources');
+  const [activeTab, setActiveTabState] = useState('resources');
 
-  // Reset to the default tab when moving to another course (prev/next nav)
-  // so a tab the new course doesn't have can't stay selected.
-  const [lastSlug, setLastSlug] = useState(slug);
-  if (lastSlug !== slug) {
-    setLastSlug(slug);
-    setActiveTab('resources');
+  const setActiveTab = (tab) => {
+    setActiveTabState(tab);
+    setStoredTab(slug, tab);
+  };
+
+  // Apply the remembered tab once real course data is available for this slug
+  // — the catalogue loads asynchronously, so `course` isn't there on the first
+  // render — and again whenever the slug itself changes (prev/next nav).
+  const [resolvedFor, setResolvedFor] = useState(null);
+  if (course && resolvedFor !== slug) {
+    setResolvedFor(slug);
+    setActiveTabState(getStoredTab(slug, course));
   }
 
   usePageTitle(course ? `${course.code} — ${course.title}` : 'Course not found');
