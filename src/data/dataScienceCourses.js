@@ -947,13 +947,13 @@ export const courses = [
       'This course sets up DTS 426 in final year; keep your notes',
     ],
     lectureNotes: ent221LectureNotes,
-    // Chapters of the workbook against our outline (1–15, then 17 — chapter 16
-    // hasn't been transcribed yet). The indices are ours alone; Cybersecurity
-    // maps the same notes onto a differently-worded outline and reaches
-    // different answers — chapter 6, for instance, is full coverage for them
-    // (their item is concept/dimensions/knowledge-and-change, all of which
-    // chapter 6 teaches) but our item names diffusion of innovation, which the
-    // chapter only mentions in passing while citing Rogers.
+    // Chapters 1–18 of the workbook against our outline. The indices are ours
+    // alone; Cybersecurity maps the same notes onto a differently-worded
+    // outline and reaches different answers — chapter 6, for instance, is
+    // full coverage for them (their item is concept/dimensions/knowledge-and-
+    // change, all of which chapter 6 teaches) but our item names diffusion of
+    // innovation, which the chapter only mentions in passing while citing
+    // Rogers.
     //
     // Three of our items land badly against this workbook and are worth knowing
     // about when planning revision: item 5 (business model canvas) is never
@@ -972,12 +972,22 @@ export const courses = [
     // clean match, but the nearest thing our outline has. Chapter 15 is
     // Cybersecurity's e-commerce chapter (their item 9) — we have no
     // e-commerce item, but its digital-marketing subsection (15.5.4) is a
-    // reasonable partial for our item 8. Chapter 17 (technopreneurship) splits
-    // two ways: 17.6.1 (business structure and registration) reinforces item 6,
-    // and 17.4.1's DeFi/blockchain funding mechanisms (ICOs, STOs, peer-to-peer
-    // lending) are a modern partial for item 7's entrepreneurial finance —
-    // everything else in the chapter (blockchain's other uses, cloud, renewable
-    // energy, IoT, AI) has no home in our outline.
+    // reasonable partial for our item 8. Chapter 16 is almost entirely
+    // intellectual property law — no home in our outline at all — except its
+    // opening CAMA section (16.2), which is squarely business registration in
+    // Nigeria, a partial for item 6. Chapter 17 (technopreneurship) splits two
+    // ways: 17.6.1 (business structure and registration) reinforces item 6
+    // too, and 17.4.1's DeFi/blockchain funding mechanisms (ICOs, STOs, peer-
+    // to-peer lending) are a modern partial for item 7's entrepreneurial
+    // finance — everything else in that chapter (blockchain's other uses,
+    // cloud, renewable energy, IoT, AI) has no home in our outline either.
+    // Chapter 18 is Cybersecurity's virtual-office/networking chapter (their
+    // item 7, which we don't have) — but its 18.6 "Navigating the Startup
+    // Ecosystem" section covers access to capital (a partial for our item 7)
+    // and market/mentorship/legal survival factors for a growing small
+    // business (a partial for our item 9). Everything else in the chapter
+    // (skills/tech solutions, virtual office, mixed reality, networking,
+    // sustainability/CSR) has no home in our outline.
     noteCoverage: {
       1: { covers: [1], partial: [2] },
       2: { partial: [1] },
@@ -993,7 +1003,9 @@ export const courses = [
       13: { partial: [7] },
       14: { partial: [9] },
       15: { partial: [8] },
+      16: { partial: [6] },
       17: { partial: [6, 7] },
+      18: { partial: [7, 9] },
     },
   },
   {

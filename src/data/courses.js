@@ -916,10 +916,9 @@ export const courses = [
       'This course matters for your career: many technology professionals eventually consult or freelance',
     ],
     lectureNotes: ent221LectureNotes,
-    // Chapters of the workbook against our outline (1–15, then 17 — chapter 16
-    // hasn't been transcribed yet). The indices are ours alone — Data Science
-    // takes ENT 221 too, off a differently-worded outline, so it keeps its own
-    // map.
+    // Chapters 1–18 of the workbook against our outline. The indices are ours
+    // alone — Data Science takes ENT 221 too, off a differently-worded outline,
+    // so it keeps its own map.
     //
     // Item 6 (enterprise formation) is deliberately three `partial`s rather than
     // one `covers`: chapter 7 does formation/partnership/networking, 8 does the
@@ -929,11 +928,19 @@ export const courses = [
     // institutions (incubators, accelerators, non-profits, associations) to
     // chapter 13's governmental ones. Item 9 (e-commerce) sat uncovered through
     // chapter 13 — chapter 15 finally reaches it, dedicated entirely to
-    // e-commerce principles. Chapter 17 (technopreneurship) lands as a partial
-    // for item 7 (contemporary entrepreneurship issues) — its 17.6.2 section is
-    // specifically intellectual property protection, one of item 7's named
-    // examples, though the chapter's blockchain/cloud/IoT/AI material otherwise
-    // has no home in our outline.
+    // e-commerce principles.
+    //
+    // Item 7 (contemporary entrepreneurship issues: intellectual property,
+    // virtual office, networking) is named after exactly three sub-topics, and
+    // between them chapters 16 and 18 now teach all three: chapter 16
+    // (16.5–16.9) is intellectual property in depth; chapter 18 dedicates 18.3
+    // to virtual offices (plus mixed reality) and 18.4 to networking. Both are
+    // marked `covers` rather than `partial` for that reason, even though each
+    // chapter individually only carries part of the item. Chapter 17
+    // (technopreneurship) also lands a lighter partial on item 7 via its own
+    // IP subsection (17.6.2); the rest of that chapter's blockchain/cloud/
+    // IoT/AI material, and chapter 18's sections on skills/tech solutions and
+    // sustainability/CSR, have no home in our outline.
     noteCoverage: {
       1: { covers: [1], partial: [2, 3] },
       2: { partial: [3] },
@@ -950,7 +957,9 @@ export const courses = [
       13: { partial: [8] },
       14: { partial: [8] },
       15: { covers: [9] },
+      16: { covers: [7] },
       17: { partial: [7] },
+      18: { covers: [7] },
     },
   },
   {
