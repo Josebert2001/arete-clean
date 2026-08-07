@@ -27,6 +27,8 @@ vercel dev         # needed for /api/* endpoints locally
 node scripts/validate-modules.mjs  # validate module data structure
 ```
 
+**Toolchain: Node 24, npm ≥ 11.16.** CI (`.github/workflows/ci.yml`) runs Node 24 / npm 11.16. npm changed its mind twice about whether `@napi-rs/wasm-runtime`'s optional peers (`@emnapi/core`, `@emnapi/runtime`) belong in `package-lock.json` as top-level entries: npm 10 records them, npm 11.6 drops them, npm 11.16 records them again. Regenerate the lockfile on npm 11.6–11.15 and it silently loses those entries, and every CI run then dies at `npm ci` with `Missing: @emnapi/core@… from lock file` before a single check executes. Check `npm --version` before any command that rewrites the lockfile (`npm install`, `npm audit fix`, dependency bumps). The committed lockfile is valid for npm 10.9, 11.6 and 11.16 alike, so only *regenerating* it on a bad version breaks things — installing never does.
+
 ## Project Conventions
 - **No TypeScript** — stay in `.jsx`/`.js`; do not introduce `.ts` files
 - **No component libraries** — no Shadcn, MUI, etc.; everything is Tailwind + custom
