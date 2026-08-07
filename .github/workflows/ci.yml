@@ -16,9 +16,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          # Node 24 ships npm 11, which is what package-lock.json is generated
-          # with locally. Node 22's npm 10 records @napi-rs/wasm-runtime's
-          # optional peers differently and rejects the lockfile in `npm ci`.
+          # Matches the Node version used for local development, so the
+          # lockfile is generated and verified against the same toolchain.
           node-version: 24
           cache: npm
 
