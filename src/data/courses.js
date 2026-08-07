@@ -2,6 +2,7 @@
 // plain Node ESM, which does not do Vite's extensionless resolution.
 import { cos121LectureNotes } from './lectureNotes/cos121.js';
 import { cyb121LectureNotes } from './lectureNotes/cyb121.js';
+import { cyb122LectureNotes } from './lectureNotes/cyb122.js';
 import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
 import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
 import { ent221LectureNotes } from './lectureNotes/ent221.js';
@@ -622,6 +623,12 @@ export const courses = [
       'Professor Messer\'s free Security+ course covers most of this curriculum and is excellent',
       'Social engineering is the most common attack vector — understand human psychology, not just technical controls',
     ],
+    // Transcribed from the "Principles and Practice of Information Security:
+    // Polished Master Study Guide" — see src/data/lectureNotes/cyb122.js for
+    // provenance and the coverage mapping. The guide never reaches
+    // cryptography/steganography (topic 4), funds-transfer/e-voting security
+    // (topic 6) or secure application design (topic 7).
+    lectureNotes: cyb122LectureNotes,
   },
 
   // ═══════════════════════════════════════════════════════════════
