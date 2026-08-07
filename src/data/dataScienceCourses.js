@@ -947,7 +947,7 @@ export const courses = [
       'This course sets up DTS 426 in final year; keep your notes',
     ],
     lectureNotes: ent221LectureNotes,
-    // Chapters 1–13 of the workbook against our outline. The indices are ours
+    // Chapters 1–15 of the workbook against our outline. The indices are ours
     // alone; Cybersecurity maps the same notes onto a differently-worded outline
     // and reaches different answers — chapter 6, for instance, is full coverage
     // for them (their item is concept/dimensions/knowledge-and-change, all of
@@ -957,14 +957,21 @@ export const courses = [
     // Three of our items land badly against this workbook and are worth knowing
     // about when planning revision: item 5 (business model canvas) is never
     // taught — chapter 9 is the business *plan*, a different artefact; item 8
-    // (marketing) survives only as a section of that plan; and item 3 is split
-    // across chapters 5, 7 and 9 without any one of them teaching all of
-    // opportunity identification, idea generation and feasibility.
+    // (marketing) survives only as a section of that plan (plus, now, chapter
+    // 15's digital-marketing subsection — still no dedicated chapter); and item
+    // 3 is split across chapters 5, 7 and 9 without any one of them teaching all
+    // of opportunity identification, idea generation and feasibility.
     //
     // Chapter 11 (women entrepreneurship) maps to nothing here. Our outline has
     // no equivalent item, so it marks nothing rather than being forced onto a
     // near-miss. Entrepreneurial finance (item 7) is the reverse surprise: it is
-    // chapter 12, the youth chapter, that actually teaches it.
+    // chapter 12, the youth chapter, that actually teaches it. Chapter 14
+    // (incubators, accelerators and business associations) lands as a partial
+    // for item 9 — it's growth support for an existing small business, not a
+    // clean match, but the nearest thing our outline has. Chapter 15 is
+    // Cybersecurity's e-commerce chapter (their item 9) — we have no
+    // e-commerce item, but its digital-marketing subsection (15.5.4) is a
+    // reasonable partial for our item 8.
     noteCoverage: {
       1: { covers: [1], partial: [2] },
       2: { partial: [1] },
@@ -978,6 +985,8 @@ export const courses = [
       10: { partial: [2] },
       12: { covers: [7] },
       13: { partial: [7] },
+      14: { partial: [9] },
+      15: { partial: [8] },
     },
   },
   {
