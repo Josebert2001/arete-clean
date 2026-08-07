@@ -947,6 +947,38 @@ export const courses = [
       'This course sets up DTS 426 in final year; keep your notes',
     ],
     lectureNotes: ent221LectureNotes,
+    // Chapters 1–13 of the workbook against our outline. The indices are ours
+    // alone; Cybersecurity maps the same notes onto a differently-worded outline
+    // and reaches different answers — chapter 6, for instance, is full coverage
+    // for them (their item is concept/dimensions/knowledge-and-change, all of
+    // which chapter 6 teaches) but our item names diffusion of innovation, which
+    // the chapter only mentions in passing while citing Rogers.
+    //
+    // Three of our items land badly against this workbook and are worth knowing
+    // about when planning revision: item 5 (business model canvas) is never
+    // taught — chapter 9 is the business *plan*, a different artefact; item 8
+    // (marketing) survives only as a section of that plan; and item 3 is split
+    // across chapters 5, 7 and 9 without any one of them teaching all of
+    // opportunity identification, idea generation and feasibility.
+    //
+    // Chapter 11 (women entrepreneurship) maps to nothing here. Our outline has
+    // no equivalent item, so it marks nothing rather than being forced onto a
+    // near-miss. Entrepreneurial finance (item 7) is the reverse surprise: it is
+    // chapter 12, the youth chapter, that actually teaches it.
+    noteCoverage: {
+      1: { covers: [1], partial: [2] },
+      2: { partial: [1] },
+      3: { partial: [9] },
+      4: { covers: [2] },
+      5: { partial: [3] },
+      6: { covers: [4] },
+      7: { partial: [3, 6] },
+      8: { covers: [6] },
+      9: { partial: [3, 5, 8] },
+      10: { partial: [2] },
+      12: { covers: [7] },
+      13: { partial: [7] },
+    },
   },
   {
     code: 'MTH 223',
