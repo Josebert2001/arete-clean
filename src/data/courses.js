@@ -916,9 +916,10 @@ export const courses = [
       'This course matters for your career: many technology professionals eventually consult or freelance',
     ],
     lectureNotes: ent221LectureNotes,
-    // Chapters 1–15 of the workbook against our outline. The indices are ours
-    // alone — Data Science takes ENT 221 too, off a differently-worded outline,
-    // so it keeps its own map.
+    // Chapters of the workbook against our outline (1–15, then 17 — chapter 16
+    // hasn't been transcribed yet). The indices are ours alone — Data Science
+    // takes ENT 221 too, off a differently-worded outline, so it keeps its own
+    // map.
     //
     // Item 6 (enterprise formation) is deliberately three `partial`s rather than
     // one `covers`: chapter 7 does formation/partnership/networking, 8 does the
@@ -928,7 +929,11 @@ export const courses = [
     // institutions (incubators, accelerators, non-profits, associations) to
     // chapter 13's governmental ones. Item 9 (e-commerce) sat uncovered through
     // chapter 13 — chapter 15 finally reaches it, dedicated entirely to
-    // e-commerce principles.
+    // e-commerce principles. Chapter 17 (technopreneurship) lands as a partial
+    // for item 7 (contemporary entrepreneurship issues) — its 17.6.2 section is
+    // specifically intellectual property protection, one of item 7's named
+    // examples, though the chapter's blockchain/cloud/IoT/AI material otherwise
+    // has no home in our outline.
     noteCoverage: {
       1: { covers: [1], partial: [2, 3] },
       2: { partial: [3] },
@@ -945,6 +950,7 @@ export const courses = [
       13: { partial: [8] },
       14: { partial: [8] },
       15: { covers: [9] },
+      17: { partial: [7] },
     },
   },
   {

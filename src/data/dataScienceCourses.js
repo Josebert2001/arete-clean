@@ -947,12 +947,13 @@ export const courses = [
       'This course sets up DTS 426 in final year; keep your notes',
     ],
     lectureNotes: ent221LectureNotes,
-    // Chapters 1–15 of the workbook against our outline. The indices are ours
-    // alone; Cybersecurity maps the same notes onto a differently-worded outline
-    // and reaches different answers — chapter 6, for instance, is full coverage
-    // for them (their item is concept/dimensions/knowledge-and-change, all of
-    // which chapter 6 teaches) but our item names diffusion of innovation, which
-    // the chapter only mentions in passing while citing Rogers.
+    // Chapters of the workbook against our outline (1–15, then 17 — chapter 16
+    // hasn't been transcribed yet). The indices are ours alone; Cybersecurity
+    // maps the same notes onto a differently-worded outline and reaches
+    // different answers — chapter 6, for instance, is full coverage for them
+    // (their item is concept/dimensions/knowledge-and-change, all of which
+    // chapter 6 teaches) but our item names diffusion of innovation, which the
+    // chapter only mentions in passing while citing Rogers.
     //
     // Three of our items land badly against this workbook and are worth knowing
     // about when planning revision: item 5 (business model canvas) is never
@@ -971,7 +972,12 @@ export const courses = [
     // clean match, but the nearest thing our outline has. Chapter 15 is
     // Cybersecurity's e-commerce chapter (their item 9) — we have no
     // e-commerce item, but its digital-marketing subsection (15.5.4) is a
-    // reasonable partial for our item 8.
+    // reasonable partial for our item 8. Chapter 17 (technopreneurship) splits
+    // two ways: 17.6.1 (business structure and registration) reinforces item 6,
+    // and 17.4.1's DeFi/blockchain funding mechanisms (ICOs, STOs, peer-to-peer
+    // lending) are a modern partial for item 7's entrepreneurial finance —
+    // everything else in the chapter (blockchain's other uses, cloud, renewable
+    // energy, IoT, AI) has no home in our outline.
     noteCoverage: {
       1: { covers: [1], partial: [2] },
       2: { partial: [1] },
@@ -987,6 +993,7 @@ export const courses = [
       13: { partial: [7] },
       14: { partial: [9] },
       15: { partial: [8] },
+      17: { partial: [6, 7] },
     },
   },
   {

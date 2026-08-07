@@ -3987,4 +3987,514 @@ export const ent221LectureNotes = [
       },
     ],
   },
+  // Chapter 16 of the workbook has not been transcribed yet — this jumps
+  // straight from 15 to 17, matching the source docx supplied for chapter 17.
+  {
+    number: '17',
+    title: 'Technopreneurship',
+    sections: [
+      {
+        type: 'text',
+        text: 'Authors: Aniefiok O. Akpan, PhD and Sunday S. Akpan, PhD',
+      },
+      {
+        type: 'definition',
+        heading: '17.1 Introduction',
+        text: 'Technology entrepreneurship or Technopreneurship represents the convergence of technology and entrepreneurship for the purpose of driving innovation and transformation in modern business. It involves leveraging information and communication technologies (ICT) to create, innovate, and deliver solutions that meet market needs efficiently. In other words, technopreneurship is concerned with ICT application in entrepreneurship. As digital transformation reshapes industries, technopreneurship has emerged as a critical pathway for fostering economic growth, enhancing competitiveness, and solving societal challenges. This chapter examines technopreneurship through key dimensions, including its concept, market and customer solutions, and the roles of blockchain, cloud computing, renewable energy, digitization, Internet of Things, and Artificial intelligence.',
+      },
+      {
+        type: 'definition',
+        heading: '17.2 The Concept of "Technopreneurs"',
+        text: 'Technopreneurs are individuals or organizations that harness technology to develop and commercialize innovative products or services. They combine technical expertise with entrepreneurial skills to address market demands, create value and generate economic growth. Unlike traditional entrepreneurs, technopreneurs focus on disruptive technologies such as software development, robotics, and digital platforms. This approach fosters scalable and sustainable business models while driving digital transformation.',
+      },
+      {
+        type: 'text',
+        text: 'Technopreneurs stand out for their ability to identify opportunities with technology advancements and align them with market needs. They often work at the intersection of technology and business strategy, leveraging ICT tools to innovate solutions that disrupt traditional business models. For instance, successful technopreneurs like Elon Musk and Jack Ma have revolutionized industries such as energy and e-commerce by integrating cutting-edge technologies with visionary business strategies.',
+      },
+      {
+        type: 'text',
+        text: 'Key traits of technopreneurs include adaptability, problem-solving skills, and a growth mindset. They thrive in environments characterized by rapid change and uncertainty, continuously seeking ways to improve processes, goods, and services through technology. Moreover, technopreneurs often prioritize collaboration, drawing on multidisciplinary teams to foster creativity and innovation. This collaborative approach enables them to build ecosystems that support technological advancement and entrepreneurship simultaneously.',
+      },
+      {
+        type: 'definition',
+        heading: '17.3 Market and Customer Solutions',
+        text: 'Market and customer solutions are central to technopreneurship, emphasizing the creation of innovative, customer-focused strategies that address specific needs and pain points. By leveraging digital tools, technopreneurs can enhance customer engagement, improve service delivery, and establish competitive advantages. Key elements of a reliable market and customer solution are customer relationship management (CRM), big data analytics, e-commerce platforms, mobile applications, and emerging technologies. Essentially, technopreneurs who focus on delivering superior market and customer solutions position themselves for long-term success. By integrating cutting-edge technologies and prioritizing customer-centric approaches, they can address unmet needs, foster loyalty, and maintain a competitive edge in dynamic markets.',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Customer relationship management (CRM) system', def: 'This is one of the critical tools, which allows businesses to track customer interactions, manage leads, and analyze purchasing patterns. CRM platforms, such as Salesforce and HubSpot, enable technopreneurs to create personalized marketing campaigns, foster customer loyalty, and drive repeat business.' },
+          { term: 'Big data analytics', def: 'This provides actionable insights into customer behavior and market trends, enabling entrepreneurs to tailor their offerings to evolving demands.' },
+          { term: 'E-commerce platforms', def: 'These are another cornerstone of market solutions, offering seamless and scalable avenues for reaching global audiences. Technopreneurs can utilize platforms like Shopify or Amazon to establish online storefronts, streamline payment processing, and optimize logistics. These platforms not only reduce operational barriers but also provide data-driven recommendations to enhance sales performance.' },
+          { term: 'Mobile applications', def: 'These play a significant role in enhancing accessibility and convenience for customers. Apps provide direct channels for communication, facilitate transactions, and offer personalized experiences. For instance, ride-sharing apps like Uber revolutionize transportation services by connecting users and drivers through intuitive interfaces.' },
+          { term: 'Emerging technologies', def: 'Like augmented reality (AR) and virtual reality (VR) are also reshaping market solutions. AR-enabled apps allow customers to visualize products in real-world settings, such as furniture in their homes or clothing on their avatars, thereby reducing uncertainty and boosting purchase confidence.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4 Emerging Technologies and Entrepreneurship',
+        text: 'Emerging technologies are revolutionizing entrepreneurship by creating opportunities for innovation, efficiency, and scalability. These technologies, including blockchain, cloud computing, renewable energy, and digitization/automation, empower entrepreneurs to tackle complex challenges, create value, and redefine market boundaries. By integrating these advanced solutions, businesses can streamline operations, enhance decision-making, and build sustainable models that align with evolving market dynamics. Following is an exploration of the transformative roles of these technologies in shaping the entrepreneurial landscape.',
+      },
+      {
+        type: 'definition',
+        heading: '17.4.1 The Concept of Blockchain',
+        text: 'Blockchain technology, initially designed as the foundational infrastructure for cryptocurrencies, has evolved into a transformative tool that is reshaping industries and entrepreneurial activities globally. By offering decentralized, transparent, and secure mechanisms for data management, blockchain is fostering trust and innovation in ways previously unimaginable. Blockchain is a distributed ledger technology (DLT) that records transactions across multiple computers so that the record cannot be altered retroactively without the alteration of all subsequent blocks and the consensus of the network. This decentralized nature ensures transparency, immutability, and security, making it particularly appealing for entrepreneurial applications in industries such as finance, supply chain, healthcare, and real estate. The roles of blockchain in entrepreneurship are discussed below.',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Enhanced Transparency and Trust', def: "Trust is a critical component in entrepreneurship, especially for startups that lack an established reputation. Blockchain's transparent nature allows all stakeholders to access a unified and immutable record of transactions. For example, smart contracts on blockchain platforms like Ethereum automate and enforce agreements without intermediaries. This reduces fraud risks and builds confidence among investors, partners, and customers." },
+          { term: 'Access to Funding through Decentralized Finance (DeFi)', def: 'Traditional funding options, such as bank loans and venture capital, often present significant barriers for entrepreneurs. Blockchain introduces alternative funding mechanisms like Initial Coin Offerings (ICOs) and Security Token Offerings (STOs), which enable startups to raise capital directly from global investors without intermediaries. Decentralized finance (DeFi) platforms also allow entrepreneurs to access peer-to-peer lending and borrowing services, democratizing access to capital.' },
+          { term: 'Streamlining Supply Chain Management', def: "Entrepreneurs in sectors reliant on supply chain operations benefit significantly from blockchain's ability to track and verify goods' movement. Companies like IBM and Maersk have implemented blockchain-based solutions that enhance transparency and reduce inefficiencies in supply chains. For startups, this means better resource allocation and improved trust with suppliers and customers." },
+          { term: 'Facilitating Global Transactions', def: "Blockchain's borderless nature enables entrepreneurs to conduct international transactions without the complexities of currency exchange and banking regulations. Cryptocurrencies like Bitcoin and stablecoins facilitate faster and cost-effective cross-border payments, making it easier for startups to expand globally." },
+          { term: 'Intellectual Property and Digital Rights Management', def: 'Protecting intellectual property (IP) is a significant challenge for entrepreneurs. Blockchain can serve as a secure platform for registering and managing IP rights. For example, startups in creative industries can tokenize their work, ensuring that ownership and royalties are tracked and distributed fairly.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.1.1 Blockchain-Driven Business Models',
+        text: 'Entrepreneurs are leveraging blockchain to develop innovative business models, including:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Tokenization of Assets', def: 'Entrepreneurs can tokenize physical and digital assets, allowing fractional ownership and liquidity. For instance, real estate platforms are enabling small investors to purchase fractions of properties using blockchain.' },
+          { term: 'Decentralized Marketplaces', def: 'Blockchain facilitates peer-to-peer marketplaces where users can trade goods and services without intermediaries, reducing costs and increasing transparency.' },
+          { term: 'Blockchain-as-a-Service (BaaS)', def: 'Startups offering BaaS solutions provide tools for other businesses to integrate blockchain into their operations without requiring extensive technical expertise.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.1.2 Challenges/Limitations and Future Prospects',
+        text: 'Despite its potential, blockchain adoption faces several challenges:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Scalability Issues', def: 'Blockchain networks often struggle with processing high volumes of transactions quickly.' },
+          { term: 'Regulatory Uncertainty', def: 'Entrepreneurs must navigate complex and evolving regulatory landscapes.' },
+          { term: 'High Initial Costs', def: 'Implementing blockchain solutions can be costly for startups with limited resources.' },
+          { term: 'Skill Gaps', def: 'A shortage of skilled blockchain developers can hinder adoption and innovation.' },
+        ],
+      },
+      {
+        type: 'text',
+        text: 'The integration of blockchain in entrepreneurship is poised to deepen as technology matures and adoption grows. Emerging trends such as non-fungible tokens (NFTs), decentralized autonomous organizations (DAOs), and blockchain-based identity management are opening new avenues for entrepreneurial innovation.',
+      },
+      {
+        type: 'definition',
+        heading: '17.4.2 Cloud Computing',
+        text: 'Cloud computing refers to the delivery of computing services such as storage, servers, databases, networking, software, and analytics over the internet, commonly known as "the cloud". It allows users to access and store data or applications remotely, rather than on local computers or physical servers. This model provides scalable, flexible, and cost-efficient solutions, enabling individuals and businesses to pay only for the resources they use. Cloud computing has revolutionized various industries by providing on-demand access to computing resources. This technological advancement has become a critical tool for entrepreneurs, enabling them to innovate, reduce operational costs, and scale their businesses efficiently. By leveraging cloud services, startups and small businesses can access enterprise-level resources without the significant upfront investment traditionally required.',
+      },
+      {
+        type: 'definition',
+        heading: '17.4.2.1 The Role of Cloud Computing in Entrepreneurship',
+        text: 'Entrepreneurship thrives on innovation, agility, and scalability. Cloud computing provides a platform that aligns with these principles by offering flexibility and cost-efficiency. Entrepreneurs can access software, platforms, etc. through cloud providers such as Amazon Web Services (AWS), Microsoft Azure, and Google Cloud. This accessibility democratizes technology, enabling startups to compete with larger corporations.',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Cost Efficiency', def: 'Cloud computing eliminates the need for significant capital investment in IT infrastructure. Entrepreneurs can pay for services on a subscription or pay-as-you-go basis, which aligns with their cash flow constraints.' },
+          { term: 'Scalability and Flexibility', def: 'Startups often face fluctuating demands. Cloud computing allows them to scale resources up or down based on their needs, fostering adaptability.' },
+          { term: 'Enhanced Collaboration and Productivity', def: 'Cloud-based tools enable teams to collaborate in real-time, irrespective of location. Applications like Google Workspace and Slack enhance productivity and streamline operations.' },
+          { term: 'Access to Advanced Technologies', def: 'Entrepreneurs can leverage advanced technologies such as artificial intelligence (AI), machine learning (ML), and big data analytics, which are increasingly offered as cloud services.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.2.2 Challenges of Cloud Computing in Entrepreneurship',
+        text: 'Despite its advantages, cloud computing presents several challenges for entrepreneurs:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Security and Privacy Concerns', def: 'Startups may face risks related to data breaches and unauthorized access. Entrepreneurs must ensure compliance with data protection regulations.' },
+          { term: 'Dependence on Internet Connectivity', def: 'Reliable internet access is critical for cloud services. Poor connectivity can disrupt operations, especially in regions with inadequate infrastructure.' },
+          { term: 'Vendor Lock-in', def: 'Entrepreneurs may become dependent on a single cloud provider, making it challenging to migrate to another platform without incurring high costs.' },
+          { term: 'Cost Management', def: 'While cloud services are cost-efficient, poor management of resources can lead to unexpected expenses, impacting the financial sustainability of startups.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.2.3 Cloud Computing and Entrepreneurship: Case Studies and Future Implications',
+        text: 'Futuristically, the integration of cloud computing in entrepreneurship is poised to grow, driven by advancements in edge computing, 5G technology, and AI. Entrepreneurs will increasingly rely on cloud platforms to drive innovation, enter new markets, and improve operational efficiency. However, addressing challenges related to data security, regulatory compliance, and vendor lock-in will be critical for sustainable adoption. Discuss below are some cases of cloud computing and entrepreneurship:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Dropbox', def: 'Dropbox started as a startup leveraging Amazon S3 for cloud storage. By using cloud services, it scaled rapidly without investing heavily in infrastructure, becoming a global leader in file sharing and storage.' },
+          { term: 'Zoom', def: 'Zoom Video Communications utilized cloud computing to provide a scalable and reliable video conferencing solution. During the COVID-19 pandemic, its cloud-based architecture allowed it to handle the surge in demand seamlessly.' },
+          { term: 'Flutterwave', def: "A Nigerian fintech company, Flutterwave, leveraged cloud services to build a robust payment processing platform. Its scalability and accessibility have made it a leader in Africa's digital payments space." },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.3 Renewable Energy',
+        text: 'The intersection of renewable energy and entrepreneurship presents a critical pathway toward sustainable economic development, environmental conservation, and energy security. In recent years, the rising demand for clean energy solutions has fueled innovation and created opportunities for entrepreneurs to drive transformation across diverse sectors. Renewable energy refers to energy derived from naturally replenishing sources such as solar, wind, hydropower, geothermal, and biomass. Unlike fossil fuels, renewable energy resources are abundant, sustainable, and have minimal environmental impact. The increasing adoption of renewable energy is driven by factors such as climate change concerns, declining costs of renewable technologies, and supportive government policies.',
+      },
+      {
+        type: 'definition',
+        heading: '17.4.3.1 Entrepreneurship in Renewable Energy',
+        text: 'Entrepreneurship plays a pivotal role in accelerating the transition to renewable energy. Entrepreneurs are at the forefront of developing innovative solutions, creating employment opportunities, and fostering local economic growth. Their contributions are evident in the areas discussed below:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Technology Development and Innovation', def: "Entrepreneurs drive technological advancements by developing more efficient and affordable renewable energy systems. Innovations such as advanced battery storage, smart grids, and energy-efficient appliances have significantly enhanced the viability of renewable energy. For example, Tesla's Powerwall technology has revolutionized home energy storage, enabling households to store excess solar energy for later use." },
+          { term: 'Decentralized Energy Solutions', def: 'Entrepreneurs are expanding access to energy through decentralized renewable energy systems. These systems, such as solar microgrids and off-grid solutions, provide electricity to remote and underserved communities.' },
+          { term: 'Green Business Models', def: 'Renewable energy entrepreneurs are pioneering green business models that integrate sustainability with profitability. Businesses such as SolarCity have shown that combining renewable energy installations with financing options can be both environmentally and economically beneficial.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.3.2 Challenges in Renewable Energy',
+        text: 'While renewable energy offers immense potential, it also faces significant challenges:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'High Initial Costs', def: 'Despite declining costs, the upfront investment required for renewable energy projects remains a barrier for many entrepreneurs. Access to financing is often limited, particularly in developing economies.' },
+          { term: 'Regulatory Hurdles', def: 'Entrepreneurs must navigate complex regulatory environments that can hinder project implementation. Inconsistent policies and lengthy approval processes can delay renewable energy projects.' },
+          { term: 'Market Competition', def: 'The renewable energy market is increasingly competitive, with large corporations and well-established firms dominating the space. This can make it difficult for small-scale entrepreneurs to gain market share.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.3.3 Policy Support and Recommendations',
+        text: 'To address these challenges and promote renewable energy entrepreneurship, the following measures are essential:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Access to Financing', def: 'Governments and financial institutions should establish funding mechanisms such as green bonds, grants, and low-interest loans to support renewable energy entrepreneurs.' },
+          { term: 'Supportive Policies', def: 'Governments should implement clear and consistent policies, including tax incentives, subsidies, and renewable energy mandates, to create a conducive environment for entrepreneurs.' },
+          { term: 'Capacity Building', def: 'Training programs and workshops can equip entrepreneurs with the technical and business skills needed to succeed in the renewable energy sector.' },
+          { term: 'Public-Private Partnerships', def: 'Collaborations between governments, private sector actors, and international organizations can facilitate resource-sharing and accelerate the development of renewable energy projects.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.4 Digitization and Automation',
+        text: 'The convergence of digitization, automation, and entrepreneurship has revolutionized business landscapes globally, bringing with it significant opportunities and challenges. These transformative elements are reshaping the way entrepreneurs launch, operate, and grow businesses, particularly in developing economies. By automating routine tasks, digitizing business processes, and leveraging cutting-edge technologies, entrepreneurs are able to scale operations, optimize resource management, and reach global markets with unprecedented ease.',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Digitization', def: 'Refers to the process of converting analog information into digital form. It involves the use of digital technologies to transform business operations, customer engagement, and internal processes. Digitization encompasses a range of technologies, such as cloud computing, artificial intelligence (AI), big data analytics, mobile apps, and e-commerce platforms.' },
+          { term: 'Automation', def: 'Refers to the use of technology to perform tasks without human intervention. It can involve everything from simple software automation of repetitive tasks to more complex robotics or AI systems designed to perform sophisticated tasks. In the context of entrepreneurship, automation often pertains to streamlining administrative, marketing, customer service, and production processes, which reduces human error and increases efficiency.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.4.1 The Role of Digitization and Automation in Entrepreneurship',
+        text: 'Digitization and automation play a pivotal role in empowering entrepreneurs, enabling them to overcome traditional business barriers. Prominent among these roles are the following:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Access to Global Markets', def: 'Digital technologies have democratized market access. Entrepreneurs no longer need to depend on physical stores or local networks to grow their businesses. With e-commerce platforms, entrepreneurs can sell products and services to customers worldwide, increasing their market reach and customer base.' },
+          { term: 'Enhanced Efficiency', def: 'Automation allows entrepreneurs to streamline repetitive tasks such as inventory management, payroll processing, and customer inquiries. By using tools like automated emails, chatbot customer service, and AI-driven analytics, entrepreneurs can operate more efficiently with fewer resources.' },
+          { term: 'Cost Reduction', def: 'One of the primary benefits of digitization and automation for entrepreneurs is cost reduction. Entrepreneurs can minimize the need for physical office space, employees, and resources, especially in the early stages of business. Virtual meetings, cloud storage, and online collaboration tools reduce operational costs significantly.' },
+          { term: 'Better Decision-Making with Data', def: 'Digitization enables entrepreneurs to collect vast amounts of data about customer behaviour, market trends, and operational performance. Through data analytics, entrepreneurs can make informed decisions about product development, marketing strategies, and customer engagement, which can lead to better outcomes and faster growth.' },
+          { term: 'Personalization and Customer Experience', def: 'Automated systems, such as recommendation engines, personalized marketing campaigns, and AI-driven customer support, help businesses tailor their offerings to meet the specific needs of individual customers. This enhances the customer experience and can increase brand loyalty.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.4.2 The Impact of Digitization and Automation on Business Models',
+        text: 'The advent of digitization and automation has influenced the evolution of various business models, particularly those favoured by entrepreneurs. Some of the digitization- and automation-enabled business models are as follows:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Subscription-Based Models', def: 'Entrepreneurs in various industries are adopting subscription-based business models, enabled by digital platforms. This approach ensures steady revenue streams while also allowing businesses to automate billing and customer management.' },
+          { term: 'Platform Economy', def: 'The rise of digital platforms such as Uber, Airbnb, and Etsy are prime examples of how automation and digitization have created new business models. Entrepreneurs leverage these platforms to reach a global audience, provide services, or facilitate exchanges with minimal overhead and without owning physical infrastructure.' },
+          { term: 'Freemium Models', def: 'With the advent of digital tools, many entrepreneurs are adopting freemium models, offering basic services for free while charging for premium features. Automation allows businesses to scale this model effortlessly as systems can automatically handle large volumes of users with minimal manual effort.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.4.3 Benefits of Digitization and Automation for Entrepreneurs',
+        text: 'Digitization and Automation present a number of benefits to entrepreneurs. The benefits are as follows.',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Speed and Scalability', def: 'Automation makes it easier for businesses to scale quickly. Entrepreneurs can expand their reach, customer base, and product offerings without proportional increases in staffing or operational costs. Scalable digital platforms can accommodate large numbers of users and transactions.' },
+          { term: 'Flexibility and Agility', def: 'Automation empowers entrepreneurs to react more swiftly to market demands, making adjustments to their operations with minimal effort. This is particularly crucial in industries with fast-changing consumer preferences or market conditions.' },
+          { term: 'Improved Customer Insights', def: 'By automating the collection of data and leveraging analytics, entrepreneurs can gain deeper insights into customer behavior, preferences, and trends. This allows for targeted marketing and product improvements, ultimately enhancing customer satisfaction and retention.' },
+          { term: 'Increased Innovation', def: "With automation taking care of routine tasks, entrepreneurs have more time to focus on innovation, whether that's developing new products, exploring new markets, or experimenting with business strategies." },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.4.4 Challenges and Considerations for Entrepreneurs',
+        text: 'While digitization and automation offer numerous advantages, there are also challenges that entrepreneurs must navigate:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Initial Investment', def: 'The costs associated with adopting digital technologies and automation systems can be prohibitive for small entrepreneurs, especially in developing regions. However, the long-term benefits often outweigh the initial investments, though funding and financing remain key concerns.' },
+          { term: 'Technological Skills and Knowledge', def: 'Entrepreneurs may lack the technical expertise needed to fully implement and leverage digital and automation tools. This may require hiring specialized staff or outsourcing, adding to costs and complexity.' },
+          { term: 'Data Privacy and Security', def: 'As businesses digitize and collect vast amounts of customer data, ensuring data privacy and protection from cyber threats becomes paramount. Entrepreneurs must adhere to relevant data protection regulations requiring careful management of data security systems.' },
+          { term: 'Resistance to Change', def: 'Some entrepreneurs, particularly in traditional sectors, may be resistant to adopting new technologies due to fear of change or lack of understanding. Overcoming this resistance involves educating and empowering business owners to understand the long-term benefits of digitization and automation.' },
+          { term: 'Dependence on Technology', def: 'Heavy reliance on automation systems makes businesses vulnerable to system failures, cyber-attacks, or technological disruptions. Entrepreneurs must ensure that they have adequate backup systems and crisis management plans in place.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.4.4.5 Future Trends in Digitization, Automation, and Entrepreneurship',
+        text: 'The relationship between digitization, automation, and entrepreneurship will continue to evolve as technology advances. Some future trends include:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'AI and Machine Learning', def: 'These technologies will become even more embedded in business operations, automating complex tasks like customer service, decision-making, and market forecasting. Entrepreneurs will increasingly rely on AI to drive business intelligence and optimize performance.' },
+          { term: 'Blockchain Technology', def: 'In industries such as finance, supply chain management, and contract management, blockchain technology will provide secure, transparent, and decentralized solutions, allowing entrepreneurs to streamline operations and reduce fraud risks.' },
+          { term: 'The Rise of No-Code and Low-Code Platforms', def: 'Entrepreneurs will increasingly turn to no-code and low-code platforms, which allow them to create apps and automate workflows without deep programming knowledge. This will open up new possibilities for small businesses and startups to innovate rapidly.' },
+          { term: 'Remote and Hybrid Work', def: 'The shift toward remote and hybrid work models is expected to continue, with entrepreneurs leveraging digital tools to manage teams, track performance, and collaborate efficiently across geographies.' },
+          { term: 'Sustainability and Green Technologies', def: 'As automation becomes more energy-efficient, entrepreneurs may focus on sustainable practices that reduce the environmental impact of their business operations. Green technologies and sustainable innovations will increasingly be integrated into business strategies.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.5 Internet of Things and Entrepreneurship',
+        text: 'Internet of Things (IoT) refers to a network of physical objects referred to as "things" embedded with sensors, software, and other technologies that enable them to connect to and exchange data with other devices and systems over the internet. These "things" can range from household appliances to industrial machinery and vehicles. IoT has transformed how businesses operate, offering significant opportunities for entrepreneurs to innovate, reduce costs, and enhance customer experiences. To better understand the IoT, it is imperative to consider some key components and principles associated with it practice.',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Connectivity', def: 'Devices are connected through wireless technologies like Wi-Fi, Bluetooth, or cellular networks.' },
+          { term: 'Data Collection and Processing', def: 'Sensors collect data from the environment, which is then processed using cloud computing or edge computing.' },
+          { term: 'Automation and Control', def: 'IoT enables automated decision-making based on real-time data, allowing for greater efficiency and productivity.' },
+          { term: 'User Interaction', def: 'IoT facilitates interaction between users and devices through interfaces like mobile apps or voice assistants.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.5.1 IoT and Entrepreneurship: Opportunities and Applications',
+        text: 'IoT is redefining entrepreneurship by creating opportunities for new business models, improved operational efficiencies, and enhanced customer engagement. For entrepreneurs, IoT provides the tools to innovate across various industries, transforming traditional business models into smarter, more efficient systems. Some of the opportunities and applications of IoT are as follows:',
+      },
+      {
+        // The workbook nests further (a)/(b)/(c) examples inside these four items with
+        // inconsistent punctuation (stray periods, mixed "and"/semicolon). Flattened
+        // into consistent em-dash prose here rather than preserved verbatim — unlike
+        // the numbering typos in earlier chapters, this is Word autolist formatting
+        // noise, not part of the author's wording.
+        type: 'termlist',
+        items: [
+          { term: 'Innovation in Product Development', def: 'Entrepreneurs are leveraging IoT to create "smart" products that enhance user convenience and functionality. For instance: (a) Smart Wearables — devices like Fitbit and Apple Watch monitor health metrics in real time, creating value for health-conscious consumers; (b) Smart Homes — IoT-enabled devices like thermostats, lighting systems, and home security cameras have transformed home automation, opening avenues for startups in home tech; and (c) Connected Vehicles — IoT in automobiles provides features such as Global Positioning System (GPS) navigation, predictive maintenance, and autonomous driving capabilities.' },
+          { term: 'Operational Optimization', def: 'IoT helps entrepreneurs streamline operations by offering real-time insights and automation in many areas, such as: (a) Supply Chain Management — IoT sensors enable asset tracking, inventory monitoring, and logistics optimization, reducing delays and costs; (b) Predictive Maintenance — industrial IoT applications monitor machinery for signs of wear, preventing costly breakdowns; and (c) Energy Management — IoT systems, like smart grids, optimize energy consumption in businesses, reducing expenses.' },
+          { term: 'Data-Driven Decision Making', def: 'IoT generates vast amounts of data, enabling entrepreneurs to gain actionable insights. For example, by analyzing data from IoT devices, businesses can understand user preferences and offer personalized services. IoT data can also highlight emerging trends, enabling businesses to adapt quickly and maintain a competitive edge.' },
+          { term: 'Empowering Small Businesses in Emerging Markets', def: 'IoT has significant potential in developing regions, where it addresses critical challenges in several areas. For instance, in agriculture, IoT-powered precision farming tools improve crop yields through real-time monitoring of soil conditions, weather, and water levels; in healthcare, remote health monitoring systems help entrepreneurs address gaps in healthcare infrastructure.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.5.2 Challenges in Leveraging IoT for Entrepreneurship',
+        text: 'Despite its potential, IoT adoption comes with challenges some of which are as follows:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'High Initial Costs', def: 'Building IoT infrastructure, including sensors, connectivity, and data analytics platforms, can be expensive for startups.' },
+          { term: 'Data Security and Privacy', def: 'IoT devices are vulnerable to cyberattacks, which can compromise sensitive customer data.' },
+          { term: 'Integration Issues', def: 'Entrepreneurs may struggle to integrate IoT systems with existing business processes.' },
+          { term: 'Scalability', def: 'Scaling IoT solutions to accommodate growing demands requires significant investments in technology and infrastructure.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.5.3 Future Prospects of IoT in Entrepreneurship and Coping Strategies',
+        text: 'IoT is poised to play a pivotal role in the future of entrepreneurship. Advancements in 5G connectivity, artificial intelligence (AI), and edge computing will enhance IoT capabilities, enabling more sophisticated applications. Entrepreneurs who embrace these technologies will be better positioned to capitalize on emerging opportunities, from autonomous systems to smart cities. Therefore, to maximize the benefits of IoT, entrepreneurs should:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Emphasize Security', def: 'Adopt robust cybersecurity measures to protect IoT ecosystems from breaches.' },
+          { term: 'Leverage Partnerships', def: 'Collaborate with IoT platform providers to reduce costs and accelerate development.' },
+          { term: 'Focus on Scalability', def: 'Design IoT solutions with future growth in mind, ensuring systems can handle increased data and device connections.' },
+          { term: 'Seek Funding and Support', def: 'Utilize government initiatives and venture capital funding aimed at promoting IoT innovation.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.6 Regulatory Compliance and Legal Considerations in Entrepreneurship',
+        text: 'This section explores key areas of regulatory compliance and legal considerations that entrepreneurs must navigate.',
+      },
+      {
+        type: 'definition',
+        heading: '17.6.1 Business Structure and Registration',
+        text: 'Choosing the right legal structure is one of the first legal decisions an entrepreneur must make. The business structure determines the level of personal liability an entrepreneur faces, the tax treatment of the business, and the types of legal documents required for operation. As detailed earlier in Chapter 8, common business structures include Sole proprietorship, Partnership, Limited Liability Company (LLC) amongst others. Each structure has different legal and tax implications, so entrepreneurs must carefully consider their options based on factors like the scale of their business, funding requirements, and risk tolerance.',
+      },
+      {
+        type: 'text',
+        text: 'Registration is also a critical step in the legal setup of a business. Most countries require entrepreneurs to register their business with the relevant government authorities, obtain a tax identification number, and secure any necessary licenses or permits for their specific industry. Failure to properly register a business or obtain the required permits can result in fines, penalties, or even the closure of the business.',
+      },
+      {
+        // The workbook cross-references "chapter 14" here for more on IP — but in
+        // this collection chapter 14 is the non-governmental support institutions
+        // chapter, not an IP chapter. Preserved verbatim; the cross-reference
+        // appears to point at a different chapter numbering than the one used
+        // across the files transcribed for this course.
+        type: 'definition',
+        heading: '17.6.2 Intellectual Property Protection',
+        text: "Intellectual Property (IP) is an essential asset for many startups, especially those in technology, creative industries, and product development. Protecting intellectual property ensures that businesses can safeguard their unique ideas, inventions, brands, and works. Key forms of IP protection include: Trademarks, Patents, Copyrights and Trade secrets. Failing to protect intellectual property can result in competitors copying a business's unique offerings, undermining its competitive edge. Entrepreneurs should also be mindful of potential IP infringement claims, ensuring that they do not unintentionally violate other businesses' intellectual property rights (see chapter 14 for more on IP).",
+      },
+      {
+        type: 'definition',
+        heading: '17.6.3 Employment Laws',
+        text: 'Entrepreneurs must navigate a variety of employment laws that govern their relationship with employees. Failure to comply with employment laws can result in costly lawsuits, fines, and a damaged reputation, making it crucial for entrepreneurs to establish clear employment contracts and policies that align with the legal requirements of their jurisdiction. These laws vary by country and region but generally cover areas such as:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Hiring practices', def: 'Ensuring compliance with anti-discrimination laws when hiring employees.' },
+          { term: 'Wages and benefits', def: 'Adhering to minimum wage laws, overtime regulations, and providing legally mandated benefits such as health insurance or paid leave.' },
+          { term: 'Health and safety', def: 'Complying with workplace safety regulations to ensure employees are not exposed to unnecessary risks.' },
+          { term: 'Termination and severance', def: 'Following proper procedures when firing or laying off employees, including paying severance and providing appropriate notice periods.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.6.4 Tax Compliance',
+        text: 'Entrepreneurs must comply with national, regional, and local tax regulations. This includes filing tax returns, paying business taxes, and adhering to requirements for sales tax, value-added tax (VAT), and income tax. Non-compliance with tax regulations can result in audits, penalties, and potential criminal charges. Many entrepreneurs find it helpful to work with tax professionals or accountants who can ensure their business complies with tax regulations and help optimize their tax obligations. Entrepreneurs should consider the following key tax considerations:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Business income tax', def: 'Based on the revenue and profits of the business, this tax is often a percentage of earnings and varies by jurisdiction.' },
+          { term: 'Sales tax/VAT', def: 'Collected on the sale of goods or services, and typically remitted to the government.' },
+          { term: 'Employee-related taxes', def: "Including social security and pension contributions, which entrepreneurs must withhold from employees' salaries and remit to the appropriate government bodies." },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.6.5 Contract Law and Agreements',
+        text: 'Contracts are fundamental to business operations, as they govern relationships with employees, suppliers, customers, and investors. Entrepreneurs must ensure that their contracts are legally binding and enforceable. An enforceable contract must meet certain legal requirements, such as mutual consent, consideration, and the intention to create legal obligations. A well-drafted contract reduces the risk of disputes and provides a legal framework for resolving conflicts if they arise. Common types of contracts include:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Supplier contracts', def: 'Outlining the terms of supply and delivery, including payment terms and product specifications.' },
+          { term: 'Customer agreements', def: 'Including terms of sale, warranties, and return policies.' },
+          { term: 'Partnership agreements', def: 'Defining the roles, responsibilities, and equity stakes of partners in a business venture.' },
+          { term: 'Non-disclosure agreements (NDAs)', def: 'Protecting sensitive business information from being disclosed to competitors or the public.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.6.6 Regulations in Specific Industries',
+        text: 'Certain industries face additional regulatory scrutiny due to their impact on public health, safety, and the environment. Entrepreneurs in sectors such as healthcare, food and beverage, finance, and technology must comply with industry-specific regulations. Entrepreneurs operating in such regulated industries must stay informed of relevant laws and standards to avoid legal and financial penalties. For example:',
+      },
+      {
+        type: 'bullets',
+        items: [
+          'Healthcare startups may need to adhere to medical device regulations or patient privacy laws (e.g., Health Insurance Portability and Accountability Act [HIPAA] standards).',
+          'Financial technology (FinTech) startups must comply with anti-money laundering (AML) and know your customer (KYC) regulations.',
+          'Food and beverage businesses must comply with health and safety standards related to food preparation and labeling.',
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.6.7 Data Privacy and Consumer Protection',
+        text: 'With the increasing digitization of business operations, data privacy has become a critical concern. Entrepreneurs must comply with data protection laws such as the Nigeria Data Protection Regulation (NDPR) and the Consumer Protection Council Act, Cap 25, 2004. These laws regulate how businesses collect, store, and use consumer data. Adhering to data protection laws is vital to maintaining consumer trust and avoiding fines or legal actions. Therefore, it is essential for entrepreneurs to stay informed, consult legal professionals, and create systems that ensure ongoing compliance throughout the life cycle of their business. In practice, entrepreneurs must ensure that:',
+      },
+      {
+        type: 'bullets',
+        items: [
+          'They obtain informed consent before collecting personal data.',
+          'They store data securely and provide consumers with access to their data upon request.',
+          'They notify consumers in case of a data breach.',
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.7 Artificial Intelligence and Entrepreneurship',
+        text: 'Artificial Intelligence (AI) is changing the way businesses work, helping entrepreneurs find new opportunities, improve efficiency, and make better decisions. AI refers to machines or systems that can learn, think, and solve problems like humans. It is a branch of computer science that allows machines to perform tasks that require human intelligence. This technology allows businesses to analyze large amounts of data, automate tasks, and create products that meet the specific needs of customers. Key features of AI are:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Learning', def: 'AI systems can learn from data and improve over time.' },
+          { term: 'Reasoning', def: 'AI can make decisions based on the data it receives.' },
+          { term: 'Automation', def: 'AI performs tasks without human effort, such as answering questions, driving cars, or analyzing markets.' },
+        ],
+      },
+      {
+        type: 'text',
+        text: 'Entrepreneurs can use AI to grow their businesses and solve problems. AI helps in the following ways:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Creating New Goods and Services', def: "AI allows entrepreneurs to create smart products that meet customers' needs. For example: (a) Personalized Services — platforms like Netflix and Amazon use AI to suggest movies or products based on your interests; and (b) Smart Devices — AI-powered gadgets like smartwatches, smart home assistants (like Alexa), and health trackers help businesses meet customer demands." },
+          { term: 'Making Business Operations More Efficient', def: 'AI helps businesses work faster and reduce costs. For example: (a) Customer Support — AI chatbots answer customer questions 24/7 without human effort; (b) Inventory Management — AI predicts when supplies are needed and reduces waste; and (c) Fraud Detection — AI helps fintech companies identify unusual activities in online payments.' },
+          { term: 'Improving Decision-Making', def: 'AI helps businesses analyze data and make better decisions. For instance: (a) Predicting Sales — AI predicts how many products people might buy in the future; and (b) Understanding Customers — AI tools analyze customer reviews, feedback, and social media to improve goods or services.' },
+          { term: 'Creating New Business Ideas', def: 'AI allows entrepreneurs to introduce new business models, such as: (a) Platform Businesses, e.g. Uber and Airbnb apps, which connect service providers with users; and (b) AI Services — startups offer AI tools to other businesses, helping them analyze data and make decisions.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.7.1 Challenges Entrepreneurs Face When Using AI',
+        text: 'Even though AI is helpful, there are some challenges:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'High Costs', def: 'Building AI systems can be expensive for small businesses.' },
+          { term: 'Lack of Skills', def: 'Entrepreneurs may not have the knowledge to use AI tools effectively.' },
+          { term: 'Ethical Issues', def: 'AI can sometimes show bias or misuse personal data, leading to privacy concerns.' },
+          { term: 'Data Needs', def: 'AI systems need large amounts of data to work well, which can be hard to get.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.7.2 The Future of AI in Entrepreneurship and Coping Initiatives',
+        text: 'AI will play a bigger role in businesses as technology improves. Tools like AI-powered robots, self-learning systems, and better analytics will create opportunities for entrepreneurs in fields like healthcare, education, and entertainment. Entrepreneurs who adopt AI early will have an advantage over competitors by offering smarter and faster solutions. To benefit from AI, entrepreneurs should:',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: 'Learn About AI', def: 'Entrepreneurs can train themselves and their teams to understand AI.' },
+          { term: 'Collaborate', def: 'Work with technology experts or companies that offer AI solutions.' },
+          { term: 'Start Small', def: 'Begin by using AI tools like chatbots or data analysis software to see the benefits.' },
+          { term: 'Focus on Ethics', def: 'Use AI responsibly to protect customer privacy and avoid bias.' },
+        ],
+      },
+      {
+        type: 'definition',
+        heading: '17.8 Summary and Conclusion',
+        text: 'Technopreneurship is revolutionizing modern businesses by driving innovation, fostering economic growth, and addressing societal challenges. Technopreneurs leverage advanced technologies such as blockchain, cloud computing, renewable energy, digitization, the Internet of Things (IoT), and artificial intelligence (AI) to develop scalable, efficient, and customer-focused solutions. The chapter highlights the pivotal role of emerging technologies in empowering entrepreneurs. Blockchain enhances transparency, trust, and efficiency, enabling secure transactions, funding opportunities through decentralized finance, and new business models like tokenized assets. Cloud Computing provides scalable and cost-effective IT resources, allowing startups to reduce operational costs, improve collaboration, and access advanced tools like AI and big data analytics. Moreover, digitization and Automation enable businesses to streamline processes, enhance decision-making through data analytics, and reduce costs while reaching global markets.',
+      },
+      {
+        type: 'text',
+        text: 'IoT facilitates smart product development, operational optimization, and data-driven decisions, particularly in sectors like healthcare, agriculture, and logistics. AI empowers entrepreneurs to automate tasks, personalize customer experiences, and develop innovative products while improving operational efficiency. While these technologies create opportunities, they also come with some challenges that could be addressed by adopting some strategic approaches like collaboration, skill development, and ethical practices. In conclusion, technopreneurship is reshaping the entrepreneurial landscape, offering tools to innovate, scale businesses, and solve critical problems. As emerging technologies continue to evolve, entrepreneurs who adopt and adapt these advancements will drive economic growth, competitiveness, and sustainable development in a digital era.',
+      },
+      {
+        type: 'bullets',
+        heading: 'References',
+        items: [
+          'Brown, S., & Taylor, R. (2020). Emerging technologies in business: The next frontier. London: TechWorld Publishing.',
+          'Brynjolfsson, E., & McAfee, A. (2017). The business of artificial intelligence: What it can—and cannot—do for your organization. Harvard Business Review.',
+          'Buterin, V. (2013). Ethereum: A next-generation smart contract and decentralized application platform.',
+          'Buyya, R., Yeo, C. S., Venugopal, S., Broberg, J., & Brandic, I. (2009). Cloud computing and emerging IT platforms: Vision, hype, and reality for delivering computing as the 5th utility. Future Generation Computer Systems, 25(6), 599-616.',
+          'Chen, Y., Li, S., & Wu, D. (2020). Blockchain technology and its impact on financial markets. Financial Innovation, 6(1), 1-17.',
+          'Chesbrough, H. (2003). The era of open innovation. MIT Sloan Management Review, 44(3), 35-41.',
+          'Chui, M., Manyika, J., & Miremadi, M. (2018). AI adoption advances, but foundational barriers remain. McKinsey & Company.',
+          'Davenport, T. H. (2018). Artificial Intelligence for the Real World. Harvard Business Review, 96(1), 108-116.',
+          'Garcia, M. (2021). Legal frameworks for entrepreneurs: Ensuring compliance. International Journal of Entrepreneurship Law, 10(2), 120-135.',
+          'Gubbi, J., Buyya, R., Marusic, S., & Palaniswami, M. (2013). Internet of Things (IoT): A vision, architectural elements, and future directions. Future Generation Computer Systems, 29(7), 1645-1660.',
+          'Hashem, I. A. T., Yaqoob, I., Anuar, N. B., Mokhtar, S., Gani, A., & Khan, S. U. (2015). The rise of "big data" on cloud computing: Review and open research issues. Information Systems, 47, 98-115. https://doi.org/10.1016/j.is.2014.07.006',
+          'Hsu, C. L., Lin, J. C. C., & Lee, M. (2017). Exploring factors affecting the adoption of Internet of Things services. Journal of Computer Information Systems, 57(4), 345-356.',
+          'Jang, S., Lee, M., & Kim, Y. (2020). Mixed reality and virtual reality applications in the workforce: Implications for entrepreneurship. Journal of Business Research, 118, 355-363. https://doi.org/10.1016/j.jbusres.2020.07.014',
+          'Johnson, T. (2020). Networking in the digital era: Opportunities and challenges. Global Business Journal, 22(1), 34-49.',
+          'Kietzmann, J., Paschen, J., & Treen, E. (2018). Artificial intelligence in advertising: How marketers can leverage AI to improve customer relationships. International Journal of Advertising, 37(3), 421-438.',
+          'Kouhizadeh, M., & Sarkis, J. (2018). Blockchain practices, potentials, and limitations in operations and supply chain management. International Journal of Production Research, 56(1-2), 1023-1040.',
+          'Wright, M., & Duffy, K. (2021). Virtual offices in the era of remote work: A new paradigm for entrepreneurship. Journal of Business Venturing Insights, 14, 1-7. https://doi.org/10.1016/j.jbvi.2021.100225',
+          'Xu, L. D., He, W., & Li, S. (2014). Internet of Things in industries: A survey. IEEE Transactions on Industrial Informatics, 10(4), 2233-2243.',
+        ],
+      },
+    ],
+  },
 ];
