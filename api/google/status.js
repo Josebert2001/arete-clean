@@ -21,17 +21,17 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const student = await getStudentFromRequest(req);
-  if (!student) {
-    return res.status(401).json({ error: 'Please sign in.' });
-  }
-
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {
     logRequest(req, 'google-status');
     res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
     return res.status(429).json({ error: 'Too many requests.' });
+  }
+
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    return res.status(401).json({ error: 'Please sign in.' });
   }
 
   if (!googleConfigured()) {

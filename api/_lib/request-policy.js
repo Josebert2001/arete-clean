@@ -10,13 +10,15 @@ function getStore() {
 }
 
 function getClientIp(req) {
-  const forwardedFor = req.headers['x-forwarded-for'];
+  // x-forwarded-for is client-suppliable (an attacker can send a different
+  // fake leftmost entry on every request), so prefer Vercel's own edge-set
+  // signal first — it can't be spoofed by the request itself.
+  const vercelIp = req.headers['x-vercel-forwarded-for'];
   const realIp = req.headers['x-real-ip'];
-  const rawIp = Array.isArray(forwardedFor)
-    ? forwardedFor[0]
-    : forwardedFor || realIp || req.socket?.remoteAddress || 'unknown';
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const rawIp = vercelIp || realIp || forwardedFor || req.socket?.remoteAddress || 'unknown';
 
-  return String(rawIp).split(',')[0].trim().toLowerCase();
+  return String(Array.isArray(rawIp) ? rawIp[0] : rawIp).split(',')[0].trim().toLowerCase();
 }
 
 function cleanupExpiredEntries(store, now) {
