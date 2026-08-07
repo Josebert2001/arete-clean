@@ -22,6 +22,12 @@ const plainQuestion = [{
   explanation: 'A system is an orderly grouping of interdependent components.',
 }];
 
+// katexLoader pulls KaTeX in through a dynamic import() — ~80KB of JS plus its
+// stylesheet, transformed on first hit. waitFor's 1s default leaves no headroom
+// for that when the rest of the suite is competing for the same workers, so the
+// wait is given an explicit budget rather than racing the module graph.
+const KATEX_LOADED = { timeout: 5000 };
+
 describe('Quiz maths rendering', () => {
   it('renders a plain-text question unchanged', () => {
     render(<Quiz questions={plainQuestion} />);
@@ -34,7 +40,7 @@ describe('Quiz maths rendering', () => {
     // KaTeX loads on demand, so wait for it to replace the fallback source.
     await waitFor(() => {
       expect(container.querySelector('.katex')).toBeTruthy();
-    });
+    }, KATEX_LOADED);
 
     // No $ anywhere: the delimiters were consumed rather than printed.
     expect(container.textContent).not.toContain('$');
@@ -56,13 +62,13 @@ describe('Quiz maths rendering', () => {
     // when their visible content is an equation.
     await waitFor(() => {
       expect(screen.getByText(/Option 1:/)).toBeInTheDocument();
-    });
+    }, KATEX_LOADED);
     expect(screen.getByText(/Option 4:/)).toBeInTheDocument();
   });
 
   it('renders the explanation as maths once answered', async () => {
     const { container } = render(<Quiz questions={mathQuestion} />);
-    await waitFor(() => expect(container.querySelector('.katex')).toBeTruthy());
+    await waitFor(() => expect(container.querySelector('.katex')).toBeTruthy(), KATEX_LOADED);
     // Four options render four expressions; the question adds one more.
     expect(container.querySelectorAll('.katex').length).toBeGreaterThanOrEqual(5);
   });
