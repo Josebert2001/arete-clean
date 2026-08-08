@@ -2,6 +2,7 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import AuthButton from './AuthButton';
+import InstallAppButton from './InstallAppButton';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../context/AuthContext';
 import { getDepartment } from '../data/departments';
@@ -75,6 +76,10 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-1 md:hidden">
+          {/* Renders nothing until the browser offers an install — see the
+              component. Phones are where installing matters most, so it sits in
+              the bar itself rather than inside the menu. */}
+          <InstallAppButton />
           <ThemeToggle />
           <AuthButton />
           <button
@@ -104,7 +109,8 @@ export default function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          <ThemeToggle className="ml-1" />
+          <InstallAppButton className="ml-1" />
+          <ThemeToggle />
           <AuthButton />
         </div>
       </div>
