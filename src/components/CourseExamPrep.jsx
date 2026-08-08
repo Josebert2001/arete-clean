@@ -17,6 +17,33 @@ import { useProgress } from './useProgress';
 // storage key, so a course can carry both banks without them colliding.
 const STORAGE_KEY = 'course-exam-prep-v1';
 
+// Written answers are kept locally and never synced. They are bulky, they are
+// the student's own rough working rather than a result, and a half-finished
+// answer is not something to push to a server — but losing 200 words to a
+// reload would make typing in-app worse than paper, so they do persist.
+//
+// Keyed by question text rather than index: a set is sampled and shuffled per
+// attempt, so an index points at a different question next time round.
+const ANSWERS_KEY = 'course-exam-answers-v1';
+
+function loadAnswer(slug, question) {
+  try {
+    const all = JSON.parse(localStorage.getItem(ANSWERS_KEY)) || {};
+    return all[`${slug}::${question}`] || '';
+  } catch {
+    return '';
+  }
+}
+
+function saveAnswer(slug, question, text) {
+  try {
+    const all = JSON.parse(localStorage.getItem(ANSWERS_KEY)) || {};
+    if (text.trim()) all[`${slug}::${question}`] = text;
+    else delete all[`${slug}::${question}`];
+    localStorage.setItem(ANSWERS_KEY, JSON.stringify(all));
+  } catch { /* private mode — the answer just lives for this session */ }
+}
+
 // Recall answers are matched leniently: the student is being tested on whether
 // they remember the item, not on their spelling under time pressure. Strip
 // case, punctuation and any leading article, then collapse spaces. Anything
@@ -48,10 +75,28 @@ function Pill({ children }) {
   );
 }
 
-// ── Longform: question → student writes on paper → reveal + self-mark ──
-function LongformQuestion({ q, awarded, onAward }) {
+// ── Longform: question → student answers → reveal + self-mark ─────────
+//
+// The answer box gates the reveal, and the reason is not suspicion — nobody is
+// being marked here, and a student who skips is only cheating themselves. It
+// is the fluency illusion: reading a well-written model answer feels like
+// knowing it, so a student can go through all 45 questions, recognise every
+// one, and still be unable to produce a paragraph on the day. Forcing even a
+// few words of retrieval first is what makes the practice work.
+//
+// One box serves two ways of working. Type the whole answer if you are at a
+// keyboard; jot the five points you would make if you are on a phone or the
+// question wants a diagram, which cannot be typed at all. Either way the text
+// then sits beside the mark scheme, which beats marking against paper.
+function LongformQuestion({ q, courseSlug, awarded, onAward }) {
   const [revealed, setRevealed] = useState(false);
   const [ticked, setTicked] = useState([]);
+  const [answer, setAnswer] = useState(() => loadAnswer(courseSlug, q.question));
+
+  const updateAnswer = (text) => {
+    setAnswer(text);
+    saveAnswer(courseSlug, q.question, text);
+  };
 
   const toggle = (i) => {
     const next = ticked.includes(i) ? ticked.filter((t) => t !== i) : [...ticked, i];
@@ -71,18 +116,58 @@ function LongformQuestion({ q, awarded, onAward }) {
       </p>
 
       {!revealed ? (
-        <div className="rounded-xl border-2 border-dashed border-coffee-200 p-5 text-center">
-          <PenLine size={22} className="text-coffee-500 mx-auto mb-2.5" />
-          <p className="text-sm text-coffee-700 mb-4 max-w-md mx-auto leading-relaxed">
-            Write your full answer on paper first — the whole point is producing it
-            unaided. Reveal only once you have finished writing.
+        <div>
+          <label
+            htmlFor={`answer-${q.source}`}
+            className="block text-xs font-mono uppercase tracking-wider text-coffee-700 mb-2"
+          >
+            Your answer
+          </label>
+          <textarea
+            id={`answer-${q.source}`}
+            value={answer}
+            onChange={(e) => updateAnswer(e.target.value)}
+            rows={7}
+            placeholder={
+              q.figure
+                ? 'Type your answer here, and sketch the diagram on paper — you can compare it against the real one once you reveal. Short points are fine.'
+                : 'Type your answer here. Full prose if you are at a keyboard, or just the points you would make — either works.'
+            }
+            className="w-full px-4 py-3 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-none bg-paper text-ink text-sm leading-relaxed resize-y"
+          />
+          <p className="text-xs text-coffee-700 mt-2 mb-4 leading-relaxed">
+            Answer before you look. Reading a model answer feels like knowing it — writing
+            one first is the only way to find out whether you do. Saved as you type.
           </p>
-          <button onClick={() => setRevealed(true)} className="btn-primary text-sm mx-auto">
-            <Eye size={15} /> Reveal model answer &amp; mark scheme
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setRevealed(true)}
+              disabled={!answer.trim()}
+              className="btn-primary text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Eye size={15} /> Reveal model answer &amp; mark scheme
+            </button>
+            <button
+              onClick={() => setRevealed(true)}
+              className="text-xs text-coffee-600 hover:text-ink underline underline-offset-2"
+            >
+              Skip — just show me the answer
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-5 animate-fade-in">
+          {answer.trim() && (
+            <div>
+              <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-2">
+                What you wrote
+              </p>
+              <div className="rounded-xl border-2 border-coffee-200 bg-paper p-4">
+                <p className="text-sm text-ink leading-relaxed whitespace-pre-line">{answer}</p>
+              </div>
+            </div>
+          )}
+
           <div>
             <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-2">
               Model answer
@@ -359,7 +444,7 @@ export default function CourseExamPrep({ course }) {
 
           {q.type === 'recall'
             ? <RecallQuestion key={current} q={q} awarded={awarded} onAward={award} />
-            : <LongformQuestion key={current} q={q} awarded={awarded} onAward={award} />}
+            : <LongformQuestion key={current} q={q} courseSlug={course.slug} awarded={awarded} onAward={award} />}
 
           <button onClick={next} className="btn-primary w-full justify-center mt-7">
             {current + 1 < questions.length ? 'Next question' : 'See results'}
