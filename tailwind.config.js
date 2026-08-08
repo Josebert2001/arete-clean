@@ -36,6 +36,17 @@ export default {
         body: ['"Inter"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
+      /*
+       * Reading sizes for long-form study content (lecture notes, module
+       * theory, course descriptions). Added ALONGSIDE Tailwind's default
+       * scale rather than replacing it, so `text-sm` still means 14px for UI
+       * chrome — nav, buttons, badges and card labels are unaffected.
+       * Line-height ships with the token, so `leading-*` is not needed.
+       */
+      fontSize: {
+        reading:      ['1.0625rem', { lineHeight: '1.75' }],  // 17px — body copy
+        'reading-sm': ['0.9375rem', { lineHeight: '1.6'  }],  // 15px — dense/secondary prose
+      },
       backgroundImage: {
         'noise': "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
       },

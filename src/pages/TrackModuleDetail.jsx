@@ -155,7 +155,7 @@ export default function TrackModuleDetail() {
               {mod.theory.map((section, i) => (
                 <div key={i} className="bg-paper border border-coffee-200 rounded-xl p-6">
                   <h3 className="font-display text-xl font-bold text-ink mb-3">{section.heading}</h3>
-                  <p className="text-coffee-700 leading-relaxed">{section.body}</p>
+                  <p className="text-reading text-coffee-700 max-w-prose">{section.body}</p>
                   {section.diagram && <Diagram name={section.diagram} />}
                 </div>
               ))}
