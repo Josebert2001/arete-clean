@@ -624,11 +624,13 @@ export const courses = [
       'Professor Messer\'s free Security+ course covers most of this curriculum and is excellent',
       'Social engineering is the most common attack vector — understand human psychology, not just technical controls',
     ],
-    // Transcribed from the "Principles and Practice of Information Security:
-    // Polished Master Study Guide" — see src/data/lectureNotes/cyb122.js for
-    // provenance and the coverage mapping. The guide never reaches
-    // cryptography/steganography (topic 4), funds-transfer/e-voting security
-    // (topic 6) or secure application design (topic 7).
+    // Sections 1-6 transcribed from the department's "Principles and Practice
+    // of Information Security: Polished Master Study Guide"; sections 7-12
+    // from the lecturer's own combined slide deck for Lectures 1-4 (Whitman &
+    // Mattord, "Principles of Information Security", 4th ed., Chapters 1-4).
+    // See src/data/lectureNotes/cyb122.js for full provenance and the
+    // coverage mapping. Together they never reach cryptography/steganography
+    // (topic 4) or funds-transfer/e-voting security (topic 6).
     lectureNotes: cyb122LectureNotes,
   },
 
