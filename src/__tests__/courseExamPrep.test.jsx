@@ -15,7 +15,7 @@
 // Interaction goes through fireEvent rather than user-event, matching
 // profileForm.test.jsx — user-event is not a dependency of this project.
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import CourseExamPrep from '../components/CourseExamPrep';
 import { cyb122ExamPrep } from '../data/lectureNotes/cyb122ExamPrep';
@@ -53,7 +53,17 @@ const startEverything = () =>
 
 const typeInto = (input, value) => fireEvent.change(input, { target: { value } });
 
+// Longform reveal is gated on the answer box, so most tests write first.
+const answerThen = (text) => {
+  typeInto(screen.getByRole('textbox'), text);
+  fireEvent.click(screen.getByRole('button', { name: /Reveal model answer/ }));
+};
+
 describe('CourseExamPrep', () => {
+  // Written answers persist to localStorage, so each test starts from a clean
+  // slate rather than inheriting the previous one's typing.
+  beforeEach(() => localStorage.clear());
+
   it('renders nothing for a course with no examPrep bank', () => {
     const { container } = render(<CourseExamPrep course={courseWith([])} />);
     expect(container).toBeEmptyDOMElement();
@@ -66,14 +76,58 @@ describe('CourseExamPrep', () => {
     expect(screen.getByText(longform.question)).toBeInTheDocument();
     expect(screen.queryByText(longform.modelAnswer)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Reveal model answer/ }));
+    answerThen('due care sets the standard');
     expect(screen.getByText(longform.modelAnswer)).toBeInTheDocument();
+  });
+
+  // The gate exists to defeat the fluency illusion, not to catch cheats — so it
+  // must actually hold, and the escape hatch must actually work.
+  it('will not reveal until something has been written', () => {
+    render(<CourseExamPrep course={courseWith([longform])} />);
+    startEverything();
+
+    const reveal = screen.getByRole('button', { name: /Reveal model answer/ });
+    expect(reveal).toBeDisabled();
+
+    // Whitespace alone is not an answer.
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: '   ' } });
+    expect(screen.getByRole('button', { name: /Reveal model answer/ })).toBeDisabled();
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'due care' } });
+    expect(screen.getByRole('button', { name: /Reveal model answer/ })).toBeEnabled();
+  });
+
+  it('lets a student skip the answer box deliberately', () => {
+    render(<CourseExamPrep course={courseWith([longform])} />);
+    startEverything();
+
+    fireEvent.click(screen.getByRole('button', { name: /Skip — just show me/ }));
+    expect(screen.getByText(longform.modelAnswer)).toBeInTheDocument();
+  });
+
+  it('keeps a written answer across a remount, so a reload does not lose it', () => {
+    const { unmount } = render(<CourseExamPrep course={courseWith([longform])} />);
+    startEverything();
+    typeInto(screen.getByRole('textbox'), 'a long answer worth not losing');
+    unmount();
+
+    render(<CourseExamPrep course={courseWith([longform])} />);
+    startEverything();
+    expect(screen.getByRole('textbox')).toHaveValue('a long answer worth not losing');
+  });
+
+  it('shows what the student wrote alongside the mark scheme', () => {
+    render(<CourseExamPrep course={courseWith([longform])} />);
+    startEverything();
+
+    answerThen('due care establishes it, due diligence sustains it');
+    expect(screen.getByText('due care establishes it, due diligence sustains it')).toBeInTheDocument();
   });
 
   it('awards the marks carried by each ticked mark-scheme point', () => {
     render(<CourseExamPrep course={courseWith([longform])} />);
     startEverything();
-    fireEvent.click(screen.getByRole('button', { name: /Reveal model answer/ }));
+    answerThen('my answer');
 
     // Nothing ticked yet.
     expect(screen.getByText('0 / 5')).toBeInTheDocument();
