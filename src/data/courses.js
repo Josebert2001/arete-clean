@@ -1,3 +1,16 @@
+// Extension is required: scripts/validate-modules.mjs imports this file through
+// plain Node ESM, which does not do Vite's extensionless resolution.
+import { cos121LectureNotes } from './lectureNotes/cos121.js';
+import { cyb121LectureNotes } from './lectureNotes/cyb121.js';
+import { cyb122LectureNotes } from './lectureNotes/cyb122.js';
+import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
+import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
+import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
+import { ent221LectureNotes } from './lectureNotes/ent221.js';
+import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
+import { gst121LectureNotes } from './lectureNotes/gst121.js';
+import { mth121LectureNotes } from './lectureNotes/mth121.js';
+
 export const courses = [
 
   // ═══════════════════════════════════════════════════════════════
@@ -9,6 +22,7 @@ export const courses = [
     title: 'Communication in English',
     units: 2, level: 100, semester: 1, lh: 15, ph: 45,
     subject: 'gst',
+    crossDepartmental: true,
     description: 'Develops the English language skills required for academic and professional success: sound patterns, word classes, sentence construction, logical/critical reasoning, and writing craft. A foundation course that improves every other course you will take.',
     topics: [
       'Sound patterns in English: vowels, consonants, phonetics and phonology',
@@ -44,6 +58,7 @@ export const courses = [
     title: 'Elementary Mathematics I (Algebra and Trigonometry)',
     units: 2, level: 100, semester: 1, lh: 30, ph: 0,
     subject: 'math',
+    crossDepartmental: true,
     description: 'Algebra and trigonometry for university-level computation: set theory, real and complex numbers, sequences and series, quadratic equations, and circular measure. Bridges secondary-school maths with the rigour needed for the programme.',
     topics: [
       'Elementary set theory: subsets, union, intersection, complements, Venn diagrams',
@@ -78,7 +93,8 @@ export const courses = [
     title: 'General Physics I (Mechanics)',
     units: 2, level: 100, semester: 1, lh: 30, ph: 0,
     subject: 'phy',
-    description: 'Classical mechanics: vectors, kinematics, Newtonian dynamics, conservation principles, rotational motion, and gravitation. Builds the physical intuition that underpins electronics, networking signals, and hardware concepts encountered in later cybersecurity courses.',
+    crossDepartmental: true,
+    description: 'Classical mechanics: vectors, kinematics, Newtonian dynamics, conservation principles, rotational motion, and gravitation. Builds the physical intuition that underpins electronics, networking signals, and the hardware concepts met in later computing courses.',
     topics: [
       'Space, time, units and dimensions; vectors and scalars',
       'Differentiation of vectors: displacement, velocity, acceleration; kinematics',
@@ -112,6 +128,7 @@ export const courses = [
     title: 'General Practical Physics I',
     units: 1, level: 100, semester: 1, lh: 0, ph: 45,
     subject: 'phy',
+    crossDepartmental: true,
     description: 'Laboratory practicals that accompany PHY 111. Quantitative measurement, treatment of measurement errors, and graphical analysis across mechanical, electrical, light, heat, and viscosity experiments. Develops precision, scientific method, and report-writing discipline.',
     topics: [
       'Laboratory safety and quantitative measurement techniques',
@@ -146,6 +163,7 @@ export const courses = [
     title: 'Introduction to Computing Sciences',
     units: 3, level: 100, semester: 1, lh: 30, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     description: 'A broad survey of the computing field: hardware, software, human-ware, information processing, and the many specializations within computing. Lays the conceptual vocabulary and hands-on device familiarity for everything that follows in your degree.',
     topics: [
       'Brief history of computing',
@@ -181,7 +199,8 @@ export const courses = [
     title: 'Descriptive Statistics',
     units: 3, level: 100, semester: 1, lh: 45, ph: 0,
     subject: 'stats',
-    description: 'The language of data: types, sources, and methods of data collection; presentation, errors and approximations; and the core measures used to summarise a dataset. A foundation for every analysis task in cybersecurity, research, and data-driven decision-making.',
+    crossDepartmental: true,
+    description: 'The language of data: types, sources, and methods of data collection; presentation, errors and approximations; and the core measures used to summarise a dataset. A foundation for every analysis task in research and data-driven decision-making.',
     topics: [
       'Statistical data: types, sources and methods of collection',
       'Presentation of data: tables, charts and graphs',
@@ -215,6 +234,7 @@ export const courses = [
     title: 'Computer Operations',
     units: 2, level: 100, semester: 1, lh: 30, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     description: 'Practical computer skills: laboratory safety, hardware components, operating system navigation, productivity software, internet operations, and an introduction to statistical computing with SPSS. The hands-on companion to COS 111.',
     topics: [
       'Laboratory ethics and safety precautions; basic components of a computer system',
@@ -249,7 +269,8 @@ export const courses = [
     title: 'Computer Troubleshooting',
     units: 2, level: 100, semester: 1, lh: 15, ph: 45,
     subject: 'cs',
-    description: 'Diagnosing and resolving common hardware and software problems across PCs, laptops, tablets, and mobile phones. Covers network connectivity/security troubleshooting, backup and restore, and virus/anti-virus procedures — practical skills every cybersecurity professional needs.',
+    crossDepartmental: true,
+    description: 'Diagnosing and resolving common hardware and software problems across PCs, laptops, tablets, and mobile phones. Covers network connectivity/security troubleshooting, backup and restore, and virus/anti-virus procedures — practical skills every computing professional needs.',
     topics: [
       'Fundamentals of hardware',
       'Handling, testing and troubleshooting personal computer problems',
@@ -287,7 +308,8 @@ export const courses = [
     title: 'Nigerian Peoples and Culture',
     units: 2, level: 100, semester: 2, lh: 15, ph: 45,
     subject: 'gst',
-    description: 'An introduction to Nigeria\'s ethnic diversity, cultural heritage, colonial and political history, and nation-building challenges. Provides context for the social and policy dimensions of cybersecurity in Nigeria.',
+    crossDepartmental: true,
+    description: 'An introduction to Nigeria\'s ethnic diversity, cultural heritage, colonial and political history, and nation-building challenges. Provides context for the social and policy dimensions of technology in Nigeria.',
     topics: [
       'Nigerian history, culture and art up to 1800 (Yoruba, Hausa, Igbo, and minority groups)',
       'Nigeria under colonial rule and colonial administration',
@@ -311,9 +333,23 @@ export const courses = [
     studyTips: [
       'Link course topics to current events — Nigerian news puts everything in context',
       'For the culture component, draw on your own background and community knowledge',
-      'Cybercrime topics connect directly to your degree — pay extra attention there',
+      'Cybercrime and digital-policy topics connect directly to computing degrees — pay extra attention there',
       'Past questions drive most of the exam content for GST courses — collect and study them',
     ],
+    // Transcribed from the Directorate of General Studies' official GST 121
+    // textbook (May 2024) — see src/data/lectureNotes/gst121.js for provenance
+    // and the full 17-chapter table of contents.
+    lectureNotes: gst121LectureNotes,
+    // Chapters 1–2 are the only ones transcribed so far. Chapter 1 fully covers
+    // the 3Rs and national orientation strategies, and touches the Civil War
+    // and the indigenization/self-reliance material; Chapter 2 fully covers the
+    // apprenticeship strand of the trade/self-reliance topic. Kept here rather
+    // than in the shared note file because Data Science takes GST 121 against
+    // its own outline.
+    noteCoverage: {
+      1: { covers: [8], partial: [4, 5] },
+      2: { covers: [5] },
+    },
   },
   {
     code: 'COS 121',
@@ -321,6 +357,7 @@ export const courses = [
     title: 'Problem Solving',
     units: 3, level: 100, semester: 2, lh: 30, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     hasInteractiveModules: true,
     interactiveTrackPath: '/tracks/python',
     interactiveLabel: 'Python',
@@ -352,448 +389,29 @@ export const courses = [
       'Solve at least one coding problem daily, even if small; consistency beats cramming',
       'Harvard CS50P (Introduction to Programming with Python) is free and excellent',
     ],
-    lectureNotes: [
-      {
-        number: '1',
-        title: 'Concept of Computing',
-        sections: [
-          {
-            type: 'definition',
-            text: 'Computing is the study and use of computer systems to process data, solve problems, and automate tasks. It involves hardware, software, algorithms, and programming to achieve effective and efficient solutions.',
-          },
-          {
-            type: 'bullets',
-            heading: 'Core Concepts of Computing',
-            items: [
-              'Data and information policy processing',
-              'Programming',
-              'Computer Hardware & Software',
-              'Algorithms & Problem Solving',
-              'Networking & Communication',
-              'Artificial Intelligence (A.I)',
-            ],
-          },
-          {
-            type: 'bullets',
-            heading: 'Features of Computing',
-            items: ['Automation', 'Speed', 'Versatility', 'Connectivity'],
-          },
-        ],
-      },
-      {
-        number: '2',
-        title: 'Problem and Problem Solving',
-        sections: [
-          {
-            type: 'definition',
-            text: 'Problem solving is a process of finding solutions to complex challenges. It involves breaking down a problem, analyzing it, and applying systematic methods to find a solution using algorithms and programming techniques.',
-          },
-          {
-            type: 'bullets',
-            heading: 'Steps in Solving a Problem',
-            items: [
-              'Understanding the problem',
-              'Break down the problem',
-              'Explore possible solutions',
-              'Choose the best solution',
-              'Implement the best solution',
-              'Test and debug',
-              'Evaluate the system',
-            ],
-          },
-          {
-            type: 'bullets',
-            heading: 'Features of Problem Solving',
-            items: [
-              'Being able to approach a problem (Logical reasoning)',
-              'Creativity',
-              'Analytical thinking ability',
-              'Persistent: easy to refine and optimize questions',
-            ],
-          },
-          {
-            type: 'text',
-            heading: 'Problem Identification and Types of Problem',
-            text: 'A well-identified problem should be:',
-          },
-          {
-            type: 'bullets',
-            items: ['Clearly defined', 'Measurable', 'Feasible'],
-          },
-          {
-            type: 'text',
-            heading: 'Types of Problem',
-            text: 'Problems can be categorized based on complexity and how frequently they occur:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Routine problem', def: 'They are common and occur frequently in similar conditions. These problems often have pre-defined solutions and can be solved using standard procedures and algorithms. Solutions are standard and do not require creativity.' },
-              { term: 'Non-routine problem', def: 'They are complex and do not have straightforward solutions. They require creative thinking, experimentation, and new strategies to solve the problem.' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: 'Methods of Solving Computing Problems',
-            items: [
-              { term: 'Algorithm', def: 'A structured approach to problem solving. A step-by-step procedure or set of rules used to solve a specific problem. Features: There must be inputs. There must be outputs. It must be definite. It is finite, correct, and efficient.' },
-              { term: 'Heuristic', def: "An approximate approach. It finds a satisfactory solution in a place where an optimal solution is impracticable. It doesn't guarantee a perfect solution but is aimed at finding a good enough solution quickly. It is applied when you can't get an optimal solution." },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: 'Solution Techniques in Problem Solving',
-            items: [
-              { term: 'Abstraction', def: 'Focuses on relevant details and not irrelevant details. Abstraction can be applied in software development, artificial intelligence, and cybersecurity.' },
-              { term: 'Analogy', def: 'Using past experience to solve a problem. Features: Uses past experience; encourages pattern recognition commonly used in machine learning.' },
-              { term: 'Brainstorming', def: 'A group or individual problem-solving technique where multiple ideas are generated. Features: Encourages creative thinking; mostly used in business, software development, and research.' },
-              { term: 'Trial & Error', def: 'Trying different solutions with the intention of taking the best.' },
-              { term: 'Hypothesis Testing', def: 'This involves simulating an assumption and testing it through experiment or observation.' },
-              { term: 'Reduction', def: 'Simplifies a complex problem by breaking it down into simpler equivalent problems that are easier to solve. Mostly used in mathematics and computing.' },
-              { term: 'Literal Thinking', def: 'Involves applying a logical and direct approach to a problem solution without assumption or abstract interpretation. Features: Avoids assumption and abstract interpretation.' },
-              { term: 'Means-end Analysis', def: 'It involves comparing the current state of a problem with a desired goal and determining the best way to close the gap.' },
-              { term: 'Root Cause Analysis (RCA)' },
-              { term: 'Proof', def: 'The process of logically verifying the correctness of a solution using mathematical or formal proving.' },
-              { term: 'Divide and Conquer', def: 'This is where a complex problem is divided into smaller tasks, solved individually, and the solutions are combined.' },
-            ],
-          },
-          {
-            type: 'bullets',
-            heading: 'General Problem Solving Process',
-            items: [
-              'Problem definition',
-              'Analysis of the problem',
-              'Develop an algorithm',
-              'Implement the solution',
-              'Test and debug',
-              'Document and maintain',
-            ],
-          },
-        ],
-      },
-      {
-        number: '3',
-        title: 'Python Programming',
-        sections: [
-          {
-            type: 'text',
-            heading: 'History of Python Programming',
-            text: 'Python was created by Guido Van Rossum in the year 1991. It made use of a user-friendly language and is a multipurpose language that is compatible with other programming languages and operating systems like Windows, Linux, and macOS. (Important Note: Python 2.0 - 2000, Python 3.0 - 2008).',
-          },
-          {
-            type: 'definition',
-            heading: 'Definition',
-            text: 'Python Programming is a script of sequence information and commands evaluated and resolved by an interpreter called a shell. It consists of primitive constructs, syntax, and static semantics.',
-          },
-          {
-            type: 'bullets',
-            heading: 'Fundamental Concepts of Python Programming',
-            items: ['Variables', 'Data types', 'Operators'],
-          },
-          {
-            type: 'bullets',
-            heading: '1. Variables',
-            items: [
-              "It doesn't start with a digit.",
-              "It doesn't start with verb words.",
-              'It can only contain letters, digits, and underscores (_).',
-              'Can be assigned different values. It allows multiple variables to hold a particular value by using an assignment operator (=). Different values can be assigned to different variables. Variables are locations where data is stored.',
-              'Variables in Python are case-sensitive.',
-              "You can't use Python reserved words or keywords as a variable (e.g., if, for).",
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '2. Data Types',
-            items: [
-              { term: 'Numeric', def: 'Scalar objects assigned to variables used for mathematical operations.' },
-              { term: 'Sequence Type', def: 'Used to store ordered, changeable collections.' },
-              { term: 'Boolean' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: 'Numeric Types',
-            items: [
-              { term: 'Integer (int)', def: 'Whole numbers (negative or positive).' },
-              { term: 'Float', def: 'Decimal numbers.' },
-              { term: 'Complex' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: 'Sequence Types',
-            items: [
-              { term: 'String (str)', def: 'Represented by data in a single quote or double quote in the memory.' },
-              { term: 'List', def: 'Stores ordered, changeable collections.' },
-              { term: 'Tuple', def: 'Ordered but unchangeable.' },
-              { term: 'Dictionary (dict)' },
-              { term: 'Set', def: "Ordered and mutable collection used for storage of unique elements and can't be accessed by using indexing." },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '3. Operators',
-            text: 'Operators are used to perform mathematical operations or sequence operations on variables and values.',
-          },
-          {
-            type: 'termlist',
-            heading: 'Arithmetic Operators',
-            items: [
-              { term: 'Addition (+)', def: 'a + b' },
-              { term: 'Subtraction (-)', def: 'a - b' },
-              { term: 'Division (/)', def: 'a / b' },
-              { term: 'Multiplication (*)', def: 'a * b' },
-              { term: 'Modulus (%)', def: 'a % b' },
-              { term: 'Floor Division (//)', def: 'a // b' },
-              { term: 'Exponential/Power (**)', def: 'a ** b' },
-            ],
-          },
-          {
-            type: 'bullets',
-            heading: 'Logical Operators',
-            items: ['AND (and, &)', 'OR (or, |)', 'NOT (not, !, ~)'],
-          },
-          {
-            type: 'table',
-            heading: 'Truth Table',
-            headers: ['A', 'B', 'A and B', 'A or B', 'not A', 'not B'],
-            rows: [
-              ['F', 'F', 'F', 'F', 'T', 'T'],
-              ['F', 'T', 'F', 'T', 'T', 'F'],
-              ['T', 'F', 'F', 'T', 'F', 'T'],
-              ['T', 'T', 'T', 'T', 'F', 'F'],
-            ],
-          },
-          {
-            type: 'table',
-            heading: 'Assignment Operators',
-            headers: ['Operator', 'Symbol', 'Output'],
-            rows: [
-              ['=', 'x = 3', 'x = 3'],
-              ['+=', 'x += 3', 'x = x + 3'],
-              ['-=', 'x -= 3', 'x = x - 3'],
-              ['*=', 'x *= 3', 'x = x * 3'],
-              ['/=', 'x /= 3', 'x = x / 3'],
-              ['//=', 'x //= 3', 'x = x // 3'],
-              ['%=', 'x %= 3', 'x = x % 3'],
-              ['**=', 'x **= 3', 'x = x ** 3'],
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: 'Comparison / Relational Operators',
-            items: [
-              { term: 'Equals to', def: '==' },
-              { term: 'Greater than', def: '>' },
-              { term: 'Less than', def: '<' },
-              { term: 'Greater than or equal', def: '>=' },
-              { term: 'Less than or equal', def: '<=' },
-            ],
-          },
-          {
-            type: 'text',
-            text: '(Note: = is assignment, == is comparison. The answer to a logical/comparison operation is a boolean).',
-          },
-          {
-            type: 'bullets',
-            heading: 'Precedence Operation (BEDMAS)',
-            items: ['Bracket', 'Exponential', 'Division', 'Multiplication', 'Addition', 'Subtraction'],
-          },
-        ],
-      },
-      {
-        number: '4',
-        title: 'Control Structures',
-        sections: [
-          {
-            type: 'termlist',
-            heading: 'Conditional Statements',
-            items: [
-              { term: 'if', def: 'One condition, one action' },
-              { term: 'if else', def: 'One condition, two actions' },
-              { term: 'if elif', def: 'Two conditions, two actions' },
-              { term: 'if elif else', def: 'Two conditions, three actions' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: 'Loops',
-            items: [
-              { term: 'The for Loop', def: 'Used for iterating over a sequence.' },
-              { term: 'The while Loop', def: 'Repeatedly executes a code block as long as its condition remains true.' },
-              { term: 'Nested Loop', def: 'When a loop is inside another loop.' },
-            ],
-          },
-          {
-            type: 'code',
-            heading: 'The for Loop — Example',
-            code: "modulus = ['Algebra', 'Physics', 'Chemistry', 'python']\n\nfor subject in modulus:\n    print(f\"Studying {subject}\")",
-          },
-        ],
-      },
-      {
-        number: '5',
-        title: 'Arrays and Lists',
-        sections: [
-          {
-            type: 'code',
-            code: '# Creating a list\nmarks = [75, 88, 62, 95, 50]\n\n# Accessing elements\nprint(marks[0]) # 75 (first element)\nprint(marks[3]) # 95 (fourth element)',
-          },
-          {
-            type: 'text',
-            text: 'append is a command used to assign a value or item to the end of the list.',
-          },
-        ],
-      },
-      {
-        number: '6',
-        title: 'Functions and Classes',
-        sections: [
-          {
-            type: 'definition',
-            heading: 'Functions',
-            text: 'A function is a subprogram or module and a unit of a program. In some programming languages, it is called a procedure. It performs a specific task and is reusable. You can call a function as many times as required.',
-          },
-          {
-            type: 'code',
-            heading: 'Defining a Function',
-            code: 'def greet(name):\n    "Display a personalized greeting"\n    print(f"Good day {name}")\n\ngreet("Alice") # Output: Good day Alice',
-          },
-          {
-            type: 'termlist',
-            heading: 'Scope',
-            items: [
-              { term: 'Local variable', def: 'A variable that exists within a function.' },
-              { term: 'Global variable', def: 'A variable that exists outside functions.' },
-            ],
-          },
-          {
-            type: 'text',
-            text: 'The scope of a variable determines where in the code it can be accessed (LEGB rules: Local, Enclosing, Global, Built-in).',
-          },
-          {
-            type: 'termlist',
-            heading: 'Arguments',
-            items: [
-              { term: '*args', def: 'Defines undefined positional values in a variable.' },
-              { term: '**kwargs', def: 'Defines undefined keyword values in a variable.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: 'Object-Oriented Programming (OOP)',
-            text: 'OOP is a programming paradigm that organizes software around objects. An object means instances that bundle together data attributes.',
-          },
-          {
-            type: 'termlist',
-            heading: 'Fundamental Principles of OOP',
-            items: [
-              { term: 'Encapsulation', def: 'Bundling data and methods; private attributes accessed via getter/setter methods.' },
-              { term: 'Abstraction', def: 'Exposing only necessary details.' },
-              { term: 'Inheritance', def: 'A child class inherits properties from a parent class.' },
-              { term: 'Polymorphism', def: 'Different classes implement the same method name differently.' },
-            ],
-          },
-          {
-            type: 'table',
-            heading: 'Summary of OOP Concepts',
-            headers: ['OOP Concept', 'Python Implementation'],
-            rows: [
-              ['Class', 'Defined with the class keyword. It is a blueprint/template.'],
-              ['Object', 'Created by calling the class: Object = ClassName(args)'],
-              ['Constructor', '__init__ method - initializes instance attributes.'],
-              ['Instance attribute', 'Defined as self.attribute inside a method.'],
-              ['Class attribute', 'Defined directly in the class body (shared by all objects).'],
-              ['Method', 'Function defined inside a class; first parameter is self.'],
-            ],
-          },
-        ],
-      },
-      {
-        number: '7',
-        title: 'Writing Mathematical Formulas in Python',
-        sections: [
-          {
-            type: 'text',
-            text: 'To write formulas in Python, they must be written in a straight line format.',
-          },
-          {
-            type: 'table',
-            heading: 'Examples',
-            headers: ['Rule', 'Example / Formula', 'Python'],
-            rows: [
-              ['Formula', 'B = nPR / xy²', 'B = (n * P * R) / (x * (y ** 2))'],
-              ['Subscripts', 'P₁', 'P1 or P_1'],
-              ['Greek letters', 'θ²R / αβ (use their names, e.g., theta, alpha, beta)', '((theta ** 2) * R) / (alpha * beta)'],
-              ['Square root', '√x', 'math.sqrt(x)'],
-            ],
-          },
-        ],
-      },
-      {
-        number: '8',
-        title: 'Input, Output, and Type-Casting',
-        sections: [
-          {
-            type: 'code',
-            heading: 'Input Function',
-            code: 'x = input("Enter x: ")',
-          },
-          {
-            type: 'code',
-            heading: 'Output Function',
-            code: 'print("Box") # Defined string\nprint(f"Value is {box}") # Format printing',
-          },
-          {
-            type: 'text',
-            heading: 'Type-Casting',
-            text: 'Changing a value from one data type to another.',
-          },
-          {
-            type: 'bullets',
-            items: ['int()', 'float()', 'str()'],
-          },
-        ],
-      },
-      {
-        number: '9',
-        title: 'GUI with Tkinter',
-        sections: [
-          {
-            type: 'definition',
-            text: 'tkinter is a package used for creating Graphical User Interfaces.',
-          },
-          {
-            type: 'code',
-            heading: 'Basic Setup',
-            code: 'import tkinter as tk\n\nroot = tk.Tk() # root can be called windows or screen\nroot.geometry("400x350")\nroot.title("Python Class")\n\nlabel1 = tk.Label(root, text="Python Programming")\nlabel1.place(x=100, y=100)\n\nroot.mainloop() # Must be the last line',
-          },
-          {
-            type: 'casestudy',
-            title: 'Assignment',
-            prompt: 'Create a window, add caption "Arithmetic operation". Include inputs for "First number" and "Second number", a result box, and buttons for Add, Sub, Mul, Div, and Exit.',
-          },
-        ],
-      },
-    ],
+    lectureNotes: cos121LectureNotes,
   },
   {
     code: 'MTH 121',
     slug: 'mth-121',
-    title: 'Elementary Mathematics II (Calculus)',
+    title: 'General Mathematics II (Calculus)',
     units: 2, level: 100, semester: 2, lh: 30, ph: 0,
     subject: 'math',
-    description: 'Calculus and trigonometry: differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and signal theory used in cybersecurity analysis.',
+    crossDepartmental: true,
+    description: 'Single-variable calculus: limits, continuity, differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and the signal theory used across science and engineering.',
+    // Matched to the departmental workbook the lecture notes are transcribed
+    // from. The outline previously opened with trigonometric identities and
+    // closed with ordinary differential equations; MTH 121 teaches neither, so
+    // both items sat permanently at "no notes yet".
     topics: [
-      'Trigonometric functions and identities',
+      'Functions of a real variable: domain, range, composition',
       'Limits, continuity, and the derivative',
       'Rules of differentiation: product, quotient, chain',
+      'Implicit, parametric, exponential and logarithmic differentiation',
       'Applications of derivatives: tangents, rates, max/min',
       'Definite and indefinite integrals',
-      'Techniques of integration: substitution, by parts',
+      'Techniques of integration: substitution, by parts, partial fractions',
       'Applications of integration: area, volume',
-      'Introduction to ordinary differential equations',
     ],
     textbooks: [
       { title: 'Engineering Mathematics', authors: 'K.A. Stroud', note: '8th ed. — the most student-friendly maths text for engineers' },
@@ -811,6 +429,22 @@ export const courses = [
       "Understand the concept of a derivative as 'rate of change' before memorising rules",
       'Khan Academy calculus is free, self-paced, and covers this entire course',
     ],
+    // Transcribed from the Department of Mathematics' workbook ("MTH 121:
+    // General Mathematics II — Workbook Manual 2025") — see
+    // src/data/lectureNotes/mth121.js for provenance and the errata list. All
+    // five units, plus the closing tutorial questions.
+    lectureNotes: mth121LectureNotes,
+    // Which of the topics above each workbook unit reaches. Lives here rather
+    // than in the shared note file because Data Science takes the same MTH 121
+    // against a different outline. Unit 6 is the tutorial question set, so it
+    // marks nothing as taught.
+    noteCoverage: {
+      1: { covers: [1], partial: [2] },  // functions; the limits/continuity half of 2
+      2: { covers: [2, 3, 4] },          // the derivative closes out 2
+      3: { covers: [5] },
+      4: { covers: [6, 7] },
+      5: { covers: [8] },
+    },
   },
   {
     code: 'PHY 121',
@@ -818,6 +452,7 @@ export const courses = [
     title: 'General Physics II (Electricity & Magnetism)',
     units: 2, level: 100, semester: 2, lh: 30, ph: 0,
     subject: 'phy',
+    crossDepartmental: true,
     description: 'Electrostatics, DC circuits, magnetism, and electromagnetic induction. The electromagnetic foundations of this course directly underpin networking, wireless communications, and electronics studied in later years.',
     topics: [
       "Electrostatics: electric charge, Coulomb's law and superposition",
@@ -852,6 +487,7 @@ export const courses = [
     title: 'General Practical Physics II',
     units: 1, level: 100, semester: 2, lh: 0, ph: 45,
     subject: 'phy',
+    crossDepartmental: true,
     description: 'Laboratory practicals continuing from PHY 117, covering the theoretical concepts of PHY 121 through quantitative measurement, treatment of measurement errors, and graphical analysis.',
     topics: [
       'Continuation of quantitative measurement techniques from PHY 117',
@@ -912,6 +548,12 @@ export const courses = [
       'Professor Messer\'s free Network+ course on YouTube is one of the best networking courses available',
       'Use Cisco Packet Tracer (free) to simulate and visualise network configurations hands-on',
     ],
+    // Transcribed from the CYB 121 study guide (lecture notes of Sir Robinson
+    // and Sir Ubong Ntia; practical cabling by Mr. Mike Umeh) — see
+    // src/data/lectureNotes/cyb121.js for provenance and the coverage mapping.
+    // The guide stops at the data link / physical layers, so topics 6-8
+    // (network, transport and application layers) are not covered by it.
+    lectureNotes: cyb121LectureNotes,
   },
   {
     code: 'UUY-CYB 123',
@@ -945,6 +587,10 @@ export const courses = [
       'Inspect real websites using browser DevTools (F12) to see how professional sites are structured',
       'Learn the web security concepts early — XSS and CSRF from this course appear in later security courses',
     ],
+    // Transcribed from the departmental Laboratory Manual (printed under the
+    // code CSC 121) — see src/data/lectureNotes/cyb123.js for provenance and the
+    // coverage mapping. Topic 7 (XSS/CSRF) is not covered by the manual.
+    lectureNotes: cyb123LectureNotes,
   },
   {
     code: 'UUY-CYB 122',
@@ -978,7 +624,25 @@ export const courses = [
       'Read real breach case studies (Troy Hunt\'s blog, Krebs on Security) — they make abstract threats concrete',
       'Professor Messer\'s free Security+ course covers most of this curriculum and is excellent',
       'Social engineering is the most common attack vector — understand human psychology, not just technical controls',
+      'Scope triage: the examinable core is what was actually lectured — Lectures 1–4, which are sections 7–12 of the lecture notes (Whitman & Mattord chapters 1–4). Cryptography/steganography and funds transfer/e-voting sit in the course outline but were never taught, so revise them last if at all',
+      'Written paper, not CBT: a 10-mark question wants roughly five distinct points, each named and then explained in a sentence or two. One long unbroken paragraph scores badly even when everything in it is correct — the marker is counting points',
+      'Structure every long answer the same way: define the term, explain the mechanism, give an example or a diagram, then link it to a neighbouring concept. A repeatable skeleton stops you freezing on a question you half-know',
+      'Practise reproducing the diagrams from memory with their labels — the McCumber Cube, the TCP three-way handshake, the SDLC waterfall, top-down vs bottom-up. "With the aid of a diagram" is a standard question stem and the labels are where the marks are',
+      'On a four-from-six paper in two hours, budget about 30 minutes per question: 5 planning the points, 20 writing, 5 checking. Read all six and pick your four before you write a single word',
+      'Where a list is long (the fifteen threat categories, for instance) the question will ask for "any five" — so learn five you can explain properly rather than fifteen you can only name',
     ],
+    // Sections 1-6 transcribed from the department's "Principles and Practice
+    // of Information Security: Polished Master Study Guide"; sections 7-12
+    // from the lecturer's own combined slide deck for Lectures 1-4 (Whitman &
+    // Mattord, "Principles of Information Security", 4th ed., Chapters 1-4).
+    // See src/data/lectureNotes/cyb122.js for full provenance and the
+    // coverage mapping. Together they never reach cryptography/steganography
+    // (topic 4) or funds-transfer/e-voting security (topic 6).
+    lectureNotes: cyb122LectureNotes,
+    // Written-exam bank, not MCQ — this course is examined on paper. See
+    // src/data/lectureNotes/cyb122ExamPrep.js for the question types and why
+    // coverage is weighted towards the lectured sections.
+    examPrep: cyb122ExamPrep,
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -990,6 +654,7 @@ export const courses = [
     title: 'Philosophy, Logic and Human Existence',
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'gst',
+    crossDepartmental: true,
     description: 'An examination of philosophical reasoning, formal logic, and the human condition. The logic component — syllogism, symbolic logic, and rules of inference — directly supports discrete mathematics and the formal reasoning used in security proofs and algorithm design.',
     topics: [
       'Scope, notions, meanings, branches and problems of philosophy',
@@ -1014,7 +679,7 @@ export const courses = [
     studyTips: [
       'The logic component matters most for your degree — practise truth tables until they are automatic',
       'Logical validity and logical truth are different concepts — do not confuse them in exams',
-      'Ethical technology topics (privacy, AI, cybercrime) connect directly to CYB 211 and CYB 213',
+      'Ethical technology topics (privacy, AI, cybercrime) connect directly to your computing courses',
       'Argument mapping: writing out premises and conclusions explicitly prevents exam errors',
     ],
   },
@@ -1024,6 +689,7 @@ export const courses = [
     title: 'Computer Programming I',
     units: 3, level: 200, semester: 1, lh: 30, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     hasInteractiveModules: true,
     interactiveTrackPath: '/tracks/java',
     interactiveLabel: 'Java',
@@ -1066,6 +732,10 @@ export const courses = [
     title: 'Introduction to Cybersecurity and Strategy',
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'cyb',
+    // Data Science takes this course too, so its uploads pool under 'general'
+    // for both departments. Not crossDepartmental: it is a CYB-owned course,
+    // not one of the foundation courses every UniUyo programme takes.
+    sharedMaterials: true,
     description: 'A strategic overview of the cybersecurity landscape: basic concepts (confidentiality, integrity, availability, authentication, non-repudiation), security policy and incident response, risk management, and the national/organisational strategies that guide security decision-making at scale.',
     topics: [
       'Basic concepts: cyber, security, CIA, authentication, access control, non-repudiation',
@@ -1244,7 +914,8 @@ export const courses = [
     title: 'Entrepreneurship and Innovation',
     units: 2, level: 200, semester: 2, lh: 15, ph: 45,
     subject: 'ent',
-    description: 'Business thinking for technical students: entrepreneurship and intrapreneurship theory, entrepreneurial characteristics and thinking, innovation, enterprise formation, and e-commerce principles. Directly applicable to cybersecurity consulting, startup, and freelance careers.',
+    crossDepartmental: true,
+    description: 'Business thinking for technical students: entrepreneurship and intrapreneurship theory, entrepreneurial characteristics and thinking, innovation, enterprise formation, and e-commerce principles. Directly applicable to consulting, startup, and freelance careers in technology.',
     topics: [
       'Concept of entrepreneurship and intrapreneurship/corporate entrepreneurship',
       'Theories, rationale and relevance: Schumpeterian perspective, risk-taking, creative destruction',
@@ -1267,1154 +938,61 @@ export const courses = [
       'How to write a feasibility study',
     ],
     studyTips: [
-      'Apply every concept to a cybersecurity business idea — it makes abstract topics concrete and exam-ready',
+      'Apply every concept to a technology business idea from your own field — it makes abstract topics concrete and exam-ready',
       'The Business Model Canvas is the most exam-critical framework — practise filling it in for different scenarios',
       'Nigeria\'s NITDA and other agencies offer technology grants — research them as part of your learning',
-      'This course matters for your career: many cybersecurity professionals eventually consult or freelance',
+      'This course matters for your career: many technology professionals eventually consult or freelance',
     ],
-    lectureNotes: [
-      {
-        number: '1',
-        title: 'The Concept of Entrepreneurship',
-        sections: [
-          {
-            type: 'text',
-            text: 'Authors: Prof. Ntiedo J. Umoren and Sunday S. Akpan, Ph.D',
-          },
-          {
-            type: 'definition',
-            heading: '1.1 Introduction',
-            text: "The concept of entrepreneurship has evolved over several centuries, reflecting the changing nature of economic activity and the role of individuals in driving innovation and growth. Historically, the term \"entrepreneur\" originated from the French word \"entreprendre,\" which means \"to undertake.\" In the early 18th century, the term was used to describe individuals who undertook the risk of new enterprise. Over time, the definition of entrepreneurship has expanded to encompass a wide range of activities, from starting small businesses to leading large-scale innovations in established corporations. Entrepreneurship is often associated with the creation of new ventures, but it also involves the identification and exploitation of opportunities within existing organizations. This broader perspective recognizes that entrepreneurial activity can take many forms and occur in diverse contexts. Whether it's a solo entrepreneur starting a tech company or a corporate manager spearheading a new product line, the essence of entrepreneurship lies in the ability to recognize value and take the necessary steps to realize it. In today's rapidly changing global economy, entrepreneurship is more important than ever. It is a key driver of economic development, job creation, and social change. By challenging the status quo and introducing new ideas, entrepreneurs play a vital role in shaping the future. This chapter explores the fundamental concepts of entrepreneurship, including the characteristics of entrepreneurs, the different types of entrepreneurial activity, and the challenges and opportunities associated with this dynamic field.",
-          },
-          {
-            type: 'definition',
-            heading: '1.2 Who is an “Entrepreneur?”',
-            text: 'An entrepreneur is an individual who identifies an opportunity and organizes the necessary resources to exploit it. This definition highlights two key aspects of entrepreneurship: opportunity recognition and resource mobilization. Entrepreneurs are often seen as risk-takers, as they are willing to invest their time, money, and effort into ventures with uncertain outcomes. However, successful entrepreneurs are also adept at managing and mitigating risk through careful planning and strategic decision-making. The characteristics of entrepreneurs have been a subject of much study and debate. While there is no single "entrepreneurial personality," several traits are commonly associated with successful entrepreneurs. These include:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Creativity and Innovation', def: 'The ability to think outside the box and develop new solutions to problems.' },
-              { term: 'Resilience and Perseverance', def: 'The capacity to bounce back from failure and keep going in the face of obstacles.' },
-              { term: 'Self-Confidence', def: "A strong belief in one's abilities and the value of one's ideas." },
-              { term: 'Vision', def: 'The ability to see the big picture and anticipate future trends.' },
-              { term: 'Need for Achievement', def: "A strong drive to succeed and reach one's goals." },
-            ],
-          },
-          {
-            type: 'text',
-            text: 'In addition to these personal traits, entrepreneurs also possess a unique set of skills, such as leadership, communication, and problem-solving. These skills enable them to build and lead teams, attract investors, and navigate the complexities of the business world. Ultimately, an entrepreneur is someone who is not afraid to take the lead and make things happen.',
-          },
-          {
-            type: 'definition',
-            heading: '1.3 The Concept and Meaning of Entrepreneurship',
-            text: 'Entrepreneurship is a multifaceted concept that can be understood from various perspectives. At its core, it is the process of creating value by bringing together a unique package of resources to exploit an opportunity. This process involves several stages, from the initial spark of an idea to the successful launch and growth of a venture.',
-          },
-          {
-            type: 'text',
-            text: 'One way to think about entrepreneurship is as a mindset. This mindset is characterized by a proactive and innovative approach to problem-solving and a willingness to embrace change. It involves looking at the world through a lens of opportunity rather than limitation. This entrepreneurial mindset is not limited to those who start their own businesses; it can also be found in individuals working within established organizations, non-profits, and government agencies.',
-          },
-          {
-            type: 'text',
-            text: 'Another perspective on entrepreneurship focuses on the economic role of the entrepreneur. In this view, entrepreneurs are seen as "agents of change" who drive economic growth by introducing new products, services, and processes. By challenging existing markets and creating new ones, they foster competition and innovation, which ultimately benefits consumers and society as a whole. This economic perspective highlights the importance of entrepreneurship in promoting efficiency and progress.',
-          },
-          {
-            type: 'text',
-            text: "Entrepreneurship can also be seen as a social process. It involves building relationships and networks, and it often has a significant impact on communities and society. Social entrepreneurship, in particular, focuses on using entrepreneurial principles to solve social and environmental problems. Whether it's providing clean water to rural communities or developing sustainable energy solutions, social entrepreneurs are driven by a desire to make a positive difference in the world.",
-          },
-          {
-            type: 'definition',
-            heading: '1.4 The Concept of Intrapreneurship',
-            text: 'Intrapreneurship, also known as corporate entrepreneurship, refers to the practice of fostering an entrepreneurial mindset and behaviors within an established organization. It involves encouraging employees to think and act like entrepreneurs, identifying and pursuing new opportunities that can drive growth and innovation for the company. Intrapreneurs are individuals who take the initiative to develop new products, services, or processes within the context of their existing jobs.',
-          },
-          {
-            type: 'text',
-            text: 'The concept of intrapreneurship recognizes that large organizations can often become bureaucratic and resistant to change. By empowering employees to be intrapreneurial, companies can tap into the creativity and talent of their workforce and stay competitive in a rapidly changing market. Intrapreneurship can take many forms, from formal innovation programs to more informal efforts to encourage employee-led initiatives.',
-          },
-          {
-            type: 'text',
-            text: 'Successful intrapreneurship requires a supportive organizational culture that values innovation and risk-taking. This involves providing employees with the resources, autonomy, and incentives they need to pursue new ideas. It also requires a willingness on the part of management to embrace failure as a learning opportunity and to support projects that may not have immediate or certain outcomes. By fostering an intrapreneurial environment, companies can create a more dynamic and resilient organization that is better equipped to navigate the challenges of the future.',
-          },
-          {
-            type: 'definition',
-            heading: '1.5 Corporate Entrepreneurship Defined',
-            text: "Corporate entrepreneurship is a broad term that encompasses a variety of activities aimed at fostering innovation and growth within an established firm. It can be defined as the process by which teams within an established company conceive, foster, launch and manage a new business that is distinct from the parent company but leverages the parent's assets, market position, capabilities or other resources. There are several different types of corporate entrepreneurship, including:",
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Corporate Venturing', def: 'This involves the creation of new businesses by an established firm. This can be done through internal corporate venturing, where the new business is developed within the company, or external corporate venturing, where the company invests in or partners with outside startups.' },
-              { term: 'Strategic Entrepreneurship', def: "This refers to a firm's efforts to achieve creativity and innovation in its strategic areas, such as its business model, product services, or served markets. It involves using entrepreneurial thinking to gain a competitive advantage and drive long-term growth." },
-            ],
-          },
-          {
-            type: 'text',
-            text: "Corporate entrepreneurship is not just about starting new businesses; it's also about transforming the existing organization. It involves challenging the status quo and introducing new ways of thinking and acting throughout the company. By embracing corporate entrepreneurship, firms can become more agile, innovative, and better able to respond to the changing needs of their customers and the market.",
-          },
-          {
-            type: 'definition',
-            heading: '1.6 Entrepreneurial Mindset and Behaviours',
-            text: 'It is not a big idea alone that paves the path to ultimate entrepreneurial success; the mindset and behaviour of the "would-be" entrepreneur plays a crucial role. Entrepreneurs are often seen as innovators, risk-takers, and visionaries who create value and solve problems in the world, but what makes them different from other people and how they think and act in ways that enable them to achieve their goals lies in their mindset, which is a set of beliefs, attitudes, and habits that shape their behavior and influence their actions. In other words, entrepreneurial mindset encompasses a unique set of attitudes and behaviors that drive individuals to innovate, take risks, and create opportunities. This mindset is characterized by a strong desire to solve problems, think creatively, and constantly seek new challenges.',
-          },
-          {
-            type: 'text',
-            text: 'Thus, entrepreneurial mindset is a combination of creativity, resilience, and a relentless drive to succeed. The entrepreneurial mindset is unique in that one must be creative, communicative, and highly motivated to succeed, yet open to risk and failure. Opportunity recognition, self-efficacy, proactivity, resourcefulness and value creation constitute the basic aspects of entrepreneurial mindset. Having an entrepreneurial mindset is not only essential for starting and growing a business, but also for personal and professional development in any field or context. This mindset is not limited to starting a business; it can be applied in various contexts, including within established organizations, non-profits, or personal projects.',
-          },
-          {
-            type: 'text',
-            text: 'Entrepreneurial behaviors refer to the actions and characteristics exhibited by individuals who are venturing into new business opportunities. These behaviors include a high level of risk-taking, creativity, innovation, leadership, and persistence. Moreover, entrepreneurial behaviors also involve strong networking skills, adaptability, and a willingness to learn from failures. Building a successful business often requires forming strong relationships with other industry professionals, potential clients, and investors. Entrepreneurs must be able to adapt to changing market conditions and consumer preferences in order to stay competitive and relevant.',
-          },
-          {
-            type: 'definition',
-            heading: '1.7 Challenges in Developing an Entrepreneurial Mindset',
-            text: 'The mind is often regarded as the most powerful attribute and weapon every human has. Whatever we become is always attributed to the state of our mind. Thus, developing an enterprise is chiefly a function of the state of our mind and that is where the battle for life and success began. Here, few of the challenges and how entrepreneurial mindset can be developed:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Overcoming the Fear of Failure', def: 'One of the primary hurdles to fostering an entrepreneurial mindset is surmounting the fear of failure. Many individuals shy away from taking risks and initiating their ventures due to concerns about potential negative consequences. Overcoming this fear requires a shift in perspective, recognizing failures as valuable learning experiences that contribute to personal and professional growth.' },
-              { term: 'Cultivating Self-Confidence', def: 'Entrepreneurs must possess unwavering self-confidence in their abilities to navigate the uncertainties of the business world. A lack of self-confidence can impede decision-making processes and create obstacles to pursuing new opportunities. Cultivating self-confidence involves recognizing strengths, acknowledging achievements, and embracing challenges as opportunities for skill development.' },
-              { term: 'Embracing Change', def: 'Entrepreneurship is synonymous with change, innovation, and continuous learning. Those resistant to change may find it challenging to adapt to new situations and acquire the necessary skills for success. Embracing change involves fostering a mindset that welcomes innovation, values adaptability, and views challenges as catalysts for growth.' },
-              { term: 'Managing Uncertainty', def: 'The inherent uncertainty of entrepreneurship makes decision-making challenging without knowing the outcome. Developing a tolerance for uncertainty is crucial, requiring the ability to make informed decisions despite limited information. Entrepreneurial individuals must hone skills in risk assessment, strategic planning, and adapting to unforeseen circumstances.' },
-              { term: 'Financial Stability Concerns', def: 'Commencing a new venture often involves financial risks, and the apprehension of financial instability can hinder the development of an entrepreneurial mindset. Mitigating these concerns involves careful financial planning, risk assessment, and a strategic approach to resource allocation. Developing financial literacy is integral to navigating the entrepreneurial landscape with confidence.' },
-              { term: 'Building a Supportive Ecosystem', def: 'Entrepreneurs thrive in supportive environments with access to resources like funding, mentorship, and networking opportunities. The absence of such support can hinder the development of necessary skills and knowledge for success. Building a robust support network involves seeking mentorship, engaging in networking activities, and accessing resources that foster entrepreneurial growth.' },
-              { term: 'Balancing Work and Life', def: 'Entrepreneurs often grapple with long working hours and challenges in maintaining a healthy work-life balance. Managing personal well-being and relationships while pursuing a new venture requires intentional efforts to prioritize self-care, set boundaries, and cultivate resilience amidst the demands of entrepreneurship.' },
-              { term: 'Resilience to Criticism and Rejection', def: 'Entrepreneurs frequently encounter criticism, rejection, and skepticism from others. Developing resilience and the ability to persevere despite criticism is crucial for success. Fortifying mental strength involves reframing criticism as constructive feedback, learning from setbacks, and maintaining a steadfast focus on long-term goals.' },
-              { term: 'Sustaining Motivation and Perseverance', def: 'The entrepreneurial journey is a protracted and challenging endeavor. Sustaining motivation, focus, and perseverance is vital, especially during setbacks and obstacles. Entrepreneurs must cultivate a resilient mindset, set achievable milestones, and celebrate small victories to stay motivated on the path to long-term success.' },
-              { term: 'Fostering Creative and Innovative Thinking', def: 'Entrepreneurship demands creative problem-solving and innovative thinking. Developing these skills can be challenging, particularly for individuals with traditional educational or professional backgrounds. Fostering creative thinking involves embracing curiosity, experimenting with diverse perspectives, and fostering an environment that encourages unconventional ideas and solutions.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '1.8 Rationale and Relevance of Entrepreneurship',
-            text: 'Entrepreneurship as we see has to do with the persistent of opportunity to create wealth through innovative creation of product or service that meets a need of customers, using scarce resources in any way that result in enterprise development and growth which satisfies the expectation of stakeholders whose roles sustain the business. It is therefore a process which involves a vision of a future state regarding an idea, product or service. This process has played vital roles in the economic development of any nation, amongst which are:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Creation of Employment', def: 'It has been pointed out at various times and with varying degrees of emphasis that entrepreneurship creates employment for the teaming population of any nation. In Nigeria, for instance, it is documented that small and medium scale business, the catalyst of entrepreneurship employs about 30% of the entire labour force (Acquah, 1986).' },
-              { term: 'Transformation of Traditional Industry', def: "Entrepreneurial activities help to transform the traditional sector thereby helping in the economic development of a nation. In one respect, it helps in modernizing the people's perception of life, and in another, it modernizes the traditional handicraft prevalent in the rural economies, by introducing the use of anarchies instead of manual labour in most economics. Again, the skills of traditional craftsmen are modernized and synchronized with the developments in entrepreneurial activities." },
-              { term: 'Utilization of Resources', def: 'Entrepreneurship helps to mobilize resources that would otherwise remain idle in the lands of people and employ them productively. By so doing, capital formation which is a vital engine of economic growth is encouraged.' },
-              { term: 'Better Standard of Living', def: "As a result of their numerous economic activities, entrepreneurship activities make large quantities of goods and services available to people. With increased supply of goods and services individual's demands increase as well. This increase in demand, in turn, results in a better standard of living for the people." },
-              { term: 'Rural-Urban Migration', def: 'Majority of the small business, which constitute the bedrock for entrepreneurship are found in the rural areas- Nigeria is still a rural economy. By providing employment for the rural population, these business enterprises reduce the incidence of urban migration, thereby, thereby enhancing the economic growth of such rural areas.' },
-              { term: 'Innovation', def: 'Unless there are individuals who are willing to assume the risks of introducing new techniques of production, there would be no major breakthrough in technological development. This can be made possible through the activities in entrepreneurial pursuits. These individuals (entrepreneurs) provide the major sources of new ideas and inventions which result in the production of quality goods and services which are needed to improve the standard of living of the citizenry. This in turn enhances the economic growth and development of such nation.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '1.9 Summary and Conclusion',
-            text: 'The concept of entrepreneurship has evolved significantly, yet its definition remains a topic of scholarly debate. From this chapter, the essence of entrepreneurship can be distilled into a simpler framework focused on the development and validation of ideas. This perspective highlights the importance of opportunity recognition and innovation, proposing a coherent understanding that separates entrepreneurship from management practices. The multifaceted nature of entrepreneurship encompasses both positive contributions to economic growth and potential negative societal impacts, revealing its complex role in contemporary economies. Similarly, the concept of intrapreneurship, corporate entrepreneurship, entrepreneurial mindset and behaviours, challenges in developing an entrepreneurial mindset, rationale and relevance of entrepreneurship have all been discussed in this chapter. By emphasizing these fundamental elements, the definition of entrepreneurship presented above and other conceptual definitions / explanations allows for a more accessible approach to understanding entrepreneurial activities. As scholars continue to explore this dynamic field, it is essential to consider both individual skills and broader environmental factors that shape entrepreneurial success.',
-          },
-        ],
-      },
-      {
-        number: '2',
-        title: 'Classification and Biographical Study of Entrepreneur',
-        sections: [
-          {
-            type: 'text',
-            text: 'Authors: Prof. Essien E. Akpanuko and Ekwere R. Enang, Ph.D',
-          },
-          {
-            type: 'definition',
-            heading: '2.1 Introduction',
-            text: 'The study of entrepreneurship involves understanding the diverse ways in which individuals identify and exploit opportunities. This chapter focuses on the classification of entrepreneurs and the biographical study of their characteristics. By categorizing entrepreneurs based on various criteria, we can gain a deeper understanding of the different types of entrepreneurial activity and the factors that contribute to their success. Classification of entrepreneurs is essential for several reasons. First, it helps researchers and policymakers to identify and support different types of entrepreneurial ventures. Second, it provides a framework for understanding the diverse motivations and characteristics of entrepreneurs. Finally, it enables us to analyze the impact of different types of entrepreneurship on economic growth and development. The biographical study of entrepreneurs involves examining their backgrounds, experiences, and personal traits. This approach recognizes that the individual entrepreneur is at the heart of the entrepreneurial process. By studying the lives and careers of successful entrepreneurs, we can identify common patterns and insights that can inform our understanding of entrepreneurship more broadly.',
-          },
-          {
-            type: 'text',
-            heading: '2.2 Classification and Types of Entrepreneurships',
-            text: 'Entrepreneurs can be classified into several different types based on various criteria, such as their motivation, level of innovation, and the scale of their operations. These classifications are not mutually exclusive, and many entrepreneurs may fall into multiple categories.',
-          },
-          {
-            type: 'text',
-            heading: '2.2.1 Clarence Danhof Classifications',
-            text: 'Clarence Danhof (1949) classified entrepreneurs into four categories based on their level of innovation and willingness to embrace change:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Innovating Entrepreneurs', def: 'These are individuals who introduce new products, services, or processes to the market. They are often seen as the "true" entrepreneurs, as they drive economic growth and progress through their creativity and vision.' },
-              { term: 'Imitative (Adoptive) Entrepreneurs', def: 'These individuals do not innovate themselves but instead adopt and adapt successful innovations from others. They play an important role in spreading innovation and increasing competition in the market.' },
-              { term: 'Fabian Entrepreneurs', def: 'These individuals are cautious and skeptical of change. They only adopt new innovations when they are forced to do so by market pressure or when the success of the innovation has been clearly demonstrated by others.' },
-              { term: 'Drone Entrepreneurs', def: 'These individuals are resistant to change and refuse to adopt new innovations, even when they are facing significant challenges or competition. They are often associated with traditional or declining industries.' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '2.2.2 Classification by Arthur H. Cole',
-            text: 'Arthur H. Cole classified entrepreneurs based on their role in the economy:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Empirical Entrepreneurs', def: 'These individuals rely on their experience and intuition to make decisions. They are often found in traditional or small-scale businesses.' },
-              { term: 'Rational Entrepreneurs', def: 'These individuals use formal analysis and planning to make decisions. They are more likely to be found in larger or more complex organizations.' },
-              { term: 'Cognitive Entrepreneurs', def: 'These individuals are driven by their vision and their ability to recognize and exploit new opportunities. They are the primary drivers of innovation and change in the economy.' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '2.2.3 Classification by Naidu and Rao (2008)',
-            text: 'Naidu and Rao (2008) provided several classifications based on different dimensions:',
-          },
-          {
-            type: 'termlist',
-            heading: 'Motivational Classification',
-            items: [
-              { term: 'First-generation entrepreneur', def: 'Starts from scratch without family business background.' },
-              { term: 'Self-actualizer entrepreneurs', def: 'Driven by the desire for autonomy and personal fulfillment.' },
-              { term: 'Dissatisfied entrepreneurs', def: 'Start a business because they are unhappy with their previous employment.' },
-              { term: 'Family business entrepreneurs', def: "Inherit and develop their family's business." },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: 'Classification Based on Entrepreneurial Experience',
-            items: [
-              { term: 'Novice Entrepreneurs', def: 'Individuals with no prior business ownership experience.' },
-              { term: 'Habitual Entrepreneurs', def: 'Individuals who have owned at least two or more separate businesses at the same time.' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: 'Classification Based on Technical Experience',
-            items: [
-              { term: '"Research" Technical entrepreneur', def: 'Has prior expertise in technological research.' },
-              { term: '"Producer" technological entrepreneur', def: 'Has a background in direct commercial production.' },
-              { term: '"User" technical entrepreneur', def: 'Has experience as an end user of the relevant product/technology.' },
-              { term: '"Opportunist" technical entrepreneur', def: 'Has found and imagined a technology-based opportunity and seized it.' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '2.2.4 Classification Based on Ownership',
-            items: [
-              { term: 'Private entrepreneurship', def: 'Independent entrepreneurs engaging in business where the entrepreneurial process is dominant. These are often small, simple, and economical to set up, motivated by profit.' },
-              { term: 'Public entrepreneurship', def: 'In developing countries, the government may take the initiative in businesses, leading to government-linked corporations (GLCs) or state-owned firms. Popular examples include State Economic Development Corporations (SEDCs).' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '2.3.5 Classification Based on Scale of Enterprise',
-            items: [
-              { term: 'Small scale entrepreneurship', def: 'Particularly popular in developing nations. Small business owners often face obstacles such as maintaining consistent cash balance, balancing family time, keeping up with trends, and brand management.' },
-              { term: 'Scalable startup', def: 'Rarer but garner significant media interest. These begin on a small scale as the "germ" of an idea and are nurtured and scaled up, often with venture funding.' },
-              { term: 'A big corporation', def: 'Entrepreneurs can function within larger, existing organizations to expand into new consumer segments and broaden the scope of a well-established enterprise.' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '2.3.6 New Entrepreneurial Classifications',
-            text: 'In recent years, various new classifications have emerged:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Solo entrepreneurs', def: 'Prefer to start and run their businesses on their own, providing their own cash and skills.' },
-              { term: 'Active partners', def: 'Entrepreneurs who work together by pooling their resources and participating in daily operations.' },
-              { term: 'Inventors', def: 'Involved mostly in R&D, having a creative personality for developing new goods and technologies.' },
-              { term: 'Challengers', def: 'Take on obstacles to develop a commercial enterprise as a symbol of success.' },
-              { term: 'Buyers (entrepreneurs)', def: 'Look for possibilities to acquire existing units that may be seized or are in working condition, using their knowledge to repair them.' },
-              { term: 'Life timers', def: 'Think of business as an integral part of their lives, driven by a strong desire to take personal responsibility.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '2.4 Biographical Study of Entrepreneurs',
-            text: 'This addresses the characteristics or attributes of an entrepreneur from sociological, psychological, and economic perspectives. Key traits include:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Self Confidence', def: 'High internal locus of control; believing in oneself rather than fate.' },
-              { term: 'Risk Taking Ability', def: 'Propelled by the idea that higher risk often leads to higher profit.' },
-              { term: 'Task (Result) Oriented', def: 'Setting clear and measurable goals with persistence and determination.' },
-              { term: 'Leadership', def: 'Important for successful discharge of duties; not being too rigid or dogmatic.' },
-              { term: 'Future Oriented (Visionary)', def: 'Possessing foresight and perception of the future.' },
-              { term: 'Creativity (Innovative Behaviour)', def: 'Making the business outlive the entrepreneur through flexible changes.' },
-              { term: 'Originality (Uniqueness)', def: 'Being original in thoughts and innovations rather than merely copying.' },
-              { term: 'Need for Achievement', def: "Driven by the psychologist David C. McClelland's theory of \"acquired need.\"" },
-              { term: 'Drive and Energy', def: 'Ability to handle complex and demanding entrepreneurial jobs.' },
-              { term: 'Taking Initiative (Conceptual Ability)', def: "Being one's own boss and taking initiatives as needs arise." },
-              { term: 'Long-term Involvement', def: 'Setting eyes on tomorrow to build a business that outlives them.' },
-              { term: 'Deviant Behaviour', def: "A high propensity to leave other's employment to open their own business." },
-              { term: 'Taking Personal Responsibility', def: "Assuming control for one's own decisions and actions." },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '2.5 Summary and Conclusion',
-            text: 'Classification of entrepreneurs can be done based on various criteria such as motivation, level of innovation, scale of operation, and industry focus. By categorizing entrepreneurs based on these criteria, researchers and policymakers can better understand the diverse motivations and characteristics that drive entrepreneurial activity. Biographical study of entrepreneurs involves examining their backgrounds, experiences, and personal traits that have shaped their entrepreneurial journey. By studying the biographies of successful entrepreneurs, researchers can gain insights into the factors that contribute to entrepreneurial success, such as passion, resilience, and resourcefulness.',
-          },
-        ],
-      },
-      {
-        number: '3',
-        title: 'Barriers and Critical Success Factors in Entrepreneurship',
-        sections: [
-          {
-            type: 'text',
-            text: 'Authors: Akpan J. Williams, Ph.D and Uduakobong A. Inyang, Ph.D',
-          },
-          {
-            type: 'definition',
-            heading: '3.1 Introduction',
-            text: 'Entrepreneurship is often hailed as the engine of economic growth, driving innovation, creating jobs, and fostering competition. However, the path to successful entrepreneurship is fraught with challenges and obstacles. This chapter explores the various barriers that entrepreneurs face and the critical success factors that can help them overcome these challenges and achieve their goals. Understanding these barriers is essential for aspiring entrepreneurs, policymakers, and support organizations. By identifying the common pitfalls and hurdles, stakeholders can develop strategies to mitigate risks and create a more conducive environment for entrepreneurial activity. Similarly, identifying the critical success factors provides a roadmap for entrepreneurs to build resilient and sustainable businesses.',
-          },
-          {
-            type: 'definition',
-            heading: '3.2 General Barriers to Entrepreneurship',
-            text: "Entrepreneurs face a wide range of general barriers that can impede their progress at various stages of the entrepreneurial process. These barriers can be internal, related to the entrepreneur's own characteristics and skills, or external, related to the economic, social, and political environment. Some of the most common general barriers include:",
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Lack of Access to Finance', def: 'Securing adequate funding is one of the most significant challenges for entrepreneurs. Many struggle to obtain loans from traditional financial institutions due to a lack of collateral or a proven track record.' },
-              { term: 'Inadequate Infrastructure', def: 'Poor infrastructure, such as unreliable power supply, inadequate transportation networks, and limited access to high-speed internet, can significantly increase the cost of doing business and hinder growth.' },
-              { term: 'Bureaucratic Red Tape', def: 'Complex and time-consuming administrative procedures for business registration, licensing, and taxation can deter potential entrepreneurs and stifle innovation.' },
-              { term: 'Lack of Skilled Labour', def: 'Finding and retaining employees with the necessary skills and expertise can be a major challenge, particularly in specialized or high-tech industries.' },
-              { term: 'Market Competition', def: 'Entrepreneurs must navigate intense competition from established firms and other startups. Gaining market share and building brand loyalty can be difficult and costly.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '3.3 Cultural Barriers to Entrepreneurship',
-            text: 'Cultural factors play a significant role in shaping entrepreneurial attitudes and behaviors. In some societies, cultural norms and values may discourage risk-taking and innovation, making it difficult for entrepreneurs to gain support and recognition. Common cultural barriers include:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Fear of Failure', def: 'In cultures where failure is stigmatized, individuals may be less likely to take the risks associated with starting a new business.' },
-              { term: 'Preference for Stability', def: 'Some cultures place a high value on stable, long-term employment, which can discourage individuals from pursuing entrepreneurial ventures.' },
-              { term: 'Social Norms and Expectations', def: 'Traditional social norms may dictate certain career paths or roles, which can limit the opportunities available to certain groups, such as women or young people.' },
-              { term: 'Lack of Role Models', def: 'A lack of successful entrepreneurial role models in a community can make it difficult for aspiring entrepreneurs to envision themselves as successful business owners.' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '3.3.1 Strategies for Overcoming Cultural Barriers',
-            text: 'Overcoming cultural barriers to entrepreneurship requires a shift in mindset and a concerted effort to challenge and change cultural norms and attitudes towards entrepreneurship. This can be achieved through education, awareness-raising campaigns, and the creation of support systems and resources for aspiring entrepreneurs. By addressing cultural barriers to entrepreneurship, societies can unlock the potential of their entrepreneurs and drive economic growth and innovation. Some specific strategies are as follows:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Embrace Cultural Intelligence', def: 'Cultural intelligence or cultural quotient (CQ) refers to the skill to relate and work effectively in culturally diverse situations. It is the capability to cross boundaries and prosper in multiple cultures. It involves understanding and appreciating different cultural norms, values, and communication styles. By embracing cultural intelligence, entrepreneurs can adapt their strategies and approaches to resonate with local customers and stakeholders.' },
-              { term: 'Build Cross-Cultural Relationships', def: 'Establishing strong relationships with individuals from different cultures is key to overcoming barriers. By fostering trust and mutual understanding, entrepreneurs can navigate cultural differences more effectively. Networking events, partnerships, and mentorship programs can facilitate cross-cultural relationship building.' },
-              { term: 'Conduct Market Research', def: "Thorough market research is crucial to identify cultural nuances and preferences. By understanding the target market's cultural context, entrepreneurs can tailor their products, services, and marketing strategies accordingly. This may involve adapting branding, packaging, messaging, and even product features to align with cultural expectations." },
-              { term: 'Adapt Communication Styles', def: 'Effective communication is vital when dealing with cultural barriers. Entrepreneurs should be mindful of language nuances, non-verbal cues, and communication etiquette in different cultures. Adapting communication styles to match the cultural context can enhance understanding and build stronger connections with customers and stakeholders. Also, providing multilingual customer support or hiring translators can help bridge the gap.' },
-              { term: 'Hire Local Talent', def: 'Employing individuals who possess local cultural knowledge and language proficiency can be invaluable. Local employees can provide insights, bridge cultural gaps, and help navigate challenges specific to the target market. Their expertise can contribute to better decision-making and more culturally sensitive business practices.' },
-              { term: 'Collaborate with Local Partners', def: 'Partnering with local businesses or organizations can facilitate market entry and expansion. Local partners can provide valuable guidance, access to networks, and a deeper understanding of the cultural landscape. Collaborative efforts can lead to mutually beneficial outcomes and help overcome cultural barriers.' },
-              { term: 'Respect and Adapt to Local Customs', def: 'Demonstrating respect for local customs and traditions is essential for building trust and credibility. Entrepreneurs should be aware of cultural sensitivities, religious practices, and social norms. Adapting business practices to align with local customs can foster positive relationships and avoid potential misunderstandings.' },
-              { term: 'Leverage Technology', def: 'Technology can bridge cultural gaps and facilitate communication in diverse markets. Utilizing translation tools, localization software, and cross-cultural collaboration platforms can enhance efficiency and effectiveness. Embracing technology can also help overcome language barriers and streamline operations in global markets. It should be noted that cultural competitiveness is an ongoing process that requires continuous learning, adaptation, and an open mindset. By embracing cultural diversity and proactively addressing cultural barriers and challenges, entrepreneurs can position their businesses for success in the global market.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '3.4 Environmental Barriers to Entrepreneurship',
-            text: "Environmental barriers are commonly seen as negative features of the environment that impede the operation of an entrepreneur or hinder one's ability to start and grow successful businesses. Some of the barriers are discussed below:",
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Regulatory and Legal Barriers', def: 'The rules, regulations, policies and laws of the government and other regulatory bodies can restrict as well as support the ability of entrepreneurs to start and grow their businesses. In addition to red tape, these barriers can make it challenging for individuals to navigate the requirements of starting a business, further hindering entrepreneurial efforts. Regulations such as licensing requirements, zoning laws, and tax policies can create significant hurdles for entrepreneurs looking to start their own businesses. Navigating these regulations can be time-consuming and costly, particularly for small business owners who may not have the resources to hire legal counsel or compliance experts. As a result, many potential entrepreneurs are deterred from starting businesses due to the perceived complexity and uncertainty of regulatory compliance.' },
-              { term: 'Lack of Access to Capital', def: 'Entrepreneurs require capital to start a business. In many communities, there is a lack of financial infrastructure and resources to support new businesses. Without access to funding and resources, individuals may struggle to get their businesses off the ground and grow them successfully. Many aspiring entrepreneurs struggle to secure funding to start or expand their businesses, as traditional financial institutions may be hesitant to lend to startups with limited track records. Additionally, entrepreneurs from marginalized communities or underrepresented groups may face additional obstacles in accessing capital due to systemic bias and discrimination. Thus, a lack of access to capital can make it difficult for aspiring entrepreneurs to start their businesses.' },
-              { term: 'Market Conditions', def: 'A major barrier to entrepreneurship can be the local market and economic environment. For example, it might be challenging for business owners to prosper in an area with high unemployment rates and low levels of consumer demand.' },
-              { term: 'Infrastructure and Resource Constraints', def: 'For entrepreneurs to run and expand their businesses, physical infrastructure like roads, energy, and telephones must be accessible. Operating and growing a firm can be challenging for entrepreneurs without a solid infrastructure.' },
-              { term: 'Environmental Degradation', def: 'Degradation of the environment might also prevent entrepreneurship. For instance, it can be challenging for business owners to operate sustainably and may incur more expenditures for them to handle environmental difficulties due to pollution, soil deterioration, and other environmental harm.' },
-              { term: 'Societal Attitudes towards Entrepreneurship', def: 'In some communities, entrepreneurship may not be viewed as a desirable career path, leading to the lack of support and encouragement for individuals interested in starting their own businesses. Also, stereotypes and misconceptions about entrepreneurs can perpetuate negative attitudes towards entrepreneurship, making it more challenging for aspiring entrepreneurs to pursue their dreams.' },
-              { term: 'Lack of Supportive Entrepreneurial Ecosystem', def: 'Entrepreneurial ecosystems are interconnected networks of entrepreneurs, investors, institutions, and supporting organizations, influenced by culture and norms, that foster the development and growth of businesses within a particular region or community. The absence of this constitutes a serious environmental setback to potential entrepreneurs.' },
-              { term: 'Environmental Sustainability Concerns', def: "Environmental sustainability is the practice of interacting with the planet responsibly to avoid depleting natural resources and compromising the future generation's ability to meet their daily needs. This is important because the Earth is a finite place, with limited land, water, and wildlife. Neglecting these concerns could pose serious hindrance to aspiring entrepreneurs to start or expand a business." },
-              { term: 'Technological and Digital Divides', def: 'This refers to the existing divide between people who have access to the Internet and Information and Communication Technologies (ICT), and those who do not, or who have limited access. Where this divide exists, it may hinder entrepreneurs from venturing into business.' },
-              { term: 'Geopolitical and Economic Instability', def: 'This refers to the unpredictable and often violent fluctuations in political, economic, and social conditions that affect international/regional relations and global markets. Such instability can arise from various factors, including territorial disputes, political upheaval, economic crises, or social unrest, inflation and it often leads to uncertainty for investors and businesses operating across borders. This can serve as a serious environmental barrier to entrepreneurs.' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '3.4.1 Strategies for Overcoming Environmental Barriers',
-            text: 'Environmental barriers to entrepreneurship pose significant challenges for aspiring business owners looking to start and grow successful businesses. There are however, various strategies that entrepreneurs can employ to navigate and overcome the barriers which they face in the realm of operation environmental. These strategies are as follows:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Embracing Innovation and Leverage Technological Advancements', def: 'By adopting cutting-edge technologies and exploring new approaches, entrepreneurs can develop sustainable solutions and address environmental challenges in creative and impactful ways.' },
-              { term: 'Building Collaborative Networks', def: 'Entrepreneurs can establish partnerships with like-minded organizations, government agencies, and local communities to pool resources, share knowledge, and collectively work towards sustainable solutions. These collaborative networks foster a supportive ecosystem for environmental entrepreneurship.' },
-              { term: 'Engaging Stakeholders', def: 'Entrepreneurs can actively involve stakeholders such as customers, suppliers, employees, and local communities in decision-making processes. By incorporating diverse perspectives and insights, entrepreneurs can develop more robust and sustainable strategies and navigate the volatile environment successfully.' },
-              { term: 'Implementing Sustainable Business Models', def: 'As a key to long-term success, entrepreneurs can integrate principles of circular economy, renewable energy, and resource efficiency into their operations. By prioritizing sustainability, they can create value while minimizing environmental impact and start/grow their business sustainably.' },
-              { term: 'Continuous Learning and Adaptation', def: 'Environment is dynamic and so are its barriers. Aspiring entrepreneurs must continuously learn and adapt to changing circumstances. By staying updated on the latest research, industry trends, and regulatory developments, entrepreneurs can proactively adjust their strategies and remain resilient in the face of challenges.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '3.5 Critical Success Factors in Entrepreneurship',
-            text: "To begin with, anyone with a strong desire to earn money may set up and start a company. However, not all entrepreneurs are successful. Many aspects of entrepreneurship are thought to be crucial to business growth. The reality is that in the field of entrepreneurship, all of these qualities are needed (Kanu, 2018). There are some characteristics of entrepreneurship that contribute to the venture's success, and we will discuss these characteristics in this article.",
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Optimum Resources Utilization', def: 'Entrepreneurship is regarded as an entrepreneurial practice because it entails a great deal of ingenuity as well as the workings of a company with the aim of maximizing benefit but still ensuring adequate resource usage. Both of these operations are carried out in a specific category of market setting, and hence Entrepreneurship is viewed as a competitive force.' },
-              { term: 'The Path to Success is Innovation', def: 'To capture the interest of their future clients, a constant and random quest for new and creative business ideas is needed. It is the duty of an entrepreneur to review and assess all company processes on a regular basis in order to create a framework that is both reliable and competitive. An organization’s ongoing attempt to improve performance is known as performance optimization.' },
-              { term: 'Seek Out the Objectives', def: 'A business often starts with a set of objectives that must be met in order for the company to stay afloat. To achieve their goals and increase profits, an entrepreneur must have certain optimistic inspirations. Without an objective and the means to achieve it, not even a business can survive.' },
-              { term: 'Profit Maximization', def: 'The profit potential is described as the expected amount of return or earning that a business organisation would gain by taking a gamble and launching a business venture with some creative ideas. If there is no benefit opportunity, the effort of an entrepreneur would remain hypothetical and a form of leisure activity dependent on philosophy.' },
-              { term: 'Risk Taking', def: 'Entrepreneurship is inextricably linked to risk, and an entrepreneur must consider the amount of risk involved with the establishment of a company. The core of entrepreneurship is a desire to gamble the development and execution of such new innovations. Some of the new theories are provisional and therefore the findings are not favourable or even immediate.' },
-              { term: 'Manage the Human Resources', def: 'It is impossible to operate a company without employing even one employee. Both business operations cannot be done effectively as an entrepreneur, and there is an apparent need for manpower to do the different activities relevant to business performance in a better way.' },
-              { term: 'Strong Abilities to Establish Networking', def: 'The practice involved in the field of Entrepreneurship is the creation of networks and the expansion of relationships. In addition, an entrepreneur must increase their opportunities by expanding their network. The best approach is to network with other entrepreneurs at networking gatherings, business parties, get-togethers, and other functions where you can get some ideas for growing your business.' },
-              { term: 'Self-Motivation', def: 'When a company wishes to reach new heights of prosperity, it must always challenge itself and remain inspired. There will be ups and downs in the business world, but staying focused will allow you to seize opportunities that are beneficial to your company.' },
-              { term: 'Hard Work and Commitment', def: 'Entrepreneurship necessitates a significant amount of time and effort, as well as dedication and commitment. To generate a variety of new ideas, improve strategic strategies, and ensure the firmness of vital capital, a mixture of hard work and excitement is required. It is a strong sense of personal duty combined with a high degree of motivation.' },
-              { term: 'Rewards', def: 'Entrepreneurship is synonymous with a variety of incentives, whether financial or non-financial, so it either satisfies financial targets or provides a high degree of personal satisfaction. Monetary incentives are viewed as a symbol of success for Entrepreneurship, while non-monetary rewards include an incentive to contribute to social well-being while still receiving some social attention.' },
-              { term: 'Passion is a Must', def: "It is often necessary in the world of Entrepreneurship to be passionate but still prioritizing one's goods or services. When you are frustrated, there is always inspiration to propel you up and make you move towards your passion. Every successful entrepreneur is guided by a strong sense of purpose. If it is discovered that one's interest is fading, this is a sign that it is time to move on to something new." },
-              { term: 'Set a Vision', def: "It is inarguable that entrepreneurship must establish a vision. The overall goal of an Entrepreneurship must be discussed with members of the team so that they understand how much work they must put in to achieve the same. The Entrepreneur's vision is straightforward, and it should also fulfill the business's goals. This is the obvious consideration that must be considered for great encouragement and taking the company to the next level." },
-              { term: 'Adaptability', def: 'This is the most critical thing to consider when it comes to surviving in today’s ever-changing corporate world. It is necessary to stay competitive and adapt in order to succeed in a variety of market conditions. The willingness to respond to change is important for Entrepreneurship.' },
-              { term: 'Core Values', def: 'Without values, entrepreneurship cannot survive for a long time. If you want to run the business efficiently and effectively, then there is a need for establishing some set of core values. Some of the core values should be fairly treating all business operations and make sure all deal with employees is honest and stay away from any fraud. This is not applied in case of business activities but also in terms of treating customers as well as clients in a fair manner. These are the part of business etiquette that are required to follow all the times.' },
-              { term: 'Leading Abilities', def: 'Entrepreneurship is all about directing all staff in the same direction with the appropriate amount of commitment. A simple vision often brings meaning, but it requires a significant amount of resources to transition from vision to practice. Entrepreneurs hire a variety of staff to manage various company activities such as production, sourcing, distributing, accounting, and so on. Since an entrepreneur cannot handle all tasks on his or her own, he or she can only guide others in the path of target achievement.' },
-              { term: 'Active-minded', def: 'A successful entrepreneur still understands what situation will get to them what kind of business opportunities. As a result, it can be used to improve the market and generate income in the future. To illustrate, when demonetization occurred, an online-based enterprise may introduce their online services, which increased the success of that company during that time span. As a result, it gave the business a massive boost and caused it to grow rapidly over that time span.' },
-              { term: 'Highly Optimistic', def: 'Business fluctuates constantly due to changing business dynamics, and an entrepreneur must have an optimistic attitude at all times. Entrepreneurship must remain optimistic during times of disappointment and ups and downs are a part of any company, regardless of its existence.' },
-              { term: 'Communication Skills', def: 'An entrepreneur must effectively collaborate with all of his or her staff as well as customers. It is not only beneficial to the company, but it also creates a very favorable impact and a high degree of trust. Furthermore, it puts the recipient and sender on the same page and makes it simple to grasp everything.' },
-              { term: 'Knowledge About the Niche', def: 'An enterprise is often founded on a certain niche, and it is clear that an entrepreneur must be well-versed in the intricacies of the good or service with which they are concerned. Furthermore, it is important to be mindful of the marketing plans for goods and services, as well as how to improve them. The technical information about the pros and cons of these services must be thoroughly researched.' },
-              { term: 'Urge to Learn', def: 'As an entrepreneur, you must understand all of the modern and emerging facets of industry so that you can keep up with the changing business environment. However, if you are unable to learn anything new, it is clear that entrepreneurship is not for you.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '3.6 Summary and Conclusion',
-            text: 'Entrepreneurship is not a part-time career, but rather a full-time opportunity to increase profit as far as possible. There is no point in starting and running a company if there is no change in business goals. However, if you have a creative and innovative concept, you must plan ahead of time in order to launch a new company. All of the above characteristics of an Entrepreneurship propel the company to new heights of growth. Do it once and you never know what would happen if you never try it.',
-          },
-          {
-            type: 'bullets',
-            heading: 'References',
-            items: [
-              "Alabladejo, M. (2002). Promoting SMEs in Africa: Keys Areas of Intervention. UNIDO's contribution to the preparation of AFDB's Lines of Credit Support to Small and Medium Scale Enterprises in Africa. sl: UNIDO.",
-              "Ali, I., Tajddini, K., ur Rehman, K., Ali, J. F., & Ahmed, I. (2010). University student's inclination of governance and its effects on entrepreneurial intentions: an empirical analysis. International Journal of Trade, Economics and Finance, 1(1), 36.",
-              'Baena, V. (2012). Market conditions driving international franchising in emerging markets. International Journal of Emerging Markets, 7(1), 49-71.',
-              'El Nemar, S., Ghazzawi, K., El Danaoui, S., Tout, S., & Dennaoui, H. (2016). Entrepreneurship barriers and entrepreneurial inclination in Lebanon. Management, 6(1), 21-28.',
-              'Hsieh, C., Parker, S. C., & van Praag, C. M. (2017). Risk, balanced skills and entrepreneurship. Small Business Economics, 48, 287-302.',
-              'Iwarsson, S., Nygren, C., Oswald, F., Wahl, H. W., & Tomsone, S. (2006). Environmental barriers and housing accessibility problems over a one-year period in later life in three European countries. Journal of Housing for the Elderly, 20(3), 23-43.',
-              "Kanu, A. (2018). Benefits and Barriers of Entrepreneurial Ventures: -A Literature Review Point of View. The Int'l Journal of Entrepreneurship and Business Innovation, 1(01), 27.",
-              "Kooyman, R. (2015). Creative Entrepreneurs: Cultural Ants 'Identity, Perspectives and Dilemmas'. Int'l Journal of Economics, Commerce and Management, 3(9), 15-26.",
-              'Laclé, F. A. (2010). Entrepreneurship, Economic Development and the Barriers in Between. s.l:s.n',
-              'Onyebinama, U. A. U., & Onyebinama, I. C. (2010). Extension education and entrepreneurship development in Nigerian agriculture. Agricultural Journal, 5(2), 63-69.',
-              'Radikoko, I., Maswabi, B., & Dzimiri, M. (2015). Investigating Factors Affecting Entrepreneurship Development in Botswana. Archives of Business Research, 3(6).',
-              'Ray, C. (1998). Culture, intellectual property and territorial rural development. Sociologia ruralis, 38(1), 3-20.',
-              'Singh Sandhu, M., Fahmi Sidique, S., & Riaz, S. (2011). Entrepreneurship barriers and entrepreneurial inclination among Malaysian postgraduate students. International journal of entrepreneurial behavior & research, 17(4), 428-449.',
-              "Staniewski, M., & Awruk, K. (2015). Motivating factors and barriers in the commencement of one's own business for potential entrepreneurs. Economic research-Ekonomska istraživanja, 28(1), 583-592.",
-            ],
-          },
-        ],
-      },
-      {
-        number: '4',
-        title: 'Theories of Entrepreneurship',
-        sections: [
-          {
-            type: 'text',
-            text: 'Authors: Prof. Micheal P. Nnamesh and Mrs. Emem Akainyene, Ph.D',
-          },
-          {
-            type: 'definition',
-            heading: '4.1 Introduction',
-            text: 'The term "theory" is used by scientists to describe the interactions between evidence. Put it differently, theory is some ordering principles. There are variety of entrepreneurship myths that can be explained from different perspectives. Economists, Sociologists, and Psychologists. These theories have been supported and given by various thinkers over the period of more than two and half centuries. Although, a coordinated and comprehensive theory of entrepreneurship is yet to come, some authorities have compounded theories on entrepreneurship and these theories are constructed from either psychological or sociological elements. Interestingly, these various theories are named after their proponents. For the purpose of this course, we shall, in this chapter, present and discuss the under-listed theories of entrepreneurship propounded by the different eminent social thinkers.',
-          },
-          {
-            type: 'bullets',
-            items: [
-              'Krizner Theory',
-              'Joseph Schumpeter Theory',
-              'Knight Theory',
-              'Shackle Theory',
-              'Casson Theory',
-              'Max Weber Theory',
-              'Frank Young Theory',
-              'Evarer Hagen Theory',
-              'John Kunkel Theory',
-              'David McClelland Theory and',
-              'Thomas Cochran Theory',
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '4.2 Krizner Theory (1997)',
-            text: 'According to K. Kirzner, an entrepreneur is a person or someone who is alert to and perceives profitable opportunities. He is an intermediary who is able to opportunities for trade. He is of the Austrian school of thought and an Austrian decent. The highlight of his theory is entrepreneurial (opportunity) discovery in the phase of disequilibrium. The key words associated with this theorist are disequilibrium in the market and discovery.',
-          },
-          {
-            type: 'definition',
-            heading: '4.3 Joseph Schumpeter Theory (1928)',
-            text: "This theory is otherwise referred to as the Innovation Theory of entrepreneurship or a dynamic theory of entrepreneurship. It is named after Schumpeter since he was the first theorist to advocate for it. He belongs to the radical school of thought with key highlights on innovation, creative destruction, and detaching risk from entrepreneur. Entrepreneurship, according to Schumpeter, is the catalyst that disrupts the economy's stationary circular flow and thus initiates and sustains the growth process. The inventor activates the economy to a higher stage of growth by embarking on 'new variations' of the forces of production, which he succinctly refers to as creativity. In addition to taking chances and organizing manufacturing, Schumpeter developed the idea of creativity as a central force in entrepreneurship. Entrepreneurship, according to Schumpeter, is \"an innovative practice.\" An inventor is someone who creates innovative goods or services and also introduces them into the market. He sees creativity as an entrepreneur's weapon. The inventor is regarded as the \"driver of innovation.\" He sees the potential to introduce new goods, new markets, new sources of production, new forms of industrial and commercial enterprise, or for the development of newly discovered resources. By this theory, Schumpeter sees an entrepreneur as a special Person vis-à-vis an innovator who brings about ideas from the introduction of new technological process and product. Schumpeter was the first major economic economist to place the human agent at the center of the production process. He is quite clear about the entrepreneur's economic role. The entrepreneur is the driving force behind economic development; his job is to create new combinations or reinvent. Schumpeter distinguishes between innovators and inventors. A designer develops novel materials and techniques. An innovator, on the other hand, is someone who uses or implements inventions and discoveries to create new combinations. An engineer is concerned with his scientific innovation work, while an entrepreneur is concerned with converting the technical work into economic efficiency. An innovator differs from an entrepreneur in that he not only creates something new, but also goes beyond mere creation to the commercialization of that which has been originated.",
-          },
-          {
-            type: 'definition',
-            heading: '4.4 Knight Theory (1921)',
-            text: "An Austrian decent with theoretic focus on distinguishing between uncertainties, risks, and relating them to profit and entrepreneurship. His key words are uncertainty, risk and profit. Knight described an entrepreneur to be a specialized group of persons who bears uncertainty. Uncertainty is defined as a risk which cannot be insured against and is incalculable. The entrepreneur according to him is the economic functionary who undertakes such responsibility of uncertainty, which by its very nature cannot be insured, or capitalized, or salaried too. By this theory, risk bearing is seen as the primary element of entrepreneurship. The underlying tenets Knight's theory is as follows:",
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Risk creates Profit', def: "According to the Knight's theory of risk-bearing, the entrepreneur or capitalist makes money by undertaking risks." },
-              { term: 'More Risk More Gain', def: 'The level of risk varies depending on the industry. Entrepreneurs take varying degrees of risk based on their skill and tendency. According to risk theory, the more dangerous the essence of a company, the greater the profit it would receive.' },
-              { term: 'Profit as Reward and Cost', def: "Profit is the entrepreneur's incentive for taking chances. As a result, it is still considered part of the usual cost of production." },
-              { term: "Entrepreneur's Income is Uncertain", def: 'He defines uncertainty as a condition in which the probabilities of alternative results cannot be calculated either a priori or statistically. In an economic scenario involving a one-of-a-kind case, a priori logic is clearly meaningless. Benefit, according to this principle, is the incentive for an entrepreneur\'s investment in bearing uninsurable risks and uncertainties, and the amount of benefit received is proportional to the degree of uncertainty assumed.' },
-            ],
-          },
-          {
-            type: 'text',
-            text: "In all, Knight contends that the degree of instability in an enterprise could be minimized by 'consolidation.' Consolidation is to uncertainty; what insurance is to risk. In other words, consolidation is similar to insurance in that it is a way of minimizing absolute volatility by pooling individual instances. The elasticity of self-confidence supply is the single most significant determinant of benefit and the number of entrepreneurs.",
-          },
-          {
-            type: 'definition',
-            heading: '4.5 Shackle Theory (1970)',
-            text: "An Austrian school of thought advocates having theoretic focus on entrepreneurship and decision-making with the key word \"decision-making\". He sees an entrepreneur as someone who is creative, imaginative and original whereas Krizner's entrepreneur perceives opportunities; Shackle's entrepreneur creates and imagines the opportunities.",
-          },
-          {
-            type: 'definition',
-            heading: '4.6 Casson Theory (1995)',
-            text: 'An entrepreneur is someone with different skills from others. He needs skills to coordinate scarce resources and make judgment decisions. Cason developed an economic theory of entrepreneur that fits alongside neo-classical constructs. He also developed the modern economic theory of entrepreneurship through the combination of the ideas of Joseph Schumpeter, Friedrich Hayek and Frank Knight. According to this theory, successful entrepreneurs demonstrate good judgment in making risky innovations, and are compensated through either profits or salaries depending on whether they act as owners or managers of their firms. He also emphasized the significance of emotional rewards and cost of accessing information, while remaining detached from the views of Schumpeter and Krizner.',
-          },
-          {
-            type: 'definition',
-            heading: '4.7 Max Weber Theory (1904 – 1906)',
-            text: 'A German protestant, Max Weber theory of entrepreneurship believes that the protestant ethics encourages hard work, which leads to accumulation of capital and investment. According to him, certain religious beliefs create either a positive or a negative attitude towards profit generation and wealth accumulation. According to Max Weber\'s theory, religion has a significant influence on entrepreneurial growth. Some sects, according to Weber, have fundamental beliefs in how to earn and accumulate wealth, while others have fewer. He refers to them as having a "capitalist spirit" and an "adventurous spirit." When society\'s mental outlook is favorable to capitalism, the essence of capitalism will emerge. According to Max Weber, the acceptance of exogenously-supplied religious values generates moving entrepreneurial resources. These values are what lead to intense effort in professional endeavors, organized ordering of means to ends, and wealth accumulation. According to his theory, Hinduism, Buddhism, and Islam do not promote entrepreneurship. Many sociologists have questioned his position. Nevertheless, the colonial rulers liked Max Weber\'s theory because it encouraged European entrepreneurship in India. However, subsequent scholars have criticized it. The hypothesis is based on the following false assumptions:',
-          },
-          {
-            type: 'bullets',
-            items: [
-              'There is a single Hindu belief structure.',
-              'The Indian society internalized those beliefs and put them into practice on a daily basis, and',
-              'The exponential rise in entrepreneurship in India after independence demonstrates that Hinduism is not anti-capitalist or anti-adventurous.',
-            ],
-          },
-          {
-            type: 'text',
-            text: 'Many thinkers agree with Weber\'s assessment of the relationship between religious belief and entrepreneurial development. However, this viewpoint is not uniformly shared. Weber\'s opinion was criticized by Samuelson, who said that capitalism evolved in cultures where the protestant ethic was "not widespread." Hoselitz concluded that Protestants in France were unable to establish businesses because they lacked political stability.',
-          },
-          {
-            type: 'definition',
-            heading: '4.8 Frank Young Theory (1971)',
-            text: "A sociological theorist of entrepreneurship, his theory is one of change, based on society's incorporation of reactive sub-groups. He believes that entrepreneurs are not super normal individuals. This indicates that inter-group relationship affects entrepreneurial activities. In Young's opinion, entrepreneurial traits are seen in small communities where individuals grow as entrepreneurs. Young came by the group level trend behavior of entrepreneurs based on his research on groups of entrepreneurs known as Thematic Appreciation Test (TAT). The test showed a propensity to characterize the situation as a problem to be solved, understanding the practical effort involved, faith in their own abilities to solve the problem, and a tendency to examine the situation from each individual's perspective before proposing a solution. Young's theory is a transition theory focused around the inclusion of reactive subgroups in society. If the following three conditions occur, a group becomes reactive:",
-          },
-          {
-            type: 'bullets',
-            items: [
-              'When access to critical social networks is denied;',
-              "When a group's standing is low; and",
-              "When a group's institutional capabilities are superior to that of other classes in society at the same stage.",
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '4.9 Everett Hagen Theory (1962)',
-            text: "He views an entrepreneur as a creative problem solver, who is interested in things in the technological and practical realms with a motivation of duty to achieve. Hagen proposed an important principle of entrepreneurial behavior known as the removal of status esteem. Hagen attributes the emergence of entrepreneurship to the withdrawal of a group's status respect. The withdrawal of rank, of esteem, according to Hagen, is the cause factor for changes in personality development. Status withdrawal happens when members of a social community believe that their goals and ideals in life are not respected by the groups in society that they love and support. Hagen proposes four forms of incidents that may lead to status withdrawal:",
-          },
-          {
-            type: 'bullets',
-            items: [
-              'Displacement of a conventional elite community from its former position by another traditional supply physical force.',
-              "Denigration of valuable symbols as a result of a change in the superior group's mindset.",
-              'Inconsistency of status markers with changing economic power distribution.',
-              "Refusal to recognize one's expected status after migrating to a foreign community.",
-            ],
-          },
-          {
-            type: 'text',
-            text: 'Hagen goes on to hypothesize that the removal of status esteem will result in four potential responses and four distinct personality types, which are:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Retreatist', def: 'An entrepreneur who continues to serve in society but is unconcerned with his job or status.' },
-              { term: 'Ritualist', def: "Someone who performs according to society's expectations but has no intention of improving his working standards or status." },
-              { term: 'Reformist', def: 'A rebel who attempts to introduce modern methods of living and a new culture.' },
-              { term: 'Innovator', def: 'An inventor who is innovative who strives to accomplish his or her own goals.' },
-            ],
-          },
-          {
-            type: 'text',
-            text: 'According to Hagen (1962), the key cause of entrepreneurship is the ingenuity of a marginalized minority community. He established this case based on the Japanese samurai culture. This culture had formerly held a high reputation, which was later revoked. To reclaim its lost glory, it became more active and robust, giving birth to a slew of entrepreneurs.',
-          },
-          {
-            type: 'definition',
-            heading: '4.10 John Kunkel Theory',
-            text: "A behaviouralistic theorist, Kunkel argues that entrepreneurial behaviour is a function of the surrounding social structures. He further argues that the type of social values that exists in the society determines the type of entrepreneurial skill. The overtly articulated behaviors of individuals and their relationships to historically and currently surrounding social environments and physical circumstances are the focus of Kunkel's behavioral model. In this model, rewarding and aversive stimuli in the social environment decide behavioral patterns. As a result, entrepreneurial behavior is motivated by manipulative economic and social pressures and is a part of the surrounding social system, both past and present. In furthering the explanation, the psychologists opined that entrepreneurship is more likely to occur when a population has an ample supply of people with specific psychological traits. Below are the major characteristics of the Kunkel's theory:",
-          },
-          {
-            type: 'bullets',
-            items: [
-              'a potential for institutions to see problems in new ways (vision),',
-              'mental and physical energy to break free from ingrained thought patterns,',
-              'a strong desire to act,',
-              'to realize a fantasy',
-              'the will to persevere in the face of adversity; and',
-              'a strong will to succeed',
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '4.11 David McClelland Theory (1961)',
-            text: 'McClelland argues that it is the drive for achievement (not just competence), that makes people venture into entrepreneurial ventures. It is the need for achievement that motivates entrepreneurial activities. According to McClelland, an entrepreneur has two characteristics: first, doing things in a new and better way, and second, making decisions in the face of uncertainty. The most critical aspect for entrepreneurs, according to McClelland, is success orientation. Individuals that have a strong success orientation are unaffected by monetary or other potential rewards. Profit and incentives are merely yardsticks by which entrepreneurs with a high achievement orientation measure their success. According to him, as a result of one\'s life experience, one develops three types of needs which include need for:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Achievements', def: 'Desire for success, advancement, and development or growth.' },
-              { term: 'Power', def: 'A need to control or manipulate people, and circumstances.' },
-              { term: 'Affiliation', def: 'A strong desire to form pleasant and near interpersonal bonds.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '4.13 Thomas Cochran Theory',
-            text: "A sociological Theorist of entrepreneurship. Cochran argued that the environment in which the individual is brought up determines the entrepreneurial urge in an individual. He believes the key factors in entrepreneurship are: Cultural values, role expectation and social sanctions. The entrepreneur, as he claims, reflects the community's personality model. Cochran argued that entrepreneur's success is determined by factors such as his own attitudes toward his work, sanctioning groups' task preferences, and the job's organizational requirements. From all the above theories of entrepreneurship, we can deduce that an entrepreneur is a middleman, creative, alert to opportunities, perceives opportunities, a special person, an innovator, original, resourceful, imaginative, a risk taker, a reward seeker, and a coordinator of resources etc.",
-          },
-          {
-            type: 'definition',
-            heading: '4.14 Application of Entrepreneurship Theories',
-            text: "Theories are framework which serves as a guide to a particular subject matter. Various theories of entrepreneurship have emerged which has led to the development of the entrepreneurship field. Some of the theories are applied to explain the origin or etymology of entrepreneurship both as a field of study or noble profession and as a practice. For instance, the earliest theories, especially those of the early 18th century are today used to introduce the perception of an entrepreneur from economic perspective. Also, theories with psychological undertone are applied to explain how individual's personality or traits, psychodynamic model and the need for achievement transcend into his/her entrepreneurial pursuit be it positively or negatively. Other theories with sociological tenets are used to discuss the social context within which entrepreneurship can emerged and thrive. The innovation-based theories are applied to explain entrepreneurship as being a function of criticisms and dissatisfaction from the status-quo. Theories that are based on economic thoughts and principles are applied to explain entrepreneurship as resulting from one's ability to combine the factors of production (Machine, labour, capital) together to produce economic value (goods and services); and also, one who originates changes, innovations and new.",
-          },
-          {
-            type: 'definition',
-            heading: '4.15 Summary and Conclusion',
-            text: "The Chapter deals with the multi-dimensional concept of entrepreneurship wherein the theories of entrepreneurship have been discussed in detail. The most important was the Schumpeter's theory of innovation wherein Schumpeter emphasises the importance of innovation in entrepreneurship. The second important theory of entrepreneurship is written by McClelland as a function of achievement that is doing things in a better way and taking critical decisions in a new enterprise. From the above theories we can see that Schumpeter and McClelland have given primary importance to the individual. While Schumpeter has stressed on innovativeness or creativity of the individual as an important determinant for entrepreneurship, McClelland stresses more on the internal factors, specifically, the need for achievement. Weber has touched upon the religious belief system which is part of culture and which has a great influence in determining the individual's behaviour in every aspect of his life. Hegan's views economic development as a process which is brought about by withdrawal of status respect of a group. Young lays greater emphasis on the nature of the groups, group's assistance and coordination. Like Weber and McClelland, Cochran also speaks in different terms but explicitly, of cultural values and social structure (which include role expectations and social sanction) as playing a vital role in economic development. As observed, every theorist has looked at the entrepreneur and entrepreneurship on the basis of his perception, and therefore, can, at best, provide only a limited view of entrepreneurial phenomenon. No view is right or wrong, or more or less; in fact, the various factors which cause the emergence of entrepreneurship are integral and not additive. They care interlocking, mutually dependent and usually reinforcing.",
-          },
-          {
-            type: 'bullets',
-            heading: 'References',
-            items: [
-              'Ardichvilia, A. R., & Ray S. (2000). A theory of entrepreneurial opportunity identification and development, Journal of Business Venturing, 18, 105–123.',
-              'Bathia, D. (2013). Theories of entrepreneurship. Retrieved from http://slideshare/theoriesofentrepreneurship.html',
-              'Brandenburg, F. (1962). A Contribution to the Theory of Entrepreneurship and Economic Development: The Case of Mexico, I Inter-American Economic Affairs 16: 3-24.',
-              'Bygrave W. D. and Hofer C. W. (1991), Theorizing about Entrepreneurship. Entrepreneurship Theory and Practice, 11-22.',
-              'Cherukara, J. M. & Manalel, J. (2011). Evolution of entrepreneurship theories through different schools of thought. The Ninth Biennial Conference on Entrepreneurship at EDI, Ahmedabad, February 16-18, 2011.',
-              'Desai, V. (2009). The Dynamics of Entrepreneurial Development and Management – Planning for Future Sustainable Growth. India: Himalaya Publishing House.',
-              'Drucker Peter F. (1985). Innovation and Entrepreneurship. Harper & Row, New York, p.143.',
-              'Khalil, E. (2006). Entrepreneurship and Economic Theory MPRA Paper No. 501, posted 07.',
-              'Kwabena, N. S. (2011). Entrepreneurship theories and empirical research: A summary review of the literature. European Journal of Business and Management, 3(6), 1-9.',
-              'Landstrom, H. (1998). The Roots of Entrepreneurship Research, Conference proceedings, Lyon, France, November 26-27.',
-              'Leff, N. H. (1979). Entrepreneurship and Economic Development: The Problem Revisited, Journal of Economic Literature 17: 46-64.',
-              'Linden, P. (2015). Entrepreneurship: Theory and Application in a University Arts Management Setting. Professional Work – Communication. Paper 138.',
-              'Murphy, J. P., Liao, J. & Welsch, P.H. (2006). A Conceptual history of entrepreneurial thought. Journal of Management History. 12, 9-24.',
-              'Nelson R. R. & Pack, H. (1999). The Asian Miracle and Modern Growth Theory. The Economic Journal 109 (457): 416–36.',
-              'Rotter, J. (1966). Generalised expectancies for internal versus external control reinforcementl, Psychological Monographs, 80, Whole No. 609.',
-              "Schumpeter, J.'A. (1934). The Theory of Economic Development, translated by Opie R. Harvard University Press, Cambridge, MA., pp 42–46, 78–89.",
-              'Sharma, Balraj, & Sandeep (2005). Entrepreneurship Development. Delhi.: Wisdom Publications.',
-            ],
-          },
-        ],
-      },
-      {
-        number: '5',
-        title: 'Entrepreneurial Thinking and Creativity',
-        sections: [
-          {
-            type: 'text',
-            text: 'Authors: Prof. Anietie E. Effi and Francis Bassey, Ph.D.',
-          },
-          {
-            type: 'definition',
-            heading: '5.1 Introduction',
-            text: "Entrepreneurial thinking and creativity are two essential elements that drive innovation and success in business today. In today's competitive and rapidly changing business environment, entrepreneurs must constantly be thinking outside the box and coming up with creative solutions to problems. This requires a mindset that is constantly looking for new opportunities and ways to improve existing products or services. Therefore, entrepreneurial success is measured by creativity and innovative thinking. It would be impossible to create a value-added firm without these two characteristics. The major aspect of entrepreneurial thinking is the ability to adapt to change and embrace uncertainty as well as take risks and think creatively. Entrepreneurs are not afraid to try new things and push the boundaries of what is possible. They are constantly looking for ways to disrupt the status quo and create something new and innovative. This requires a high level of creativity and the ability to think in unconventional ways. Thus, companies have devoted a significant amount of their resources in research and development (R&D) to remain competitive. These investments have enabled them to be creative, and this innovation must be maintained if they are to be successful. These firms' inventiveness has enabled them to develop new goods, differentiate themselves, and become market leaders in their respective industries. In this chapter, emphasis is placed on explaining different forms of entrepreneurial thinking and creativity within the context of entrepreneurial venturesome.",
-          },
-          {
-            type: 'definition',
-            heading: '5.2 The concept of creativity',
-            text: 'Creativity is defined as the capacity to create new objects, ideas, products, and procedures via inventive abilities. Most creative entrepreneurs are highly enthusiastic about their business, and are prepared to take chances, and trust their intuition. Creativity is the capacity to create or bring into being something new, whether it be a new solution to a problem or a new method or technique. All invention begins with a spark of creativity. Creativity is also a mindset, as well as the capacity to embrace change and seek out new ideas and opportunities. Entrepreneurs that are creative work hard to better ideas and discover answers to challenges by gradually modifying and refining their products. People are driven to be creative for three reasons: (i) a need to be unique, varied, and complicated stimulation; (ii) a need to express ideas and ideals; and (iii) a need to solve problems. Creativity manifests itself in various ways. A variety of thinkers have proposed models of the creative person. According to one paradigm, there are several types of creativity or Creativity Profiles that result in growth, invention, speed, and so on. These profiles are:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Incubate', def: 'This is long-term development' },
-              { term: 'Imagine', def: 'This means a breakthrough idea' },
-              { term: 'Improve', def: 'This implies incremental adjustments' },
-              { term: 'Invest', def: 'These are the short-term goals' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '5.3 The concept of creative thinking',
-            text: "Creative thinking on the other hand may be defined as the art of solving problems via the use of one's imagination and logic. It is a mental activity that seeks solutions to some of life's issues. Entrepreneurs face dynamic and changing difficulties in a dynamic and changing environment. They take on new shapes and necessitate a highly creative approach. Creative entrepreneurs use their minds to think creatively in order to produce ideas and products that will stand the test of time. When we come up with a new idea, we apply the process of creative thinking. As identified and explained by Harris (2012), the following are descriptions of creative thinking:",
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Ability', def: 'Creative thinking is defined as the capacity to envision or invent a new thing.' },
-              { term: 'An Attitude', def: 'Creative thinking is also an attitude: the capacity to embrace change and newness, a desire to experiment with ideas and possibilities, a flexible view, and the habit of appreciating the excellent while seeking ways to better it.' },
-              { term: 'A Process', def: 'Creative individuals work hard and constantly to better ideas and solutions by gradually modifying and refining their works. The creative individual understands that there is always space for development.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '5.4 Approaches of Creative thinking',
-            text: 'Creativity is a process of producing ideas, thoughts, and associations that is fueled by both conscious and unconscious knowledge. To improve your creative thinking abilities, you must alter your perspective. You must seek for unusual relationships between people and things, and you must have an open, inquiring mind to do so. You may also employ strategies to help you think more creatively. Here are five creative approaches for coming up with ideas and addressing problems:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Evolution', def: 'method of incremental improvement, as new ideas stem from other ideas. Evolution is all about steadily improving things.' },
-              { term: 'Synthesis', def: 'method of combining two ideas into a third (new) idea. Synthesis is all about combining multiple ideas and "connecting them" into a new idea.' },
-              { term: 'Revolution', def: 'method of marked change from the previous ones, a completely different. The third way to generate fresh ideas and solve issues is to do something entirely different from what you are presently doing.' },
-              { term: 'Reapplication', def: 'Reapplication is a fourth creative process that involves utilizing or doing something in a new way.' },
-              { term: 'Changing direction (or Pivoting)', def: 'This is a way to utilize when you wish to approach an issue from a completely new perspective. It is a method of creative insight, and or breakthroughs.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '5.5 The concept of Critical Thinking',
-            text: "Critical thinking is much of the thinking done in formal education. It stresses analytical abilities, teaching pupils how to analyze statements and follow or build logical arguments. Creative thinking is concerned with the exploration of ideas, the generation of options, and the search for several correct solutions rather than just one simple solution. Both creative and critical thinking are essential for an entrepreneur's successful working life.",
-          },
-          {
-            type: 'definition',
-            heading: '5.6 Critical thinking and creative thinking compared',
-            text: 'Critical thinking and creative thinking play vital roles in entrepreneurship. Critical thinking involves analyzing, evaluating, and problem-solving, while creative thinking entails generating new ideas, perspectives, and solutions. Both skills are crucial for launching and growing a successful business. In the world of entrepreneurship, critical thinking is essential for making sound business decisions. Entrepreneurs must be able to assess risks, analyze market trends, and evaluate various options to make strategic choices. Critical thinking helps entrepreneurs navigate through challenges, setbacks, and uncertainties that are inevitable in the business world. By using critical thinking skills, entrepreneurs can minimize risks, anticipate obstacles, and make informed decisions that can lead to success. On the other hand, creative thinking is crucial for innovation and differentiation in entrepreneurship. Entrepreneurs need to think outside the box, come up with unique ideas, and create disruptive solutions to stand out in a competitive market. Creative thinking allows entrepreneurs to identify new opportunities, develop innovative products or services, and explore unconventional approaches to solve problems. By unleashing their creativity, entrepreneurs can differentiate themselves from competitors, attract customers, and drive business growth. These two types of thinking are distinguished as follows:',
-          },
-          {
-            type: 'table',
-            heading: 'Table 6.1: Differences between critical and creative thinking',
-            headers: ['Critical Thinking', 'Creative Thinking'],
-            rows: [
-              ['Analytic', 'Generative'],
-              ['Convergent', 'Divergent'],
-              ['Vertical', 'Lateral'],
-              ['Probability', 'Possibility'],
-              ['Judgment', 'Suspended Judgment'],
-              ['Focused', 'Diffuse'],
-              ['Objective', 'Subjective'],
-              ['Answer', 'An answer'],
-              ['Left brain', 'Right brain'],
-              ['Verbal', 'Visual'],
-              ['Linear', 'Associative'],
-              ['Reasoning', 'Richness, novelty'],
-              ['Yes but', 'Yes and'],
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '5.7 The concept of Reflective Thinking',
-            text: 'Reflectiveness implies the use of metacognitive skills (thinking about thinking), creative abilities and taking a critical stance. For short, reflective thinking can be defined simply to mean the process of "Thinking about thinking". It is a part of the thinking process that focuses on analyzing and drawing conclusions regarding past actions. Reflective thinking is action oriented; Simply put, reflective thinking is defined as constantly thinking and analyzing what someone has done, is doing, have experienced, or have learnt as well as how what was learnt was learned. Reflective thinking is essential for success in unpredictable and complex situations such as working with customers or clients which is typical of an entrepreneurial venturesome. Thus, reflective thinking is a critical skill that plays a significant role in entrepreneurship. As an entrepreneur, one must continuously assess their decisions and actions in order to learn and grow from their experiences. Reflective thinking involves evaluating what worked well and what did not, identifying areas for improvement, and adapting strategies accordingly. It allows entrepreneurs to make more informed decisions and ultimately increases their chances of success.',
-          },
-          {
-            type: 'text',
-            text: 'Two key aspects underscore reflective thinking in entrepreneurship, namely:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'The ability to objectively analyze failures', def: 'Failure is inevitable in the world of entrepreneurship, but it is how one responds to failure that ultimately determines their success. Reflective thinking allows entrepreneurs to unpack the reasons behind their failures, identify the lessons learned, and apply those lessons to future endeavors. By reflecting on past mistakes, entrepreneurs can avoid making the same errors in the future and ultimately improve their chances of achieving their goals.' },
-              { term: 'The ability to think creatively and adapt to changing circumstances', def: 'Entrepreneurs often face unexpected challenges and obstacles along their journey. Reflective thinking allows them to approach these challenges with a fresh perspective, brainstorm potential solutions, and adjust their strategies accordingly. By thinking critically and reflecting on their experiences, entrepreneurs can navigate uncertainty and make informed decisions that lead to success.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '5.8 Framework and Structures of Creativity',
-            text: 'This explains how creativity grows and or researched and conceived as well as how areas of creativity interact with one another. Three ways have been identified to include the Four P (4Ps) framework, the Five A (5As) framework and the Five C (5Cs) framework.',
-          },
-          {
-            type: 'text',
-            heading: '5.8.1 The 4Ps structure',
-            text: 'Was developed by Rhodes (1961) to evaluated the existing literature to see how creativity was investigated. He categorized everything about creativity into four major categories known as the Four Ps: Person, Product, Process, and Press (i.e., environment).',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Person', def: "emphasizes on the creative person's nature considers more broad intellectual habits such as openness, autonomy, expertise, inquisitive activity, etc." },
-              { term: 'Product', def: 'assess creativity and the capacity to generate increasingly often include an emphasis on creative Product' },
-              { term: 'Process', def: 'Theories focusing on process Cognitive methods that attempt to define thought systems and procedures for creative thinking have an emphasis on Process' },
-              { term: 'Press or Place (or environment)', def: 'A emphasis on Place analyzes the conditions that foster creativity, such as degrees of autonomy, access to resources, and the type of gatekeepers.' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '5.8.2 The 5As structure',
-            text: 'This framework explains creativity from the point of 5As: Actors, Audiences, Actions, Artifacts, and Affordances, it addresses questions on any creative innovation such as whether or not do performers relate to their audiences, what socio-cultural and material affordances are made available by creative action, and whether or not do creative actors use existing artifacts to create new ones?',
-          },
-          {
-            type: 'text',
-            heading: '5.8.3 The 5Cs structure',
-            text: 'The 4Ps and 5As are structures that investigate how creativity is operationalized, the 4Cs (mini-c, little-c, Pro-c, and Big-C) are more concerned with the person. "Mini-c" means one\'s personal and self-recognized significant and novel discovery; "Little c" means daily creativity; "Pro-c" mean one\'s personal significant and novel discovery recognized by others and the "Big-C" means one\'s brilliant creativity that remains a legacy for years after his or her death. The 4Cs framework is a developmental trajectory that begins with mini-c and end with the Big-C.',
-          },
-          {
-            type: 'definition',
-            heading: '5.9 Theories and drivers of creativity',
-            text: 'Creativity can mean so many different things that simply cataloging the most-cited theories would be coherent. However, among these theories, there is reasonable consensus regarding the definition of creativity, which is that it is something both new and task-related. In spite of that, there is still no (successful or widely accepted) grand theory of creativity that takes into account every possible question, variable, or approach nor, truly, is there any particular need for one. Creativity is so complex and multi-faceted that any theory that tried to explain everything would be unwieldly to the point of being incomprehensible. Creativity theories vary greatly. This is apparent when one looks at the different views on creativity. This depends on the topic itself, which incorporates the many types of individual insight as well as the greatest achievements of human brilliance throughout history; this may be dubbed "the finest of the mind\'s work" (Perkins, 1981). The range of possible definitions, conceptualizations, domains, disciplines, research techniques, and degrees of analysis that reflect on the study of creativity, as well as fundamental and applied research orientations, greatly affects the variety of creative theories. However, it is hoped that creativity theorists will think carefully about what underlying question they are trying to address. A good theory tells a story and that is consistent with existing empirical research and suggests interesting questions that can be tested. A good theory will make the often-contradictory study easier to understand, instead of further muddying the waters. A sense of sameness across different viewpoints is absolutely vital in order to apply a unifying theory of creativity. Ten key theory types have been identified and arranged in order of importance thus: developmental, psychometric, economic, stage and componential process, cognitive, problem solving and expertise-based, problem finding, evolutionary, typological, and systems. Each category is discussed as follows:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Developmental Theories', def: 'By these theories, creativity is most practical. They consider all the many elements of creativity: person, location, and potential and focus more on products, while playing an essential, albeit often implicit, function in any creative expression.' },
-              { term: 'Psychometric Theories', def: 'Psychometric theories deal with difficulties of assessment reliability and validity in any scientific study on creativity. Their methodology differs from previous theories of creativity in that they concentrate on measurement. Reliability represents consistency of measurement. It encompasses inter-judge reliability as well as inter-item dependability. Validity refers to the precision of measurement.' },
-              { term: 'Economic Theories', def: 'Economic theories also give empirical ideas about creative endeavors. Wider groups will dampen collective creativity, for instance, because it is more difficult to be innovative when you have a larger audience. They anticipate that experts will be less flexible when it comes to alternative ideas that challenge their beliefs than less involved experts.' },
-              { term: 'Stage and componential process – Theories', def: 'Some theories of the creative process offer phases, which might be sequential or recursive, or underlie componential cognitive processes. Such models put more emphasis on process and creative magnitude. An issue is defined before information is gathered and the process starts until it gets to discoveries and the "Eureka!" moments.' },
-              { term: 'Cognitive Theories', def: "These theories highlight the significance of cognitive processes and place emphasis on the creative process, which involves using one's cognitive systems and exceptional cognitive talents to bring about conceptual product and creative achievement." },
-              { term: 'Problem solving and expertise-based Theories', def: 'These theories are rooted on cognitive psychology, stress problem-solving processes and expert knowledge. Principal focus is on based largely on creative person and the creative process.' },
-              { term: 'Problem finding Theories', def: 'Once creativity was applied to addressing problems, "problem finding" gained popularity. These theories argue that the standard problem-solving approach cannot sufficiently explain how creators discover that a problem exists, and how they are motivated to proactively go about addressing the problem.' },
-              { term: 'Evolutionary Theories', def: 'These theories explain creativity based on evolutionary biology principles drawn from Darwin with the Darwinian theory (formerly known as "chance-configuration") being the most explanatory.' },
-              { term: 'Typological Theories', def: 'These theories integrate the problem-solving/expertise and Darwinian perspectives of creativity. It is thus, a unified theory of creativity and it stresses variations in individual creative capacities rather than nomothetic tendencies.' },
-              { term: 'Systems Theories', def: 'In contrast to theories previously mentioned, systems theories embrace a very wide and frequently highly qualitative approach to creativity. They conceive of creativity as originating from a complex system that includes all its component elements and has to be accounted for in order to accurately comprehend creativity.' },
-            ],
-          },
-          {
-            type: 'table',
-            heading: 'Table 5.1: Summary of Theories of Creativity',
-            headers: ['Creativity theories', 'Primary Assertion', 'Key Concepts', "Six P's Focus", 'Level of scale'],
-            rows: [
-              ['Developmental', 'Creativity develops over time (from potential to achievement); mediated by an interaction of person and environment.', 'Place and family structures; Role of play; Support during transitions; longitudinal process; Multivariate influences', 'Person, Place, Potential, & Product', 'Mini-c to Pro-c'],
-              ['Psychometric', 'Creativity can be measured reliability and validity; differentiating it from related constructs (IQ) and highlighting its domain-specific nature', 'Reliable & valid measurement; Discriminant validity; Thresholds; Domain specificity', 'Primarily Product', 'Little-c to Big-C'],
-              ['Economic', 'Creative ideation and behavior is influenced by "market forces" and cost-benefit analyses.', 'Influence of macro-level factors; Psychoeconomic perspective; Markets of creativity; Investment decisions', 'Person, Place, Product, & Persuasion', 'Little-c to Big-C'],
-              ['Stage and Componential Process', 'Creative expression proceeds through a series of stages or components; the process can have linear and recursive elements', 'Preparation stages; Incubation and insight; Verification and evaluation; Component mechanisms', 'Primarily Process', 'Mini-c to Big-C'],
-              ['Cognitive', 'Ideational thought processes are foundational to creative persons and accomplishments', 'Remote association; Divergent/convergent thinking; Conceptual combination, expansion; Metaphorical thinking, imagery; Meta-cognitive processes', 'Person & Process', 'Little-c to Big-C'],
-              ['Problem Solving and Expertise-Based', 'Creative solutions to ill-defined problems result from a rational process, which relies on general cognitive processes and domain expertise.', 'Vague problems; Cognitive, computational approach; Expertise-based approaches; Problem depiction & heuristics', 'Person, Process, & Product', 'Little-c to Big-C'],
-              ['Problem Finding', 'Creative people proactively engage in a subjective and exploratory process of identifying problems to be solved.', 'Subjective creative processes; Exploratory behaviors; On-line discovery', 'Process, Person, & Potential', 'Primarily Mini-c'],
-              ['Evolutionary', 'Eminent creativity results from the evolutionary-like processes of blind generation and selective retention.', 'Chance-configuration; Blind generation of ideas; Selective retention of ideas; Equal-odds rule; Social judgment and chance', 'Person, Process, Place, & Product', 'Primarily Big-C'],
-              ['Typological', 'Creators vary along key individual differences, which are related to both macro- and micro-level factors and can be classified via typologies.', 'Individual differences; Categories of creators; Seekers versus finders; Integrate multiple levels of analysis', 'Primarily Person; but also Process, Product, & Place', 'Little-c to Big-C'],
-              ['Systems', 'Creativity results from a complex system of interacting and interrelated factors.', 'Evolving systems; Network of enterprises; Domain and field; Gatekeepers; Collaborative Creativity; Chaos and Complexity', "Varying emphasis across all P's", 'Little-c to Big-C'],
-            ],
-          },
-          {
-            type: 'text',
-            text: 'Source: From cited literatures',
-          },
-          {
-            type: 'text',
-            text: "From the above explanations, theories of creativity explain the drivers and forms of creativity and what makes a creative individual. In other words, theories of creativity (particularly investigation of why some people are more creative than others) have focused on various aspects of creativity. Creative individuals and teams must be a part of an innovative culture. Individuals' and teams' creativity is encouraged in cultures that are innovation-oriented.",
-          },
-          {
-            type: 'definition',
-            heading: '5.10 Types of creative contribution',
-            text: 'Contributors who are creative have varied choices on how to show their talent. We developed a propulsion theory of creative contributions (Sternberg, 1999b; Sternberg, Kaufman, & Pretz, 2001, 2002) to address the question of how people select where to invest their creative resources. Taxonomy of creative contributions must address not just the question of whether a contribution is creative in what domain, but also what sort of creative contribution it is (Gardner, 1993). A creative contribution is an attempt to move a field from where it is to where the creator feels it should be. Thus, by definition, creativity is propulsion. It shifts a field from one location to another. It is also usually associated with a decision to exert leadership. The creator attempts to lead people to a certain place in the multidimensional creative realm. The endeavor might succeed or fail. Depending on how the creator decides to be creative, he or she may strive to practice various types of creative leadership. The propulsion model proposes eight different sorts of contributions to an area of endeavor at any one moment as categorized below:',
-          },
-          {
-            type: 'text',
-            heading: '5.10.1 Contributions that accept current paradigms:',
-            text: 'These include replication, redefinition, forward incrementation and advance forward incrementation. Replication is the act of imitating or duplicating but ensuring that the field remains in its correct form. Redefinition is an attempt to redefine where the field is and how it is viewed or a reinterpretation of the field in terms of its current state. Incrementation (or forward Incrementation) - is an act making innovative contribution to moving the field ahead in the direction it is already headed. For example, the propulsion causes the vehicle to move ahead. Advance forward Incrementation - is an act of advancing the field beyond the point where others are ready for it to go. In other words, this is an incrementation in the direction of the future.',
-          },
-          {
-            type: 'text',
-            heading: '5.10.2 Contributions that reject current paradigms:',
-            text: 'These are redirection, reconstruction / redirection, re-initiation. Redirection - this is a re-direction of resources which moves the field in a new or different direction. Reconstruction / redirection - is an attempt to bring the field back to where it previously was (a reconstruction of the past), in order for it to continue ahead from that point, but in a different path from the one it followed from that moment onward. Re-initiation/Starting over is an attempt to move the field to a different and as yet not reached starting point and then to move the field in a different direction from that point.',
-          },
-          {
-            type: 'text',
-            heading: '5.10.3 Paradigms that attempt to integrate multiple current paradigms:',
-            text: 'This involves only one type of creative contribution called "Integration" otherwise called "synergetic creativity". It synthesizes current paradigms by combining two or more diverse ways of thinking about the field into a single way of thinking. It is an act of re-starting the process.',
-          },
-          {
-            type: 'definition',
-            heading: '5.11 Attributes of creative personality',
-            text: 'A creative personality is characterized by the ability to think outside the box, come up with innovative solutions, and take risks. This trait is essential for entrepreneurs to differentiate themselves from competitors, create unique products or services, and adapt to changing market conditions. These attributes as follows:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Energetic', def: 'Creative individuals radiate energy' },
-              { term: 'Intelligent', def: 'A clever person is also creative' },
-              { term: 'Sensitive', def: 'Creative individuals also are more subservient. They are empathetic because their hearts are always open to the world. Many things cause them to weep' },
-              { term: 'Ambitious', def: 'Creatives are ambitious in their goals. They have an eagerness to move on to the next endeavor. Nothing daunts their desire to try something new' },
-              { term: 'Naive', def: "Creatives are frequently subservient. It's perfectly safe to be naive, because it helps creatives learn from their mistakes and develop." },
-              { term: 'Rebellious', def: 'Most creative people are rather rebellious. They take chances and not frightened to fail since they recognize the positive aspects of failure.' },
-              { term: 'Extroverted and Introverted', def: 'Can someone be both outgoing and introverted? Yes, they can. Creative individuals have two sides, their private and public side. Extroversion has its benefits, so does introversion. Creative people accept new ideas and see the benefits of finding the proper balance between extroversion and introversion.' },
-              { term: 'Playful', def: 'It is in our nature to be fun. They experiment with ideas until they find the solution. Nothing good happens by design' },
-              { term: 'Open minded', def: 'If anybody is open-minded, it is your creative buddy, or anyone who is creative in our world. Open-mindedness encourages creatives to climb mountains and explore mysterious regions.' },
-              { term: 'Dreamer', def: "Never-ending creativity. They daydream the whole day, in their heads continually, in the evening, and the next day, too. They dream because they're motivated, and their dreams reflect that reality" },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '5.12 Obstacle to creative thinking',
-            text: 'Everyone possesses powerful creative talents and capabilities, but they have to be unlocked. There are six key behavioral factors that could be hindering your efforts to boost your corporate problem-solving abilities. One of these people might be holding you back.',
-          },
-          {
-            type: 'bullets',
-            items: [
-              'Lack of direction from yourself or others:',
-              'The fear of failure:',
-              'Fear of rejection:',
-              'Never changing or adapting to the situation.',
-              'Not thinking proactively.',
-              'You rationalize, but never improve:',
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '5.13 Summary and Conclusion',
-            text: 'Successful entrepreneurs are able to balance critical thinking and creative thinking. They use critical thinking to analyze data, assess market trends, and make informed decisions, while also utilizing creative thinking to come up with innovative ideas, design unique products, and create compelling marketing strategies. Reflective thinking is a valuable skill that can greatly benefit entrepreneurs in their quest for success. By actively engaging in reflective thinking, entrepreneurs can learn from their experiences, adapt to changing circumstances, and ultimately increase their chances of achieving their goals. One key aspect of entrepreneurial thinking is the ability to take risks and think creatively. Another important aspect of entrepreneurial thinking is the ability to adapt to change and embrace uncertainty. Critical thinking and creative thinking are indispensable skills for entrepreneurs who aspire to build thriving businesses in today\'s dynamic and competitive landscape. Entrepreneurs must be willing to take risks, think creatively, and adapt to change in order to thrive in a competitive and rapidly changing environment. By fostering a mindset that is always looking for new opportunities and ways to innovate, entrepreneurs can set themselves apart and achieve great success. By combining critical and creative thinking, and also reflective thinking, entrepreneurs can develop a winning business strategy, adapt to changing market conditions, and seize opportunities for growth. Finally, the attribute of a creative personality in entrepreneurship is essential for driving innovation, differentiation, and success in the business world. Entrepreneurs who possess this trait are better equipped to navigate the challenges of the entrepreneurial journey and capitalize on opportunities to create value for their customers and society as a whole. By cultivating and honing their creative skills, entrepreneurs can unlock their full potential and achieve sustainable growth and success in their ventures.',
-          },
-          {
-            type: 'bullets',
-            heading: 'References',
-            items: [
-              'Baer, J. (2011). Why grand theories of creativity distort, distract, and disappoint. International Journal of Creativity and Problem Solving, 21(1), 73-100.',
-              'Barron, F. (1955). The disposition toward originality. The Journal of Abnormal and Social Psychology, 51(3), 478.',
-              'Couros, A. (2003). Innovation, change theory and the acceptance of new technologies: A literature review. Unpublished manuscript.',
-              'Damiano Jr., R.J. (2011). What is innovation? Innovations: Technology and Techniques in Cardiothoracic and Vascular Surgery, 6(2), 65.',
-              'Hennessey, B. A., & Amabile, T. M. (2010). Creativity. Annual Review of Psychology, 61, 569-598.',
-              'Naiman, R. J. (Ed.). (2012). Watershed management: balancing sustainability and environmental change. Springer Science & Business Media.',
-              'Okpara, F. (2005). The Practice of Entrepreneurship. Precision Publishers Limited, Enugu, Nigeria.',
-              'Simonton, D. K. (2012). Teaching creativity: Current findings, trends, and controversies in the psychology of creativity. Teaching of Psychology, 39(3), 217-222.',
-            ],
-          },
-        ],
-      },
-      {
-        number: '6',
-        title: 'Innovations and Change Management',
-        sections: [
-          {
-            type: 'text',
-            text: 'Authors: Nseabasi I. Etukafia, PhD and Mr. Michael Efiom',
-          },
-          {
-            type: 'definition',
-            heading: '6.1 Introduction',
-            text: "Innovation and change management are critical components of entrepreneurship, particularly in today's rapidly evolving global landscape. There are however, a number of thoughts and perspectives regarding innovations and change management. But, like most concepts in management sciences, little consensus exists on what are actually are and because this has proven to be a never-ending subject of dispute, this chapter is devoted to discussing these concepts in order to demystify and simplify it for any interested person. As a result, in this chapter, we describe and cover all of the most significant issues in innovation and change management.",
-          },
-          {
-            type: 'definition',
-            heading: '6.2 The concept of innovation',
-            text: 'There is scarcely a business event or discussion these days that does not include the phrase "Innovation." Innovation is the process of transforming an idea or invention into a product or service that adds value or for which people will pay. It is the process by which organizations use their skills and resources to develop new goods and services or to develop new production and operating systems so that they can better respond to the needs of their customers. To be considered an innovation, a concept must be repeatable at a low cost and must meet a specific need. According to Sagagi et al. (2020), the concept of innovation and its corollary development encompasses five tasks or functions:',
-          },
-          {
-            type: 'bullets',
-            items: [
-              'Innovation is the process of taking new ideas effectively and profitability through to satisfy customers.',
-              'Innovation is the successful exploration of new ideas; it is a profitable outcome of the creative process, which involves generating and applying in a specific context product, services, procedures, and processes that are desirable and viable.',
-              'Innovation is the process of creating a commercial product from an invention.',
-              'Innovation is the post hoc recognition of creativity, involving a new and valuable discovery of some kind. In other words, innovation can only be said to have taken place after the event. It is an outcome phenomenon.',
-              'Innovation is the specific tool of entrepreneurs, the means by which they exploit change as an opportunity for a different business or service. It is capable of being presented as a discipline, capable of being learned, and capable of being practiced.',
-            ],
-          },
-          {
-            type: 'text',
-            text: 'The above definition and explanation of innovation clearly shows how importance entrepreneurs consider innovation. According to Okpara (2005) as cited in Sagagi et al. (2020), the following aspects of innovation are present in the definition of innovation:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Challenge', def: 'what we are trying to change or accomplish-the-"pull".' },
-              { term: 'Customer focus', def: 'creating value for your customers-the "push".' },
-              { term: 'Creativity', def: 'generating and sharing the idea(s)- the "brain"' },
-              { term: 'Communication', def: 'The flow of information and ideas-the "life blood"' },
-              { term: 'Collaboration', def: 'people coming together to work together on the idea(s)- the "heart"' },
-              { term: 'Completion', def: 'implementing the new idea- the muscle"' },
-              { term: 'Contemplation', def: 'learning and sharing lesson lead to higher competency - the "ladder"' },
-              { term: 'Culture', def: 'the playing field of innovation includes:' },
-              { term: 'Leadership', def: 'sees the possibilities and positions of the team for action- the role model' },
-              { term: 'People', def: 'diverse groups of radically empowered people innovate-the source of innovation.' },
-              { term: 'Basic values', def: 'trust and respect defines and distinguish innovation organization-the backbone' },
-              { term: 'Innovation values', def: 'certain values stoke the fire that makes the "impossible" possible-the spark.' },
-              { term: 'Context', def: 'innovation is shaped by interactions with the world' },
-            ],
-          },
-          {
-            type: 'text',
-            text: 'As can be seen from the examples above, innovation may be defined as a strategic instrument that is required for organizational survival. It is equally crucial to note that creativity precedes innovation. Simply said, companies seek to achieve and maintain a competitive edge via innovation. There three basic forms where innovation exist:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Process innovation', def: 'including modifications and technique enhancement. These all lead to increased production, which reduces costs and helps to boost demand.' },
-              { term: 'Product or service innovation', def: 'While progressive innovation predominates, radical innovation creates new markets. This leads to a rise in effective demand, which stimulates further investment and job creation.' },
-              { term: 'Management and work organization innovation', def: 'as well as human resource exploitation, and the ability to anticipate approaches' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '6.3 Types of Innovation',
-            text: 'Because the environment and consumer demands continually change, organizations must be able to adjust different aspects of their business to fix growing problems and create new value for customers. Because of this, understanding which innovations a corporation has to pursue allows them to identify the most suited ones. Disruptive, gradual, radical, and sustaining innovations are common ways to categorized innovation. Innovation may be characterized in several other ways, and some of those classifications overlap. It is possible to group innovation according to two dimensions: the underlying technology and the specific market. The innovation matrix is useful in visualizing different forms of innovation thus:',
-          },
-          {
-            type: 'table',
-            heading: 'Innovation Matrix (Impact on the Market × Technology Newness)',
-            headers: ['', 'Low Technology Newness', 'High Technology Newness'],
-            rows: [
-              ['High Impact on the Market', 'Sustaining: A significant improvement on a productive that aims to sustain the position in an existing market.', 'Disruptive: Technology or new business model that disrupts the existing market.'],
-              ['Low Impact on the Market', 'Incremental: Gradual, continuous improvements on existing products and services.', 'Radical: Technological breakthrough that transforms industries, often creates a new market.'],
-            ],
-          },
-          {
-            type: 'text',
-            text: 'The above four categories of innovation in the innovation matrix are commonly used to describe the technology a new innovation employs and the effects it has on the market. To generate actionable outcomes, innovation should be addressed holistically. In this section, additional kinds of innovation may be utilized to improve and unlock new value across the organization.',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Product innovation', def: 'Innovation and product improvement go hand in hand, and are far and away the most prevalent forms of innovation. It can employ components that are not used in prior products.' },
-              { term: 'Service innovation', def: 'This refers to a new or significantly improved service concept, product, or process in a new or existing market. It could be a new customer interaction or distribution channel, a system that improves the delivery process, or new customer interface solutions.' },
-              { term: 'Process innovation', def: 'A process brings together all of the things required to create goods or offer services, Process innovation typically means implementing a new or improved manufacturing or delivery technique.' },
-              { term: 'Technological innovation', def: 'Entails the incorporation of new or improved technology, such as a new type of machinery or the modification of some form of technology into a product, process, or method of service delivery' },
-              { term: 'Marketing innovation', def: 'People must be able to locate and benefit from an innovation for it to be successful. The primary goal of marketing innovation is to expand into new markets or gain market share.' },
-              { term: 'Architectural innovation', def: 'The reconfiguration of current product technology that results in an improvement in how components, some of which are not necessarily creative when joined, are integrated. Networked computer systems and flexible manufacturing systems are examples' },
-              { term: 'Social innovation', def: 'Social innovations are innovative practices or technical breakthroughs that attempt to better fulfill social demands than existing solutions.' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '6.4 Dimensions of innovations',
-            text: 'As mentioned before innovation can be classified into many different classes and into two categories. Now we can continue to divide innovation to smaller dimensions popularly called "The 4Ps of innovation space" namely process, position, product and paradigm (Francis & Bessant, 2005; Tidd & Bessant, 2009).',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Product innovation (first P of the 4Ps)', def: 'is the easiest to understand. It means changes in the things which an organization offers.' },
-              { term: 'Process innovation (second P of 4Ps)', def: "is also quite easy to understand. It means changes in the organization's processes. In the other words it means changes in the ways in which organization is created and delivered." },
-              { term: 'Position innovation (third P of 4Ps)', def: 'to understand needs some thinking and it is not as clear as the first two innovation types. It means changes in the context in which the products/services are introduced.' },
-              { term: 'The last P', def: 'is meaning for paradigm innovation. It is by far the hardest to understand. Changes in the underlying mental models which frame what the organization does.' },
-            ],
-          },
-          {
-            type: 'text',
-            text: 'In the above framework every innovation can be mapped somewhere in the four-dimension space. First two dimensions, product and process, are the most common innovation dimensions that exist.',
-          },
-          {
-            type: 'definition',
-            heading: '6.5 Sources of Innovation',
-            text: 'There are innovations that result from a stroke of brilliance. Most inventions, particularly successful ones, are the product of a deliberate, purposeful search for innovation possibilities, which are found only in a few settings. Within a firm or industry, four such areas of opportunity exist: unexpected occurrences, incongruities, process needs, and industry and market shifts. Outside of a company\'s social and intellectual context, three more sources of opportunity exist: demographic changes, changes in perception, and new knowledge. These sources overlap, as distinct as they are in terms of risk, difficulty, and complexity and the potential for innovation may reside in more than one area at the same time. They do, however, account for the vast majority of all innovation opportunities. However, the sources of innovation include: (i) unexpected occurrences, (ii) incongruities of various kinds, (iii) process needs, (iv) changes in an industry or market, (v) demographic changes (vi) changes in perceptions, and (vii) new knowledge.',
-          },
-          {
-            type: 'definition',
-            heading: '6.6 Innovation management',
-            text: 'This is the process of handling all the actions needed to "bring anything new," which in reality involves things like generating ideas, developing, prioritizing, and executing them, as well as introducing new procedures. It involves making decisions, doing actions, and implementing the innovation plan. Innovation management thus covers all measures to foster innovation and produce value. Examples are new products to serve new markets better products and services to compete to mention but a few. Four aspects of innovation management are:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Capabilities', def: 'This is a catch-all phrase for all the varied capabilities and resources the company has to support innovation.' },
-              { term: 'Structures', def: 'The difference between structures and capabilities is that structures permit efficient utilization of the specified skills. This practice means the organizational structure, methods, and infrastructure.' },
-              { term: 'Culture', def: 'Culture is what enables the company to gain the qualities relevant to individuals. Culture has a significant role in whether or not the company is able to recruit and retain the proper individuals. A pro-innovation environment fosters proper conduct and discourages the opposite.' },
-              { term: 'Strategy', def: 'Finally, strategy is the long-term goals of the company. But what is essential to comprehend is that strategy is about making a conscious choice from a variety of plausible choices with the aim of having the highest chance of "winning."' },
-            ],
-          },
-          {
-            type: 'text',
-            text: 'Innovation management is the process of planning, organizing, implementing and monitoring the development of new products, services, processes or business models that create value for customers, stakeholders and the organization. Innovation management involves identifying opportunities, generating ideas, selecting and testing solutions, scaling and diffusing innovations, and evaluating their impact and performance. Innovation management requires a combination of creativity, strategic thinking, collaboration, risk-taking and learning from failures. Simply glancing at the definition clarifies everything about the word. Innovation management is essentially the process of devising and implementing innovative approaches to the business, no matter how. Innovation management involves managing both innovation processes and change management.',
-          },
-          {
-            type: 'definition',
-            heading: '6.7 Change and Change Management',
-            text: "Change in the organization (nay organizational change) is the process by which organizations move from their present state to some desired future state to increase their effectiveness. Change is described as the process of organization's transformation and modification of those factors that maintain system behavior. It is both an internal and external makeover for organizations. Most entrepreneurs and company managers are accustomed to the idea of continual change and so they must monitor and adapt to it correctly. However, the reality remains that for entrepreneurs to respond effectively to these developments, they must first comprehend the reasons behind these shifts. And they must accept that change is required and must be able to manage or deal with it, hence the need for change management. Change management is the process of planning, implementing and evaluating changes in an organization. Change management aims to achieve desired outcomes, minimize risks and disruptions, and increase stakeholder acceptance and support. Change management can involve changes in strategy, structure, culture, technology, processes, policies, or people. Change management requires a clear vision, effective communication, stakeholder involvement, and continuous monitoring and feedback.",
-          },
-          {
-            type: 'definition',
-            heading: '6.8 Forces Responsible for Change',
-            text: 'Entrepreneurs must recognize and understand the variables that bring change within the business environment where they carry out their business operations. Entrepreneurs can discover a number of alternatives open to them to acquire competitive advantage because they grasp the dynamics that bring about change. These forces responsible for change are:',
-          },
-          {
-            type: 'bullets',
-            items: [
-              'Economic factors',
-              'Change in technology',
-              'Social causes',
-              'Political and legal changes and',
-              'Intense competition',
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '6.9 Resistance to change',
-            text: 'An entrepreneur tends to resist change since it is simpler to follow well-established and learned pathways than it is to alter or learn and adapt to new techniques where the consequences may not be as predictable. Some of the variables that contribute to entrepreneur reluctance to change are as follows:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Uncertainty about the Impact of Change', def: 'Uncertainty about the impact of change is one of the primary reasons why an entrepreneur may oppose change. An entrepreneur, for example, might fight the change if it may entail an adverse shift in government policy affecting its company operations or problems encountered when compelled to relocate.' },
-              { term: 'Economic Implications', def: "When compelled to relocate, an entrepreneur would fight the move since it may influence the cost of obtaining a new location, client loss, which may damage his/her market share or profit, and, in certain circumstances, the cost of operation." },
-              { term: 'Lack of Proper Communication', def: 'If the need for change is not communicated to entrepreneurs and small company owners in a timely and appropriate way, it might result in resistance.' },
-              { term: 'The Group Resistance', def: 'Individual entrepreneurs and small company owners may oppose change because the group to which they belong does. Individual entrepreneurs typically adhere to group norms and rules and support collective attitudes.' },
-              { term: 'Emotional Reasons', def: "One of the primary reasons for an entrepreneur's aversion to change is the emotional anguish that a change may bring, especially if previous experiences with changes have not been beneficial." },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '6.10 Critical change areas',
-            text: 'A brief outline of what the future may hold for change in small business operations in seven critical areas of planning during the current world economic environment are as follows:',
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Capital', def: 'It will grow more difficult and expensive to get, and many small firms may find it almost impossible to obtain at any price.' },
-              { term: 'Raw materials', def: 'They will also become more expensive and difficult to get. Smaller businesses may need to rely on greater inventories or move to more plentiful replacements.' },
-              { term: 'Labor', def: "This is a company's most abundant resource. Scarce capital will be replaced by abundant labor." },
-              { term: 'Technology', def: 'In the future, technology will be more crucial to small businesses than it has been in the past.' },
-              { term: 'Markets', def: 'Markets based on items that use huge amounts of more expensive resources will tend to decrease, whereas markets based on products that make fewer demands on irreplaceable resources or actively preserve them will likely to thrive.' },
-              { term: 'Government regulation', def: 'As government regulatory agencies fight to keep the country wealthy, regulation is probably guaranteed to rise.' },
-              { term: 'Management', def: 'Entrepreneurs will need to be more competent and foresighted if they are to steer the small company sector through the economic downturn' },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '6.11 Change management strategies',
-            text: "In today's world, the one constant that surrounds us is change. It is no different in business. Employees may find this difficult to handle and unpleasant. Among the techniques for dealing with change resistance are:",
-          },
-          {
-            type: 'termlist',
-            items: [
-              { term: 'Education and Communication', def: 'If entrepreneurs do not have enough knowledge about government policy pertaining to their company operations, or if the information they do have is erroneous, it is important to educate them about the change, its process, and its functioning. Training sessions, seminars, and conferences can all be used to provide this information.' },
-              { term: 'Participation and Involvement', def: 'Involvement of entrepreneurs and small company owners in changes to government policy affecting their operations will guarantee commitment to the execution of such reform.' },
-              { term: 'Negotiation and Agreement', def: 'Managing change opposition necessitates negotiation and agreement with all relevant parties.' },
-              { term: 'Timing of Change', def: 'The time of change has a large impact on the amount of change resistance. When there is a need for organizational transformation, entrepreneurs should select a moment when the organizational environment is most conducive to change.' },
-              { term: 'Leadership', def: "The entrepreneur's reputation and status may inspire workers to participate in the change process." },
-            ],
-          },
-          {
-            type: 'definition',
-            heading: '6.12 Change and innovations management contrasted',
-            text: 'Innovation management and change management are related but distinct concepts. Innovation management focuses on generating and implementing new ideas that create value for customers or stakeholders, while change management focuses on managing the transition from the current state to the desired state.',
-          },
-          {
-            type: 'table',
-            heading: 'Table 1: Differences between Innovation and Change management in Entrepreneurship',
-            headers: ['Innovation Management', 'Change Management'],
-            rows: [
-              ['Proactive: Seeks to create new opportunities or solve existing problems', 'Reactive: Responds to changes that have already occurred or are inevitable'],
-              ['Exploratory: Experimenting with different possibilities, testing assumptions, and learning from failures', 'Explanatory: Explaining the rationale, benefits, and impacts of the change, and addressing concerns and objections'],
-              ['Creative: Generating novel and useful ideas, challenging conventional wisdom, and thinking outside the box', 'Analytical: Assessing the current situation, identifying gaps and risks, and planning and executing actions.'],
-              ['Divergent: Encourages diversity of opinions, perspectives, and solutions', 'Convergent: Seeks alignment, consensus, and commitment.'],
-            ],
-          },
-          {
-            type: 'text',
-            text: 'However, innovation management and change management also have some similarities. They both:',
-          },
-          {
-            type: 'bullets',
-            items: [
-              'aims to improve the performance or competitiveness of the organization,',
-              'involve people and processes, they both require communication and collaboration, and',
-              'face challenges such as resistance to change, lack of resources, or organizational inertia.',
-            ],
-          },
-          {
-            type: 'text',
-            text: 'Therefore, innovation management and change management should not be seen as separate or competing activities, but rather as complementary and interdependent ones. Innovation can trigger change, and change can enable innovation. A successful organization needs both innovation and change capabilities to adapt to changing customer needs, market conditions, technological trends, or regulatory requirements.',
-          },
-          {
-            type: 'definition',
-            heading: '6.13 Knowledge and innovation',
-            text: 'Knowledge and innovation are two pivotal elements in the realm of entrepreneurship, yet they serve distinct purposes. Innovation refers to the process of developing new ideas or improving existing products and services, thereby driving entrepreneurial success. In contrast, knowledge encompasses the information, skills, and expertise that entrepreneurs possess or acquire through experience and education. While innovation is often viewed as a catalyst for economic growth and competitive advantage, knowledge serves as a foundation that enhances the effectiveness of innovative endeavors. Thus, knowledge and innovation are foundational pillars of entrepreneurship, driving both individual ventures and regional economic development. As highlighted by Kraus (2021), entrepreneurial activity, especially during its nascent stages, is heavily dependent on innovative practices that stimulate economic growth. The interplay between knowledge and innovation varies across different types of enterprises and underscores the necessity for firms to cultivate an environment where knowledge sharing and innovative thinking thrive, thus enhancing overall performance. For instance, family-owned small and medium-sized enterprises (SMEs) often rely on both innovation and knowledge to achieve high performance levels. Thus, the relationship between knowledge and innovation is said to be pronounced in family-owned businesses because family firms often leverage their unique knowledge dynamics to gain a competitive advantage in innovation (McDowell, 2013). Research indicates that while innovation is crucial for all SMEs, knowledge plays an especially significant role in family businesses by augmenting the impact of innovative activities. This distinction highlights how various organizational contexts can influence the relationship between these two critical components of entrepreneurship.',
-          },
-          {
-            type: 'definition',
-            heading: '6.14 Summary and Conclusion',
-            text: 'Innovations and change management are critical components in the evolution of organizations. Effective change in in organizations necessitates a nuanced understanding of individual behaviors, as acceptance is paramount for successful implementation. Innovation thrives in collaborative environments where communication is prioritized. Successful change management requires early engagement of employees, enabling them to contribute actively to innovation processes. Thus, integrating effective change management strategies with innovative practices is vital for entrepreneurial success in a dynamic world.',
-          },
-          {
-            type: 'bullets',
-            heading: 'References',
-            items: [
-              'Al-Shammari, M., Aziz, W. A., & Jasimuddin, S. M. (2023). Emerging trends in innovation management and entrepreneurship development in the 21st century: issues, challenges, and opportunities. Frontiers in Psychology, 14, 1145727.',
-              'Chatzinikolaou, D., & Vlados, C. (2022). Crisis, innovation and change management: a blind spot for micro-firms? Journal of Entrepreneurship in Emerging Economies, 16(3), 698-719.',
-              'Damiano Jr., R.J. (2011). What is innovation? Innovations: Technology and Techniques in Cardiothoracic and Vascular Surgery, 6(2), 65.',
-              'Dormant, D. (2011). The Chocolate Model of Change. San Bernardino, CA.',
-              'Drucker, P. (1985). Innovation and entrepreneurship. New York: HarperCollins.',
-              'Hall, G. E. (1979). The concerns-based approach to facilitating change. Educational Horizons, 57(4), 202-208.',
-              'Hisrich, R.D., Peters, M.P & Shepherd, D.A. (2008). Entrepreneurship (7th edition). Singapore: McGraw-Hill.',
-              'Kraus, S., McDowell, W., Ribeiro-Soriano, D. E., & Rodríguez-García, M. (2021). The role of innovation and knowledge for entrepreneurship and regional development. Entrepreneurship & Regional Development, 33(3-4), 175-184',
-              'Liu, S., Zhou, Y., Wang, C., & Yu, Y. (2022). The influence of entrepreneurship on the innovation path of cultural enterprises under the background of digital transformation. Frontiers in Psychology, 13, 892348.',
-              'Milella, F., Minelli, E. A., Strozzi, F., & Croce, D. (2021). Change and innovation in healthcare: findings from literature. Clinico Economics and outcomes research, 395-408.',
-              'Misra, D. K., Hill, L. A., Laroia, G., & Hamacher, C. (2024). A Better Way to Unlock Innovation and Drive Change. MIT Sloan Management Review, 66(1), 31-35.',
-              'Price, D. P., Stoica, M., & Boncella, R. J. (2013). The relationship between innovation, knowledge, and performance in family and non-family firms: an analysis of SMEs. Journal of innovation and Entrepreneurship, 2, 1-20.',
-              'Rogers, E. M. (2003). Diffusion of innovations, 5th ed. New York: Free Press',
-              'Sriboonnark, N. (2021). Innovation and Change Management. RICE Journal of Creative Entrepreneurship and Management, 1(3), 36-45.',
-              'Zimmermer, T.W., Scarborough, N.M. and Wilson, D. (2008). Essentials of entrepreneurship and small business management. (5th edition). New Jersey: Prentice Hall.',
-            ],
-          },
-        ],
-      },
-    ],
+    lectureNotes: ent221LectureNotes,
+    // Chapters 1–18 of the workbook against our outline. The indices are ours
+    // alone — Data Science takes ENT 221 too, off a differently-worded outline,
+    // so it keeps its own map.
+    //
+    // Item 6 (enterprise formation) is deliberately three `partial`s rather than
+    // one `covers`: chapter 7 does formation/partnership/networking, 8 does the
+    // ownership forms and 9 the business plan, and no single chapter carries the
+    // whole item. Item 8 (entrepreneurship in Nigeria) works the same way across
+    // chapters 3 and 10–14 — chapter 14 adds non-governmental support
+    // institutions (incubators, accelerators, non-profits, associations) to
+    // chapter 13's governmental ones. Item 9 (e-commerce) sat uncovered through
+    // chapter 13 — chapter 15 finally reaches it, dedicated entirely to
+    // e-commerce principles.
+    //
+    // Item 7 (contemporary entrepreneurship issues: intellectual property,
+    // virtual office, networking) is named after exactly three sub-topics, and
+    // between them chapters 16 and 18 now teach all three: chapter 16
+    // (16.5–16.9) is intellectual property in depth; chapter 18 dedicates 18.3
+    // to virtual offices (plus mixed reality) and 18.4 to networking. Both are
+    // marked `covers` rather than `partial` for that reason, even though each
+    // chapter individually only carries part of the item. Chapter 17
+    // (technopreneurship) also lands a lighter partial on item 7 via its own
+    // IP subsection (17.6.2); the rest of that chapter's blockchain/cloud/
+    // IoT/AI material, and chapter 18's sections on skills/tech solutions and
+    // sustainability/CSR, have no home in our outline.
+    noteCoverage: {
+      1: { covers: [1], partial: [2, 3] },
+      2: { partial: [3] },
+      3: { partial: [8] },
+      4: { covers: [2] },
+      5: { covers: [4] },
+      6: { covers: [5] },
+      7: { partial: [6, 7] },
+      8: { partial: [6] },
+      9: { partial: [6] },
+      10: { partial: [8] },
+      11: { partial: [8] },
+      12: { partial: [8] },
+      13: { partial: [8] },
+      14: { partial: [8] },
+      15: { covers: [9] },
+      16: { covers: [7] },
+      17: { partial: [7] },
+      18: { covers: [7] },
+    },
+    // Shared with Data Science — see src/data/lectureNotes/ent221Quiz.js.
+    // 367 questions across all 18 chapters; one bank for both catalogues
+    // since it tests the shared lecture notes, not either outline.
+    quiz: ent221Quiz,
   },
   {
     code: 'COS 221',
@@ -2422,6 +1000,7 @@ export const courses = [
     title: 'Computer Programming II',
     units: 3, level: 200, semester: 2, lh: 15, ph: 45,
     subject: 'cs',
+    crossDepartmental: true,
     hasInteractiveModules: true,
     interactiveTrackPath: '/tracks/java',
     interactiveLabel: 'Java',
@@ -2460,6 +1039,7 @@ export const courses = [
     title: 'Systems Analysis and Design',
     units: 3, level: 200, semester: 2, lh: 15, ph: 45,
     subject: 'ins',
+    crossDepartmental: true,
     description: 'A structured approach to analysing information system needs and designing solutions: the software development lifecycle, top-down and bottom-up design, dataflow diagramming, entity-relationship modelling, and file/database and user-interface design.',
     topics: [
       'Structured approach to analysis and design of information systems for businesses',
@@ -3795,6 +2375,1847 @@ export const courses = [
           },
         ],
       },
+      {
+        number: '4',
+        title: 'Concepts of Big Data Security',
+        sections: [
+          {
+            type: 'definition',
+            heading: '4.1 Definition',
+            text: 'Big Data security is the collective term for the guardrails, policies, and technologies used to protect massive volumes of data — both structured and unstructured — from unauthorized access, theft, exposure, and modification.',
+          },
+          {
+            type: 'text',
+            heading: '4.2 How It Differs from Traditional Security',
+            text: 'Traditional security focuses on securing perimeter walls (like firewalls) around static databases. Big Data security is unique because the data is constantly moving, changing, and being analysed at an immense scale — so protection has to travel with the data instead of sitting only at the boundary.',
+          },
+          {
+            type: 'termlist',
+            heading: '4.3 The 3Vs of Big Data Security Challenges',
+            items: [
+              { term: 'Volume', def: 'Protecting petabytes or exabytes of data requires security tools that scale dynamically without creating processing bottlenecks' },
+              { term: 'Velocity', def: 'Data streams into systems in real time (IoT sensors, network logs), so encryption and threat detection must happen on the fly without causing latency' },
+              { term: 'Variety', def: 'Structured SQL databases, semi-structured JSON, and unstructured video, audio and text all coexist — a one-size-fits-all security policy does not work' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '4.4 Core Pillars of Big Data Security',
+            text: 'To secure a Big Data ecosystem (such as Hadoop, Spark, or a cloud-based data lake), organisations implement a multi-layered security framework resting on four pillars.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Pillar 1 — Data Encryption and Privacy',
+            items: [
+              { term: 'Encryption in transit', def: 'Protecting data as it moves between nodes, clusters, or users — typically using TLS/SSL' },
+              { term: 'Encryption at rest', def: 'Safeguarding data stored on disks using strong encryption standards such as AES-256' },
+              { term: 'Data masking & tokenization', def: 'Replacing sensitive data (card numbers, PII) with realistic but fake values or tokens before it enters the analytics pipeline, so data scientists can work with it safely' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Pillar 2 — Centralized Access Control',
+            items: [
+              { term: 'Role-Based Access Control (RBAC)', def: 'Assigning permissions based on organisational roles' },
+              { term: 'Attribute-Based Access Control (ABAC)', def: 'A finer-grained approach where access is decided by contextual attributes — e.g. allow access only if the user is a Data Analyst AND the request comes from an internal IP during working hours' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Pillar 3 — Endpoint and Infrastructure Security',
+            items: [
+              { term: 'Node authentication', def: 'Ensuring only authorised servers/nodes can join the computing cluster — often managed via Kerberos' },
+              { term: 'API security', def: 'Protecting the endpoints and APIs that applications use to connect to and query the data lake' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Pillar 4 — Real-Time Monitoring and Auditing',
+            items: [
+              'With massive infrastructure, detecting a breach manually is impossible — monitoring must be automated',
+              'Maintain continuous audit logs of who accessed what data and when',
+              'Employ AI and machine-learning-driven User and Entity Behaviour Analytics (UEBA) to spot anomalous data access patterns that may indicate an insider threat or compromised credentials',
+            ],
+          },
+          {
+            type: 'image',
+            heading: '4.5 Common Tools in the Big Data Security Ecosystem',
+            src: '/lecture-notes/cyb-224/security-ecosystem.webp',
+            width: 1600, height: 238,
+            alt: 'Four tools mapped to their functions: Apache Ranger/Sentry to centralized security administration and access control, Kerberos to network authentication, Knox Gateway to secure perimeter access for REST APIs, and SIEM systems (Splunk, Elastic) to log aggregation and analysis at scale',
+            caption: 'Figure 1: The Big Data security ecosystem — each tool mapped to its primary function',
+          },
+          {
+            type: 'table',
+            headers: ['Tool / Technology', 'Primary Function'],
+            rows: [
+              ['Apache Ranger / Apache Sentry', 'Centralized security administration and fine-grained access control for Hadoop/Spark ecosystems'],
+              ['Kerberos', 'Network authentication protocol used to verify the identity of users and nodes in a cluster'],
+              ['Knox Gateway', 'Provides a single, secure point of access (perimeter security) for Big Data cluster REST APIs'],
+              ['SIEM systems (Splunk, Elastic)', 'Security Information and Event Management systems used to aggregate and analyse security logs at scale'],
+            ],
+          },
+        ],
+      },
+      {
+        number: '5',
+        title: 'Artificial Intelligence and Big Data Security',
+        sections: [
+          {
+            type: 'definition',
+            heading: '5.1 Artificial Intelligence',
+            text: 'Artificial Intelligence (AI) is the branch of computer science that focuses on creating systems capable of performing tasks that typically require human intelligence — learning, reasoning, problem-solving, perception, and language understanding. It spans a wide range of technologies, from rule-based systems to machine learning and deep learning.',
+          },
+          {
+            type: 'definition',
+            heading: '5.2 Machine Learning',
+            text: 'Machine Learning (ML), a subset of AI, is the study of algorithms and statistical models that let computers perform specific tasks without explicit instructions, relying instead on patterns and inference derived from data. The goal is to build models that generalise from training data to unseen data, making predictions or decisions on new inputs.',
+          },
+          {
+            type: 'text',
+            heading: '5.3 Application of ML in Data Security',
+            text: 'Applying AI and ML to network security means analysing large amounts of network data, identifying patterns, and detecting anomalies that may indicate security threats. This enables real-time detection and mitigation, which matters because of the increasing complexity and volume of attacks. The digital landscape is defined by two converging trends: the ubiquity of machine learning, and the increasing vulnerability of interconnected systems (e.g. microprocessor flaws like Spectre and Meltdown).',
+          },
+          {
+            type: 'image',
+            heading: '5.4 Cybersecurity Threat Categories',
+            src: '/lecture-notes/cyb-224/threat-taxonomy.webp',
+            width: 1400, height: 704,
+            alt: 'Mind map of cybersecurity threats in three branches: Malware (worm, trojan, ransomware, bot, rootkit, adware, botnet, spyware, backdoor), Network Attacks (login attack, phishing, spear phishing, keylogger, spam, exploit, account takeover, social engineering, sniffing, scanning, DoS/DDoS) and Advanced Threats (APT, zero-day)',
+            caption: 'Figure 2: Threat taxonomy — malware, network attacks, and advanced threats',
+          },
+          {
+            type: 'table',
+            headers: ['Threat Category', 'Definition', 'Example'],
+            rows: [
+              ['Malware', 'Malicious software designed to damage systems, steal data, or gain unauthorized access', 'A program that secretly deletes company files after installation'],
+              ['Worm', 'Self-replicating malware that spreads automatically across networks without user action', 'A worm spreading through a university network by exploiting a vulnerability'],
+              ['Trojan', 'Malware disguised as legitimate software to trick users into installing it', "A fake 'Free Antivirus' app that installs hidden spyware"],
+              ['Spyware', 'Software that secretly monitors and collects user information without consent', 'A program that tracks browsing history and sends it to attackers'],
+              ['Adware', 'Software that automatically displays unwanted advertisements on a device', 'Constant pop-up ads appearing during internet browsing'],
+              ['Ransomware', 'Malware that encrypts files and demands payment to restore access', "A hospital's records encrypted until ransom is paid"],
+              ['Rootkit', 'A hidden tool that gives attackers privileged access while remaining undetected', 'An attacker installing a rootkit to hide a server intrusion'],
+              ['Backdoor', 'A secret method of bypassing normal authentication to access a system', 'A hidden login password embedded in an application'],
+              ['Bot', 'An infected computer remotely controlled by an attacker', 'A laptop unknowingly sending spam emails under attacker control'],
+              ['Botnet', 'A group of infected devices controlled together by an attacker', 'Thousands of compromised devices launching a coordinated attack'],
+              ['Exploit', 'Code that takes advantage of a specific software weakness', 'Using an unpatched browser flaw to gain system access'],
+              ['Scanning', 'Actively searching systems or networks to identify vulnerabilities', 'Using automated tools to detect open ports on a server'],
+              ['Sniffing', 'Monitoring network traffic to capture sensitive information', 'Capturing login details on unsecured public Wi-Fi'],
+              ['Keylogger', 'A tool that records every keystroke typed on a device', "Recording a victim's banking password as they type"],
+              ['Spam', 'Unwanted bulk electronic messages, often for advertising or malicious purposes', 'Receiving hundreds of unsolicited promotional emails'],
+              ['Login attack', 'Automated attempts to guess usernames and passwords', 'Trying thousands of password combinations to access an account'],
+              ['Account Takeover (ATO)', "Unauthorized access to someone's legitimate account", 'Hackers accessing a social media account and changing the password'],
+              ['Phishing', 'Fraudulent communication pretending to be from a trusted source', 'An email pretending to be from a bank requesting login details'],
+              ['Spear phishing', 'Targeted phishing aimed at a specific individual or organisation', 'An email sent to a CEO pretending to be from a board member'],
+              ['Social engineering', 'Manipulating individuals into revealing confidential information', 'A caller pretending to be IT support asking for credentials'],
+              ['Incendiary speech', 'Harmful or discriminatory speech intended to incite hostility', 'Online posts targeting a group with harmful statements'],
+              ['Denial of Service (DoS/DDoS)', 'Flooding a system with traffic to make it unavailable', 'Overloading an e-commerce website during peak sales'],
+              ['Advanced Persistent Threat (APT)', 'A long-term targeted cyberattack where attackers remain undetected', 'Attackers secretly monitoring a government network for months'],
+              ['Zero-day vulnerability', 'A newly discovered software flaw exploited before a fix is released', 'Hackers exploiting a new OS weakness before patching'],
+            ],
+          },
+          {
+            type: 'text',
+            heading: '5.5 Protecting ML Systems from Adversarial Attacks',
+            text: 'Just as no modern computer system can be absolutely assured, there is no fail-safe way to protect an AI or ML system — research into defending ML tools is ongoing. The realistic goal is a systems-security approach that reduces the risk and impact of attacks to acceptable levels.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Three Protections to Insist On',
+            items: [
+              { term: 'Robustness', def: 'Integrity of the tool itself, plus protection of the confidentiality of what it holds' },
+              { term: 'Resilience', def: 'Resistance to attacks during both training and classification' },
+              { term: 'Reliable input', def: 'Evidence that the input data is reliable and representative' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Worked Example — The Stop Sign Attack',
+            text: 'ML tools contain well-known vulnerabilities, many of them susceptible to adversary manipulation. Self-driving cars use ML to identify street signs; by deliberately altering a small section of a stop sign with a purpose-designed sticker, an adversary can make these operational ML tools reliably misclassify the stop sign as a 45-mile-per-hour speed limit sign. In cybersecurity the manipulated input is usually far less obvious to an analyst than a sticker on a traffic sign — so any security system built on ML must take these threats seriously.',
+          },
+          {
+            type: 'bullets',
+            heading: 'What to Ask Developers and Suppliers',
+            items: [
+              'How does the design and deployment of the ML tool protect against well-documented classes of attack? (Not an abstract question about all possible attacks.)',
+              "What protections are in place for the integrity of the tool's decisions, during both training and deployment?",
+              'What protects the confidentiality of sensitive information used by the tool?',
+              'What evidence is there that the input data is reliable and representative?',
+              'Cybersecurity cannot prevent all attacks, and does not claim to — any ML tool deployed in a security context should be part of an explicit risk assessment',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: '5.6 The Upshot — Why Sensitive Data Is Attacked',
+            items: [
+              'The motivations behind cyber-attacks are complex and largely economically driven',
+              'Cybercrime has a functioning marketplace',
+              'Hacking tools are commoditized',
+              'Monetization pathways are layered and indirect',
+              'Defensive systems increase complexity, forcing attackers to adapt',
+              'The result is a continuous adversarial cycle between attackers and defenders',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '5.7 Activity 1 — Threat Identification from Logs',
+            items: [
+              { term: 'Which patterns may indicate scanning activity?', def: 'Repeated SYN packets without completed handshakes; multiple connection attempts to different ports in a short timeframe from the same IP' },
+              { term: 'Which patterns suggest a brute-force login attempt?', def: 'Repeated failed login attempts from one IP in a short window; a high frequency of authentication requests' },
+              { term: 'Which features would you extract to train an ML model to detect DDoS attacks?', def: 'Number of unique destination ports; packet rate / requests per second' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '5.8 Activity 2 — Threat Classification Mapping',
+            headers: ['Threat Type', 'Main Target'],
+            rows: [
+              ['Ransomware', 'Encrypts user or organisation data/files for ransom'],
+              ['Phishing', 'Targets human trust to steal credentials'],
+              ['Botnet', 'Compromises multiple machines to control remotely'],
+              ['Spyware', 'Monitors user activity and steals information'],
+              ['DoS', 'Targets network availability to disrupt service'],
+            ],
+          },
+        ],
+      },
+      {
+        number: '6',
+        title: "The Cyber Attacker's Economy",
+        sections: [
+          {
+            type: 'definition',
+            heading: '6.1 Security as an Economic Problem',
+            text: 'Cybersecurity is not only a technical battle but also an economic one. Modern cybercrime operates within a structured financial ecosystem where monetary gain is the primary motivation. Understanding attacker incentives helps security professionals design stronger detection and prevention systems.',
+          },
+          {
+            type: 'text',
+            heading: '6.2 From Reputation to Revenue',
+            text: 'Early cyber-attacks were often motivated by curiosity, mischief, or reputation within hacker communities. Today, most cyber-attacks are financially motivated — as long as cybercrime produces meaningful financial returns, attackers will continue to innovate.',
+          },
+          {
+            type: 'bullets',
+            heading: 'What Modern Attackers Target',
+            items: [
+              'Online payment platforms',
+              'Financial institutions',
+              'Gift card systems',
+              'Cryptocurrency wallets',
+              'E-commerce platforms',
+              'Identity databases',
+            ],
+          },
+          {
+            type: 'text',
+            heading: '6.3 Marketplace for Hacking Skills',
+            text: 'The commoditization of hacking has lowered the barrier to entry. Darknet marketplaces sell exploits, malware kits, stolen credentials, and even subscription-based hacking services.',
+          },
+          {
+            type: 'text',
+            heading: '6.4 Zero-Day Vulnerability Markets',
+            text: 'Zero-day vulnerabilities are unknown software weaknesses. They can be sold legally through bug bounty programmes or illegally in underground markets. Selling an exploit often provides faster and lower-risk financial returns than launching the attack directly.',
+          },
+          {
+            type: 'table',
+            heading: '6.5 Attack Supply Chain Mapping',
+            headers: ['Role in Ecosystem', 'Description'],
+            rows: [
+              ['Vulnerability researcher', 'Finds and documents unpatched security flaws'],
+              ['Exploit developer', 'Writes code that weaponizes a discovered flaw into a usable attack'],
+              ['Malware distributor', 'Spreads the malware to victims via phishing, infected downloads, or botnets'],
+              ['Botnet operator', 'Manages networks of infected devices and rents them out for DDoS attacks'],
+              ['Data reseller', 'Buys and sells stolen data (credentials, card numbers) on dark web markets'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '6.6 Activity — Economic Motivation Analysis',
+            items: [
+              { term: 'Why have cyber-attacks shifted from reputation-based to monetary motivations?', def: 'The rise of e-commerce, cryptocurrency, and organised cybercrime markets made data and access directly convertible to cash, turning attacks into a business rather than a hobby' },
+              { term: 'Why might attackers avoid large financial institutions despite the high potential reward?', def: 'Large institutions invest heavily in security — SOC teams for detection, encryption, regulatory compliance — making attacks costly and risky to execute' },
+              { term: 'How do weaker organisations become attractive targets?', def: 'Small businesses often have limited security budgets, no dedicated IT/security staff, and outdated systems' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '6.7 Activity — Machine Learning Implications',
+            items: [
+              { term: 'How does the commercialization of hacking increase attack volume?', def: 'Ready-made hacking tools and malware-as-a-service let low-skill attackers launch attacks at scale, multiplying the number of incidents' },
+              { term: 'Why must machine learning models be scalable in modern environments?', def: 'As data size increases, models need to keep processing in real time without breaking down' },
+              { term: 'How does attacker innovation pressure defensive systems to evolve?', def: 'As attackers develop new evasion techniques, defensive systems must continuously retrain and adapt or become obsolete against novel threats' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: '6.8 Activity — Case Scenario',
+            prompt: 'A small online retail company experiences a sudden increase in login attempts from multiple geographic locations.',
+            tasks: [
+              'Why might this company be targeted instead of a major bank?',
+              'What economic incentive might motivate the attacker?',
+              'Which machine learning approach would you recommend — supervised, anomaly detection, or hybrid — and why?',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Why this company, not a major bank?', def: 'Smaller companies have weaker defences and less monitoring, making them easier and faster to breach even though the payout per victim is smaller' },
+              { term: 'Economic incentive', def: 'Stored payment data, or ransom potential from disrupting a business that cannot afford downtime' },
+              { term: 'ML approach', def: 'A hybrid: supervised learning catches known attack patterns effectively, while anomaly detection catches unknown attacks that do not match existing signatures' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '6.9 Activity — General Understanding',
+            items: [
+              { term: 'How does understanding attacker economics improve defensive strategy design?', def: 'Knowing what makes a target profitable (weak security, valuable data) helps a defender prioritise protecting the most attractive assets first' },
+              { term: 'Why is cybersecurity considered an adversarial machine learning problem?', def: 'Unlike static datasets, the data is generated by an intelligent opponent actively adapting to evade detection' },
+              { term: 'In what ways does the underground marketplace accelerate threat evolution?', def: 'Attackers buy, sell, and share tools and techniques instantly, so improvements spread across the criminal community faster than defenders can respond' },
+            ],
+          },
+        ],
+      },
+      {
+        number: '7',
+        title: 'Machine Learning for Data Security',
+        sections: [
+          {
+            type: 'definition',
+            heading: '7.1 What Machine Learning Is',
+            text: 'Machine learning refers to a set of mathematical and statistical techniques that enable computer systems to learn patterns from historical data, generalise beyond observed examples, predict future outcomes, identify similarities and differences, and detect anomalies. At its core, machine learning transforms raw data into meaningful insights through pattern discovery and inference.',
+          },
+          {
+            type: 'text',
+            heading: 'Why It Matters in Security',
+            text: 'Since the beginning of the technological age, researchers have aimed to design computer systems capable of reasoning, generalising, and making intelligent decisions from complex data — and ML is one of the primary approaches used to achieve it. In security, ML analyses vast amounts of data such as network traffic, learning from historical records and using that knowledge to make predictions about new and unseen events.',
+          },
+          {
+            type: 'bullets',
+            heading: '7.2 Supervised Learning',
+            items: [
+              'The dataset includes labeled examples',
+              'The algorithm learns from known input and output pairs',
+              'The goal is to predict labels for new data',
+              'Security applications: spam detection, malware classification, phishing detection, malicious URL detection',
+              'Tasks: classification (spam vs legitimate) and regression (predicting numerical values such as risk scores)',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: '7.3 Unsupervised Learning',
+            items: [
+              'Data is unlabeled',
+              'The algorithm identifies hidden structures or patterns',
+              'It groups data, or detects deviations from normal behaviour',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: '7.4 Use 1 — Pattern Recognition',
+            items: [
+              'Focuses on identifying known characteristics within data',
+              'Examples: spam detection, malware detection, botnet detection, phishing classification',
+              'Works because malicious activity exhibits recognisable features that can be learned',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: '7.5 Use 2 — Anomaly Detection',
+            items: [
+              'Defines normal behaviour and flags deviations from it',
+              'Examples: network outlier detection, insider threat detection, access control anomaly detection, behavioural monitoring',
+              'Unlike pattern recognition, it does not require explicit malicious examples — it models normal activity instead',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'There may be infinitely many anomalous patterns, including ones never observed during training. That is what makes anomaly detection powerful — and also what makes it prone to false positives if it is not carefully designed.',
+          },
+          {
+            type: 'text',
+            heading: '7.6 Access Control and Behavioural Intelligence',
+            text: 'Traditional rule-based access control systems are rigid and inflexible. Machine learning enhances access control by learning typical user access patterns, identifying abnormal behaviour, and providing adaptive responses.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Example Scenario — A Hospital',
+            items: [
+              'Nurses access individual patient records',
+              'Doctors query multiple patient records for diagnosis',
+              'An ML system can detect abnormal access patterns without blocking legitimate rare events',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '7.7 Activity — Machine Learning Application',
+            items: [
+              { term: 'Which threats are best suited to supervised learning models, and why?', def: "Well-labeled threats such as phishing, malware and spam — there is plenty of historical labeled data to train on" },
+              { term: 'Which threats require anomaly detection (unsupervised learning), and why?', def: 'Zero-day attacks, insider threats and unusual network behaviour, where no prior labeled examples exist' },
+              { term: 'What makes cybersecurity data different from standard ML datasets?', def: 'Attacks are rare compared with normal traffic; patterns constantly evolve; adversaries actively try to evade detection; and labeled attack data is scarce and sensitive' },
+            ],
+          },
+        ],
+      },
+      {
+        number: '8',
+        title: 'Supervised Learning Algorithms for Intrusion Detection',
+        sections: [
+          {
+            type: 'definition',
+            heading: '8.1 The Supervised Learning Set-up',
+            text: 'Supervised learning trains a model on a labeled dataset where every input example xᵢ is paired with its correct output label yᵢ. The goal is to learn a mapping f : x → y that generalises well to unseen data. In network security this is applied to classification tasks such as separating benign from malicious traffic (intrusion detection), spam from non-spam email, or normal from anomalous behaviour.',
+          },
+          {
+            type: 'code',
+            heading: 'Loss Functions',
+            language: 'math',
+            code: 'Binary cross-entropy (binary classification):\n  L(y, ŷ) = −[ y·log(ŷ) + (1 − y)·log(1 − ŷ) ]\n\nCategorical cross-entropy (multi-class):\n  L(y, ŷ) = − Σ(c = 1..C) y_c · log(ŷ_c)\n\nThe model minimises the loss using gradient descent\nor a variant (Adam, SGD with momentum).',
+          },
+          {
+            type: 'text',
+            heading: '8.2 Decision Trees (DT)',
+            text: 'Decision trees build a tree-like model where internal nodes represent feature tests, branches represent outcomes, and leaf nodes represent class labels or probability distributions. They are interpretable, handle mixed data types well, and require little preprocessing — which makes them popular for initial IDS prototyping.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/cyb-224/decision-tree.webp',
+            width: 1400, height: 578,
+            alt: 'A decision tree branching from a root node on income (≤ or > $75,000), then on family size (≤ or > 4 members), then on education (≤ or > 12 years), with leaf nodes labelled Purchaser or Non-Purchaser',
+            caption: 'Figure 3: Decision tree structure — each internal node tests a feature, each leaf assigns a class',
+          },
+          {
+            type: 'code',
+            heading: 'CART Splitting Criteria',
+            language: 'math',
+            code: 'Gini impurity:\n  Gini(t) = 1 − Σ(i = 1..k) p_i²\n  where p_i is the proportion of class i at node t\n\nInformation gain using entropy:\n  Entropy(S) = − Σ(i = 1..k) p_i · log₂(p_i)\n  Gain(S, A) = Entropy(S) − Σ(v ∈ Values(A)) (|S_v| / |S|) · Entropy(S_v)',
+          },
+          {
+            type: 'bullets',
+            heading: 'Training Procedure — Greedy Recursive Partitioning',
+            items: [
+              'Start at the root with the full dataset',
+              'For each feature and possible split point, compute the impurity reduction',
+              'Choose the split that maximises gain (or minimises weighted child impurity)',
+              'Repeat until a stopping criterion is met — max depth, min samples per leaf, min impurity decrease',
+              'Assign the majority class (or a probability) to each leaf',
+              'In network security the features might be packet size, inter-arrival time, source/destination ports and flags, with leaves predicting "normal" or a specific attack type',
+            ],
+          },
+          {
+            type: 'text',
+            heading: '8.3 Support Vector Machines (SVM)',
+            text: 'SVMs find the optimal hyperplane that separates classes with the maximum margin. They are effective on high-dimensional data and remain popular in intrusion detection because they generalise well from relatively small labeled datasets.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/cyb-224/svm-margin.webp',
+            width: 1100, height: 860,
+            alt: 'Diagram relating support vectors to the positive and negative hyperplanes, with the maximum margin hyperplane sitting between them and the margin measured across the gap',
+            caption: 'Figure 4: SVM geometry — support vectors define the margin around the separating hyperplane',
+          },
+          {
+            type: 'code',
+            heading: 'SVM Equations',
+            language: 'math',
+            code: 'Hard margin (linearly separable case):\n  find w, b such that  y_i(wᵀx_i + b) ≥ 1   for all i\n  maximise margin 2/||w||  ⟺  minimise ½||w||²\n\nSoft margin (realistic case, slack variables ξ):\n  minimise  ½||w||² + C · Σ(i = 1..n) ξ_i\n  subject to  y_i(wᵀx_i + b) ≥ 1 − ξ_i,  ξ_i ≥ 0\n  C trades off margin size against classification error\n\nPrediction:\n  f(x) = sign(wᵀx + b)\n\nKernel trick (non-linear separation) — replace xᵢᵀxⱼ with K(xᵢ, xⱼ):\n  RBF:  K(xᵢ, xⱼ) = exp(−γ·||xᵢ − xⱼ||²)',
+          },
+          {
+            type: 'text',
+            heading: '8.4 Neural Networks (Feedforward / Multi-Layer Perceptron)',
+            text: 'Feedforward neural networks consist of an input layer, one or more hidden layers, and an output layer. They excel at learning complex, non-linear patterns, which suits modern network intrusion detection on large traffic datasets.',
+          },
+          {
+            type: 'code',
+            heading: 'Forward Pass and Training',
+            language: 'math',
+            code: 'Single neuron:\n  z = wᵀx + b\n  a = σ(z)\n  common activations σ: ReLU max(0, z), sigmoid, tanh\n\nL-layer network:\n  a^[l] = σ^[l]( W^[l] · a^[l−1] + b^[l] ),   l = 1, ..., L\n\nTraining loop:\n  1. Forward pass  → compute predictions and loss\n  2. Backward pass → compute gradients ∂L/∂W^[l], ∂L/∂b^[l]\n  3. Update        → W ← W − η · ∂L/∂W   (or Adam, etc.)',
+          },
+          {
+            type: 'text',
+            heading: '8.5 Choosing Between Them',
+            text: 'Each method has trade-offs: decision trees offer interpretability, SVMs provide strong theoretical guarantees in high dimensions, and neural networks deliver top performance on large or complex datasets. Neural approaches work best combined with feature engineering, autoencoders for anomaly-detection preprocessing, or modern variants (CNNs, LSTMs, Transformers) for traffic sequence analysis. In practice many real-world IDS/IPS systems ensemble these methods or use deep learning hybrids.',
+          },
+        ],
+      },
+      {
+        number: '9',
+        title: 'Practical — Building Detection Models by Hand',
+        sections: [
+          {
+            type: 'text',
+            heading: '9.1 Objective',
+            text: 'These activities combine discussion, manual calculation, and coding practice, to help you understand the strengths and weaknesses of different machine learning algorithms applied to real network security problems.',
+          },
+          {
+            type: 'casestudy',
+            heading: '9.2 Practical 1 — Algorithm Comparison',
+            prompt: 'You are designing an Intrusion Detection System (IDS) that analyses these network traffic features: packet size, source and destination IP address, source and destination port, TCP flags (e.g. SYN), TTL (Time To Live), and packet inter-arrival time. Work in small groups, each group taking one algorithm — Decision Tree, SVM, or Neural Network (MLP).',
+            tasks: [
+              'What are three advantages of your algorithm for IDS?',
+              'What are three disadvantages?',
+              'How could overfitting occur when detecting network attacks?',
+              'What techniques could reduce overfitting?',
+              'Which model suits a small labeled dataset from a university network, and which suits a massive real-time traffic dataset?',
+            ],
+          },
+          {
+            type: 'table',
+            heading: '9.3 Practical 2 — Decision Tree Construction',
+            headers: ['Packet', 'Packet Size', 'Src Port < 1024', 'SYN Flag', 'Label'],
+            rows: [
+              ['1', '60', 'Yes', '1', 'Malicious'],
+              ['2', '1500', 'No', '0', 'Benign'],
+              ['3', '55', 'Yes', '1', 'Malicious'],
+              ['4', '1400', 'No', '0', 'Benign'],
+              ['5', '70', 'Yes', '0', 'Benign'],
+              ['6', '65', 'Yes', '1', 'Malicious'],
+            ],
+          },
+          {
+            type: 'code',
+            heading: 'Step 1 — Root Gini Impurity',
+            language: 'math',
+            code: 'Gini = 1 − ( p²_malicious + p²_benign )\n\nmalicious packets = 3,  benign packets = 3\n  p_malicious = 3/6 = 0.5\n  p_benign    = 3/6 = 0.5\n\nGini = 1 − (0.5² + 0.5²)\nGini = 0.5',
+          },
+          {
+            type: 'code',
+            heading: 'Step 2 — Split on the SYN Flag',
+            language: 'math',
+            code: 'If SYN = 1 → all packets Malicious → Gini = 0\nIf SYN = 0 → all packets Benign    → Gini = 0\n\nA perfect split.\n\nFinal decision rule:\n  IF SYN_Flag = 1 THEN Malicious\n  ELSE Benign\n\nTraining accuracy = 6/6 = 100%',
+          },
+          {
+            type: 'casestudy',
+            title: 'Discussion Question',
+            prompt: 'Why might this tree overfit real network traffic data, and how could pruning improve generalisation?',
+          },
+          {
+            type: 'definition',
+            heading: 'Background — The SYN Flag',
+            text: 'The SYN ("synchronize") flag is a control bit in the TCP header used to start a connection between two computers on a network. It is used mainly during the initial stage of communication to synchronize sequence numbers between sender and receiver, telling the receiving device that the sender wants to start a session.',
+          },
+          {
+            type: 'termlist',
+            heading: 'The TCP Three-Way Handshake',
+            items: [
+              { term: 'Step 1 — SYN (client → server)', def: 'The client sends a packet with SYN = 1, meaning "I want to start a connection"' },
+              { term: 'Step 2 — SYN-ACK (server → client)', def: 'The server replies with SYN = 1 and ACK = 1, meaning "connection request received"' },
+              { term: 'Step 3 — ACK (client → server)', def: 'The client sends ACK = 1, and the connection is now established' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '9.4 Practical 3 — SVM for Malicious Traffic Detection',
+            headers: ['Packet', 'Packet Rate', 'Byte Entropy', 'SYN Flag', 'Label', 'Converted Label'],
+            rows: [
+              ['1', '12', '0.30', '0', 'Benign', '0'],
+              ['2', '15', '0.35', '0', 'Benign', '0'],
+              ['3', '18', '0.40', '0', 'Benign', '0'],
+              ['4', '40', '0.85', '1', 'Malicious', '1'],
+              ['5', '45', '0.90', '1', 'Malicious', '1'],
+              ['6', '50', '0.95', '1', 'Malicious', '1'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Reading the Dataset',
+            items: [
+              { term: 'Packet rate', def: 'Number of packets per second' },
+              { term: 'Byte entropy', def: 'Randomness in the packet data' },
+              { term: 'SYN flag', def: 'Indicates a connection request' },
+              { term: 'Converted label', def: 'SVMs need numeric targets — Benign → 0, Malicious → 1' },
+            ],
+          },
+        ],
+      },
+      {
+        number: '10',
+        title: 'Unsupervised, Reinforcement and Deep Learning',
+        sections: [
+          {
+            type: 'definition',
+            heading: '10.1 Unsupervised Learning',
+            text: 'Unsupervised learning trains a model on data without labeled responses. The model learns the underlying structure of the data by identifying patterns and relationships on its own.',
+          },
+          {
+            type: 'text',
+            heading: 'Clustering Algorithms',
+            text: 'Clustering algorithms such as k-means and hierarchical clustering group similar data points together. In network security, clustering identifies groups of similar network behaviours, which helps detect abnormal activity — for example grouping similar login attempts and identifying the outliers that may indicate unauthorized access.',
+          },
+          {
+            type: 'text',
+            heading: 'Anomaly Detection Techniques',
+            text: 'Anomaly detection identifies data points that deviate significantly from the majority of the data. Gaussian Mixture Models (GMM) and Principal Component Analysis (PCA) are commonly used. In network security this surfaces unusual traffic patterns that may indicate a breach.',
+          },
+          {
+            type: 'definition',
+            heading: '10.2 Reinforcement Learning',
+            text: 'Reinforcement learning trains a model to make a sequence of decisions by learning from the consequences of its actions — rewards for desired behaviour, penalties for undesired behaviour — optimising its actions over time.',
+          },
+          {
+            type: 'text',
+            heading: 'Markov Decision Processes (MDP)',
+            text: 'MDPs provide a mathematical framework for modelling decisions where outcomes are partly random and partly under the control of the decision-maker. In network security, reinforcement learning can develop adaptive security policies that respond to evolving threats — for example dynamically adjusting firewall rules based on detected threats, balancing security against network performance.',
+          },
+          {
+            type: 'definition',
+            heading: '10.3 Deep Learning',
+            text: 'Deep learning, a subset of ML, uses neural networks with many layers (deep neural networks) to model complex patterns. It is particularly effective on high-dimensional data such as images and speech.',
+          },
+          {
+            type: 'text',
+            heading: 'Convolutional Neural Networks (CNNs)',
+            text: 'CNNs are specialised networks for grid-like data such as images. In network security, CNNs analyse traffic data represented as images to identify patterns indicative of malicious activity — and can detect malware by analysing the binary code of executable files.',
+          },
+          {
+            type: 'text',
+            heading: 'Recurrent Neural Networks (RNNs)',
+            text: 'RNNs handle sequential data, which suits time-series analysis. In network security, RNNs detect anomalies in network traffic over time, identifying patterns that indicate ongoing attacks or data exfiltration attempts.',
+          },
+        ],
+      },
+      {
+        number: '11',
+        title: 'Detection and Mitigation of Threats in Big Data',
+        sections: [
+          {
+            type: 'text',
+            heading: '11.1 How AI/ML Changed Threat Detection',
+            text: 'Applying AI and ML to network security has fundamentally transformed how threats are detected and mitigated. These technologies analyse vast amounts of network data in real time, identifying and responding to potential threats more effectively and efficiently than traditional methods, and enabling proactive defences that adapt to the evolving threat landscape.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/cyb-224/ml-detection-pipeline.webp',
+            width: 1000, height: 1174,
+            maxWidth: 620,
+            alt: 'A six-stage pipeline: data collection from network traffic, data preprocessing (cleansing and feature extraction), model training with neural networks, decision trees and SVM, real-time monitoring and detection, threat identification and mitigation, then automated response such as blocking IPs and isolating devices',
+            caption: 'Figure 5: The ML threat-detection pipeline, from raw traffic to automated response',
+          },
+          {
+            type: 'termlist',
+            heading: '11.2 Anomaly Detection',
+            items: [
+              { term: 'Baseline behaviour modeling', def: 'The system first establishes what normal looks like by analysing historical data — typical login times, frequency of data access, common communication patterns — building a profile of regular activity' },
+              { term: 'Real-time monitoring', def: 'Traffic and activity are watched continuously and any deviation from the baseline is flagged; statistical analysis, clustering, and neural networks are common here. A sudden spike in data transfer volume or an unusual login time triggers an alert' },
+              { term: 'Contextual analysis', def: 'User behaviour analytics (UBA) separates normal activity from suspicious action using context — time of day, location, user role — which improves accuracy and reduces false positives' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '11.3 Threat Identification',
+            items: [
+              { term: 'Pattern recognition', def: 'Models are trained to recognise patterns associated with known threats. Signature-based detection uses predefined malware patterns; ML extends this to variations and new patterns signatures would miss, such as polymorphic malware that changes its code to evade detection' },
+              { term: 'Behavioural analysis', def: "Rather than relying only on known patterns, the model analyses how entities behave — a rise in failed logins, unusual data transfers, unexpected communication. This is especially useful for zero-day attacks and APTs, where the attacker's behaviour deviates from normal user activity" },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '11.4 Predictive Analytics',
+            items: [
+              { term: 'Predictive modeling', def: 'Trends and historical data are used to anticipate attacks and identify vulnerabilities before they are exploited — time-series analysis can forecast a potential DDoS by spotting patterns in traffic volume and alerting administrators to act' },
+              { term: 'Risk assessment', def: 'Evaluating the potential impact and likelihood of different threats lets the system prioritise responses and allocate resources — determining the criticality of assets and protecting high-value targets first' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '11.5 Activity — Supervised or Unsupervised?',
+            headers: ['Scenario', 'Approach', 'Why'],
+            rows: [
+              ['Spam detection', 'Supervised', 'Labeled examples of spam and non-spam are available'],
+              ['Unknown network traffic patterns', 'Unsupervised', 'No prior labels exist for new or evolving attack patterns'],
+              ['Malware family classification', 'Supervised', 'Historical data exists for the different malware families'],
+              ['Insider behaviour anomaly detection', 'Unsupervised', 'Insider threats are rare and often lack predefined labels'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '11.6 Activity — Adversarial Thinking',
+            items: [
+              { term: 'How might attackers use machine learning to bypass security systems?', def: 'To generate evasive malware, craft sophisticated phishing campaigns, or learn to mimic normal user behaviour and avoid detection' },
+              { term: 'Why must ML systems in cybersecurity consider adversarial threats?', def: 'Because attackers actively adapt to evade detection, models must be robust against adversarial examples and continuously updated to counter new evasion techniques' },
+              { term: 'What is adversarial machine learning?', def: 'The field that studies the vulnerability of ML models to malicious inputs (adversarial examples) and develops techniques to make those models more robust' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '11.7 Activity — Pattern Recognition vs Anomaly Detection',
+            items: [
+              { term: 'A problem best solved by pattern recognition?', def: 'Detecting known malware variants from their characteristic code signatures or network traffic patterns' },
+              { term: 'A problem best solved by anomaly detection?', def: 'Identifying a zero-day attack or insider threat, where no signature exists but the behaviour deviates sharply from the established baseline' },
+              { term: 'Why can anomaly detection generate false positives?', def: 'It flags any deviation from normal, so legitimate but unusual events — a new software update, a user working from a new location — can be mistaken for anomalies' },
+              { term: 'Why can there be infinitely many anomalous patterns?', def: 'Anomalies are defined by deviation from the norm, and the ways something can differ from the norm are theoretically infinite — attackers also keep inventing new, unforeseen attack vectors' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: '11.8 Activity — Case Study',
+            prompt: 'A company observes that one employee suddenly accesses 50 times more files than usual, at 2:00 AM, from a new geographic location.',
+            tasks: [
+              'Is this a pattern recognition or an anomaly detection problem?',
+              'What features would you extract to analyse this case?',
+              'What risks exist if the model makes an incorrect prediction?',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Which problem type?', def: "Anomaly detection — the scenario describes a significant deviation from the employee's usual behaviour in time, volume and location" },
+              { term: 'Features to extract', def: 'Login time; login location (IP address, geo-coordinates); number of files accessed; type of files accessed; historical access patterns for that user; typical access patterns for users in similar roles' },
+              { term: 'Risk of a false positive', def: 'Flagging legitimate activity as malicious causes unnecessary investigations, user inconvenience, and erosion of trust in the security system' },
+              { term: 'Risk of a false negative', def: 'Missing genuine malicious activity can result in a data breach, financial loss, reputational damage, and compromise of the entire system' },
+            ],
+          },
+        ],
+      },
+      {
+        number: '12',
+        title: 'Supervised Machine Learning for Threat Detection',
+        sections: [
+          {
+            type: 'definition',
+            heading: '12.1 The Trained Digital Sentry',
+            text: 'In cybersecurity, supervised machine learning acts as a trained digital sentry. It learns from a labeled dataset of past incidents, identifying which patterns are harmless (benign) and which are dangerous (malicious). The two main tasks are classification — is this a threat? — and regression — how high is the risk?',
+          },
+          {
+            type: 'termlist',
+            heading: '12.2 The Procedural Workflow',
+            items: [
+              { term: 'Data labeling', def: 'Experts provide a dataset where every entry is tagged — for example 1 for malware, 0 for safe' },
+              { term: 'Feature engineering', def: "Identifying the characteristics that signal a threat. For an email that might be the sender's IP, the number of links, or the presence of urgent-sounding keywords" },
+              { term: 'Training', def: 'The algorithm processes the features to find a mathematical boundary between safe and unsafe' },
+              { term: 'Testing / validation', def: 'The model is given new, unlabeled data to see whether it predicts the correct category' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '12.3 Network Intrusion Detection (NIDS)',
+            items: [
+              { term: 'Purpose', def: 'Monitors traffic to identify unauthorized access or attacks such as DDoS' },
+              { term: 'Common algorithms', def: 'Random Forest, Support Vector Machines' },
+              { term: 'Indicators used', def: 'Byte counts, packet intervals, TCP flag combinations' },
+              { term: 'How it works', def: 'The model learns the profile of a standard connection; if a connection shows features similar to a labeled SYN flood attack, it triggers an alert' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '12.4 Malware Analysis',
+            items: [
+              { term: 'Purpose', def: 'Detecting zero-day threats that signature-based antivirus software might miss' },
+              { term: 'Common algorithms', def: 'Decision Trees, K-Nearest Neighbors (KNN)' },
+              { term: 'Indicators used', def: 'File size, API calls made by the code, registry key changes' },
+              { term: 'How it works', def: 'Instead of looking for a specific fingerprint, the model looks at behavioural features — if a file behaves like previously labeled ransomware (rapid file encryption, for instance), it is quarantined' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '12.5 Phishing and Spam Detection',
+            items: [
+              { term: 'Purpose', def: 'Analysing communication to stop social engineering' },
+              { term: 'Common algorithms', def: 'Naive Bayes, Logistic Regression' },
+              { term: 'Indicators used', def: 'URL length, use of IP addresses in place of domain names, suspicious call-to-action phrases' },
+              { term: 'How it works', def: 'Naive Bayes calculates the probability that an email is phishing from the frequency of suspicious words seen in past labeled phishing campaigns' },
+            ],
+          },
+          {
+            type: 'image',
+            heading: '12.6 Algorithm Comparison',
+            src: '/lecture-notes/cyb-224/algorithm-comparison.webp',
+            width: 1400, height: 596,
+            alt: 'Mind map of security algorithms: Naive Bayes (phishing/spam, fast and text-friendly, assumes feature independence), Random Forest (network intrusion, accurate on large data, slow in real time), SVM (malware detection, strong on high-dimensional data, memory intensive), and Logistic Regression (fraud detection, gives a risk score, struggles with non-linear threats)',
+            caption: 'Figure 6: Four supervised algorithms with their security use, strength, and weakness',
+          },
+          {
+            type: 'table',
+            headers: ['Algorithm', 'Typically Used For', 'Strength', 'Weakness'],
+            rows: [
+              ['Naive Bayes', 'Phishing / spam', 'Extremely fast; works well with text', 'Assumes features are independent'],
+              ['Random Forest', 'Network intrusion', 'Highly accurate; handles large data', 'Can be slow to run in real time'],
+              ['SVM', 'Malware detection', 'Excellent for complex, high-dimensional data', 'High memory consumption'],
+              ['Logistic Regression', 'Fraud detection', 'Provides a clear risk score (0–100%)', 'Struggles with non-linear threats'],
+            ],
+          },
+        ],
+      },
+      {
+        number: '13',
+        title: 'Exploratory Data Analysis and the Python Toolkit',
+        sections: [
+          {
+            type: 'definition',
+            heading: '13.1 What EDA Is',
+            text: 'Exploratory Data Analysis (EDA) is the process of examining, summarising, and visualising a dataset to understand its main characteristics before applying formal models.',
+          },
+          {
+            type: 'bullets',
+            heading: '13.2 What EDA Is For',
+            items: [
+              'Discovering patterns in the data',
+              'Detecting errors or missing values',
+              'Identifying relationships between variables',
+              'Checking the assumptions required for modelling',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '13.3 Types of EDA',
+            items: [
+              { term: 'Univariate (one variable)', def: 'Mean, median, mode; histograms and boxplots — used to understand the distribution of a single feature' },
+              { term: 'Bivariate (two variables)', def: 'Scatter plots and correlation analysis — used to identify relationships between variables' },
+              { term: 'Multivariate (many variables)', def: 'Heatmaps and pair plots — used to understand complex interactions' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '13.4 Pandas — Data Manipulation and Analysis',
+            text: 'Pandas loads datasets (CSV, Excel and more), organises data into tables called DataFrames, cleans and preprocesses that data, and performs statistical operations.',
+          },
+          {
+            type: 'code',
+            language: 'python',
+            code: `import pandas as pd
+
+df = pd.read_csv("data.csv")   # Load dataset
+df.head()                      # View first rows
+df.describe()                  # Summary statistics
+df.isnull().sum()              # Check missing values`,
+          },
+          {
+            type: 'text',
+            heading: '13.5 NumPy — Numerical Computation',
+            text: 'NumPy handles large numerical datasets efficiently, supports mathematical operations, and works with multi-dimensional arrays. In simple terms: NumPy is fast maths on numbers and arrays.',
+          },
+          {
+            type: 'code',
+            language: 'python',
+            code: `import numpy as np
+
+arr = np.array([1, 2, 3])
+np.mean(arr)   # Mean
+np.std(arr)    # Standard deviation
+np.max(arr)    # Maximum value`,
+          },
+          {
+            type: 'text',
+            heading: '13.6 Matplotlib — Basic Visualisation',
+            text: 'Matplotlib creates plots such as line charts, bar charts, and histograms. In simple terms: Matplotlib draws graphs from scratch.',
+          },
+          {
+            type: 'code',
+            language: 'python',
+            code: `import matplotlib.pyplot as plt
+
+plt.plot([1, 2, 3], [4, 5, 6])
+plt.title("Simple Plot")
+plt.show()`,
+          },
+          {
+            type: 'text',
+            heading: '13.7 Seaborn — Statistical Visualisation',
+            text: 'Seaborn builds on Matplotlib to provide attractive, easy-to-use statistical plots and handles complex visualisations easily. In simple terms: Seaborn draws beautiful and smarter graphs.',
+          },
+          {
+            type: 'code',
+            language: 'python',
+            code: `import seaborn as sns
+
+# df is the DataFrame loaded in the Pandas example above
+sns.countplot(x='label', data=df)             # Bar chart
+sns.heatmap(df.corr(numeric_only=True))       # Correlation heatmap
+                                              # (numeric_only skips text columns,
+                                              #  which corr() cannot handle)
+sns.boxplot(x='label', y='value', data=df)    # Boxplot`,
+          },
+        ],
+      },
+      {
+        number: '14',
+        title: 'Model Evaluation — Confusion Matrix and Metrics',
+        sections: [
+          {
+            type: 'definition',
+            heading: '14.1 The Confusion Matrix',
+            text: 'Evaluation metrics for threat-detection models are derived from the confusion matrix, which summarises classification results by comparing the predicted labels with the actual labels.',
+          },
+          {
+            type: 'termlist',
+            heading: 'The Four Components',
+            items: [
+              { term: 'True Positive (TP)', def: 'The model correctly identifies a threat pattern' },
+              { term: 'True Negative (TN)', def: 'The model correctly predicts that the system has no threat' },
+              { term: 'False Positive (FP)', def: 'The model predicts a threat where there is none — a false alarm' },
+              { term: 'False Negative (FN)', def: 'The model fails to detect a threat that is present — a miss' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '14.2 Accuracy',
+            text: 'Accuracy measures the proportion of correctly predicted instances out of all predictions made. It gives a general measure of overall performance — a higher accuracy means the model correctly classifies a large proportion of the dataset.',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Accuracy = (TP + TN) / (TP + TN + FP + FN)',
+          },
+          {
+            type: 'text',
+            heading: '14.3 Precision',
+            text: 'Precision measures the proportion of positive predictions that are actually correct. A high precision value means the model produces fewer false alarms.',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Precision = TP / (TP + FP)',
+          },
+          {
+            type: 'text',
+            heading: '14.4 Recall (Sensitivity)',
+            text: 'Recall measures the proportion of actual positive cases the model correctly identifies. In an IDS, recall matters especially because failing to detect a real threat (a false negative) delays intervention and response — so threat-screening models are often tuned to maximise recall.',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Recall = TP / (TP + FN)',
+          },
+          {
+            type: 'text',
+            heading: '14.5 F1 Score',
+            text: 'The F1-score is the harmonic mean of precision and recall, giving a balanced measure when both false positives and false negatives matter. It is especially useful on imbalanced datasets because it considers both quantities simultaneously.',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'F1 = 2 × (Precision × Recall) / (Precision + Recall)',
+          },
+        ],
+      },
+      {
+        number: '15',
+        title: 'Practical — EDA on the UNSW-NB15 IDS Dataset',
+        sections: [
+          {
+            type: 'note',
+            text: 'The three blocks below are one continuous script — run them in order in the same notebook. 15.2 and 15.3 reuse df and num_cols from the block before them, so running 15.3 on its own raises a NameError.',
+          },
+          {
+            type: 'code',
+            heading: '15.1 Load and Explore',
+            language: 'python',
+            code: `# 1. Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_style("whitegrid")
+
+# 2. Load Dataset
+file_path = "UNSW_NB15_dataset.csv"   # update path if needed
+df = pd.read_csv(file_path)
+
+# 3. Basic Exploration
+print("First 5 rows:")
+print(df.head())
+
+print("\\nDataset Info:")
+print(df.info())
+print("\\nDataset Shape:")
+print(df.shape)
+print("\\nColumn Names:")
+print(df.columns)
+
+# 4. Preprocessing - Missing Values
+print("\\nMissing Values:")
+missing = df.isnull().sum()
+print(missing[missing > 0])
+
+# 5. Statistical Summary
+print("\\nStatistical Summary:")
+print(df.describe())
+
+# 6. Categorical Features Analysis
+categorical_cols = df.select_dtypes(include='object').columns
+for col in categorical_cols:
+    print(f"\\nValue Counts for {col}:")
+    print(df[col].value_counts().head())`,
+          },
+          {
+            type: 'code',
+            heading: '15.2 Target and Feature Distributions',
+            language: 'python',
+            code: `# 7. Target Variable Analysis - binary label
+plt.figure()
+sns.countplot(x='label', data=df)
+plt.title("Distribution of Target Variable (Label)")
+plt.show()
+
+# Attack categories
+plt.figure(figsize=(10, 5))
+sns.countplot(x='attack_cat', data=df, order=df['attack_cat'].value_counts().index)
+plt.xticks(rotation=45)
+plt.title("Attack Category Distribution")
+plt.show()
+
+# 8. Numerical Features Distribution
+num_cols = df.select_dtypes(include=np.number).columns
+df[num_cols].hist(figsize=(15, 12))
+plt.suptitle("Histogram of Numerical Features")
+plt.show()
+
+# 9. Correlation Matrix
+plt.figure(figsize=(12, 10))
+corr = df[num_cols].corr()
+sns.heatmap(corr, cmap='coolwarm', annot=False)
+plt.title("Correlation Matrix")
+plt.show()`,
+          },
+          {
+            type: 'code',
+            heading: '15.3 Outliers, Relationships and Class Imbalance',
+            language: 'python',
+            code: `# 10. Boxplots for Outlier Detection
+plt.figure(figsize=(15, 10))
+for i, col in enumerate(num_cols[:10]):   # first 10 features
+    plt.subplot(2, 5, i + 1)
+    sns.boxplot(y=df[col])
+    plt.title(col)
+
+plt.tight_layout()
+plt.show()
+
+# 11. Pairplot (sampled for performance)
+sample_df = df.sample(n=1000, random_state=42)
+sns.pairplot(sample_df[['dur', 'spkts', 'dpkts', 'sbytes', 'dbytes', 'label']], hue='label')
+plt.show()
+
+# 12. Feature Relationships with Target
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='label', y='sbytes', data=df)
+plt.title("sbytes vs Label")
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='label', y='dbytes', data=df)
+plt.title("dbytes vs Label")
+plt.show()
+
+# 13. Class Imbalance Check
+print("\\nClass Distribution:")
+print(df['label'].value_counts(normalize=True))`,
+          },
+        ],
+      },
+      {
+        number: '16',
+        title: 'Practical — SVM and KNN for Intrusion Detection',
+        sections: [
+          {
+            type: 'note',
+            text: 'A kernel SVM (SVC) scales roughly with the square of the number of samples, so 16.1 on the full UNSW-NB15 file can run for hours. Train it on a stratified subsample first — or use the LinearSVC version in 16.2, which is built for datasets this size.',
+          },
+          {
+            type: 'code',
+            heading: '16.1 SVM with an RBF Kernel',
+            language: 'python',
+            code: `# 1. Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import (accuracy_score, precision_score,
+                             recall_score, f1_score, confusion_matrix,
+                             ConfusionMatrixDisplay, classification_report)
+
+# 2. Load Dataset
+df = pd.read_csv('/content/UNSW_NB15_dataset.csv')
+
+# 3. Data Preprocessing - drop missing values
+df = df.dropna()
+
+# Encode categorical features
+label_encoders = {}
+for col in df.select_dtypes(include=['object']).columns:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    label_encoders[col] = le
+
+# Split features and target
+# Drop 'id' (a row number, not a signal) and 'attack_cat' - attack_cat
+# names the attack family, so leaving it in leaks the answer to the model
+X = df.drop(['id', 'attack_cat', 'label'], axis=1)
+y = df['label']
+
+# 4. Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
+
+# 5. Feature Scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# 6. Train SVM Model
+svm_model = SVC(kernel='rbf', C=1.0, gamma='scale')
+svm_model.fit(X_train, y_train)
+
+# 7. Predictions
+y_pred = svm_model.predict(X_test)
+
+# 8. Evaluation Metrics
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='weighted')
+recall = recall_score(y_test, y_pred, average='weighted')
+f1 = f1_score(y_test, y_pred, average='weighted')
+
+print("===== SVM Performance =====")
+print(f"Accuracy : {accuracy:.4f}")
+print(f"Precision: {precision:.4f}")
+print(f"Recall   : {recall:.4f}")
+print(f"F1-score : {f1:.4f}")
+print("\\nClassification Report:\\n")
+print(classification_report(y_test, y_pred))
+
+# 9. Confusion Matrix Plot
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot()
+plt.title("Confusion Matrix - SVM")
+plt.show()
+
+# 10. Performance Metrics Bar Plot
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1-score']
+values = [accuracy, precision, recall, f1]
+plt.figure()
+plt.bar(metrics, values)
+plt.title("SVM Performance Metrics")
+plt.xlabel("Metrics")
+plt.ylabel("Score")
+plt.show()`,
+          },
+          {
+            type: 'code',
+            heading: '16.2 Alternative — LinearSVC with an ROC Curve',
+            language: 'python',
+            code: `import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
+from sklearn.metrics import (classification_report, confusion_matrix,
+                             accuracy_score, precision_score,
+                             recall_score, f1_score, roc_curve, auc)
+
+# 1. Load the dataset
+df = pd.read_csv('UNSW_NB15_dataset.csv')
+
+# Drop rows with missing values - the real file has blank service entries,
+# and StandardScaler passes NaN straight through to LinearSVC.fit()
+df = df.dropna()
+
+# 2. Preprocessing - drop non-predictive columns and the multiclass target
+X = df.drop(['id', 'attack_cat', 'label'], axis=1)
+y = df['label']
+
+# Convert categorical features (proto, service, state) to dummy variables
+X = pd.get_dummies(X, columns=['proto', 'service', 'state'], drop_first=True)
+
+# 3. Split into training and testing sets (80/20)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 4. Feature Scaling (crucial for SVM performance)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 5. Model Training (LinearSVC is optimised for large datasets)
+svm_model = LinearSVC(dual=False, random_state=42, max_iter=5000)
+svm_model.fit(X_train_scaled, y_train)
+
+# 6. Evaluation
+y_pred = svm_model.predict(X_test_scaled)
+print("Performance Metrics:")
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
+print(classification_report(y_test, y_pred))
+
+# 7. Plotting Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.title('Confusion Matrix - SVM')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.savefig('confusion_matrix_svm.png')
+
+# 8. Plotting ROC Curve
+y_score = svm_model.decision_function(X_test_scaled)
+fpr, tpr, _ = roc_curve(y_test, y_score)
+roc_auc = auc(fpr, tpr)
+plt.figure(figsize=(8, 6))
+plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (AUC = {roc_auc:.2f})')
+plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curve - SVM')
+plt.legend(loc="lower right")
+plt.savefig('roc_curve_svm.png')`,
+          },
+          {
+            type: 'code',
+            heading: '16.3 Intrusion Detection Using KNN',
+            language: 'python',
+            code: `import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import (classification_report, confusion_matrix,
+                             accuracy_score, precision_score,
+                             recall_score, f1_score, roc_curve, auc)
+
+# 1. Load data
+df = pd.read_csv('UNSW_NB15_dataset.csv')
+
+# Drop rows with missing values - StandardScaler passes NaN through and
+# KNeighborsClassifier.fit() then raises ValueError: Input X contains NaN
+df = df.dropna()
+
+# 2. Preprocessing
+X = df.drop(['id', 'attack_cat', 'label'], axis=1)
+y = df['label']
+X = pd.get_dummies(X, columns=['proto', 'service', 'state'], drop_first=True)
+
+# 3. Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+                                                    random_state=42)
+
+# 4. Feature Scaling (mandatory for KNN)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 5. Train KNN Model (k=5)
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train_scaled, y_train)
+
+# 6. Predictions and Probability
+y_pred = knn.predict(X_test_scaled)
+y_prob = knn.predict_proba(X_test_scaled)[:, 1]
+
+# 7. Print Performance
+print(f'Accuracy: {accuracy_score(y_test, y_pred):.4f}')
+print(classification_report(y_test, y_pred))
+
+# 8. Plot Confusion Matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Greens')
+plt.title('Confusion Matrix - KNN')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.savefig('confusion_matrix_knn.png')
+
+# 9. Plot ROC Curve
+fpr, tpr, _ = roc_curve(y_test, y_prob)
+plt.figure(figsize=(8, 6))
+plt.plot(fpr, tpr, color='forestgreen', label=f'AUC = {auc(fpr, tpr):.2f}')
+plt.plot([0, 1], [0, 1], linestyle='--')
+plt.title('ROC Curve - KNN')
+plt.legend()
+plt.savefig('roc_curve_knn.png')`,
+          },
+        ],
+      },
+      {
+        number: '17',
+        title: 'Practical — Decision Tree for Intrusion Detection',
+        sections: [
+          {
+            type: 'text',
+            heading: '17.1 About This Implementation',
+            text: 'A full Decision Tree model for intrusion detection on the UNSW-NB15 dataset: data loading, preprocessing, training, evaluation, and k-fold cross-validation. Note that feature scaling is optional for a decision tree — splits are threshold-based, so the scale of a feature does not change the tree — but it is kept here so the same preprocessing serves other models too.',
+          },
+          {
+            type: 'note',
+            text: '17.2 and 17.3 are one continuous script — 17.3 reuses the model and the split from 17.2. Both drop the id and attack_cat columns before training: attack_cat names the attack family, so a model that can see it is just reading the answer, and the accuracy it reports would be meaningless.',
+          },
+          {
+            type: 'code',
+            heading: '17.2 Load, Preprocess and Train',
+            language: 'python',
+            code: `# 1. Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import (accuracy_score, precision_score, recall_score,
+                             f1_score, confusion_matrix,
+                             ConfusionMatrixDisplay, classification_report)
+
+# 2. Load Dataset
+df = pd.read_csv('UNSW_NB15_dataset.csv')
+
+# 3. Data Preprocessing - drop missing values
+df = df.dropna()
+
+# Encode categorical features
+label_encoders = {}
+for col in df.select_dtypes(include=['object']).columns:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    label_encoders[col] = le
+
+# Features and target
+# Drop 'id' (a row number, not a signal) and 'attack_cat' - attack_cat
+# names the attack family, so leaving it in leaks the answer to the model
+X = df.drop(['id', 'attack_cat', 'label'], axis=1)
+y = df['label']
+
+# 4. Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# 5. Feature Scaling (optional for a Decision Tree)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# 6. Train Decision Tree Model
+dt_model = DecisionTreeClassifier(
+    criterion='gini',   # or 'entropy'
+    max_depth=None,     # you can tune this
+    random_state=42
+)
+dt_model.fit(X_train, y_train)
+
+# 7. Predictions
+y_pred = dt_model.predict(X_test)`,
+          },
+          {
+            type: 'code',
+            heading: '17.3 Evaluate and Cross-Validate',
+            language: 'python',
+            code: `# 8. Evaluation Metrics
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='weighted')
+recall = recall_score(y_test, y_pred, average='weighted')
+f1 = f1_score(y_test, y_pred, average='weighted')
+
+print("===== Decision Tree Performance =====")
+print(f"Accuracy : {accuracy:.4f}")
+print(f"Precision: {precision:.4f}")
+print(f"Recall   : {recall:.4f}")
+print(f"F1-score : {f1:.4f}")
+
+print("\\nClassification Report:\\n")
+print(classification_report(y_test, y_pred))
+
+# 9. Confusion Matrix Plot
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot()
+plt.title("Confusion Matrix - Decision Tree")
+plt.show()
+
+# 10. Performance Metrics Bar Plot
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1-score']
+values = [accuracy, precision, recall, f1]
+
+plt.figure()
+plt.bar(metrics, values)
+plt.title("Decision Tree Performance Metrics")
+plt.xlabel("Metrics")
+plt.ylabel("Score")
+plt.show()
+
+# 11. K-Fold Cross-Validation
+cv_scores = cross_val_score(dt_model, X, y, cv=5, scoring='accuracy')
+
+print("\\nCross-Validation Scores:", cv_scores)
+print("Mean CV Accuracy:", np.mean(cv_scores))`,
+          },
+        ],
+      },
+      {
+        number: '18',
+        title: 'Network Anomaly Detection with K-Means',
+        sections: [
+          {
+            type: 'definition',
+            heading: '18.1 Detecting Patterns, Not Signatures',
+            text: 'In cybersecurity, threat detection often relies on identifying unusual patterns rather than known virus signatures. NumPy, K-Means clustering, and Matplotlib work together to detect anomalies in network behaviour without any labeled attack data.',
+          },
+          {
+            type: 'termlist',
+            heading: '18.2 The Tools and Their Roles',
+            items: [
+              { term: 'NumPy — data preparation', def: 'Converts raw security logs into structured numerical arrays, which allow fast mathematical computation' },
+              { term: 'Scikit-learn (K-Means) — detection', def: 'An unsupervised algorithm that groups data into clusters; points far from the cluster centres (centroids) are considered anomalies' },
+              { term: 'Matplotlib — visualisation', def: 'Displays the clustered data so analysts can identify suspicious outliers at a glance' },
+              { term: 'Pandas — data handling', def: 'Used for loading, manipulating and analysing the log data before it is turned into arrays' },
+            ],
+          },
+          {
+            type: 'image',
+            heading: '18.3 Workflow',
+            src: '/lecture-notes/cyb-224/kmeans-workflow.webp',
+            width: 1000, height: 1148,
+            maxWidth: 560,
+            alt: 'Five-step flow: collect network activity data, convert to a NumPy array, apply K-Means clustering, identify data points far from centroids, then visualise clusters and anomalies',
+            caption: 'Figure 7: The K-Means anomaly detection workflow',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Collect network activity data — for example bytes transferred and session duration',
+              'Convert the data into a NumPy array',
+              'Apply K-Means clustering to group normal behaviours',
+              'Identify data points far from the cluster centroids',
+              'Visualise clusters and anomalies using Matplotlib',
+            ],
+          },
+          {
+            type: 'casestudy',
+            title: 'Practical Example',
+            prompt: 'A user normally downloads small files of 1–2 MB. Suddenly, one session shows a 10 GB transfer at 3:00 AM. This behaviour would sit far from the cluster of normal sessions and be flagged as anomalous.',
+          },
+          {
+            type: 'code',
+            heading: '18.4 Python Implementation',
+            language: 'python',
+            code: `# Import Libraries
+import numpy as np
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# 1. Organize Data (example: network activity)
+# Format: [Data Volume, Session Duration]
+data = np.array([[1, 2],
+                 [1, 1],
+                 [2, 1.5],
+                 [10, 10]])   # potential threat (anomaly)
+
+# 2. Apply K-Means Clustering
+kmeans = KMeans(n_clusters=2, random_state=42)
+kmeans.fit(data)
+
+# 3. Visualize Results
+plt.scatter(data[:, 0], data[:, 1], c=kmeans.labels_)
+plt.scatter(kmeans.cluster_centers_[:, 0],
+            kmeans.cluster_centers_[:, 1],
+            marker='X', s=200)
+plt.xlabel("Data Volume")
+plt.ylabel("Session Duration")
+plt.title("Anomaly Detection Using K-Means")
+plt.show()`,
+          },
+          {
+            type: 'code',
+            heading: '18.5 Variant — Simulated Traffic',
+            language: 'python',
+            code: `import numpy as np
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Simulated traffic data
+traffic = np.array([[10, 100],
+                    [12, 120],
+                    [11, 110],
+                    [200, 1000],   # anomaly
+                    [9, 95]])
+
+kmeans = KMeans(n_clusters=2, random_state=42)
+kmeans.fit(traffic)
+labels = kmeans.labels_
+
+plt.scatter(traffic[:, 0], traffic[:, 1], c=labels)
+plt.xlabel("Requests per Second")
+plt.ylabel("Data Volume")
+plt.show()`,
+          },
+        ],
+      },
+      {
+        number: '19',
+        title: 'The k-Nearest Neighbours (k-NN) Algorithm',
+        sections: [
+          {
+            type: 'definition',
+            heading: '19.1 Lazy Learning',
+            text: 'The k-Nearest Neighbours (k-NN) algorithm is a simple and well-known example of a lazy learning algorithm. Lazy learners delay most computation until the classification stage instead of doing intensive work during training.',
+          },
+          {
+            type: 'bullets',
+            heading: '19.2 Training Phase',
+            items: [
+              'Stores all training feature vectors and their corresponding labels',
+              'No model building or parameter learning is performed',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: '19.3 Classification Phase',
+            items: [
+              'Calculates the distance between the test sample and all training samples',
+              'Selects the k nearest neighbours',
+              'Assigns the most common label among those neighbours',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '19.4 Distance Metrics',
+            items: [
+              { term: 'Euclidean distance', def: 'Used for continuous numerical data' },
+              { term: 'Hamming distance', def: 'Used for discrete or categorical data' },
+            ],
+          },
+          {
+            type: 'proscons',
+            heading: '19.5 Advantages and Disadvantages',
+            advantages: [
+              'Simple to understand and implement',
+              'Very fast training phase',
+              'Useful for teaching machine learning concepts',
+            ],
+            disadvantages: [
+              'Large memory usage — it stores all the training data',
+              'Slow classification time',
+              'Not efficient for very large datasets',
+              'Performance depends on the choice of k and the distance metric',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Optimised data structures such as k-d trees can speed up the neighbour search. Overall: k-NN is simple and intuitive, storing training data and predicting from similarity — effective on small datasets but inefficient for large-scale real-world applications.',
+          },
+          {
+            type: 'casestudy',
+            heading: '19.6 Activity — k-NN Review Questions',
+            tasks: [
+              'Define the k-Nearest Neighbours (k-NN) algorithm.',
+              'What is meant by lazy learning?',
+              'What happens during the training phase of k-NN?',
+              'What happens during the classification phase?',
+              'Explain the role of the parameter k.',
+              'When is Hamming distance used?',
+              'Why is k-NN considered memory inefficient?',
+              'What is the purpose of a k-d tree in k-NN?',
+              'What happens if k = 1?',
+              'What happens if k is too large?',
+              'How would you choose the best value of k?',
+              'How does feature scaling affect k-NN performance?',
+              'Compare k-NN with Random Forest in terms of training time and prediction time.',
+            ],
+          },
+        ],
+      },
+      {
+        number: '20',
+        title: 'Anomaly Detection with Pandas and Scikit-learn',
+        sections: [
+          {
+            type: 'termlist',
+            heading: '20.1 Main Functions of Pandas',
+            items: [
+              { term: 'Data creation', def: 'Build datasets using DataFrame and Series — e.g. df = pd.read_csv(path)' },
+              { term: 'Data cleaning', def: 'Handle missing values, remove duplicates, filter unwanted records' },
+              { term: 'Data selection and filtering', def: 'Select rows and columns — e.g. X = df.drop("label", axis=1)' },
+              { term: 'Data transformation', def: 'Modify columns, convert data types, engineer features' },
+              { term: 'Data exploration', def: 'Summary statistics with df.describe(), first rows with df.head()' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Pandas in an Intrusion Detection Script',
+            items: [
+              'Creating the simulated login dataset',
+              'Organising login attempts and failed attempts',
+              'Separating the input features (X) from the labels (y)',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '20.2 Main Functions of Scikit-learn',
+            items: [
+              { term: 'Data splitting', def: 'Split the dataset into training and testing sets with train_test_split()' },
+              { term: 'Model building', def: 'Classification (Random Forest, SVM, Logistic Regression), regression, and clustering' },
+              { term: 'Model training', def: 'Fit the model to the data with model.fit(X_train, y_train)' },
+              { term: 'Prediction', def: 'Predict outcomes with model.predict(X_test)' },
+            ],
+          },
+          {
+            type: 'code',
+            heading: '20.3 Isolation Forest — Unsupervised Anomaly Detection',
+            language: 'python',
+            code: `import numpy as np
+from sklearn.ensemble import IsolationForest
+
+# same simulated traffic as 18.5
+traffic = np.array([[10, 100],
+                    [12, 120],
+                    [11, 110],
+                    [200, 1000],
+                    [9, 95]])
+
+model = IsolationForest(contamination=0.2, random_state=42)
+model.fit(traffic)
+
+anomalies = model.predict(traffic)
+print("Anomaly Labels:", anomalies)
+# -1 = anomaly, 1 = normal`,
+          },
+        ],
+      },
+      {
+        number: '21',
+        title: 'Practical — Credit Card Fraud Anomaly Detection',
+        sections: [
+          {
+            type: 'resource',
+            href: 'https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud',
+            label: 'Credit Card Fraud Detection dataset',
+            filename: 'creditcard.csv',
+            meta: 'Kaggle · mlg-ulb/creditcardfraud',
+          },
+          {
+            type: 'code',
+            heading: '21.1 Exploratory Analysis',
+            language: 'python',
+            code: `import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Optional - better looking plots
+plt.style.use('seaborn-v0_8-whitegrid')
+sns.set_palette("muted")
+
+df = pd.read_csv('/content/creditcard.csv')   # change path if needed
+df.head(5)
+df.tail(5)
+
+print("Shape:", df.shape)
+print("\\nColumns:")
+print(df.columns.tolist())
+print(df.info())
+
+# Summarize the dataset
+print(df.describe().T[['mean', 'std', 'min', '50%', 'max']])
+
+# Check target distribution
+print("\\nClass distribution:")
+print(df['Class'].value_counts())
+print(df['Class'].value_counts(normalize=True).mul(100).round(3))
+
+plt.figure(figsize=(5, 4))
+sns.countplot(data=df, x='Class')
+plt.title("Class Distribution\\n(0 = Normal 1 = Fraud)")
+plt.xlabel("Class (0 = genuine, 1 = fraud)")
+plt.ylabel("Count")
+plt.show()
+
+# Missing values?
+print("\\nMissing values:")
+print(df.isna().sum().sum(), "missing values in total")
+
+# Time feature analysis
+plt.figure(figsize=(14, 5))
+
+plt.subplot(1, 2, 1)
+sns.histplot(df['Time'] / 3600, bins=48, kde=True)
+plt.title("Transaction Time (hours from first record)")
+plt.xlabel("Time (hours)")
+
+plt.subplot(1, 2, 2)
+sns.boxplot(x='Class', y='Time', data=df)
+plt.title("Time by Class")
+plt.show()
+
+# Amount feature (very skewed!)
+print("\\nAmount statistics:")
+print(df['Amount'].describe())
+
+plt.figure(figsize=(14, 5))
+
+plt.subplot(1, 2, 1)
+sns.histplot(df['Amount'], bins=60, kde=True)
+plt.title("Transaction Amount (original scale)")
+plt.xlim(0, 500)
+
+plt.subplot(1, 2, 2)
+sns.histplot(np.log1p(df['Amount']), bins=60, kde=True)
+plt.title("log1p(Amount) - much better behaved")
+plt.show()
+
+# Compare amounts by class
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='Class', y='Amount', data=df, showfliers=False)   # hide outliers for a better view
+plt.title("Transaction Amount by Class")
+plt.yscale('log')
+plt.show()
+
+# PCA features (V1-V28) - density plots, fraud vs non-fraud
+selected = ['V3', 'V4', 'V10', 'V11', 'V12', 'V14', 'V17']   # often the most discriminative
+
+plt.figure(figsize=(14, 10))
+for i, col in enumerate(selected, 1):
+    plt.subplot(3, 3, i)
+    sns.kdeplot(data=df, x=col, hue='Class', common_norm=False)
+    plt.title(f"{col} distribution by class")
+    plt.xlabel(col)
+
+plt.tight_layout()
+plt.show()
+
+# Correlation heatmap - focus on the top features plus Class and Amount
+plt.figure(figsize=(12, 10))
+corr_cols = ['Time', 'Amount', 'Class'] + selected
+corr = df[corr_cols].corr()
+sns.heatmap(corr, annot=True, fmt='.2f')
+plt.show()`,
+          },
+          {
+            type: 'code',
+            heading: '21.2 Model Comparison — SVM, KNN, Decision Tree, Random Forest',
+            language: 'python',
+            code: `import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (classification_report, confusion_matrix,
+                             precision_recall_curve, roc_curve, auc,
+                             accuracy_score)
+
+# Load data
+df = pd.read_csv('creditcard.csv')
+
+# Features and target
+X = df.drop('Class', axis=1)
+y = df['Class']
+
+# To keep models within time limits, use a stratified 10% sample of the data
+X_sample, _, y_sample, _ = train_test_split(X, y, train_size=0.1, stratify=y, random_state=42)
+
+# Now split the sample into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_sample, y_sample, test_size=0.3,
+                                                    stratify=y_sample, random_state=42)
+
+# Scale Amount and Time AFTER the split, fitting only on the training rows.
+# Scaling the whole frame first would let the test set's mean and standard
+# deviation influence the training data, flattering every score below.
+X_train = X_train.copy()
+X_test = X_test.copy()
+scaler = StandardScaler()
+X_train[['Amount', 'Time']] = scaler.fit_transform(X_train[['Amount', 'Time']])
+X_test[['Amount', 'Time']] = scaler.transform(X_test[['Amount', 'Time']])
+
+print(f"Training set size: {X_train.shape[0]}")
+print(f"Test set size: {X_test.shape[0]}")
+print(f"Fraud cases in training: {y_train.sum()}")
+print(f"Fraud cases in test: {y_test.sum()}")
+
+models = {
+    "SVM": LinearSVC(random_state=42, max_iter=2000),
+    "KNN": KNeighborsClassifier(n_neighbors=5),
+    "Decision Tree": DecisionTreeClassifier(random_state=42),
+    "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+}
+
+results = []
+
+# Create plots
+fig_cm, axes_cm = plt.subplots(2, 2, figsize=(15, 12))
+axes_cm = axes_cm.ravel()
+
+# Keep handles to these figures - plt.figure(1) would grab the confusion
+# matrix figure created above, drawing the curves into the wrong plot
+fig_roc = plt.figure(figsize=(10, 8))
+plt.title('ROC Curves')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+
+fig_pr = plt.figure(figsize=(10, 8))
+plt.title('Precision-Recall Curves')
+plt.xlabel('Recall')
+plt.ylabel('Precision')
+
+for i, (name, model) in enumerate(models.items()):
+    print(f"Processing {name}...")
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    # Probabilities / scores
+    if hasattr(model, "predict_proba"):
+        y_score = model.predict_proba(X_test)[:, 1]
+    else:
+        y_score = model.decision_function(X_test)
+
+    # Metrics
+    report = classification_report(y_test, y_pred, output_dict=True)
+    results.append({
+        "Model": name,
+        "Accuracy": accuracy_score(y_test, y_pred),
+        "Precision (Fraud)": report['1']['precision'],
+        "Recall (Fraud)": report['1']['recall'],
+        "F1-Score (Fraud)": report['1']['f1-score']
+    })
+
+    # Confusion Matrix
+    cm = confusion_matrix(y_test, y_pred)
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=axes_cm[i])
+    axes_cm[i].set_title(f'Confusion Matrix: {name}')
+
+    # ROC Curve
+    fpr, tpr, _ = roc_curve(y_test, y_score)
+    roc_auc = auc(fpr, tpr)
+    plt.figure(fig_roc.number)
+    plt.plot(fpr, tpr, label=f'{name} (AUC = {roc_auc:.2f})')
+
+    # PR Curve
+    precision, recall, _ = precision_recall_curve(y_test, y_score)
+    plt.figure(fig_pr.number)
+    plt.plot(recall, precision, label=name)
+
+# Finalize and Save
+fig_cm.savefig('confusion_matrices.png')
+
+plt.figure(fig_roc.number)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.legend()
+plt.savefig('roc_curves.png')
+
+plt.figure(fig_pr.number)
+plt.legend()
+plt.savefig('precision_recall_curves.png')
+
+summary_df = pd.DataFrame(results)
+print("\\n--- Performance Comparison ---")
+print(summary_df.to_string(index=False))`,
+          },
+          {
+            type: 'table',
+            heading: '21.3 Report Your Results',
+            headers: ['Model', 'Accuracy', 'Precision', 'Recall', 'F1-score'],
+            rows: [
+              ['SVM', '', '', '', ''],
+              ['KNN', '', '', '', ''],
+              ['Decision Tree', '', '', '', ''],
+              ['Random Forest', '', '', '', ''],
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -3838,6 +4259,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 0 research project — by Amasi Rhema. An assigned project topic for CYB 222, examining how Artificial Intelligence (AI) and Machine Learning (ML) are transforming cybersecurity threat detection.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Signature-based detection only catches attacks it has already seen — zero-days, polymorphic malware and insider abuse walk straight past it',
+              'AI and ML detect by behaviour instead: baseline what normal looks like, flag the deviation, adapt in real time',
+              'Three ML families do the work — supervised (spam, malware classification), unsupervised (anomaly detection), and deep learning (CNN, RNN, LSTM)',
+              'Applied across IDS, malware and phishing detection, fraud, IoT monitoring and automated incident response',
+              'The cost: false positives, model bias, adversarial attacks, privacy exposure and heavy compute — which is why human oversight and Explainable AI remain essential',
+            ],
           },
           {
             type: 'definition',
@@ -3950,6 +4382,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 1 research project. An assigned project topic for CYB 222 — a comprehensive study of Zero Trust Architecture (ZTA), from its origins to its future directions.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              '“Never trust, always verify” — coined by John Kindervag at Forrester in 2010, after cloud, remote work and BYOD dissolved the castle-and-moat perimeter',
+              'Four principles: never trust/always verify, least privilege, assume breach, and micro-segmentation to contain lateral movement',
+              'Assembled from IAM, MFA, ZTNA (which replaces the VPN), device trust and EDR, pervasive encryption, and SIEM/UEBA monitoring',
+              'Standardised by NIST SP 800-207 (Policy Decision Point + Policy Enforcement Point) and CISA’s maturity model; rollout runs Visualise → Mitigate → Optimise',
+              'Real limits: cost and complexity, authentication fatigue, insider threats, and “Zero Trust washing” — partial rollouts that buy false confidence',
+            ],
           },
           {
             type: 'definition',
@@ -4088,6 +4531,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 2 research project — by Sunday Robert, Iwok Abigail Sylvester, Onyejiaka Patrick Chiemerie, James Joseph Essien, Samuel Emmanuel Ette and Ndem Dennis Victor. An assigned project topic for CYB 222: an assessment of post-quantum cryptography (PQC) encryptions and migration frameworks for cyber defense.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Shor’s algorithm breaks RSA, ECC and Diffie-Hellman in polynomial time the moment a Cryptographically Relevant Quantum Computer exists — consensus puts Q-Day between 2030 and 2035',
+              'Bigger keys do not help: the design itself must change. Grover only halves symmetric security, so AES-128 → AES-256 and SHA-256 → SHA-384/512 is sufficient there',
+              '“Harvest Now, Decrypt Later” means traffic captured today is already at risk. Mosca’s Theorem makes it concrete: migration time + data secrecy lifetime > years to Q-Day = already exposed',
+              'The NIST standards are ML-KEM (FIPS 203), ML-DSA (204), SLH-DSA (205), Falcon (206) and HQC — drawn from five mathematical families for structural diversity',
+              'Migration is hybrid-first (X25519 + ML-KEM-768, already Chrome’s default), then hardware refit, then quantum-native — set out as a four-phase plan for UNIUYO',
+            ],
           },
           {
             type: 'definition',
@@ -4292,6 +4746,17 @@ export const courses = [
             text: 'Group 3 research project. An assigned project topic for CYB 222 — examining behavioral biometrics as a shift from point-in-time login checks to continuous, frictionless identity assurance.',
           },
           {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Legacy MFA verifies once at the gate and then trusts the session for hours — behavioural biometrics verifies continuously, closing that point-of-entry blind spot',
+              'What defeats static MFA: adversary-in-the-middle proxy phishing, MFA fatigue prompt-bombing, and stolen session tokens — all of which survive a perfectly valid login',
+              'It validates how you act, not what you know or hold: keystroke dynamics, mouse paths, touch gestures, device kinematics, navigation habits and context',
+              'Four-stage pipeline — collection → processing → analysis (LSTM baseline compared by cosine similarity) → response in under 0.5 seconds',
+              'The output is a 0.0–1.0 anomaly score, not a yes/no: below 0.3 allow, 0.3–0.7 step-up challenge, 0.7 and above block. Privacy-by-design and adaptive baselines are what keep it workable',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'The Paradigm Shift in Identity Assurance',
             text: 'Legacy access control verifies identity only at the gateway — the moment of login. Once a session token or cookie is issued it stays valid for hours or days without re-verification, creating a "point-of-entry blind spot": if an attacker seizes the terminal three minutes after a valid login, the system never notices. Behavioral biometrics closes this gap by continuously verifying who is actually operating the session.',
@@ -4432,6 +4897,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 4 research project — by Bisong Malachi Obanghe, Archibong Samuel Samuel, Ekpo Blessing Edidiong, Francis Kalu, Akpan Ikouwem Albert and Uwemedimoh Anthony Ayah. An assigned project topic for CYB 222, examining blockchain technology and its role in cyber security.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'A distributed ledger in which every block carries the previous block’s hash — so altering any historical record breaks every link after it and the whole network notices',
+              'Three moving parts: cryptographic hashing (SHA-256), a peer-to-peer network of nodes holding copies, and a consensus mechanism (Proof of Work, Proof of Stake, PBFT). Smart contracts make it programmable',
+              'Four types — public, private, consortium and hybrid — each trading decentralisation against speed and control',
+              'As a security tool: decentralised identity, tamper-proof audit trails, IoT device authentication, DNS resilience, and threat-intel sharing between organisations that do not trust each other',
+              'As a security target: smart contract bugs, wallet and private-key theft, cross-chain bridge attacks and 51% attacks — plus the quantum threat to ECDSA now driving post-quantum migration roadmaps',
+            ],
           },
           {
             type: 'definition',
@@ -4665,6 +5141,17 @@ export const courses = [
           {
             type: 'text',
             text: 'Group 6 research project — by Mitchel Ifiok Nkan, Oto-abasi Effiok Offiong, Timothy David Richard, Felix Uwem Umoesen, Etim Ebenezer Mfon, Essien Emmanuel Festus, Essien Michael John, Ekpo Ebenezer Ime, Umoh Uyaiabasi Anthony and Igwechima Grace Chiamaka. An assigned project topic for CYB 222, examining Privacy Enhancing Technologies (PET) — mechanisms, applications and challenges in the modern digital ecosystem.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'PETs protect personal data while still allowing useful processing, resting on three principles: data minimisation, user control, and privacy by design',
+              'Security defends against outsiders; privacy constrains what the service provider itself may collect and link — a highly secure system can still be deeply privacy-invasive',
+              'Three classes: Hard PETs (Differential Privacy, Homomorphic Encryption, Zero-Knowledge Proofs, SMPC, Federated Learning), Soft PETs (anonymisation, consent management, Self-Sovereign Identity), and Network PETs (Tor, VPNs, mix networks)',
+              'Already deployed at scale — Apple’s Local DP since 2016, Google Gboard’s federated learning, Zcash’s zk-SNARKs, Estonia’s e-Residency, the COVID-19 exposure-notification API',
+              'The barriers: fully homomorphic encryption runs 100–1,000× slower than plaintext, DP trades accuracy for privacy, and Nigeria’s NDPA 2023 mandates no specific PET — both an adoption gap and a research opening',
+            ],
           },
           {
             type: 'definition',
@@ -4933,7 +5420,184 @@ export const courses = [
       {
         number: '8',
         title: 'Agentic AI',
-        sections: [],
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 8 seminar presentation — by Charles Prosper Obot, Abasiakara Bassey Samuel, Victor Gregory Tom, Edikan Amaowoh Joseph, Victor Archibong Akaninyene and Uwaoma Eze Ebisike. An assigned project topic for CYB 222, examining Agentic AI — autonomous systems that plan, decide and act with minimal human supervision, and what that autonomy means for cybersecurity.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Agentic AI is given a goal rather than a command — it plans, acts and adapts toward that goal with minimal human intervention',
+              'Perceive → reason and plan → act → monitor and adapt is the loop that separates an agent from a model that merely answers when spoken to',
+              'Assembled from five components: machine learning, natural language processing, a memory system, a reasoning engine, and a planning/execution module',
+              'In cybersecurity it drives threat detection, incident response, vulnerability management, malware detection and continuous monitoring',
+              'Strictly dual-use — the same autonomy lets attackers run sophisticated campaigns at scale. Black-box decisions, privacy exposure and cost are why human oversight stays mandatory',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Abstract',
+            text: 'Agentic AI refers to autonomous systems that can plan, decide, and act toward specific goals with little to no human supervision. Unlike traditional AI that simply responds to inputs, agentic systems continuously perceive, reason, and adapt — making them fundamentally different from conventional models. Tracing back to the early expert systems of the 1950s, through the BDI architectures of the 1990s, to today’s LLM-powered agents, agentic AI has grown into a critical force in modern technology. In cybersecurity this cuts both ways: defenders use it to automate threat detection and incident response, while attackers exploit the same autonomy to launch sophisticated, large-scale campaigns. This dual nature makes agentic AI one of the most consequential developments in the cybersecurity landscape today, demanding careful oversight, governance, and responsible deployment.',
+          },
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'Artificial Intelligence has evolved significantly over the years, progressing from simple rule-based systems to intelligent technologies capable of learning, reasoning, and making decisions. One of the latest developments in this field is Agentic AI, a new generation of AI systems that can plan, act, and solve problems with minimal human intervention. Unlike traditional AI, which performs specific tasks based on predefined instructions, Agentic AI can perceive its environment, make autonomous decisions, adapt to changing situations, and work toward achieving defined goals. It combines machine learning, natural language processing, reasoning models and memory systems to perform complex tasks more efficiently. It is being adopted across healthcare, finance, education, robotics and cybersecurity — and in cybersecurity specifically it automates threat detection, incident response and security monitoring, helping organisations respond more quickly to evolving threats.',
+          },
+          {
+            type: 'definition',
+            heading: 'History of Artificial Intelligence and Agentic AI',
+            text: 'The history of Artificial Intelligence dates back to the 1950s, when scientists began exploring the idea of creating machines capable of performing tasks that normally require human intelligence. In 1956 the term “Artificial Intelligence” was officially introduced by computer scientist John McCarthy during the Dartmouth Conference, widely regarded as the birth of AI as a field of study. Agentic AI is the modern stage of that development — systems designed not only to respond to commands but to reason, plan, adapt and act autonomously, completing tasks, interacting with tools and analysing situations with minimal supervision.',
+          },
+          {
+            type: 'termlist',
+            heading: 'From Rule-Based Programs to Agentic AI — the Timeline',
+            items: [
+              { term: '1950s', def: 'Scientists begin exploring machines capable of tasks that normally require human intelligence. Early systems are rule-based programs that solve mathematical problems, play simple games and perform basic reasoning — but cannot learn and are inflexible.' },
+              { term: '1956 — Dartmouth Conference', def: 'John McCarthy formally introduces the term “Artificial Intelligence”. This is widely regarded as the birth of AI as a field of study.' },
+              { term: '1960s–1970s', def: 'AI research expands into natural language processing, robotics and expert systems.' },
+              { term: '1980s — expert systems', def: 'Systems that use stored knowledge and rules to imitate human decision-making in specialised fields such as medicine and engineering become popular. Limitations in computing power and data then cause a slowdown known as the “AI Winter”.' },
+              { term: '1990s–early 2000s — resurgence', def: 'Improvements in processing power, internet growth and the availability of large datasets revive the field. Machine learning and neural networks advance, letting systems learn patterns from data instead of relying only on fixed rules.' },
+              { term: '2010s — deep learning and LLMs', def: 'Deep learning and large language models transform AI capability: speech recognition, image analysis, translation, recommendation systems and intelligent conversation. Virtual assistants, autonomous vehicles and advanced chatbots emerge.' },
+              { term: 'Intelligent agents → Agentic AI', def: 'Researchers introduce intelligent agents — systems that perceive environments, make decisions and take actions to achieve goals. This leads directly to Agentic AI, now applied in cybersecurity, healthcare, finance, education, robotics and business automation.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'What Is Agentic AI?',
+            text: 'Agentic AI is a type of Artificial Intelligence that can independently make decisions, plan actions, solve problems and complete tasks with minimal human intervention. Unlike traditional AI systems, which mainly respond to specific commands or perform predefined tasks, Agentic AI acts as an intelligent agent that can reason, adapt to changing situations and work toward achieving a defined goal. It combines machine learning (ML), natural language processing (NLP), reasoning models, memory systems and automation tools to analyse information, make informed decisions and execute multi-step tasks. It can also learn from previous interactions and adjust its actions based on new information, making it more flexible and efficient than conventional AI.',
+          },
+          {
+            type: 'table',
+            heading: 'Traditional AI vs Agentic AI',
+            headers: ['Dimension', 'Traditional AI', 'Agentic AI'],
+            rows: [
+              ['Trigger', 'Responds to a specific command or input', 'Receives a goal, then decides for itself what to do'],
+              ['Task scope', 'Performs predefined, single-step tasks', 'Plans and executes complex, multi-step tasks'],
+              ['Instructions', 'Depends heavily on human instructions', 'Operates with minimal human intervention'],
+              ['Response to change', 'Fixed behaviour — rules must be rewritten', 'Adapts its behaviour to changing situations and new information'],
+              ['Learning', 'Learns only where the model is explicitly retrained', 'Learns from previous interactions and feedback, improving over time'],
+              ['Security use', 'Relies on predefined detection rules', 'Reasons about new attack patterns and decides in real time'],
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Evolution of Agentic AI',
+            text: 'The evolution of Agentic AI is closely linked to the advancement of Artificial Intelligence generally. Early AI systems were rule-based and could only perform tasks according to predefined instructions. As machine learning and deep learning developed, AI gained the ability to learn from data, recognise patterns and improve its performance over time. The emergence of large language models (LLMs), advanced reasoning techniques and automation tools transformed these systems further, enabling AI to understand complex instructions, retain context, plan multiple steps and interact with other software and digital environments. Agentic AI represents the next stage: rather than simply responding to user commands, it independently plans, decides, adapts and completes tasks with minimal human intervention.',
+          },
+          {
+            type: 'bullets',
+            heading: 'How Agentic AI Works',
+            items: [
+              'Receive — the system is given a goal or instruction by a user',
+              'Perceive — it gathers relevant information from its environment or available data sources',
+              'Reason and plan — it analyses that information, reasons through possible solutions, and creates a plan to accomplish the task',
+              'Act — it executes the required actions, interacting with software, databases or other digital tools',
+              'Monitor and adapt — it continuously monitors the results, learns from feedback, and adjusts its actions when necessary to improve performance',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The difference between traditional AI and an agent is the difference between a calculator and an accountant. You hand a calculator two numbers and an operation, and it returns one answer — it does exactly and only what you typed. You hand an accountant a goal ("file this year’s returns"), and they go and find the receipts, decide what still needs checking, do the work in whatever order makes sense, and come back if something does not add up. The perceive → reason → plan → act → adapt loop above is what turns the calculator into the accountant — and it is also precisely why an agent that is compromised or badly aimed can do far more damage than a compromised calculator ever could.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Characteristics of Agentic AI',
+            items: [
+              { term: 'Autonomy', def: 'Performs tasks and makes decisions with minimal human intervention.' },
+              { term: 'Goal-oriented', def: 'Focuses on achieving specific objectives by planning and executing actions.' },
+              { term: 'Adaptability', def: 'Adjusts its behaviour based on changes in its environment or new information.' },
+              { term: 'Reasoning', def: 'Analyses situations and selects the most appropriate course of action.' },
+              { term: 'Learning ability', def: 'Improves its performance over time through experience and feedback.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Components of Agentic AI',
+            items: [
+              { term: 'Machine Learning (ML)', def: 'Enables the system to learn from data and improve accuracy.' },
+              { term: 'Natural Language Processing (NLP)', def: 'Allows the AI to understand and communicate using human language.' },
+              { term: 'Memory system', def: 'Stores and retrieves information from previous interactions.' },
+              { term: 'Reasoning engine', def: 'Evaluates information and supports intelligent decision-making.' },
+              { term: 'Planning and execution module', def: 'Creates action plans and carries out tasks to achieve defined goals.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Applications of Agentic AI',
+            items: [
+              { term: 'Cybersecurity', def: 'Detects cyber threats, automates incident response, and strengthens security monitoring.' },
+              { term: 'Healthcare', def: 'Assists in disease diagnosis, patient monitoring and treatment recommendations.' },
+              { term: 'Finance', def: 'Detects fraudulent transactions, manages risk and supports investment decisions.' },
+              { term: 'Education', def: 'Provides personalised learning experiences and intelligent tutoring systems.' },
+              { term: 'Business automation', def: 'Automates customer service, workflow management and administrative tasks.' },
+              { term: 'Manufacturing', def: 'Optimises production processes, predictive maintenance and quality control.' },
+              { term: 'Robotics', def: 'Enables autonomous robots to navigate, make decisions and perform complex tasks in dynamic environments.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Agentic AI in Cybersecurity',
+            text: 'Agentic AI is transforming cybersecurity by enabling security systems to detect, analyse and respond to cyber threats with minimal human intervention. Unlike traditional security tools that rely on predefined rules, Agentic AI can reason, adapt to new attack patterns, and make real-time decisions to protect digital systems. The same autonomy, however, is available to attackers — who can use it to launch sophisticated, large-scale campaigns — which is why the technology is described as dual-use and why governance and human oversight remain essential.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Key Security Applications',
+            items: [
+              { term: 'Threat detection', def: 'Identifies suspicious activities and emerging cyber threats in real time.' },
+              { term: 'Incident response', def: 'Automatically investigates and responds to security incidents, reducing response time.' },
+              { term: 'Vulnerability management', def: 'Scans systems for weaknesses and recommends or applies appropriate security measures.' },
+              { term: 'Malware detection', def: 'Detects and analyses malicious software using intelligent learning techniques.' },
+              { term: 'Security monitoring', def: 'Continuously monitors networks and systems to identify unusual behaviour.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Benefits of Agentic AI',
+            items: [
+              { term: 'Increased automation', def: 'Performs repetitive and complex tasks with little human intervention, improving operational efficiency and reducing manual workload.' },
+              { term: 'Faster decision-making', def: 'Analyses large volumes of data in real time and decides much faster than humans, especially in time-sensitive situations.' },
+              { term: 'Improved productivity', def: 'Automates multi-step workflows, allowing employees to focus on strategic and creative tasks rather than routine activities.' },
+              { term: 'Enhanced cybersecurity', def: 'Continuously monitors systems, detects threats, investigates suspicious activity and responds to incidents more quickly than traditional security tools.' },
+              { term: 'Adaptability', def: 'Unlike rule-based systems, learns from new information, adapts to changing environments and improves its performance over time.' },
+              { term: 'Scalability', def: 'Manages multiple tasks simultaneously across large and complex systems without a significant increase in human resources.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Challenges of Agentic AI',
+            items: [
+              { term: 'Security risks', def: 'If compromised by attackers, an autonomous AI system could make harmful decisions or be manipulated into performing malicious actions.' },
+              { term: 'Privacy concerns', def: 'Agentic AI often requires access to large amounts of personal or organisational data, raising data-protection and unauthorised-access concerns.' },
+              { term: 'Lack of transparency', def: 'Some agentic systems operate as “black boxes”, making it difficult to understand how they reached a particular decision.' },
+              { term: 'Ethical issues', def: 'Autonomous decision-making creates ethical dilemmas, especially in healthcare, finance and law enforcement where AI decisions significantly affect people’s lives.' },
+              { term: 'High development and implementation costs', def: 'Building, deploying and maintaining agentic systems requires significant investment in computing resources, skilled professionals and infrastructure.' },
+              { term: 'Dependence on data quality', def: 'Effectiveness depends on the accuracy and quality of the data received — poor or biased data leads to incorrect decisions and unreliable outcomes.' },
+              { term: 'Human oversight', def: 'Despite its autonomy, Agentic AI still requires human supervision to ensure its actions remain safe, ethical and aligned with organisational objectives.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Conclusion',
+            text: 'Agentic AI represents the next stage in the evolution of Artificial Intelligence, enabling systems to make decisions, adapt to changing situations and perform tasks with minimal human intervention. Its ability to combine reasoning, learning, planning and automation makes it more efficient than traditional AI systems. As adoption continues to grow across industries — particularly in cybersecurity — Agentic AI is improving threat detection, incident response and overall operational efficiency. Although challenges such as security, privacy and ethical concerns remain, responsible development and human oversight can help maximise its benefits. Overall, Agentic AI has the potential to transform the future of intelligent systems and drive innovation across many sectors.',
+          },
+          {
+            type: 'bullets',
+            heading: 'References',
+            items: [
+              'Russell, S., & Norvig, P. (2021). Artificial Intelligence: A Modern Approach (4th ed.). Pearson.',
+              'NIST. (2024). Artificial Intelligence Risk Management Framework (AI RMF 1.0).',
+              'OWASP. (2025). Top 10 Risks for Large Language Model Applications.',
+              'Microsoft. (2024). Security Copilot Documentation.',
+              'OpenAI. (2025–2026). ChatGPT and AI Agent documentation.',
+              'IBM. (2024). What Is Agentic AI?',
+              'Google Cloud. (2025). Agentic AI Explained.',
+              'Gartner. (2025). Top Strategic Technology Trends.',
+            ],
+          },
+        ],
       },
       {
         number: '9',
@@ -5072,6 +5736,9 @@ export const courses = [
       'Know the difference between IDS (detect only) and IPS (detect + block) — exam-critical',
       'Relate every defence mechanism to a specific attack from UUY-CYB 212 — show the attack/defence pairing',
     ],
+    // Transcribed from the departmental Laboratory Manual — see
+    // src/data/lectureNotes/cyb221.js for provenance and the coverage mapping.
+    lectureNotes: cyb221LectureNotes,
   },
   {
     code: 'UUY-CYB 222',
@@ -5110,6 +5777,10 @@ export const courses = [
       'For every vulnerability, know: how it works, how to exploit it, and how to fix it',
       'Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies',
     ],
+    // Topics 1–7 are the class lecture notes. Topics 8–9, and the additions
+    // marked as exam wording throughout, come from the lecturer's handout
+    // "Cybersecurity Concepts: Web and Mobile Application Security" plus the
+    // exam guidance he gave in class (the six flagged questions in Topic 9).
     lectureNotes: [
       {
         number: '1',
@@ -5146,6 +5817,11 @@ export const courses = [
             ],
           },
           {
+            type: 'text',
+            heading: 'How a Web Application Works',
+            text: 'A web application functions using a combination of server-side and client-side scripts. Server-side scripts, written in languages like PHP or ASP.NET, manage the storage and retrieval of data, ensuring the application’s core functions are executed on the server. Client-side scripts — typically HTML, CSS and JavaScript — handle the presentation of that information and build the user interface. When a user interacts with a web application, their browser sends a request to the server; the server processes it and returns the necessary data; the browser then uses client-side scripts to display that data in a readable, interactive format. This request–response cycle is what allows a web application to serve dynamic content.',
+          },
+          {
             type: 'bullets',
             heading: 'Features of Web Applications',
             items: [
@@ -5162,6 +5838,28 @@ export const courses = [
             type: 'definition',
             heading: 'Mobile Application',
             text: 'A mobile application is software installed directly on a user’s device (iOS or Android), designed to run on a mobile device or tablet. Some mobile apps can also be accessed via an internet connection and a web browser. Mobile apps typically require a version built for each platform, and can provide a more dynamic, interactive user experience with strong collaboration and fast sharing features.',
+          },
+          {
+            type: 'table',
+            heading: 'Comparison: Web App vs Mobile App',
+            headers: ['Aspect', 'Web Application', 'Mobile Application'],
+            rows: [
+              ['Access', 'Runs in a web browser and can be reached from any device with an internet connection', 'Designed for a specific platform and must be downloaded and installed on the device before use'],
+              ['Development', 'Uses a combination of server-side and client-side scripts to process and present data', 'Uses server-side and client-side scripts as well as native code that reaches the device’s own features'],
+              ['Cost', 'Easier and cheaper to develop and maintain — a single version works across all platforms and devices', 'More complex and expensive to develop and update — it must be built for each platform separately'],
+              ['Convenience', 'Universally accessible; nothing to download or install, which saves the user time and storage', 'Must be downloaded and installed, consuming time and storage space on the device'],
+              ['Performance', 'Depends on the speed and reliability of the user’s internet connection and browser', 'Offers offline access and faster performance, which can improve the user experience'],
+              ['Compatibility', 'Faces browser-compatibility issues, since browsers differ in how they interpret code', 'No browser-compatibility issues — it is built for specific platforms and devices'],
+              ['Security', 'More exposed to attacks such as XSS and SQL injection, because it depends on the internet and web servers', 'Data is stored on the device and protected with encryption and authentication methods'],
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Read the Security row alongside the “Web Risk vs Mobile App Risk” table in Topic 4 — it is the same distinction the lecturer expects in the exam: web risk is centralised on the server, mobile risk is decentralised onto individual devices.',
+              'A mobile app is not automatically “more secure”. Storing data on the device removes the single-server blast radius, but it hands the data to a device an attacker may physically hold — which is why Topic 4 lists insecure data storage and reverse engineering as the top mobile risks.',
+              'Watch the Performance and Access rows: a mobile app can work offline, a web app cannot. Several of the guaranteed exam answers turn on exactly that point.',
+            ],
           },
         ],
       },
@@ -5365,6 +6063,19 @@ export const courses = [
           },
           {
             type: 'definition',
+            heading: 'Authentication vs Authorization',
+            text: 'Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information. Authentication answers “who are you?”; authorization answers “what are you allowed to do, now that we know who you are?”',
+          },
+          {
+            type: 'note',
+            items: [
+              'The banking example used in class: every teller and every manager authenticates the same way when signing in, but they are authorized differently — a teller can only approve transactions up to a set limit, while the branch manager holds higher clearance.',
+              'Authentication always comes first. A system cannot decide what you are permitted to do until it has established who you are.',
+              'These two are what the course calls the security/tracking models. Expect a question asking you to define each and distinguish them — the marks are on the two definitions plus one example of differing permission levels.',
+            ],
+          },
+          {
+            type: 'definition',
             heading: 'Password Security & Creation',
             text: 'Password policy is the most basic layer of access control, and it should be enforced at the point a user or account is created, not applied after the fact.',
           },
@@ -5469,6 +6180,14 @@ export const courses = [
             ],
           },
           {
+            type: 'note',
+            items: [
+              'Exam wording for the definition: encryption is the conversion of information into ciphertext — text that is unreadable to unauthorised users.',
+              'Exam wording for the distinction: symmetrical encryption uses a single key to both lock and unlock the data; asymmetrical encryption uses two keys — a public key and a private key.',
+              'Write those two sentences first, then add the trade-off if the question asks you to explain: the single symmetric key is fast but must itself be shared securely, while the asymmetric pair removes the need to share a secret at all.',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Steganography',
             text: 'Steganography hides data or a message inside an ordinary-looking file — commonly an image — rather than encrypting it into obviously unreadable ciphertext. A sensitive text file describing a security vulnerability could be embedded within an innocuous photograph and transmitted over a public channel.',
@@ -5524,6 +6243,15 @@ export const courses = [
         sections: [
           {
             type: 'definition',
+            heading: 'Web-Based Risk',
+            text: 'Web-based risk is any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption.',
+          },
+          {
+            type: 'note',
+            text: 'Learn that sentence exactly as written — “define web-based risk” is one of the questions the lecturer flagged as certain to appear, and the marks are on the three consequences: data breaches, financial losses, service disruption.',
+          },
+          {
+            type: 'definition',
             heading: 'Mobile App Risks',
             text: 'Mobile app risk refers to attacks associated with the device and OS features — vulnerabilities, threats, and security flaws that occur when mobile apps connect to the internet for data exchange, such as data leakage, spyware, cryptographic issues, and phishing attacks.',
           },
@@ -5558,6 +6286,21 @@ export const courses = [
             ],
           },
           {
+            type: 'text',
+            heading: 'Why Mobile Risk Is Different',
+            text: 'Mobile applications send processing out into “the wild” — onto user devices. They do benefit from built-in operating-system protections such as biometrics and sandboxing, but the attacker may have physical access to the device and to its runtime memory, and the developer has surrendered control of the environment the code runs in.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Four Core Mobile Application Risks',
+            items: [
+              { term: 'Insecure data storage', def: 'unencrypted data written to the local file system — cached passwords or personal information — can be read by physically acquiring the device, or by another malicious app on it' },
+              { term: 'Reverse engineering & tampering', def: 'bad actors decompile the application binary to extract hardcoded API keys, or alter the original app’s code' },
+              { term: 'Man-in-the-Middle (MitM) attacks', def: 'devices frequently switch networks — from secure home Wi-Fi to a spoofed public hotspot — which makes unencrypted network traffic highly vulnerable to interception' },
+              { term: 'Unpatched vulnerabilities', def: 'developers must surrender control of the operating environment, so security teams depend heavily on end users actually updating their apps and OS' },
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Web App Risks / Threats',
             text: 'Web app threats refer to vulnerabilities and attacks that exploit weaknesses in web-based systems. These threats lead to unauthorized access, data breaches, and service disruption — driven especially by the growth of online banking and e-commerce transactions. This historical progression has driven an ever-increasing sophistication among cybercriminals, alongside a continuous need for advancement in IT security measures.',
@@ -5583,16 +6326,41 @@ export const courses = [
             ],
           },
           {
+            type: 'termlist',
+            heading: 'Top Web Application Security Risks',
+            items: [
+              { term: 'Injection', def: 'untrusted data is sent to an interpreter inside a command or query; the injected code looks like normal code and tricks the interpreter into executing unexpected commands or returning data without proper permission, which can bypass authorization entirely. Common flaws are SQL, NoSQL and LDAP injection' },
+              { term: 'Denial of Service (DoS) / Distributed Denial of Service (DDoS)', def: 'attackers generate fake traffic through different vectors to overload the target server until it slows down and stops serving legitimate users; DDoS is the same attack at far larger scale, using botnets of thousands or millions of controlled devices' },
+              { term: 'Cross-Site Request Forgery (CSRF)', def: 'victims are tricked into making unwanted requests, and the attacker leverages their existing authentication to impersonate them and act on their behalf' },
+              { term: 'Cross-Site Scripting (XSS)', def: 'client-side scripts are injected into web pages to intercept sessions, impersonate users, read sensitive information, tamper with the site, or redirect to malicious URLs; it occurs whenever an application embeds untrusted data in a page without proper validation' },
+              { term: 'Security misconfiguration', def: 'security controls set incorrectly in the application or surrounding infrastructure — unpatched known vulnerabilities, cloud storage exposed to the internet with no authentication, insecure defaults left as-is, misconfigured HTTP headers, or error messages detailed enough to leak information to an attacker' },
+              { term: 'XML External Entities (XXE)', def: 'a misconfigured XML processor evaluates external entity references in XML files, letting an attacker expose internal server files, scan internal ports, use the web server for DoS, or achieve remote code execution' },
+              { term: 'Vulnerable (insecure) deserialization', def: 'untrusted, attacker-authored data is rebuilt into objects by the language’s deserialization mechanism; in severe cases this enables remote code execution, and otherwise privilege escalation, code injection, and replay attacks' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Deserialization is the reverse of serialization: an object is flattened into a stream of bytes so it can be stored or sent, then rebuilt at the other end. If those bytes came from an attacker, the rebuild step is running on attacker-controlled input.',
+              'Security misconfiguration is one of the most common risks precisely because it needs no clever exploit — an unpatched server or a public storage bucket is enough on its own.',
+              'Note where the boundary sits: injection, XSS and XXE are input-handling failures; DoS/DDoS is an availability failure; misconfiguration is an operational failure. Grouping them this way makes them much easier to recall under exam pressure.',
+            ],
+          },
+          {
             type: 'table',
             heading: 'Comparison: Web Risk vs Mobile App Risk',
             headers: ['Feature', 'Web Risk', 'Mobile App Risk'],
             rows: [
-              ['Centralization', 'Risk is centralized', 'Attacks are on the client side'],
-              ['Attack location', 'Attack is on the server; distributed across users', 'Attack is directly on the victim’s device'],
-              ['Data breach impact', 'Data breach affects the whole database/server', 'Data leakage from the device, often due to a lost or stolen phone'],
-              ['Connectivity', 'Requires internet connection', 'Some functionality may work offline, but data-exchange risk applies when connected'],
+              ['Centralization', 'Centralized risk — concentrated on the server', 'Decentralized risk — spread across individual devices'],
+              ['Attack location', 'Client–server attacks; the attack lands on the server and is distributed across users', 'The attack lands directly on the victim’s own device'],
+              ['Data breach impact', 'A breach affects the entire database, and therefore every user in it', 'Data leakage from a single device, usually following physical loss or theft of the phone'],
+              ['Connectivity', 'Requires an internet connection to function at all', 'Can work offline; data-exchange risk applies once it connects'],
               ['Common attack types', 'SQL injection, DDoS, CSRF', 'Reverse engineering, code tampering, permission abuse'],
             ],
+          },
+          {
+            type: 'note',
+            text: '“Differentiate between web application risk and mobile application risk” is a guaranteed question. Answer it with these five contrasts in this order — centralized vs decentralized, server vs device, whole database vs physical loss of one device, internet required vs works offline — and name one or two attack types on each side. Do not pad it with best-practice material; that is a separate question with a separate mark scheme.',
           },
         ],
       },
@@ -5626,6 +6394,7 @@ export const courses = [
             heading: 'Integrity and Availability Attacks',
             items: [
               { term: 'Distributed Denial of Service (DDoS)', def: 'attackers use a network of compromised devices to flood a website with excessive traffic, overloading the server and making the site unavailable to legitimate users' },
+              { term: 'Brute force & credential stuffing', def: 'automated bots test thousands of username and password combinations to break into administrative dashboards or user accounts' },
             ],
           },
           {
@@ -5649,12 +6418,36 @@ export const courses = [
             type: 'note',
             text: 'CSRF in practice: imagine you are logged in to your bank in one tab and open a malicious link in another. That page silently submits a transfer request to the bank — and because your browser automatically attaches your logged-in session cookie to every request to that site, the bank believes you made the request yourself. Common defences are CSRF tokens (a secret the malicious page cannot know) and re-confirming sensitive actions.',
           },
+          {
+            type: 'definition',
+            heading: 'Buffer Overflow',
+            text: 'A buffer overflow is a type of vulnerability where a program, while writing data to a buffer, overruns the buffer’s boundary and overwrites adjacent memory, leading to a system crash.',
+          },
+          {
+            type: 'note',
+            text: 'A buffer is simply a block of memory set aside to hold a fixed amount of data. If the program never checks that the incoming data fits, the excess spills into whatever memory sits next to it. A crash is the visible outcome, but the dangerous case is quieter: if the overwritten memory held the address the program was going to jump to next, a careful attacker can steer execution into code of their own choosing.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Five Website Attacks to Name in an Exam',
+            items: [
+              'SQL Injection (SQLi) — malicious input in a search bar, login form or other field manipulates the backend database, giving unauthorized access, data theft, or compromise of the host system',
+              'Cross-Site Scripting (XSS) — a harmful script is injected into a page and executes in another user’s browser, hijacking their session or stealing cookies',
+              'Malware / backdoor attacks — malicious code, or a hidden route back into the site, is planted on the server',
+              'Brute-force login attacks — automated bots test thousands of credential combinations against admin dashboards or user accounts',
+              'Phishing — a fake copy of a legitimate site tricks visitors into giving up credit card numbers or login credentials',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'This is the exact list to give when a question says “define a website attack and give five examples”. Open with the definition — any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions — then name the five. The marks are on those terms, not on the length of the prose around them.',
+          },
         ],
       },
       {
         number: '6',
         title: 'Strengths, Weaknesses & Best Practice',
-        covers: [4, 5],
+        covers: [4, 5, 6],
         sections: [
           {
             type: 'bullets',
@@ -5728,14 +6521,22 @@ export const courses = [
             text: 'WAF vs RASP in one line: a WAF stands guard in front of the application, inspecting HTTP traffic before it arrives; RASP lives inside the running application and stops an attack at the exact moment the code would execute it. They complement each other rather than compete.',
           },
           {
-            type: 'bullets',
-            heading: 'Additional Best Practices',
+            type: 'termlist',
+            heading: 'Web Application Security Best Practices',
             items: [
-              'Execute input validation & authorization',
-              'Enhance authentication',
-              'Record code changes',
-              'Track API usage',
-              'Employ dynamic testing for application testing',
+              { term: 'Execute input validation', def: 'verify all data submitted to the application for type, length, format and range before processing it, so attackers cannot inject malicious code — the primary mitigation for SQL injection and XSS' },
+              { term: 'Employ up-to-date encryption', def: 'use Transport Layer Security (TLS) with current recommended cipher suites and protocols for data in transit, and store user passwords using strong cryptographic hash functions such as SHA-256 or SHA-512 before they go into the database' },
+              { term: 'Enhance authentication and authorization', def: 'implement multi-factor authentication (MFA), set complex password requirements, limit failed login attempts to blunt brute-force attacks, and use role-based access control (RBAC) so each user holds only the permissions their role needs' },
+              { term: 'Track API usage', def: 'ensure every API the application uses has adequate authentication and authorization and communicates over encrypted channels; monitor usage routinely and analyse access logs for unusual activity' },
+              { term: 'Record code changes', def: 'keep accurate records of updates, bug fixes and new features using a version control system such as Git, so a security problem introduced by a recent modification can be traced quickly' },
+              { term: 'Employ dynamic testing for security validation', def: 'run DAST across every stage of the development lifecycle — early testing, staging and production — to catch injection, XSS, broken authentication and session management, and insecure direct object references; this is what “shifting security left” means in practice' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'These six are their own exam question. Keep them separate from the web/mobile risk answers — the lecturer specifically warned against mixing the two, because a best-practice question earns no marks for describing risks.',
+              'Each best practice pairs with a risk from Topic 4: input validation answers injection and XSS, up-to-date encryption answers interception, stronger authentication answers brute force, API tracking and change records answer misconfiguration. If a question asks you to justify a practice, name the risk it closes.',
             ],
           },
         ],
@@ -5750,6 +6551,27 @@ export const courses = [
             type: 'text',
             heading: 'Overview',
             text: 'Beyond the testing methodologies and protective mechanisms in the previous topic, keeping a web or mobile application secure is an ongoing operational discipline. The following are practical measures for maintaining audit compliance and quality assurance in day-to-day operation.',
+          },
+          {
+            type: 'definition',
+            heading: 'Quality Assurance (QA)',
+            text: 'Quality assurance ensures that software products meet the desired standard. It is measured against a fixed set of evaluation metrics, so that “the product is good” becomes a claim that can actually be tested and evidenced.',
+          },
+          {
+            type: 'termlist',
+            heading: 'QA Evaluation Metrics',
+            items: [
+              { term: 'Functionality', def: 'the product does what it was specified to do' },
+              { term: 'Performance', def: 'it responds and processes within acceptable time and load limits' },
+              { term: 'Reliability', def: 'it behaves consistently and remains available over time' },
+              { term: 'Usability', def: 'users can operate it correctly, without confusion' },
+              { term: 'Compatibility', def: 'it works across the intended browsers, devices and platforms' },
+              { term: 'Security', def: 'it protects data and withstands attack' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Memorise the six as a list — Functionality, Performance, Reliability, Usability, Compatibility, Security. “Write short notes on quality assurance” and “list the evaluation metrics” are the same question in this course, and the marks are awarded for naming all six, not for describing any of them at length. Lead with the one-line definition, then the list.',
           },
           {
             type: 'bullets',
@@ -5781,6 +6603,97 @@ export const courses = [
           {
             type: 'note',
             text: 'These operational measures complement the testing methodologies from the previous topic — SAST, DAST, IAST and SCA find flaws in the code, while audits, patching, staff training and documentation keep the running system secure over time. Exam questions often ask you to connect the two: a vulnerability found in testing is only truly fixed once the patch is deployed and the change is documented and audited.',
+          },
+        ],
+      },
+      {
+        number: '8',
+        title: 'Web Application Security & the Security Lifecycle',
+        covers: [5],
+        partial: [9],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'Web Application Security',
+            text: 'Web application security is the practice of detecting and preventing cyber attacks on websites and web applications — building websites that are secure to begin with. It is the set of security controls built into a web application to protect it from a growing variety of cyber threats.',
+          },
+          {
+            type: 'text',
+            heading: 'A Lifecycle, Not a Stage',
+            text: 'Web applications inevitably contain bugs and misconfigurations, and some of those are security vulnerabilities an attacker can exploit. Web application security addresses them by leveraging secure development practices, implementing security testing throughout the software development lifecycle (SDLC), resolving design-level defects, and avoiding security problems during deployment and at runtime. Security is therefore not a phase bolted on before release — it runs from design through development, testing, deployment and live operation.',
+          },
+          {
+            type: 'note',
+            text: 'This is the “lifecycle approach” item on the course outline. A design-level defect — say, an application that was architected to trust input from its own mobile client — cannot be patched away later by a firewall rule; it has to be caught in design. That is the whole argument for spreading security across the lifecycle rather than testing once at the end.',
+          },
+          {
+            type: 'definition',
+            heading: 'Why Web Security Testing Is Important',
+            text: 'Web security testing focuses on identifying security vulnerabilities in web applications and their configurations, and its primary objective is the application layer. Testing typically involves delivering various input types to provoke errors and cause unexpected system behaviour. These “negative tests” investigate whether the system is performing tasks it was never designed to execute.',
+          },
+          {
+            type: 'note',
+            items: [
+              'A positive test asks “does the login form accept a valid password?” A negative test asks “what happens if I put a quote mark, 10,000 characters, or a script tag in the username field?” Security lives almost entirely in the second question.',
+              'The value of vulnerability and security assessment is that it converts an unknown risk into a known, prioritised defect that can be scheduled, fixed and verified — which is precisely what the audit and QA discipline in Topic 7 then has to evidence.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Two Ways to Defend',
+            items: [
+              'Prevention — find and remove the vulnerability before an attacker reaches it, using SAST, SCA, IAST and DAST',
+              'Blocking — stop the attack in real time as it arrives, using a Web Application Firewall (WAF) or Runtime Application Self-Protection (RASP)',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Ideally an organisation employs both methods, not one. The individual tools are defined in Topic 6 — this topic is about where each of them sits in the lifecycle: SAST and SCA during development, IAST and DAST during testing and staging, WAF and RASP in production.',
+          },
+        ],
+      },
+      {
+        number: '9',
+        title: 'Exam Focus — The Lecturer’s Guaranteed Questions',
+        covers: [],  // revision aid over the topics above, not an outline item
+        sections: [
+          {
+            type: 'text',
+            heading: 'How to Use This Topic',
+            text: 'These are the questions the lecturer flagged in class as certain to appear, with the answers in the wording he gave. Each one is set out in full in the topic named beside it — this page is a revision checklist, not a substitute for the notes.',
+          },
+          {
+            type: 'bullets',
+            heading: 'The Golden Rules He Gave',
+            items: [
+              'Hit the marking points. Pages of prose that never name the technical terms score nothing — the marks sit on the terms themselves.',
+              'Do not mix the answers up. Keep the best-practices answer separate from the web/mobile risk answers; they are different questions with different mark schemes.',
+              'Get the class rep’s photos of the board notes, especially the short notes on SQL injection and cross-site scripting.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Model Answers at a Glance',
+            items: [
+              { term: 'Write short notes on quality assurance / list the evaluation metrics', def: 'QA ensures software products meet the desired standard. The metrics are Functionality, Performance, Reliability, Usability, Compatibility and Security. (Topic 7)' },
+              { term: 'Define web-based risk', def: 'Any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption. (Topic 4)' },
+              { term: 'Differentiate web application risk from mobile application risk', def: 'Web: centralized risk, client–server attacks landing on the server, a breach affecting the entire database, and an internet connection required. Mobile: decentralized risk, attacks on the individual device, data leakage usually following physical loss of the device, and the ability to work offline. (Topic 4)' },
+              { term: 'Explain the security/tracking models — authentication vs authorization', def: 'Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information — a bank teller has a transaction limit, while the branch manager holds higher clearance. (Topic 3)' },
+              { term: 'Distinguish symmetrical from asymmetrical encryption', def: 'Encryption converts information into ciphertext, which is unreadable to unauthorized users. Symmetrical encryption uses a single key to both lock and unlock; asymmetrical encryption uses two keys — a public key and a private key. (Topic 3)' },
+              { term: 'Define a website attack and give five examples', def: 'Any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions. Five examples: SQL injection (SQLi), cross-site scripting (XSS), malware/backdoor attacks, brute-force login attacks, and phishing. (Topic 5)' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Use the “Study as cards” button above to drill these six — the question is the front of the card, the model answer is the back.',
+          },
+          {
+            type: 'note',
+            items: [
+              'A structure that protects your marks: one sentence of definition using the question’s own keywords, then the list, then one line per item only if the question asks you to explain. Writing the list before the explanation means a shortage of time costs you the elaboration, not the marks.',
+              'Where a question says “differentiate” or “distinguish”, answer in contrasting pairs rather than describing one side and then the other — it makes each contrast visible to whoever is marking.',
+              'These six are the flagged questions, not the whole syllabus. Topics 1–8 remain examinable, and the outline items on secure mobile/web development and next-generation challenges are not yet covered by any topic here.',
+            ],
           },
         ],
       },
@@ -6278,6 +7191,7 @@ export const courses = [
     title: 'Peace and Conflict Resolution',
     units: 2, level: 300, semester: 1, lh: 30, ph: 0,
     subject: 'gst',
+    crossDepartmental: true,
     description: 'The causes, dynamics, and resolution of conflict in a multi-ethnic nation: types and theories of conflict, root causes of conflict and violence in Africa, peacebuilding strategies, and the roles of international organisations, media, and traditional institutions.',
     topics: [
       'Concepts of peace, conflict, and security in a multi-ethnic nation',
@@ -6301,7 +7215,7 @@ export const courses = [
       'Nigeria conflict resolution case studies',
     ],
     studyTips: [
-      'Tie cyber conflict topics directly to CYB 211 (Cybersecurity Strategy) for cross-course reinforcement',
+      'Tie cyber-conflict topics back to your own security or computing courses for cross-course reinforcement',
       'Current events in Nigeria provide excellent case studies for conflict analysis questions',
       'Understand the UN Charter and its limitations regarding cyber operations — examined often',
       'Mediator vs arbitrator vs conciliator: know the distinctions precisely',
@@ -6313,7 +7227,8 @@ export const courses = [
     title: 'Artificial Intelligence',
     units: 2, level: 300, semester: 1, lh: 15, ph: 45,
     subject: 'cs',
-    description: 'Foundations of AI: intelligent agents, search algorithms, knowledge representation, semantic networks, natural language processing, and expert systems. Directly relevant to AI-powered threat detection, anomaly detection, and automated vulnerability analysis in cybersecurity.',
+    crossDepartmental: true,
+    description: 'Foundations of AI: intelligent agents, search algorithms, knowledge representation, semantic networks, natural language processing, and expert systems. Directly relevant to AI-powered anomaly detection, prediction, and automated analysis across computing.',
     topics: [
       'Overview, history, goals, types, branches and applications of AI',
       'Intelligent agents: performance, faculties, rationality, environment, architectures',
@@ -6337,7 +7252,7 @@ export const courses = [
     ],
     studyTips: [
       'Understand A* search intuitively by tracing it on a grid before studying the formal algorithm',
-      'Connect AI to cybersecurity in every exam answer — your degree makes this connection valuable',
+      'Connect AI to a concrete application in your own field in every exam answer — applied answers score higher',
       'Google\'s free Machine Learning Crash Course covers supervised/unsupervised ML at the right level',
       'AI ethics questions (bias, fairness) appear frequently — develop considered, referenced arguments',
     ],
@@ -6874,6 +7789,7 @@ export const courses = [
     title: 'Research Methodology and Technical Report Writing',
     units: 3, level: 400, semester: 1, lh: 45, ph: 0,
     subject: 'cs',
+    crossDepartmental: true,
     description: 'The rigorous methods for conducting and communicating academic and technical research: research types and approaches, scientific investigation and problem formulation, data collection instruments, and the structure of technical reports. Essential preparation for the Final Year Project.',
     topics: [
       'Foundations, types, and approaches of research; significance of research',
@@ -6982,7 +7898,8 @@ export const courses = [
     title: 'Venture Creation',
     units: 2, level: 400, semester: 2, lh: 15, ph: 45,
     subject: 'ent',
-    description: 'The practical mechanics of launching a business: opportunity identification, business planning, entrepreneurial finance, marketing and e-commerce, and applying emerging technologies to new ventures. Prepares graduates who want to start cybersecurity consultancies or technology ventures.',
+    crossDepartmental: true,
+    description: 'The practical mechanics of launching a business: opportunity identification, business planning, entrepreneurial finance, marketing and e-commerce, and applying emerging technologies to new ventures. Prepares graduates who want to start consultancies or technology ventures.',
     topics: [
       'Opportunity identification: sources of business opportunities in Nigeria, market gaps',
       'New business development: business planning and market research',
@@ -7005,7 +7922,7 @@ export const courses = [
     ],
     studyTips: [
       'Actually complete the CAC registration process research — knowing the real steps sets exam answers apart',
-      'Frame your venture creation around a cybersecurity service gap you identified during SIWES',
+      'Frame your venture creation around a real service gap you identified during SIWES',
       'A completed business plan is typically the coursework submission — start it week one',
       'Connect this to ENT 221 — build on the feasibility study you conceptualised in 200L',
     ],
@@ -7229,6 +8146,13 @@ export function getCoursesByLevel(level) {
 
 export function getCoursesByLevelAndSemester(level, semester) {
   return courses.filter(c => c.level === level && c.semester === semester);
+}
+
+// The subset of courses shared across science/engineering programmes at
+// University of Uyo (GST, MTH, PHY, STA, COS, CSC, ENT, INS, UUY-CSC) — used
+// by the 'general' foundation-mode department for students outside Cybersecurity.
+export function getCrossDepartmentalCourses() {
+  return courses.filter(c => c.crossDepartmental);
 }
 
 export const firstSemesterCourses = courses.filter(c => c.semester === 1 && c.level === 200);

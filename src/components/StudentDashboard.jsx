@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, Flame, PlayCircle, Target, BrainCircuit,
@@ -8,8 +9,12 @@ import { useAuth } from '../context/AuthContext';
 import { useProgress } from './useProgress';
 import { getTrackProgress } from '../utils/trackProgress';
 import { readLastLocation } from '../utils/lastLocation';
-import { readStudyDays, computeStreak } from '../utils/streak';
+import { useStudyDays } from '../context/StudyDaysContext';
+import { computeStreak } from '../utils/streak';
 import { pickDailyChallenge } from '../utils/dailyChallenge';
+import { shouldShowGettingStarted, readDismissed, writeDismissed } from '../utils/gettingStarted';
+import { findDepartmentByName, getDepartment } from '../data/departments';
+import GettingStartedCard from './GettingStartedCard';
 
 // ─── The signed-in homepage ───────────────────────────────────────────────────
 // Home for a signed-in student is a daily dashboard, not a marketing page:
@@ -53,6 +58,7 @@ const QUICK_ACTIONS = [
 
 export default function StudentDashboard() {
   const { profile } = useAuth();
+  const { days } = useStudyDays(); // account-wide, so the streak matches on every device
   // One hook per track — cloud-merged, so the dashboard matches the track
   // pages on any device.
   const progressBySlug = {
@@ -69,10 +75,30 @@ export default function StudentDashboard() {
     Object.values(progressBySlug).flatMap(p => p.completedModules || [])
   );
   const challenge = pickDailyChallenge(Object.values(trackMeta), completedIds);
-  const streak = computeStreak(readStudyDays());
+  const streak = computeStreak(days);
   const lastPath = readLastLocation();
   const firstName = (profile?.full_name || '').trim().split(/\s+/)[0] || 'there';
   const level = parseInt(String(profile?.level ?? ''), 10) || null;
+
+  // Day-one layout: while nothing is completed yet, replace the streak nag
+  // and the (necessarily arbitrary) daily challenge with a checklist of what
+  // to try first. Dismissing it is a permanent per-user, per-device choice,
+  // same as completing a module — either way the dashboard settles into its
+  // standard returning-user layout for good.
+  const [dismissed, setDismissed] = useState(() => readDismissed(profile?.id));
+  const showGettingStarted = shouldShowGettingStarted({ completedCount: completedIds.size, dismissed });
+  const dismissGettingStarted = () => {
+    writeDismissed(profile?.id);
+    setDismissed(true);
+  };
+
+  // A foundation student whose typed department has since been authored. Read
+  // from the lightweight registry, never useCatalogue — the dashboard renders on
+  // every visit and must not pull a course catalogue for a one-line banner.
+  const departmentNowAvailable =
+    getDepartment(profile?.department).status === 'foundation'
+      ? findDepartmentByName(profile?.department_other)
+      : null;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -87,22 +113,50 @@ export default function StudentDashboard() {
             {greetingFor(new Date().getHours())}, {firstName}.
           </h1>
         </div>
-        <div
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold ${
-            streak > 0
-              ? 'bg-ember-500/10 border-ember-500/30 text-ember-600'
-              : 'bg-coffee-100 border-coffee-200 text-coffee-600'
-          }`}
-        >
-          <Flame size={15} />
-          {streak > 0 ? `${streak}-day streak` : 'Study today to start a streak'}
-        </div>
+        {!showGettingStarted && (
+          <div
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold ${
+              streak > 0
+                ? 'bg-ember-500/10 border-ember-500/30 text-ember-600'
+                : 'bg-coffee-100 border-coffee-200 text-coffee-600'
+            }`}
+          >
+            <Flame size={15} />
+            {streak > 0 ? `${streak}-day streak` : 'Study today to start a streak'}
+          </div>
+        )}
       </div>
+
+      {/* ── Their department's catalogue has landed since they signed up ── */}
+      {departmentNowAvailable && (
+        <Link
+          to="/profile"
+          className="group flex items-center gap-3 mb-6 p-4 rounded-2xl border border-moss/30 bg-moss/5 hover:border-moss/50 transition-colors animate-fade-up"
+        >
+          <GraduationCap size={18} className="text-moss shrink-0" />
+          <p className="flex-1 text-sm text-coffee-700 leading-relaxed">
+            <span className="font-semibold text-ink">
+              {departmentNowAvailable.degree || departmentNowAvailable.name} is ready.
+            </span>{' '}
+            Switch from the shared foundation courses to your own full curriculum — your progress
+            carries over.
+          </p>
+          <ArrowRight size={15} className="text-moss group-hover:translate-x-0.5 transition-transform shrink-0" />
+        </Link>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-up" style={{ animationDelay: '80ms' }}>
 
         {/* ── Left column: continue + tracks ── */}
         <div className="lg:col-span-2 space-y-6">
+          {showGettingStarted && (
+            <GettingStartedCard
+              profile={profile}
+              completedCount={completedIds.size}
+              lastPath={lastPath}
+              onDismiss={dismissGettingStarted}
+            />
+          )}
           {lastPath && (
             <Link
               to={lastPath}
@@ -150,25 +204,8 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* ── Right column: daily challenge, year, tools ── */}
+        {/* ── Right column: year, daily challenge, tools ── */}
         <div className="space-y-6">
-          {challenge && (
-            <div className={`${challenge.track.accentBg} ${challenge.track.accentText} rounded-2xl p-6`}>
-              <div className="flex items-center gap-2 mb-3 opacity-80">
-                <Target size={15} />
-                <p className="text-xs font-mono uppercase tracking-widest">Today&rsquo;s challenge</p>
-              </div>
-              <p className="font-display text-xl font-bold leading-snug mb-1">{challenge.module.title}</p>
-              <p className="text-xs opacity-70 mb-4">{challenge.track.fullName}</p>
-              <Link
-                to={challenge.track.detailPath(challenge.module.id)}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold bg-cream/15 hover:bg-cream/25 transition-colors rounded-lg px-3.5 py-2"
-              >
-                {challenge.track.slug === 'security' ? 'Enter the room' : 'Open the module'} <ArrowRight size={13} />
-              </Link>
-            </div>
-          )}
-
           {level && (
             <Link
               to={`/courses?level=${level}`}
@@ -183,6 +220,26 @@ export default function StudentDashboard() {
               </div>
               <ArrowRight size={15} className="text-coffee-400 group-hover:text-ink transition-colors" />
             </Link>
+          )}
+
+          {/* An arbitrary uncompleted module is disorienting before a student
+              has done anything at all — hidden while the getting-started
+              checklist is showing instead. */}
+          {!showGettingStarted && challenge && (
+            <div className={`${challenge.track.accentBg} ${challenge.track.accentText} rounded-2xl p-6`}>
+              <div className="flex items-center gap-2 mb-3 opacity-80">
+                <Target size={15} />
+                <p className="text-xs font-mono uppercase tracking-widest">Today&rsquo;s challenge</p>
+              </div>
+              <p className="font-display text-xl font-bold leading-snug mb-1">{challenge.module.title}</p>
+              <p className="text-xs opacity-70 mb-4">{challenge.track.fullName}</p>
+              <Link
+                to={challenge.track.detailPath(challenge.module.id)}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold bg-cream/15 hover:bg-cream/25 transition-colors rounded-lg px-3.5 py-2"
+              >
+                {challenge.track.slug === 'security' ? 'Enter the room' : 'Open the module'} <ArrowRight size={13} />
+              </Link>
+            </div>
           )}
 
           <div className="bg-paper border border-coffee-200 rounded-2xl p-5">

@@ -48,7 +48,12 @@ function materialUrl(filePath) {
   return supabase.storage.from(BUCKET).getPublicUrl(filePath).data.publicUrl;
 }
 
-export default function CourseMaterials({ courseCode, courseSlug }) {
+// `department` is the materials pool this course's uploads live in — see
+// materialsDepartmentFor() in data/departments.js. Both the listing and the
+// insert below are scoped to it, so two departments' distinct courses can share
+// a slug without their materials mixing, while genuinely shared courses stay
+// pooled across every programme.
+export default function CourseMaterials({ courseCode, courseSlug, department }) {
   const { user } = useAuth();
   const [materials, setMaterials] = useState([]);
   const [fetching, setFetching] = useState(isConfigured);
@@ -63,13 +68,14 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
   useEffect(() => {
     if (!isConfigured) return;
     load();
-  }, [courseSlug]);
+  }, [courseSlug, department]);
 
   async function load() {
     const { data } = await supabase
       .from('course_materials')
       .select('id, display_name, file_path, file_size, file_type, description, uploaded_at')
       .eq('course_slug', courseSlug)
+      .eq('department', department)
       .order('uploaded_at', { ascending: false });
     setMaterials(data ?? []);
     setFetching(false);
@@ -134,6 +140,7 @@ export default function CourseMaterials({ courseCode, courseSlug }) {
       const { error: dbErr } = await supabase.from('course_materials').insert({
         course_code: courseCode,
         course_slug: courseSlug,
+        department,
         display_name: file.name,
         file_path: path,
         file_size: file.size,

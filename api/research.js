@@ -18,7 +18,7 @@ import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } fr
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { captureApiError } from './_lib/sentry.js';
 
-const SYSTEM_PROMPT = `You are Areté's study helper for beginner B.Sc. Cybersecurity students at the University of Uyo.
+const SYSTEM_PROMPT = `You are Areté's study helper for beginner university students at the University of Uyo.
 
 A student has highlighted a passage from their course notes and wants it explained simply. Use web search to add current, accurate context, then explain the passage in plain language.
 
@@ -71,17 +71,8 @@ export default async function handler(req, res) {
     return res.status(200).json({ configured: Boolean(process.env.GROQ_API_KEY) });
   }
 
-  // Signed-in only. getStudentFromRequest returns null for anonymous, invalid,
-  // or expired tokens (and when Supabase isn't configured) — all mean "no".
-  const student = await getStudentFromRequest(req);
-  if (!student) {
-    logRequest(req, 'research', { denied: 'unauthorized' });
-    return res.status(401).json({
-      error: 'Please sign in to use Explain-this.',
-      kind: 'unauthorized',
-    });
-  }
-
+  // Rate-limit before auth so an invalid/garbage token can't be used to dodge
+  // throttling by forcing a fresh, uncounted Supabase auth call every time.
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {
@@ -90,6 +81,17 @@ export default async function handler(req, res) {
     return res.status(429).json({
       error: 'You’ve used your Explain-this lookups for now. Please wait a few minutes and try again.',
       kind: 'rate_limited',
+    });
+  }
+
+  // Signed-in only. getStudentFromRequest returns null for anonymous, invalid,
+  // or expired tokens (and when Supabase isn't configured) — all mean "no".
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'research', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to use Explain-this.',
+      kind: 'unauthorized',
     });
   }
 

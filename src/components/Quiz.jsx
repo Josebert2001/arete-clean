@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import MathText from './MathText';
 
 const PASS_MARK = 70;
 
@@ -97,12 +98,12 @@ export default function Quiz({ questions, onComplete }) {
                   ? <CheckCircle2 size={16} className="text-moss shrink-0 mt-0.5" />
                   : <XCircle size={16} className="text-rust shrink-0 mt-0.5" />}
                 <div className="min-w-0">
-                  <p className="text-ink leading-snug">{question.question}</p>
+                  <p className="text-ink leading-snug"><MathText text={question.question} /></p>
                   {!correct && (
                     <p className="text-xs text-coffee-700 mt-1">
-                      <span className="text-rust">Your answer:</span> {question.options[answers[i]]}
+                      <span className="text-rust">Your answer:</span> <MathText text={question.options[answers[i]]} />
                       <span className="mx-1.5">·</span>
-                      <span className="text-moss">Correct:</span> {question.options[question.correctIndex]}
+                      <span className="text-moss">Correct:</span> <MathText text={question.options[question.correctIndex]} />
                     </p>
                   )}
                 </div>
@@ -140,7 +141,7 @@ export default function Quiz({ questions, onComplete }) {
       </div>
 
       <h3 className="font-display text-xl font-bold text-ink mb-6 leading-snug">
-        {q.question}
+        <MathText text={q.question} />
       </h3>
 
       <div className="space-y-3 mb-6">
@@ -163,10 +164,16 @@ export default function Quiz({ questions, onComplete }) {
               key={idx}
               onClick={() => handleSelect(idx)}
               disabled={answered}
-              aria-label={`Option ${idx + 1}: ${opt}`}
               className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all flex items-center justify-between gap-3 ${style}`}
             >
-              <span className="text-ink text-sm sm:text-base">{opt}</span>
+              {/* The accessible name comes from the content rather than an
+                  aria-label: an option may be maths, and KaTeX emits MathML a
+                  screen reader can read properly, which a label of raw LaTeX
+                  ("Option 1: \frac{dy}{dx}") would override. */}
+              <span className="text-ink text-sm sm:text-base">
+                <span className="sr-only">{`Option ${idx + 1}: `}</span>
+                <MathText text={opt} />
+              </span>
               {icon}
             </button>
           );
@@ -189,7 +196,7 @@ export default function Quiz({ questions, onComplete }) {
             <span className={`font-bold ${selected === q.correctIndex ? 'text-moss' : 'text-rust'}`}>
               {selected === q.correctIndex ? 'Correct. ' : 'Not quite. '}
             </span>
-            {q.explanation}
+            <MathText text={q.explanation} />
           </p>
         </div>
       )}

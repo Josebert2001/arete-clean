@@ -90,7 +90,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'stdin exceeds the 1,000 character limit.' });
     }
 
-    const lang = LANGUAGES[language] || LANGUAGES.java;
+    const lang = Object.hasOwn(LANGUAGES, language) ? LANGUAGES[language] : LANGUAGES.java;
 
     const [jdoodleRes, creditRes] = await Promise.all([
       fetch('https://api.jdoodle.com/v1/execute', {
@@ -123,10 +123,11 @@ export default async function handler(req, res) {
       // Common case: out of daily credits
       const msg = String(data.error);
       const isLimit = /credit|limit|reached/i.test(msg);
+      if (!isLimit) console.error('JDoodle runner error:', msg);
       return res.status(200).json({
         output: isLimit
           ? "Daily run limit reached for today. The free plan allows a limited number of runs per day. Please try again tomorrow, or read the code examples in the meantime."
-          : `Runner error: ${msg}`,
+          : "The code runner hit an unexpected error. Please try again in a moment.",
         kind: isLimit ? 'limit' : 'runtime_error',
         status: isLimit ? 'Daily limit reached' : 'Error',
         creditsUsed: DAILY_LIMIT,

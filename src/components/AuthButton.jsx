@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { LogIn, LogOut, CloudUpload } from 'lucide-react';
+import { LogIn, LogOut, CloudUpload, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -80,6 +80,14 @@ export default function AuthButton() {
               <CloudUpload size={14} className="text-moss shrink-0" />
               <p className="text-xs text-moss leading-snug">Progress syncing to cloud automatically</p>
             </div>
+
+            <Link
+              to="/profile"
+              onClick={() => setOpen(false)}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-coffee-200 text-coffee-700 text-xs font-medium hover:bg-coffee-100 hover:text-ink hover:border-coffee-400 transition-all"
+            >
+              <Settings size={13} /> Profile settings
+            </Link>
 
             <button
               onClick={() => { signOut(); setOpen(false); }}

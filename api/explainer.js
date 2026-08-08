@@ -12,7 +12,7 @@ import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } fr
 import { captureApiError } from './_lib/sentry.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
-const SYSTEM_PROMPT = `You are Areté's code explainer for beginner Cybersecurity students.
+const SYSTEM_PROMPT = `You are Areté's code explainer for beginner university students.
 When given code in any language (Java, Python, C, or C++), explain it clearly and simply.
 
 Structure your response like this:
@@ -86,7 +86,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Code exceeds the 5,000 character limit.' });
   }
 
-  const lang = LANGUAGES[language]; // undefined => let the model auto-detect
+  const lang = Object.hasOwn(LANGUAGES, language) ? LANGUAGES[language] : undefined; // undefined => let the model auto-detect
 
   try {
     const outcome = await generateTextWithFallback({

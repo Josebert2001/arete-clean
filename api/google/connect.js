@@ -23,18 +23,18 @@ export default async function handler(req, res) {
     return res.status(200).json({ configured: googleConfigured() });
   }
 
-  const student = await getStudentFromRequest(req);
-  if (!student) {
-    logRequest(req, 'google-connect', { denied: 'unauthorized' });
-    return res.status(401).json({ error: 'Please sign in to connect Google.' });
-  }
-
   const rateLimit = enforceRateLimit(req, RATE_LIMIT);
   setRateLimitHeaders(res, rateLimit);
   if (!rateLimit.allowed) {
     logRequest(req, 'google-connect');
     res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
     return res.status(429).json({ error: 'Too many attempts. Please wait a few minutes and try again.' });
+  }
+
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'google-connect', { denied: 'unauthorized' });
+    return res.status(401).json({ error: 'Please sign in to connect Google.' });
   }
 
   if (!googleConfigured()) {

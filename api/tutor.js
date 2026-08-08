@@ -19,16 +19,24 @@ import { stepCountIs } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
-import { COURSE_INDEX, MODULE_INDEX } from './_lib/courseData.js';
+import { getCourseIndexForDepartment, MODULE_INDEX } from './_lib/courseData.js';
 import { buildTutorTools } from './_lib/tutorTools.js';
 import { buildModelChain, hasAnyProvider, streamTextWithFallback } from './_lib/model.js';
 import { classifyTaskTier } from './_lib/taskRouter.js';
 
-const SYSTEM_PROMPT = `You are Areté's AI academic tutor for the Department of Cybersecurity, University of Uyo, Nigeria.
-You cover the entire B.Sc. Cybersecurity programme — every course and every interactive programming module in the app.
+// departmentLabel personalises the opening line and the "outside the
+// programme" fallback near the end; courseIndex is scoped to the student's
+// own department catalogue (see getCourseIndexForDepartment) so a foundation-
+// mode student's prompt never advertises Cybersecurity-only courses they
+// can't actually take. Built per-request since both vary by student.
+function buildSystemPrompt(courseIndex, departmentLabel, isFoundation) {
+  return `You are Areté's AI academic tutor for students at the University of Uyo, Nigeria, currently helping a student in ${departmentLabel}.
+${isFoundation
+  ? `Your course catalogue below covers only the foundation courses shared across University of Uyo programmes (GST, MTH, PHY, STA, COS and similar) — their department's own specialist courses are not in Areté yet. Help fully with what IS listed and with every interactive programming module. If they ask about a specialist course you don't have, say plainly that it isn't in Areté yet, then help from general knowledge if you can.`
+  : 'You cover their full curriculum — every course and every interactive programming module in the app.'}
 
 COURSE CATALOGUE (index only — call getCourseOutline with a course code for full topics, textbooks, and exam tips):
-${COURSE_INDEX}
+${courseIndex}
 
 INTERACTIVE PROGRAMMING MODULES (index only — call getModuleDetail for a module's theory, examples, and mini project):
 ${MODULE_INDEX}
@@ -66,8 +74,9 @@ HOW TO TUTOR:
 - Do NOT pad. No preamble, no restating the question, and do NOT tack on unsolicited "in your programme you'll also study this in COURSE X…" cross-references or extra background the student didn't ask for. If a course pointer is genuinely useful, keep it to a short clause — never a whole paragraph
 - Be warm and encouraging, but briefly — a short friendly tone, not extra sentences of reassurance
 - If the student just greets you ("hello", "hi", "good morning") or makes small talk, reply in ONE short, warm line and ask what they're working on. Do NOT re-introduce yourself or list what you can help with — the app has already shown that. Use their first name if you know it (e.g. "Hey Josebert! 👋 What are you working on today?")
-- If asked about something outside the programme (e.g. a random general topic), help briefly then gently note you are optimised for the Cybersecurity curriculum
+- If asked about something outside the programme (e.g. a random general topic), help briefly then gently note you are optimised for ${departmentLabel}'s curriculum
 - If context suggests the student is on a specific module (passed via [Studying:] tag), use that module's content to answer precisely`;
+}
 
 const RATE_LIMIT = {
   namespace: 'tutor',
@@ -175,16 +184,38 @@ export function sanitizeContextValue(value, max = 60) {
     .trim();
 }
 
+// One label per fully-authored department catalogue (see src/data/departments.js
+// and the DEPARTMENTS registry in _lib/courseData.js — keep the slugs in step).
+// 'general' is foundation mode, where the student's own department name comes
+// from their profile; an unrecognised/missing slug falls back to Cybersecurity,
+// matching the frontend's DEFAULT_DEPARTMENT convention.
+//
+// Each label reads naturally in both prompt positions ("a student in X" /
+// "optimised for X's curriculum"), so avoid trailing parentheticals here.
+const DEPARTMENT_LABELS = {
+  cybersecurity: 'the B.Sc. Cybersecurity programme',
+  dataScience: 'the B.Sc. Data Science programme',
+};
+
+function departmentLabelFor(departmentSlug, departmentOther) {
+  if (departmentSlug === 'general') {
+    return departmentOther ? `the ${departmentOther} programme` : 'their own degree programme';
+  }
+  return DEPARTMENT_LABELS[departmentSlug] || DEPARTMENT_LABELS.cybersecurity;
+}
+
 // Builds the STUDENT CONTEXT line for a signed-in student, enriched with their
-// profile (first name + level) so the tutor can address them naturally and
-// pitch explanations at the right year. The profile read is RLS-scoped to the
-// student's own row; a lookup failure is non-fatal — we fall back to email only.
+// profile (first name, level, department) so the tutor can address them
+// naturally, pitch explanations at the right year, and scope the course
+// catalogue to their own programme. The profile read is RLS-scoped to the
+// student's own row; a lookup failure is non-fatal — we fall back to email
+// only and the default (Cybersecurity) catalogue.
 async function buildStudentContext(student) {
   let profile = null;
   try {
     const { data } = await student.db
       .from('profiles')
-      .select('full_name, level')
+      .select('full_name, level, department, department_other')
       .eq('id', student.user.id)
       .maybeSingle();
     profile = data || null;
@@ -194,6 +225,9 @@ async function buildStudentContext(student) {
 
   const firstName = profile?.full_name ? sanitizeContextValue(profile.full_name).split(/\s+/)[0] : '';
   const level = profile?.level ? sanitizeContextValue(profile.level, 12) : '';
+  const departmentSlug = profile?.department || 'cybersecurity';
+  const departmentOther = profile?.department_other ? sanitizeContextValue(profile.department_other, 40) : '';
+  const departmentLabel = departmentLabelFor(departmentSlug, departmentOther);
 
   const identity = [
     firstName && `their name is ${firstName}`,
@@ -201,9 +235,11 @@ async function buildStudentContext(student) {
   ].filter(Boolean).join(', ');
 
   const email = student.user.email || 'no email on record';
-  return `\n\nSTUDENT CONTEXT: The student is signed in (${email}).${
+  const text = `\n\nSTUDENT CONTEXT: The student is signed in (${email}).${
     identity ? ` Personalise to them — ${identity}; address them by first name when it fits naturally, and calibrate depth to their level.` : ''
   } Their saved module progress and quiz scores are available through the getStudentProgress tool.`;
+
+  return { text, departmentSlug, departmentLabel };
 }
 
 export default async function handler(req, res) {
@@ -265,9 +301,14 @@ export default async function handler(req, res) {
 
   try {
     const student = await getStudentFromRequest(req);
-    const studentContext = student
-      ? await buildStudentContext(student)
-      : '\n\nSTUDENT CONTEXT: The student is browsing anonymously, so no saved progress is available. If they ask about tracking or saving progress, mention that signing in keeps it synced across devices.';
+    // Anonymous students get the default (Cybersecurity) catalogue — we have
+    // no profile to scope by, so this matches the frontend's own fallback.
+    let studentContext, departmentSlug = 'cybersecurity', departmentLabel = 'the B.Sc. Cybersecurity programme';
+    if (student) {
+      ({ text: studentContext, departmentSlug, departmentLabel } = await buildStudentContext(student));
+    } else {
+      studentContext = '\n\nSTUDENT CONTEXT: The student is browsing anonymously, so no saved progress is available. If they ask about tracking or saving progress, mention that signing in keeps it synced across devices.';
+    }
 
     // Stream plain text so the frontend renders chunks as they arrive. The
     // fallback helper tries each provider in turn (Gemini → Groq → OpenRouter),
@@ -280,9 +321,13 @@ export default async function handler(req, res) {
     const outcome = await streamTextWithFallback(
       {
         chain,
-        system: SYSTEM_PROMPT + studentContext,
+        system: buildSystemPrompt(
+          getCourseIndexForDepartment(departmentSlug),
+          departmentLabel,
+          departmentSlug === 'general',
+        ) + studentContext,
         messages,
-        tools: buildTutorTools(student),
+        tools: buildTutorTools(student, departmentSlug),
         // 4 steps is enough for a couple of tool lookups plus the answer, while
         // limiting how many times the (growing) context is resent — each step
         // counts against a provider's per-request token budget.

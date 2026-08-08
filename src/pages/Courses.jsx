@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield, Search, X } from 'lucide-react';
-import { courses, getCoursesByLevelAndSemester, LEVELS, levelMeta } from '../data/courses';
+import { useCatalogue } from '../data/useCatalogue';
+import { YEAR_LEVELS } from '../data/departments';
 import { trackMeta } from '../data/trackMeta';
+import { useAuth } from '../context/AuthContext';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
 import { useLevelGate, LEVEL_STORAGE_KEY } from '../components/useLevelGate';
+import CoursePicker from '../components/CoursePicker';
 import { usePageTitle } from '../utils/usePageTitle';
 
 const trackIcons = { java: Coffee, python: Code2, c: Terminal };
@@ -61,6 +64,11 @@ const subjectStyles = {
   cyb:   { bg: 'bg-rust',       text: 'text-cream',  light: 'bg-rust/10 text-rust' },
   math:  { bg: 'bg-moss',       text: 'text-cream',  light: 'bg-moss/10 text-moss' },
   stats: { bg: 'bg-ember-500',  text: 'text-cream',  light: 'bg-ember-500/10 text-ember-500' },
+  // Data Science shares the statistics colour rather than taking a new one:
+  // the palette already pairs kindred subjects (math+phy on moss, cs+sen on
+  // ink), and ember-400 — the only unused warm tone — drops to ~2.9:1 against
+  // text-cream, below the 3:1 these badges need.
+  dts:   { bg: 'bg-ember-500',  text: 'text-cream',  light: 'bg-ember-500/10 text-ember-500' },
   gst:   { bg: 'bg-coffee-700', text: 'text-cream',  light: 'bg-coffee-100 text-coffee-700' },
   phy:   { bg: 'bg-moss',       text: 'text-cream',  light: 'bg-moss/10 text-moss' },
   sen:   { bg: 'bg-ink',        text: 'text-cream',  light: 'bg-coffee-100 text-coffee-800' },
@@ -129,6 +137,7 @@ function SemesterSection({ title, semCourses, index }) {
           {semCourses.length} course{semCourses.length !== 1 ? 's' : ''} · {semCourses.reduce((s, c) => s + c.units, 0)} units
         </span>
       </div>
+      {hasSiwes(semCourses) && <SiwesNote />}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {semCourses.map(c => <CourseCard key={c.slug} course={c} />)}
       </div>
@@ -136,43 +145,43 @@ function SemesterSection({ title, semCourses, index }) {
   );
 }
 
-function LevelView({ level }) {
+// Whether a semester's course list actually contains an industrial-training
+// placement. Derived from the data rather than from `level === 300`, which was
+// only ever true of the Cybersecurity catalogue: a foundation-mode student has
+// no SIWES courses at all (their programme's placement isn't in Areté), and
+// Data Science's 300L second semester mixes DTS 399 with regular coursework.
+function hasSiwes(semCourses) {
+  return semCourses.some(c => c.subject === 'siwes');
+}
+
+function semesterLabel(semester, semCourses) {
+  const base = semester === 1 ? 'First Semester' : 'Second Semester';
+  return hasSiwes(semCourses) ? `${base} — SIWES` : base;
+}
+
+function SiwesNote() {
+  return (
+    <div className="mb-6 p-4 bg-coffee-50 border border-coffee-200 rounded-xl text-sm text-coffee-700 leading-relaxed">
+      <strong className="text-ink">SIWES (Student Industrial Work Experience Scheme)</strong> — a supervised industrial placement in an organisation working in your field, assessed on a logbook and a defended report. This is your first sustained professional experience; treat it with the same seriousness as your academic work.
+    </div>
+  );
+}
+
+function LevelView({ level, getCoursesByLevelAndSemester }) {
   const sem1 = getCoursesByLevelAndSemester(level, 1);
   const sem2 = getCoursesByLevelAndSemester(level, 2);
-  const isSiwes = level === 300;
 
   return (
     <div className="space-y-14">
-      <SemesterSection title="First Semester" semCourses={sem1} index={1} />
-      {isSiwes ? (
-        <div>
-          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 mb-6">
-            <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-coffee-700">02</span>
-              <h2 className="display-heading text-2xl sm:text-3xl text-ink">Second Semester — SIWES</h2>
-            </div>
-            <div className="h-px flex-1 bg-coffee-200" />
-            <span className="text-sm text-coffee-700 font-mono shrink-0">
-              {sem2.length} components · {sem2.reduce((s, c) => s + c.units, 0)} units
-            </span>
-          </div>
-          <div className="mb-6 p-4 bg-coffee-50 border border-coffee-200 rounded-xl text-sm text-coffee-700 leading-relaxed">
-            <strong className="text-ink">SIWES (Student Industrial Work Experience Scheme)</strong> — the full second semester of 300L is spent on industrial training. Students are placed in organisations in cybersecurity, IT, or technology roles. This is your first sustained professional experience; treat it with the same seriousness as your academic work.
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sem2.map(c => <CourseCard key={c.slug} course={c} />)}
-          </div>
-        </div>
-      ) : (
-        <SemesterSection title="Second Semester" semCourses={sem2} index={2} />
-      )}
+      <SemesterSection title={semesterLabel(1, sem1)} semCourses={sem1} index={1} />
+      <SemesterSection title={semesterLabel(2, sem2)} semCourses={sem2} index={2} />
     </div>
   );
 }
 
 // ─── Level picker (shown until a level is chosen) ─────────────────────────────
 
-function LevelPicker({ onSelect }) {
+function LevelPicker({ onSelect, courses, levelMeta, LEVELS }) {
   return (
     <div>
       <div className="flex items-center gap-3 mb-3">
@@ -220,7 +229,7 @@ function LevelPicker({ onSelect }) {
 
 // ─── Semester picker (after a level is chosen) ────────────────────────────────
 
-function SemesterPicker({ level, onSelect, onShowAll, onBack }) {
+function SemesterPicker({ level, onSelect, onShowAll, onBack, levelMeta, getCoursesByLevelAndSemester }) {
   const meta = levelMeta[level];
   return (
     <div>
@@ -238,7 +247,6 @@ function SemesterPicker({ level, onSelect, onShowAll, onBack }) {
         {[1, 2].map(sem => {
           const semCourses = getCoursesByLevelAndSemester(level, sem);
           if (!semCourses.length) return null;
-          const isSiwes = level === 300 && sem === 2;
           return (
             <button
               key={sem}
@@ -248,12 +256,12 @@ function SemesterPicker({ level, onSelect, onShowAll, onBack }) {
               <div>
                 <span className="text-xs font-mono text-coffee-500 uppercase tracking-widest">Semester {sem}</span>
                 <h3 className="font-display font-bold text-2xl text-ink mt-1">
-                  {sem === 1 ? 'First Semester' : isSiwes ? 'Second Semester — SIWES' : 'Second Semester'}
+                  {semesterLabel(sem, semCourses)}
                 </h3>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-coffee-700">
-                  {semCourses.length} {isSiwes ? 'components' : 'courses'} · {semCourses.reduce((s, c) => s + c.units, 0)} units
+                  {semCourses.length} course{semCourses.length !== 1 ? 's' : ''} · {semCourses.reduce((s, c) => s + c.units, 0)} units
                 </span>
                 <span className="inline-flex items-center gap-1 font-medium text-ink opacity-70 group-hover:opacity-100 group-hover:gap-2 transition-all">
                   View <ArrowRight size={13} />
@@ -276,14 +284,12 @@ function SemesterPicker({ level, onSelect, onShowAll, onBack }) {
 
 // ─── One semester's courses (final step of the picker flow) ───────────────────
 
-function SemesterCoursesView({ level, semester, onBack, onSwitchSemester, onShowAll }) {
+function SemesterCoursesView({ level, semester, onBack, onSwitchSemester, onShowAll, levelMeta, getCoursesByLevelAndSemester }) {
   const meta = levelMeta[level];
   const semCourses = getCoursesByLevelAndSemester(level, semester);
   const otherSemester = semester === 1 ? 2 : 1;
   const otherCourses = getCoursesByLevelAndSemester(level, otherSemester);
-  const isSiwes = level === 300 && semester === 2;
-  const otherIsSiwes = level === 300 && otherSemester === 2;
-  const semLabel = semester === 1 ? 'First Semester' : isSiwes ? 'Second Semester — SIWES' : 'Second Semester';
+  const semLabel = semesterLabel(semester, semCourses);
 
   return (
     <div>
@@ -299,15 +305,11 @@ function SemesterCoursesView({ level, semester, onBack, onSwitchSemester, onShow
           {meta.label} · {semLabel}
         </p>
         <h2 className="display-heading text-2xl sm:text-3xl text-ink">
-          {semCourses.length} {isSiwes ? 'components' : 'courses'} · {semCourses.reduce((s, c) => s + c.units, 0)} units
+          {semCourses.length} course{semCourses.length !== 1 ? 's' : ''} · {semCourses.reduce((s, c) => s + c.units, 0)} units
         </h2>
       </div>
 
-      {isSiwes && (
-        <div className="mb-6 p-4 bg-coffee-50 border border-coffee-200 rounded-xl text-sm text-coffee-700 leading-relaxed">
-          <strong className="text-ink">SIWES (Student Industrial Work Experience Scheme)</strong> — the full second semester of 300L is spent on industrial training. Students are placed in organisations in cybersecurity, IT, or technology roles. This is your first sustained professional experience; treat it with the same seriousness as your academic work.
-        </div>
-      )}
+      {hasSiwes(semCourses) && <SiwesNote />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         {semCourses.map(c => <CourseCard key={c.slug} course={c} />)}
@@ -318,10 +320,10 @@ function SemesterCoursesView({ level, semester, onBack, onSwitchSemester, onShow
           <div>
             <p className="text-xs font-mono text-coffee-500 uppercase tracking-widest mb-1">Also available</p>
             <h3 className="font-display font-bold text-lg text-ink">
-              {meta.label} {otherSemester === 1 ? 'First' : 'Second'} Semester{otherIsSiwes ? ' — SIWES' : ''}
+              {meta.label} {semesterLabel(otherSemester, otherCourses)}
             </h3>
             <p className="text-sm text-coffee-700 mt-0.5">
-              {otherCourses.length} {otherIsSiwes ? 'components' : 'courses'} · {otherCourses.reduce((s, c) => s + c.units, 0)} units
+              {otherCourses.length} course{otherCourses.length !== 1 ? 's' : ''} · {otherCourses.reduce((s, c) => s + c.units, 0)} units
             </p>
           </div>
           <button onClick={() => onSwitchSemester(otherSemester)} className="btn-ghost shrink-0 text-sm">
@@ -340,11 +342,15 @@ function SemesterCoursesView({ level, semester, onBack, onSwitchSemester, onShow
   );
 }
 
+const EMPTY_COURSES = [];
+const EMPTY_LEVEL_META = {};
+const EMPTY_LOOKUP = () => [];
+
 // 'all' | 100 | 200 | 300 | 400 | null (invalid/absent)
 function parseLevel(value) {
   if (value === 'all') return 'all';
   const n = Number(value);
-  return LEVELS.includes(n) ? n : null;
+  return YEAR_LEVELS.includes(n) ? n : null;
 }
 
 // 1 | 2 | null (invalid/absent)
@@ -410,17 +416,49 @@ const SEMESTER_FILTERS = [
 
 export default function Courses() {
   usePageTitle('Course Hub');
+  const { catalogue, department, status } = useCatalogue();
+  const { user, profile, profileLoading } = useAuth();
+  // Stable fallbacks (module-scope constants) while the catalogue chunk is
+  // still loading, so the useMemo below doesn't see a new `courses` reference
+  // — and therefore invalidate — on every render.
+  const courses = catalogue?.courses ?? EMPTY_COURSES;
+  const levelMeta = catalogue?.levelMeta ?? EMPTY_LEVEL_META;
+  const LEVELS = catalogue?.LEVELS ?? YEAR_LEVELS;
+  const getCoursesByLevelAndSemester = catalogue?.getCoursesByLevelAndSemester ?? EMPTY_LOOKUP;
+  const isFoundation = department?.status === 'foundation';
+  const selectedCourses = profile?.selected_courses;
+  // Signed-in students see their own department; a signed-out visitor (who
+  // hasn't picked one yet) gets neutral, university-wide copy instead of
+  // assuming Cybersecurity. The university name is part of this string rather
+  // than the JSX below, so the signed-out case doesn't render it twice.
+  const badgeLabel = user && department
+    ? `${isFoundation ? 'Foundation Track' : department.degree || department.name} · University of Uyo`
+    : 'University of Uyo';
+  const heroProgramme = user && department
+    ? (isFoundation ? (profile?.department_other?.trim() || 'your programme') : department.degree || department.name)
+    : 'University of Uyo students';
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [semesterFilter, setSemesterFilter] = useState(0);
+  const [mineOnly, setMineOnly] = useState(false);
 
-  // The URL is the source of truth; the last remembered level/semester fill
-  // in when their params are absent. null level = show the level picker;
-  // null semester (for a returning level) = show the semester picker — but
-  // only once per level, since it's remembered after that.
+  // "300L" → 300, guarded against unknown levels the same way Welcome.jsx
+  // guards its own level deep-link — an unrecognised level (e.g. a future
+  // '500L') must fail closed to the level picker, not dead-end on a level
+  // the catalogue doesn't have.
+  const profileLevelNum = parseInt(String(profile?.level ?? ''), 10);
+  const profileLevel = YEAR_LEVELS.includes(profileLevelNum) ? profileLevelNum : null;
+
+  // The URL is the source of truth; the last remembered level fills in when
+  // absent, then the signed-in student's own profile level — so a fresh
+  // signup lands straight in their year instead of being asked again. A
+  // level the student deliberately browsed (stored) still wins over the
+  // profile default. null level = show the level picker; null semester (for
+  // a returning level) = show the semester picker — but only once per level,
+  // since it's remembered after that.
   const paramLevel = parseLevel(searchParams.get('level'));
-  const activeLevel = paramLevel !== null ? paramLevel : getStoredLevel();
+  const activeLevel = paramLevel !== null ? paramLevel : (getStoredLevel() ?? profileLevel);
   const paramSemester = typeof activeLevel === 'number' ? parseSemester(searchParams.get('semester')) : null;
   const activeSemester = paramSemester !== null ? paramSemester : getStoredSemester(activeLevel);
 
@@ -452,14 +490,15 @@ export default function Courses() {
     selectLevel(activeLevel);
   }
 
-  // Normalise a bare /courses URL to the remembered level so back/forward and
-  // link sharing always reflect what is on screen.
+  // Normalise a bare /courses URL to the remembered level (falling back to
+  // the profile's level) so back/forward and link sharing always reflect
+  // what is on screen.
   useEffect(() => {
     if (paramLevel === null) {
-      const stored = getStoredLevel();
-      if (stored !== null) setSearchParams({ level: String(stored) }, { replace: true });
+      const fallback = getStoredLevel() ?? profileLevel;
+      if (fallback !== null) setSearchParams({ level: String(fallback) }, { replace: true });
     }
-  }, [paramLevel, setSearchParams]);
+  }, [paramLevel, profileLevel, setSearchParams]);
 
   // Same for the semester once a level is known (e.g. a dashboard link that
   // only sets ?level=): fill in the remembered semester so a returning
@@ -497,17 +536,20 @@ export default function Courses() {
   const interactiveCourses = courses.filter(c => c.hasInteractiveModules).length;
 
   const trimmedQuery = query.trim().toLowerCase();
-  const isFiltering = trimmedQuery !== '' || typeFilter !== 'all' || semesterFilter !== 0;
+  const hasSelection = isFoundation && selectedCourses?.length > 0;
+  const isFiltering = trimmedQuery !== '' || typeFilter !== 'all' || semesterFilter !== 0 || (mineOnly && hasSelection);
 
   // hiddenByLevel counts matches outside the selected year so a search never
   // dead-ends just because the wrong level tab is active.
   const { filteredCourses, hiddenByLevel } = useMemo(() => {
     if (!isFiltering) return { filteredCourses: [], hiddenByLevel: 0 };
+    const selectedSet = mineOnly && hasSelection ? new Set(selectedCourses) : null;
     const matches = (c, ignoreLevel) => {
       if (!ignoreLevel && typeof activeLevel === 'number' && c.level !== activeLevel) return false;
       if (semesterFilter !== 0 && c.semester !== semesterFilter) return false;
       if (typeFilter === 'interactive' && !c.hasInteractiveModules) return false;
       if (typeFilter === 'resources' && c.hasInteractiveModules) return false;
+      if (selectedSet && !selectedSet.has(c.slug)) return false;
       if (trimmedQuery) {
         const haystack = [c.code, c.title, c.description, ...(c.topics || [])].join(' ').toLowerCase();
         if (!haystack.includes(trimmedQuery)) return false;
@@ -517,13 +559,53 @@ export default function Courses() {
     const inLevel = courses.filter(c => matches(c, false));
     const anyLevel = typeof activeLevel === 'number' ? courses.filter(c => matches(c, true)) : inLevel;
     return { filteredCourses: inLevel, hiddenByLevel: anyLevel.length - inLevel.length };
-  }, [isFiltering, activeLevel, semesterFilter, typeFilter, trimmedQuery]);
+  }, [courses, isFiltering, activeLevel, semesterFilter, typeFilter, trimmedQuery, mineOnly, hasSelection, selectedCourses]);
 
   const clearFilters = () => {
     setQuery('');
     setTypeFilter('all');
     setSemesterFilter(0);
+    setMineOnly(false);
   };
+
+  // The catalogue chunk resolves after mount (see useCatalogue), so the first
+  // render has no courses or levelMeta at all. Everything below indexes
+  // levelMeta[level] directly, so hold the shell until it lands rather than
+  // rendering a year picker with zeroed counts. Placed after every hook above
+  // so hook order stays identical across the loading → ready transition.
+  if (status === 'error') {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-24 text-center">
+        <h1 className="display-heading text-3xl text-ink mb-3">Couldn't load your courses</h1>
+        <p className="text-coffee-700 mb-8">
+          The course catalogue didn't download — check your connection and try again.
+        </p>
+        <button onClick={() => window.location.reload()} className="btn-primary text-sm">
+          Reload page
+        </button>
+      </div>
+    );
+  }
+
+  // Profile loads async; without this guard, a signed-in student with no URL
+  // param and no stored level would flash the level picker for a frame before
+  // jumping to their profile's level once it lands.
+  const waitingOnProfile = paramLevel === null && getStoredLevel() === null && profileLoading;
+
+  if (!catalogue || waitingOnProfile) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-16 animate-pulse" role="status" aria-label="Loading courses">
+        <div className="h-4 w-56 bg-coffee-100 rounded mb-6" />
+        <div className="h-14 w-2/3 max-w-lg bg-coffee-100 rounded mb-4" />
+        <div className="h-4 w-full max-w-xl bg-coffee-100 rounded mb-2" />
+        <div className="h-4 w-3/4 max-w-lg bg-coffee-100 rounded mb-12" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[0, 1, 2, 3].map(i => <div key={i} className="h-36 bg-coffee-100 rounded-2xl" />)}
+        </div>
+        <span className="sr-only">Loading your courses…</span>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
@@ -532,13 +614,13 @@ export default function Courses() {
       <div className="mb-14">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-5">
           <GraduationCap size={12} />
-          <span>B.Sc. Cybersecurity · University of Uyo · 100L – 400L</span>
+          <span>{badgeLabel} · 100L – 400L</span>
         </div>
         <h1 className="display-heading text-5xl sm:text-6xl text-ink mb-4 leading-tight">
           Course Hub
         </h1>
         <p className="text-lg text-coffee-700 max-w-2xl leading-relaxed">
-          Your complete academic companion for the B.Sc. Cybersecurity programme. Every course across all four years — study resources, recommended textbooks, topic outlines, and interactive learning tracks for the programming courses.
+          Your complete academic companion for {heroProgramme}. Every course across all four years — study resources, recommended textbooks, topic outlines, and interactive learning tracks for the programming courses.
         </p>
 
         <div className="flex flex-wrap gap-6 mt-8 text-sm">
@@ -555,6 +637,14 @@ export default function Courses() {
           ))}
         </div>
       </div>
+
+      {/* Foundation-mode students pick which shared courses match their own
+          programme; CYB students never see this (department.status === 'full'). */}
+      {isFoundation && catalogue && (
+        <div className="mb-14">
+          <CoursePicker catalogue={catalogue} onSaved={(count) => setMineOnly(count > 0)} />
+        </div>
+      )}
 
       {/* Search & filters */}
       <div className="mb-8 space-y-3">
@@ -602,6 +692,16 @@ export default function Courses() {
               {f.label}
             </button>
           ))}
+          {hasSelection && (
+            <button
+              onClick={() => setMineOnly(m => !m)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                mineOnly ? 'bg-ink text-cream' : 'bg-coffee-100 text-coffee-700 hover:bg-coffee-200'
+              }`}
+            >
+              My courses
+            </button>
+          )}
           {isFiltering && (
             <button
               onClick={clearFilters}
@@ -704,7 +804,7 @@ export default function Courses() {
       {/* Course listings — level picker → semester picker → that semester's courses */}
       {!isFiltering && (
         activeLevel === null ? (
-          <LevelPicker onSelect={requestLevel} />
+          <LevelPicker onSelect={requestLevel} courses={courses} levelMeta={levelMeta} LEVELS={LEVELS} />
         ) : activeLevel === 'all' ? (
           <div>
             <div className="flex items-center gap-3 mb-10">
@@ -725,7 +825,7 @@ export default function Courses() {
                       {getCoursesByLevelAndSemester(level, 1).length + getCoursesByLevelAndSemester(level, 2).length} courses · {levelMeta[level].totalUnits} units
                     </span>
                   </div>
-                  <LevelView level={level} />
+                  <LevelView level={level} getCoursesByLevelAndSemester={getCoursesByLevelAndSemester} />
                 </div>
               ))}
             </div>
@@ -736,6 +836,8 @@ export default function Courses() {
             onSelect={selectSemester}
             onShowAll={() => selectLevel('all')}
             onBack={clearLevel}
+            levelMeta={levelMeta}
+            getCoursesByLevelAndSemester={getCoursesByLevelAndSemester}
           />
         ) : (
           <SemesterCoursesView
@@ -744,6 +846,8 @@ export default function Courses() {
             onBack={clearSemester}
             onSwitchSemester={selectSemester}
             onShowAll={() => selectLevel('all')}
+            levelMeta={levelMeta}
+            getCoursesByLevelAndSemester={getCoursesByLevelAndSemester}
           />
         )
       )}

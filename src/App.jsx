@@ -7,8 +7,8 @@ import FloatingHelp from './components/FloatingHelp';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { StudyDaysProvider, useStudyDays } from './context/StudyDaysContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
-import { recordStudyActivity } from './utils/streak';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -22,6 +22,7 @@ const Cheatsheet = lazy(() => import('./pages/Cheatsheet'));
 const Planner = lazy(() => import('./pages/Planner'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SetupProfile = lazy(() => import('./pages/SetupProfile'));
+const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
 const Welcome = lazy(() => import('./pages/Welcome'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -82,10 +83,11 @@ function ScrollToTop() {
 // and marks today as a study day for the dashboard's streak counter.
 function LastLocationTracker() {
   const { pathname } = useLocation();
+  const { recordToday } = useStudyDays();
   useEffect(() => {
     recordLocation(pathname);
-    recordStudyActivity(pathname);
-  }, [pathname]);
+    recordToday(pathname);
+  }, [pathname, recordToday]);
   return null;
 }
 
@@ -180,6 +182,7 @@ export default function App() {
   return (
     <ThemeProvider>
     <AuthProvider>
+    <StudyDaysProvider>
     <div className="min-h-screen flex flex-col paper-texture">
       <a
         href="#main"
@@ -211,6 +214,7 @@ export default function App() {
             <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
+            <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
@@ -223,6 +227,7 @@ export default function App() {
       {!isChatPage && <FloatingHelp />}
       <PWAUpdatePrompt />
     </div>
+    </StudyDaysProvider>
     </AuthProvider>
     </ThemeProvider>
   );

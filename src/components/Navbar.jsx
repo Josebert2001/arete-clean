@@ -3,11 +3,33 @@ import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import AuthButton from './AuthButton';
 import ThemeToggle from './ThemeToggle';
+import { useAuth } from '../context/AuthContext';
+import { getDepartment } from '../data/departments';
+
+// Signed-in students see their own department; a signed-out visitor (who
+// hasn't picked one yet) gets neutral, university-wide copy instead of
+// assuming Cybersecurity.
+//
+// Reads the lightweight department registry directly rather than useCatalogue:
+// the Navbar renders on every route, and useCatalogue would dynamic-import the
+// student's whole course catalogue app-wide, undoing the per-department code
+// splitting. Only the department's NAME is needed here — no course data.
+function useTagline() {
+  const { user, profile } = useAuth();
+  if (!user || !profile) return 'University of Uyo · Student Learning Platform';
+  const department = getDepartment(profile.department);
+  if (department.status === 'foundation') {
+    const own = profile.department_other?.trim();
+    return own ? `${own} · UniUyo` : 'Foundation Track · UniUyo';
+  }
+  return `Dept of ${department.name} · UniUyo`;
+}
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const toggleRef = useRef(null);
   const { pathname } = useLocation();
+  const tagline = useTagline();
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +69,7 @@ export default function Navbar() {
               Areté
             </div>
             <div className="max-w-[12rem] truncate text-[11px] tracking-wide text-coffee-700 sm:max-w-none sm:text-xs sm:tracking-wider">
-              Dept of Cybersecurity · UniUyo
+              {tagline}
             </div>
           </div>
         </Link>

@@ -3,6 +3,7 @@ import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, XCircle, ChevronDown,
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
 import RichText from './RichText';
+import MathText, { MathBlock } from './MathText';
 import { useApiAvailability } from '../utils/apiClient';
 import {
   sectionToPlainText,
@@ -13,7 +14,7 @@ import {
 function DefinitionBox({ text }) {
   return (
     <div className="bg-coffee-50 border-l-4 border-coffee-500 rounded-r-xl px-5 py-4 mb-5">
-      <p className="text-reading text-ink max-w-prose">{text}</p>
+      <p className="text-reading text-ink max-w-prose"><MathText text={text} /></p>
     </div>
   );
 }
@@ -67,9 +68,9 @@ function TermList({ items }) {
                   isOpen ? 'bg-coffee-50 border-coffee-300' : 'bg-paper border-coffee-200 hover:border-coffee-400'
                 }`}
               >
-                <span className="block font-display font-bold text-ink text-lg leading-snug">{item.term}</span>
+                <span className="block font-display font-bold text-ink text-lg leading-snug"><MathText text={item.term} /></span>
                 {isOpen ? (
-                  <span className="block mt-2 text-reading-sm text-coffee-700">{item.def}</span>
+                  <span className="block mt-2 text-reading-sm text-coffee-700"><MathText text={item.def} /></span>
                 ) : (
                   <span className="block mt-2 text-xs font-mono text-coffee-400">Tap to reveal</span>
                 )}
@@ -86,9 +87,9 @@ function TermList({ items }) {
               </span>
               <span className="text-ink max-w-prose">
                 {'term' in item ? (
-                  <><span className="font-semibold">{item.term}</span>
-                  {item.def && <span className="text-coffee-700"> — {item.def}</span>}</>
-                ) : item}
+                  <><span className="font-semibold"><MathText text={item.term} /></span>
+                  {item.def && <span className="text-coffee-700"> — <MathText text={item.def} /></span>}</>
+                ) : <MathText text={item} />}
               </span>
             </li>
           ))}
@@ -104,7 +105,7 @@ function BulletList({ items }) {
       {items.map((item, i) => (
         <li key={i} className="flex gap-2.5 text-reading text-coffee-700">
           <span className="w-1.5 h-1.5 rounded-full bg-coffee-400 shrink-0 mt-3" />
-          <span className="max-w-prose">{item}</span>
+          <span className="max-w-prose"><MathText text={item} /></span>
         </li>
       ))}
     </ul>
@@ -122,7 +123,7 @@ function ProsCons({ advantages, disadvantages }) {
           {advantages.map((a, i) => (
             <li key={i} className="flex gap-2 text-reading-sm text-coffee-700">
               <CheckCircle2 size={13} className="text-moss shrink-0 mt-1" />
-              {a}
+              <MathText text={a} />
             </li>
           ))}
         </ul>
@@ -135,7 +136,7 @@ function ProsCons({ advantages, disadvantages }) {
           {disadvantages.map((d, i) => (
             <li key={i} className="flex gap-2 text-reading-sm text-coffee-700">
               <XCircle size={13} className="text-rust shrink-0 mt-1" />
-              {d}
+              <MathText text={d} />
             </li>
           ))}
         </ul>
@@ -164,7 +165,7 @@ function ComparisonTable({ title, headers, rows }) {
             <tr key={i} className={i % 2 === 0 ? 'bg-paper' : 'bg-coffee-50'}>
               {row.map((cell, j) => (
                 <td key={j} className={`px-4 py-3 text-coffee-700 leading-snug ${j === 0 ? 'font-semibold text-ink' : ''}`}>
-                  {cell}
+                  <MathText text={cell} />
                 </td>
               ))}
             </tr>
@@ -184,13 +185,13 @@ function CaseStudy({ title, prompt, tasks }) {
         <span className="text-xs font-mono font-bold text-ember-500 uppercase tracking-wider">Case Study / Assignment</span>
       </div>
       {title && <h4 className="font-display font-bold text-ink text-lg mb-2">{title}</h4>}
-      {prompt && <p className="text-reading text-coffee-700 mb-3 max-w-prose">{prompt}</p>}
+      {prompt && <p className="text-reading text-coffee-700 mb-3 max-w-prose"><MathText text={prompt} /></p>}
       {tasks && (
         <ol className="space-y-2">
           {tasks.map((task, i) => (
             <li key={i} className="flex gap-2.5 text-reading text-coffee-700 max-w-prose">
               <span className="font-mono font-bold text-ember-500 shrink-0">{i + 1}.</span>
-              {task}
+              <MathText text={task} />
             </li>
           ))}
         </ol>
@@ -199,14 +200,25 @@ function CaseStudy({ title, prompt, tasks }) {
   );
 }
 
-function Figure({ src, alt, caption, width, height }) {
+function Figure({ src, alt, caption, width, height, maxWidth }) {
   return (
     <figure className="mb-5">
       <div className="rounded-xl border border-coffee-200 bg-paper p-3">
         {/* width/height are the intrinsic pixel size — with w-full h-auto the
             browser uses them only to reserve aspect-ratio space, preventing
-            layout shift as the lazy image loads. */}
-        <img src={src} alt={alt || caption || ''} loading="lazy" width={width} height={height} className="w-full h-auto rounded-lg" />
+            layout shift as the lazy image loads.
+            `maxWidth` caps how wide a figure may render, for tall portrait
+            diagrams that would otherwise be stretched to several screens of
+            height by w-full. Capped figures centre themselves. */}
+        <img
+          src={src}
+          alt={alt || caption || ''}
+          loading="lazy"
+          width={width}
+          height={height}
+          style={maxWidth ? { maxWidth: `${maxWidth}px` } : undefined}
+          className="w-full h-auto rounded-lg mx-auto"
+        />
       </div>
       {caption && (
         <figcaption className="mt-2 text-xs font-mono text-coffee-500 text-center">{caption}</figcaption>
@@ -222,13 +234,13 @@ function NoteBox({ text, items }) {
         <Lightbulb size={14} className="text-moss shrink-0" />
         <span className="text-xs font-mono font-bold text-moss uppercase tracking-wider">Added for clarity</span>
       </div>
-      {text && <p className="text-reading text-coffee-700 max-w-prose">{text}</p>}
+      {text && <p className="text-reading text-coffee-700 max-w-prose"><MathText text={text} /></p>}
       {items && (
         <ul className={`space-y-2 ${text ? 'mt-2' : ''}`}>
           {items.map((item, i) => (
             <li key={i} className="flex gap-2.5 text-reading text-coffee-700">
               <span className="w-1.5 h-1.5 rounded-full bg-moss shrink-0 mt-3" />
-              <span className="max-w-prose">{item}</span>
+              <span className="max-w-prose"><MathText text={item} /></span>
             </li>
           ))}
         </ul>
@@ -343,14 +355,14 @@ function Section({ section, simplifyReady, context, collapsible = false, isOpen 
                 size={15}
                 className={`text-coffee-400 shrink-0 transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`}
               />
-              <span className="flex-1">{section.heading}</span>
+              <span className="flex-1"><MathText text={section.heading} /></span>
               {section.date && (
                 <span className="text-xs font-mono font-normal text-coffee-500">— {section.date}</span>
               )}
             </button>
           ) : (
             <>
-              {section.heading}
+              <MathText text={section.heading} />
               {section.date && (
                 <span className="text-xs font-mono font-normal text-coffee-500 ml-1">— {section.date}</span>
               )}
@@ -401,9 +413,10 @@ function Section({ section, simplifyReady, context, collapsible = false, isOpen 
           {/* heading is rendered by the section-level <h4> above, like every other type — don't repeat it inside the table */}
           {section.type === 'table' && <ComparisonTable headers={section.headers} rows={section.rows} />}
           {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
-          {section.type === 'text' && <p className="text-reading text-coffee-700 max-w-prose mb-3">{section.text}</p>}
+          {section.type === 'text' && <p className="text-reading text-coffee-700 max-w-prose mb-3"><MathText text={section.text} /></p>}
+          {section.type === 'math' && <MathBlock tex={section.tex} caption={section.caption} />}
           {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
-          {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} />}
+          {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} maxWidth={section.maxWidth} />}
           {section.type === 'code' && <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />}
           {section.type === 'mosca' && <MoscaCalculator />}
           {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
@@ -540,7 +553,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, context
                             onClick={() => jumpToSection(ii)}
                             className="py-0.5 text-left text-sm leading-snug text-coffee-600 hover:text-ink transition-colors"
                           >
-                            {it.head.heading}
+                            <MathText text={it.head.heading} />
                           </button>
                         </li>
                       );

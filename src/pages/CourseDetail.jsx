@@ -1,20 +1,58 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap } from 'lucide-react';
-import { getCourseBySlug, courses } from '../data/courses';
+import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap, PenLine } from 'lucide-react';
+import { useCatalogue } from '../data/useCatalogue';
+import { materialsDepartmentFor } from '../data/departments';
 import LectureNotes from '../components/LectureNotes';
 import CourseQuiz from '../components/CourseQuiz';
+import CourseExamPrep from '../components/CourseExamPrep';
 import CourseMaterials from '../components/CourseMaterials';
 import CourseAIChat from '../components/CourseAIChat';
 import ExplainSelection from '../components/ExplainSelection';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { usePageTitle } from '../utils/usePageTitle';
 
+// Last tab viewed per course, so returning to a course you had open — after
+// switching tabs, minimizing, or a background reload — lands you back where
+// you were instead of always resetting to Study Resources.
+const TAB_STORAGE_KEY = 'arete-course-tab';
+
+function getStoredTabMap() {
+  try {
+    return JSON.parse(localStorage.getItem(TAB_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function getStoredTab(slug, course) {
+  const stored = getStoredTabMap()[slug];
+  const hasNotes = course?.lectureNotes?.length > 0;
+  const hasQuiz = course?.quiz?.length > 0;
+  const hasExamPrep = course?.examPrep?.length > 0;
+  if (stored === 'notes' && hasNotes) return 'notes';
+  if (stored === 'quiz' && hasQuiz) return 'quiz';
+  if (stored === 'exam' && hasExamPrep) return 'exam';
+  if (stored === 'materials') return 'materials';
+  return 'resources';
+}
+
+function setStoredTab(slug, tab) {
+  try {
+    const map = getStoredTabMap();
+    map[slug] = tab;
+    localStorage.setItem(TAB_STORAGE_KEY, JSON.stringify(map));
+  } catch { /* private mode — tab just resets next visit */ }
+}
+
 const subjectStyles = {
   cs:    { codeBg: 'bg-ink',        codeText: 'text-cream' },
   cyb:   { codeBg: 'bg-rust',       codeText: 'text-cream' },
   math:  { codeBg: 'bg-moss',       codeText: 'text-cream' },
   stats: { codeBg: 'bg-ember-500',  codeText: 'text-cream' },
+  // Kept in step with the same map in Courses.jsx — see the note there on why
+  // Data Science shares the statistics colour.
+  dts:   { codeBg: 'bg-ember-500',  codeText: 'text-cream' },
   gst:   { codeBg: 'bg-coffee-700', codeText: 'text-cream' },
   phy:   { codeBg: 'bg-moss',       codeText: 'text-cream' },
   sen:   { codeBg: 'bg-ink',        codeText: 'text-cream' },
@@ -26,18 +64,49 @@ const subjectStyles = {
 
 export default function CourseDetail() {
   const { slug } = useParams();
-  const course = getCourseBySlug(slug);
-  const [activeTab, setActiveTab] = useState('resources');
+  const { catalogue, department, status } = useCatalogue();
+  const course = catalogue?.getCourseBySlug(slug);
+  const [activeTab, setActiveTabState] = useState('resources');
 
-  // Reset to the default tab when moving to another course (prev/next nav)
-  // so a tab the new course doesn't have can't stay selected.
-  const [lastSlug, setLastSlug] = useState(slug);
-  if (lastSlug !== slug) {
-    setLastSlug(slug);
-    setActiveTab('resources');
+  const setActiveTab = (tab) => {
+    setActiveTabState(tab);
+    setStoredTab(slug, tab);
+  };
+
+  // Apply the remembered tab once real course data is available for this slug
+  // — the catalogue loads asynchronously, so `course` isn't there on the first
+  // render — and again whenever the slug itself changes (prev/next nav).
+  const [resolvedFor, setResolvedFor] = useState(null);
+  if (course && resolvedFor !== slug) {
+    setResolvedFor(slug);
+    setActiveTabState(getStoredTab(slug, course));
   }
 
   usePageTitle(course ? `${course.code} — ${course.title}` : 'Course not found');
+
+  if (status === 'error') {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-24 text-center">
+        <p className="text-coffee-700 mb-6">
+          The course catalogue didn't download — check your connection and try again.
+        </p>
+        <button onClick={() => window.location.reload()} className="btn-primary text-sm">
+          Reload page
+        </button>
+      </div>
+    );
+  }
+
+  if (status !== 'ready') {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-16 animate-pulse" role="status" aria-label="Loading course">
+        <div className="h-4 w-40 bg-coffee-100 rounded mb-6" />
+        <div className="h-12 w-2/3 max-w-lg bg-coffee-100 rounded mb-4" />
+        <div className="h-4 w-full max-w-xl bg-coffee-100 rounded" />
+        <span className="sr-only">Loading…</span>
+      </div>
+    );
+  }
 
   if (!course) {
     return (
@@ -48,16 +117,26 @@ export default function CourseDetail() {
     );
   }
 
+  const courses = catalogue.courses;
+
   const style = subjectStyles[course.subject] || subjectStyles.cs;
   const courseIndex = courses.findIndex(c => c.slug === slug);
   const prev = courseIndex > 0 ? courses[courseIndex - 1] : null;
   const next = courseIndex < courses.length - 1 ? courses[courseIndex + 1] : null;
   const hasNotes = course.lectureNotes?.length > 0;
   const hasQuiz = course.quiz?.length > 0;
+  const hasExamPrep = course.examPrep?.length > 0;
 
-  // Which outline topics the lecture notes actually reach. A note topic opts in
-  // with `covers: [n]` (fully) or `partial: [n]` (touched only). Courses whose
-  // notes declare neither produce an empty map and render as they always have.
+  // Which outline topics the lecture notes actually reach, as 1-based indices
+  // into `course.topics`: `covers` (fully) or `partial` (touched only).
+  //
+  // Those indices belong to the *course*, not to the notes — a note file is
+  // shared verbatim between department catalogues (see departments.js) while
+  // each department writes its own `topics` array, so one set of indices cannot
+  // be right for both. A course whose notes are shared therefore carries its own
+  // `noteCoverage` map, keyed by note number; notes used by a single catalogue
+  // still declare `covers`/`partial` inline. Declaring neither produces an empty
+  // map and renders as it always has.
   const topicCoverage = new Map();
   (course.lectureNotes || []).forEach((note) => {
     const mark = (n, level) => {
@@ -66,8 +145,9 @@ export default function CourseDetail() {
       if (level === 'full') entry.level = 'full';
       topicCoverage.set(n, entry);
     };
-    (note.covers || []).forEach(n => mark(n, 'full'));
-    (note.partial || []).forEach(n => mark(n, 'partial'));
+    const source = course.noteCoverage?.[note.number] ?? note;
+    (source.covers || []).forEach(n => mark(n, 'full'));
+    (source.partial || []).forEach(n => mark(n, 'partial'));
   });
 
   return (
@@ -137,8 +217,9 @@ export default function CourseDetail() {
       <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0 overflow-x-auto no-scrollbar">
         {[
           { key: 'resources', label: 'Study Resources', icon: BookOpen },
-          ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} topics` }] : []),
+          ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} ${course.lectureNotes.length === 1 ? 'topic' : 'topics'}` }] : []),
           ...(hasQuiz ? [{ key: 'quiz', label: 'Practice Quiz', icon: GraduationCap, badge: `${course.quiz.length} Q` }] : []),
+          ...(hasExamPrep ? [{ key: 'exam', label: 'Written Exam Prep', icon: PenLine, badge: `${course.examPrep.length} Q` }] : []),
           { key: 'materials', label: 'Materials', icon: Paperclip },
         ].map(({ key, label, icon: Icon, badge }) => (
           <button
@@ -175,10 +256,21 @@ export default function CourseDetail() {
         </div>
       )}
 
+      {/* Written Exam Prep tab */}
+      {activeTab === 'exam' && hasExamPrep && (
+        <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <CourseExamPrep course={course} />
+        </div>
+      )}
+
       {/* Materials tab */}
       {activeTab === 'materials' && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
-          <CourseMaterials courseCode={course.code} courseSlug={slug} />
+          <CourseMaterials
+            courseCode={course.code}
+            courseSlug={slug}
+            department={materialsDepartmentFor(course, department?.slug)}
+          />
         </div>
       )}
 

@@ -30,7 +30,7 @@ export default function CourseAIChat({ course }) {
     `What are the key topics I must know for ${course.code}?`,
     course.topics[0] ? `Explain: ${course.topics[0]}` : 'What is this course about?',
     course.topics[2] ? `Explain: ${course.topics[2]}` : `Give me exam tips for ${course.code}`,
-    `How does ${course.code} connect to cybersecurity?`,
+    `How is ${course.code} applied in practice?`,
   ];
 
   useEffect(() => {

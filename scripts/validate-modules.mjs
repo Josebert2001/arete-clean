@@ -8,7 +8,16 @@ import { pythonModules } from '../src/data/pythonModules.js';
 import { cModules } from '../src/data/cModules.js';
 import { securityModules } from '../src/data/securityModules.js';
 import { trackMeta } from '../src/data/trackMeta.js';
-import { courses } from '../src/data/courses.js';
+import { courses as cybersecurityCourses } from '../src/data/courses.js';
+import { courses as dataScienceCourses } from '../src/data/dataScienceCourses.js';
+
+// Every department catalogue, so the course checks below cover all of them.
+// A new department must be added here too — otherwise its courses are silently
+// skipped by the prebuild validator (see CLAUDE.md → Adding a department).
+const catalogues = [
+  { department: 'cybersecurity', courses: cybersecurityCourses },
+  { department: 'dataScience',   courses: dataScienceCourses },
+];
 
 const tracks = [
   { name: 'java',     modules },
@@ -150,30 +159,106 @@ for (const { name, modules: list } of tracks) {
   });
 }
 
-// Some courses ship a practice-quiz bank (course.quiz). Students pick how many
-// questions to draw, so there is no fixed count — but every question must still
-// be well-formed, with an in-range correctIndex, or a quiz could break silently.
-for (const c of courses) {
-  if (!c.quiz) continue;
-  const where = (qi, suffix) => `[course ${c.code ?? c.slug ?? '?'}] quiz[${qi}]: ${suffix}`;
-  if (!Array.isArray(c.quiz) || c.quiz.length === 0) {
-    errors.push(`[course ${c.code ?? c.slug}] quiz must be a non-empty array`);
-    continue;
+for (const { department, courses } of catalogues) {
+  // A duplicate slug silently shadows a course: /courses/:slug resolves to
+  // whichever entry comes first and the other becomes unreachable. Cheap to
+  // check, and the likeliest mistake in a hand-authored catalogue.
+  //
+  // Codes are deliberately NOT checked — courses.js repeats CYB 311/312/313 on
+  // purpose (each is both a taught course and a SIWES placement), which is why
+  // slugs, not codes, are the unique key. findCourseEntry() in
+  // api/_lib/courseData.js resolves that ambiguity for the tutor.
+  const seenSlugs = new Set();
+  for (const c of courses) {
+    if (seenSlugs.has(c.slug)) errors.push(`[${department}] duplicate course slug "${c.slug}"`);
+    seenSlugs.add(c.slug);
   }
-  c.quiz.forEach((q, qi) => {
-    check(isNonEmptyString(q?.question), where(qi, 'question missing'));
-    check(Array.isArray(q?.options) && q.options.length >= 2,
-          where(qi, 'options must have at least 2 entries'));
-    check(typeof q?.correctIndex === 'number', where(qi, 'correctIndex missing'));
-    if (Array.isArray(q?.options) && typeof q?.correctIndex === 'number') {
-      check(q.correctIndex >= 0 && q.correctIndex < q.options.length,
-            where(qi, `correctIndex out of range (got ${q.correctIndex}, ${q.options.length} options)`));
+
+  // Some courses ship a practice-quiz bank (course.quiz). Students pick how many
+  // questions to draw, so there is no fixed count — but every question must still
+  // be well-formed, with an in-range correctIndex, or a quiz could break silently.
+  for (const c of courses) {
+    if (!c.quiz) continue;
+    const where = (qi, suffix) => `[${department}] course ${c.code ?? c.slug ?? '?'} quiz[${qi}]: ${suffix}`;
+    if (!Array.isArray(c.quiz) || c.quiz.length === 0) {
+      errors.push(`[${department}] course ${c.code ?? c.slug}: quiz must be a non-empty array`);
+      continue;
     }
-    (q?.options || []).forEach((opt, oi) => {
-      check(isNonEmptyString(opt), where(qi, `options[${oi}] empty`));
+    c.quiz.forEach((q, qi) => {
+      check(isNonEmptyString(q?.question), where(qi, 'question missing'));
+      check(Array.isArray(q?.options) && q.options.length >= 2,
+            where(qi, 'options must have at least 2 entries'));
+      check(typeof q?.correctIndex === 'number', where(qi, 'correctIndex missing'));
+      if (Array.isArray(q?.options) && typeof q?.correctIndex === 'number') {
+        check(q.correctIndex >= 0 && q.correctIndex < q.options.length,
+              where(qi, `correctIndex out of range (got ${q.correctIndex}, ${q.options.length} options)`));
+      }
+      (q?.options || []).forEach((opt, oi) => {
+        check(isNonEmptyString(opt), where(qi, `options[${oi}] empty`));
+      });
+      check(isNonEmptyString(q?.explanation), where(qi, 'explanation missing'));
     });
-    check(isNonEmptyString(q?.explanation), where(qi, 'explanation missing'));
-  });
+  }
+
+  // Courses examined on paper ship a written-exam bank (course.examPrep) instead
+  // of, or alongside, the MCQ bank. It is deliberately NOT validated as a quiz:
+  // a written question has no options and no correctIndex. The checks that matter
+  // here are that each mark scheme's per-point marks add up to the question's
+  // stated total — the component derives the student's self-marked score from
+  // those trailing "(2)" values, so a scheme that doesn't balance silently makes
+  // full marks unreachable — and that a recall drill has one item per mark.
+  for (const c of courses) {
+    if (!c.examPrep) continue;
+    const where = (qi, suffix) => `[${department}] course ${c.code ?? c.slug ?? '?'} examPrep[${qi}]: ${suffix}`;
+    if (!Array.isArray(c.examPrep) || c.examPrep.length === 0) {
+      errors.push(`[${department}] course ${c.code ?? c.slug}: examPrep must be a non-empty array`);
+      continue;
+    }
+    c.examPrep.forEach((q, qi) => {
+      check(['longform', 'recall'].includes(q?.type),
+            where(qi, `type must be 'longform' or 'recall' (got ${JSON.stringify(q?.type)})`));
+      check(isNonEmptyString(q?.question), where(qi, 'question missing'));
+      check(isNonEmptyString(q?.source), where(qi, 'source missing — students need the section to re-read'));
+      check(typeof q?.marks === 'number' && q.marks > 0, where(qi, 'marks must be a positive number'));
+
+      if (q?.type === 'longform') {
+        check(isNonEmptyString(q?.modelAnswer), where(qi, 'modelAnswer missing'));
+        check(Array.isArray(q?.markScheme) && q.markScheme.length > 0,
+              where(qi, 'markScheme must be a non-empty array'));
+        let total = 0;
+        let parseable = true;
+        (q?.markScheme || []).forEach((point, pi) => {
+          check(isNonEmptyString(point), where(qi, `markScheme[${pi}] empty`));
+          const m = String(point).match(/\(([0-9.]+)\)\s*$/);
+          if (!m) {
+            parseable = false;
+            errors.push(where(qi, `markScheme[${pi}] must end with its mark value in parentheses, e.g. "… (2)"`));
+          } else {
+            total += parseFloat(m[1]);
+          }
+        });
+        if (parseable && typeof q?.marks === 'number') {
+          check(Math.abs(total - q.marks) < 0.001,
+                where(qi, `markScheme totals ${total} but the question is worth ${q.marks}`));
+        }
+      }
+
+      if (q?.type === 'recall') {
+        check(Array.isArray(q?.items) && q.items.length > 0,
+              where(qi, 'items must be a non-empty array'));
+        if (Array.isArray(q?.items) && typeof q?.marks === 'number') {
+          check(q.items.length === q.marks,
+                where(qi, `recall drills score a mark per item — ${q.items.length} items but marks is ${q.marks}`));
+        }
+        (q?.items || []).forEach((item, ii) => {
+          check(isNonEmptyString(item?.name), where(qi, `items[${ii}].name missing`));
+          check(isNonEmptyString(item?.explain), where(qi, `items[${ii}].explain missing`));
+          check(item?.aliases === undefined || Array.isArray(item.aliases),
+                where(qi, `items[${ii}].aliases must be an array when present`));
+        });
+      }
+    });
+  }
 }
 
 if (errors.length > 0) {
@@ -184,4 +269,8 @@ if (errors.length > 0) {
 }
 
 const total = tracks.reduce((sum, t) => sum + t.modules.length, 0);
-console.log(`✓ Module data OK (${total} modules across ${tracks.length} tracks).`);
+const courseTotal = catalogues.reduce((sum, c) => sum + c.courses.length, 0);
+console.log(
+  `✓ Module data OK (${total} modules across ${tracks.length} tracks; ` +
+  `${courseTotal} courses across ${catalogues.length} department catalogues).`
+);

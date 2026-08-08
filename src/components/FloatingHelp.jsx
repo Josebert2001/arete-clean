@@ -44,7 +44,7 @@ export default function FloatingHelp() {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState('help'); // 'help' | 'chat'
   const [messages, setMessages] = useState([
-    { role: 'bot', text: "Hi! I'm your Areté tutor. Ask me anything about your cybersecurity courses, programming tracks, or any concept you're studying." },
+    { role: 'bot', text: "Hi! I'm your Areté tutor. Ask me anything about your courses, the programming tracks, or any concept you're studying." },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);

@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Areté — interactive learning platform for the Cybersecurity Department, University of Uyo. Java, Python & C tracks plus a full Cybersecurity course hub.",
+  "description": "Areté — interactive learning platform for the University of Uyo. Multi-department course hub (Cybersecurity, Data Science, plus foundation mode) with Java, Python, C and Security tracks.",
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/validate-modules.mjs",
@@ -23,12 +23,13 @@
     "@supabase/supabase-js": "^2.45.0",
     "ai": "^6.0.199",
     "googleapis": "^173.0.0",
+    "katex": "^0.18.1",
     "lucide-react": "^0.400.0",
     "mammoth": "^1.8.0",
     "pdf-parse": "^1.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.0",
+    "react-router-dom": "^7.18.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -50,5 +51,11 @@
     "vite": "^8.0.16",
     "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.9"
+  },
+  "overridesReason": {
+    "gaxios": "googleapis-common pins gaxios to exactly 7.1.3, which drags in rimraf -> glob -> minimatch -> brace-expansion@2.x. brace-expansion 2.x has no patch for GHSA-3jxr-9vmj-r5cp / GHSA-mh99-v99m-4gvg (the 1.x line was patched at 1.1.16, the 2.x line never was). gaxios 7.3.0 dropped the rimraf dependency outright, so this bump removes the vulnerable chain instead of patching it. google-auth-library@10.9.0 already resolves gaxios 7.3.0 in this same tree."
+  },
+  "overrides": {
+    "gaxios": "^7.3.0"
   }
 }
