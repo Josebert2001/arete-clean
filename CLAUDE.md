@@ -67,7 +67,7 @@ Browser → React SPA (Vite)
 | `src/data/cModules.js` | 12 C modules |
 | `src/data/securityModules.js` | 12 Security "rooms" (theory + quiz + an embedded CTF `challenge`); flags stored as SHA-256 hashes |
 | `src/components/FlagChallenge.jsx` | Renders a module's CTF challenge; validates the flag client-side via Web Crypto SHA-256 (no backend); escalating hints, marks the module complete on solve |
-| `src/data/courses.js` | ~7800 lines — all Cybersecurity courses (100L–400L), topics, textbooks, exam tips; the 22 foundation courses carry `crossDepartmental: true`, and CYB 211 carries `sharedMaterials: true` (see below) |
+| `src/data/courses.js` | ~8200 lines — all Cybersecurity courses (100L–400L), topics, textbooks, exam tips; the 22 foundation courses carry `crossDepartmental: true`, and CYB 211 carries `sharedMaterials: true` (see below) |
 | `src/data/departments.js` | Department registry (cybersecurity + dataScience = full, general = foundation) + lazy catalogue loaders + `YEAR_LEVELS` (the lightweight level list — import this, not courses.js, when a page only needs to validate/render a level) + `materialsDepartmentFor()` (which `course_materials.department` pool a course's uploads belong to) + `findDepartmentByName()` (matches a foundation student's typed `department_other` against the authored departments, so Welcome and the dashboard can offer them the switch) |
 | `src/data/useCatalogue.js` | Hook resolving the signed-in student's department catalogue; status `loading \| ready \| error` — always handle `error` or the page hangs on a failed chunk load. Stays `loading` until auth/profile settle, so a student never sees another department's catalogue flash first |
 | `src/data/dataScienceCourses.js` | ~2000 lines — the full B.Sc. Data Science catalogue (structure transcribed from the Students' Information Handbook Ch.4 §4.1). Standalone: imports only `lectureNotes/*` |
@@ -83,6 +83,9 @@ Browser → React SPA (Vite)
 | `api/extract.js` | Extracts text from freshly uploaded course materials (.txt/.docx/.pdf via mammoth + pdf-parse) so the tutor can reference lecture notes; signed-in only |
 | `api/simplify.js` | "Simplify this" — Groq rewrite of a dense lecture-note section in plain English; client caches results in localStorage |
 | `src/components/LectureNotes.jsx` | Renders lecture-note sections (definition/bullets/termlist/table/mosca/…); termlists double as flashcards; hosts the Simplify button |
+| `src/components/CourseQuiz.jsx` \| `Quiz.jsx` | MCQ practice off `course.quiz` — student picks a length, questions sampled at random, options shuffled per attempt. Scores land in `quizScores[course.slug]` under the `course-quizzes-v1` key |
+| `src/components/CourseExamPrep.jsx` | Written-exam practice off `course.examPrep`, for courses examined on paper rather than by CBT. Generic over any course carrying a bank; see "Adding a question bank" below for why it is a sibling field and not more question types on `quiz` |
+| `src/data/lectureNotes/ent221Quiz.js` \| `cyb122ExamPrep.js` | The two banks that exist today — an MCQ bank shared by both catalogues' ENT 221 entries, and CYB 122's written-exam bank |
 | `api/_lib/supabase.js` | Server-side Supabase client using Bearer token from request |
 | `api/_lib/googleAuth.js` | Google OAuth2 client, signed `state` (CSRF), service-role client — the only file allowed to use `SUPABASE_SERVICE_ROLE_KEY` |
 | `api/_lib/googleEvents.js` | PlanEvent → Google Calendar event resource (duplicates `src/utils/ics.js`'s date/RRULE math for the Node context — keep both in sync by hand) |
@@ -94,7 +97,7 @@ Browser → React SPA (Vite)
 | `supabase/migrations/20260801000000_materials_department_backfill.sql` | Sorts existing `course_materials` rows into their pool ('general' for shared courses) + indexes both lookup pairs. **Run manually in the Supabase SQL editor** |
 | `supabase/migrations/20260802000000_reg_number_optional.sql` | Drops `NOT NULL` from `profiles.reg_number`. **Run manually before deploying the optional-reg-number frontend**, or every signup that leaves the field blank fails |
 | `vercel.json` | CSP, CORS headers, SPA rewrite rule |
-| `scripts/validate-modules.mjs` | Pre-build module structure validator |
+| `scripts/validate-modules.mjs` | Pre-build module structure validator — also validates every catalogue's `course.quiz` and `course.examPrep` banks |
 
 ## Environment Variables
 Must be set in `.env.local` for local dev (never commit this file):
@@ -132,7 +135,7 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 - Never install new dependencies without asking first
 - Handle errors explicitly — no silent failures, no empty catch blocks
 - Make the smallest change that solves the problem
-- `src/data/courses.js` is very large (~2131 lines) — read only the relevant section before editing
+- `src/data/courses.js` is very large (~8200 lines) — read only the relevant section before editing
 - AI features gracefully degrade when keys are missing — preserve this behavior
 - Rate limiting in `/api/*` is IP-based in-memory — do not remove or weaken it
 
@@ -145,14 +148,24 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 ## Testing — Important Context
 The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-library/react` available for component tests.
 - Config: `vitest.config.js` · setup file: `src/__tests__/setup.js` (imports `@testing-library/jest-dom`)
-- Test files live in `src/__tests__/` as `*.test.js`. Current coverage is thin — `useProgress.test.js` (the progress hook) is the only suite so far.
+- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 26 suites, ~290 tests.
 - Run with `npm test` (single run) or `npm run test:watch`. CI runs `npm test` on every push.
-- When writing new logic, add or extend a test if the function is testable in isolation — coverage beyond `useProgress` is still missing, so most of the app is untested.
+- When writing new logic, add or extend a test if the function is testable in isolation. Coverage is uneven — data/util logic is reasonably covered, most page-level components are not.
+- **Component tests use `fireEvent` from `@testing-library/react`** (see `profileForm.test.jsx`, `courseExamPrep.test.jsx`). `@testing-library/user-event` is *not* a dependency — do not import it.
 - Do not add new test tooling (e.g. coverage providers, Playwright) without asking first.
 
 ## Common Tasks
 - **Adding a module:** Edit the relevant data file (`modules.js`, `pythonModules.js`, `cModules.js`, `securityModules.js`), run `npm run validate` to confirm structure. A track is registered in `trackMeta.js` (metadata + `moduleIndex`) and `trackConfig.js` (lazy loader); the generic `/tracks/:lang/:id` route picks it up automatically. Security modules add a `challenge` object (validated by `validate-modules.mjs`) and render a Challenge tab; they omit the JDoodle playground.
 - **Adding a course:** Edit `src/data/courses.js` — read the existing structure first, it is large
+- **Adding a question bank:** A course can carry two independent banks, and which one you want depends on how the course is *examined*, not on what feels easier to write.
+  - `quiz` — MCQ, for CBT papers. `{ question, options[] (≥2), correctIndex, explanation }`. Rendered by `CourseQuiz.jsx`; `Quiz.jsx` shuffles the options every attempt, so never encode position into the wording ("both of the above" will break).
+  - `examPrep` — written answers, for paper exams. Two types: `longform` (`modelAnswer` + `markScheme[]`, optional `figure`) and `recall` (`items[]` of `{ name, aliases[], explain }`). Rendered by `CourseExamPrep.jsx`. Every question needs a `source` naming the lecture-note section it came from, so a student who drops marks knows what to re-read.
+
+  **Keep them separate — do not add written types to `quiz`.** The MCQ shape is hard-wired at three levels (the data shape, `Quiz.jsx`'s `idx === correctIndex` scoring, and the validator's mandatory `options`/`correctIndex`), so a question without options cannot travel through it. The sibling field costs nothing and leaves the existing banks untouched.
+
+  **Mark scheme lines must end with their mark value in parentheses** — `'Due care defined (2)'`. `CourseExamPrep.jsx` parses that trailing value to compute the student's self-marked score, and `validate-modules.mjs` asserts the per-point values sum to the question's `marks`; an unbalanced scheme would otherwise make full marks silently unreachable. Recall drills score a mark per item, so `items.length` must equal `marks`.
+
+  A bank shared between catalogues (like `ent221Quiz`) lives in `src/data/lectureNotes/` beside the notes it tests and is imported by each catalogue's course entry. Run `node scripts/validate-modules.mjs` after editing either kind.
 - **Adding a department:** Query demand first (`SELECT lower(trim(department_other)), count(*) FROM profiles WHERE department_other IS NOT NULL GROUP BY 1 ORDER BY 2 DESC`). Then, three steps:
   1. Author `src/data/<dept>Courses.js` — **self-contained**, exporting `courses`, `LEVELS` and `levelMeta` (same shape as `courses.js`; copy `dataScienceCourses.js` as the model). Re-author the shared courses with your department's framing rather than importing another catalogue; do import the shared `./lectureNotes/*.js` for any course that has them, or students lose the transcribed workbook content. **When you import shared notes, write your own `noteCoverage` for that course** — a map of note number → `{ covers: [n], partial: [n] }`, where the indices are 1-based positions in *your* `topics` array. The note files carry no indices of their own precisely because they are shared; without it the Course Hub's outline badges point at whatever the other department's outline happened to say (`departments.test.js` asserts this). Mark SIWES courses `subject: 'siwes'` — the Course Hub keys its SIWES section off that, not off the level.
   2. Register it in `departments.js` with `status: 'full'` and a `loadCatalogue()` importing it. `SELECTABLE_DEPARTMENTS` and the SetupProfile/ProfileSettings pickers pick it up automatically.
