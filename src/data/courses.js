@@ -3,6 +3,7 @@
 import { cos121LectureNotes } from './lectureNotes/cos121.js';
 import { cyb121LectureNotes } from './lectureNotes/cyb121.js';
 import { cyb122LectureNotes } from './lectureNotes/cyb122.js';
+import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
 import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
 import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
 import { ent221LectureNotes } from './lectureNotes/ent221.js';
@@ -623,6 +624,12 @@ export const courses = [
       'Read real breach case studies (Troy Hunt\'s blog, Krebs on Security) — they make abstract threats concrete',
       'Professor Messer\'s free Security+ course covers most of this curriculum and is excellent',
       'Social engineering is the most common attack vector — understand human psychology, not just technical controls',
+      'Scope triage: the examinable core is what was actually lectured — Lectures 1–4, which are sections 7–12 of the lecture notes (Whitman & Mattord chapters 1–4). Cryptography/steganography and funds transfer/e-voting sit in the course outline but were never taught, so revise them last if at all',
+      'Written paper, not CBT: a 10-mark question wants roughly five distinct points, each named and then explained in a sentence or two. One long unbroken paragraph scores badly even when everything in it is correct — the marker is counting points',
+      'Structure every long answer the same way: define the term, explain the mechanism, give an example or a diagram, then link it to a neighbouring concept. A repeatable skeleton stops you freezing on a question you half-know',
+      'Practise reproducing the diagrams from memory with their labels — the McCumber Cube, the TCP three-way handshake, the SDLC waterfall, top-down vs bottom-up. "With the aid of a diagram" is a standard question stem and the labels are where the marks are',
+      'On a four-from-six paper in two hours, budget about 30 minutes per question: 5 planning the points, 20 writing, 5 checking. Read all six and pick your four before you write a single word',
+      'Where a list is long (the fifteen threat categories, for instance) the question will ask for "any five" — so learn five you can explain properly rather than fifteen you can only name',
     ],
     // Sections 1-6 transcribed from the department's "Principles and Practice
     // of Information Security: Polished Master Study Guide"; sections 7-12
@@ -632,6 +639,10 @@ export const courses = [
     // coverage mapping. Together they never reach cryptography/steganography
     // (topic 4) or funds-transfer/e-voting security (topic 6).
     lectureNotes: cyb122LectureNotes,
+    // Written-exam bank, not MCQ — this course is examined on paper. See
+    // src/data/lectureNotes/cyb122ExamPrep.js for the question types and why
+    // coverage is weighted towards the lectured sections.
+    examPrep: cyb122ExamPrep,
   },
 
   // ═══════════════════════════════════════════════════════════════
