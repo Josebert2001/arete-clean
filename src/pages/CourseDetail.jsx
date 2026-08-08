@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap, PenLine } from 'lucide-react';
 import { useCatalogue } from '../data/useCatalogue';
 import { materialsDepartmentFor } from '../data/departments';
 import LectureNotes from '../components/LectureNotes';
 import CourseQuiz from '../components/CourseQuiz';
+import CourseExamPrep from '../components/CourseExamPrep';
 import CourseMaterials from '../components/CourseMaterials';
 import CourseAIChat from '../components/CourseAIChat';
 import ExplainSelection from '../components/ExplainSelection';
@@ -28,8 +29,10 @@ function getStoredTab(slug, course) {
   const stored = getStoredTabMap()[slug];
   const hasNotes = course?.lectureNotes?.length > 0;
   const hasQuiz = course?.quiz?.length > 0;
+  const hasExamPrep = course?.examPrep?.length > 0;
   if (stored === 'notes' && hasNotes) return 'notes';
   if (stored === 'quiz' && hasQuiz) return 'quiz';
+  if (stored === 'exam' && hasExamPrep) return 'exam';
   if (stored === 'materials') return 'materials';
   return 'resources';
 }
@@ -122,6 +125,7 @@ export default function CourseDetail() {
   const next = courseIndex < courses.length - 1 ? courses[courseIndex + 1] : null;
   const hasNotes = course.lectureNotes?.length > 0;
   const hasQuiz = course.quiz?.length > 0;
+  const hasExamPrep = course.examPrep?.length > 0;
 
   // Which outline topics the lecture notes actually reach, as 1-based indices
   // into `course.topics`: `covers` (fully) or `partial` (touched only).
@@ -215,6 +219,7 @@ export default function CourseDetail() {
           { key: 'resources', label: 'Study Resources', icon: BookOpen },
           ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} ${course.lectureNotes.length === 1 ? 'topic' : 'topics'}` }] : []),
           ...(hasQuiz ? [{ key: 'quiz', label: 'Practice Quiz', icon: GraduationCap, badge: `${course.quiz.length} Q` }] : []),
+          ...(hasExamPrep ? [{ key: 'exam', label: 'Written Exam Prep', icon: PenLine, badge: `${course.examPrep.length} Q` }] : []),
           { key: 'materials', label: 'Materials', icon: Paperclip },
         ].map(({ key, label, icon: Icon, badge }) => (
           <button
@@ -248,6 +253,13 @@ export default function CourseDetail() {
       {activeTab === 'quiz' && hasQuiz && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
           <CourseQuiz course={course} />
+        </div>
+      )}
+
+      {/* Written Exam Prep tab */}
+      {activeTab === 'exam' && hasExamPrep && (
+        <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <CourseExamPrep course={course} />
         </div>
       )}
 

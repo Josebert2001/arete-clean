@@ -199,6 +199,66 @@ for (const { department, courses } of catalogues) {
       check(isNonEmptyString(q?.explanation), where(qi, 'explanation missing'));
     });
   }
+
+  // Courses examined on paper ship a written-exam bank (course.examPrep) instead
+  // of, or alongside, the MCQ bank. It is deliberately NOT validated as a quiz:
+  // a written question has no options and no correctIndex. The checks that matter
+  // here are that each mark scheme's per-point marks add up to the question's
+  // stated total — the component derives the student's self-marked score from
+  // those trailing "(2)" values, so a scheme that doesn't balance silently makes
+  // full marks unreachable — and that a recall drill has one item per mark.
+  for (const c of courses) {
+    if (!c.examPrep) continue;
+    const where = (qi, suffix) => `[${department}] course ${c.code ?? c.slug ?? '?'} examPrep[${qi}]: ${suffix}`;
+    if (!Array.isArray(c.examPrep) || c.examPrep.length === 0) {
+      errors.push(`[${department}] course ${c.code ?? c.slug}: examPrep must be a non-empty array`);
+      continue;
+    }
+    c.examPrep.forEach((q, qi) => {
+      check(['longform', 'recall'].includes(q?.type),
+            where(qi, `type must be 'longform' or 'recall' (got ${JSON.stringify(q?.type)})`));
+      check(isNonEmptyString(q?.question), where(qi, 'question missing'));
+      check(isNonEmptyString(q?.source), where(qi, 'source missing — students need the section to re-read'));
+      check(typeof q?.marks === 'number' && q.marks > 0, where(qi, 'marks must be a positive number'));
+
+      if (q?.type === 'longform') {
+        check(isNonEmptyString(q?.modelAnswer), where(qi, 'modelAnswer missing'));
+        check(Array.isArray(q?.markScheme) && q.markScheme.length > 0,
+              where(qi, 'markScheme must be a non-empty array'));
+        let total = 0;
+        let parseable = true;
+        (q?.markScheme || []).forEach((point, pi) => {
+          check(isNonEmptyString(point), where(qi, `markScheme[${pi}] empty`));
+          const m = String(point).match(/\(([0-9.]+)\)\s*$/);
+          if (!m) {
+            parseable = false;
+            errors.push(where(qi, `markScheme[${pi}] must end with its mark value in parentheses, e.g. "… (2)"`));
+          } else {
+            total += parseFloat(m[1]);
+          }
+        });
+        if (parseable && typeof q?.marks === 'number') {
+          check(Math.abs(total - q.marks) < 0.001,
+                where(qi, `markScheme totals ${total} but the question is worth ${q.marks}`));
+        }
+      }
+
+      if (q?.type === 'recall') {
+        check(Array.isArray(q?.items) && q.items.length > 0,
+              where(qi, 'items must be a non-empty array'));
+        if (Array.isArray(q?.items) && typeof q?.marks === 'number') {
+          check(q.items.length === q.marks,
+                where(qi, `recall drills score a mark per item — ${q.items.length} items but marks is ${q.marks}`));
+        }
+        (q?.items || []).forEach((item, ii) => {
+          check(isNonEmptyString(item?.name), where(qi, `items[${ii}].name missing`));
+          check(isNonEmptyString(item?.explain), where(qi, `items[${ii}].explain missing`));
+          check(item?.aliases === undefined || Array.isArray(item.aliases),
+                where(qi, `items[${ii}].aliases must be an array when present`));
+        });
+      }
+    });
+  }
 }
 
 if (errors.length > 0) {
