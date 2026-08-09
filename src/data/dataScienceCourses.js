@@ -36,6 +36,7 @@ import { ent221LectureNotes } from './lectureNotes/ent221.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 import { gst121LectureNotes } from './lectureNotes/gst121.js';
 import { mth121LectureNotes } from './lectureNotes/mth121.js';
+import { phy128LectureNotes } from './lectureNotes/phy128.js';
 
 export const courses = [
 
@@ -496,6 +497,20 @@ export const courses = [
       'Your graph is worth more marks than your arithmetic — label axes with quantity AND unit every time',
       'Quote every final result with its uncertainty; a number without an error bar is incomplete',
     ],
+    // Section 1 of the departmental practical manual — the four theoretical
+    // background chapters. See src/data/lectureNotes/phy128.js for provenance
+    // and the errata list. Section 2 (the experiments) is not transcribed yet.
+    lectureNotes: phy128LectureNotes,
+    // Which of the topics above each manual chapter reaches. Written for this
+    // outline specifically — Cybersecurity takes the same PHY 128 against a
+    // different one. Chapter 3 (sound) is absent: nothing in this outline
+    // covers it. Note also that despite its title, Chapter 4 has no magnetism
+    // content, so topic 6 stays unclaimed; and no chapter reaches topic 5.
+    noteCoverage: {
+      1: { covers: [8] },
+      2: { covers: [7] },
+      4: { covers: [2, 3, 4], partial: [1, 8] },
+    },
   },
   {
     code: 'COS 121',

@@ -10,6 +10,7 @@ import { ent221LectureNotes } from './lectureNotes/ent221.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 import { gst121LectureNotes } from './lectureNotes/gst121.js';
 import { mth121LectureNotes } from './lectureNotes/mth121.js';
+import { phy128LectureNotes } from './lectureNotes/phy128.js';
 
 export const courses = [
 
@@ -514,6 +515,19 @@ export const courses = [
       'Always quote uncertainties with your measurements — it demonstrates scientific rigour',
       'Submit lab reports on time; late submissions lose marks even when the content is perfect',
     ],
+    // Section 1 of the departmental practical manual — the four theoretical
+    // background chapters. See src/data/lectureNotes/phy128.js for provenance
+    // and the errata list. Section 2 (the experiments) is not transcribed yet.
+    lectureNotes: phy128LectureNotes,
+    // Which of the topics above each manual chapter reaches. Lives here rather
+    // than in the shared note file because Data Science takes the same PHY 128
+    // against a different outline. Chapters 2 (optics) and 3 (sound) are
+    // deliberately absent: this outline is an electricity-and-magnetism one, so
+    // those chapters are background the manual supplies beyond the syllabus.
+    noteCoverage: {
+      1: { covers: [5, 7], partial: [1, 2, 3] },
+      4: { covers: [4], partial: [3, 6] },
+    },
   },
   {
     code: 'UUY-CYB 121',

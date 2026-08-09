@@ -23,8 +23,11 @@ export default defineConfig({
          * cap is precached — index.html, the CSS, the icons, the app chunk and
          * all the small route chunks — which is everything needed to open the
          * app offline. The heavy data chunks blow straight past it and are
-         * skipped: today that is the Cybersecurity catalogue (846 kB, all 57
-         * courses in one chunk) and the MTH 121 notes (785 kB).
+         * skipped: today that is the Cybersecurity catalogue (881 kB, all 57
+         * courses in one chunk) and the shared lecture-notes chunk (837 kB).
+         * That second one is named after whichever note file rolldown happens
+         * to pick — phy128 today, mth121 before it — so match it by size, not
+         * by name.
          *
          * Those are picked up instead by the same-origin /assets rule below, on
          * the first visit that actually needs them — so a student pays for the
