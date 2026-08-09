@@ -145,6 +145,44 @@ body {
 .code-block .fn { color: #F0E4CD; }
 .code-block .type { color: #CFA665; }
 
+/*
+ * Justified body copy.
+ *
+ * Hooked to the two reading tokens (see tailwind.config.js `fontSize`) plus an
+ * opt-in `.prose-justify` class, rather than a blanket rule on <p>, so UI
+ * chrome — nav, buttons, badges, card blurbs, headings — keeps its ragged
+ * right. Anything that reads badly justified opts out with Tailwind's
+ * `text-left`: utilities are emitted after this components layer, so they win.
+ */
+@layer components {
+  .text-reading,
+  .text-reading-sm,
+  .prose-justify {
+    text-align: justify;
+  }
+
+  /*
+   * Opt back out for anything that reads worse justified:
+   *   th/td — a narrow column opens rivers of whitespace
+   *   pre   — preformatted text does not reflow at all
+   *   li    — a short list item stretches to meet a marker it should sit beside
+   *   h1-h6 — and RichText's pseudo-headings, which are bold <p> not real
+   *           heading tags (see RichText.jsx), so they need naming separately
+   * `code` is deliberately absent: it is inline, and text-align does not apply
+   * to inline elements, so listing it would only look reassuring.
+   */
+  .text-reading :is(th, td, pre, li, h1, h2, h3, h4, h5, h6),
+  .text-reading-sm :is(th, td, pre, li, h1, h2, h3, h4, h5, h6),
+  .prose-justify :is(th, td, pre, li, h1, h2, h3, h4, h5, h6),
+  .prose-justify > p.font-display,
+  /* List rows in LectureNotes/CourseDetail carry the reading token on the <li>
+     itself rather than descending from it, so the rules above miss them. */
+  li.text-reading,
+  li.text-reading-sm {
+    text-align: left;
+  }
+}
+
 /* Display heading style */
 .display-heading {
   font-family: 'Fraunces', Georgia, serif;

@@ -35,7 +35,7 @@ export default function RichText({ text }) {
   const blocks = parseBlocks(text);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 prose-justify">
       {blocks.map((block, i) => {
         if (block.type === 'code') {
           return (

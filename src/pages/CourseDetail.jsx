@@ -346,7 +346,7 @@ export default function CourseDetail() {
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div>
-                    <p className="font-medium text-ink text-reading-sm leading-snug mb-0.5">{book.title}</p>
+                    <p className="font-medium text-ink text-reading-sm leading-snug mb-0.5 text-left">{book.title}</p>
                     <p className="text-sm text-coffee-700">{book.authors}</p>
                     {book.note && (
                       <p className="text-sm text-coffee-500 mt-1 italic">{book.note}</p>
@@ -391,7 +391,7 @@ export default function CourseDetail() {
                   <span className="w-5 h-5 rounded-full bg-ember-500/10 text-ember-500 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
                     {i + 1}
                   </span>
-                  <span className="text-coffee-700 max-w-prose">{tip}</span>
+                  <span className="text-coffee-700">{tip}</span>
                 </li>
               ))}
             </ul>
