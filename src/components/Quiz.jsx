@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { CheckCircle2, XCircle, RotateCcw, ArrowLeft } from 'lucide-react';
 import MathText from './MathText';
 
 const PASS_MARK = 70;
@@ -22,41 +22,42 @@ export default function Quiz({ questions, onComplete }) {
   // prop stays stable for a given mount, so this initializer runs exactly once.
   const [items, setItems] = useState(() => questions.map(shuffleOptions));
   const [current, setCurrent] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [answered, setAnswered] = useState(false);
-  const [score, setScore] = useState(0);
-  const [answers, setAnswers] = useState([]);
+  // One slot per question, null until answered. Indexed rather than appended
+  // because the student can step back to re-read a question they've already
+  // answered — appending would record the same answer twice on the way back.
+  const [answers, setAnswers] = useState(() => questions.map(() => null));
   const [finished, setFinished] = useState(false);
 
   const q = items[current];
+  const selected = answers[current];
+  const answered = selected !== null;
+  // Derived rather than accumulated, so revisiting a question can't double-count
+  // it. An answer is locked once given, so this only ever grows as you advance.
+  const score = answers.reduce(
+    (sum, a, i) => sum + (a !== null && a === items[i].correctIndex ? 1 : 0),
+    0,
+  );
 
   const handleSelect = (idx) => {
     if (answered) return;
-    setSelected(idx);
-    setAnswered(true);
-    setAnswers(a => [...a, idx]);
-    if (idx === q.correctIndex) setScore(s => s + 1);
+    setAnswers(a => a.map((prev, i) => (i === current ? idx : prev)));
   };
 
   const next = () => {
     if (current + 1 < items.length) {
       setCurrent(c => c + 1);
-      setSelected(null);
-      setAnswered(false);
     } else {
       setFinished(true);
-      const finalScore = score;
-      if (onComplete) onComplete(finalScore, items.length);
+      if (onComplete) onComplete(score, items.length);
     }
   };
+
+  const back = () => setCurrent(c => Math.max(0, c - 1));
 
   const restart = () => {
     setItems(questions.map(shuffleOptions));
     setCurrent(0);
-    setSelected(null);
-    setAnswered(false);
-    setScore(0);
-    setAnswers([]);
+    setAnswers(questions.map(() => null));
     setFinished(false);
   };
 
@@ -133,7 +134,7 @@ export default function Quiz({ questions, onComplete }) {
             <div
               key={i}
               className={`progress-dot ${
-                i < current ? 'bg-moss' : i === current ? 'bg-ember-500' : 'bg-coffee-200'
+                i === current ? 'bg-ember-500' : answers[i] !== null ? 'bg-moss' : 'bg-coffee-200'
               }`}
             />
           ))}
@@ -202,10 +203,22 @@ export default function Quiz({ questions, onComplete }) {
       )}
       </div>
 
-      {answered && (
-        <button onClick={next} className="btn-primary w-full justify-center">
-          {current + 1 < items.length ? 'Next Question' : 'See Results'}
-        </button>
+      {/* Back is offered whether or not the current question is answered — its
+          job is letting a student re-read one they've already done, and an
+          answered question renders with its answer and explanation intact. */}
+      {(current > 0 || answered) && (
+        <div className="flex flex-col-reverse sm:flex-row gap-3">
+          {current > 0 && (
+            <button onClick={back} className="btn-ghost justify-center sm:w-auto">
+              <ArrowLeft size={16} /> Previous
+            </button>
+          )}
+          {answered && (
+            <button onClick={next} className="btn-primary flex-1 justify-center">
+              {current + 1 < items.length ? 'Next Question' : 'See Results'}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
