@@ -17,7 +17,14 @@ export default defineConfig({
       showMaximumFileSizeToCacheInBytesWarning: true,
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
-        globIgnores: ['og-image.png', 'lecture-notes/**', 'install/**'],
+        // `assets/notes-*.js` is all of src/data/lectureNotes/ — the notes and
+        // their question banks (named by the manualChunks rule below). They
+        // MUST be excluded by name, not left to the size cap: split per course
+        // they are individually small, so most now fall UNDER the cap and would
+        // be precached, putting every note file back on every student's first
+        // visit — the exact cost the split removed. The /assets rule below
+        // still caches each one permanently the first time it is opened.
+        globIgnores: ['og-image.png', 'lecture-notes/**', 'install/**', 'assets/notes-*.js'],
         /*
          * Precache the shell, not the syllabus. Every build artefact under this
          * cap is precached — index.html, the CSS, the icons, the app chunk and
@@ -92,5 +99,24 @@ export default defineConfig({
       devOptions: { enabled: false },  // npm run dev untouched; test via build+preview
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        /*
+         * Everything in src/data/lectureNotes/ is course content, not app
+         * shell: the transcribed notes plus the question banks that go with
+         * them. Giving them all a stable `notes-` prefix lets the service
+         * worker exclude them by name (see globIgnores above) — without it
+         * they are named after whichever module rolldown happens to pick,
+         * which is not something a glob can rely on.
+         */
+        manualChunks(id) {
+          const match = id.match(/[\\/]src[\\/]data[\\/]lectureNotes[\\/]([^\\/]+)\.js$/);
+          if (!match || match[1] === 'index') return undefined;
+          return `notes-${match[1]}`;
+        },
+      },
+    },
+  },
   server: { port: 5173, open: true },
 })

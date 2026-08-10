@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, Check
 import { useCatalogue } from '../data/useCatalogue';
 import { materialsDepartmentFor } from '../data/departments';
 import LectureNotes from '../components/LectureNotes';
+import { useLectureNotes } from '../components/useLectureNotes';
 import CourseQuiz from '../components/CourseQuiz';
 import CourseExamPrep from '../components/CourseExamPrep';
 import CourseMaterials from '../components/CourseMaterials';
@@ -27,7 +28,7 @@ function getStoredTabMap() {
 
 function getStoredTab(slug, course) {
   const stored = getStoredTabMap()[slug];
-  const hasNotes = course?.lectureNotes?.length > 0;
+  const hasNotes = Boolean(course?.notesKey) || course?.lectureNotes?.length > 0;
   const hasQuiz = course?.quiz?.length > 0;
   const hasExamPrep = course?.examPrep?.length > 0;
   if (stored === 'notes' && hasNotes) return 'notes';
@@ -84,6 +85,11 @@ export default function CourseDetail() {
 
   usePageTitle(course ? `${course.code} — ${course.title}` : 'Course not found');
 
+  // Above the early returns below: hooks must run in the same order every
+  // render. Safe before `course` resolves — the hook treats a missing course
+  // as 'no notes' and issues no request.
+  const { status: notesStatus, notes: lectureNotes, hasNotes } = useLectureNotes(course);
+
   if (status === 'error') {
     return (
       <div className="max-w-6xl mx-auto px-6 py-24 text-center">
@@ -123,7 +129,6 @@ export default function CourseDetail() {
   const courseIndex = courses.findIndex(c => c.slug === slug);
   const prev = courseIndex > 0 ? courses[courseIndex - 1] : null;
   const next = courseIndex < courses.length - 1 ? courses[courseIndex + 1] : null;
-  const hasNotes = course.lectureNotes?.length > 0;
   const hasQuiz = course.quiz?.length > 0;
   const hasExamPrep = course.examPrep?.length > 0;
 
@@ -138,7 +143,7 @@ export default function CourseDetail() {
   // still declare `covers`/`partial` inline. Declaring neither produces an empty
   // map and renders as it always has.
   const topicCoverage = new Map();
-  (course.lectureNotes || []).forEach((note) => {
+  (lectureNotes || []).forEach((note) => {
     const mark = (n, level) => {
       const entry = topicCoverage.get(n) || { chapters: [], level: 'partial' };
       entry.chapters.push(note.number);
@@ -217,7 +222,7 @@ export default function CourseDetail() {
       <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0 overflow-x-auto no-scrollbar">
         {[
           { key: 'resources', label: 'Study Resources', icon: BookOpen },
-          ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: `${course.lectureNotes.length} ${course.lectureNotes.length === 1 ? 'topic' : 'topics'}` }] : []),
+          ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: lectureNotes.length ? `${lectureNotes.length} ${lectureNotes.length === 1 ? 'topic' : 'topics'}` : null }] : []),
           ...(hasQuiz ? [{ key: 'quiz', label: 'Practice Quiz', icon: GraduationCap, badge: `${course.quiz.length} Q` }] : []),
           ...(hasExamPrep ? [{ key: 'exam', label: 'Written Exam Prep', icon: PenLine, badge: `${course.examPrep.length} Q` }] : []),
           { key: 'materials', label: 'Materials', icon: Paperclip },
@@ -243,9 +248,33 @@ export default function CourseDetail() {
       {/* Lecture Notes tab */}
       {activeTab === 'notes' && hasNotes && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
-          <ExplainSelection context={{ courseCode: course.code, courseTitle: course.title }}>
-            <LectureNotes topics={course.lectureNotes} context={{ courseCode: course.code, courseTitle: course.title }} />
-          </ExplainSelection>
+          {notesStatus === 'loading' && (
+            <div role="status" className="space-y-3 animate-pulse">
+              <span className="sr-only">Loading lecture notes…</span>
+              {[0, 1, 2].map(i => (
+                <div key={i} className="h-14 rounded-xl bg-coffee-100" />
+              ))}
+            </div>
+          )}
+          {notesStatus === 'error' && (
+            <div role="alert" className="py-10 text-center">
+              <p className="font-display font-bold text-ink mb-1">Couldn&apos;t load these notes</p>
+              <p className="text-sm text-coffee-600 mb-5">
+                They download separately from the rest of the page. Check your connection and try again.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-coffee-300 px-4 py-2 text-sm font-medium text-coffee-700 transition-colors hover:border-ink hover:text-ink"
+              >
+                Reload
+              </button>
+            </div>
+          )}
+          {notesStatus === 'ready' && (
+            <ExplainSelection context={{ courseCode: course.code, courseTitle: course.title }}>
+              <LectureNotes topics={lectureNotes} context={{ courseCode: course.code, courseTitle: course.title }} />
+            </ExplainSelection>
+          )}
         </div>
       )}
 

@@ -31,12 +31,7 @@
 // same GST 121 whichever programme a student is enrolled on. Course prose
 // (description/topics/studyTips) stays department-specific; notes come from
 // the single copy in ./lectureNotes/ so a fix there reaches every department.
-import { cos121LectureNotes } from './lectureNotes/cos121.js';
-import { ent221LectureNotes } from './lectureNotes/ent221.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
-import { gst121LectureNotes } from './lectureNotes/gst121.js';
-import { mth121LectureNotes } from './lectureNotes/mth121.js';
-import { phy128LectureNotes } from './lectureNotes/phy128.js';
 
 export const courses = [
 
@@ -367,7 +362,7 @@ export const courses = [
       'Where a question allows it, ground your answer in data (population figures, census history) — it reads far stronger from a data science student',
       'Do not leave this course to the last week; it is easy marks that many students throw away',
     ],
-    lectureNotes: gst121LectureNotes,
+    notesKey: 'gst121',
     // Chapters 1–2 are the only ones transcribed so far. Chapter 1's item 8 is
     // `partial` rather than `covers`: the chapter's reorientation strategies are
     // the 3Rs, indigenization and the NYSC, not the MAMSER/WAI/EFCC/ICPC ones
@@ -415,7 +410,7 @@ export const courses = [
       'Do not skip integration techniques because "the computer does it" — you need them to read the probability density functions in DTS 226',
       'Work problems until you can do a full differentiation without looking up a rule',
     ],
-    lectureNotes: mth121LectureNotes,
+    notesKey: 'mth121',
     // Which of the topics above each workbook unit reaches. The indices are ours
     // alone — the note file is shared with Cybersecurity, whose outline for the
     // same course is worded and ordered differently. Unit 6 is the tutorial
@@ -500,7 +495,7 @@ export const courses = [
     // Section 1 of the departmental practical manual — the four theoretical
     // background chapters. See src/data/lectureNotes/phy128.js for provenance
     // and the errata list. Section 2 (the experiments) is not transcribed yet.
-    lectureNotes: phy128LectureNotes,
+    notesKey: 'phy128',
     // Which of the topics above each manual chapter reaches. Written for this
     // outline specifically — Cybersecurity takes the same PHY 128 against a
     // different one. Chapter 3 (sound) is absent: nothing in this outline
@@ -552,7 +547,7 @@ export const courses = [
       'Never copy-paste code examples — type every line yourself so your fingers learn the syntax',
       'Solve at least one small coding problem daily; consistency beats cramming for programming',
     ],
-    lectureNotes: cos121LectureNotes,
+    notesKey: 'cos121',
   },
   {
     code: 'UUY-DTS 121',
@@ -962,7 +957,7 @@ export const courses = [
       'Data-driven ventures are the natural application for you — think about what a data product built on Nigerian open data could be worth',
       'This course sets up DTS 426 in final year; keep your notes',
     ],
-    lectureNotes: ent221LectureNotes,
+    notesKey: 'ent221',
     // Chapters 1–18 of the workbook against our outline. The indices are ours
     // alone; Cybersecurity maps the same notes onto a differently-worded
     // outline and reaches different answers — chapter 6, for instance, is

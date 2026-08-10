@@ -2,6 +2,7 @@
 // Consumed only by api/tutor.js — not bundled into the frontend.
 
 import { courses, getCrossDepartmentalCourses } from '../../src/data/courses.js';
+import { loadNotesFor } from '../../src/data/lectureNotes/index.js';
 import { courses as dataScienceCourses } from '../../src/data/dataScienceCourses.js';
 
 export const COURSE_KNOWLEDGE = `
@@ -691,7 +692,10 @@ function buildNoteIndex(courseList) {
   for (const c of courseList) {
     const key = normalizeCode(c.code);
     const existing = byCode.get(key);
-    if (!existing || (!existing.lectureNotes?.length && c.lectureNotes?.length)) {
+    // `notesKey` names a lazily-loaded note file; a few courses still hold their
+    // notes inline. Either counts as "has notes" when breaking a code collision.
+    const has = (x) => Boolean(x?.notesKey) || Boolean(x?.lectureNotes?.length);
+    if (!existing || (!has(existing) && has(c))) {
       byCode.set(key, c);
     }
   }
@@ -755,8 +759,11 @@ const MAX_LECTURE_NOTES_CHARS = 3500;
 
 // Every topic title, in order, so "list the topics" is always answerable
 // exactly — even once the truncated content below cuts a later topic off.
-function lectureNotesText(course) {
-  const topics = course?.lectureNotes;
+async function lectureNotesText(course) {
+  // Notes live in per-course chunks (src/data/lectureNotes/index.js). On the
+  // server that is a plain dynamic import, resolved once per process and then
+  // cached by the module registry — so a repeat lookup costs nothing.
+  const topics = await loadNotesFor(course);
   if (!topics?.length) return '';
 
   const titleLine = topics.map(t => `Topic ${t.number}: ${t.title}`).join('\n');
@@ -794,7 +801,7 @@ function lectureNotesText(course) {
 // Scoping is structural: each department searches only its own knowledge text
 // and its own note index, so there is nothing to filter out afterwards. Omit
 // the slug (or pass an unrecognised one) for the full Cybersecurity catalogue.
-export function findCourseEntry(courseCode, departmentSlug) {
+export async function findCourseEntry(courseCode, departmentSlug) {
   const target = normalizeCode(courseCode);
   if (!target) return null;
   const department = departmentFor(departmentSlug);
@@ -819,7 +826,7 @@ export function findCourseEntry(courseCode, departmentSlug) {
       if (code.endsWith(target)) { courseObj = c; break; }
     }
   }
-  const notes = courseObj ? lectureNotesText(courseObj) : '';
+  const notes = courseObj ? await lectureNotesText(courseObj) : '';
 
   if (!matches.length && !notes) return null;
 
@@ -841,8 +848,8 @@ export function findCourseEntry(courseCode, departmentSlug) {
 
 // Full catalogue entry text for one course code, plus uploaded lecture notes
 // when they exist for it. Returns null when nothing matches.
-export function findCourse(courseCode) {
-  return findCourseEntry(courseCode)?.outline ?? null;
+export async function findCourse(courseCode) {
+  return (await findCourseEntry(courseCode))?.outline ?? null;
 }
 
 const TRACK_SECTION_HEADERS = {

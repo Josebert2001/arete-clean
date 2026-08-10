@@ -4,6 +4,7 @@ import {
   materialsDepartmentFor, findDepartmentByName,
 } from '../data/departments';
 import { getCrossDepartmentalCourses, LEVELS as CATALOGUE_LEVELS } from '../data/courses';
+import { loadNotesFor } from '../data/lectureNotes/index.js';
 
 describe('department registry', () => {
   it('defaults to cybersecurity', () => {
@@ -62,8 +63,8 @@ describe('data science catalogue', () => {
   // must not cost Data Science students the transcribed workbook content.
   it('carries the shared lecture notes for courses that have them', async () => {
     const catalogue = await departments.dataScience.loadCatalogue();
-    expect(catalogue.getCourseBySlug('mth-121').lectureNotes?.length).toBeGreaterThan(0);
-    expect(catalogue.getCourseBySlug('gst-121').lectureNotes?.length).toBeGreaterThan(0);
+    expect((await loadNotesFor(catalogue.getCourseBySlug('mth-121'))).length).toBeGreaterThan(0);
+    expect((await loadNotesFor(catalogue.getCourseBySlug('gst-121'))).length).toBeGreaterThan(0);
   });
 
   it('is offered at signup alongside Cybersecurity', () => {
@@ -281,19 +282,30 @@ describe('outline coverage indices belong to the course, not the shared notes', 
     // A note object reached from more than one department is shared, so any
     // covers/partial on it can only be right for whichever catalogue authored
     // them. The owning course must override with its own `noteCoverage`.
+    // loadNotesFor returns the SAME array instance for a given notesKey (the
+    // module registry caches it), so identity still tells us a note file is
+    // reached from more than one catalogue.
+    const notesByCourse = new Map();
+    for (const [, catalogue] of loaded) {
+      for (const course of catalogue.courses) {
+        notesByCourse.set(course, await loadNotesFor(course));
+      }
+    }
+
     const departmentsByNotes = new Map();
     for (const [slug, catalogue] of loaded) {
       for (const course of catalogue.courses) {
-        if (!course.lectureNotes?.length) continue;
-        if (!departmentsByNotes.has(course.lectureNotes)) departmentsByNotes.set(course.lectureNotes, new Set());
-        departmentsByNotes.get(course.lectureNotes).add(slug);
+        const notes = notesByCourse.get(course);
+        if (!notes?.length) continue;
+        if (!departmentsByNotes.has(notes)) departmentsByNotes.set(notes, new Set());
+        departmentsByNotes.get(notes).add(slug);
       }
     }
 
     const inherited = [];
     for (const [slug, catalogue] of loaded) {
       for (const course of catalogue.courses) {
-        const notes = course.lectureNotes;
+        const notes = notesByCourse.get(course);
         if (!notes?.length) continue;
         if (departmentsByNotes.get(notes).size < 2) continue;
         for (const note of notes) {
@@ -319,7 +331,7 @@ describe('outline coverage indices belong to the course, not the shared notes', 
     const outOfRange = [];
     for (const [slug, catalogue] of loaded) {
       for (const course of catalogue.courses) {
-        for (const note of course.lectureNotes || []) {
+        for (const note of await loadNotesFor(course)) {
           const source = course.noteCoverage?.[note.number] ?? note;
           for (const n of [...(source.covers || []), ...(source.partial || [])]) {
             if (!Number.isInteger(n) || n < 1 || n > (course.topics?.length ?? 0)) {
@@ -342,7 +354,7 @@ describe('outline coverage indices belong to the course, not the shared notes', 
     for (const [slug, catalogue] of loaded) {
       for (const course of catalogue.courses) {
         if (!course.noteCoverage) continue;
-        const numbers = new Set((course.lectureNotes || []).map(n => String(n.number)));
+        const numbers = new Set((await loadNotesFor(course)).map(n => String(n.number)));
         for (const key of Object.keys(course.noteCoverage)) {
           if (!numbers.has(String(key))) orphans.push(`${slug} ${normalize(course.code)} → note ${key}`);
         }

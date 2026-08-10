@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import katex from 'katex';
 import { courses } from '../data/courses';
+import { loadNotesFor } from '../data/lectureNotes/index.js';
 import { parseMathSegments } from '../utils/mathText';
 
 // Walks a lecture-note tree and yields every expression with a readable path.
@@ -44,8 +45,13 @@ function collectExpressions(notes, coursePath) {
   return found;
 }
 
-const withNotes = courses.filter((c) => Array.isArray(c.lectureNotes) && c.lectureNotes.length);
-const allExpressions = withNotes.flatMap((c) => collectExpressions(c.lectureNotes, c.code));
+// Notes are lazily chunked (data/lectureNotes/index.js), so resolve them up
+// front — top-level await keeps the rest of this file synchronous.
+const resolved = await Promise.all(
+  courses.map(async (c) => ({ code: c.code, notes: await loadNotesFor(c) }))
+);
+const withNotes = resolved.filter((r) => r.notes.length);
+const allExpressions = withNotes.flatMap((r) => collectExpressions(r.notes, r.code));
 
 describe('lecture-note maths', () => {
   it('actually collects expressions to check', () => {
@@ -94,8 +100,8 @@ describe('lecture-note maths', () => {
       }
     };
 
-    for (const course of withNotes) {
-      course.lectureNotes.forEach((topic) => check(topic, `${course.code} unit ${topic.number}`));
+    for (const entry of withNotes) {
+      entry.notes.forEach((topic) => check(topic, `${entry.code} unit ${topic.number}`));
     }
 
     expect(stray, `unpaired $ delimiter in:\n\n${stray.join('\n\n')}`).toEqual([]);

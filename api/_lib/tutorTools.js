@@ -160,7 +160,7 @@ export function buildTutorTools(student, departmentSlug) {
         courseCode: z.string().describe('Course code, e.g. "CYB 224", "COS 111", "MTH 121"'),
       }),
       execute: async ({ courseCode }) => {
-        const entry = findCourseEntry(courseCode, departmentSlug);
+        const entry = await findCourseEntry(courseCode, departmentSlug);
         if (!entry) {
           return `No course found matching "${courseCode}" in your programme's catalogue. Use a course code from the catalogue index.`;
         }
