@@ -1,16 +1,7 @@
 // Extension is required: scripts/validate-modules.mjs imports this file through
 // plain Node ESM, which does not do Vite's extensionless resolution.
-import { cos121LectureNotes } from './lectureNotes/cos121.js';
-import { cyb121LectureNotes } from './lectureNotes/cyb121.js';
-import { cyb122LectureNotes } from './lectureNotes/cyb122.js';
 import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
-import { cyb123LectureNotes } from './lectureNotes/cyb123.js';
-import { cyb221LectureNotes } from './lectureNotes/cyb221.js';
-import { ent221LectureNotes } from './lectureNotes/ent221.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
-import { gst121LectureNotes } from './lectureNotes/gst121.js';
-import { mth121LectureNotes } from './lectureNotes/mth121.js';
-import { phy128LectureNotes } from './lectureNotes/phy128.js';
 
 export const courses = [
 
@@ -340,7 +331,7 @@ export const courses = [
     // Transcribed from the Directorate of General Studies' official GST 121
     // textbook (May 2024) — see src/data/lectureNotes/gst121.js for provenance
     // and the full 17-chapter table of contents.
-    lectureNotes: gst121LectureNotes,
+    notesKey: 'gst121',
     // Chapters 1–2 are the only ones transcribed so far. Chapter 1 fully covers
     // the 3Rs and national orientation strategies, and touches the Civil War
     // and the indigenization/self-reliance material; Chapter 2 fully covers the
@@ -390,7 +381,7 @@ export const courses = [
       'Solve at least one coding problem daily, even if small; consistency beats cramming',
       'Harvard CS50P (Introduction to Programming with Python) is free and excellent',
     ],
-    lectureNotes: cos121LectureNotes,
+    notesKey: 'cos121',
   },
   {
     code: 'MTH 121',
@@ -434,7 +425,7 @@ export const courses = [
     // General Mathematics II — Workbook Manual 2025") — see
     // src/data/lectureNotes/mth121.js for provenance and the errata list. All
     // five units, plus the closing tutorial questions.
-    lectureNotes: mth121LectureNotes,
+    notesKey: 'mth121',
     // Which of the topics above each workbook unit reaches. Lives here rather
     // than in the shared note file because Data Science takes the same MTH 121
     // against a different outline. Unit 6 is the tutorial question set, so it
@@ -518,7 +509,7 @@ export const courses = [
     // Section 1 of the departmental practical manual — the four theoretical
     // background chapters. See src/data/lectureNotes/phy128.js for provenance
     // and the errata list. Section 2 (the experiments) is not transcribed yet.
-    lectureNotes: phy128LectureNotes,
+    notesKey: 'phy128',
     // Which of the topics above each manual chapter reaches. Lives here rather
     // than in the shared note file because Data Science takes the same PHY 128
     // against a different outline. Chapters 2 (optics) and 3 (sound) are
@@ -567,7 +558,7 @@ export const courses = [
     // src/data/lectureNotes/cyb121.js for provenance and the coverage mapping.
     // The guide stops at the data link / physical layers, so topics 6-8
     // (network, transport and application layers) are not covered by it.
-    lectureNotes: cyb121LectureNotes,
+    notesKey: 'cyb121',
   },
   {
     code: 'UUY-CYB 123',
@@ -604,7 +595,7 @@ export const courses = [
     // Transcribed from the departmental Laboratory Manual (printed under the
     // code CSC 121) — see src/data/lectureNotes/cyb123.js for provenance and the
     // coverage mapping. Topic 7 (XSS/CSRF) is not covered by the manual.
-    lectureNotes: cyb123LectureNotes,
+    notesKey: 'cyb123',
   },
   {
     code: 'UUY-CYB 122',
@@ -652,7 +643,7 @@ export const courses = [
     // See src/data/lectureNotes/cyb122.js for full provenance and the
     // coverage mapping. Together they never reach cryptography/steganography
     // (topic 4) or funds-transfer/e-voting security (topic 6).
-    lectureNotes: cyb122LectureNotes,
+    notesKey: 'cyb122',
     // Written-exam bank, not MCQ — this course is examined on paper. See
     // src/data/lectureNotes/cyb122ExamPrep.js for the question types and why
     // coverage is weighted towards the lectured sections.
@@ -957,7 +948,7 @@ export const courses = [
       'Nigeria\'s NITDA and other agencies offer technology grants — research them as part of your learning',
       'This course matters for your career: many technology professionals eventually consult or freelance',
     ],
-    lectureNotes: ent221LectureNotes,
+    notesKey: 'ent221',
     // Chapters 1–18 of the workbook against our outline. The indices are ours
     // alone — Data Science takes ENT 221 too, off a differently-worded outline,
     // so it keeps its own map.
@@ -5752,7 +5743,7 @@ print(summary_df.to_string(index=False))`,
     ],
     // Transcribed from the departmental Laboratory Manual — see
     // src/data/lectureNotes/cyb221.js for provenance and the coverage mapping.
-    lectureNotes: cyb221LectureNotes,
+    notesKey: 'cyb221',
   },
   {
     code: 'UUY-CYB 222',
