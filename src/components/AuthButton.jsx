@@ -76,7 +76,7 @@ export default function AuthButton() {
           </div>
 
           <div className="p-4 space-y-3">
-            <div className="flex items-center gap-2.5 px-3 py-2.5 bg-moss/8 border border-moss/15 rounded-xl">
+            <div className="flex items-center gap-2.5 px-3 py-2.5 bg-moss/10 border border-moss/15 rounded-xl">
               <CloudUpload size={14} className="text-moss shrink-0" />
               <p className="text-xs text-moss leading-snug">Progress syncing to cloud automatically</p>
             </div>

@@ -117,7 +117,7 @@ export default function StudentDashboard() {
           <div
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold ${
               streak > 0
-                ? 'bg-ember-500/10 border-ember-500/30 text-ember-600'
+                ? 'bg-ember-500/10 border-ember-500/30 text-ember-500'
                 : 'bg-coffee-100 border-coffee-200 text-coffee-600'
             }`}
           >
