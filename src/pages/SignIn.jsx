@@ -104,7 +104,7 @@ export default function SignIn() {
             <img src="/arete.svg" alt="Areté logo" className="w-10 h-10 rounded-xl" />
             <div className="leading-tight">
               <div className="font-display text-xl font-bold text-cream">Areté</div>
-              <div className="text-xs text-coffee-500 tracking-wide">University of Uyo · Student Learning Platform</div>
+              <div className="text-xs text-coffee-400 tracking-wide">University of Uyo · Student Learning Platform</div>
             </div>
           </div>
 
@@ -127,7 +127,7 @@ export default function SignIn() {
           </ul>
         </div>
 
-        <p className="text-xs text-coffee-700 mt-16">
+        <p className="text-xs text-coffee-400 mt-16">
           University of Uyo · Student Learning Platform
         </p>
       </div>

@@ -101,23 +101,26 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
 
   const lineCount = code.split('\n').length;
 
+  // Tones come from the fixed code surface (see .code-surface in index.css),
+  // not the theme palette: moss/rust invert with the theme and measured
+  // 2.0-2.6:1 against this background in dark mode.
   const kindStyles = {
-    success: { icon: Check, color: 'text-moss', label: 'Success' },
-    compile_error: { icon: X, color: 'text-rust', label: 'Compilation Error' },
-    runtime_error: { icon: AlertTriangle, color: 'text-rust', label: 'Runtime Error' },
-    empty: { icon: Terminal, color: 'text-coffee-400', label: 'No output' },
-    limit: { icon: AlertTriangle, color: 'text-coffee-500', label: 'Daily limit reached' },
-    not_configured: { icon: AlertTriangle, color: 'text-coffee-500', label: 'Not connected yet' },
+    success: { icon: Check, color: 'code-surface-ok', label: 'Success' },
+    compile_error: { icon: X, color: 'code-surface-error', label: 'Compilation Error' },
+    runtime_error: { icon: AlertTriangle, color: 'code-surface-error', label: 'Runtime Error' },
+    empty: { icon: Terminal, color: 'code-surface-line', label: 'No output' },
+    limit: { icon: AlertTriangle, color: 'code-surface-muted', label: 'Daily limit reached' },
+    not_configured: { icon: AlertTriangle, color: 'code-surface-muted', label: 'Not connected yet' },
   };
   const ks = kind ? kindStyles[kind] || kindStyles.success : null;
 
   return (
     <div className="overflow-hidden rounded-xl border border-coffee-200">
       {/* Editor header */}
-      <div className="bg-ink flex flex-col gap-3 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="code-surface flex flex-col gap-3 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-2">
-          <Terminal size={14} className="text-coffee-400" />
-          <span className="truncate text-xs font-mono uppercase tracking-wider text-coffee-300">
+          <Terminal size={14} className="code-surface-line" />
+          <span className="truncate text-xs font-mono uppercase tracking-wider code-surface-muted">
             {LANGUAGE_LABELS[language] || language} · try it yourself
           </span>
         </div>
@@ -126,10 +129,10 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
             <span
               className={`text-xs font-mono ${
                 creditsRemaining <= 3
-                  ? 'text-rust'
+                  ? 'code-surface-error'
                   : creditsRemaining <= 8
-                  ? 'text-ember'
-                  : 'text-coffee-500'
+                  ? 'code-surface-muted'
+                  : 'code-surface-line'
               }`}
               title={`Shared daily run limit: ${creditsRemaining} of ${DAILY_LIMIT} runs remaining today`}
             >
@@ -138,7 +141,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           )}
           <button
             onClick={reset}
-            className="rounded p-1.5 text-coffee-400 transition-colors hover:text-cream"
+            className="rounded p-1.5 code-surface-line transition-colors hover:text-[color:var(--syntax-plain)]"
             aria-label="Reset code"
             title="Reset code"
           >
@@ -157,14 +160,14 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
       </div>
 
       {/* Editor body */}
-      <div className="flex flex-col bg-ink sm:flex-row">
+      <div className="code-surface flex flex-col sm:flex-row">
         {/* Line numbers */}
         <div
           className="hidden select-none py-4 pl-4 pr-3 text-right sm:block"
           style={{ fontFamily: 'JetBrains Mono', fontSize: '0.8rem', lineHeight: '1.6' }}
         >
           {Array.from({ length: lineCount }, (_, i) => (
-            <div key={i} className="text-coffee-700">{i + 1}</div>
+            <div key={i} className="code-surface-line">{i + 1}</div>
           ))}
         </div>
         {/* Textarea */}
@@ -180,20 +183,20 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           spellCheck={false}
           aria-label={`${LANGUAGE_LABELS[language] || 'Code'} editor`}
           title="Ctrl+Enter to run"
-          className="flex-1 resize-y bg-transparent px-4 py-4 text-sm text-cream outline-none sm:text-[0.8rem]"
+          className="flex-1 resize-y bg-transparent px-4 py-4 text-sm outline-none sm:text-[0.8rem]"
           style={{ fontFamily: 'JetBrains Mono', lineHeight: '1.6', minHeight: '220px' }}
         />
       </div>
 
       {/* Output panel */}
       {(output !== null || running) && (
-        <div className="border-t border-coffee-700 bg-ink">
-          <div className="flex flex-col gap-2 border-b border-coffee-800 px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-xs font-mono uppercase tracking-wider text-coffee-400">Output</span>
+        <div className="code-surface border-t code-surface-edge">
+          <div className="flex flex-col gap-2 border-b code-surface-edge px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-xs font-mono uppercase tracking-wider code-surface-line">Output</span>
             {ks && (
               <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${ks.color}`}>
                 <ks.icon size={12} /> {ks.label}
-                {meta?.time && <span className="ml-2 text-coffee-500">{meta.time}s</span>}
+                {meta?.time && <span className="ml-2 code-surface-line">{meta.time}s</span>}
               </span>
             )}
           </div>
