@@ -21,6 +21,7 @@
 // resolves the same file (see the note on shared notes in CLAUDE.md).
 export const noteLoaders = {
   cos121: () => import('./cos121.js').then((m) => m.cos121LectureNotes),
+  cos221: () => import('./cos221.js').then((m) => m.cos221LectureNotes),
   cyb121: () => import('./cyb121.js').then((m) => m.cyb121LectureNotes),
   cyb122: () => import('./cyb122.js').then((m) => m.cyb122LectureNotes),
   cyb123: () => import('./cyb123.js').then((m) => m.cyb123LectureNotes),

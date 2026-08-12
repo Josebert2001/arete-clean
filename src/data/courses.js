@@ -1038,6 +1038,7 @@ export const courses = [
       'Trace sorting algorithms step by step on a 5-element array by hand before every exam',
       'Areté Java modules cover the programming foundation; use them for the Java component of this course',
     ],
+    notesKey: 'cos221',
   },
   {
     code: 'INS 224',
