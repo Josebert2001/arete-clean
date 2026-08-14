@@ -2,6 +2,7 @@
 // plain Node ESM, which does not do Vite's extensionless resolution.
 import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
 import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
+import { cyb222ExamPrep } from './lectureNotes/cyb222ExamPrep.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 
 export const courses = [
@@ -7836,6 +7837,11 @@ print(summary_df.to_string(index=False))`,
         explanation: 'Password, 2FA, 3FA and multi-party authentication govern entry; time/volume limits and input filtering govern conduct once inside.',
       },
     ],
+    // This course is examined on paper, not by CBT, so the written bank is the
+    // one that matches the exam — the MCQs above stay as low-stakes recall
+    // practice. See src/data/lectureNotes/cyb222ExamPrep.js for why the two
+    // banks are kept separate.
+    examPrep: cyb222ExamPrep,
   },
 
   // ═══════════════════════════════════════════════════════════════
