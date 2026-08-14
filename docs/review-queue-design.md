@@ -62,11 +62,29 @@ itemId = `${kind}:${courseSlug}:${hash(promptText)}`
        →  q:uuy-cyb-222:1f4c9a2b
 ```
 
-| kind | source | prompt hashed |
-|------|--------|---------------|
-| `q` | `course.quiz[]` | `question` |
-| `x` | `course.examPrep[]` | `question` |
-| `f` | lecture-note `termlist` items | `term` |
+**What counts as "the prompt" differs by kind**, and getting it wrong silently
+conflates two items into one shared schedule. Running the hash over the real
+corpus (2,626 items) is what settled this — the first attempt hashed the bare
+`question` / `term` and produced 78 duplicate ids:
+
+| kind | source | hashed | why |
+|------|--------|--------|-----|
+| `q` | `course.quiz[]` | `question` + sorted `options` | A stem alone is not unique across a bank. Sorted, because `Quiz.jsx` reshuffles options every attempt. |
+| `x` | `course.examPrep[]` | `question` | Sufficient — no duplicates in the corpus. Re-weighting a question's `marks` correctly leaves its identity alone. |
+| `f` | lecture-note `termlist` items | `term` + `def` | **45 terms in ENT 221 alone appear in more than one termlist with genuinely different definitions.** `Need for Achievement` is *"a strong drive to succeed"* in note 1 and *"McClelland's acquired-need theory"* in note 2. On the term alone, a student drilling one would be credited for the other. |
+
+Fields are joined with U+001F, which survives the whitespace normalisation below,
+so a card `{term: 'Web app', def: 'risk model'}` cannot collide with
+`{term: 'Web', def: 'app risk model'}`.
+
+With per-kind identity the corpus produces **2,623 unique ids from 2,626 items**.
+The three remaining duplicates are byte-identical cards repeated across two notes
+(`Sequence Number` in UUY-CYB 221, `Utilization of Resources` in ENT 221) —
+collapsing those into one schedule is correct, not a defect. Nobody should drill
+the same card twice.
+
+Use the exported `quizItemId` / `examItemId` / `cardItemId` helpers rather than
+calling `itemId` directly, so this cannot be got wrong at a call site.
 
 `hash` is a 32-bit FNV-1a rendered base36 — synchronous, ~10 lines, no Web
 Crypto (the SHA-256 in `FlagChallenge.jsx` is async, which is wrong for building
