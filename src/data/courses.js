@@ -1,5 +1,6 @@
 // Extension is required: scripts/validate-modules.mjs imports this file through
 // plain Node ESM, which does not do Vite's extensionless resolution.
+import { cyb121Quiz } from './lectureNotes/cyb121Quiz.js';
 import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
 import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
@@ -560,6 +561,10 @@ export const courses = [
     // The guide stops at the data link / physical layers, so topics 6-8
     // (network, transport and application layers) are not covered by it.
     notesKey: 'cyb121',
+    // CBT paper, so an MCQ bank rather than examPrep. Drawn note by note from
+    // the guide — see src/data/lectureNotes/cyb121Quiz.js. It stops where the
+    // guide stops: topics 6-8 are not examined by this bank.
+    quiz: cyb121Quiz,
   },
   {
     code: 'UUY-CYB 123',
