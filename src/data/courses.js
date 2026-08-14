@@ -6015,13 +6015,21 @@ print(summary_df.to_string(index=False))`,
       'For every vulnerability, know: how it works, how to exploit it, and how to fix it',
       'Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies',
     ],
-    // Topics 1–3 and 5–8 are the class lecture notes. Topics 9–10, and the
+    // Topics 1–3 and 7–10 are the class lecture notes. Topics 11–12, and the
     // additions marked as exam wording throughout, come from the lecturer's
     // handout "Cybersecurity Concepts: Web and Mobile Application Security"
     // plus the exam guidance he gave in class (the six flagged questions in
-    // Topic 10). Topic 4 covers outline item 3 (secure mobile development),
-    // which the class notes leave uncovered — it sits at position 4 so the
-    // topics read in outline order, which is why the later numbers skip.
+    // Topic 12).
+    //
+    // Topics 4–6 cover outline item 3 (secure mobile development), which the
+    // class notes leave uncovered; they sit at positions 4–6 so the topics read
+    // in outline order, which is why the later numbers skip. They were one
+    // 351-line topic until it was split three ways — threats and developer
+    // practice, then the two platform security models, then the bearer layers
+    // (WAP, Bluetooth, SMS/MMS, location) that sit below both. No content from
+    // the handout was dropped in the split: the OWASP Mobile Top 10 moved up
+    // beside the other risk material, and the single Key Takeaways list was
+    // rewritten as one per topic.
     lectureNotes: [
       {
         number: '1',
@@ -6097,8 +6105,8 @@ print(summary_df.to_string(index=False))`,
           {
             type: 'note',
             items: [
-              'Read the Security row alongside the “Web Risk vs Mobile App Risk” table in Topic 5 — it is the same distinction the lecturer expects in the exam: web risk is centralised on the server, mobile risk is decentralised onto individual devices.',
-              'A mobile app is not automatically “more secure”. Storing data on the device removes the single-server blast radius, but it hands the data to a device an attacker may physically hold — which is why Topic 5 lists insecure data storage and reverse engineering as the top mobile risks.',
+              'Read the Security row alongside the “Web Risk vs Mobile App Risk” table in Topic 7 — it is the same distinction the lecturer expects in the exam: web risk is centralised on the server, mobile risk is decentralised onto individual devices.',
+              'A mobile app is not automatically “more secure”. Storing data on the device removes the single-server blast radius, but it hands the data to a device an attacker may physically hold — which is why Topic 7 lists insecure data storage and reverse engineering as the top mobile risks.',
               'Watch the Performance and Access rows: a mobile app can work offline, a web app cannot. Several of the guaranteed exam answers turn on exactly that point.',
             ],
           },
@@ -6479,9 +6487,9 @@ print(summary_df.to_string(index=False))`,
       },
       {
         number: '4',
-        title: 'Secure Program Development for Mobile (Android & iOS)',
+        title: 'Mobile Threats & Secure Development Practices',
         covers: [3],
-        partial: [6, 8],
+        partial: [6],
         sections: [
           {
             type: 'definition',
@@ -6490,7 +6498,7 @@ print(summary_df.to_string(index=False))`,
           },
           {
             type: 'note',
-            text: 'Read this topic against the web-vs-mobile comparison in Topic 1 and the risk tables in Topic 5. The distinction the lecturer keeps returning to is where the blast radius sits: web risk is centralised on the server, so one compromised server affects every user; mobile risk is decentralised onto thousands of individual devices, each of which an attacker may physically hold.',
+            text: 'Read this topic against the web-vs-mobile comparison in Topic 1 and the risk tables in Topic 7. The distinction the lecturer keeps returning to is where the blast radius sits: web risk is centralised on the server, so one compromised server affects every user; mobile risk is decentralised onto thousands of individual devices, each of which an attacker may physically hold.',
           },
           {
             type: 'termlist',
@@ -6541,6 +6549,53 @@ print(summary_df.to_string(index=False))`,
           {
             type: 'note',
             text: 'The threat-modelling tip is the one that ties the list together. The STRIDE categories used by the OWASP mobile threat model — spoofing, tampering, repudiation, information disclosure, denial of service and elevation of privilege — give you a checklist for enumerating threats rather than guessing at them.',
+          },
+          {
+            type: 'termlist',
+            heading: 'The OWASP Mobile Top 10 Risks',
+            items: [
+              { term: 'Insecure data storage', def: 'Store only what is absolutely required, never in a public area such as an SD card. Use secure containers and the platform’s encryption APIs, and never mark files world-readable or world-writable.' },
+              { term: 'Weak server-side controls', def: 'A mobile front end does not remove the server’s obligations. Apply the existing body of knowledge — the OWASP Web, Cloud and Web Services Top 10s, the cheat sheets and development guides — to the backend the app talks to.' },
+              { term: 'Insufficient transport layer protection', def: 'Encrypt all sensitive data leaving the device, over carrier networks, Wi-Fi and NFC alike. When the platform throws a security exception it is usually right — do not suppress it.' },
+              { term: 'Client-side injection', def: 'Sanitise or escape untrusted data before rendering or executing it, use prepared statements for database calls rather than string concatenation, and minimise the native capabilities exposed to hybrid web content.' },
+              { term: 'Poor authorisation and authentication', def: 'Contextual signals help only as part of a genuine multi-factor scheme. Out-of-band verification is meaningless when both factors arrive on the same device, and a device ID or subscriber ID must never be the sole authenticator.' },
+              { term: 'Improper session handling', def: 'Do not be afraid to re-authenticate periodically, make sure tokens can be revoked quickly when a device is lost or stolen, and generate tokens from high-entropy, well-tested sources.' },
+              { term: 'Security decisions via untrusted inputs', def: 'Check the caller’s permissions at every input boundary, prompt for additional authorisation before acting, and where a permission check is impossible require extra steps before a sensitive action can run.' },
+              { term: 'Side-channel data leakage', def: 'Never log credentials or personal data to system logs. Strip sensitive data before screenshots, disable keystroke logging per field, apply anti-caching directives to web content, watch what files your app creates while debugging, review third-party libraries and the data they consume, and test across as many platform versions as possible.' },
+              { term: 'Broken cryptography', def: 'Storing the key alongside the encrypted data negates the encryption entirely. Use battle-tested crypto libraries rather than writing your own, and take advantage of what the platform already provides.' },
+              { term: 'Sensitive information disclosure', def: 'Private API keys are private for a reason — keep them off the client. Keep proprietary business logic on the server, and accept that there is almost never a legitimate reason to hardcode a password.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Read this alongside the website attacks in Topic 8 and the best practices in Topic 9. Injection, weak authentication and sensitive-data exposure appear on both the web and the mobile list, but insecure data storage, side-channel leakage and improper session handling on a lost device are mobile-specific — they exist precisely because the client is a device the attacker can hold.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Key Takeaways',
+            items: [
+              'Secure mobile development begins from a different assumption than web development: the client device is under the attacker’s physical control, so nothing stored, computed or hidden on it can be trusted',
+              'Most of the sixteen issues collapse into four underlying problems — an attacker who holds the device, data written where it can be read, credentials too weak to type on a small keyboard, and input arriving from channels the developer does not control',
+              'Separate what you can fix from what you cannot: storage, transport, authentication and input handling are the developer’s; patching delays and insecure drivers belong to the vendor and the carrier',
+              'Threat-model rather than guess — STRIDE gives you the checklist, and consciously accepting a risk you have named is very different from never having considered it',
+              'The OWASP Mobile Top 10 is the risk vocabulary an examiner expects; know each risk by name and by the one control that answers it',
+            ],
+          },
+        ],
+      },
+      {
+        number: '5',
+        title: 'Mobile Platform Security Models — iOS vs Android',
+        covers: [3],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'What This Topic Answers',
+            text: 'Topic 4 established what an attacker can do to a device the developer does not control. This topic is the other half of the answer: what the two dominant platforms already do about it, and where their protections stop. Both iOS and Android isolate applications from each other and harden memory against overflow attacks — but they reach that isolation by different routes, and the differences decide what a developer must supply themselves.',
+          },
+          {
+            type: 'note',
+            text: 'Read the comparison table first and treat it as the map. Everything after it is detail filling in one cell or another, and the exam-usable contrasts — distribution and review, code signing, how isolation is enforced, when permissions are granted, and where credentials are stored — are all in the table.',
           },
           {
             type: 'table',
@@ -6718,26 +6773,6 @@ print(summary_df.to_string(index=False))`,
           },
           {
             type: 'termlist',
-            heading: 'The OWASP Mobile Top 10 Risks',
-            items: [
-              { term: 'Insecure data storage', def: 'Store only what is absolutely required, never in a public area such as an SD card. Use secure containers and the platform’s encryption APIs, and never mark files world-readable or world-writable.' },
-              { term: 'Weak server-side controls', def: 'A mobile front end does not remove the server’s obligations. Apply the existing body of knowledge — the OWASP Web, Cloud and Web Services Top 10s, the cheat sheets and development guides — to the backend the app talks to.' },
-              { term: 'Insufficient transport layer protection', def: 'Encrypt all sensitive data leaving the device, over carrier networks, Wi-Fi and NFC alike. When the platform throws a security exception it is usually right — do not suppress it.' },
-              { term: 'Client-side injection', def: 'Sanitise or escape untrusted data before rendering or executing it, use prepared statements for database calls rather than string concatenation, and minimise the native capabilities exposed to hybrid web content.' },
-              { term: 'Poor authorisation and authentication', def: 'Contextual signals help only as part of a genuine multi-factor scheme. Out-of-band verification is meaningless when both factors arrive on the same device, and a device ID or subscriber ID must never be the sole authenticator.' },
-              { term: 'Improper session handling', def: 'Do not be afraid to re-authenticate periodically, make sure tokens can be revoked quickly when a device is lost or stolen, and generate tokens from high-entropy, well-tested sources.' },
-              { term: 'Security decisions via untrusted inputs', def: 'Check the caller’s permissions at every input boundary, prompt for additional authorisation before acting, and where a permission check is impossible require extra steps before a sensitive action can run.' },
-              { term: 'Side-channel data leakage', def: 'Never log credentials or personal data to system logs. Strip sensitive data before screenshots, disable keystroke logging per field, apply anti-caching directives to web content, watch what files your app creates while debugging, review third-party libraries and the data they consume, and test across as many platform versions as possible.' },
-              { term: 'Broken cryptography', def: 'Storing the key alongside the encrypted data negates the encryption entirely. Use battle-tested crypto libraries rather than writing your own, and take advantage of what the platform already provides.' },
-              { term: 'Sensitive information disclosure', def: 'Private API keys are private for a reason — keep them off the client. Keep proprietary business logic on the server, and accept that there is almost never a legitimate reason to hardcode a password.' },
-            ],
-          },
-          {
-            type: 'note',
-            text: 'Read this alongside the website attacks in Topic 6 and the best practices in Topic 7. Injection, weak authentication and sensitive-data exposure appear on both the web and the mobile list, but insecure data storage, side-channel leakage and improper session handling on a lost device are mobile-specific — they exist precisely because the client is a device the attacker can hold.',
-          },
-          {
-            type: 'termlist',
             heading: 'Enterprise Device Security Options',
             items: [
               { term: 'PIN', def: 'The first step in securing a device, and enough to make an unmotivated attacker wipe and resell it rather than break in. A four-digit PIN needs only 10,000 guesses, but most devices impose a delay after ten failures; on some, the SIM card carries its own PIN as well.' },
@@ -6748,6 +6783,34 @@ print(summary_df.to_string(index=False))`,
               { term: 'Application signing', def: 'A vetting process that gives users some assurance about an application and ties authorship and privileges to it. It is not a measure of how secure the code is. Most mobile OSes require it; Android accepts self-signed certificates, iOS does not.' },
               { term: 'Buffer overflow protection', def: 'A major attack class wherever the OS is written in C, Objective-C or C++. iOS marks the stack and heap non-executable using the NX bit, so an attempt to execute there raises an exception; Android relies on ProPolice for stack-smashing protection, OpenBSD malloc/calloc to make heap overflows harder, and safe_iop for safe integer operations.' },
             ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Key Takeaways',
+            items: [
+              'Both platforms enforce isolation, but by different means — iOS through App Store review, mandatory Apple-issued code signing and per-GUID directories; Android through per-application Linux UIDs, manifest permissions and self-signed certificates',
+              'Permission timing is the sharpest contrast between the two: Android grants everything at install and freezes it, iOS prompts in context at the moment of use',
+              'Code signing on either platform proves provenance and sets privileges — it is never a statement that the code is secure',
+              'The platform gives you encryption, credential stores, sandboxing and memory hardening for free; the recurring failures are developer decisions to bypass them — clear-text storage, disabled TLS checks, unsanitised input, keys shipped in the binary',
+              'External storage is the standing exception to the sandbox: anything written to a memory card leaves the protection of the per-application UID and is readable by any other application',
+              'Neither platform prevents reverse engineering, so no secret may live in the binary on either one',
+            ],
+          },
+        ],
+      },
+      {
+        number: '6',
+        title: 'Mobile Bearer Layers — WAP, Bluetooth, SMS/MMS & Location',
+        partial: [3, 8],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'What This Topic Answers',
+            text: 'Topics 4 and 5 dealt with the application and the platform it runs on. Everything in this topic sits below both: the bearers that carry data to and from the handset — the WAP gateway, the Bluetooth radio, the SMS and MMS messaging stack, and the positioning systems that tell an application where it is. Each one is a channel the application does not control, delivering input the application must not trust, and each has a failure history of its own.',
+          },
+          {
+            type: 'note',
+            text: 'The pattern to carry through all four is the same one Topic 4 opened with, pushed one layer down: wherever data changes hands, ask who can read it in transit, who can forge it, and what the receiving code does with a malformed message. The WAP gap, Bluetooth’s negotiable key length, the SMS PDU and the EXIF thumbnail parser are four instances of that single question.',
           },
           {
             type: 'bullets',
@@ -6819,18 +6882,18 @@ print(summary_df.to_string(index=False))`,
             type: 'bullets',
             heading: 'Key Takeaways',
             items: [
-              'Secure mobile development begins from a different assumption than web development: the client device is under the attacker’s physical control, so nothing stored, computed or hidden on it can be trusted',
-              'Both major platforms enforce isolation, but by different means — iOS through App Store review, mandatory Apple-issued code signing and per-GUID directories; Android through per-application Linux UIDs, manifest permissions and self-signed certificates',
-              'Permission timing is the sharpest contrast between the two: Android grants everything at install and freezes it, iOS prompts in context at the moment of use',
-              'The platform gives you encryption, credential stores, sandboxing and memory hardening for free — the recurring failures are developer decisions to bypass them: clear-text storage, disabled TLS checks, unsanitised input, keys shipped in the binary',
-              'External storage is the standing exception to the sandbox: anything written to a memory card leaves the protection of the per-application UID',
               'Everything below the application layer — WAP gateways, Bluetooth pairing, SMS PDUs, geolocation lookups — is another untrusted input channel, and each has to be threat-modelled rather than assumed safe',
+              'The WAP gap is the standing example of encryption that is end-to-end in name only: WAP 1.0 decrypts and re-encrypts at the gateway, WAP 2.0 closes it with full end-to-end TLS',
+              'Small keyboards drive the whole layer towards weak secrets — 4-to-8-digit mobile PINs and Bluetooth PINs alike — which is why brute force is a live threat here rather than a theoretical one',
+              'Bluetooth’s protections are only as strong as what the pair negotiated: the encryption key length can be negotiated down to a single byte, and pre-2.1 devices allow short PINs and a repeating keystream',
+              'Messaging splits into two attack classes worth naming separately: protocol attacks abuse hidden provisioning traffic and work broadly, while application attacks target one parser in one software version',
+              'Location data is a liability as much as a feature — collect the least precise fix that works, keep it anonymous, discard it after use, and make tracking visible and opt-in',
             ],
           },
         ],
       },
       {
-        number: '5',
+        number: '7',
         title: 'Risks & Threats',
         covers: [4],
         sections: [
@@ -6958,7 +7021,7 @@ print(summary_df.to_string(index=False))`,
         ],
       },
       {
-        number: '6',
+        number: '8',
         title: 'Website Attacks',
         covers: [4],
         sections: [
@@ -7038,7 +7101,7 @@ print(summary_df.to_string(index=False))`,
         ],
       },
       {
-        number: '7',
+        number: '9',
         title: 'Strengths, Weaknesses & Best Practice',
         covers: [4, 5, 6],
         sections: [
@@ -7129,13 +7192,13 @@ print(summary_df.to_string(index=False))`,
             type: 'note',
             items: [
               'These six are their own exam question. Keep them separate from the web/mobile risk answers — the lecturer specifically warned against mixing the two, because a best-practice question earns no marks for describing risks.',
-              'Each best practice pairs with a risk from Topic 5: input validation answers injection and XSS, up-to-date encryption answers interception, stronger authentication answers brute force, API tracking and change records answer misconfiguration. If a question asks you to justify a practice, name the risk it closes.',
+              'Each best practice pairs with a risk from Topic 7: input validation answers injection and XSS, up-to-date encryption answers interception, stronger authentication answers brute force, API tracking and change records answer misconfiguration. If a question asks you to justify a practice, name the risk it closes.',
             ],
           },
         ],
       },
       {
-        number: '8',
+        number: '10',
         title: 'Audit, Compliance & Quality Assurance',
         date: '8 Jul 2026',
         covers: [7],
@@ -7200,7 +7263,7 @@ print(summary_df.to_string(index=False))`,
         ],
       },
       {
-        number: '9',
+        number: '11',
         title: 'Web Application Security & the Security Lifecycle',
         covers: [5],
         partial: [9],
@@ -7228,7 +7291,7 @@ print(summary_df.to_string(index=False))`,
             type: 'note',
             items: [
               'A positive test asks “does the login form accept a valid password?” A negative test asks “what happens if I put a quote mark, 10,000 characters, or a script tag in the username field?” Security lives almost entirely in the second question.',
-              'The value of vulnerability and security assessment is that it converts an unknown risk into a known, prioritised defect that can be scheduled, fixed and verified — which is precisely what the audit and QA discipline in Topic 8 then has to evidence.',
+              'The value of vulnerability and security assessment is that it converts an unknown risk into a known, prioritised defect that can be scheduled, fixed and verified — which is precisely what the audit and QA discipline in Topic 10 then has to evidence.',
             ],
           },
           {
@@ -7241,12 +7304,12 @@ print(summary_df.to_string(index=False))`,
           },
           {
             type: 'note',
-            text: 'Ideally an organisation employs both methods, not one. The individual tools are defined in Topic 7 — this topic is about where each of them sits in the lifecycle: SAST and SCA during development, IAST and DAST during testing and staging, WAF and RASP in production.',
+            text: 'Ideally an organisation employs both methods, not one. The individual tools are defined in Topic 9 — this topic is about where each of them sits in the lifecycle: SAST and SCA during development, IAST and DAST during testing and staging, WAF and RASP in production.',
           },
         ],
       },
       {
-        number: '10',
+        number: '12',
         title: 'Exam Focus — The Lecturer’s Guaranteed Questions',
         covers: [],  // revision aid over the topics above, not an outline item
         sections: [
@@ -7268,12 +7331,12 @@ print(summary_df.to_string(index=False))`,
             type: 'termlist',
             heading: 'Model Answers at a Glance',
             items: [
-              { term: 'Write short notes on quality assurance / list the evaluation metrics', def: 'QA ensures software products meet the desired standard. The metrics are Functionality, Performance, Reliability, Usability, Compatibility and Security. (Topic 8)' },
-              { term: 'Define web-based risk', def: 'Any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption. (Topic 5)' },
-              { term: 'Differentiate web application risk from mobile application risk', def: 'Web: centralized risk, client–server attacks landing on the server, a breach affecting the entire database, and an internet connection required. Mobile: decentralized risk, attacks on the individual device, data leakage usually following physical loss of the device, and the ability to work offline. (Topic 5)' },
+              { term: 'Write short notes on quality assurance / list the evaluation metrics', def: 'QA ensures software products meet the desired standard. The metrics are Functionality, Performance, Reliability, Usability, Compatibility and Security. (Topic 10)' },
+              { term: 'Define web-based risk', def: 'Any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption. (Topic 7)' },
+              { term: 'Differentiate web application risk from mobile application risk', def: 'Web: centralized risk, client–server attacks landing on the server, a breach affecting the entire database, and an internet connection required. Mobile: decentralized risk, attacks on the individual device, data leakage usually following physical loss of the device, and the ability to work offline. (Topic 7)' },
               { term: 'Explain the security/tracking models — authentication vs authorization', def: 'Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information — a bank teller has a transaction limit, while the branch manager holds higher clearance. (Topic 3)' },
               { term: 'Distinguish symmetrical from asymmetrical encryption', def: 'Encryption converts information into ciphertext, which is unreadable to unauthorized users. Symmetrical encryption uses a single key to both lock and unlock; asymmetrical encryption uses two keys — a public key and a private key. (Topic 3)' },
-              { term: 'Define a website attack and give five examples', def: 'Any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions. Five examples: SQL injection (SQLi), cross-site scripting (XSS), malware/backdoor attacks, brute-force login attacks, and phishing. (Topic 6)' },
+              { term: 'Define a website attack and give five examples', def: 'Any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions. Five examples: SQL injection (SQLi), cross-site scripting (XSS), malware/backdoor attacks, brute-force login attacks, and phishing. (Topic 8)' },
             ],
           },
           {
@@ -7285,7 +7348,7 @@ print(summary_df.to_string(index=False))`,
             items: [
               'A structure that protects your marks: one sentence of definition using the question’s own keywords, then the list, then one line per item only if the question asks you to explain. Writing the list before the explanation means a shortage of time costs you the elaboration, not the marks.',
               'Where a question says “differentiate” or “distinguish”, answer in contrasting pairs rather than describing one side and then the other — it makes each contrast visible to whoever is marking.',
-              'These six are the flagged questions, not the whole syllabus. Topics 1–8 remain examinable, and the outline items on secure mobile/web development and next-generation challenges are not yet covered by any topic here.',
+              'These six are the flagged questions, not the whole syllabus. Topics 1–11 all remain examinable — note that none of the six touch the mobile material in Topics 4–6, which covers outline item 3 and can still be asked.',
             ],
           },
         ],
