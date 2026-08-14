@@ -16,6 +16,7 @@ import {
   gradeFromMarks,
   isLeech,
   isDue,
+  applyReviews,
   buildQueue,
   selectLeeches,
   dueCount,
@@ -499,6 +500,87 @@ describe('dueCount', () => {
 
   it('does not count never-seen items', () => {
     expect(dueCount({}, [{ id: 'a' }, { id: 'b' }], TODAY)).toBe(0);
+  });
+});
+
+// ─── applyReviews ─────────────────────────────────────────────────────────────
+
+describe('applyReviews', () => {
+  const TODAY = 20_000;
+  const NOW = 1_700_000_000_000;
+
+  it('records every outcome in one pass', () => {
+    const next = applyReviews({}, [
+      { id: 'a', correct: true },
+      { id: 'b', correct: false },
+    ], TODAY, NOW);
+    expect(next.a.b).toBe(2);
+    expect(next.b.b).toBe(1);
+  });
+
+  it('advances items that already have history', () => {
+    const items = { a: { b: 2, d: TODAY, n: 4, l: 0, t: 1 } };
+    const next = applyReviews(items, [{ id: 'a', correct: true }], TODAY, NOW);
+    expect(next.a.b).toBe(3);
+    expect(next.a.n).toBe(5);
+  });
+
+  it('does not mutate the item map it is given', () => {
+    const items = { a: { b: 2, d: TODAY, n: 4, l: 0, t: 1 } };
+    applyReviews(items, [{ id: 'a', correct: false }], TODAY, NOW);
+    expect(items.a.b).toBe(2);
+  });
+
+  it('leaves untouched items alone', () => {
+    const items = { a: { b: 2, d: TODAY, n: 4, l: 0, t: 1 } };
+    const next = applyReviews(items, [{ id: 'b', correct: true }], TODAY, NOW);
+    expect(next.a).toEqual(items.a);
+  });
+
+  it('stamps every item in a batch with the same review timestamp', () => {
+    const next = applyReviews({}, [
+      { id: 'a', correct: true },
+      { id: 'b', correct: true },
+    ], TODAY, NOW);
+    expect(next.a.t).toBe(NOW);
+    expect(next.b.t).toBe(NOW);
+  });
+
+  it('ignores outcomes with no id', () => {
+    const next = applyReviews({}, [{ correct: true }, { id: '', correct: true }], TODAY, NOW);
+    expect(Object.keys(next)).toEqual([]);
+  });
+
+  it('coerces a missing correct flag to a wrong answer', () => {
+    const next = applyReviews({}, [{ id: 'a' }], TODAY, NOW);
+    expect(next.a.b).toBe(1);
+  });
+
+  it('applies duplicate ids in a batch in order', () => {
+    const next = applyReviews({}, [
+      { id: 'a', correct: true },
+      { id: 'a', correct: false },
+    ], TODAY, NOW);
+    expect(next.a.b).toBe(1);
+    expect(next.a.n).toBe(2);
+  });
+
+  it('prunes long-abandoned well-learned items while writing', () => {
+    const items = {
+      stale: { b: MAX_BOX, d: TODAY - PRUNE_AFTER_DAYS - 1, n: 9, l: 0, t: 1 },
+    };
+    const next = applyReviews(items, [{ id: 'fresh', correct: true }], TODAY, NOW);
+    expect(next).not.toHaveProperty('stale');
+    expect(next).toHaveProperty('fresh');
+  });
+
+  it('returns an unchanged (pruned) map for an empty batch', () => {
+    const items = { a: { b: 2, d: TODAY, n: 1, l: 0, t: 1 } };
+    expect(applyReviews(items, [], TODAY, NOW)).toEqual(items);
+  });
+
+  it('handles a missing item map', () => {
+    expect(applyReviews(undefined, [{ id: 'a', correct: true }], TODAY, NOW).a.b).toBe(2);
   });
 });
 

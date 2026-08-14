@@ -238,6 +238,27 @@ export function dueCount(items = {}, available = [], today = dayIndex()) {
   return n;
 }
 
+/**
+ * Apply a whole session's outcomes to the stored item map, in one pass.
+ *
+ * Deliberately batch-shaped. useProgress re-uploads the entire progress blob on
+ * every state change (debounced 1s), so recording one outcome at a time would
+ * push the whole map on every tap — tens of kB per question, on metered mobile
+ * data. Callers accumulate outcomes during a session and commit once at the end.
+ *
+ * @param {Object}   items      current item map
+ * @param {Object[]} outcomes   [{ id, correct }]
+ * @returns {Object} a new item map, pruned
+ */
+export function applyReviews(items = {}, outcomes = [], today = dayIndex(), now = Date.now()) {
+  const next = { ...items };
+  for (const outcome of outcomes) {
+    if (!outcome?.id) continue;
+    next[outcome.id] = schedule(next[outcome.id], !!outcome.correct, today, now);
+  }
+  return pruneItems(next, today);
+}
+
 // ── Housekeeping ─────────────────────────────────────────────────────────────
 // The item map only grows, and it is re-uploaded whole on every write. Drop
 // well-learned items nobody has looked at in a long time: they are at the top

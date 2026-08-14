@@ -263,9 +263,9 @@ Nigerian students can use on 2G and one they cannot.
 
 | File | Change |
 |---|---|
-| `src/utils/reviewSchedule.js` | **new** — `hashPrompt`, `itemId`, `schedule`, `buildQueue`. Pure functions, no React. |
-| `src/__tests__/reviewSchedule.test.js` | **new** — box transitions, due-date maths, queue ordering, new-item cap, hash stability |
-| `src/components/useProgress.js` | extend `mergeProgress` for `items`; add batched `recordReviews(outcomes[])` |
+| `src/utils/reviewSchedule.js` | ✅ **done** — identity helpers, `schedule`, `applyReviews`, `buildQueue`, `pruneItems`. Pure, no React. |
+| `src/__tests__/reviewSchedule.test.js` | ✅ **done** — 83 tests |
+| `src/components/useProgress.js` | ✅ **done** — `mergeProgress` carries `items` (per-item last-write-wins); `recordReviews(outcomes[])` commits a session in one `setProgress` |
 | `src/components/Quiz.jsx` | `onComplete(score, total, outcomes)` — line 36 already computes correctness per item, it is just discarded at line 51 |
 | `src/components/CourseQuiz.jsx` | pass `outcomes` through; no behaviour change |
 | `src/components/CourseExamPrep.jsx` | emit an outcome per question from the self-marked fraction |
