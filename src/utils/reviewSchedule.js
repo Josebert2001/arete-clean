@@ -31,6 +31,11 @@
 // arguably correct — a reworded question is a different question. Whitespace is
 // normalised first so reflowing a long string in the source does not count.
 
+// Review state lives in its own user_progress row rather than alongside the quiz
+// scores, so the growing item map never bloats a record that other pages read.
+// user_progress is keyed (user_id, storage_key), so a new key costs no migration.
+export const REVIEW_STORAGE_KEY = 'review-v1';
+
 export const ITEM_KINDS = {
   quiz: 'q',   // course.quiz[]      — MCQ
   exam: 'x',   // course.examPrep[]  — written

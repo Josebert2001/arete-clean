@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { GraduationCap, Play, Award, ArrowLeft } from 'lucide-react';
 import Quiz from './Quiz';
 import { useProgress } from './useProgress';
+import { quizItemId, REVIEW_STORAGE_KEY } from '../utils/reviewSchedule';
 
 // All course practice-quiz results share one progress record, keyed by course
 // slug inside quizScores. This needs no schema change — useProgress already
@@ -22,6 +23,10 @@ function sample(arr, n) {
 export default function CourseQuiz({ course }) {
   const bank = course.quiz || [];
   const { progress, setQuizScore } = useProgress(STORAGE_KEY);
+  // Review scheduling keeps its own record — see REVIEW_STORAGE_KEY. Two hook
+  // instances rather than one, so the item map never bloats the quiz-score row
+  // that this page and the Planner both read.
+  const { recordReviews } = useProgress(REVIEW_STORAGE_KEY);
   const last = progress.quizScores?.[course.slug];
 
   // null = on the length picker; otherwise the sampled question set in play.
@@ -62,7 +67,11 @@ export default function CourseQuiz({ course }) {
         <Quiz
           key={attempt}
           questions={questions}
-          onComplete={(score, total) => setQuizScore(course.slug, score, total)}
+          itemIdFor={(q) => quizItemId(course.slug, q)}
+          onComplete={(score, total, outcomes) => {
+            setQuizScore(course.slug, score, total);
+            recordReviews(outcomes);
+          }}
         />
       </div>
     );

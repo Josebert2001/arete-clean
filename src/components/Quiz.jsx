@@ -17,7 +17,11 @@ function shuffleOptions(q) {
   return { ...q, options: opts.map((o) => o.text), correctIndex: opts.findIndex((o) => o.correct) };
 }
 
-export default function Quiz({ questions, onComplete }) {
+// `itemIdFor` is optional: pass it when the caller's questions belong to a
+// review-scheduled bank, and onComplete gains a third argument of per-item
+// outcomes. Quiz stays generic — it never learns what a course or a slug is, the
+// caller supplies the identity function (see CourseQuiz).
+export default function Quiz({ questions, onComplete, itemIdFor }) {
   // Options are shuffled once per attempt (mount), and again on retake. The
   // prop stays stable for a given mount, so this initializer runs exactly once.
   const [items, setItems] = useState(() => questions.map(shuffleOptions));
@@ -43,12 +47,24 @@ export default function Quiz({ questions, onComplete }) {
     setAnswers(a => a.map((prev, i) => (i === current ? idx : prev)));
   };
 
+  // Per-item results for the review scheduler. Built from `items` — the shuffled
+  // copies — rather than the source questions; quizItemId sorts a question's
+  // options precisely so an id built here matches one built from the bank.
+  const outcomes = () => (
+    itemIdFor
+      ? items.map((item, i) => ({ id: itemIdFor(item), correct: answers[i] === item.correctIndex }))
+      : []
+  );
+
   const next = () => {
     if (current + 1 < items.length) {
       setCurrent(c => c + 1);
     } else {
       setFinished(true);
-      if (onComplete) onComplete(score, items.length);
+      // Reported once, at the end — not per answer. useProgress re-uploads the
+      // whole progress blob on every change, so a per-question write would push
+      // it on every tap.
+      if (onComplete) onComplete(score, items.length, outcomes());
     }
   };
 

@@ -266,8 +266,8 @@ Nigerian students can use on 2G and one they cannot.
 | `src/utils/reviewSchedule.js` | ✅ **done** — identity helpers, `schedule`, `applyReviews`, `buildQueue`, `pruneItems`. Pure, no React. |
 | `src/__tests__/reviewSchedule.test.js` | ✅ **done** — 83 tests |
 | `src/components/useProgress.js` | ✅ **done** — `mergeProgress` carries `items` (per-item last-write-wins); `recordReviews(outcomes[])` commits a session in one `setProgress` |
-| `src/components/Quiz.jsx` | `onComplete(score, total, outcomes)` — line 36 already computes correctness per item, it is just discarded at line 51 |
-| `src/components/CourseQuiz.jsx` | pass `outcomes` through; no behaviour change |
+| `src/components/Quiz.jsx` | ✅ **done** — optional `itemIdFor` prop; `onComplete(score, total, outcomes)` |
+| `src/components/CourseQuiz.jsx` | ✅ **done** — second useProgress instance on `review-v1`; records the session on complete |
 | `src/components/CourseExamPrep.jsx` | emit an outcome per question from the self-marked fraction |
 | `src/components/LectureNotes.jsx` | card mode emits outcomes |
 | `src/pages/Review.jsx` | **new** — the queue page |
