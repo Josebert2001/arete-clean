@@ -24,17 +24,16 @@ Which means:
 - The flashcards in `LectureNotes.jsx` (termlists in card mode) record nothing
   at all; close the tab and the session never happened.
 
-The content is not the gap. Counted on `master` today:
+The content is not the gap. Counted on `master`:
 
 | | count |
 |---|---|
-| MCQs across the authored banks | 1,019 |
-| Written questions (`cyb122ExamPrep`) | 45 |
-| Termlist cards in lecture notes | 1,562 (445 inline + 1,117 in the lazy note files) |
+| MCQs across the authored banks | 1,137 |
+| Written questions (`cyb122ExamPrep`, `cyb222ExamPrep`) | 107 |
+| Termlist cards in lecture notes | 1,586 |
+| **Total reviewable items** | **2,830** |
 
-— and PRs #33 and #35 add another 118 MCQs and 62 written questions on top. So
-roughly **2,600 reviewable items already exist**, with more arriving every time a
-bank is authored.
+More arrive every time a bank is authored, so this only grows.
 
 The gap is that nothing tracks **which of them a particular student is
 forgetting, or when they should see them again**.
@@ -64,7 +63,7 @@ itemId = `${kind}:${courseSlug}:${hash(promptText)}`
 
 **What counts as "the prompt" differs by kind**, and getting it wrong silently
 conflates two items into one shared schedule. Running the hash over the real
-corpus (2,626 items) is what settled this — the first attempt hashed the bare
+corpus is what settled this — the first attempt hashed the bare
 `question` / `term` and produced 78 duplicate ids:
 
 | kind | source | hashed | why |
@@ -77,7 +76,7 @@ Fields are joined with U+001F, which survives the whitespace normalisation below
 so a card `{term: 'Web app', def: 'risk model'}` cannot collide with
 `{term: 'Web', def: 'app risk model'}`.
 
-With per-kind identity the corpus produces **2,623 unique ids from 2,626 items**.
+With per-kind identity the corpus produces **2,827 unique ids from 2,830 items**.
 The three remaining duplicates are byte-identical cards repeated across two notes
 (`Sequence Number` in UUY-CYB 221, `Utilization of Resources` in ENT 221) —
 collapsing those into one schedule is correct, not a defect. Nobody should drill
