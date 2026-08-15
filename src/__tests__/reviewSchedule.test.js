@@ -20,6 +20,7 @@ import {
   buildQueue,
   selectLeeches,
   dueCount,
+  dueCountFromState,
   pruneItems,
 } from '../utils/reviewSchedule';
 
@@ -581,6 +582,54 @@ describe('applyReviews', () => {
 
   it('handles a missing item map', () => {
     expect(applyReviews(undefined, [{ id: 'a', correct: true }], TODAY, NOW).a.b).toBe(2);
+  });
+});
+
+// ─── dueCountFromState ────────────────────────────────────────────────────────
+// The catalogue-free counter the dashboard uses.
+
+describe('dueCountFromState', () => {
+  const TODAY = 20_000;
+
+  it('counts due items without needing a candidate pool', () => {
+    const items = {
+      a: { b: 1, d: TODAY - 1, n: 1, l: 0, t: 1 },
+      b: { b: 1, d: TODAY, n: 1, l: 0, t: 1 },
+      c: { b: 1, d: TODAY + 1, n: 1, l: 0, t: 1 },
+    };
+    expect(dueCountFromState(items, TODAY)).toBe(2);
+  });
+
+  it('excludes leeches, matching what the queue would offer', () => {
+    const items = {
+      a: { b: 1, d: TODAY, n: 1, l: 0, t: 1 },
+      leech: { b: 1, d: TODAY, n: 30, l: LEECH_THRESHOLD, t: 1 },
+    };
+    expect(dueCountFromState(items, TODAY)).toBe(1);
+  });
+
+  it('agrees with dueCount when every stored item is still in the pool', () => {
+    const available = [{ id: 'a' }, { id: 'b' }];
+    const items = {
+      a: { b: 1, d: TODAY, n: 1, l: 0, t: 1 },
+      b: { b: 2, d: TODAY - 3, n: 2, l: 0, t: 1 },
+    };
+    expect(dueCountFromState(items, TODAY)).toBe(dueCount(items, available, TODAY));
+  });
+
+  it('reads high when an item is no longer in the catalogue — the documented trade', () => {
+    const available = [{ id: 'a' }];               // 'stale' left another department behind
+    const items = {
+      a: { b: 1, d: TODAY, n: 1, l: 0, t: 1 },
+      stale: { b: 1, d: TODAY, n: 1, l: 0, t: 1 },
+    };
+    expect(dueCountFromState(items, TODAY)).toBe(2);
+    expect(dueCount(items, available, TODAY)).toBe(1);
+  });
+
+  it('handles empty and missing state', () => {
+    expect(dueCountFromState({}, TODAY)).toBe(0);
+    expect(dueCountFromState(undefined, TODAY)).toBe(0);
   });
 });
 
