@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { usePageTitle } from '../utils/usePageTitle';
 
 function Section({ title, children }) {
@@ -68,7 +69,7 @@ export default function Terms() {
         <p>
           Some features rely on external services — code execution (JDoodle), AI providers (Groq, Google Gemini,
           OpenRouter), and, if you connect it, Google Calendar. Your use of those features is also subject to
-          those providers' own terms. See our <a href="/privacy" className="font-medium text-ink underline hover:text-ember">Privacy Policy</a> for the full list.
+          those providers' own terms. See our <Link to="/privacy" className="font-medium text-ink underline hover:text-ember">Privacy Policy</Link> for the full list.
         </p>
       </Section>
 

@@ -41,6 +41,8 @@
   --syntax-fn:    #F0E4CD;
   --syntax-plain: #F5EFE0;
   --syntax-err:   #E8927C;
+  --syntax-line:  #8F877C;  /* gutter line numbers — 4.98:1 on the surface */
+  --syntax-edge:  #3A2A1E;  /* dividers within a code surface */
 }
 
 .dark {
@@ -182,6 +184,27 @@ body {
     text-align: left;
   }
 }
+
+/*
+ * Editable code surface (CodePlayground) — pinned dark in BOTH themes, for the
+ * same reason .code-block hardcodes its background.
+ *
+ * It previously used `bg-ink`, which the .dark block inverts to near-white,
+ * while the --syntax-* tokens it prints output in are deliberately fixed. In
+ * dark mode that put light-on-light: the output pane measured 1.01:1 and a
+ * student could not read their own compiler errors. Accent tints had the same
+ * problem from the other side — no single colour clears AA on both a near-black
+ * and a near-white background, so the surface is what has to stop moving.
+ */
+.code-surface {
+  background: #1C1814;
+  color: var(--syntax-plain);
+}
+.code-surface-edge  { border-color: var(--syntax-edge); }
+.code-surface-line  { color: var(--syntax-line); }
+.code-surface-muted { color: var(--syntax-num); }   /* 7.81:1 */
+.code-surface-ok    { color: var(--syntax-str); }   /* 10.40:1 */
+.code-surface-error { color: var(--syntax-err); }   /*  7.42:1 */
 
 /* Display heading style */
 .display-heading {

@@ -25,6 +25,11 @@ export default {
           900: 'rgb(var(--coffee-900) / <alpha-value>)',
         },
         ember: {
+          // DEFAULT so the bare `text-ember` / `hover:text-ember` used across
+          // Planner, Privacy and Terms actually compiles. It reads as valid
+          // because index.css defines an `--ember` variable for .btn-* and
+          // :focus-visible, but Tailwind emits no utility without this key.
+          DEFAULT: 'rgb(var(--ember-500) / <alpha-value>)',
           400: 'rgb(var(--ember-400) / <alpha-value>)',
           500: 'rgb(var(--ember-500) / <alpha-value>)',
         },

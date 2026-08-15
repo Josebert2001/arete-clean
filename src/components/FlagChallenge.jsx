@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Flag, CheckCircle2, Lightbulb, Terminal, ChevronRight } from 'lucide-react';
 import CodeBlock from './CodeBlock';
 
@@ -196,7 +197,7 @@ export default function FlagChallenge({ challenge, moduleId, onSolve }) {
         {hintsShown >= challenge.hints.length && !solved && (
           <p className="text-xs text-coffee-500 mt-4">
             Still stuck after every hint? Ask the{' '}
-            <a href="/tutor" className="underline hover:text-ink">AI Tutor</a> to walk you through the technique.
+            <Link to="/tutor" className="underline hover:text-ink">AI Tutor</Link> to walk you through the technique.
           </p>
         )}
       </div>

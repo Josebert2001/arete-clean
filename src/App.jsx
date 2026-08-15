@@ -54,7 +54,7 @@ class ErrorBoundary extends Component {
           <p className="text-sm text-coffee-600 mb-6">Try reloading the page. If the problem persists, contact support.</p>
           <button
             onClick={() => window.location.reload()}
-            className="text-sm font-semibold text-ember-600 hover:underline"
+            className="text-sm font-semibold text-ember-500 hover:underline"
           >
             Reload page
           </button>

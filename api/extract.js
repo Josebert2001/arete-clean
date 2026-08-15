@@ -8,7 +8,6 @@
 // ============================================================================
 
 import { createRequire } from 'module';
-import mammoth from 'mammoth';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders } from './_lib/request-policy.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 
@@ -88,6 +87,10 @@ export default async function handler(req, res) {
     if (fileType === 'txt') {
       text = buffer.toString('utf-8');
     } else if (fileType === 'docx') {
+      // Imported here rather than at module scope: mammoth measures ~630ms to
+      // load, and the txt and pdf branches never touch it. pdf-parse stays
+      // eager above — it measures ~5ms, so deferring it would buy nothing.
+      const { default: mammoth } = await import('mammoth');
       const result = await mammoth.extractRawText({ buffer });
       text = result.value;
     } else if (fileType === 'pdf') {
