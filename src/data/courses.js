@@ -6347,13 +6347,17 @@ print(summary_df.to_string(index=False))`,
             heading: 'What a Strong Password Policy Requires',
             items: [
               'A minimum length — at least six characters, though longer is stronger',
-              'Mixed case (“camel casing”) — at least one uppercase letter combined with lowercase letters',
+              'Mixed case — at least one uppercase letter combined with lowercase letters',
               'At least one special character or symbol — e.g. @, #, comma, full stop, hyphen, underscore, forward slash, or backslash',
             ],
           },
           {
             type: 'note',
-            text: 'Beyond the lecture: current guidelines such as NIST SP 800-63B now favour length and passphrase uniqueness over forced complexity, and recommend checking new passwords against known breached-password lists. The point worth holding on to is that complexity rules alone do not guarantee a password has not been reused somewhere else that has already been breached.',
+            items: [
+              'The handout calls that second requirement “camel casing”. It is a loose use of the term, and worth getting right because you will meet the real one in programming. camelCase is a naming convention for identifiers: the words are run together with no spaces and every word after the first is capitalised, as in “myVariableName” or “totalStudentCount”. It says nothing about passwords. What the policy is actually asking for is mixed case — that the password contain both capital and small letters. If a question uses the lecturer’s wording, answer that it means mixed case; the requirement is the same either way, only the label is borrowed.',
+              'Beyond the lecture: current guidelines such as NIST SP 800-63B now favour length and passphrase uniqueness over forced complexity, and recommend checking new passwords against known breached-password lists. The point worth holding on to is that complexity rules alone do not guarantee a password has not been reused somewhere else that has already been breached.',
+              'The six-character minimum is the lecturer’s figure and is what to reproduce if he asks. In practice it is far too short — six characters falls to an offline brute-force attack in seconds, which is why the modern advice is a long passphrase rather than a short password decorated with symbols.',
+            ],
           },
           {
             type: 'definition',
@@ -8249,7 +8253,7 @@ print(summary_df.to_string(index=False))`,
         question: 'According to the password policy in the notes, "camel casing" in a password means:',
         options: ['Using at least six characters', 'Using a special character such as @ or #', 'Mixing at least one uppercase letter with lowercase letters', 'Never reusing a password across sites'],
         correctIndex: 2,
-        explanation: 'Camel casing refers to mixed case — at least one uppercase letter combined with lowercase letters.',
+        explanation: 'In the notes it means mixed case — at least one uppercase letter combined with lowercase letters. Note that the term is borrowed loosely: real camelCase is a programming naming convention for identifiers such as “myVariableName”, where words are run together and each one after the first is capitalised. It has nothing to do with password strength, so give the mixed-case answer whichever wording the question uses.',
       },
       {
         question: 'Three-Factor Authentication (3FA) requires evidence from three independent categories. Which set names them correctly?',
