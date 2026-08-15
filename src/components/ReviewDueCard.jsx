@@ -1,7 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Brain, ArrowRight } from 'lucide-react';
 import { useProgress } from './useProgress';
-import { REVIEW_STORAGE_KEY, dueCountFromState } from '../utils/reviewSchedule';
+import { REVIEW_STORAGE_KEY, ITEM_KINDS, dueCountFromState, trackedCount } from '../utils/reviewSchedule';
+
+// Counted kinds must match what /review actually puts in a session, or the card
+// promises work the page will not offer. Written questions and flashcards record
+// their outcomes already, but the session UI only runs MCQs — widen this and
+// Review.jsx's `kinds` together, never one alone.
+const COUNTED_KINDS = [ITEM_KINDS.quiz];
 
 // The dashboard's entry point to /review. Without it the review queue is
 // reachable only by typing the URL, and a queue nobody opens does nothing.
@@ -13,14 +19,14 @@ import { REVIEW_STORAGE_KEY, dueCountFromState } from '../utils/reviewSchedule';
 export default function ReviewDueCard() {
   const { progress } = useProgress(REVIEW_STORAGE_KEY);
   const items = progress.items;
-  const tracked = items ? Object.keys(items).length : 0;
+  const tracked = trackedCount(items, COUNTED_KINDS);
 
   // Nothing tracked yet means the student has not finished a practice quiz, so
   // there is nothing honest to say here — the Getting Started checklist and the
   // tracks card are better uses of the space until then.
   if (tracked === 0) return null;
 
-  const due = dueCountFromState(items);
+  const due = dueCountFromState(items, undefined, COUNTED_KINDS);
 
   return (
     <Link

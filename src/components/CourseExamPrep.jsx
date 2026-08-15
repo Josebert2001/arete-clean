@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import MathText from './MathText';
 import { useProgress } from './useProgress';
+import { examItemId, gradeFromMarks, REVIEW_STORAGE_KEY } from '../utils/reviewSchedule';
 
 // Written-exam practice, as opposed to the MCQ `course.quiz` bank. Nothing
 // here is auto-scored against a correct option, because a written answer has
@@ -338,6 +339,8 @@ function RecallQuestion({ q, awarded, onAward }) {
 export default function CourseExamPrep({ course }) {
   const bank = course.examPrep || [];
   const { progress, setQuizScore } = useProgress(STORAGE_KEY);
+  // Review scheduling keeps its own record — see REVIEW_STORAGE_KEY.
+  const { recordReviews } = useProgress(REVIEW_STORAGE_KEY);
   const last = progress.quizScores?.[course.slug];
 
   const [questions, setQuestions] = useState(null);
@@ -423,6 +426,14 @@ export default function CourseExamPrep({ course }) {
         setFinished(true);
         const pct = totalMarks ? Math.round((earnedMarks / totalMarks) * 100) : 0;
         setQuizScore(course.slug, pct, 100);
+        // One write for the whole set, not one per question — useProgress
+        // re-uploads the entire blob on every change. A self-marked answer is
+        // graded pass/fail against the question's marks (see REVIEW_PASS_FRACTION),
+        // since the scheduler wants a binary outcome.
+        recordReviews(questions.map((question, i) => ({
+          id: examItemId(course.slug, question),
+          correct: gradeFromMarks(awards[i] ?? 0, question.marks),
+        })));
       }
     };
 

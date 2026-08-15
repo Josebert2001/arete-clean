@@ -8,6 +8,10 @@ import { MemoryRouter } from 'react-router-dom';
 import ReviewDueCard from '../components/ReviewDueCard';
 import { REVIEW_STORAGE_KEY, dayIndex, LEECH_THRESHOLD } from '../utils/reviewSchedule';
 
+// Ids carry their kind — the card counts only what /review can actually offer.
+const Q = (n) => `q:uuy-cyb-222:mcq${n}`;
+const X = (n) => `x:uuy-cyb-222:written${n}`;
+
 vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }));
 vi.mock('../lib/supabase', () => ({ supabase: null }));
 
@@ -39,9 +43,9 @@ describe('ReviewDueCard', () => {
   it('counts what is due and links to the queue', () => {
     const today = dayIndex();
     seed({
-      a: { b: 1, d: today, n: 1, l: 0, t: 1 },
-      b: { b: 2, d: today - 3, n: 2, l: 0, t: 1 },
-      c: { b: 4, d: today + 12, n: 5, l: 0, t: 1 },
+      [Q(1)]: { b: 1, d: today, n: 1, l: 0, t: 1 },
+      [Q(2)]: { b: 2, d: today - 3, n: 2, l: 0, t: 1 },
+      [Q(3)]: { b: 4, d: today + 12, n: 5, l: 0, t: 1 },
     });
     renderCard();
 
@@ -50,7 +54,7 @@ describe('ReviewDueCard', () => {
   });
 
   it('uses the singular for a single due question', () => {
-    seed({ a: { b: 1, d: dayIndex(), n: 1, l: 0, t: 1 } });
+    seed({ [Q(1)]: { b: 1, d: dayIndex(), n: 1, l: 0, t: 1 } });
     renderCard();
     expect(screen.getByText('1 question due for review')).toBeInTheDocument();
   });
@@ -58,8 +62,8 @@ describe('ReviewDueCard', () => {
   it('stays calm and reports the tracked count when nothing is due', () => {
     const today = dayIndex();
     seed({
-      a: { b: 4, d: today + 10, n: 5, l: 0, t: 1 },
-      b: { b: 3, d: today + 2, n: 3, l: 0, t: 1 },
+      [Q(1)]: { b: 4, d: today + 10, n: 5, l: 0, t: 1 },
+      [Q(2)]: { b: 3, d: today + 2, n: 3, l: 0, t: 1 },
     });
     renderCard();
 
@@ -70,15 +74,33 @@ describe('ReviewDueCard', () => {
   it('does not count leeches, so the card agrees with the queue', () => {
     const today = dayIndex();
     seed({
-      a: { b: 1, d: today, n: 1, l: 0, t: 1 },
-      leech: { b: 1, d: today, n: 30, l: LEECH_THRESHOLD, t: 1 },
+      [Q(1)]: { b: 1, d: today, n: 1, l: 0, t: 1 },
+      [Q(2)]: { b: 1, d: today, n: 30, l: LEECH_THRESHOLD, t: 1 },
     });
     renderCard();
     expect(screen.getByText('1 question due for review')).toBeInTheDocument();
   });
 
+  it('ignores written questions, which /review does not yet offer in a session', () => {
+    const today = dayIndex();
+    seed({
+      [Q(1)]: { b: 1, d: today, n: 1, l: 0, t: 1 },
+      [X(1)]: { b: 1, d: today, n: 1, l: 0, t: 1 },
+      [X(2)]: { b: 1, d: today, n: 1, l: 0, t: 1 },
+    });
+    renderCard();
+    // Promising 3 and handing over 1 is the failure this guards against.
+    expect(screen.getByText('1 question due for review')).toBeInTheDocument();
+  });
+
+  it('stays hidden when the only tracked items are kinds it does not count', () => {
+    seed({ [X(1)]: { b: 1, d: dayIndex(), n: 1, l: 0, t: 1 } });
+    const { container } = renderCard();
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('never loads a course catalogue for its count', () => {
-    seed({ a: { b: 1, d: dayIndex(), n: 1, l: 0, t: 1 } });
+    seed({ [Q(1)]: { b: 1, d: dayIndex(), n: 1, l: 0, t: 1 } });
     renderCard();
     expect(catalogueSpy).not.toHaveBeenCalled();
   });
