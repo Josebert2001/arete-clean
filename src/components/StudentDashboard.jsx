@@ -15,6 +15,7 @@ import { pickDailyChallenge } from '../utils/dailyChallenge';
 import { shouldShowGettingStarted, readDismissed, writeDismissed } from '../utils/gettingStarted';
 import { findDepartmentByName, getDepartment } from '../data/departments';
 import GettingStartedCard from './GettingStartedCard';
+import ReviewDueCard from './ReviewDueCard';
 
 // ─── The signed-in homepage ───────────────────────────────────────────────────
 // Home for a signed-in student is a daily dashboard, not a marketing page:
@@ -204,8 +205,10 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* ── Right column: year, daily challenge, tools ── */}
+        {/* ── Right column: review, year, daily challenge, tools ── */}
         <div className="space-y-6">
+          <ReviewDueCard />
+
           {level && (
             <Link
               to={`/courses?level=${level}`}

@@ -232,8 +232,30 @@ export function selectLeeches(items = {}, available = []) {
   return available.filter((item) => isLeech(items?.[item?.id]));
 }
 
-// For the dashboard's "N due today" card. Counts the same population buildQueue
-// would draw from, uncapped, so the badge does not disagree with the queue.
+/**
+ * How much is due, counted straight off the stored state.
+ *
+ * The dashboard needs this and must NOT load a course catalogue to get it —
+ * it renders on every visit, and pulling ~800 kB of courses for one badge is
+ * exactly what StudentDashboard's existing comment forbids. Due-ness depends
+ * only on each item's stored due day, so no catalogue is required.
+ *
+ * The trade: this counts items from every course the student has ever
+ * practised, including ones no longer in their catalogue after a department
+ * switch. /review filters to the current catalogue and is the authority; this
+ * can read high in that one case. A nudge that is occasionally generous is a
+ * better bargain than a catalogue download on every dashboard render.
+ */
+export function dueCountFromState(items = {}, today = dayIndex()) {
+  let n = 0;
+  for (const state of Object.values(items || {})) {
+    if (state && !isLeech(state) && state.d <= today) n++;
+  }
+  return n;
+}
+
+// For surfaces that already hold a candidate pool. Counts the same population
+// buildQueue would draw from, uncapped, so the badge cannot disagree with it.
 export function dueCount(items = {}, available = [], today = dayIndex()) {
   let n = 0;
   for (const item of available) {

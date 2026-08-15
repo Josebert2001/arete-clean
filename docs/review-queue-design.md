@@ -241,7 +241,7 @@ student gets drilled on courses they do not take.
 | Where | What |
 |---|---|
 | `/review` (new route, `RequireAuth`) | the session itself |
-| Home / dashboard | **"14 items due today"** card |
+| Home / dashboard | ✅ **"N due for review"** card, top of the right column |
 | `CourseDetail` | "Review 6 items due in this course" |
 
 The dashboard card is load-bearing, not decoration. A review queue nobody opens
@@ -272,7 +272,7 @@ Nigerian students can use on 2G and one they cannot.
 | `src/components/LectureNotes.jsx` | card mode emits outcomes |
 | `src/pages/Review.jsx` | ✅ **done** — the queue page (MCQ only for now) |
 | `src/App.jsx` | ✅ **done** — lazy `/review` route behind RequireAuth |
-| Home / dashboard | the due-today card |
+| `src/components/ReviewDueCard.jsx` | ✅ **done** — the due-today card, mounted at the top of StudentDashboard's right column. Counts via `dueCountFromState`, never `useCatalogue`. |
 
 Suggested order: `reviewSchedule.js` + its tests → `useProgress` → `Quiz`
 wiring → `/review` → dashboard card → examPrep and flashcards. The first two
