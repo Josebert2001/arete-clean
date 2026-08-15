@@ -51,6 +51,14 @@ export default defineConfig({
         skipWaiting: false,         // prompt-mode: Reload click sends SKIP_WAITING
         runtimeCaching: [
           {
+            /*
+             * Both font rules make the service worker re-issue the request as a
+             * fetch(), so they answer to `connect-src` — not the `style-src` /
+             * `font-src` a plain page load would use. vercel.json must list
+             * both font origins in all three, or the SW's fetch is refused and
+             * the document's <link> resolves to a network error: no fonts at
+             * all, and only on deployed builds where a SW is installed.
+             */
             urlPattern: ({ url }) => url.origin === 'https://fonts.googleapis.com',
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'google-fonts-stylesheets' },
