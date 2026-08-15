@@ -246,12 +246,30 @@ export function selectLeeches(items = {}, available = []) {
  * can read high in that one case. A nudge that is occasionally generous is a
  * better bargain than a catalogue download on every dashboard render.
  */
-export function dueCountFromState(items = {}, today = dayIndex()) {
+export function dueCountFromState(items = {}, today = dayIndex(), kinds = null) {
+  const wanted = kinds?.length ? new Set(kinds) : null;
   let n = 0;
-  for (const state of Object.values(items || {})) {
+  for (const [id, state] of Object.entries(items || {})) {
+    if (wanted && !wanted.has(kindOf(id))) continue;
     if (state && !isLeech(state) && state.d <= today) n++;
   }
   return n;
+}
+
+// Read the kind back out of an item id. Lets a surface that has no catalogue
+// still tell an MCQ from a written question or a flashcard, which is what keeps
+// the dashboard's count in step with what /review will actually offer.
+export function kindOf(id) {
+  const sep = String(id ?? '').indexOf(':');
+  return sep > 0 ? String(id).slice(0, sep) : null;
+}
+
+// How many stored items match a kind filter, due or not — for a "being tracked"
+// figure that counts the same population as dueCountFromState.
+export function trackedCount(items = {}, kinds = null) {
+  const wanted = kinds?.length ? new Set(kinds) : null;
+  if (!wanted) return Object.keys(items || {}).length;
+  return Object.keys(items || {}).filter((id) => wanted.has(kindOf(id))).length;
 }
 
 // For surfaces that already hold a candidate pool. Counts the same population

@@ -267,7 +267,7 @@ Nigerian students can use on 2G and one they cannot.
 | `src/components/useProgress.js` | ✅ **done** — `mergeProgress` carries `items` (per-item last-write-wins); `recordReviews(outcomes[])` commits a session in one `setProgress` |
 | `src/components/Quiz.jsx` | ✅ **done** — optional `itemIdFor` prop; `onComplete(score, total, outcomes)` |
 | `src/components/CourseQuiz.jsx` | ✅ **done** — second useProgress instance on `review-v1`; records the session on complete |
-| `src/components/CourseExamPrep.jsx` | emit an outcome per question from the self-marked fraction |
+| `src/components/CourseExamPrep.jsx` | ✅ **done** — emits an outcome per question via `gradeFromMarks`; state accumulates but `/review` does not yet run written questions in a session |
 | `src/utils/reviewItems.js` | ✅ **done** — catalogue → candidate pool, foundation pins applied |
 | `src/components/LectureNotes.jsx` | card mode emits outcomes |
 | `src/pages/Review.jsx` | ✅ **done** — the queue page (MCQ only for now) |

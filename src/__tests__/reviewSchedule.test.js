@@ -21,6 +21,8 @@ import {
   selectLeeches,
   dueCount,
   dueCountFromState,
+  kindOf,
+  trackedCount,
   pruneItems,
 } from '../utils/reviewSchedule';
 
@@ -630,6 +632,57 @@ describe('dueCountFromState', () => {
   it('handles empty and missing state', () => {
     expect(dueCountFromState({}, TODAY)).toBe(0);
     expect(dueCountFromState(undefined, TODAY)).toBe(0);
+  });
+
+  it('filters by kind, so a surface counts only what it can actually offer', () => {
+    const items = {
+      'q:c:1': { b: 1, d: TODAY, n: 1, l: 0, t: 1 },
+      'x:c:2': { b: 1, d: TODAY, n: 1, l: 0, t: 1 },
+      'f:c:3': { b: 1, d: TODAY, n: 1, l: 0, t: 1 },
+    };
+    expect(dueCountFromState(items, TODAY)).toBe(3);
+    expect(dueCountFromState(items, TODAY, [ITEM_KINDS.quiz])).toBe(1);
+    expect(dueCountFromState(items, TODAY, [ITEM_KINDS.quiz, ITEM_KINDS.exam])).toBe(2);
+  });
+});
+
+// ─── kindOf / trackedCount ────────────────────────────────────────────────────
+
+describe('kindOf', () => {
+  it('reads the kind back out of an id without a catalogue', () => {
+    expect(kindOf('q:uuy-cyb-222:1f4c9a2b')).toBe(ITEM_KINDS.quiz);
+    expect(kindOf('x:uuy-cyb-222:1f4c9a2b')).toBe(ITEM_KINDS.exam);
+    expect(kindOf('f:ent-221:abc')).toBe(ITEM_KINDS.card);
+  });
+
+  it('returns null for anything that is not an id', () => {
+    expect(kindOf('')).toBeNull();
+    expect(kindOf(undefined)).toBeNull();
+    expect(kindOf('nocolon')).toBeNull();
+  });
+
+  it('agrees with the ids the per-kind helpers actually produce', () => {
+    expect(kindOf(quizItemId('c', { question: 'q', options: ['a'] }))).toBe(ITEM_KINDS.quiz);
+    expect(kindOf(examItemId('c', { question: 'q' }))).toBe(ITEM_KINDS.exam);
+    expect(kindOf(cardItemId('c', { term: 't', def: 'd' }))).toBe(ITEM_KINDS.card);
+  });
+});
+
+describe('trackedCount', () => {
+  const items = { 'q:c:1': {}, 'q:c:2': {}, 'x:c:3': {}, 'f:c:4': {} };
+
+  it('counts everything when no kinds are given', () => {
+    expect(trackedCount(items)).toBe(4);
+  });
+
+  it('counts only the kinds asked for', () => {
+    expect(trackedCount(items, [ITEM_KINDS.quiz])).toBe(2);
+    expect(trackedCount(items, [ITEM_KINDS.exam, ITEM_KINDS.card])).toBe(2);
+  });
+
+  it('handles empty and missing state', () => {
+    expect(trackedCount({}, [ITEM_KINDS.quiz])).toBe(0);
+    expect(trackedCount(undefined)).toBe(0);
   });
 });
 
