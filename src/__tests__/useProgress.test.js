@@ -74,6 +74,67 @@ describe('mergeProgress', () => {
   });
 });
 
+// ─── mergeProgress: review-queue items ────────────────────────────────────────
+// Merged per item rather than per bank, so reviewing on a phone and then opening
+// a laptop keeps both sessions.
+
+describe('mergeProgress — review items', () => {
+  const state = (t, extra = {}) => ({ b: 2, d: 100, n: 1, l: 0, t, ...extra });
+
+  it('omits items entirely when neither side has any', () => {
+    const result = mergeProgress({ completedModules: [], quizScores: {} }, { completedModules: [], quizScores: {} });
+    expect(result).not.toHaveProperty('items');
+  });
+
+  it('carries cloud items when local has none', () => {
+    const cloud = { completedModules: [], quizScores: {}, items: { 'q:c:a': state(500) } };
+    const result = mergeProgress({ completedModules: [], quizScores: {} }, cloud);
+    expect(result.items['q:c:a'].t).toBe(500);
+  });
+
+  it('carries local items when cloud has none', () => {
+    const local = { completedModules: [], quizScores: {}, items: { 'q:c:a': state(500) } };
+    const result = mergeProgress(local, { completedModules: [], quizScores: {} });
+    expect(result.items['q:c:a'].t).toBe(500);
+  });
+
+  it('unions items reviewed on different devices', () => {
+    const local = { items: { 'q:c:a': state(500) } };
+    const cloud = { items: { 'q:c:b': state(600) } };
+    const result = mergeProgress(local, cloud);
+    expect(Object.keys(result.items).sort()).toEqual(['q:c:a', 'q:c:b']);
+  });
+
+  it('keeps the more recent review of the same item', () => {
+    const local = { items: { 'q:c:a': state(900, { b: 4 }) } };
+    const cloud = { items: { 'q:c:a': state(500, { b: 2 }) } };
+    expect(mergeProgress(local, cloud).items['q:c:a'].b).toBe(4);
+  });
+
+  it('lets a newer cloud review win over a stale local one', () => {
+    const local = { items: { 'q:c:a': state(100, { b: 1 }) } };
+    const cloud = { items: { 'q:c:a': state(900, { b: 5 }) } };
+    expect(mergeProgress(local, cloud).items['q:c:a'].b).toBe(5);
+  });
+
+  it('prefers local on an exact timestamp tie, matching quizScores', () => {
+    const local = { items: { 'q:c:a': state(500, { b: 3 }) } };
+    const cloud = { items: { 'q:c:a': state(500, { b: 1 }) } };
+    expect(mergeProgress(local, cloud).items['q:c:a'].b).toBe(3);
+  });
+
+  it('treats an item with no timestamp as oldest', () => {
+    const local = { items: { 'q:c:a': { b: 1, d: 1, n: 1, l: 0 } } };
+    const cloud = { items: { 'q:c:a': state(400, { b: 4 }) } };
+    expect(mergeProgress(local, cloud).items['q:c:a'].b).toBe(4);
+  });
+
+  it('still returns local untouched when cloud is null, items and all', () => {
+    const local = { completedModules: [], quizScores: {}, items: { 'q:c:a': state(500) } };
+    expect(mergeProgress(local, null)).toEqual(local);
+  });
+});
+
 // ─── readProgress ─────────────────────────────────────────────────────────────
 
 describe('readProgress', () => {

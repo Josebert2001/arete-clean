@@ -20,6 +20,7 @@ const AITutor = lazy(() => import('./pages/AITutor'));
 const CodeExplainer = lazy(() => import('./pages/CodeExplainer'));
 const Cheatsheet = lazy(() => import('./pages/Cheatsheet'));
 const Planner = lazy(() => import('./pages/Planner'));
+const Review = lazy(() => import('./pages/Review'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SetupProfile = lazy(() => import('./pages/SetupProfile'));
 const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
@@ -212,6 +213,7 @@ export default function App() {
             <Route path="/explainer" element={<RequireAuth><CodeExplainer /></RequireAuth>} />
             <Route path="/cheatsheet" element={<RequireAuth><Cheatsheet /></RequireAuth>} />
             <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
+            <Route path="/review" element={<RequireAuth><Review /></RequireAuth>} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
             <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />

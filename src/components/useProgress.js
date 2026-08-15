@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { applyReviews } from '../utils/reviewSchedule';
 
 const EMPTY_PROGRESS = { completedModules: [], quizScores: {} };
 
 // Union of completed modules; for quiz scores, the most recent attempt wins.
+//
+// Review-queue state (`items`, under the review-v1 key) merges per item rather
+// than per bank, so a student who reviews on their phone and then opens a laptop
+// keeps both sessions instead of losing one. Same last-write-wins rule as
+// quizScores, just at a finer granularity.
 export function mergeProgress(local, cloud) {
   if (!cloud) return local;
   const completedModules = [...new Set([...(local.completedModules || []), ...(cloud.completedModules || [])])];
@@ -14,7 +20,22 @@ export function mergeProgress(local, cloud) {
       quizScores[id] = score;
     }
   }
-  return { completedModules, quizScores };
+
+  const merged = { completedModules, quizScores };
+
+  // Only carried when one side actually has review state, so the track progress
+  // records that never review anything don't grow an empty key.
+  if (local?.items || cloud?.items) {
+    const items = { ...(cloud.items || {}) };
+    for (const [id, item] of Object.entries(local.items || {})) {
+      if (!items[id] || (item?.t || 0) >= (items[id]?.t || 0)) {
+        items[id] = item;
+      }
+    }
+    merged.items = items;
+  }
+
+  return merged;
 }
 
 export function readProgress(storageKey) {
@@ -111,9 +132,19 @@ export function useProgress(storageKey = 'cos222-progress-v1') {
     }));
   };
 
+  // Commit a whole review session's outcomes at once: [{ id, correct }].
+  //
+  // One setProgress call for the entire batch, so the debounced cloud push
+  // uploads the progress blob once per session rather than once per question.
+  // Calling this per answered item would defeat the point — see applyReviews.
+  const recordReviews = (outcomes) => {
+    if (!Array.isArray(outcomes) || outcomes.length === 0) return;
+    setProgress(p => ({ ...p, items: applyReviews(p.items, outcomes) }));
+  };
+
   const reset = () => setProgress({ completedModules: [], quizScores: {} });
 
   const isComplete = (moduleId) => progress.completedModules.includes(moduleId);
 
-  return { progress, markComplete, markIncomplete, setQuizScore, reset, isComplete };
+  return { progress, markComplete, markIncomplete, setQuizScore, recordReviews, reset, isComplete };
 }
