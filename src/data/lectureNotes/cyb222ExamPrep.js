@@ -9,8 +9,8 @@
 // course stays as low-stakes recall practice, but an MCQ cannot rehearse what
 // this paper actually asks for: unaided recall of a named list, and an answer
 // structured so a marker can find the points. The lecturer was explicit about
-// that in class (Topic 12): "Pages of prose that never name the technical terms
-// score nothing — the marks sit on the terms themselves."
+// that in class (Topic 13, Exam Focus): "Pages of prose that never name the
+// technical terms score nothing — the marks sit on the terms themselves."
 //
 // So every question here is the form a real script uses — "define", "list and
 // explain any five", "differentiate between", "with reference to…" — and each
@@ -35,7 +35,7 @@
 export const cyb222ExamPrep = [
 
   // ══════════════════════════════════════════════════════════════════
-  //  THE SIX FLAGGED QUESTIONS — Topic 12
+  //  THE SIX FLAGGED QUESTIONS — Topic 13 (Exam Focus)
   //  Answers in the wording the lecturer gave in class.
   // ══════════════════════════════════════════════════════════════════
 

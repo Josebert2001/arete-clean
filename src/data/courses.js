@@ -6022,11 +6022,14 @@ print(summary_df.to_string(index=False))`,
       'For every vulnerability, know: how it works, how to exploit it, and how to fix it',
       'Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies',
     ],
-    // Topics 1–3 and 7–10 are the class lecture notes. Topics 11–12, and the
-    // additions marked as exam wording throughout, come from the lecturer's
+    // Topics 1–3 and 7–10 are the class lecture notes. Topics 11 and 13, and
+    // the additions marked as exam wording throughout, come from the lecturer's
     // handout "Cybersecurity Concepts: Web and Mobile Application Security"
     // plus the exam guidance he gave in class (the six flagged questions in
-    // Topic 12).
+    // Topic 13). Topic 12 is the OWASP Top 10, worked up from Ian Ross's
+    // ANZTB 2017 talk "Introduction to web security" — it teaches the 2013
+    // edition, because the figures and ratings are that edition's, and closes
+    // with a 2013→2021 mapping so nobody mistakes it for the current list.
     //
     // Topics 4–6 cover outline item 3 (secure mobile development), which the
     // class notes leave uncovered; they sit at positions 4–6 so the topics read
@@ -6296,6 +6299,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'Keep this list apart from the one that follows. This one answers why a system is attacked — the motive — while the next answers who attacks it. They overlap in wording, since “activism” is a motive and “activists” are the people holding it, so read the heading of the question carefully: a question asking you to list threat actors earns nothing for a list of motives.',
+          },
+          {
             type: 'termlist',
             heading: 'Threat Actor Profiles',
             items: [
@@ -6368,6 +6375,14 @@ print(summary_df.to_string(index=False))`,
             text: 'In multi-party authentication, the individual originating a request must wait for a second individual with higher-level credentials to approve it before access is granted. A familiar consumer example is location- or device-based step-up verification: if a user’s VPN shows them logging in from one country and, within an implausibly short time, a new login attempt appears from a different country, providers such as Google or Apple may require verification from another trusted device or person before granting access — precisely because the same credentials used from two “impossible” locations in a short window is a strong signal of compromise.',
           },
           {
+            type: 'note',
+            items: [
+              'Note that “3FA” is used here in the lecturer’s sense — approval arriving from two or more separate devices, rather than one device both requesting and approving. Most textbooks define three-factor authentication differently, as three kinds of evidence: something you know (a password), something you have (a phone or token), and something you are (a fingerprint). Answer with the definition given in these notes; mention the other one only if you have room.',
+              'The line between 3FA and multi-party authentication is thin, because both banking examples involve more than one approver. Hold on to the emphasis instead: 3FA is about the approval coming from a second device, multi-party is about it coming from a second person holding higher-level credentials.',
+              'The “impossible travel” case is the one to reach for in an exam — a login from Uyo followed eight minutes later by one from London on the same account. Nobody travels that fast, so the same credentials are almost certainly in two pairs of hands.',
+            ],
+          },
+          {
             type: 'definition',
             heading: 'Time- or Volume-Constrained Access',
             text: 'Even after legitimate access is granted, a system should limit how long a session may run and how much data may be retrieved within a given period. When a session exceeds its allotted time or volume threshold, the system should automatically terminate it and require re-authentication.',
@@ -6398,6 +6413,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'A concrete picture: an online store finds that its product-review module is being exploited. Graceful degradation means switching reviews off and leaving browsing, the cart and checkout running, rather than pulling the whole site down while the fix is written. It is the same instinct as a circuit breaker tripping one room instead of the whole building — and it is why the Key Takeaways at the end of this topic describe it as containing a breach rather than preventing one.',
+          },
+          {
             type: 'definition',
             heading: 'Biometric Authentication & Liveness Detection',
             text: 'Biometric authentication verifies identity using a physical characteristic rather than — or in addition to — a password. Liveness detection is used alongside it to confirm that the biometric sample comes from a live person and not a photograph, mask, or other spoof.',
@@ -6420,6 +6439,13 @@ print(summary_df.to_string(index=False))`,
             type: 'definition',
             heading: 'Input & Request Filtering',
             text: 'Every request or input directed at a system — a login attempt, a save operation, a data request — carries a “signature” that can be inspected for consistency. A common check is whether the requesting device’s IP address remains stable within a short window, for example 60 seconds. If the IP address changes unexpectedly within that window it may indicate the use of a VPN or another anomaly, and the system can flag or restrict the request rather than granting it outright. The same principle underlies geo-gating, where access from IP ranges associated with certain regions is blocked, and VPN detection, where traffic identified as coming from a VPN is denied access to protected resources.',
+          },
+          {
+            type: 'note',
+            items: [
+              'The “signature” of a request here is not a cryptographic signature. It is the bundle of properties that travel with the request — source IP address, browser user-agent, timing, the order the form fields were filled in — which should stay consistent for one genuine user in one sitting.',
+              'Name the trade-off if the question asks you to evaluate this control: geo-gating and VPN detection block real customers too. A student in Uyo studying over a VPN, or a traveller whose IP changes mid-session, looks exactly like the anomaly the filter is hunting, which is why sensible systems flag and re-challenge rather than deny outright.',
+            ],
           },
           {
             type: 'definition',
@@ -6711,6 +6737,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'The two isolation mechanisms are worth picturing rather than memorising. Android gives every installed application its own Linux user account, so the operating system keeps two applications apart in exactly the way it keeps two people’s home folders apart on a shared computer — ordinary file permissions do all the work. iOS instead installs each application into its own directory named by a GUID, a long randomly generated identifier, and refuses reads and writes across those directories. Same outcome, different machinery — and on both platforms the standing exception is the memory card, covered further down.',
+          },
+          {
             type: 'bullets',
             heading: 'Google Android — Manifest Permissions',
             items: [
@@ -6755,6 +6785,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'Self-signing sounds weaker than it is, and the distinction is a favourite exam point. A self-signed certificate is simply one the developer generated themselves, so nobody vouches for who they are — Android accepts this, Apple does not. What it still guarantees is continuity: only whoever holds that same key can publish an update to that application, which is what stops a stranger pushing a malicious “update” to your users. Signing proves the same hands wrote both versions; it says nothing at all about whether either version is secure.',
+          },
+          {
             type: 'bullets',
             heading: 'Google Android — Memory-Management Hardening',
             items: [
@@ -6769,6 +6803,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'None of these are things a developer switches on — they are protections the compiler and the operating system apply for you, which is why the answer to “how does the platform harden memory?” is a list of names. The two to know are NX (No eXecute), which marks the stack and heap as data-only so code an attacker manages to write there cannot be run, and ASLR (Address Space Layout Randomisation), which shuffles where things sit in memory on every run so the attacker cannot predict an address to jump to. ProPolice, safe_iop and the hardened OpenBSD allocators are the same idea aimed at specific bug classes — stack overruns, integer overflows and double-frees — and the flaw they all exist to blunt is the buffer overflow defined in Topic 8.',
+          },
+          {
             type: 'bullets',
             heading: 'Google Android — Files, Preferences and Mass Storage',
             items: [
@@ -6776,6 +6814,14 @@ print(summary_df.to_string(index=False))`,
               'SharedPreferences is a system feature backed by an ordinary file, carrying ordinary file permissions',
               'Devices commonly support add-on file systems mounted on memory cards, because on-board storage is limited',
               'Data written to a memory card is unprotected — it sits outside the per-application UID sandbox and can be read by other applications on the device, which is why sensitive data must never be stored there',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The Keychain and SharedPreferences sit in the same row of the comparison table, but they are not equivalents. The Keychain is a purpose-built encrypted store for secrets; SharedPreferences is an ordinary file in the application’s own directory, protected by nothing more than the UNIX permissions described above.',
+              'That gap opens the moment a device is rooted, because rooting removes the very user-account boundary the Android model rests on, and a SharedPreferences file that was private becomes readable. Topic 7 lists jailbreak and rooting as a mobile vulnerability for exactly this reason.',
+              'The rule that survives on either platform: put secrets in the platform’s own credential store, and treat anything you write yourself as something somebody will eventually read.',
             ],
           },
           {
@@ -6833,6 +6879,14 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            items: [
+              'The acronyms, expanded once: WAP is the Wireless Application Protocol, the pre-smartphone way of reaching the internet from a handset; WTLS is Wireless TLS, a cut-down TLS built for slow radio links; WSP is the Wireless Session Protocol, WAP’s equivalent of HTTP.',
+              'A gateway here is simply a proxy standing between the phone and an ordinary web server, translating between the two. The “WAP gap” is what that translation costs you — the gateway must decrypt the WTLS traffic arriving from the phone before re-encrypting it as TLS towards the server, so for an instant your data sits in plain text on a machine belonging neither to you nor to the site you are visiting.',
+              'This is why “end-to-end” is worth reading literally. WAP 1.0 encrypts each half of the journey separately, which is not end-to-end at all; WAP 2.0 encrypts the whole journey in one TLS session, which is precisely why the gateway becomes optional.',
+            ],
+          },
+          {
             type: 'termlist',
             heading: 'Bluetooth Security Features',
             items: [
@@ -6853,6 +6907,14 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            items: [
+              'The four “blue” attacks are easy to mix up, so order them by severity and they stay put: bluejacking pushes an unwanted message to a nearby device (a nuisance), bluesnarfing steals data such as contacts from it without pairing (a breach), bluebugging takes control of the device to place calls or read messages (a full compromise), and car whispering is bluesnarfing aimed at hands-free car kits still using their default PIN.',
+              '“The encryption key length is negotiable down to a single byte” is the sharpest line on this page. One byte is eight bits, which is 256 possible keys — an attacker can try every one of them faster than you can read this sentence. The two devices agree that length between themselves, so the weaker device sets the standard for both, and configuring a maximum key size is the recommendation that answers it.',
+              'Notice how much of this section is version history rather than design: the unit key before v1.2, short PINs and a repeating keystream before v2.1. On a device you cannot update, the mitigation is operational — keep it non-discoverable, pair only when you must, and unpair anything you no longer hold.',
+            ],
+          },
+          {
             type: 'bullets',
             heading: 'SMS and MMS Attack Surface',
             items: [
@@ -6863,6 +6925,10 @@ print(summary_df.to_string(index=False))`,
               'Application attacks target the software that consumes the message, and unlike protocol attacks they are highly specific to the software version — historically the browser, the MMS client or the image parser',
               'Two classic examples: a mobile Safari heap overflow triggered by viewing a malicious page, allowing arbitrary code execution; and a Motorola RAZR overflow in the way it parsed thumbnails in a JPEG EXIF header',
             ],
+          },
+          {
+            type: 'note',
+            text: 'The split to hold on to is who the attacker is talking to. A protocol attack talks to the phone’s messaging stack itself — the PDU is the raw wire format of an SMS, carrying header fields for sender, encoding and length alongside the text — and it works broadly, because every handset on the network parses that same format. An application attack talks to whatever software opens the message, which is why the Motorola RAZR case is so narrow: the flaw was in the code that drew the small preview image tucked inside a photograph’s EXIF header, so only that model running that firmware was vulnerable. Both are the Topic 4 lesson one layer down — the message is untrusted input, and the parser is the attack surface.',
           },
           {
             type: 'table',
@@ -6964,6 +7030,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'Man-in-the-Middle deserves a picture, because it is the one term here that is pure jargon. You join free Wi-Fi in a café, but the access point named “Free_WiFi” belongs to the person sitting two tables away. Every request your phone makes now passes through their laptop on its way to the internet, so anything sent without encryption is theirs to read and to alter. It is the same failure as the WAP gap in Topic 6 — readable at a point in the middle — and it takes the same answer: encrypt end to end, and never suppress the certificate warnings the platform raises.',
+          },
+          {
             type: 'definition',
             heading: 'Web App Risks / Threats',
             text: 'Web app threats refer to vulnerabilities and attacks that exploit weaknesses in web-based systems. These threats lead to unauthorized access, data breaches, and service disruption — driven especially by the growth of online banking and e-commerce transactions. This historical progression has driven an ever-increasing sophistication among cybercriminals, alongside a continuous need for advancement in IT security measures.',
@@ -6973,7 +7043,14 @@ print(summary_df.to_string(index=False))`,
             heading: 'Common Threats to Web Apps',
             items: [
               'Injection vulnerabilities — e.g. SQL injection, Cross-Site Scripting (XSS)',
-              'Remote remediation — e.g. email phishing, privacy risk (cookies), financial risk (DoS — Denial of Service), operational/network risk (subject to user mistakes)',
+              'Broader web-based risks — e.g. email phishing, privacy risk (cookies), financial risk (DoS — Denial of Service), operational/network risk (subject to user mistakes)',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The handout labels that second bullet “remote remediation”. Remediation means fixing a problem, not causing one, so the label is a transcription slip — everything listed under it is a risk, not a remedy. It has been relabelled here so the two bullets read as what they are: the injection flaws, and then everything else.',
+              'The items in that second bullet are the same categories set out in the next section, just written out in a line. If a question asks for common threats to web applications, lead with the injection flaws — SQL injection and XSS, both worked through in Topic 8 — and then name the broader categories.',
             ],
           },
           {
@@ -6987,6 +7064,10 @@ print(summary_df.to_string(index=False))`,
               'Operational risk',
               'Network risk — subject to user mistakes',
             ],
+          },
+          {
+            type: 'note',
+            text: 'Watch the odd one out. Five of these six name a kind of harm — security, privacy, financial, operational, network. Denial of Service names an attack, not a harm; the harm it does is the financial and operational loss that follows. Reproduce all six as given if you are asked to list them, because that is the lecturer’s list — but if you are asked to explain them, say that DoS is the attack through which the financial and operational risks are realised. Topic 12 makes the same distinction in OWASP’s language, where the attack and the impact are two separate stages of one risk path.',
           },
           {
             type: 'termlist',
@@ -7050,6 +7131,14 @@ print(summary_df.to_string(index=False))`,
             items: [
               'Telling them apart: SQL injection targets the database (backend) to extract or manipulate stored data; XSS targets other users’ browsers (frontend) by getting a malicious script to run when they view the page.',
               'Backend vs frontend: the backend is the server-side logic and database a user never sees directly; the frontend is everything rendered in the browser that the user interacts with.',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'What SQL injection actually looks like: a login form builds its query by pasting whatever you typed into a string, so entering \' OR \'1\'=\'1 in the username box turns “find the user whose name is X” into a condition that is always true, and the database hands back the first account in the table. The fix is not to ban that one string but to use parameterised queries, so input can never be read as part of the command.',
+              'What XSS actually looks like: a comment box that saves what you type and shows it to the next visitor will just as happily save a <script> tag, and that script then runs in their browser, inside their logged-in session — which is how a stolen cookie becomes a hijacked account.',
+              'Two flavours of XSS are worth naming: stored XSS is saved on the server and hits every visitor who loads the page, while reflected XSS is bounced straight back from a crafted URL and only hits the person who clicked the link. Stored is the more damaging, reflected the more common in phishing.',
             ],
           },
           {
@@ -7145,6 +7234,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: '“Security” appears as an advantage here, yet the comparison table in Topic 1 lists the web app as the more exposed of the two. Both are true, and an examiner will accept either provided you say which sense you mean. The strength is centralised control: one patch on the server protects every user at once, and nobody is left running last year’s version. The weakness is exposure: that same server is reachable by anyone with an internet connection, which is why every attack in Topic 8 is aimed straight at it.',
+          },
+          {
             type: 'bullets',
             heading: 'Solutions to These Challenges',
             items: ['Regular security audits', 'Regular software updates'],
@@ -7170,6 +7263,10 @@ print(summary_df.to_string(index=False))`,
               'An easy way to keep SAST and DAST apart: SAST is like proofreading a recipe before you cook (reading the source code); DAST is like tasting the finished dish (probing the running app from the outside, the way an attacker would).',
               'IAST is often described as combining SAST and DAST: it runs during testing like DAST, but has visibility into the actual code like SAST.',
             ],
+          },
+          {
+            type: 'note',
+            text: 'SCA is the odd one out of the four, because it does not examine code you wrote at all. A modern application is mostly assembled from third-party libraries, so SCA reads your list of dependencies and checks each one against public vulnerability databases — catching the case where your own code is faultless but the logging library you imported has a known hole in it. That is why “regular software updates” sits in the solutions list above, and it is the tooling answer to the OWASP risk of vulnerable and outdated components.',
           },
           {
             type: 'termlist',
@@ -7317,6 +7414,361 @@ print(summary_df.to_string(index=False))`,
       },
       {
         number: '12',
+        title: 'The OWASP Top 10 — Ranking Web Application Risk',
+        covers: [4],
+        partial: [5, 9],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'The OWASP Top 10',
+            text: 'The OWASP Top 10 is a published list of the ten most critical security risks facing web applications. Each entry is named after the type of attack, the type of weakness, or the type of impact it causes — OWASP chose whichever name was already best known, because the primary aim of the list is to educate. It is a place to start and an awareness document, not a complete catalogue of everything that can go wrong with an application.',
+          },
+          {
+            type: 'note',
+            items: [
+              'OWASP is the Open Web Application Security Project, a non-profit that publishes the list along with free tools and testing guides. Nobody is obliged to adopt it; it carries weight because the industry settled on it as the common vocabulary for web risk.',
+              'This topic teaches the 2013 edition, because the ratings and the figures below are that edition’s and the numbering has to match. The current edition is 2021, and the last table in this topic maps every 2013 entry onto where it now sits. Whenever you quote the Top 10 — in an exam answer or a report — say which edition you mean.',
+              'Topic 7 already named seven of these risks. This topic is where that vocabulary comes from, and it adds the part Topic 7 leaves out: how OWASP decides that one risk outranks another.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Traditional Areas of Concern',
+            items: [
+              { term: 'Confidentiality', def: 'only those authorised to see the data can see it' },
+              { term: 'Integrity', def: 'the data is what it is supposed to be, and any unauthorised change is prevented or detected' },
+              { term: 'Availability', def: 'the system is there and working when a legitimate user needs it' },
+              { term: 'Accountability', def: 'every action can be traced back to whoever performed it, so nobody can plausibly deny what they did' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Topic 7 and CYB 122 teach the first three of these as the CIA triad. Neither list is wrong. Accountability is the fourth property practitioners add once a system has real users, because confidentiality, integrity and availability can all be intact while nobody can say who made a change. If a question asks for the triad, give three; if it asks what security protects, four is the better answer — and name the fourth as accountability, the property that makes non-repudiation possible.',
+              'Security is dependent on context. A teaching hospital’s records, a student portal and a payment gateway do not want the same balance of these four, so an organisation’s security requirements follow from what it actually does rather than from a standard list.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Three Levels of Security',
+            items: [
+              { term: 'Physical', def: 'doors, walls and locks — controlling who can reach the machine at all' },
+              { term: 'Network', def: 'the operating system, the network itself, and the firewalls between its segments' },
+              { term: 'Application', def: 'the software running at the application layer, and the data it handles' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Every risk in this topic lives at the third level, and that is the whole reason the list exists. A firewall doing its job perfectly still forwards an injection payload, because the payload arrives inside an ordinary HTTP request on a port the firewall is meant to leave open. Physical and network controls cannot see it — only the application can.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Perceived Security vs Actual Security',
+            items: [
+              { term: 'Security theatre', def: 'a control that looks reassuring but changes nothing an attacker actually has to do' },
+              { term: 'FUD — fear, uncertainty and doubt', def: 'justifying a control by frightening people rather than by naming the risk it closes' },
+              { term: 'Absolutism', def: 'the belief that a system can be made totally secure. Nothing is. Security raises the cost of an attack; it does not reduce risk to zero' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'The Risk Path',
+            text: 'Attackers can potentially use many different paths through your application to do harm to your business or organisation, and each of those paths represents a risk that may — or may not — be serious enough to warrant attention. OWASP models a single path as a chain of six stages, and every entry in the Top 10 is named after one stage or another of that chain.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/01-risk-path-model.webp',
+            width: 1400, height: 168, maxWidth: 720,
+            alt: 'A single left-to-right chain of six stages joined by dotted blue arrows: a stick figure labelled "Threat Agents" glowing yellow, then an "Attack Vector" arrow-shaped box, then a wide "Weakness" box with a white arrow entering it, then a "Control" box, then a database cylinder labelled "Technical Impacts", and finally a document-shaped box labelled "Business Impacts"',
+            caption: 'Figure 1: one path through an application — threat agent, attack vector, weakness, control, technical impact, business impact.',
+          },
+          {
+            type: 'termlist',
+            heading: 'The Six Stages, Defined',
+            items: [
+              { term: 'Threat agent', def: 'an individual or group that can manifest a threat. It is fundamental to identify who would want to exploit the assets of a company, and how they might use them against the company' },
+              { term: 'Attack', def: 'the techniques attackers use to exploit vulnerabilities in applications' },
+              { term: 'Vulnerability', def: 'a hole or weakness in the application — a design flaw or an implementation bug — that allows an attacker to cause harm to the stakeholders of an application. The term is often used very loosely' },
+              { term: 'Control', def: 'a defensive technology or module used to detect, deter or deny attacks. A weakness or design flaw in a control, or the absence of a necessary control, is itself a vulnerability' },
+              { term: 'Technical impact', def: 'the system damage resulting from a successful breach — the effect on the technology only, not on the business' },
+              { term: 'Business impact', def: 'the impact on the business, generally counted in money, lives, reputation, customers or speed' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Read the chain as one sentence: a threat agent detects a weakness in the application and its controls, then launches an attack that causes both technical and business impacts.',
+              'The last link is the one engineers skip and the one that gets the work funded. “The orders table can be read” is a technical impact; “every customer’s address and card reference can be read, which is a regulatory penalty and a front-page story” is the business impact. The business risk is what justifies investment in fixing the security problem.',
+              'Notice that a vulnerability gets defined twice over — as a weakness in the application, and as a missing or flawed control. That is deliberate: forgetting to add a check is exactly as exploitable as writing a broken one.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Many Paths, One Risk',
+            text: 'A real application does not offer one path; it offers hundreds. The next figure fans the same six stages out into every route an attacker might take through a system, and then picks one of those routes out in red.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/02-example-security-risk.webp',
+            width: 1400, height: 639, maxWidth: 720,
+            alt: 'The risk-path diagram fanned out into many parallel routes. On the left two threat-agent stick figures, one glowing yellow; three "Attack Vector" boxes lead right into four rows of "Weakness" and "Control" boxes, which converge on two "Technical Impacts" database cylinders and then on three "Business Impacts" documents. Blue dotted lines show all the possible routes; one route is picked out in thick red dotted line and yellow highlighting — the glowing threat agent takes an attack vector, drops down past the controls to an unprotected weakness on the bottom row, through a control shaded red to show it was bypassed, and up into a technical impact and a business impact',
+            caption: 'Figure 2: every route an attacker might take, with one successful route highlighted.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Follow the red route. The highlighted threat agent picks one attack vector out of three, drops past the rows where a control stands in front of the weakness, and reaches the one weakness on the bottom row with nothing guarding it — the control shaded red is the one that was bypassed. From there the route runs into a technical impact and out into a business impact.',
+              'That is the lesson of the picture: the controls above did not fail, and they did not matter. An attacker needs one open path; a defender has to close every one. Since no team can close every one, the work has to be ordered by risk.',
+              'OWASP orders it as Risk = Likelihood × Impact. Likelihood is how plausible the path is, impact is what it costs at the end of it. A frightening-looking weakness nobody can reach scores low; a mundane one sitting on an open path scores high.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'How OWASP Rates a Risk',
+            text: 'Every entry in the Top 10 carries the same four ratings, and each rating sits over a stage of the risk path. Exploitability, prevalence and detectability together estimate the likelihood; impact estimates the cost. The strip below is the one OWASP published for A1 Injection — the other nine ratings are gathered into the table that follows.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/03-a1-injection-rating.webp',
+            width: 1400, height: 253, maxWidth: 700,
+            alt: 'OWASP\'s risk-rating strip for A1 Injection. A blue band across the top repeats the risk path — Threat Agents, Attack Vector, Weakness, Technical Impacts, Business Impacts — and a band of coloured cells beneath rates each stage: Exploitability EASY on red, Prevalence COMMON on amber, detectability AVERAGE on amber, Impact SEVERE on red. The threat-agent and business-impact cells are grey and left blank, because those are application-specific',
+            caption: 'Figure 3: how OWASP rates one risk — the ratings sit directly over the stages of the risk path.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Read the four columns as questions. Exploitability: how much skill and effort does the attack take? Prevalence: how often does this weakness turn up in real applications? Detectability: how easily can an attacker find it — not how easily your own team can. Impact: how much technical damage does it do when it works?',
+              'Two cells in the strip are grey and deliberately empty. Who would attack your application, and what a breach would cost your organisation, are specific to your application — OWASP cannot fill them in for you, and filling them in is exactly what a real risk assessment is.',
+              'Injection is EASY to exploit, COMMON, and SEVERE in impact, which is what put it at number one. Its detectability is only AVERAGE — easy to exploit and not especially easy to spot is a worse combination than merely widespread.',
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'The Ten Risks, and How the 2013 List Rated Them',
+            headers: ['#', 'Risk', 'Exploitability', 'Prevalence', 'Detectability', 'Impact'],
+            rows: [
+              ['A1', 'Injection', 'EASY', 'COMMON', 'AVERAGE', 'SEVERE'],
+              ['A2', 'Broken Authentication and Session Management', 'AVERAGE', 'COMMON', 'AVERAGE', 'SEVERE'],
+              ['A3', 'Cross-Site Scripting (XSS)', 'AVERAGE', 'VERY WIDESPREAD', 'EASY', 'MODERATE'],
+              ['A4', 'Insecure Direct Object References', 'EASY', 'COMMON', 'EASY', 'MODERATE'],
+              ['A5', 'Security Misconfiguration', 'EASY', 'COMMON', 'EASY', 'MODERATE'],
+              ['A6', 'Sensitive Data Exposure', 'DIFFICULT', 'UNCOMMON', 'AVERAGE', 'SEVERE'],
+              ['A7', 'Missing Function Level Access Control', 'EASY', 'UNCOMMON', 'AVERAGE', 'MODERATE'],
+              ['A8', 'Cross-Site Request Forgery (CSRF)', 'AVERAGE', 'WIDESPREAD', 'EASY', 'MODERATE'],
+              ['A9', 'Using Components with Known Vulnerabilities', 'AVERAGE', 'WIDESPREAD', 'DIFFICULT', 'MODERATE'],
+              ['A10', 'Unvalidated Redirects and Forwards', 'AVERAGE', 'UNCOMMON', 'EASY', 'MODERATE'],
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'A6 is the instructive row. It is DIFFICULT to exploit and UNCOMMON, and it still made the list — because the impact is SEVERE. That is Risk = Likelihood × Impact doing its work: a rare, hard attack outranks a frequent easy one once the loss is large enough.',
+              'A3 carries the highest prevalence on the list, VERY WIDESPREAD, but only MODERATE impact. Common is not the same as serious, and an exam answer that ranks risks by how often they occur has missed half the formula.',
+              'A9 is the only entry rated DIFFICULT to detect, and that is from the defender’s side as much as the attacker’s: most teams cannot list the third-party components their own application depends on, which is precisely why the risk survives.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'What Each of the Ten Means',
+            items: [
+              { term: 'A1 Injection', def: 'Injection flaws, such as SQL, OS and LDAP injection, occur when untrusted data is sent to an interpreter as part of a command or query. The attacker’s hostile data can trick the interpreter into executing unintended commands or accessing unauthorized data.' },
+              { term: 'A2 Broken Authentication and Session Management', def: 'Application functions related to authentication and session management are often not implemented correctly, allowing attackers to compromise passwords, keys or session tokens, or to exploit other implementation flaws to assume other users’ identities.' },
+              { term: 'A3 Cross-Site Scripting (XSS)', def: 'XSS flaws occur whenever an application takes untrusted data and sends it to a web browser without proper validation and escaping. XSS allows attackers to execute scripts in the victim’s browser, which can hijack user sessions, deface web sites, or redirect the user to malicious sites.' },
+              { term: 'A4 Insecure Direct Object References', def: 'A direct object reference occurs when a developer exposes a reference to an internal implementation object, such as a file, directory or database key. Without an access control check or other protection, attackers can manipulate these references to access unauthorized data.' },
+              { term: 'A5 Security Misconfiguration', def: 'Good security requires a secure configuration defined and deployed for the application, frameworks, application server, web server, database server and platform. All these settings should be defined, implemented and maintained, as many are not shipped with secure defaults.' },
+              { term: 'A6 Sensitive Data Exposure', def: 'Many web applications do not properly protect sensitive data — credit cards, national identity numbers, authentication credentials — with appropriate encryption or hashing. Attackers may steal or modify such weakly protected data to conduct identity theft, credit card fraud, or other crimes.' },
+              { term: 'A7 Missing Function Level Access Control', def: 'Not all users should have access to all functions. Sometimes function level protection is managed through configuration and the system is misconfigured; sometimes developers simply forget to include the proper checks.' },
+              { term: 'A8 Cross-Site Request Forgery (CSRF)', def: 'A CSRF attack forces a logged-on victim’s browser to send a forged HTTP request, including the victim’s session cookie and any other automatically included authentication information, to a vulnerable web application. This forces the victim’s browser to generate requests the application thinks are legitimate.' },
+              { term: 'A9 Using Components with Known Vulnerabilities', def: 'Virtually every application has these issues, because most development teams do not focus on keeping their components and libraries up to date. In many cases the developers do not even know all the components they are using, never mind their versions. Component dependencies make things even worse.' },
+              { term: 'A10 Unvalidated Redirects and Forwards', def: 'Web applications frequently redirect and forward users to other pages and websites, and use untrusted data to determine the destination pages. Without proper validation, attackers can redirect victims to phishing or malware sites, or use forwards to access unauthorized pages.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Learn these ten as a vocabulary, not as ten separate essays. Four of them — A1, A3, A5 and A8 — you already met under different headings in Topics 7 and 8, and the mobile equivalents of most of them are in Topic 4’s OWASP Mobile Top 10. The five sections that follow take one risk each and show what it looks like from the outside, which is the part a definition cannot give you.',
+          },
+          {
+            type: 'text',
+            heading: 'A1 Injection — Watching It Happen',
+            text: 'The demonstration used a bank’s messaging feature: three pages, each of which takes the message the user typed and hands it on to something that interprets text.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/04-injection-demo-flow.webp',
+            width: 1400, height: 258, maxWidth: 700,
+            alt: 'Three rounded slate-grey boxes joined left to right by grey block arrows. First, "LeaveMsg.asp — allows user to enter a message for the bank; only one message per user at a time". Second, "confirmMsg.asp — saves message into queue (form\'s target); confirms message saved". Third, "Email.asp — generates HTML for email to user"',
+            caption: 'Figure 4: the injection demonstration — one message, three interpreters.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Trace the untrusted string. The user types it on LeaveMsg.asp; confirmMsg.asp writes it into a database queue, where it is read as part of a SQL statement; Email.asp reads it back out and builds HTML from it. One piece of input, three chances to be treated as code rather than as text — which is why injection and XSS keep appearing together.',
+              'Injection is not only SQL. Any interpreter that takes a string can be injected: the shell (OS command injection), a directory service (LDAP injection), an XML parser, a template engine. The rule is the same everywhere — never build a command by pasting input into a string, and use parameterised queries or the equivalent so input can never cross into the command.',
+              'Topic 8 shows the payload itself and the always-true condition that gets you past a login form; this flow shows why it is so hard to stamp out. If you want the joke that makes it stick, it is xkcd 327, “Exploits of a Mom”, at https://xkcd.com/327/ — a mother whose son’s registered name is written so that the school’s database reads it as a command to delete the students table. Sanitise your database inputs.',
+              'The bank in this demonstration was a deliberately vulnerable practice site, and it has been offline since around 2017 — as have the other demonstration sites in this topic. The flows are the teaching material; do not go looking for the sites, and never point a tool at a system you do not own or have written permission to test.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'A6 Sensitive Data Exposure — Reading an Error Page',
+            text: 'Sensitive data exposure is usually taught as unencrypted card numbers, but its cheapest form is an error message. The screenshot below took no tool and no payload: a page expects a record identifier in the URL, and the tester replaced it with the word “foo”.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/05-sensitive-data-exposure.webp',
+            width: 1325, height: 941, maxWidth: 660,
+            alt: 'An Internet Explorer window whose address bar, ringed in red, reads "http://localhost:62275/Genre.aspx?ID=foo". The page is an ASP.NET yellow-screen-of-death: a red heading "Server Error in \'/\' Application", the message "Conversion failed when converting from a character string to uniqueidentifier", then Description, Exception Details naming System.Data.SqlClient.SqlException, Source Error, and a Stack Trace panel listing internal .NET database calls such as SqlConnection.OnError, TdsParser.ThrowExceptionAndWarning and SqlDataReader.ReadInternal',
+            caption: 'Figure 5: one wrong parameter, and the application describes its own internals.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Work through what the page gives away. The address bar, ringed in red, ends in ?ID=foo — that is the whole attack. Anyone can edit a URL, so this is a test every user of the site could run by accident.',
+              'The message — “Conversion failed when converting from a character string to uniqueidentifier” — says the ID column is a GUID, and that the value went from the URL into the query without ever being validated as a GUID first. That is the same missing check an injection attempt would exploit.',
+              'The exception type, System.Data.SqlClient.SqlException, names the data access provider, so the attacker now knows the backend is Microsoft SQL Server reached through ADO.NET — and therefore which dialect of SQL to write, and which quoting and comment syntax will work.',
+              'The stack trace lists internal calls such as SqlConnection.OnError, TdsParser.ThrowExceptionAndWarning and SqlDataReader.ReadInternal. That is the shape of the data-access layer, the framework in use, and often its version. None of it is customer data, but it is the map that makes finding customer data quick.',
+              'The fix has two halves, and both are needed. Validate the parameter before it reaches the query, so “foo” is rejected as a bad request rather than passed to the database. And configure production to show a plain, custom error page while the detail goes to a server-side log — a debug configuration deployed to production is A5 Security Misconfiguration handing an attacker A6.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'A8 Cross-Site Request Forgery — A Request You Never Made',
+            text: 'The CSRF demonstration targeted a home router rather than a bank, and the flow is worth following because of what the middle step does not require.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/06-csrf-demo-flow.webp',
+            width: 1400, height: 320, maxWidth: 700,
+            alt: 'Three rounded boxes joined left to right by grey block arrows. First, "Login.asp — user logs in and is given session cookie". Second, drawn in black to mark it as the attacker\'s step, "User opens another page in new browser tab — img tab sends request \'on behalf of user\' to one of routers CGI pages". Third, "Router system processes message as if it was a user request"',
+            caption: 'Figure 6: the attacker’s step is the black box in the middle — and it is only an image tag.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Topic 8 explains the bank-transfer version of CSRF and the token that stops it. Two things this flow adds. First, the forged request needs no form and no click: an image tag whose source is not an image but an administration URL is enough, because the browser fetches image sources automatically as it renders the page.',
+              'Second, look at the target. The router’s administration interface is not reachable from the internet — but it is reachable from your browser, which sits inside your network. CSRF turns the victim’s browser into a bridge across that boundary, which is why the technique is used against routers, printers and internal dashboards as much as against banks.',
+              'The application cannot tell the difference on its own, because the request is genuinely well formed and genuinely carries the user’s session cookie. That is why the defence has to add something the attacker’s page cannot know — a per-session CSRF token — rather than trying to inspect the request more carefully.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'A9 Components with Known Vulnerabilities — the Conference’s Own Site',
+            text: 'The best example of this risk in the original talk was the website of the conference the talk was given at. It had been defaced through a component nobody had patched.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/07-defacement-anztb.webp',
+            width: 586, height: 1039, maxWidth: 320,
+            alt: 'An iPhone screenshot of the site anztb.org in Safari. The top of the page still shows the legitimate ANZTB and ISTQB logos, the navigation bar, a banner for "ANZTB Test 2017, Testing for Tomorrow, 5 May 2017 in Wellington", and four content tiles. Below that the page has been overwritten with a grid of defacement images — orange and black graphics reading "TURKHACKTEAM", a Turkish flag crest, and a black banner captioned "TURK HACK TEAM" between rows of stars',
+            caption: 'Figure 7: the conference site, still showing its own logos above the defacement.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Nobody had to invent an exploit here. The vulnerability was public, the patch was public, and the only thing missing was somebody applying it — which is what makes this risk different in kind from the others. It is not a coding mistake; it is an operational one.',
+              'Notice that the site’s own header survives above the defacement. Defacement is defined in Topic 8 as replacing the page with the attacker’s message, and it is the loudest possible use of that access. The same foothold could have been used quietly to read the site’s database instead, and nobody would have known.',
+              'The tooling answer is SCA from Topic 9 — it reads your dependency list and checks each entry against public vulnerability databases — and the operational answer is the “regular software updates” line in the same topic. Between them they turn “we did not know we were running that” into a report somebody has to act on.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'A10 Unvalidated Redirects and Forwards — Login, Then Surprise',
+            text: 'The last demonstration is the subtlest, and the slide is a PowerPoint build, so the flow appears twice with one copy offset behind the other. The run you can read is the one that starts from a link in an email.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/08-redirect-demo-flow.webp',
+            width: 1400, height: 273, maxWidth: 700,
+            alt: 'Three rounded boxes joined left to right by grey block arrows, each drawn with a second identical box stacked behind it to show a second run of the same flow. In front: "Link to site in email — user is not logined in, redirect to login.asp", then "Login.asp — user logs in and is given session cookie", then a black box reading "Surprise!"',
+            caption: 'Figure 8: the redirect demonstration — a genuine login, then a destination nobody validated.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Follow it. A link in an email points at the real site. The user is not logged in, so the application redirects them to its own login page; they log in and are given a session cookie; and then the application forwards them on to wherever the original link said they were going — the “Surprise!” box. The destination came from the untrusted link, and nothing checked it.',
+              'This works on careful people, and that is the point. Every piece of advice students are given about phishing — check the domain, do not log in from an emailed link — is satisfied here. The domain is real, the login page is real, the password went to the right server. Only the last hop was the attacker’s.',
+              'The fix is to stop putting destinations in parameters at all. Redirect to a fixed page, or send a short key that the server maps to an approved destination on its own side. If a full URL genuinely must travel in the request, check it against an allow-list of your own hosts before you obey it.',
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Where Each 2013 Risk Went in the 2021 List',
+            headers: ['2013 entry', 'In the OWASP Top 10 2021'],
+            rows: [
+              ['A1 Injection', 'A03:2021 Injection — still here, but XSS was folded into it'],
+              ['A2 Broken Authentication and Session Management', 'A07:2021 Identification and Authentication Failures (renamed)'],
+              ['A3 Cross-Site Scripting', 'Merged into A03:2021 Injection — XSS is no longer its own entry'],
+              ['A4 Insecure Direct Object References', 'Merged into A01:2021 Broken Access Control'],
+              ['A5 Security Misconfiguration', 'A05:2021 Security Misconfiguration (unchanged)'],
+              ['A6 Sensitive Data Exposure', 'A02:2021 Cryptographic Failures — renamed to name the cause rather than the symptom'],
+              ['A7 Missing Function Level Access Control', 'Merged into A01:2021 Broken Access Control'],
+              ['A8 Cross-Site Request Forgery', 'Merged into A01:2021 Broken Access Control; dropped as its own entry in 2017, once frameworks shipped protection by default'],
+              ['A9 Using Components with Known Vulnerabilities', 'A06:2021 Vulnerable and Outdated Components (renamed)'],
+              ['A10 Unvalidated Redirects and Forwards', 'Dropped from the Top 10 in 2017; the access-control half now sits under A01:2021'],
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'New in 2021, With No 2013 Ancestor',
+            items: [
+              'A04:2021 Insecure Design — flaws that no amount of careful coding can fix, because the design itself was wrong',
+              'A08:2021 Software and Data Integrity Failures — trusting code, updates or serialised data whose integrity was never verified',
+              'A09:2021 Security Logging and Monitoring Failures — the breach nobody noticed, because nothing was recorded or watched',
+              'A10:2021 Server-Side Request Forgery (SSRF) — making the server itself fetch a URL an attacker chose',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The headline change is A01:2021 Broken Access Control, now the largest category in the list. It absorbed three separate 2013 entries — A4, A7 and A8 — because all three were the same failure wearing different names: the application did not check whether this user was allowed to do this thing.',
+              'CSRF is the encouraging story in this table. It stopped needing its own entry once the major web frameworks began shipping token protection switched on by default. A Top 10 entry can be retired by better defaults, which is a stronger fix than any amount of testing.',
+              'A09:2021 has no 2013 ancestor at all, and it is worth pausing on: it is the only entry about not knowing. Everything else on the list is a hole in the application; this one is a hole in what the organisation can see, and it is why the audit and logging material in Topic 10 is a security control rather than paperwork.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Tools to Try This Yourself',
+            items: [
+              'Your browser’s developer tools — the Network panel shows every request and its parameters, and the Storage panel shows the cookies a session actually carries',
+              'OWASP ZAP — a free proxy and scanner from OWASP itself, which sits between browser and site so you can read and modify requests',
+              'Burp Suite Community Edition — the same idea, and the tool most of the industry uses; the free edition is enough for everything in this topic',
+              'PortSwigger Web Security Academy — free labs for every risk on the list, with a deliberately vulnerable target you are allowed to attack',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The 2017 talk this topic follows recommended a set of Firefox add-ons that no longer exist — Firefox replaced its extension system that year, and browser developer tools have since absorbed most of what they did. The four above are the current equivalents.',
+              'Practise only on a target you own or have been explicitly permitted to test. Under the Cybercrimes Act 2015, unauthorised access to a computer system is an offence in Nigeria whether or not anything was damaged, and “I was only learning” is not a defence. The Academy labs exist precisely so you do not need one.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'What the Top 10 Is Actually For',
+            items: [
+              'The Top 10 is a place to start. It does not define all the possible threats.',
+              'Its role is to educate — to introduce a number of critical threats, in language a whole team can share.',
+              'Testing for weaknesses does not provide as much assurance as having a secure development lifecycle.',
+              'Build security in; do not bolt it on.',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The last two points are Topic 11’s argument arriving from the other direction. Assessment is worth doing — it is how an unknown risk becomes a scheduled, verifiable defect — but a list of ten risks is a checklist for finding problems, not a method for not creating them. A team that only tests against the Top 10 will keep finding Top 10 problems.',
+          },
+          {
+            type: 'note',
+            heading: 'Source & Attribution',
+            items: [
+              'This topic follows “Introduction to web security”, a talk given by Ian Ross at the ANZTB conference in March 2017. The demonstrations, the defaced-site screenshot and the framing are his.',
+              'The risk-path diagrams and the risk-rating tables are OWASP’s own, from the OWASP Top 10 2013, used here under the Creative Commons Attribution-ShareAlike 3.0 licence (CC BY-SA 3.0).',
+              'The 2013-to-2021 mapping, and the tooling list, are this course’s additions — the talk predates the 2021 edition, and its tools have not survived.',
+            ],
+          },
+        ],
+      },
+      {
+        number: '13',
         title: 'Exam Focus — The Lecturer’s Guaranteed Questions',
         covers: [],  // revision aid over the topics above, not an outline item
         sections: [
@@ -7355,7 +7807,7 @@ print(summary_df.to_string(index=False))`,
             items: [
               'A structure that protects your marks: one sentence of definition using the question’s own keywords, then the list, then one line per item only if the question asks you to explain. Writing the list before the explanation means a shortage of time costs you the elaboration, not the marks.',
               'Where a question says “differentiate” or “distinguish”, answer in contrasting pairs rather than describing one side and then the other — it makes each contrast visible to whoever is marking.',
-              'These six are the flagged questions, not the whole syllabus. Topics 1–11 all remain examinable — note that none of the six touch the mobile material in Topics 4–6, which covers outline item 3 and can still be asked.',
+              'These six are the flagged questions, not the whole syllabus. Topics 1–12 all remain examinable — note that none of the six touch the mobile material in Topics 4–6, which covers outline item 3 and can still be asked.',
             ],
           },
         ],
