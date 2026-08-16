@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink } from 'lucide-react';
+import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, Circle, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink, ListChecks } from 'lucide-react';
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
 import RichText from './RichText';
@@ -10,6 +10,13 @@ import {
   getCachedSimplification,
   requestSimplification,
 } from '../utils/simplifySection';
+import {
+  topicToPlainText,
+  canSummarize,
+  getCachedSummary,
+  requestSummary,
+} from '../utils/summarizeTopic';
+import { useAutoMarkRead } from './useReadingProgress';
 
 function DefinitionBox({ text }) {
   return (
@@ -448,9 +455,94 @@ function buildOutline(sections) {
   return items;
 }
 
-function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, context }) {
+// The revision recap for a whole topic. Distinct from the per-section Simplify
+// above: that one explains a section you did not understand, this one gives back
+// the key points of a topic you have already read. Same visual language, so the
+// two read as one family, but the label says which is which.
+function KeyPoints({ topic, plain, context }) {
+  const [state, setState] = useState({ status: 'idle', text: '', error: '' });
+  const abortRef = useRef(null);
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  const run = async () => {
+    if (state.status === 'done') {
+      setState({ status: 'idle', text: '', error: '' });
+      return;
+    }
+    const cached = getCachedSummary(plain);
+    if (cached) {
+      setState({ status: 'done', text: cached, error: '' });
+      return;
+    }
+    setState({ status: 'loading', text: '', error: '' });
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const data = await requestSummary({
+      text: plain,
+      context: { ...context, topicTitle: topic.title },
+      signal: controller.signal,
+    });
+    if (controller.signal.aborted || data.aborted) return;
+    if (data.summary) {
+      setState({ status: 'done', text: data.summary, error: '' });
+    } else {
+      setState({ status: 'error', text: '', error: data.error || 'Failed to summarise this topic.' });
+    }
+  };
+
+  return (
+    <>
+      <div className="flex justify-end mb-4">
+        <button
+          type="button"
+          onClick={run}
+          disabled={state.status === 'loading'}
+          className="inline-flex items-center gap-1.5 rounded-full border border-coffee-200 bg-paper px-3 py-1.5 text-xs font-mono font-medium text-coffee-600 transition-colors hover:border-coffee-400 hover:text-ink disabled:opacity-60"
+        >
+          <ListChecks size={12} className={state.status === 'loading' ? 'animate-pulse text-ember-500' : 'text-ember-500'} />
+          {state.status === 'loading' ? 'Summarising…'
+            : state.status === 'done' ? 'Hide key points'
+            : state.status === 'error' ? 'Retry'
+            : 'Key points'}
+        </button>
+      </div>
+
+      {state.status === 'error' && (
+        <p className="rounded-lg border border-rust/25 bg-rust/10 px-3 py-2 text-sm text-rust mb-4">
+          {state.error}
+        </p>
+      )}
+
+      {state.status === 'done' && (
+        <div className="bg-coffee-50 border border-coffee-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <ListChecks size={13} className="text-ember-500 shrink-0" />
+            <span className="text-xs font-mono font-bold text-coffee-600 uppercase tracking-wider">Key points</span>
+          </div>
+          <div className="text-reading text-ink">
+            <RichText text={state.text} />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, summarizeReady, context, tracksReading, isRead, onSetRead }) {
   const panelId = `lecture-panel-${index}`;
   const buttonId = `lecture-header-${index}`;
+
+  // Serialised once per topic and reused for both the Key points call and the
+  // auto-mark dwell, so a long topic asks for proportionally more reading time.
+  const plain = useMemo(() => topicToPlainText(topic), [topic]);
+  const showKeyPoints = summarizeReady && canSummarize(topic, plain);
+
+  const { panelRef, sentinelRef } = useAutoMarkRead({
+    active: tracksReading && isOpen && !isRead,
+    charCount: plain.length,
+    onRead: () => onSetRead(true),
+  });
 
   const items = useMemo(() => buildOutline(topic.sections), [topic.sections]);
   const firstGroupIdx = items.findIndex((it) => it.head);
@@ -496,6 +588,14 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, context
             isOpen ? 'bg-coffee-50' : 'hover:bg-coffee-50'
           }`}
         >
+          {/* Read marker. An icon, not a control — the accordion header is
+              already a <button> and nesting one inside it is invalid HTML. The
+              toggle lives at the end of the panel, where you finish reading. */}
+          {tracksReading && (isRead ? (
+            <CheckCircle2 size={16} className="text-moss shrink-0" aria-label="Read" />
+          ) : (
+            <Circle size={16} className="text-coffee-300 shrink-0" aria-hidden="true" />
+          ))}
           <span className="bg-ink text-cream font-mono text-xs font-bold px-2.5 py-1.5 rounded-lg shrink-0">
             Topic {topic.number}
           </span>
@@ -516,6 +616,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, context
       {isOpen && (
         <div
           id={panelId}
+          ref={panelRef}
           role="region"
           aria-labelledby={buttonId}
           className="px-4 sm:px-5 pt-2 pb-5 border-t border-coffee-100"
@@ -523,6 +624,8 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, context
           {topic.date && (
             <span className="sm:hidden text-xs font-mono text-coffee-500 mb-4 block">Lecture date: {topic.date}</span>
           )}
+
+          {showKeyPoints && <KeyPoints topic={topic} plain={plain} context={context} />}
 
           {collapsibleSections ? (
             <>
@@ -593,23 +696,69 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, context
               <Section key={si} section={section} simplifyReady={simplifyReady} context={sectionContext} />
             ))
           )}
+
+          {/* End of topic. The sentinel is what tells useAutoMarkRead the student
+              got to the bottom; the button is how they correct it either way. */}
+          {tracksReading && (
+            <>
+              <div ref={sentinelRef} aria-hidden="true" />
+              <div className="flex justify-end pt-4 mt-2 border-t border-coffee-100">
+                <button
+                  type="button"
+                  onClick={() => onSetRead(!isRead)}
+                  aria-pressed={isRead}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-mono font-medium transition-colors ${
+                    isRead
+                      ? 'border-moss/40 bg-moss/10 text-moss hover:border-moss'
+                      : 'border-coffee-200 bg-paper text-coffee-600 hover:border-coffee-400 hover:text-ink'
+                  }`}
+                >
+                  {isRead ? <CheckCircle2 size={12} /> : <Circle size={12} />}
+                  {isRead ? 'Read — mark unread' : 'Mark as read'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-export default function LectureNotes({ topics, context }) {
-  // Split so the /api/simplify availability probe in the inner component only
-  // fires on courses that actually have lecture notes.
+/**
+ * @param {Object} [props.reading] `{ isRead, setRead }` from useReadingProgress,
+ *   owned by the *page* rather than by this component. Two useProgress hooks on
+ *   the same storage key keep independent React state, so if this component
+ *   mounted its own, marking a topic here would never reach the tab badge in
+ *   CourseDetail — both would write the same localStorage record and neither
+ *   would re-render the other. One owner, passed down.
+ *
+ *   Omitting it renders the notes without any reading UI. That is a real
+ *   (if currently unused) mode, not a fallback — a caller that does not track
+ *   reading gets no progress bar rather than a bar that silently does nothing.
+ */
+export default function LectureNotes({ topics, context, reading }) {
+  // Split so the availability probes in the inner component only fire on
+  // courses that actually have lecture notes.
   if (!topics?.length) return null;
-  return <LectureNotesInner topics={topics} context={context} />;
+  return <LectureNotesInner topics={topics} context={context} reading={reading} />;
 }
 
-function LectureNotesInner({ topics, context }) {
+function LectureNotesInner({ topics, context, reading }) {
   // First topic open by default; rest collapsed.
   const [openSet, setOpenSet] = useState(() => new Set([0]));
   const simplifyStatus = useApiAvailability('/api/simplify');
+  const summarizeStatus = useApiAvailability('/api/summarize');
+
+  const tracksReading = Boolean(reading);
+  const isRead = (topic) => Boolean(reading?.isRead(topic));
+  const setRead = (topic, read) => reading?.setRead(topic, read);
+
+  // Counted off the topics actually on screen rather than the stored total, so
+  // a topic that was renamed (and so lost its mark) shows as unread here
+  // instead of inflating the bar past the number of topics on the page.
+  const readCount = topics.filter((t) => isRead(t)).length;
+  const allRead = readCount === topics.length;
 
   const allOpen = openSet.size === topics.length;
 
@@ -626,18 +775,40 @@ function LectureNotesInner({ topics, context }) {
 
   return (
     <div>
-      {/* Expand / collapse all */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-mono text-coffee-500">
-          {topics.length} {topics.length === 1 ? 'topic' : 'topics'}
-        </span>
-        <button
-          type="button"
-          onClick={toggleAll}
-          className="text-xs font-mono font-medium text-coffee-600 hover:text-ink transition-colors"
-        >
-          {allOpen ? 'Collapse all' : 'Expand all'}
-        </button>
+      {/* Reading progress + expand / collapse all */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <span className={`inline-flex items-center gap-1.5 text-xs font-mono ${allRead && tracksReading ? 'font-bold text-moss' : 'text-coffee-500'}`}>
+            {allRead && tracksReading && <CheckCircle2 size={12} />}
+            {!tracksReading
+              ? `${topics.length} ${topics.length === 1 ? 'topic' : 'topics'}`
+              : allRead
+                ? `All ${topics.length} ${topics.length === 1 ? 'topic' : 'topics'} read`
+                : `${readCount} of ${topics.length} ${topics.length === 1 ? 'topic' : 'topics'} read`}
+          </span>
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="text-xs font-mono font-medium text-coffee-600 hover:text-ink transition-colors shrink-0"
+          >
+            {allOpen ? 'Collapse all' : 'Expand all'}
+          </button>
+        </div>
+        {tracksReading && (
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-full bg-coffee-100"
+            role="progressbar"
+            aria-valuenow={readCount}
+            aria-valuemin={0}
+            aria-valuemax={topics.length}
+            aria-label="Topics read"
+          >
+            <div
+              className="h-full rounded-full bg-moss transition-all duration-500"
+              style={{ width: `${topics.length ? (readCount / topics.length) * 100 : 0}%` }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -649,7 +820,11 @@ function LectureNotesInner({ topics, context }) {
             isOpen={openSet.has(ti)}
             onToggle={() => toggle(ti)}
             simplifyReady={simplifyStatus === 'ready'}
+            summarizeReady={summarizeStatus === 'ready'}
             context={context}
+            tracksReading={tracksReading}
+            isRead={isRead(topic)}
+            onSetRead={(read) => setRead(topic, read)}
           />
         ))}
       </div>

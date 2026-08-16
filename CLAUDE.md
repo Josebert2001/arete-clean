@@ -50,6 +50,7 @@ Browser → React SPA (Vite)
                 ├── api/research.js → Groq compound-mini web search (Explain-this, signed-in, rate: 4/10min/IP)
                 ├── api/extract.js  → text extraction from uploaded course materials (signed-in, rate: 20/10min/IP)
                 ├── api/simplify.js → Groq plain-English rewrite of lecture-note sections (rate: 8/10min/IP)
+                ├── api/summarize.js → exam-ready recap of a whole lecture-note topic (rate: 10/10min/IP)
                 ├── api/run.js     → JDoodle (code execution, 20 runs/day free)
                 └── api/google/*   → Google OAuth (Calendar sync + Drive import); see api/_lib/googleAuth.js
 ```
@@ -82,7 +83,10 @@ Browser → React SPA (Vite)
 | `api/run.js` | JDoodle proxy — runs Java/C/C++/Python code |
 | `api/extract.js` | Extracts text from freshly uploaded course materials (.txt/.docx/.pdf via mammoth + pdf-parse) so the tutor can reference lecture notes; signed-in only |
 | `api/simplify.js` | "Simplify this" — Groq rewrite of a dense lecture-note section in plain English; client caches results in localStorage |
-| `src/components/LectureNotes.jsx` | Renders lecture-note sections (definition/bullets/termlist/table/mosca/…); termlists double as flashcards; hosts the Simplify button |
+| `api/summarize.js` \| `src/utils/summarizeTopic.js` | "Key points" — exam-ready recap of a **whole topic**, for a student who has already read it. Deliberately separate from Simplify (one *section*, for a student who is stuck): different scope, prompt, cap (32k vs 4k chars) and rate bucket. Skips topics whose title is already a hand-written summary (`/exam focus\|key takeaways/i`) |
+| `src/components/LectureNotes.jsx` | Renders lecture-note sections (definition/bullets/termlist/table/mosca/…); termlists double as flashcards; hosts the Simplify and Key points buttons and the per-topic read markers. Takes `reading` from the *page* — see below |
+| `src/components/useReadingProgress.js` | Lecture-note reading progress under `course-reading-v1` (own `user_progress` row, no migration). Topics are identified by `hashPrompt(topic.title)` so renumbering doesn't wipe marks. `useAutoMarkRead` marks a topic read once its end sentinel is seen **and** the panel has been *visible* for a length-scaled dwell — accumulated visible time, so "Expand all" + a fast scroll marks nothing. **CourseDetail owns the hook and passes it into `<LectureNotes>`**: two `useProgress` hooks on one key write the same record but never re-render each other, so the tab badge would go stale |
+| `src/data/lectureNotes/index.js` | Lazy note registry + `NOTE_TOPIC_COUNTS` / `noteTopicCount()` — topic counts *without* loading a chunk, so the 57 course cards can size their progress bars. `validate-modules.mjs` fails the build if the map drifts from the real files |
 | `src/components/CourseQuiz.jsx` \| `Quiz.jsx` | MCQ practice off `course.quiz` — student picks a length, questions sampled at random, options shuffled per attempt. Scores land in `quizScores[course.slug]` under the `course-quizzes-v1` key |
 | `src/components/CourseExamPrep.jsx` | Written-exam practice off `course.examPrep`, for courses examined on paper rather than by CBT. Generic over any course carrying a bank; see "Adding a question bank" below for why it is a sibling field and not more question types on `quiz` |
 | `src/data/lectureNotes/ent221Quiz.js` \| `cyb122ExamPrep.js` | The two banks that exist today — an MCQ bank shared by both catalogues' ENT 221 entries, and CYB 122's written-exam bank |

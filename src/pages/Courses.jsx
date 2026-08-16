@@ -1,16 +1,28 @@
-import { useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, BookOpen, Coffee, Code2, Terminal, GraduationCap, Shield, Search, X } from 'lucide-react';
 import { useCatalogue } from '../data/useCatalogue';
 import { YEAR_LEVELS } from '../data/departments';
+import { noteTopicCount } from '../data/lectureNotes/index.js';
 import { trackMeta } from '../data/trackMeta';
 import { useAuth } from '../context/AuthContext';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
 import { useLevelGate, LEVEL_STORAGE_KEY } from '../components/useLevelGate';
+import { useProgress } from '../components/useProgress';
+import { READING_STORAGE_KEY, readCountFor } from '../components/useReadingProgress';
 import CoursePicker from '../components/CoursePicker';
 import { usePageTitle } from '../utils/usePageTitle';
 
 const trackIcons = { java: Coffee, python: Code2, c: Terminal };
+
+// How many lecture-note topics the student has read, per course slug.
+//
+// A context rather than a prop, because this page renders up to 57 cards behind
+// four layers of layout components: a hook in each card would mount 57 copies of
+// useProgress (and 57 Supabase round-trips) for one shared record, and threading
+// a prop would touch every layout signature between here and the card. Read once
+// in Courses(), consumed only by CourseCard.
+const ReadCountContext = createContext(() => 0);
 
 function InteractiveTracks() {
   const tracks = Object.values(trackMeta);
@@ -80,6 +92,13 @@ const subjectStyles = {
 
 function CourseCard({ course }) {
   const style = subjectStyles[course.subject] || subjectStyles.cs;
+  const readCountFn = useContext(ReadCountContext);
+  // noteTopicCount is synchronous by design — see lectureNotes/index.js. Loading
+  // the note chunks to size these bars would undo the code-splitting.
+  const noteTotal = noteTopicCount(course);
+  // Clamped: a renamed topic leaves its old mark behind, and a card reading
+  // 14/13 would look broken. The notes tab itself counts off the live topics.
+  const notesRead = Math.min(readCountFn(course.slug), noteTotal);
   return (
     <Link
       to={`/courses/${course.slug}`}
@@ -110,6 +129,19 @@ function CourseCard({ course }) {
         </h3>
         <p className="text-sm text-coffee-700 leading-relaxed line-clamp-2">{course.description}</p>
       </div>
+      {notesRead > 0 && (
+        <div className="flex items-center gap-2">
+          <div className="h-1 flex-1 overflow-hidden rounded-full bg-coffee-100">
+            <div
+              className="h-full rounded-full bg-moss transition-all duration-500"
+              style={{ width: `${(notesRead / noteTotal) * 100}%` }}
+            />
+          </div>
+          <span className={`text-xs font-mono whitespace-nowrap ${notesRead === noteTotal ? 'font-bold text-moss' : 'text-coffee-600'}`}>
+            {notesRead === noteTotal ? 'Notes read' : `${notesRead}/${noteTotal} read`}
+          </span>
+        </div>
+      )}
       <div className="flex items-center justify-between text-xs text-coffee-700 pt-1 border-t border-coffee-100">
         <span className="flex items-center gap-1">
           <BookOpen size={11} />
@@ -437,6 +469,14 @@ export default function Courses() {
   const heroProgramme = user && department
     ? (isFoundation ? (profile?.department_other?.trim() || 'your programme') : department.degree || department.name)
     : 'University of Uyo students';
+  // Read once for the whole page and handed to the cards through
+  // ReadCountContext — see the note on that context above.
+  const { progress: readingProgress } = useProgress(READING_STORAGE_KEY);
+  const readCountBySlug = useMemo(
+    () => (slug) => readCountFor(readingProgress, slug),
+    [readingProgress],
+  );
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -608,6 +648,7 @@ export default function Courses() {
   }
 
   return (
+    <ReadCountContext.Provider value={readCountBySlug}>
     <div className="max-w-6xl mx-auto px-6 py-16">
 
       {/* Header */}
@@ -873,5 +914,6 @@ export default function Courses() {
         />
       )}
     </div>
+    </ReadCountContext.Provider>
   );
 }

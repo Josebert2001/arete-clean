@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, Flame, PlayCircle, Target, BrainCircuit,
-  CalendarDays, FileText, Code2, GraduationCap, CheckCircle2,
+  CalendarDays, FileText, Code2, GraduationCap, CheckCircle2, BookOpen,
 } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +16,7 @@ import { shouldShowGettingStarted, readDismissed, writeDismissed } from '../util
 import { findDepartmentByName, getDepartment } from '../data/departments';
 import GettingStartedCard from './GettingStartedCard';
 import ReviewDueCard from './ReviewDueCard';
+import { READING_STORAGE_KEY, readTopicTotal, readCourseCount } from './useReadingProgress';
 
 // ─── The signed-in homepage ───────────────────────────────────────────────────
 // Home for a signed-in student is a daily dashboard, not a marketing page:
@@ -75,6 +76,9 @@ export default function StudentDashboard() {
   const completedIds = new Set(
     Object.values(progressBySlug).flatMap(p => p.completedModules || [])
   );
+  const { progress: readingProgress } = useProgress(READING_STORAGE_KEY);
+  const topicsRead = readTopicTotal(readingProgress);
+  const coursesRead = readCourseCount(readingProgress);
   const challenge = pickDailyChallenge(Object.values(trackMeta), completedIds);
   const streak = computeStreak(days);
   const lastPath = readLastLocation();
@@ -205,9 +209,33 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* ── Right column: review, year, daily challenge, tools ── */}
+        {/* ── Right column: review, reading, year, daily challenge, tools ── */}
         <div className="space-y-6">
           <ReviewDueCard />
+
+          {/* Reading counted straight off the progress blob — no denominators,
+              because knowing how many topics a course *has* means loading its
+              note chunk, and the dashboard must not pull course data for a
+              one-line stat (same reason ReviewDueCard avoids useCatalogue). */}
+          {topicsRead > 0 && (
+            <Link
+              to="/courses"
+              className="flex items-center gap-3 bg-paper border border-coffee-200 rounded-2xl p-5 hover:border-coffee-400 transition-colors group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-moss/15 flex items-center justify-center shrink-0">
+                <BookOpen size={17} className="text-moss" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-ink text-sm">
+                  {topicsRead} lecture-note topic{topicsRead === 1 ? '' : 's'} read
+                </p>
+                <p className="text-xs text-coffee-600">
+                  Across {coursesRead} course{coursesRead === 1 ? '' : 's'}
+                </p>
+              </div>
+              <ArrowRight size={15} className="text-coffee-400 group-hover:text-ink transition-colors shrink-0" />
+            </Link>
+          )}
 
           {level && (
             <Link
