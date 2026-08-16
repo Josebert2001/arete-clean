@@ -10,6 +10,7 @@ import { securityModules } from '../src/data/securityModules.js';
 import { trackMeta } from '../src/data/trackMeta.js';
 import { courses as cybersecurityCourses } from '../src/data/courses.js';
 import { courses as dataScienceCourses } from '../src/data/dataScienceCourses.js';
+import { noteLoaders, NOTE_TOPIC_COUNTS } from '../src/data/lectureNotes/index.js';
 
 // Every department catalogue, so the course checks below cover all of them.
 // A new department must be added here too — otherwise its courses are silently
@@ -321,6 +322,23 @@ for (const { department, courses } of catalogues) {
       }
     });
   }
+}
+
+// ── Lecture-note topic counts ────────────────────────────────────────────────
+// NOTE_TOPIC_COUNTS is hand-maintained so the course list can size a reading
+// progress bar without downloading a note chunk. That only stays true if it
+// matches reality, so load the real files here — the one place in the app where
+// pulling all ~1.36 MB of notes costs nothing, because this runs in Node at
+// prebuild and never ships.
+for (const key of Object.keys(noteLoaders)) {
+  const topics = (await noteLoaders[key]()) ?? [];
+  const declared = NOTE_TOPIC_COUNTS[key];
+  check(declared === topics.length,
+        `lectureNotes/index.js: NOTE_TOPIC_COUNTS.${key} is ${declared ?? 'missing'} but ${key} has ${topics.length} topics`);
+}
+for (const key of Object.keys(NOTE_TOPIC_COUNTS)) {
+  check(key in noteLoaders,
+        `lectureNotes/index.js: NOTE_TOPIC_COUNTS.${key} has no matching entry in noteLoaders`);
 }
 
 // Warnings never fail the build — they mark work that is known and outstanding,

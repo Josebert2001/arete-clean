@@ -5,6 +5,7 @@ import { useCatalogue } from '../data/useCatalogue';
 import { materialsDepartmentFor } from '../data/departments';
 import LectureNotes from '../components/LectureNotes';
 import { useLectureNotes } from '../components/useLectureNotes';
+import { useReadingProgress } from '../components/useReadingProgress';
 import CourseQuiz from '../components/CourseQuiz';
 import CourseExamPrep from '../components/CourseExamPrep';
 import CourseMaterials from '../components/CourseMaterials';
@@ -89,6 +90,15 @@ export default function CourseDetail() {
   // render. Safe before `course` resolves — the hook treats a missing course
   // as 'no notes' and issues no request.
   const { status: notesStatus, notes: lectureNotes, hasNotes } = useLectureNotes(course);
+
+  // Owned here, not inside <LectureNotes>, because the tab badge below and the
+  // notes' own progress bar have to move together — two useProgress hooks on one
+  // storage key would write the same record but never re-render each other.
+  //
+  // Counted off the loaded topics rather than the stored ids, so the badge can
+  // never read 14/13 after a topic was renamed and left a stale mark behind.
+  const reading = useReadingProgress(slug);
+  const readCount = lectureNotes.filter((t) => reading.isRead(t)).length;
 
   if (status === 'error') {
     return (
@@ -222,7 +232,17 @@ export default function CourseDetail() {
       <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0 overflow-x-auto no-scrollbar">
         {[
           { key: 'resources', label: 'Study Resources', icon: BookOpen },
-          ...(hasNotes ? [{ key: 'notes', label: 'Lecture Notes', icon: FileText, badge: lectureNotes.length ? `${lectureNotes.length} ${lectureNotes.length === 1 ? 'topic' : 'topics'}` : null }] : []),
+          // Once anything has been read the badge switches to a fraction, so the
+          // tab itself shows how far through the notes the student is without
+          // them having to open it.
+          ...(hasNotes ? [{
+            key: 'notes',
+            label: 'Lecture Notes',
+            icon: FileText,
+            badge: !lectureNotes.length ? null
+              : readCount > 0 ? `${readCount}/${lectureNotes.length}`
+              : `${lectureNotes.length} ${lectureNotes.length === 1 ? 'topic' : 'topics'}`,
+          }] : []),
           ...(hasQuiz ? [{ key: 'quiz', label: 'Practice Quiz', icon: GraduationCap, badge: `${course.quiz.length} Q` }] : []),
           ...(hasExamPrep ? [{ key: 'exam', label: 'Written Exam Prep', icon: PenLine, badge: `${course.examPrep.length} Q` }] : []),
           { key: 'materials', label: 'Materials', icon: Paperclip },
@@ -272,7 +292,11 @@ export default function CourseDetail() {
           )}
           {notesStatus === 'ready' && (
             <ExplainSelection context={{ courseCode: course.code, courseTitle: course.title }}>
-              <LectureNotes topics={lectureNotes} context={{ courseCode: course.code, courseTitle: course.title }} />
+              <LectureNotes
+                topics={lectureNotes}
+                context={{ courseCode: course.code, courseTitle: course.title }}
+                reading={reading}
+              />
             </ExplainSelection>
           )}
         </div>
