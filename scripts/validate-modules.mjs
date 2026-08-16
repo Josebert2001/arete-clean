@@ -30,8 +30,34 @@ const isHex64 = (v) => typeof v === 'string' && /^[0-9a-f]{64}$/.test(v);
 const VALID_MATERIAL_TYPES = new Set(['code', 'terminal', 'text', 'table']);
 
 const errors = [];
+const warnings = [];
 const isNonEmptyString = (v) => typeof v === 'string' && v.trim().length > 0;
 const check = (cond, msg) => { if (!cond) errors.push(msg); };
+
+// ── The "longest option is the answer" tell ──────────────────────────────────
+// An MCQ bank is worthless if the correct option can be picked by length alone,
+// and it happens without anyone intending it: the correct answer gets written as
+// a careful, complete, hedged definition while the distractors are quick
+// throwaway wrong answers, so the right one ends up visibly the longest.
+//
+// Measured Aug 2026, the catalogue sat at 62% strictly-longest across 1,505
+// questions — chance is 25% with four options — and UUY-CYB 222 at 74%, meaning
+// a student could score ~79% on it knowing no security at all.
+//
+// Rebalancing 900+ questions at once is not realistic, so this is a ratchet:
+// banks listed below are held to the threshold and fail the build if they drift
+// back; every other bank reports a warning, so the remaining work stays visible
+// instead of being forgotten. Add a course code here once its bank is balanced.
+const LENGTH_BALANCED_BANKS = new Set(['UUY-CYB 222']);
+
+// Chance is 1/options. 0.40 leaves real headroom above the 0.25 four-option
+// baseline: this exists to catch a bank sliding back, not to police the noise in
+// an honest one.
+const LONGEST_ANSWER_MAX_RATE = 0.40;
+
+// A bank can sit under that rate and still contain one question whose answer is
+// unmissable, so the individual case is bounded too.
+const LONGEST_ANSWER_MAX_GAP = 25;
 
 for (const { name, modules: list } of tracks) {
   const where = (m, suffix) => `[${name}] module "${m?.id ?? '?'}" (#${m?.number ?? '?'}): ${suffix}`;
@@ -198,6 +224,42 @@ for (const { department, courses } of catalogues) {
       });
       check(isNonEmptyString(q?.explanation), where(qi, 'explanation missing'));
     });
+
+    // See LENGTH_BALANCED_BANKS above for why this is a ratchet rather than a
+    // flat rule. Only well-formed questions are measured — a malformed one has
+    // already raised its own error and would skew the rate.
+    const measurable = c.quiz.filter(
+      (q) => Array.isArray(q?.options) && q.options.length > 1
+        && typeof q?.correctIndex === 'number'
+        && q.options.every(isNonEmptyString)
+        && q.correctIndex >= 0 && q.correctIndex < q.options.length
+    );
+    if (measurable.length > 0) {
+      const ratcheted = LENGTH_BALANCED_BANKS.has(c.code);
+      let longest = 0;
+      measurable.forEach((q, qi) => {
+        const lens = q.options.map((o) => o.trim().length);
+        const correct = lens[q.correctIndex];
+        const bestDistractor = Math.max(...lens.filter((_, oi) => oi !== q.correctIndex));
+        // Strictly longest — a tie gives the student nothing to go on.
+        if (correct > bestDistractor) longest += 1;
+        if (ratcheted && correct - bestDistractor > LONGEST_ANSWER_MAX_GAP) {
+          errors.push(where(qi,
+            `correct option is ${correct - bestDistractor} chars longer than the longest distractor ` +
+            `(max ${LONGEST_ANSWER_MAX_GAP}) — it can be picked by length alone`));
+        }
+      });
+      const rate = longest / measurable.length;
+      const summary =
+        `${c.code ?? c.slug}: correct option is strictly the longest in ` +
+        `${longest}/${measurable.length} questions (${Math.round(rate * 100)}%)`;
+      if (ratcheted && rate > LONGEST_ANSWER_MAX_RATE) {
+        errors.push(`[${department}] ${summary} — exceeds ${Math.round(LONGEST_ANSWER_MAX_RATE * 100)}%; ` +
+                    'the bank is answerable by length alone');
+      } else if (!ratcheted && rate > LONGEST_ANSWER_MAX_RATE) {
+        warnings.push(`[${department}] ${summary} — not yet rebalanced`);
+      }
+    }
   }
 
   // Courses examined on paper ship a written-exam bank (course.examPrep) instead
@@ -259,6 +321,14 @@ for (const { department, courses } of catalogues) {
       }
     });
   }
+}
+
+// Warnings never fail the build — they mark work that is known and outstanding,
+// so printing them before the errors would bury the thing that actually broke.
+if (warnings.length > 0) {
+  console.warn(`\n! ${warnings.length} warning${warnings.length === 1 ? '' : 's'}:\n`);
+  for (const w of warnings) console.warn(`  · ${w}`);
+  console.warn('');
 }
 
 if (errors.length > 0) {
