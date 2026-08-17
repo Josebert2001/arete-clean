@@ -19,6 +19,27 @@ const AuthContext = createContext({
   refreshProfile: async () => {},
 });
 
+// Last profile fetched per student, so a network failure while offline (e.g.
+// reopening the installed PWA with no connectivity) can fall back to it
+// instead of reading as "no profile" — see loadProfile below.
+const PROFILE_CACHE_KEY = 'arete-profile-cache';
+
+function readCachedProfile(userId) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY));
+    return cached?.id === userId ? cached : null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheProfile(userId, profile) {
+  try {
+    if (profile) localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+    else if (readCachedProfile(userId)) localStorage.removeItem(PROFILE_CACHE_KEY);
+  } catch { /* private mode — skip cache */ }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser]                   = useState(null);
   const [profile, setProfile]             = useState(null);
@@ -35,12 +56,23 @@ export function AuthProvider({ children }) {
   const loadProfile = useCallback(async (u) => {
     if (!u || !supabase) { setProfile(null); setProfileLoading(false); return; }
     setProfileLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('id, full_name, reg_number, level, department, department_other, selected_courses, created_at')
       .eq('id', u.id)
       .maybeSingle();
+    if (error) {
+      // A failed fetch (e.g. offline, reopening the installed PWA with no
+      // connectivity) looks identical to "no row" unless we check `error`
+      // explicitly. Treating it as "no profile" bounced students who had
+      // already completed setup back to setup-profile. Fall back to the last
+      // profile fetched for this student instead of clearing it.
+      setProfile(readCachedProfile(u.id));
+      setProfileLoading(false);
+      return;
+    }
     setProfile(data ?? null);
+    cacheProfile(u.id, data ?? null);
     setProfileLoading(false);
   }, []);
 

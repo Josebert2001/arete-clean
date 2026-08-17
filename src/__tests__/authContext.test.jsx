@@ -5,7 +5,7 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 // Shared handle so the test can drive the mocked Supabase auth client: fire
 // arbitrary auth events and count how many times the profile row was fetched.
 const mocks = vi.hoisted(() => ({
-  state: { listener: null, profileSelects: 0, session: { user: { id: 'u1' } } },
+  state: { listener: null, profileSelects: 0, session: { user: { id: 'u1' } }, profileError: null },
 }));
 
 vi.mock('../lib/supabase', () => ({
@@ -24,6 +24,7 @@ vi.mock('../lib/supabase', () => ({
         eq: () => ({
           maybeSingle: async () => {
             mocks.state.profileSelects += 1;
+            if (mocks.state.profileError) return { data: null, error: mocks.state.profileError };
             return { data: { id: 'u1', full_name: 'Ada', department: 'cybersecurity' } };
           },
         }),
@@ -54,7 +55,9 @@ beforeEach(() => {
   mocks.state.listener = null;
   mocks.state.profileSelects = 0;
   mocks.state.session = { user: { id: 'u1' } };
+  mocks.state.profileError = null;
   sessionStorage.clear();
+  localStorage.clear();
 });
 
 describe('AuthContext session handling', () => {
@@ -110,5 +113,24 @@ describe('AuthContext session handling', () => {
     await waitFor(() => expect(screen.getByTestId('uid')).toHaveTextContent('u2'));
     expect(mocks.state.profileSelects).toBe(2);
     expect(sessionStorage.getItem('arete-just-signed-in')).toBe('1');
+  });
+
+  // Regression: reopening the installed PWA while offline restores the
+  // cached Supabase session (no network needed to decode a stored JWT), but
+  // the profile row fetch fails. That failure must not read as "this student
+  // has no profile" — that sent already-onboarded students back to
+  // setup-profile every time they opened the app offline.
+  it('falls back to the cached profile when the fetch fails offline', async () => {
+    const { unmount } = renderProvider();
+    await waitFor(() => expect(screen.getByTestId('name')).toHaveTextContent('Ada'));
+    unmount();
+
+    // Simulate reopening the app offline: a fresh provider instance, same
+    // cached session, but the profile fetch now fails.
+    mocks.state.profileError = { message: 'Failed to fetch' };
+    renderProvider();
+
+    await waitFor(() => expect(screen.getByTestId('uid')).toHaveTextContent('u1'));
+    expect(screen.getByTestId('name')).toHaveTextContent('Ada');
   });
 });
