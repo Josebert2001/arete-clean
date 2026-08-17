@@ -1,25 +1,68 @@
 // UUY-CYB 221 — Network Defense Fundamentals
-// Lecture notes transcribed from the departmental Laboratory Manual
-// ("CYB 221 Network Defense Fundamentals — Laboratory Manual",
-// prepared by Dr. Samuel A. Robinson, University of Uyo).
+// Lecture notes transcribed from the departmental Laboratory Manual, whose
+// title page reads "CYB 224: NETWORK DEFENSE FUNDAMENTALS — LABORATORY MANUAL",
+// prepared by Dr. Samuel A. Robinson, Department of Cyber Security,
+// University of Uyo.
 //
-// Topics 1–9 are the manual's 25 numbered theory sections, grouped thematically;
-// each section keeps its original number in its heading so students can cross-
-// reference the printed manual. Topics 10–21 are the manual's 12 laboratory
-// practicals.
+// COURSE CODE DISCREPANCY: the manual's title page says CYB 224, but this
+// catalogue carries Network Defense Fundamentals as UUY-CYB 221 and lists
+// CYB 224 as Information and Big Data Security. Unresolved — do not "fix"
+// either entry without checking what the department actually examines.
+//
+// SECTION NUMBERS: the manual's body headings carry NO numbers — every printed
+// heading is bare (`CLASSIFICATION OF THREATS`, `CIA Triad`, `Kerberos`…). The
+// numbers used in the headings below are the row numbers of the manual's own
+// `OUTLINES` table on printed pp. 2–3, which has 24 rows. Rows 1–24 are checked
+// against that table one by one; two mismatches were found and fixed:
+//   · outline row 8 is a single row, "Hardware Attacks and Cyber Threat
+//     Categories" — it had been split into two note sections, 8 and a
+//     fabricated 9.
+//   · "Definition of a Firewall" is outline row 9, not 10, and "Firewall
+//     Technologies" is row 10 — it had been left unnumbered.
+// Mobile Device Security (printed p. 38) has NO outline row; the manual's
+// theory simply runs past the end of its own outline.
 //
 // `covers` / `partial` refer to 1-based indices in the course's `topics` array
 // in courses.js — CourseDetail uses them to show which syllabus items the notes
-// actually reach. Note the manual carries its own 24-item outline that does not
-// line up with the 8-item departmental syllabus; the mapping below is against
-// the syllabus.
+// actually reach. The manual's 24-item outline does not line up with the 8-item
+// departmental syllabus; the mapping below is against the syllabus.
 //
-// Figures live in public/lecture-notes/cyb-221/ (converted from the manual's
-// embedded PNGs by scripts/optimize-lecture-images.mjs).
+// Figures live in public/lecture-notes/cyb-221/. Two provenances:
+//   · Figures 1–15 (the borrowed paper's sequence) come from the lecturer's own
+//     source images, supplied as a .docx transcription of the manual. Each one
+//     was checked side by side against the corresponding PDF page scan before
+//     use; all 15 match the print exactly, in their original colour.
+//   · `seven-layers.webp` and `cyber-attacker-actions.webp` are cropped from the
+//     page photographs, because the .docx carried a *different* seven-layers
+//     diagram (no numbers, sub-text, icons or title) and omitted the
+//     cyber-attacker tree entirely.
+// Cropping from the scans uses the page's embedded photo at native resolution;
+// everything is converted by scripts/optimize-lecture-images.mjs.
 //
-// Where the manual's scanned text was garbled, the prose has been repaired to
-// its evident intent. Material genuinely added beyond the manual is marked with
-// a `note` section ("Added for clarity") or stated in the section text.
+// FIGURE PLACEMENT: the manual prints Figures 4, 5, 7, 8 and 15 before the prose
+// that explains them, and prints Figures 4 and 5 side by side. Here each figure
+// sits beside the paragraph it illustrates. The diagrams and their captions are
+// unchanged; only where they fall in the reading order differs.
+//
+// WARNING FOR FUTURE EDITORS: the figures that were here before this pass were
+// Mermaid diagrams drawn from the surrounding prose and captioned as if they
+// were the manual's. They contained content the lecturer never wrote (the fake
+// Figure 3 invented "Advertised Window" arrow labels and a "Connection
+// Established" state box). Never generate a figure and caption it as the
+// manual's — crop it, or leave it out and say so.
+//
+// NOTE ON FIGURE NUMBERING: the manual contains two independent figure
+// sequences. Its own "Figure 1. Seven Layers of Cyber Security" (p. 6, printed
+// with a period) is unrelated to "Figure 1: OSI Model" (p. 19, printed with a
+// colon) — pp. 18–38 are lifted from a published paper, which the manual refers
+// to as "this paper" and cites as [8], [9], [26]. That paper carries its own
+// Figures 1–15.
+//
+// TRANSCRIPTION POLICY: the lecturer's wording is reproduced as printed,
+// including his own errors, spellings and typography. Where a printed statement
+// conflicts with the standard definition, the statement is KEPT and a `note`
+// section names the conflict — it is never silently corrected. Material added
+// beyond the manual is marked "Added for clarity" or stated in the section text.
 
 const IMG = '/lecture-notes/cyb-221';
 
@@ -33,161 +76,291 @@ export const cyb221LectureNotes = [
       {
         type: 'definition',
         heading: '1. Classification of Threats',
-        text: 'A cyber-attack is an exploitation of computer systems and networks. It uses malicious code to alter computer code, logic or data, leading to cybercrimes such as information and identity theft. Cyber-attacks fall into two broad categories: web-based attacks and system-based attacks.',
+        text: 'A cyber-attack is an exploitation of computer systems and networks. It uses malicious code to alter computer code, logic or data and lead to cybercrimes, such as information and identity theft.',
       },
       {
-        type: 'termlist',
-        heading: 'Web-based Attacks',
+        type: 'bullets',
+        heading: 'Cyber-attacks can be classified into the following categories:',
         items: [
-          { term: 'Injection attacks', def: 'Data is injected into a web application to manipulate it and retrieve information the attacker is not entitled to. Examples: SQL injection, code injection, log injection, XML injection.' },
-          { term: 'DNS spoofing', def: 'Data is introduced into a DNS resolver’s cache so the name server returns an incorrect IP address, diverting traffic to the attacker’s machine. These attacks can run undetected for long periods.' },
-          { term: 'Session hijacking', def: 'An attack on a user session over a protected network. Web applications store state and user sessions in cookies; by stealing the cookies an attacker gains access to all of the user’s data.' },
-          { term: 'Phishing', def: 'An attempt to steal sensitive information such as login credentials and credit card numbers by masquerading as a trustworthy entity in an electronic communication.' },
-          { term: 'Brute force', def: 'A trial-and-error method that generates a large number of guesses and validates them to obtain real data such as a password or PIN. Used by criminals to crack encrypted data, and by analysts to test an organisation’s security.' },
-          { term: 'Denial of service', def: 'Makes a server or network resource unavailable by flooding the target with traffic or sending data that triggers a crash, from a single system and single connection. Sub-types: volume-based (saturate bandwidth, measured in bits per second), protocol (consume server resources, measured in packets) and application-layer (crash the web server, measured in requests per second).' },
-          { term: 'Dictionary attacks', def: 'Validates a stored list of commonly used passwords against an account to recover the original password.' },
-          { term: 'URL interpretation', def: 'Altering parts of a URL to make the web server deliver pages the attacker is not authorised to browse.' },
-          { term: 'File inclusion attacks', def: 'Abuses an application’s include functionality to access unauthorised files on the web server, or to execute malicious files there.' },
-          { term: 'Man-in-the-middle attacks', def: 'The attacker intercepts the connection between client and server and acts as a bridge between them, gaining the ability to read, insert and modify data in the intercepted connection.' },
+          'Web-based attacks',
+          'System-based attacks',
         ],
-      },
-      {
-        type: 'termlist',
-        heading: 'System-based Attacks',
-        items: [
-          { term: 'Virus', def: 'Malicious software that spreads through computer files without the user’s knowledge. It self-replicates by inserting copies of itself into other programs when executed, and can carry instructions that harm the system.' },
-          { term: 'Worm', def: 'Malware whose primary function is to replicate itself to spread to uninfected computers. It behaves much like a virus, and often arrives as an email attachment that appears to come from a trusted sender.' },
-          { term: 'Trojan horse', def: 'A malicious program that causes unexpected setting changes and unusual activity even when the computer should be idle. It misleads the user about its true intent, appearing to be a normal application while malicious code runs in the background.' },
-          { term: 'Backdoors', def: 'A method that bypasses the normal authentication process. A developer may create one so an application or operating system can be accessed for troubleshooting or other purposes.' },
-          { term: 'Bots', def: 'Automated processes that interact with other network services. Some run automatically, others execute only on specific input. Common examples are crawlers, chatroom bots, and malicious bots.' },
-        ],
-      },
-      {
-        type: 'definition',
-        heading: '2. The Seven Layers of Cyber Security',
-        text: 'The seven layers of cyber security should centre on the mission-critical assets you are seeking to protect.',
-      },
-      {
-        type: 'termlist',
-        items: [
-          { term: 'Mission-critical assets', def: 'The data you need to protect — the centre that every other layer surrounds.' },
-          { term: 'Data security', def: 'Controls that protect the storage and transfer of data.' },
-          { term: 'Application security', def: 'Controls that protect access to an application, the application’s own access to mission-critical assets, and the internal security of the application.' },
-          { term: 'Endpoint security', def: 'Controls that protect the connection between devices and the network.' },
-          { term: 'Network security', def: 'Controls that protect the organisation’s network and prevent unauthorised access to it.' },
-          { term: 'Perimeter security', def: 'Both the physical and the digital security methodologies that protect the business overall.' },
-          { term: 'The human layer', def: 'Humans are the weakest link in any security posture. Controls here include phishing simulations and access management, protecting mission-critical assets from cyber criminals, malicious insiders and negligent users.' },
-        ],
-      },
-      {
-        type: 'definition',
-        heading: '3. Vulnerability, Threat and Harmful Acts',
-        text: 'As the recent epidemic of data breaches illustrates, no system is immune to attack. Any company that manages, transmits, stores or otherwise handles data must institute and enforce mechanisms to monitor its cyber environment, identify vulnerabilities, and close security holes as quickly as possible.',
       },
       {
         type: 'text',
-        text: 'Cyber threats are security incidents or circumstances with the potential to have a negative outcome for your network or other data management systems — a phishing attack that results in malware infecting your data, a staff member failing to follow data protection protocols, or even a tornado that takes down your data headquarters. Vulnerabilities, by contrast, are the gaps or weaknesses in a system that make those threats possible and tempt threat actors to exploit them.',
+        heading: 'Web-based attacks',
+        text: 'These are the attacks which occur on a website or web applications. Some of the important web-based attacks are as follows-',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: '1. Injection attacks', def: 'It is the attack in which some data will be injected into a web application to manipulate the application and fetch the required information. Example- SQL Injection, code Injection, log Injection, XML Injection etc.' },
+          { term: '2. DNS Spoofing', def: 'DNS Spoofing is a type of computer security hacking. Whereby a data is introduced into a DNS resolver’s cache causing the name server to return an incorrect IP address, diverting traffic to the attacker’s computer or any other computer. The DNS spoofing attacks can go on for a long period of time without being detected and can cause serious security issues.' },
+          { term: '3. Session Hijacking', def: 'It is a security attack on a user session over a protected network. Web applications create cookies to store the state and user sessions. By stealing the cookies, an attacker can have access to all of the user data.' },
+          { term: '4. Phishing', def: 'Phishing is a type of attack which attempts to steal sensitive information like user login credentials and credit card number. It occurs when an attacker is masquerading as a trustworthy entity in electronic communication.' },
+          { term: '5. Brute force', def: 'It is a type of attack which uses a trial-and-error method. This attack generates a large number of guesses and validates them to obtain actual data like user password and personal identification number. This attack may be used by criminals to crack encrypted data, or by security, analysts to test an organization’s network security.' },
+          { term: '6. Denial of Service', def: 'It is an attack which meant to make a server or network resource unavailable to the users. It accomplishes this by flooding the target with traffic or sending it information that triggers a crash. It uses the single system and single internet connection to attack a server. It can be classified into the following-' },
+        ],
+      },
+      {
+        type: 'bullets',
+        items: [
+          'Volume-based attacks- Its goal is to saturate the bandwidth of the attacked site, and is measured in bit per second.',
+          'Protocol attacks- It consumes actual server resources, and is measured in a packet.',
+          'Application layer attacks- Its goal is to crash the web server and is measured in request per second.',
+        ],
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: '7. Dictionary attacks', def: 'This type of attack stored the list of a commonly used password and validated them to get original password.' },
+          { term: '8. URL Interpretation', def: 'It is a type of attack where we can change the certain parts of a URL, and one can make a web server to deliver web pages for which he is not authorized to browse.' },
+          { term: '9. File Inclusion attacks', def: 'It is a type of attack that allows an attacker to access unauthorized or essential files which is available on the web server or to execute malicious files on the web server by making use of the include functionality.' },
+          { term: '10. Man in the middle attacks', def: 'It is a type of attack that allows an attacker to intercepts the connection between client and server and acts as a bridge between them. Due to this, an attacker will be able to read, insert and modify the data in the intercepted connection.' },
+        ],
+      },
+      {
+        type: 'text',
+        heading: 'System-based attacks',
+        text: 'These are the attacks which are intended to compromise a computer or a computer network. Some of the important system-based attacks are as follows-',
+      },
+      {
+        type: 'termlist',
+        items: [
+          { term: '1. Virus', def: 'It is a type of malicious software program that spread throughout the computer files without the knowledge of a user. It is a self-replicating malicious computer program that replicates by inserting copies of itself into other computer programs when executed. It can also execute instructions that cause harm to the system.' },
+          { term: '2. Worm', def: 'It is a type of malware whose primary function is to replicate itself to spread to uninfected computers. It works same as the computer virus. Worms often originate from email attachments that appear to be from trusted senders.' },
+          { term: '3. Trojan horse', def: 'It is a malicious program that occurs unexpected changes to computer setting and unusual activity, even when the computer should be idle. It misleads the user of its true intent. It appears to be a normal application but when opened/executed some malicious code will run in the background.' },
+          { term: '4. Backdoors', def: 'It is a method that bypasses the normal authentication process. A developer may create a backdoor so that an application or operating system can be accessed for troubleshooting or other purposes.' },
+          { term: '5. Bots', def: 'A bot (short for "robot") is an automated process that interacts with other network services. Some bots program run automatically, while others only execute commands when they receive specific input. Common examples of bots program are the crawler, chatroom bots, and malicious bots.' },
+        ],
+      },
+
+      {
+        type: 'definition',
+        heading: '2. The 7 Layers of Cyber Security',
+        text: 'The 7 layers of cyber security should Centre on the mission critical assets you are seeking to protect.',
+      },
+      {
+        type: 'image',
+        src: `${IMG}/seven-layers.webp`,
+        width: 1100, height: 816,
+        caption: 'Figure 1. Seven Layers of Cyber Security',
+        alt: 'Concentric half-rings labelled, from the outside in: 1 The Human Layer, 2 Perimeter Security, 3 Network Security, 4 Endpoint Security, 5 Application Security, 6 Data Security, 7 Mission Critical Assets',
+      },
+      {
+        type: 'note',
+        items: [
+          'The figure and the text below it number the layers in opposite directions. The figure counts inwards — 1 is the human layer and 7 is mission-critical assets. The lecturer’s own list, reproduced below, counts outwards — 1 is mission-critical assets and 7 is the human layer. Learn the list, not the badge numbers on the diagram.',
+          'The figure also titles itself "THE 7 LAYERS OF CYBERSECURITY" while the printed section heading reads "THE 7 LAYERS OF CYBER SECURITY".',
+        ],
+      },
+      {
+        type: 'bullets',
+        items: [
+          '1: Mission Critical Assets – This is the data you need to protect',
+          '2: Data Security – Data security controls protect the storage and transfer of data.',
+          '3: Application Security – Applications security controls protect access to an application, an application’s access to your mission critical assets, and the internal security of the application.',
+          '4: Endpoint Security – Endpoint security controls protect the connection between devices and the network.',
+          '5: Network Security – Network security controls protect an organization’s network and prevent unauthorized access of the network.',
+          '6: Perimeter Security – Perimeter security controls include both the physical and digital security methodologies that protect the business overall.',
+          '7: The Human Layer – Humans are the weakest link in any cyber security posture. Human security controls include phishing simulations and access management controls that protect mission critical assets from a wide variety of human threats, including cyber criminals, malicious insiders, and negligent users.',
+        ],
+      },
+
+      {
+        type: 'definition',
+        heading: '3. Vulnerability, Threat, Harmful Acts',
+        text: 'As the recent epidemic of data breaches illustrates, no system is immune to attacks. Any company that manages, transmits, stores, or otherwise handles data has to institute and enforce mechanisms to monitor their cyber environment, identify vulnerabilities, and close up security holes as quickly as possible. Before identifying specific dangers to modern data systems, it is crucial to understand the distinction between cyber threats and vulnerabilities.',
+      },
+      {
+        type: 'text',
+        text: 'Cyber threats are security incidents or circumstances with the potential to have a negative outcome for your network or other data management systems.',
+      },
+      {
+        type: 'text',
+        text: 'Examples of common types of security threats include phishing attacks that result in the installation of malware that infects your data, failure of a staff member to follow data protection protocols that cause a data breach, or even a tornado that takes down your company’s data headquarters, disrupting access.',
+      },
+      {
+        type: 'text',
+        text: 'Vulnerabilities are the gaps or weaknesses in a system that make threats possible and tempt threat actors to exploit them.',
       },
       {
         type: 'bullets',
         heading: 'Types of Vulnerabilities',
         items: [
-          'SQL injections',
-          'Server misconfigurations',
-          'Cross-site scripting',
-          'Transmitting sensitive data in non-encrypted plain text',
+          'Types of vulnerabilities in network security include but are not limited to',
+          'i. SQL injections,',
+          'ii. server misconfigurations,',
+          'iii. cross-site scripting',
+          'iv. transmitting sensitive data in a non-encrypted plain text format.',
         ],
       },
       {
         type: 'text',
-        text: 'When threat probability is multiplied by the potential loss that may result, cyber security experts refer to this as risk.',
+        text: 'When threat probability is multiplied by the potential loss that may result, cyber security experts, refer to this as a risk.',
       },
       {
         type: 'bullets',
-        heading: 'Categories of Vulnerabilities',
+        heading: 'SECURITY VULNERABILITIES, THREATS AND ATTACKS — Categories of vulnerabilities',
         items: [
-          'Corrupted — loss of integrity',
-          'Leaky — loss of confidentiality',
-          'Unavailable or very slow — loss of availability',
+          'Corrupted (Loss of integrity)',
+          'Leaky (Loss of confidentiality)',
+          'Unavailable or very slow (Loss of availability)',
         ],
       },
       {
-        type: 'termlist',
+        type: 'bullets',
         items: [
-          { term: 'Threats', def: 'Represent potential security harm to an asset when vulnerabilities are exploited.' },
-          { term: 'Attacks', def: 'Threats that have actually been carried out.' },
-          { term: 'Passive', def: 'Makes use of information from the system without affecting system resources.' },
-          { term: 'Active', def: 'Alters system resources or affects their operation.' },
-          { term: 'Insider', def: 'Initiated by an entity inside the organisation.' },
-          { term: 'Outsider', def: 'Initiated from outside the perimeter.' },
+          'Threats represent potential security harm to an asset when vulnerabilities are exploited',
+          'Attacks are threats that have been carried out',
+          'Passive – Make use of information from the system without affecting system resources',
+          'Active – Alter system resources or affect operation',
+          'Insider – Initiated by an entity inside the organization',
+          'Outsider – Initiated from outside the perimeter',
         ],
       },
       {
         type: 'text',
-        heading: 'Computer Criminals',
-        text: 'Computer criminals have access to enormous amounts of hardware, software and data; they have the potential to cripple much of effective business and government throughout the world. In a sense, the purpose of computer security is to prevent these criminals from doing damage. Computer crime is any crime involving a computer or aided by the use of one. Although this definition is admittedly broad, it allows us to consider ways to protect ourselves, our businesses and our communities against those who use computers maliciously. One approach to prevention is to understand who commits these crimes and why: by studying those who have already used computers to commit crimes, we may be able to spot likely criminals in future and prevent the crimes from occurring.',
+        heading: 'Computer criminals',
+        text: 'Computer criminals have access to enormous amounts of hardware, software, and data; they have the potential to cripple much of effective business and government throughout the world. In a sense, the purpose of computer security is to prevent these criminals from doing damage.',
       },
+      {
+        type: 'text',
+        text: 'We say computer crime is any crime involving a computer or aided by the use of one. Although this definition is admittedly broad, it allows us to consider ways to protect ourselves, our businesses, and our communities against those who use computers maliciously.',
+      },
+      {
+        type: 'text',
+        text: 'One approach to prevention or moderation is to understand who commits these crimes and why. Many studies have attempted to determine the characteristics of computer criminals. By studying those who have already used computers to commit crimes, we may be able in the future to spot likely criminals and prevent the crimes from occurring.',
+      },
+
       {
         type: 'definition',
-        heading: '4. The CIA Triad',
-        text: 'The CIA Triad is a security model developed to help people think about the various parts of IT security.',
-      },
-      {
-        type: 'termlist',
-        items: [
-          { term: 'Confidentiality', def: 'Protecting sensitive, private information from unauthorised access. This depends on being able to define and enforce access levels — often by separating information into collections organised by who needs access and how sensitive the information is (i.e. how much damage a breach would cause). Common means include access control lists, volume and file encryption, and Unix file permissions.' },
-          { term: 'Integrity', def: 'Protects data from deletion or modification by any unauthorised party, and ensures that when an authorised person makes a change that should not have been made, the damage can be reversed.' },
-          { term: 'Availability', def: 'Refers to the actual availability of your data. Authentication mechanisms, access channels and systems all have to work properly so the information they protect is available when it is needed.' },
-        ],
+        heading: '4. CIA Triad',
+        text: 'The CIA Triad is actually a security model that has been developed to help people think about various parts of IT security.',
       },
       {
         type: 'text',
-        heading: 'Understanding the CIA Triad',
-        text: 'The CIA Triad is all about information. While this is the core factor of most IT security, it promotes a limited view that ignores other important factors. For example, even though availability serves to make sure you do not lose access to the resources needed to provide information, thinking about information security alone does not guarantee that someone has not used your hardware resources without authorisation. It is important to understand what the CIA Triad is and how it is used to plan and implement a quality security policy — and equally important to understand the limitations it presents. When you are informed, you can use the CIA Triad for what it has to offer and avoid the consequences of not understanding it.',
+        text: 'CIA triad broken down:',
       },
       {
-        type: 'termlist',
-        heading: '5. Assets and Threats',
-        items: [
-          { term: 'Asset', def: 'Any data, device or other component of an organisation’s systems that is valuable — often because it contains sensitive data or can be used to access such information. An employee’s desktop, laptop or company phone is an asset, as are the applications on those devices and critical infrastructure such as servers and support systems. The most common assets are information assets: databases and physical files, i.e. the sensitive data you store.' },
-          { term: 'Threat', def: 'Any incident that could negatively affect an asset — if it is lost, knocked offline or accessed by an unauthorised party. Threats compromise the confidentiality, integrity or availability of an asset, and can be either intentional or accidental. Intentional threats include criminal hacking or a malicious insider stealing information; accidental threats generally involve employee error, technical malfunction, or an event causing physical damage such as a fire or natural disaster.' },
-        ],
+        type: 'text',
+        heading: 'Confidentiality',
+        text: 'It’s crucial in today’s world for people to protect their sensitive, private information from unauthorized access.',
+      },
+      {
+        type: 'text',
+        text: 'Protecting confidentiality is dependent on being able to define and enforce certain access levels for information.',
+      },
+      {
+        type: 'text',
+        text: 'In some cases, doing this involves separating information into various collections that are organized by who needs access to the information and how sensitive that information actually is - i.e. the amount of damage suffered if the confidentiality was breached.',
+      },
+      {
+        type: 'text',
+        text: 'Some of the most common means used to manage confidentiality include access control lists, volume and file encryption, and Unix file permissions.',
+      },
+      {
+        type: 'text',
+        heading: 'Integrity',
+        text: 'Data integrity is what the "I" in CIA Triad stands for.',
+      },
+      {
+        type: 'text',
+        text: 'This is an essential component of the CIA Triad and designed to protect data from deletion or modification from any unauthorized party, and it ensures that when an authorized person makes a change that should not have been made the damage can be reversed.',
+      },
+      {
+        type: 'text',
+        heading: 'Availability',
+        text: 'This is the final component of the CIA Triad and refers to the actual availability of your data. Authentication mechanisms, access channels and systems all have to work properly for the information they protect and ensure it’s available when it is needed.',
+      },
+      {
+        type: 'text',
+        heading: 'Understanding the CIA triad',
+        text: 'The CIA Triad is all about information. While this is considered the core factor of the majority of IT security, it promotes a limited view of the security that ignores other important factors.',
+      },
+      {
+        type: 'text',
+        text: 'For example, even though availability may serve to make sure you don’t lose access to resources needed to provide information when it is needed, thinking about information security in itself doesn’t guarantee that someone else hasn’t used your hardware resources without authorization.',
+      },
+      {
+        type: 'text',
+        text: 'It is important to understand what the CIA Triad is, how it is used to plan and also to implement a quality security policy while understanding the various principles behind it. It’s also important to understand the limitations it presents. When you are informed, you can utilize the CIA Triad for what it has to offer and avoid the consequences that may come along by not understanding it.',
+      },
+
+      {
+        type: 'definition',
+        heading: '5. Assets and Threat',
+        text: 'What is an Asset: An asset is any data, device or other component of an organization’s systems that is valuable – often because it contains sensitive data or can be used to access such information.',
+      },
+      {
+        type: 'text',
+        text: 'For example: An employee’s desktop computer, laptop or company phone would be considered an asset, as would applications on those devices. Likewise, critical infrastructure, such as servers and support systems, are assets. An organization’s most common assets are information assets. These are things such as databases and physical files – i.e. the sensitive data that you store',
+      },
+      {
+        type: 'text',
+        text: 'What is a threat: A threat is any incident that could negatively affect an asset – for example, if it’s lost, knocked offline or accessed by an unauthorized party.',
+      },
+      {
+        type: 'text',
+        text: 'Threats can be categorized as circumstances that compromise the confidentiality, integrity or availability of an asset, and can either be intentional or accidental.',
+      },
+      {
+        type: 'text',
+        text: 'Intentional threats include things such as criminal hacking or a malicious insider stealing information, whereas accidental threats generally involve employee error, a technical malfunction or an event that causes physical damage, such as a fire or natural disaster.',
       },
       {
         type: 'text',
         heading: 'Motive of Attackers',
-        text: 'Categorising cyber-attackers helps us understand their motivations and the actions they take. Operational cyber security risks arise from three types of action: inadvertent actions (generally by insiders) taken without malicious intent; deliberate actions (by insiders or outsiders) taken intentionally and meant to do harm; and inaction (generally by insiders), such as a failure to act because of a lack of appropriate skills, knowledge, guidance, or the availability of the right person. Of primary concern are deliberate actions, of which there are three categories of motivation.',
+        text: 'The categories of cyber-attackers enable us to better understand the attackers\' motivations and the actions they take. As shown in Figure, operational cyber security risks arise from three types of actions: i) inadvertent actions (generally by insiders) that are taken without malicious or harmful intent; ii) deliberate actions (by insiders or outsiders) that are taken intentionally and are meant to do harm; and iii) inaction (generally by insiders), such as a failure to act in a given situation, either because of a lack of appropriate skills, knowledge, guidance, or availability of the correct person to take action Of primary concern here are deliberate actions, of which there are three categories of motivation.',
       },
       {
         type: 'bullets',
         items: [
-          'Political motivations — destroying, disrupting or taking control of targets; espionage; making political statements, protests or retaliatory actions.',
-          'Economic motivations — theft of intellectual property or other economically valuable assets (funds, credit card information); fraud; industrial espionage and sabotage; blackmail.',
-          'Socio-cultural motivations — attacks with philosophical, theological, political and even humanitarian goals, as well as fun, curiosity, and a desire for publicity or ego gratification.',
+          '1. Political motivations: examples include destroying, disrupting, or taking control of targets; espionage; and making political statements, protests or retaliatory actions.',
+          '2. Economic motivations: examples include theft of intellectual property or other economically valuable assets (e.g., funds, credit card information); fraud; industrial espionage and sabotage; and blackmail.',
+          '3. Socio-cultural motivations: examples include attacks with philosophical, theological, political, and even humanitarian goals. Socio-cultural motivations also include fun, curiosity, and a desire for publicity or ego gratification.',
+        ],
+      },
+      {
+        type: 'image',
+        src: `${IMG}/cyber-attacker-actions.webp`,
+        width: 1313, height: 745,
+        caption: 'Cyber-Attacker Actions (printed without a figure number or caption)',
+        alt: 'Tree diagram: Cyber-Attacker Actions branches to Inadvertent, Deliberate and Inaction; Deliberate branches further to Political, Economic and Socio-Cultural',
+      },
+      {
+        type: 'note',
+        items: [
+          'The manual prints this diagram with no caption and no figure number, and the sentence above it reads "As shown in Figure," — the number is missing in the printed text too, not lost in transcription.',
+        ],
+      },
+
+      {
+        type: 'definition',
+        heading: '6. Types of Cyber-Attacker Actions',
+        text: 'Active attacks: An active attack is a network exploit in which a hacker attempts to make changes to data on the target or data en route to the target.',
+      },
+      {
+        type: 'termlist',
+        heading: 'Types of Active attacks:',
+        items: [
+          { term: 'Masquerade', def: 'in this attack, the intruder pretends to be a particular user of a system to gain access or to gain greater privileges than they are authorized for. A masquerade may be attempted through the use of stolen login IDs and passwords, through finding security gaps in programs or through bypassing the authentication mechanism.' },
+          { term: 'Session replay', def: 'In this type of attack, a hacker steals an authorized user’s log in information by stealing the session ID. The intruder gains access and the ability to do anything the authorized user can do on the website.' },
+          { term: 'Message modification', def: 'In this attack, an intruder alters packet header addresses to direct a message to a different destination or modify the data on a target machine.' },
+          { term: 'Denial of service (DoS)', def: 'In a denial of service (DoS) attack, users are deprived of access to a network or web resource. This is generally accomplished by overwhelming the target with more traffic than it can handle.' },
+          { term: 'Distributed denial-of-service (DDoS)', def: 'In a distributed denial-of-service (DDoS) exploit, large numbers of compromised systems (sometimes called a botnet or zombie army) attack a single target.' },
         ],
       },
       {
         type: 'definition',
-        heading: '6. Active and Passive Attacks',
-        text: 'An active attack is a network exploit in which a hacker attempts to make changes to data on the target, or to data en route to the target. Passive attacks are relatively scarce from a classification perspective, but can be carried out with relative ease — particularly if the traffic is not encrypted.',
-      },
-      {
-        type: 'termlist',
-        heading: 'Types of Active Attacks',
-        items: [
-          { term: 'Masquerade', def: 'The intruder pretends to be a particular user of a system to gain access, or to gain greater privileges than they are authorised for. This may be attempted using stolen login IDs and passwords, by finding security gaps in programs, or by bypassing the authentication mechanism.' },
-          { term: 'Session replay', def: 'A hacker steals an authorised user’s login information by stealing the session ID, gaining access and the ability to do anything the authorised user can do on the website.' },
-          { term: 'Message modification', def: 'An intruder alters packet header addresses to direct a message to a different destination, or modifies the data on a target machine.' },
-          { term: 'Denial of service (DoS)', def: 'Users are deprived of access to a network or web resource, generally by overwhelming the target with more traffic than it can handle.' },
-          { term: 'Distributed denial of service (DDoS)', def: 'Large numbers of compromised systems — sometimes called a botnet or zombie army — attack a single target.' },
-        ],
+        text: 'Passive Attacks: Passive attacks are relatively scarce from a classification perspective, but can be carried out with relative ease, particularly if the traffic is not encrypted.',
       },
       {
         type: 'termlist',
         heading: 'Types of Passive Attacks',
         items: [
-          { term: 'Eavesdropping (tapping)', def: 'The attacker simply listens to messages exchanged by two entities. For the attack to be useful the traffic must not be encrypted; any unencrypted information, such as a password sent in response to an HTTP request, may be retrieved.' },
-          { term: 'Traffic analysis', def: 'The attacker examines the metadata transmitted in traffic to deduce information about the exchange and the participating entities — the form of the traffic, its rate, duration and so on. Where encrypted data is used, traffic analysis can also lead to attacks by cryptanalysis, through which the attacker may obtain information or succeed in decrypting the traffic.' },
+          { term: 'Eavesdropping (tapping)', def: 'the attacker simply listens to messages exchanged by two entities. For the attack to be useful, the traffic must not be encrypted. Any unencrypted information, such as a password sent in response to an HTTP request, may be retrieved by the attacker.' },
+          { term: 'Traffic analysis', def: 'the attacker looks at the metadata transmitted in traffic in order to deduce information relating to the exchange and the participating entities, e.g. the form of the exchanged traffic (rate, duration, etc.). In the cases where encrypted data are used, traffic analysis can also lead to attacks by cryptanalysis, whereby the attacker may obtain information or succeed in unencrypting the traffic.' },
         ],
       },
     ],
@@ -201,39 +374,84 @@ export const cyb221LectureNotes = [
       {
         type: 'definition',
         heading: '7. Software Attacks: Malware',
-        text: 'Malicious code (sometimes called malware) is software designed to take over or damage a computer user’s operating system without the user’s knowledge or approval. It can be very difficult to remove and very damaging.',
+        text: 'Software Attacks: Malicious code (sometimes called malware) is a type of software designed to take over or damage a computer user\'s operating system, without the user\'s knowledge or approval. It can be very difficult to remove and very damaging. Common malware examples are listed in the following table:',
       },
       {
         type: 'table',
         heading: 'Cyber Attacks and Their Characteristics',
         headers: ['Attack', 'Characteristics'],
         rows: [
-          ['Virus', 'A program that attempts to damage a computer system and replicate itself to other computer systems. Requires a host to replicate and usually attaches to a host file or hard drive sector. Replicates each time the host is used. Often focuses on destruction or corruption of data. Usually attaches to executable files such as .doc, .exe and .bat. Often distributed through email and may send itself to contacts. Examples: Stoned, Michelangelo, Melissa, I Love You.'],
-          ['Worm', 'A self-replicating program that can perform harmful activities such as deleting files or sending documents through email. Can install a backdoor in an infected computer. Usually introduced through system vulnerabilities. Infects one system and spreads to other systems on the network. Example: Code Red.'],
-          ['Trojan horse', 'A malicious program disguised as legitimate software. Cannot replicate itself. Often contains spying functions such as packet sniffers, or backdoor functions for remote control. Often hidden inside useful software such as screen savers or games. Examples: Back Orifice, NetBus, Whack-a-Mole.'],
-          ['Logic bomb', 'Malware that remains inactive until a specific trigger occurs. Triggers may include a specific date or time, launching a program, or processing a specific activity. Logic bombs do not self-replicate.'],
+          ['Virus', 'A virus is a program that attempts to damage a computer system and replicate itself to other computer systems. • Requires a host to replicate and usually attaches itself to a host file or hard drive sector. • Replicates each time the host is used. • Often focuses on destruction or corruption of data. • Usually attaches to executable files such as .doc, .exe and .bat extensions. • Often distributes through e-mail and may send itself to contacts. • Examples: Stoned, Michelangelo, Melissa, I Love You.'],
+          ['Worm', 'A worm is a self-replicating program that can perform harmful activities such as deleting files or sending documents through e-mail. • Can install a backdoor in an infected computer. • Usually introduced through system vulnerabilities. • Infects one system and spreads to other systems on the network. • Example: Code Red.'],
+          ['Trojan Horse', 'A Trojan horse is a malicious program disguised as legitimate software. • Cannot replicate itself. • Often contains spying functions such as packet sniffers or backdoor functions for remote control. • Often hidden inside useful software such as screen savers or games. • Examples: Back Orifice, Net Bus, Whack-a-Mole.'],
+          ['Logic Bomb', 'A Logic Bomb is malware that remains inactive until a specific trigger occurs. • Trigger activities may include a specific date/time, launching a program, or processing a specific activity. • Logic bombs do not self-replicate.'],
         ],
+      },
+      {
+        type: 'note',
+        items: [
+          'The virus row lists ".doc" among "executable files". A .doc file is a Word document, not an executable — it is data that Word opens. The reason it belongs on a list of infection vectors is macro viruses: a .doc can carry VBA macro code that runs when the document is opened. Melissa, named two lines later in the same row, was exactly that. Reproduce the lecturer\'s list if he asks for it, but know why .doc is the odd one out.',
+        ],
+      },
+
+      {
+        type: 'definition',
+        heading: '8. Hardware Attacks and Cyber Threat Categories',
+        text: 'Hardware Attacks: Common hardware attacks include:',
       },
       {
         type: 'bullets',
-        heading: '8. Hardware Attacks',
         items: [
-          'Manufacturing backdoors, for malware or other penetrative purposes — backdoors are not limited to software, and also affect embedded radio-frequency identification (RFID) chips and memory.',
-          'Eavesdropping by gaining access to protected memory without opening other hardware.',
-          'Inducing faults, causing the interruption of normal behaviour.',
-          'Hardware modification, tampering with invasive operations.',
-          'Backdoor creation — hidden methods for bypassing normal computer authentication systems.',
-          'Counterfeiting product assets that can produce extraordinary operations, and those made to gain malicious access to systems.',
+          'Manufacturing backdoors, for malware or other penetrative purposes; backdoors aren’t limited to software and hardware, but they also affect embedded radio-frequency identification (RFID) chips and memory',
+          'Eavesdropping by gaining access to protected memory without opening other hardware',
+          'Inducing faults, causing the interruption of normal behaviour',
+          'Hardware modification tampering with invasive operations',
+          'Backdoor creation; the presence of hidden methods for bypassing normal computer authentication systems',
+          'Counterfeiting product assets that can produce extraordinary operations and those made to gain malicious access to systems.',
         ],
       },
       {
-        type: 'termlist',
-        heading: '9. Cyber Threat Categories',
+        type: 'note',
         items: [
-          { term: 'Cyber warfare', def: 'The use of digital attacks — such as computer viruses and hacking — by one country to disrupt the vital computer systems of another, with the aim of creating damage, death and destruction. Future wars will see hackers using computer code to attack an enemy’s infrastructure alongside troops using conventional weapons. It involves actions by a nation-state or international organisation to attack and damage another nation’s computers or information networks.' },
-          { term: 'Cyber crime', def: 'Criminal activity that either targets or uses a computer, a computer network or a networked device. It is committed by cybercriminals or hackers who want to make money, and is carried out by individuals or organisations. Some cybercriminals are organised, use advanced techniques and are highly skilled; others are novices.' },
-          { term: 'Cyber terrorism', def: 'The convergence of cyberspace and terrorism — unlawful attacks and threats of attack against computers, networks and the information stored in them, done to intimidate or coerce a government or its people in furtherance of political or social objectives. Examples: hacking into computer systems, introducing viruses to vulnerable networks, website defacing, denial-of-service attacks, or terroristic threats made via electronic communication.' },
-          { term: 'Cyber espionage', def: 'Cyber spying — the act or practice of obtaining secrets and information without the permission and knowledge of the holder of that information.' },
+          'The first bullet contradicts itself as printed: it appears under "Hardware Attacks" yet says backdoors "aren’t limited to software and hardware". The sense intended is that backdoors are not limited to software — they reach into hardware too, such as RFID chips and memory. The wording above is left exactly as the manual prints it.',
+        ],
+      },
+      {
+        type: 'text',
+        heading: 'Cyber Threats-Cyber Warfare',
+        text: 'Cyber warfare refers to the use of digital attacks -- like computer viruses and hacking -- by one country to disrupt the vital computer systems of another, with the aim of creating damage, death and destruction. Future wars will see hackers using computer code to attack an enemy\'s infrastructure, fighting alongside troops using conventional weapons like guns and missiles.',
+      },
+      {
+        type: 'text',
+        text: 'Cyber warfare involves the actions by a nation-state or international organization to attack and attempt to damage another nation\'s computers or information networks through, for example, computer viruses or denial-of-service attacks.',
+      },
+      {
+        type: 'text',
+        heading: 'Cyber Crime',
+        text: 'Cybercrime is criminal activity that either targets or uses a computer, a computer network or a networked device. Cybercrime is committed by cybercriminals or hackers who want to make money. Cybercrime is carried out by individuals or organizations.',
+      },
+      {
+        type: 'text',
+        text: 'Some cybercriminals are organized, use advanced techniques and are highly technically skilled. Others are novice hackers.',
+      },
+      {
+        type: 'text',
+        heading: 'Cyber Terrorism',
+        text: 'Cyber terrorism is the convergence of cyberspace and terrorism. It refers to unlawful attacks and threats of attacks against computers, networks and the information stored therein when done to intimidate or coerce a government or its people in furtherance of political or social objectives.',
+      },
+      {
+        type: 'text',
+        text: 'Examples are hacking into computer systems, introducing viruses to vulnerable networks, web site defacing, Denial-of-service attacks, or terroristic threats made via electronic communication.',
+      },
+      {
+        type: 'text',
+        heading: 'Cyber Espionage',
+        text: 'Cyber spying, or cyber espionage, is the act or practice of obtaining secrets and information without the permission and knowledge of the holder of the information from …',
+      },
+      {
+        type: 'note',
+        items: [
+          'The manual\'s sentence stops there. It ends on the dangling word "from" at the foot of printed page 14, and the next line is the heading NETWORK SECURITY-FIREWALL — nothing was lost in transcription, and no continuation appears anywhere later. The missing words are presumably "…from that holder", i.e. the individual, competitor, rival group, government or enemy who owns the information.',
         ],
       },
     ],
@@ -246,16 +464,30 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '10. Definition of a Firewall',
-        text: 'A firewall is a system that enforces an access control policy between two networks, such as your private LAN and the unsafe, public Internet. It determines which inside services can be accessed from the outside, and vice versa.',
+        heading: '9. Network Security-Firewall: Definition of Firewall',
+        text: 'A firewall is a system that enforces an access control policy between two networks such as your private LAN and the unsafe, public Internet. The firewall determines which inside services can be accessed from the out-side, and vice versa.',
       },
       {
         type: 'text',
-        text: 'The means by which this is accomplished varies widely, but in principle a firewall can be thought of as a pair of mechanisms: one to block traffic, and one to permit traffic. A firewall is more than the locked front door to your network — it is your security guard as well. Firewalls are also important because they provide a single "choke point" where security and audits can be imposed. A firewall can tell a network administrator what kinds and amount of traffic passed through it, how many attempts were made to break into it, and so on. Like a closed-circuit security TV system, your firewall not only prevents access but also monitors who has been sniffing around, and assists in identifying those who attempt to breach your security.',
+        text: 'The actual means by which this is accomplished varies widely, but in principle, the firewall can be thought of as a pair of mechanisms: one to block traffic, and one to permit traffic. A firewall is more than the locked front door to your network. It your security guard as well. Firewalls are also important because they provide a single “choke point” where security and audits can be imposed. A firewall can provide a net-work administrator with data about what kinds and amount of traffic passed through it, how many attempts were made to break into it, and so on. Like a closed-circuit security TV system, your firewall not only prevents access but also monitors who’s been sniffing around, and assists in identifying those who attempt to breach your security.',
+      },
+      {
+        type: 'note',
+        items: [
+          '"It your security guard as well" is printed exactly as it appears — the manual drops the word "is". Read it as "It is your security guard as well."',
+        ],
+      },
+      {
+        type: 'text',
+        heading: 'Screening Levels of Firewalls',
+        text: 'A firewall can screen both incoming and outgoing traffic. Because incoming traffic poses a greater threat to the network, it’s usually screened more closely than outgoing traffic.',
+      },
+      {
+        type: 'text',
+        text: 'When you are looking at firewall hardware or software products, you’ll probably hear about three types of screening that firewalls perform:',
       },
       {
         type: 'bullets',
-        heading: 'Screening Levels of Firewalls',
         items: [
           'Screening that blocks any incoming data not specifically ordered by a user on the network',
           'Screening by the address of the sender',
@@ -264,63 +496,118 @@ export const cyb221LectureNotes = [
       },
       {
         type: 'text',
-        text: 'A firewall can screen both incoming and outgoing traffic. Because incoming traffic poses a greater threat, it is usually screened more closely than outgoing traffic. Think of screening levels as a process of elimination: the firewall first determines whether the incoming transmission was requested by a user on the network, rejecting anything else. Anything allowed in is then examined more closely — the firewall checks the sender’s computer address to ensure it is a trusted site, and also checks the contents of the transmission.',
+        text: 'Think of screening levels as a process of elimination. The firewall first determines whether the incoming transmission is something requested by a user on the network, rejecting anything else. Anything that is allowed in is then examined more closely. The firewall checks the sender’s computer address to ensure that it is a trusted site. It also checks the contents of the transmission.',
       },
+
       {
         type: 'definition',
-        heading: 'Firewall Technologies',
-        text: 'Firewalls come in all shapes, sizes and prices; choosing the correct one depends mainly on your business requirements and the size of your network. Whatever type you choose, you must ensure it is secure and that a trusted third party, such as the International Computer Security Association (ICSA), has certified it. The ICSA classifies firewalls into three categories.',
+        heading: '10. Firewall Technologies',
+        text: 'Firewalls come in all shapes, sizes, and prices. Choosing the correct one depends mainly on your business requirements and the size of your net-work. This section discusses the different types of firewall technologies and formats available. Above all, no matter what type of firewall you choose or its functionality, you must ensure that it is secure and that a trusted third party, such as the International Computer Security Association (ICSA), has certified it.',
       },
       {
-        type: 'termlist',
-        items: [
-          { term: 'Packet filter firewall', def: 'Checks the address of incoming traffic and turns away anything that does not match the list of trusted addresses. It uses rules to deny access according to information in each packet — the TCP/IP port number, source/destination IP address, or data type. Restrictions can be as tight or loose as you want. An ordinary router may be able to screen traffic by address, but attackers use source IP spoofing to make data appear to come from a trusted source, even from your own network. Packet filter firewalls are prone to IP spoofing and are arduous and confusing to configure; any mistake could leave you wide open to attack.' },
-          { term: 'Application-level proxy server', def: 'Examines the application used for each individual IP packet to verify its authenticity. Traffic from each application — HTTP for web, FTP for file transfers, SMTP/POP3 for email — typically requires the installation and configuration of a different application proxy. Proxy servers often require administrators to reconfigure network settings and applications such as web browsers, which can be a labour-intensive process.' },
-          { term: 'Stateful packet inspection firewall', def: 'The latest generation of firewall technology, considered the most advanced and secure because it examines all parts of the IP packet to decide whether to accept or reject the communication. The firewall keeps track of all requests for information originating from your network, then scans incoming responses to check for validity — rejecting anything that was not requested. Requested data proceeds to the next level of screening. The screening software determines the state of each packet of data, hence the term stateful packet inspection.' },
-        ],
+        type: 'text',
+        text: 'The ICSA classifies firewalls into three categories: packet filter fire-walls, application-level proxy servers, and stateful packet inspection fire-walls.',
       },
       {
-        type: 'definition',
-        heading: 'Additional Firewall Features and Functionality',
-        text: 'Beyond core security capability, a wide range of additional features are integrated into standard firewall products: support for public web and email servers (normally referred to as a demilitarized zone, or DMZ), content filtering, virtual private networking (VPN) encryption support, and antivirus support.',
+        type: 'text',
+        heading: '1. Packet Filter Firewall',
+        text: 'Every computer on a network has an address commonly referred to as an IP address. A packet filter firewall checks the address of incoming traffic and turns away anything that doesn’t match the list of trusted addresses. The packet filter firewall uses rules to deny access according to information located in each packet such as: the TCP/IP port number, source/destination IP address, or data type. Restrictions can be as tight or as loose as you want. An ordinary router on a network may be able to screen traffic by address, but hackers have a little trick called source IP spoofing that makes data appear to come from a trusted source, even from your own network. Unfortunately, packet filter firewalls are prone to IP spoofing and are also arduous and confusing to configure. And any mistake in configuration could potentially leave you wide open to attack.',
       },
       {
-        type: 'termlist',
-        items: [
-          { term: 'Demilitarized zone (DMZ) firewalls', def: 'Effective for companies that invite customers to contact their network from any external source. The deciding factors are the number of outside users who access information on the network and how often. A DMZ firewall creates a protected ("demilitarized") information area: outsiders can reach the protected area but cannot reach the rest of the network, so they get the information you want them to have and are prevented from reaching what you do not.' },
-          { term: 'Content filtering', def: 'A website or content filter extends the firewall’s capability to block access to certain websites — for example, to ensure employees do not access pornography or racially intolerant material. You define categories of unwelcome material and obtain a service listing thousands of sites that include it, then choose whether to block those sites entirely or allow access but log it. Such a service should automatically update its list of banned sites on a regular basis.' },
-          { term: 'Virtual private networks', def: 'A VPN is a private data network that makes use of the public network infrastructure — the Internet — to give a company the same capabilities as a private leased line at much lower cost. It provides secure sharing of public resources by using encryption so only authorised users can view or "tunnel" into a company’s private network. Companies use VPNs as a cost-effective way to connect branch offices, remote workers and privileged partners to their private LANs. A growing range of firewalls have VPN encryption built in or as an optional extra. When implementing a VPN, ensure all devices support the same level of encryption and that it is sufficiently secure. Note that the stronger the encryption level, the more processing power is required by the firewall; a small number of vendors offer VPN hardware acceleration to improve performance.' },
-        ],
+        type: 'text',
+        heading: 'Application-Level Proxy Server',
+        text: 'An application-level proxy server examines the application used for each individual IP packet to verify its authenticity. Traffic from each application such as HTTP for Web, FTP for file transfers, and SMTP/POP3 for e-mail typically requires the installation and configuration of a different application proxy. Proxy servers often require administrators to reconfigure their network settings and applications (i.e., Web browsers) to support the proxy, and this can be a labor-intensive process.',
+      },
+      {
+        type: 'text',
+        heading: '2. Stateful Packet Inspection Firewall',
+        text: 'This is the latest generation in firewall technology. Stateful packet inspection is considered by Internet experts to be the most advanced and secure fire-wall technology because it examines all parts of the IP packet to determine whether to accept or reject the requested communication.',
+      },
+      {
+        type: 'text',
+        text: 'The firewall keeps track of all requests for information that originate from your network. Then it scans each incoming communication to see if it was requested, and rejects anything that wasn’t. Requested data proceeds to the next level of screening. The screening software determines the state of each packet of data, hence the term stateful packet inspection.',
       },
       {
         type: 'note',
         items: [
-          'The manual states that 168-bit Triple DES (3DES) is "the strongest level of encryption publicly available and deemed unbreakable by security experts". That reflects the era the passage was written in — 3DES was formally deprecated by NIST in 2017 and disallowed after 2023.',
-          'Today AES (128, 192 or 256-bit) is the standard for this role, as Practical 3 in this manual demonstrates when it compares Caesar, DES and AES.',
+          'The manual’s numbering here is broken. It announces three ICSA categories, then numbers the first "1." and the third "2.", leaving Application-Level Proxy Server — the second category — with no number and its heading run into the body text. The same running sequence then continues into the next section as "3.", "4." and "5." for DMZ, content filtering and VPN, which are additional firewall *features*, not ICSA categories. The numbers below are reproduced as printed; do not read 3, 4 and 5 as a fourth, fifth and sixth kind of firewall.',
+        ],
+      },
+
+      {
+        type: 'text',
+        heading: 'Additional Firewall Features and Functionality',
+        text: 'In addition to the security capability of a firewall, a wide range of additional features and functionalities are being integrated into standard fire-wall products. These include support for public Web and e-mail servers, normally referred to as a demilitarized zone (DMZ), content filtering, virtual private networking (VPN) encryption support, and antivirus support.',
+      },
+      {
+        type: 'text',
+        heading: '3. Demilitarized Zone Firewalls',
+        text: 'A firewall that provides DMZ protection is effective for companies that invite customers to contact their net-work from any external source, through the Internet or any other route for example, a company that hosts a Web site or sells its products or services over the Internet.',
+      },
+      {
+        type: 'text',
+        text: 'The deciding factors for a DMZ fire-wall would be the number of out-siders or external users who access information on the network and how often they access it. A DMZ firewall creates a protected (“demilitarized”) information area on the network. Outsiders can get to the protected area but can’t get to the rest of the network. This allows outside users to get to the information you want them to have and prevents them from getting to the information you don’t want them to have.',
+      },
+      {
+        type: 'text',
+        heading: '4. Content Filtering',
+        text: 'A Web site filter or content filter extends the firewall’s capability to block access to certain Web sites. You can use this add-on to ensure that employees do not access particular content, such as pornography or racially intolerant material. With this functionality you can define cate-gories of unwelcome material and obtain a service that lists thousands of Web sites that include such mater-ial. You can then choose whether to totally block those sites, or to allow access but log it. Such a service should automatically update its list of banned Web sites on a regular basis.',
+      },
+      {
+        type: 'text',
+        heading: '5. Virtual Private Networks',
+        text: 'A VPN is a private data network that makes use of the public network infrastructure, that is, the Internet. The idea of the VPN is to give the company the same capabilities as a private leased line but at much lower cost. A VPN provides secure sharing of public resources for data by using encryption techniques to ensure that only authorized users can view or “tunnel” into a company’s private network.',
+      },
+      {
+        type: 'text',
+        text: 'Companies today are looking at VPNs as a cost-effective means of securely connecting branch offices, remote workers, and privileged partners/cus-tomers to their private LANs. A grow-ing range of firewalls now have VPN encryption capability built in or offer it as an optional extra. This offers companies a simple, cost-effective alternative to traditional private leased lines or modem remote access.',
+      },
+      {
+        type: 'text',
+        text: 'When implementing a VPN, you need to ensure that all devices support the same level of encryption and that it is sufficiently secure. To date, 168-bit Data Encryption Standard (3DES) is the strongest level of encryption pub-licly available and is deemed unbreak-able by security experts. One thing to bear in mind is that the stronger the encryption level, the more processing power is required by the firewall. A small number of firewall vendors are now offering VPN hardware accelera-tion to improve VPN traffic performance.',
+      },
+      {
+        type: 'note',
+        items: [
+          'Two things about the sentence above. First, "168-bit Data Encryption Standard (3DES)" mislabels the algorithm: 3DES is Triple DES, which runs DES three times over a 168-bit key. Plain DES is a 56-bit cipher. Write Triple DES in an exam answer.',
+          'Second, "the strongest level of encryption publicly available and deemed unbreakable" was true of the era this passage was written in, not now. NIST deprecated 3DES in 2017 and disallowed it after 2023. AES (128, 192 or 256-bit) is today\'s standard for this role — which Practical 3 in this manual demonstrates when it compares Caesar, DES and AES.',
         ],
       },
       {
         type: 'text',
         heading: 'Antivirus Protection',
-        text: 'Everyone should be concerned about the threat of viruses, which are among the most pernicious forms of computer hacking. Users can quickly damage entire networks by unknowingly downloading and launching dangerous viruses, and companies have lost enormous amounts of money to lost productivity and network repair costs. Firewalls are not designed to remove or clean viruses, but they can assist with virus detection, which is an important part of an overall protection plan. Note that a firewall can only protect the network from the wide area device to which it is attached: a remote access server, or a PC with a modem, could provide a back door that circumvents the firewall — as could an employee inserting a virus-infected disk into a PC. The ultimate place for antivirus software is on every user’s PC; however, a firewall can assist by requiring that every user’s PC have the latest antivirus software running and enabled before it permits that user to access the Internet or download email.',
+        text: 'Everyone should be concerned about the threat of viruses, which are among the most pernicious forms of computer hacking. Users can quickly damage entire networks by unknowingly downloading and launching dangerous computer viruses. Companies have lost enormous amounts of money due to resulting lost productivity and network repair costs. Firewalls are not designed to remove or clean viruses, but they can assist with virus detection, which is an important part of an overall virus protection plan. It is important to note that a firewall can only protect the network from the wide area device to which it is attached. A remote access server or a PC with a modem could provide a back door into your network that circumvents the firewall. The same is true if an employee inserts a virus-infected floppy disk into a PC. The ultimate place for antivirus software is on every user’s PC; however, a fire-wall can assist in virus detection by requiring that every user’s PC have the latest antivirus software running and enabled before the firewall permits that user to access the Internet or download e-mail.',
       },
       {
         type: 'text',
         heading: 'Choosing a Firewall',
-        text: 'Firewall functions can be implemented as software, or as an addition to your router/gateway. Alternatively, dedicated firewall appliances are increasing in popularity, mainly due to their ease of use, performance improvements and lower cost.',
+        text: 'Firewall functions can be implemented as software or as an addition to your router/gateway. Alternatively, dedicated firewall appliances are increasing in popularity, mainly due to their ease of use, performance improvements, and lower cost.',
       },
       {
-        type: 'termlist',
+        type: 'text',
+        heading: 'Router/Firmware-Based Firewalls',
+        text: 'Certain routers provide limited firewall capabilities. These can be augmented further with additional software/firmware options. However, great care must be taken not to overburden your router by running additional services like a firewall. Enhanced firewall-related functionality such as VPN, DMZ, content filtering, or antivirus protection may not be available or may be expensive to implement.',
+      },
+      {
+        type: 'text',
+        heading: 'Software-Based Firewalls',
+        text: 'Software-based firewalls are typically sophisticated, complex applications that run on a dedicated UNIX or Windows NT server. These products become expensive when your account for the costs associated with the software, server operating system, server hardware, and continual maintenance required to support their implementation. It is essential that system administrators constantly monitor and install the latest operating system and security patches as soon as they become available. Without these patches to cover newly discovered security holes, the software firewall can be rendered useless.',
+      },
+      {
+        type: 'text',
+        heading: 'Dedicated Firewall Appliances',
+        text: 'Most firewall appliances are dedicated, hardware-based systems. Because these appliances run on an embedded operating system specifically tailored for firewall use, they are less susceptible to many of the security weaknesses inherent in Windows NT and UNIX operating systems. These high-performance firewalls are designed to satisfy the extremely high throughput requirements or the processor-intensive requirements of stateful packet inspection firewalls. Because there is no need to harden the operating system, firewall appliances are usually easier to install and configure than software firewall products, and can potentially offer plug and play installation, minimal maintenance, and a very complete solution. They also prove to be extremely cost effective when compared to other firewall implementations.',
+      },
+      {
+        type: 'note',
         items: [
-          { term: 'Router / firmware-based firewalls', def: 'Certain routers provide limited firewall capabilities, which can be augmented with additional software or firmware options. Great care must be taken not to overburden the router by running additional services like a firewall. Enhanced functionality such as VPN, DMZ, content filtering or antivirus protection may be unavailable or expensive to implement.' },
-          { term: 'Software-based firewalls', def: 'Typically sophisticated, complex applications that run on a dedicated UNIX or Windows server. These become expensive once you account for the software, server operating system, server hardware and the continual maintenance required. System administrators must constantly monitor and install the latest operating system and security patches as soon as they become available — without these patches to cover newly discovered holes, a software firewall can be rendered useless.' },
-          { term: 'Dedicated firewall appliances', def: 'Mostly dedicated, hardware-based systems. Because they run an embedded operating system tailored specifically for firewall use, they are less susceptible to many of the security weaknesses inherent in general-purpose Windows and UNIX systems. These high-performance firewalls are designed to satisfy very high throughput requirements, or the processor-intensive requirements of stateful packet inspection. Because there is no need to harden the operating system, they are usually easier to install and configure than software firewall products, potentially offering plug-and-play installation, minimal maintenance and a complete solution — and they prove extremely cost effective compared with other implementations.' },
+          'Windows NT dates this passage to the late 1990s / early 2000s, and the manual reproduces it unchanged. The security argument still holds — a purpose-built embedded OS exposes less attack surface than a general-purpose server OS — but read "Windows NT and UNIX" as "a general-purpose server operating system".',
         ],
       },
       {
         type: 'text',
         heading: 'Designing a Firewall',
-        text: 'Once you have familiarised yourself with the different firewalls on the market, the next step is to define your firewall policy. Will the firewall explicitly deny all services except those critical to the mission of connecting to the Internet? Or is it intended to provide a metered and audited method of queuing access in a non-threatening manner? Decisions like these are less about engineering than politics. The next decision is what level of monitoring, redundancy and control you want — juggling needs analysis with risk assessment, then sorting through often-conflicting requirements to determine what to implement. Where firewalls are concerned, the emphasis should be on security rather than connectivity: consider blocking everything by default and only allowing the services you need on a case-by-case basis. If you block all but a specific set of services, you make your job much easier.',
+        text: 'Once you have familiarized yourself with all of the different firewalls on the market, the next step is to define your firewall policy. For example, will the firewall explicitly deny all services except those critical to the mission of connecting to the Internet? Or is it intended to provide a metered and audited method of “queuing” access in a nonthreatening manner? Decisions like these are less about engineering than politics. The next decision is what level of monitoring, redundancy, and control you want. This involves juggling needs analysis with risk assessment, and then sorting through the often-conflicting requirements in order to determine what to implement. Where firewalls are concerned, the emphasis should be on security rather than connectivity. You should consider blocking everything by default, and only allowing the services you need on a case-by-case basis. If you block all but a specific set of services, you make your job much easier.',
       },
     ],
   },
@@ -333,89 +620,122 @@ export const cyb221LectureNotes = [
       {
         type: 'definition',
         heading: '11. Network Security Controls',
-        text: 'Network security comprises the measures adopted to protect the resources and integrity of a computer network. The sections that follow review the basics of computer networks and the Internet, laying the foundation needed to understand the network security controls covered later in this manual.',
-      },
-      {
-        type: 'definition',
-        heading: '12. The ISO-OSI Reference Model',
-        text: 'The communication problem in computer networks is the task of transferring data entered by an application user in one system to an application user in another system, through one or more intermediate networks.',
-      },
-      {
-        type: 'text',
-        text: 'The problem is solved using a layered approach, through a collection of protocols forming a protocol suite. Each layer deals with a particular aspect of the communication problem, is implemented with a particular protocol, and the protocols co-operate with each other to solve the whole problem. The Open Systems Interconnection (OSI) model is an abstract representation of the basic layers involved: Application, Presentation, Session, Transport, Network, Data-link and Physical.',
-      },
-      {
-        type: 'termlist',
-        items: [
-          { term: 'Application', def: 'Specifies how one particular application uses a network and contacts the application program running on a remote machine.' },
-          { term: 'Presentation', def: 'Deals with the translation and representation of data at the two end hosts of the communication.' },
-          { term: 'Session', def: 'Responsible for establishing a communication session with a remote system, and for security issues such as password authentication before the application user connects.' },
-          { term: 'Transport', def: 'Provides end-to-end, reliable or best-effort, in-order data packet delivery, along with support for flow control and congestion control.' },
-          { term: 'Network', def: 'Deals with forwarding data packets from the source to the destination nodes of the communication.' },
-          { term: 'Data-link', def: 'Deals with the organisation of data into frames and provides reliable data delivery over the physical medium.' },
-          { term: 'Physical', def: 'Provides the encoding/decoding and modulation/demodulation schemes for the actual transmission of data over the physical medium, as a sequence of 1s and 0s.' },
-        ],
-      },
-      {
-        type: 'image',
-        src: `${IMG}/osi-model.webp`,
-        width: 480, height: 3028,
-        // Very tall portrait diagram — without a cap, w-full stretches it to
-        // roughly six screens of height.
-        maxWidth: 300,
-        caption: 'Figure 1: OSI Model',
-      },
-      {
-        type: 'image',
-        src: `${IMG}/tcpip-stack.webp`,
-        width: 1136, height: 2740,
-        maxWidth: 520,
-        caption: 'Figure 2: TCP/IP Protocol Stack and the Structure of a Data Packet',
-      },
-      {
-        type: 'text',
-        heading: 'The TCP/IP Protocol Stack',
-        text: 'The seven-layer OSI model is conceptual: it shows the different activities required for communication between application programs running on two different hosts. Its full implementation would result in excessive overhead and huge delays in data delivery. The TCP/IP (Transmission Control Protocol / Internet Protocol) stack shown in Figure 2 is the commonly used model for wide area communications like the Internet, and is composed of the Application, Transport, Internet and Link layers, from top to bottom.',
-      },
-      {
-        type: 'bullets',
-        items: [
-          'The application layer of the TCP/IP model takes on the responsibilities of the application, presentation and session layers of the OSI model.',
-          'The transport layer of the TCP/IP model is similar to the transport layer of the OSI model.',
-          'The Internet layer takes care of addressing and routing data packets across different heterogeneous networks. Each machine and router in the Internet has a unique IP address.',
-          'The link layer combines the functionality of the OSI data-link and physical layers. It supports the organisation of data into frames and their encoding/decoding mechanisms; the structure and transmission of frames depends on the topology and hardware technology used (Ethernet, Token Ring, and so on).',
-          'A data packet is referred to as a segment, a datagram and a frame at the transport, internet and link layers respectively.',
-        ],
-      },
-      {
-        type: 'definition',
-        heading: '13. TCP Connection Establishment',
-        text: 'The two commonly used transport layer protocols in the TCP/IP stack are TCP and UDP. TCP is a connection-oriented, byte-stream based protocol providing reliable, in-order data delivery. UDP is a connectionless, message-based protocol providing only best-effort service for end-to-end delivery.',
-      },
-      {
-        type: 'text',
-        text: 'Processes running TCP must establish a connection before exchanging any data packet. During connection establishment the two processes exchange information about the capabilities and resources available at their respective hosts for the session about to begin — this helps the TCP process in one host adjust its sending rate according to the resources (such as memory buffer space) available at the receiving host. To avoid replay errors, the two processes pick an arbitrary starting sequence number for the packets they send. Each byte of data is given a unique, monotonically increasing sequence number, and the sequence number of a TCP data packet represents the sequence number of the first byte of data transmitted in that packet.',
-      },
-      {
-        type: 'text',
-        text: 'The connection-establishment process is a three-way handshake. A process on host A initiates a session with a process on host B by sending a Synchronization (SYN) packet with the initial sequence number set to X, including information about the memory resources available through the "Advertised Window" field of the TCP header. If the process at host B is willing to establish the session, it sends back a SYN/ACK packet indicating the memory resources available at host B, the starting sequence number for packets coming from host B, and an acknowledgment of the SYN packet from host A. Host A responds with an ACK packet if it accepts the advertised window value of host B and is willing to tune its sending rate accordingly. Note that acknowledging receipt of a packet with sequence number X indicates the sequence number (X+1) of the next packet expected. Typically host A is a client and host B is a server.',
-      },
-      {
-        type: 'image',
-        src: `${IMG}/tcp-handshake.webp`,
-        width: 1400, height: 715,
-        caption: 'Figure 3: TCP Connection Establishment Mechanism',
-      },
-      {
-        type: 'text',
-        heading: 'Internet Control Message Protocol (ICMP)',
-        text: 'IP provides best-effort service in delivering datagrams from one host to another through one or more intermediate networks. The TCP/IP suite provides an error-reporting protocol called the Internet Control Message Protocol (ICMP) that operates in tandem with IP, which uses it to report errors and certain critical information to the end hosts. Each ICMP message is identified by an 8-bit type field in the IP header. One commonly used ICMP message is ECHO Request/Reply: an ECHO Request is sent to the ICMP process running on a host to check whether it is alive, and if it is, the host responds with an ECHO Reply.',
+        text: 'Network security comprises of the measures adopted to protect the resources and integrity of a computer network. This section reviews the basics of computer networks and Internet in order to lay a strong foundation for the reader to understand the rest of this paper on network security.',
       },
       {
         type: 'note',
         items: [
-          'ICMP ECHO Request/Reply is exactly what the `ping` utility sends — the syllabus item on basic network utilities (ipconfig, ping, tracert, netstat) rests on this section.',
-          '`tracert` also builds on ICMP: it sends packets with deliberately small TTL values so each router along the path returns an ICMP "time exceeded" message, revealing the route hop by hop.',
+          'Printed as "NETWORK SECUITY CONTROLS" — the manual drops the R from SECURITY.',
+          'The manual calls itself "this paper" here, and cites sources as [8], [9] and [26] further on. Everything from this heading to the end of the theory is lifted from a published paper, which is also why its figures are numbered from 1 again even though the manual already had a Figure 1 on page 6.',
+        ],
+      },
+
+      {
+        type: 'definition',
+        heading: '12. ISO-OSI Reference Model',
+        text: 'The communication problem in computer networks can be defined as the task of transferring data entered by an application user in one system to an application user in another system through one or more intermediate networks.',
+      },
+      {
+        type: 'text',
+        text: 'The communication problem is solved using a layered approach through a collection of protocols forming the so-called protocol suite. Each layer, dealing with a particular aspect of the communication problem, is implemented with a particular protocol and the protocols co-operate with each other to solve the entire communication problem.',
+      },
+      {
+        type: 'text',
+        text: 'The Open Systems Interconnection (OSI) model is an abstract representation of the basic layers involved to solve the communication problem: Application, Presentation, Session, Transport, Network, Data-link and Physical layers.',
+      },
+      {
+        type: 'text',
+        text: 'The application layer specifies how one particular application uses a network and contacts the application program running on a remote machine. The presentation layer deals with the translation and/or representation of data at the two end hosts of the communication.',
+      },
+      {
+        type: 'text',
+        text: 'The session layer is responsible for establishing a communication session with a remote system and it also handles security issues like password authentication before the application user can connect to the remote system.',
+      },
+      {
+        type: 'text',
+        text: 'The transport layer provides end-to-end, reliable or best-effort, in-order data packet delivery along with support for flow control and congestion control.',
+      },
+      {
+        type: 'text',
+        text: 'The network layer deals with forwarding data packets from the source to the destination nodes of the communication.',
+      },
+      {
+        type: 'text',
+        text: 'The data-link layer deals with the organization of data into frames and provides reliable data delivery over the physical medium.',
+      },
+      {
+        type: 'text',
+        text: 'The physical layer provides encoding/decoding schemes and the modulation/demodulation schemes for the actual transmission of data, over the physical medium, as a sequence of bits of 1s and 0s.',
+      },
+      {
+        type: 'image',
+        src: `${IMG}/osi-model.webp`,
+        width: 214, height: 232,
+        maxWidth: 430,
+        caption: 'Figure 1: OSI Model',
+        alt: 'The seven OSI layers, numbered Layer 7 Application down to Layer 1 Physical',
+      },
+      {
+        type: 'image',
+        src: `${IMG}/tcpip-stack.webp`,
+        width: 676, height: 164,
+        maxWidth: 820,
+        caption: 'Figure 2: TCP/IP Protocol Stack and the Structure of a Data Packet',
+        alt: 'Segment, datagram and frame shown as successive encapsulations of Data, beside the four TCP/IP layers Application, Transport, Internet and Link',
+      },
+      {
+        type: 'text',
+        heading: 'TCP/IP Protocol Stack',
+        text: 'The seven-layer OSI model is conceptual: It shows the different activities required for communication between application programs running in two different hosts. Its full implementation will result in excessive overhead and will lead to huge delays in data delivery at the destination. The TCP/IP (Transmission Control Protocol/ Internet Protocol) protocol stack shown in Figure 2, is the commonly used model for wide area communications, like the Internet. The TCP/IP protocol stack is composed of the Application, Transport, Internet and the Link layers (from top to bottom).',
+      },
+      {
+        type: 'text',
+        text: 'The application layer of the TCP/IP model is in-charge of the responsibilities of the application, presentation and session layers of the OSI model. The transport layer of the TCP/IP model is similar to the transport layer of the OSI model.',
+      },
+      {
+        type: 'text',
+        text: 'The Internet layer takes care of addressing and routing the data packets across different heterogeneous networks. Each machine and router in the Internet has a unique IP address.',
+      },
+      {
+        type: 'text',
+        text: 'The link layer of the TCP/IP model combines the functionalities of the data-link layer and physical layer of the OSI model. The link layer supports the organization of data into frames and their encoding/decoding mechanisms. The structure and transmission of the frames depend on the topology and hardware technology (like Ethernet, Token Ring and etc) used for the network. A data packet is referred to as segment, datagram and frame at the transport, internet and the link layers respectively.',
+      },
+
+      {
+        type: 'definition',
+        heading: '13. TCP Connection Establishment and ICMP',
+        text: 'The two commonly used transport layer protocols in the TCP/IP protocol stack are the Transmission Control Protocol (TCP) and the User Datagram Protocol (UDP) . TCP is a connection-oriented, byte-stream based protocol and provides reliable, in-order data delivery. UDP is a connectionless, message-based protocol and provides only best-effort service for end-to-end data delivery.',
+      },
+      {
+        type: 'text',
+        text: 'Processes running TCP have to establish a connection before exchanging any data packet. During this connection establishment mechanism, the two processes exchange information about the capabilities and resources available at their respective hosts for the particular communication session that is about to begin. This will help the TCP process running in one host to adjust its data sending rate according to the resources (like the memory buffer space) available for the TCP process at the receiving host.',
+      },
+      {
+        type: 'text',
+        text: 'In order to avoid replay errors, the two processes pick an arbitrary starting sequence number for the data packets sent by them. Each byte of data is given a unique, monotonically increasing sequence number. The sequence number of a data packet sent using TCP represents the sequence number of the first byte of the data transmitted in that packet. The TCP connection-establishment process (shown in Figure 3) is a three-way handshake mechanism and is explained as follows through this example:',
+      },
+      {
+        type: 'text',
+        text: 'Let a process running in host A initiate a session with a process at host B by sending a Synchronization (SYN) packet to host B with the initial sequence number set to X. The process at host A will include information about the memory resources available (through the ‘Advertised Window’ field of the TCP header) in the SYN packet. If the process at host B is willing to establish a communication session with the process at host A, then it sends back a SYN/ACK packet that will indicate the memory resources available at host B for this communication, the starting sequence number of the data packets coming from the process at host B and an acknowledgment for receiving the SYN packet from the process at host A. The process at host A will respond back with an ACK packet if it accepts to the advertised window value of host B and is willing to tune down its data sending rate accordingly. Note that the acknowledgment sent to a process/host for receiving a packet with a particular sequence number (say X) indicates the sequence number (X+1) of the next packet expected from the process/host. Typically, host A could be a client and host B could be a server.',
+      },
+      {
+        type: 'image',
+        src: `${IMG}/tcp-handshake.webp`,
+        width: 345, height: 336,
+        maxWidth: 690,
+        caption: 'Figure 3: TCP Connection Establishment Mechanism',
+        alt: 'Three sloped arrows between Host A and Host B: SYN Seq Num = X; SYN Seq Num = Y with ACK Seq Num = X+1; ACK Seq Num = Y+1',
+      },
+      {
+        type: 'text',
+        heading: 'Internet Control Message Protocol (ICMP)',
+        text: 'IP provides best-effort service in delivering datagrams from one host to another host through one or more intermediate networks. The TCP/IP protocol suite provides an error-reporting protocol called the Internet Control Message Protocol (ICMP) that operates in tandem with IP. IP uses ICMP to report errors and certain critical information to the end hosts. Each ICMP message is identified by an 8-bit type field in the IP header. One of the commonly used ICMP message is ECHO Request/Reply. An ECHO request message is sent to the ICMP process running on a host computer to check whether the host is alive. If the host is alive, the host sends a response using the ECHO Reply message.',
+      },
+      {
+        type: 'note',
+        items: [
+          '"Each ICMP message is identified by an 8-bit type field in the IP header" is printed exactly as it appears, and it is wrong. The 8-bit Type field belongs to the ICMP header — the first octet of the ICMP message, which travels inside the IP payload. The IP header has its own 8-bit field, Protocol, and a value of 1 there is what says "the payload is ICMP". The two 8-bit fields are easy to conflate; know which is which.',
+          'ECHO Request/Reply is exactly what the `ping` utility sends, so the syllabus item on basic network utilities (ipconfig, ping, tracert, netstat) rests on this paragraph. `tracert` builds on ICMP too: it sends packets with deliberately small TTL values so each router along the path returns an ICMP "time exceeded" message, revealing the route hop by hop.',
         ],
       },
     ],
@@ -430,98 +750,132 @@ export const cyb221LectureNotes = [
       {
         type: 'definition',
         heading: '14. Classical Network Attacks',
-        text: 'This part of the manual describes classical attacks that have exploited the typical vulnerabilities of computer networks, together with the solutions deployed to combat them or reduce the chances of their success.',
+        text: 'In this section, we describe some of the classical attacks that have exploited the typical vulnerabilities of computer networks and the solutions deployed to combat or reduce the chances of some of these attacks.',
       },
+
       {
         type: 'definition',
         heading: '15. Threats in Transit',
-        text: 'The network interface card (NIC) of each host is uniquely identified with a hardware address. A NIC is programmed to pick up only packets addressed to the unicast hardware address of the host, the multicast address of a group the host belongs to, or the broadcast address. A capable intruder can reprogram the NIC with the hardware address of another host and accept packets addressed to it — and to avoid being caught, can put a copy of the packet back onto the network.',
+        text: 'The network interface card (NIC) of each host in a network is uniquely identified with a hardware address. The NIC will be programmed to pick up only the packets addressed to: (i) The unicast hardware address corresponding to the host, (ii) The multicast hardware address corresponding to the multicast group in which the host is a member of and (iii) The broadcast hardware address. A capable intruder can reprogram the NIC with the hardware address of another host and accept packets addressed to that host. To avoid being caught, the intruder can put a copy of the packet back to the network.',
       },
       {
         type: 'text',
-        text: 'Wiretapping is the process of extracting information as it flows through a wire, and differs depending on the communication medium. In cables, wiretapping can be done with a packet sniffer or through inductance. A packet sniffer is software or hardware that intercepts traffic passing through a LAN cable, and can be used for both beneficial and malicious purposes: to analyse network problems and monitor usage, to filter suspect content, to study the structure of packet headers, to detect intrusion attempts, and to gather information for effecting an intrusion. Because an ordinary wire emits radiation as electrical signals propagate through it, an intruder can read radiated signals through inductance without making physical contact with the cable. An intruder intercepting signals on a broadband cable has to separate the targeted signal from all the multiplexed signals.',
+        text: 'Wiretapping is the process of extracting information as it flows through a wire. The process of wiretapping differs depending on the communication medium used. In cables, wiretapping can be done through the use of a packet sniffer or through inductance.',
       },
       {
         type: 'text',
-        text: 'Wireless signals are broadcast through open space and are more susceptible to tapping. The signal path of microwave signals has to be fairly wide to be sure the receiver’s antenna is hit by the transmitted signal — but the wider the path, the easier it is for an intruder to interfere with the line of sight, or to pick up the entire transmission from an antenna located close to the receiver. Satellite communication involves a similar trade-off between coverage and secure communication. A footprint is the pattern produced on the surface of the earth by a satellite’s transmitter: a broader footprint maximises coverage because signals can be picked up over a huge region, while a smaller footprint is desirable to reduce the risk of interception. The angle of dispersion of the satellite transponder is the parameter that adjusts the spread of the footprint.',
+        text: 'A packet sniffer is a computer software or hardware that can intercept the traffic passing through a local area network (LAN) cable. A packet sniffer can be used for both beneficial and malicious purposes: (i) To analyze network problems and monitor network usage, (ii) To filter suspect content from network traffic, (iii) To study the structure of the packet headers of the different protocols used over the network, (iv) To detect network intrusion attempts and (v) To gather information for effecting a network intrusion. As an ordinary wire emits radiation during the propagation of electrical signals through it, an intruder can tap the wire and read radiated signals through inductance without making physical contact with the cable. An intruder intercepting the signals on a broadband cable has to separate the targeted signal from all the multiplexed signals.',
       },
       {
         type: 'text',
-        text: 'An optical fibre, made of thin glass strands, can carry light pulses over long distances without being much affected by electrical interference. Optical fibres are more secure than any other transmission medium for two reasons: they are fine-tuned to achieve total internal reflection, so the entire network would have to be re-tuned to facilitate tapping and interception; and they carry light energy rather than electrical signals, so inductance-based tapping is not possible.',
+        text: 'Wireless signals are broadcast through the open space and are more susceptible for tapping. For example, the signal path of microwave signals has to be fairly wide to make sure the antenna of the receiver will be hit by the transmitted signal. But, the wider the signal path, the more it is easy for an intruder to interfere with the line of sight of transmission between the sender and the receiver and also to pick up the entire transmission from an antenna located closely to the receiver. Similarly, with satellite communication, there is a tradeoff between coverage and secure communication.',
       },
+      {
+        type: 'text',
+        text: 'A footprint is defined as the pattern produced on the surface of the earth from the satellite’s transmitter. A broader footprint is needed to maximize coverage because the signals can be picked up over a huge region. On the other hand, a smaller footprint is desirable to reduce the risk of interception. The angle of dispersion of a satellite transponder is a parameter that could be controlled to adjust the spread of a footprint.',
+      },
+      {
+        type: 'text',
+        text: 'An optical fiber, made of thin glass strands, can carry light pulses over long distances without being much affected by electrical interference. Optical fibers are more secure than any other transmission media because of the following two reasons: (i) Optical fibers are fine tuned to achieve total internal reflection. So, the entire network should be returned to facilitate tapping and interception and (ii) Optical fibers carry light energy and not electrical signals. So, inductance-based tapping would not be possible.',
+      },
+      {
+        type: 'note',
+        items: [
+          'The word "returned" in the optical-fibre reason (i) is printed exactly as it appears. It is a typo for "re-tuned": the point is that a fibre is tuned to hold light inside by total internal reflection, so an attacker cannot simply clamp a tap onto it — the whole network would have to be re-tuned before any light leaked out to be intercepted.',
+        ],
+      },
+
       {
         type: 'definition',
         heading: '16. TCP Session Hijacking',
-        text: 'TCP session hijacking is the act of taking over an already established TCP session and injecting packets into the stream that the receiver processes as if they came from the authentic owner of the session. A TCP session is identified by the quadruple: client IP address, client port number, server IP address and server port number. Any packet reaching either machine with those identifiers is considered part of the existing session, so if attackers can spoof these items they can pass TCP packets to the client or server and have them processed as coming from the other machine.',
+        text: 'TCP Session Hijacking refers to the act of taking over an already established TCP session and injecting packets into the stream that are processed by the receiver as if the packets are coming from the authentic owner of the session. A TCP session is identified by the quadruple: client IP address, client port number, server IP address and server port number. Any packet that reaches either machine with the above identifiers is considered to be part of the existing session. If attackers can spoof these items, they can pass TCP packets to the client or server and have those packets processed as coming from the other machine.',
       },
       {
         type: 'text',
-        text: 'To successfully hijack an existing TCP session, an attacker must first desynchronise the session and then inject the intended commands. To desynchronise a session between a client and server (Figure 4), the attacker must predict the sequence number the client or server is about to use, and use it before they get a chance to. If the attacker has access to the network, a packet sniffer can be used to look into the packets belonging to the session, and the expected sequence number can be predicted accurately from the ACK packets exchanged. If the attacker cannot sniff the session, they must try all possible options and guess the expected sequence number.',
+        text: 'To successfully hijack an existing TCP session, an attacker has to first desynchronize the session and then inject the intended commands. To desynchronize an existing TCP session (refer Figure 4) between a client and server, the attacker has to first predict the sequence number that is about to be used by a client (or server) and use that sequence number before the client (or server) gets a chance to use. If the attacker has access to the network, a packet sniffer can be used to look into the packets belonging to the TCP session and one can accurately predict the expected sequence number from the ACK packets exchanged. If the attacker cannot sniff the TCP session between the client and server, then the attacker has to try all possible options and guess the expected sequence number.',
       },
       {
         type: 'image',
         src: `${IMG}/tcp-desync.webp`,
-        width: 1400, height: 928,
+        width: 671, height: 505,
+        maxWidth: 820,
         caption: 'Figure 4: Desynchronizing a TCP Session',
+        alt: 'Client-server message trace: a normal handshake and data exchange, then an injected DATA = 1000 bytes packet from the attacker that shifts the client sequence numbers',
       },
       {
         type: 'text',
-        text: 'When the attacker successfully hijacks the session and injects spoofed data packets (as if they came from the original client), the server acknowledges receipt to the original client with an ACK packet. Because this ACK bears a sequence number the client is not expecting, the original client attempts to resynchronise by sending an ACK with the sequence number it expects. That ACK in turn contains a sequence number the server is not expecting, so the server resends its last ACK. This cycle continues, and the rapid passing back and forth of ACK packets creates a TCP ACK storm (Figure 5). As the attacker injects more data packets the storm grows, and can quickly bring down network performance. After a number of unsuccessful resynchronisation attempts, the original client eventually gets exhausted and closes the connection.',
+        text: 'When the attacker successfully hijacks the TCP session and injects own spoofed data packets (as if the data packets are coming from the original client), the server will acknowledge the receipt of the data packet to the original client by sending it an ACK packet. As this ACK packet will most likely bear a sequence number that is not expected by it, the original client will attempt to resynchronize with the server by sending it an ACK packet with the sequence number that it is expecting. This ACK packet will in turn contain a sequence number that the server is not expecting and so the server will resend its last ACK packet. This cycle will continue and the rapid passing back and forth of the ACK packets creates the TCP ACK storm (refer Figure 5). As the attacker injects more and more data packets, the size of the ACK storm increases and can quickly bring down performance of the network. After a certain number of unsuccessful resynchronization attempts, the original client eventually gets exhausted and closes the connection with the server.',
       },
       {
         type: 'image',
         src: `${IMG}/tcp-ack-storm.webp`,
-        width: 1144, height: 1340,
+        width: 668, height: 433,
+        maxWidth: 820,
         caption: 'Figure 5: Creating a TCP ACK Storm',
+        alt: 'Client and server exchanging ACK Client 5279 / Server 8001 and ACK Server 8001 / Client 3279 back and forth without progressing, after an injected DATA = 1000 bytes packet',
       },
       {
         type: 'text',
-        heading: 'Man-in-the-Middle Attack',
-        text: 'With a man-in-the-middle (MITM) attack, an attacker can read, modify and insert messages between two communicating parties without either party knowing the link has been compromised. To carry this out, the attacker must be able to observe and intercept messages between the two victims. Consider an MITM attack on public-key cryptography: let A and B be the communicating parties, and M the attacker who wants to deliver a false message to B. B sends its public key to A. If M can intercept the channel between A and B, M gets access to B’s public key. M then sends A a spoofed message claiming to come from B, containing M’s own public key — but A believes it has received B’s public key. When A sends a data packet to B it encrypts the packet with what it considers B’s public key. M intercepts the message, decrypts it with its own private key to extract the actual message, may modify it, then encrypts it with B’s real public key and inserts it back into the channel. B decrypts the message with its own private key and reads it, assuming it came from A.',
+        heading: 'Man in the Middle Attack',
+        text: 'With a Man-In-The-Middle (MITM) attack [8], an attacker can read, modify and insert messages between two communicating parties, without either party knowing that the link between them has been compromised. To successfully carry out this attack, one must be able to observe and intercept messages between the two victims. We now describe an example for an MITM attack on public-key cryptography.',
       },
+      {
+        type: 'text',
+        text: 'Let A and B be the two communicating parties and let M be the attacker who wants to deliver a false message to B. To get started, B sends its public key to A. If M can intercept the communication channel between A and B, then M gets access to the public key of B. Then, M sends A, a spoofed message that claims to have come from B. In this message, M sends its own public key, but A thinks it has received the public key of B. When A sends a data packet to B, it encrypts the packet with (what A considers as) the public key of B and inserts the encrypted message in the channel. M intercepts the message and decrypts it with its own private key to extract the actual message sent by A to B. M then encrypts the message with the public key of B. Note that M could even modify the message before encrypting it again. M inserts the new encrypted message back in the channel so that the message can go to B. B decrypts the message using its own private key and reads the message assuming it came from A.',
+      },
+
       {
         type: 'definition',
         heading: '17. Echo-Chargen Attack',
-        text: 'Chargen (Character Generator) is a protocol of the TCP/IP stack used for testing and performance measurement. It runs on TCP port 19 and UDP port 19. When a client opens a TCP connection to a server on port 19, the server sends arbitrary characters back until the connection is closed. When a host sends a UDP message to a server on UDP port 19, the server responds with an arbitrary message of between 0 and 512 characters.',
-      },
-      {
-        type: 'text',
-        text: 'An attacker can trigger the Echo-Chargen attack by spoofing a conversation between the Echo Request/Reply service and the Chargen service, redirecting the output of each service to the other and creating a rapidly expanding spiral of traffic. In Figure 6 the attacker triggers the attack by sending a spoofed message to one targeted host (host A) running Chargen at UDP port 19, spoofed so it appears to originate from the other targeted host (host B) at UDP port 7, the Echo Request/Reply port. Host A now sends a UDP message from port 19 to port 7 of host B. Host B treats this as an Echo Request and sends a Reply back to UDP port 19 of host A. Host A treats the Reply as a message for the Chargen service and sends a new arbitrary UDP message to port 7 of host B. This cycle continues and generates excessive traffic. Eventually the attack consumes memory and processor power at both targeted hosts and causes them to become non-responsive to user commands.',
+        text: 'Chargen (Character Generator) [9] is a protocol of the TCP/IP protocol stack and is used for testing and performance measurement purposes. Chargen runs on TCP port 19 and also on UDP port 19. When a client opens a TCP connection with a server on TCP port 19, the server starts sending arbitrary characters back to the client, until the TCP connection is closed. Whenever a host sends a UDP message to a server on UDP port 19, the server responds back with an arbitrary message and the number of characters in the message will be in the range [0...512].',
       },
       {
         type: 'image',
         src: `${IMG}/echo-chargen.webp`,
-        width: 1400, height: 1131,
+        width: 736, height: 107,
+        maxWidth: 820,
         caption: 'Figure 6: A Typical Echo-Chargen Attack',
+        alt: 'Attacker sends a trigger spoofed packet to UDP port 19 on host A; random chars go from A to UDP port 7 on host B, and characters are echoed back to UDP port 19',
+      },
+      {
+        type: 'text',
+        text: 'An attacker can trigger the Echo-Chargen attack by spoofing a conversation between the Echo Request/Reply service and the Chargen service and then redirecting the output of each service to the other, creating a rapidly expanding spiral of traffic in the network. In Figure 6, we see an attacker triggering the attack by sending a spoofed message to one of the targeted hosts (host A) running the Chargen service at UDP port 19. The message is spoofed in such a way that it appears to have originated from the other targeted host (host B) and UDP port 7, which is the port number used for Echo-Request/Reply messaging. Host A now sends a UDP message from port 19 to port 7 of host B. Host B will consider this as an Echo Request message and sends back a Reply message to UDP port 19 of host A. Host A will treat the Reply message as a message received for the Chargen service and sends back a new arbitrary UDP message to port 7 of host B. This cycle of message exchange between the two services will continue and generate excessive traffic in the network. Eventually, the attack consumes memory and processor power at the two targeted hosts A and B and causes them to become non-responsive to user commands.',
       },
       {
         type: 'text',
         heading: 'Smurf Attack',
-        text: 'A perpetrator launches the Smurf attack by sending a spoofed Echo-Request message to a network’s broadcast IP address, with the victim’s IP address as the source. Every host receiving the broadcast Echo-Request sends an Echo-Reply to the victim, who is overwhelmed by the flood — making Smurf a kind of denial-of-service attack. Two solutions are currently adopted on the Internet to prevent it: routers do not forward datagrams whose destination address is a broadcast IP address, and hosts are configured not to reply to Echo-Request messages received as a broadcast.',
+        text: 'A perpetrator can launch the Smurf attack [8] by sending a spoofed Echo-Request message to a network’s broadcast IP address. The spoofed Echo-Request message has the victim’s IP address as the source IP address. Hence, each host receiving the broadcast Echo-Request message will send an Echo-Reply message to the victim. The victim will be overwhelmed with a flood of Echo-Reply messages. Thus, the Smurf attack is a kind of Denial-of-Service (DoS) attack. Two solutions have been currently adopted in the Internet to prevent a Smurf attack: (i) Routers do not forward datagrams having the destination address as a broadcast IP address and (ii) Hosts are configured not to reply for Echo-Request messages that were received as a broadcast message.',
       },
       {
         type: 'text',
         heading: 'Traffic Redirection',
-        text: 'A compromised router can send route update messages to all its neighbouring routers, informing them that it lies on the shortest path to every network on the Internet. The neighbouring routers then forward all of their incoming data packets to this compromised router, which eventually gets flooded and starts dropping them, so the packets never make it to their destination.',
+        text: 'A compromised router can send out route update messages to all its neighboring routers informing them that it lies on the shortest path to every network in the Internet. The neighboring routers forward all of their incoming data packets to this compromised router, which will get eventually flooded with the data packets and starts dropping them. The data packets do not make it to the destination.',
       },
       {
         type: 'text',
         heading: 'Attacks on Domain Name Service (DNS)',
-        text: 'A DNS server holds a table (the DNS cache) mapping domain names to IP addresses. It queries other DNS servers higher up the domain name hierarchy to resolve names for which it has no entry, and updates its cache with what it learns. DNS cache poisoning is an attack that makes the DNS server believe a domain name-to-IP mapping is authentic when it is not. Once poisoned, the entry stays in the cache for a while and affects every client using that server in the meantime. For example, an attacker can replace the IP address of a target file server with that of a compromised file server they control, creating fake entries with filenames matching those on the target server. Those files could contain malicious content such as a worm or virus, so users who want to download files from the target server may end up unknowingly downloading malicious content instead.',
+        text: 'A DNS server is a machine that holds a table (called the DNS cache) mapping the domain names to IP addresses. The server queries other DNS servers higher up in the domain name hierarchy to resolve domain names for which it does not have an IP address entry in its DNS cache and updates its cache with the mapping learnt. DNS cache poisoning is an attack using which the DNS server is made to believe a domain name-IP address mapping as authentic, while, in reality, it is not. Once the DNS cache is poisoned, the entry stays for a while in the cache and affects the clients who use the DNS server in the meantime. For example, an attacker can replace the IP address information for a target file server with the IP address of a compromised file server which the attacker controls. The attacker creates fake entries in the compromised server with file names matching those on the target server. These files could contain malicious contents such as a worm or virus. Users who want to download files from the target file server may end up unknowingly downloading files with malicious content from the compromised file server.',
       },
       {
         type: 'text',
         heading: 'Distributed Denial of Service (DDoS) Attacks',
-        text: 'DDoS attacks involve breaking into hundreds or thousands of machines all over the Internet. The attacker installs malicious software on these compromised machines (called zombies) and controls them to launch coordinated attacks on victim sites. DDoS attacks are normally aimed at exhausting network bandwidth, overwhelming a router’s processing capacity, and breaking network connectivity to the victims. The attacker uses any convenient method — exploiting a buffer overflow, or tricking the victim into installing unknown code from an email attachment — to plant a Trojan horse on a target machine and transform it into a zombie by also installing rootkit software, which conceals the presence of the Trojan and hides its malicious activities. After forming a sufficient number of zombies, the attacker signals them all to launch the attack on a chosen victim. Each zombie may launch the same or a different type of attack.',
-      },
-      {
-        type: 'definition',
-        heading: '18. SYN Flood Attack',
-        text: 'During TCP connection establishment, the server maintains a SYN_RECV queue tracking connection requests for which it has allocated resources and responded with a SYN/ACK, but for which the corresponding ACK from the client has not yet arrived. The server eventually times out waiting for the ACK and removes the incomplete request from its queue.',
+        text: 'DDoS attacks involve breaking into hundreds or thousands of machines all over the Internet. The attacker installs malicious software on all these compromised machines (called zombies) and controls them to launch coordinated attacks on victim sites. DDoS attacks are normally aimed at exhausting the network bandwidth, overwhelming a router’s processing capacity and breaking network connectivity to the victims.',
       },
       {
         type: 'text',
-        text: 'An attacker can launch a denial-of-service attack by sending many SYN connection requests using spoofed, non-existent IP addresses and never responding with the ACK messages. The server’s SYN_RECV queue fills up with incomplete connection requests. Even though these are discarded after the timeout, if a genuine client attempts to establish a TCP connection with the server in the meantime, the server discards that client’s SYN request.',
+        text: 'The attacker uses any convenient method (like exploiting the buffer overflow attack or tricking the victim to open and install an unknown code from an email attachment) to plant a Trojan Horse on a target machine and transform it into a zombie by also installing a rootkit software. The rootkit helps to conceal the presence of the Trojan Horse and hide its malicious activities. After forming sufficient number of zombies, the attacker sends a signal to all the zombies to launch the DDoS attack on a chosen victim machine. Each zombie may launch the same or a different type of attack on the victim.',
+      },
+
+      {
+        type: 'definition',
+        heading: '18. Syn Flood Attack',
+        text: 'During the TCP connection establishment process, the server maintains a SYN_RECV queue to keep track of the connection requests for which it has allocated the resources and responded back with a SYN/ACK message, but the corresponding ACK from the client has not yet been received. The server eventually times out waiting for the ACK packet and removes the incomplete connection request from its queue. An attacker can launch a DDOS attack by sending several SYN connection request messages using spoofed non-existing IP addresses and never respond back with the ACK messages. The SYN_RECV queue of the server gets filled up with incomplete connection request messages. Even though these incomplete connection requests are discarded after the timeout, if a genuine client attempts to establish a TCP connection with the server in the meantime, the server discards the SYN request from that client.',
+      },
+      {
+        type: 'note',
+        items: [
+          'The paragraph calls this "a DDOS attack". As described it is a plain DoS: one attacker sending SYN packets from spoofed source addresses. A SYN flood becomes a *distributed* denial of service only when it is launched from many compromised machines at once, as in the DDoS section above. The manual\'s own outline names this section "SYN Flood Attack", and the printed heading spells it "Syn Flood Attack".',
+        ],
       },
     ],
   },
@@ -534,61 +888,67 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '19. Network Security Controls (Encryption)',
-        text: 'This section describes several network security controls adopted in modern computer networks to combat threats, and to prevent or reduce the chances of an attack.',
+        heading: '19. Network Security Controls',
+        text: 'This section describes several network security controls that have been adopted in modern day computer networks to combat the threats and prevent or reduce the chances of an attack.',
+      },
+      {
+        type: 'note',
+        items: [
+          'The manual prints this heading twice: once on page 18 (as "NETWORK SECUITY CONTROLS", outline row 11) and again here on page 25. The two are different sections — row 11 introduces the network chapter, row 19 introduces the encryption controls. The manual\'s own outline calls this one "Encryption Techniques: Link and End-to-End Encryption".',
+        ],
       },
       {
         type: 'text',
-        heading: 'Link Encryption vs End-to-End Encryption',
-        text: 'Encryption applied between every pair of hosts connected by a link is called link-to-link encryption. Link encryption is preferred when all the hosts in the network are secure but the communication medium is shared among several users and is not secure. Almost all components of a data frame — except the source and destination hardware addresses in the frame header — are encrypted before the frame is inserted onto the physical link. As the frame reaches the next hop receiver (a router or the end host) it is decrypted at the bottom protocol layer and sent to the higher layers for processing and forwarding. Because encryption is at the bottom protocol layer, the message is exposed in plaintext at all the other layers of the sender and receiver, and at the link and Internet layers of intermediate hosts.',
+        heading: 'Link Encryption Vs End-to-End Encryption',
+        text: 'Encryption applied between every pair of hosts connected by a link is called link-to-link encryption. Link encryption is preferred when all the hosts in the network are secure, but the communication medium is shared among several users and is not secure. Almost all the components of a data frame (except the source and destination hardware addresses in the frame header) are encrypted before the frame is inserted onto the physical communications link. As the frame reaches the next hop receiver (could be a router or the end host), the frame is decrypted at the bottom protocol layer and sent to the higher layers for further processing and forwarding. Since encryption is at the bottom protocol layer, the message is exposed in plaintext at all the other layers of the sender and receiver and at the link and Internet layers of the intermediate hosts for hardware addressing and routing. Thus, link encryption protects the message in transit between two computers, but the message is in plaintext inside the end hosts and the intermediate hosts. One or more of the intermediate hosts may not be credible.',
       },
       {
         type: 'table',
         heading: 'Table 1: Comparison of Link Encryption and End-to-End Encryption',
-        headers: ['', 'Link encryption', 'End-to-end encryption'],
+        headers: ['Link Encryption', 'End-to-End Encryption'],
         rows: [
-          ['Key management', 'End hosts of every link should share a key and should be able to do encryption and decryption.', 'The intermediate hosts of a transmission path do not need to have cryptographic facilities.'],
-          ['Number of keys', 'If there are N hosts and n users in a network (N << n), the number of keys needed would be N(N-1)/2.', 'The number of keys needed for symmetric encryption and public-key encryption would be n(n-1)/2 and 2n respectively.'],
-          ['Scope of encryption', 'All message transmissions have to be encrypted and decrypted at every link.', 'Encryption is application and message specific and need not be done for all messages. Each application user can deploy an encryption algorithm of choice.'],
-          ['Data exposure', 'Data is exposed at the end hosts and the intermediate hosts.', 'Except at the application layer, data is encrypted at both the end hosts and the intermediate hosts.'],
+          ['End hosts of every link should share a key and should be able to do encryption and decryption', 'The intermediate hosts of a transmission path do not need to have cryptographic facilities.'],
+          ['If there are N hosts and n users in a network (N << n), the number of keys needed would be N (N -1)/2', 'The number of keys needed for symmetric encryption and public-key encryption would be n (n -1)/2 and 2n respectively.'],
+          ['All message transmissions have to be encrypted and decrypted at every link.', 'Encryption is application and message specific and need not be done for all messages.'],
+          ['One encryption algorithm may be used for all users in all links', 'Each application user can deploy an encryption algorithm of choice.'],
+          ['Data is exposed at the end hosts and the intermediate hosts', 'Except the application layer, data is encrypted at both the end hosts and the intermediate hosts'],
+        ],
+      },
+      {
+        type: 'note',
+        items: [
+          'The last row is printed as it appears and it contradicts itself: it says end-to-end encryption leaves data encrypted "at both the end hosts and the intermediate hosts", when the point of end-to-end encryption is that the data is in plaintext at the end hosts — that is where the application encrypts and decrypts it. Read the row as: everything below the application layer is encrypted, all the way through, including at the intermediate hosts.',
         ],
       },
       {
         type: 'text',
-        text: 'Encryption applied between two application programs running at the end hosts of a communication is called end-to-end encryption. Here only the data portion of the packet is encrypted, at the highest level (the application layer), and the packet is transmitted with the data in encrypted form throughout the Internet. End-to-end encryption therefore protects data against disclosure while in transit, even though the packet may pass through potentially insecure intermediate hosts.',
+        text: 'Encryption applied between two application programs running at the end hosts of a communication is called end-to-end encryption. Here, only the data portion of the packet is encrypted at the highest level (i.e. the application layer) and the packet is transmitted with the data in encrypted form throughout the Internet. Thus, end-to-end encryption protects the data against disclosure while in transit, but the data packet could go through potentially insecure intermediate hosts. Table 1 compares the pros and cons of link encryption and end-to-end encryption.',
       },
+
       {
         type: 'definition',
         heading: '20. Virtual Private Networks',
-        text: 'There are two types of IP address: public and private. A public IP address is globally unique — only one machine connected to the public Internet can have it. Private IP addresses are one of the solutions to the exhaustion of IP address space: a private address only has to be unique within the set of networks of a particular organisation.',
-      },
-      {
-        type: 'text',
-        text: 'Larger organisations have sites at different locations in the world, and hosts at different sites may be identified with a unique private IP address. But the same set of private addresses can be used in the networks of different organisations, so a packet with a private IP address as its destination cannot be used to route packets from one site to another through the public Internet.',
+        text: 'There are two types of IP addresses: public and private. A public IP address is globally unique and only one machine connected to the public Internet can have a public IP address. Private IP addresses are one of the solutions to reduce the exhaustion of IP address space. A private IP address has to be unique only within the set of networks of a particular organization. Larger organizations have sites at different locations in the world. The hosts in the different sites of the organization may be identified with a unique private IP address. But the same set of private IP addresses can be used in the networks of different organizations. Hence, a packet with a private IP address as the destination IP address cannot be used to route packets from one site to another site of an organization through the public Internet.',
       },
       {
         type: 'image',
         src: `${IMG}/vpn.webp`,
-        width: 1400, height: 493,
+        width: 744, height: 171,
+        maxWidth: 820,
         caption: 'Figure 7: Virtual Private Network',
+        alt: 'Host X in Site 1 private network reaches gateway router R1, crosses the public Internet to router R2, and on to host Y in Site 2 private network',
       },
       {
         type: 'text',
-        text: 'Virtual private network (VPN) technology uses IP-in-IP tunnelling to encrypt and encapsulate the IP datagram that has the private IP addresses of the two end hosts, wrapping it in another IP header whose source and destination are the public IP addresses of the gateway routers for the two private networks. Each organisation is required to have one or more gateway routers with a public IP address in order to communicate over the public Internet. Because the original IP datagram is encrypted, no intermediate forwarding host on the public Internet can look at the contents of the message.',
+        text: 'The virtual private network (VPN) technology uses IP-in-IP tunneling to encrypt and encapsulate the IP datagram that has the private IP addresses of the two end hosts with another IP header that has the source and destination IP addresses as the public IP address of the gateway routers for these two private networks. Each organization is required to have one or more gateway routers with a public IP address in order to facilitate communication over the public Internet. As the original IP datagram is encrypted, no intermediate forwarding host in the public Internet can look at the contents of the message. Figure 7 illustrates the notion of a VPN and Figure 8 displays the structure of an IP datagram as it goes through the different phases of IP-in-IP tunneling.',
       },
       {
         type: 'image',
         src: `${IMG}/ip-in-ip-tunneling.webp`,
-        width: 1357, height: 1103,
+        width: 603, height: 310,
+        maxWidth: 820,
         caption: 'Figure 8: Structure of an IP Datagram during Different Phases of IP-in-IP Tunneling',
-      },
-      {
-        type: 'bullets',
-        items: [
-          'Source IP, Destination IP → original unencrypted payload (before encryption at gateway router R1)',
-          'Source IP: R1, Destination IP: R2 → encapsulated, encrypted version of the original IP datagram (in transit through the public Internet)',
-          'Source IP, Destination IP → original unencrypted payload (after decryption at gateway router R2)',
-        ],
+        alt: 'Three stages of a datagram: Source IP X / Dest. IP Y with an original unencrypted payload; after encryption at R1, Source IP R1 / Dest. IP R2 wrapping the encapsulated encrypted version of the original datagram for transmission through the public Internet; after decryption at R2, Source IP X / Dest. IP Y with the original unencrypted payload again',
       },
     ],
   },
@@ -601,76 +961,89 @@ export const cyb221LectureNotes = [
       {
         type: 'definition',
         heading: '21. Secure Shell (SSH)',
-        text: 'Secure Shell (SSH) is a network protocol that allows a user to interact securely with remote machines by establishing a secure channel for data exchange. SSH replaced TELNET and other insecure remote shell programs that sent information — including passwords — in plaintext. SSH encrypts information sent over the insecure Internet and so provides both confidentiality and integrity of data. It operates over a sequence of three phases.',
+        text: 'Secure Shell (SSH) is a network protocol that allows a user to securely interact with remote machines by establishing a secure channel for data exchange. SSH replaced TELNET and other insecure remote shell programs that were used in the past to send information in plaintext, including passwords, to remote systems. SSH encrypts the information sent over the insecure Internet and thus provides both confidentiality and integrity of data. SSH operates over a sequence of three phases as illustrated by the timeline diagram shown in Figure 9. The three phases are described below:',
       },
       {
-        type: 'bullets',
+        type: 'text',
         heading: 'Step 1: Host Identification',
-        items: [
-          'The client contacts the server and requests its public-key certificate.',
-          'The client maintains a list of public keys for the server machines available to it. If asked to contact a machine for which it has no locally held public key, it warns the user that the public key reported by the server is not in the list of known hosts, and asks whether to continue connecting.',
-          'If the user agrees to continue, the client verifies the authenticity of the Certifying Authority (CA) that issued the server’s public key certificate and, if satisfied, accepts the public keys — adding them to its personal list of host public keys.',
-          'When the administrator has included the client machine’s public key in the per-machine list of known host public keys on the server, the server may want the client to prove it is what it claims to be.',
-          'The server creates a "challenge" encrypted with the client’s host public key and sends it to the client. Only a genuine client can decrypt this with its private key. The client then sends the same challenge encrypted with the server’s public key; if the server decrypts it and gets back the challenge it sent, the client is genuine.',
-        ],
-      },
-      {
-        type: 'text',
-        text: 'The client machine needs to be sure it is communicating with the remote machine the application asked for, and not with another machine spoofing it. The server on the remote side also has the option of ensuring the user is connecting from the machine it appears to be.',
+        text: 'The client machine needs to ensure that it is communicating with the remote machine it has been asked to by the application program, and not with another machine that is spoofing it. The server machine on the remote side also has the option to ensure that the user is connecting from the machine as it appears to be, and not from another machine that is spoofing it. This step is accomplished as outlined below:',
       },
       {
         type: 'bullets',
-        heading: 'Step 2: Encryption',
         items: [
-          'Once host identification is done, the client sends a list of encryption algorithms it could use and their corresponding keys, encrypted with the server’s public key.',
-          'The server decrypts the list with its private key and chooses the strongest encryption algorithm it can handle from the list.',
-          'The server notifies the client of the selected algorithm, encrypting the notification with its private key.',
-          'The client generates the appropriate secret session key for the selected algorithm and notifies the server, encrypting the notification with the server’s public key.',
-          'The server decrypts the notification with its private key and extracts the secret session key.',
-        ],
-      },
-      {
-        type: 'text',
-        text: 'The objective of this step is to establish a secure end-to-end link that supports encryption of the data transferred. Even the password and other authentication information are encrypted, and are never transmitted in plaintext.',
-      },
-      {
-        type: 'bullets',
-        heading: 'Step 3: User Authentication',
-        items: [
-          'The client asks the user for a username and password, encrypts them with the server’s public key, and sends them to the server.',
-          'The server checks the validity of the username and password and, if everything is fine, accepts the connection request by sending a confirmation encrypted with its private key.',
-          'The client decrypts the confirmation with the server’s public key. The client and server are now set to exchange data securely using the selected encryption algorithm and the agreed secret session key.',
+          'The client contacts the server and requests for its public-key certificate.',
+          'The client maintains a list of public keys for server machines available to it. If it is asked to contact a machine for which it does not have a public key locally held, it will warn the user with a message telling that the public key reported by the server is not in the list of known hosts and ask the user whether the user wants to continue connecting.',
+          'If the user agrees to continue connecting, the client verifies the authenticity of the Certifying Authority (CA) that issued the public key certificate for the server and if satisfied, accepts the public keys. The machine then adds the server’s public keys to its personal list of host public keys.',
+          'When the administrator has included the public key for the client machine in the per-machine list of known host public keys on the server machine, the server may want the client machine to prove that it is what it claims to be.',
+          'The server will create a “challenge” encrypted with the client’s host public key and send it to the client. Only a genuine client machine will be able to decrypt this message with its private key. The client then sends the same challenge encrypted with the public key of the server. If the server when decrypting the message gets the same challenge it sent, the client is genuine.',
         ],
       },
       {
         type: 'image',
         src: `${IMG}/ssh-connection.webp`,
-        width: 1352, height: 1217,
+        width: 745, height: 404,
+        maxWidth: 820,
         caption: 'Figure 9: Steps to Establish a Secure Shell (SSH) Connection',
+        alt: 'Client-server timeline: request to establish a connection; public key certificate; the client authenticates the server’s CA; then E-Pub-s(List of encryption algorithms), E-Pri-s(Name of the selected encryption algorithm), E-Pub-s(Session Key S-K), E-Pub-s(Username and password) and E-Pri-s(Result of user authentication)',
       },
       {
-        type: 'definition',
-        heading: '22. Transport Layer Security (TLS)',
-        text: 'Transport Layer Security (TLS) is the successor of the Secure Sockets Layer (SSL) cryptographic protocol. It provides secure communication of transport layer datagrams as part of an end-to-end connection across the network, and has been used for a wide variety of applications including web browsing, electronic mail, voice-over-IP and instant messaging.',
+        type: 'text',
+        heading: 'Step 2: Encryption',
+        text: 'The objective of this step is to establish a secure end-to-end link that supports encryption of the data transferred. Even the password and other authentication information are encrypted and are not transmitted in plaintext. This step is accomplished as outlined below:',
       },
       {
         type: 'bullets',
         items: [
-          'The client initiates the connection request by sending a ClientHello message containing: the latest TLS version supported by the client; a random number arbitrarily chosen by the client; and a list of suggested cipher suites (the encryption algorithms to be used, the key exchange and authentication algorithms, and the hashing algorithms used to generate message authentication codes).',
-          'The server responds with a ServerHello message containing: the TLS version chosen by the server based on the client’s submitted version; a random number arbitrarily chosen by the server; and the cipher suite chosen from the list offered by the client.',
-          'The server also sends its public-key certificate to the client. The client may contact the CA that issued the certificate to confirm it is authentic before proceeding. The server may also ask for the client’s public-key certificate by sending a CertificateRequest message, so the connection can be mutually authenticated.',
-          'The client generates a shared session key and sends it along with the client-side and server-side random numbers, all encrypted with the server’s public key. The random numbers are sent to enhance each other’s authentication.',
-          'The server decrypts the message with its private key and extracts the shared session key.',
-          'The client computes a hash of the messages received so far from the server using the agreed hashing algorithm, encrypts the hash with the shared session key using the selected encryption algorithm, and sends it to the server.',
-          'The server decrypts the client’s message with the shared session key and independently calculates the hash of all its messages to the client. If the values match, the server accepts the connection request, then computes a hash of all the messages it has received so far and sends it to the client, encrypted with the shared session key.',
-          'The client decrypts the message with the shared session key and independently computes a hash of all the messages it has sent to the server. If the locally computed value matches the value sent by the server, the client has authenticated the server. The TLS connection is now established.',
+          'Once the host identification step is successfully done, the client sends a list of encryption algorithms it could use and their corresponding keys. This is sent encrypted with the public key of the server.',
+          'The server decrypts the list with its private key and chooses the strongest encryption algorithm that it could handle from the list sent by the client.',
+          'The server then notifies the selected encryption algorithm to the client by encrypting the notification using its private key.',
+          'The client generates the appropriate secret session key for the encryption algorithm selected and notifies the session key to the server by encrypting the notification with the public key of the server.',
+          'The server decrypts the notification with its private key and extracts the secret session key.',
         ],
+      },
+      {
+        type: 'text',
+        heading: 'Step 3: User Authentication',
+        text: 'In this step, the user proves to the server that he/she has the right to perform operations as a particular user on the server machine. This is accomplished as outlined below:',
+      },
+      {
+        type: 'bullets',
+        items: [
+          'The client asks for the username and password from the user, encrypts them with the server’s public key and sends to the server.',
+          'The server checks the validity of the username and password and if everything is fine, accepts the connection request by sending the confirmation encrypted with its private key.',
+          'The client decrypts the confirmation with the server’s public key and the client and server are all set to exchange data securely using the encryption algorithm selected and the secret session key agreed.',
+        ],
+      },
+
+      {
+        type: 'definition',
+        heading: '22. Transport Layer Security (TLS)',
+        text: 'Transport Layer Security (TLS) is the successor of the Secure Sockets Layer (SSL) cryptographic protocol and it provides secure communication of the datagrams of the transport layer protocols as part of an end-to-end connection across the network. TLS has been used for a wide-variety of applications like web browsing, electronic mail, voice-over-IP, instant messaging and etc.',
       },
       {
         type: 'image',
         src: `${IMG}/tls-handshake.webp`,
-        width: 1352, height: 1179,
+        width: 778, height: 411,
+        maxWidth: 820,
         caption: 'Figure 10: TLS Connection Establishment Mechanism',
+        alt: 'Client-server timeline: ClientHello (TLS-version, RN-c, List of Cipher suites) as C-M1; ServerHello (TLS-version, RN-s, Chosen Cipher suite) as S-M1; Public-key certificate as S-M2; the client authenticates the server’s CA; E-Pub-s(Session Key S-K, RN-c, RN-s) as C-M2; E-S-K(Hash(S-M1, S-M2)); the server checks; E-S-K(Hash(C-M1, C-M2)); the client checks and takes the final decision',
+      },
+      {
+        type: 'text',
+        text: 'We now explain the sequence of steps to be followed to establish a TLS connection between a client and a server and it is pictorially illustrated in Figure 10:',
+      },
+      {
+        type: 'bullets',
+        items: [
+          'The client initiates the connection request by sending a ClientHello message to the server. This message has the following information: (i) The latest TLS-version supported by the client; (ii) A random number arbitrarily chosen by the client and (iii) A list of suggested cipher suites (i.e., the encryption algorithms to be used, the key exchange and authentication algorithms, as well as the hashing algorithms to generate message authentication codes).',
+          'The server responds back with a ServerHello message that includes the following information: (i) The TLS version chosen by the server based on the version information submitted by the client; (ii) A random number arbitrarily chosen by the server and (iii) The cipher-suite chosen from the list of choices offered by the client.',
+          'The server also sends its public-key certificate to the client. The client may contact the CA that issued the certificate and confirm that the certificate is authentic before proceeding. The server also has the option of asking for the client’s public-key certificate by sending a CertificateRequest message, so that the connection can be mutually authenticated.',
+          'The client generates a shared session key and sends it along with the client-side and server-side random numbers, all encrypted with the public key of the server. The client-side and server-side random numbers are merely sent to enhance each other’s authentication.',
+          'The server decrypts the message received with its private key and extracts the shared session key.',
+          'The client then computes a hash of the messages received so far from the server using the hashing algorithm agreed upon, encrypts the hash value with the shared session key using the encryption algorithm selected and sends it to the server.',
+          'The server decrypts the client’s message with the shared session key using the decryption algorithm selected. The server then independently calculates the hash of all its messages to the client using the hashing algorithm agreed upon. If the hash value matches with the hash value in the message sent by the client, the server basically accepts the connection request from its direction. The server then computes a hash of all the messages it has received so far from the client and then sends it to the client by encrypting the hash value with the shared session key.',
+          'The client decrypts the message with the shared session key and independently computes a hash of all the messages it has sent to the server. If the hash value locally computed matches with the hash value sent by the server, then the client has basically authenticated the server. Thus, a TLS connection is established.',
+        ],
       },
     ],
   },
@@ -682,103 +1055,128 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '23. IP Security (IPSec)',
-        text: 'The IP Security protocol suite (IPSec) is implemented at the IP layer, so it does not require any change to existing transport layer and application layer protocols. IPSec is primarily designed as a generic solution for overcoming shortcomings of the IP layer such as IP address spoofing, wiretapping and replay attacks.',
+        heading: '23. IP Security',
+        text: 'The IP Security Protocol suite (IPSec) is implemented at the IP layer, so it does not require any change to existing transport layer and application layer protocols. IPSec is primarily designed to address the fundamental shortcomings of the IP layer such as IP address spoofing, wiretapping and session hijacking. The following two protocols are used to provide packet-level security for both IPv4 and IPv6:',
       },
       {
         type: 'bullets',
         items: [
-          'IP Authentication Header, AH (Next Header protocol ID: 51) — provides integrity, authentication and non-repudiation.',
-          'IP Encapsulating Security Payload, ESP (Next Header protocol ID: 50) — provides confidentiality, along with authentication and integrity protection.',
+          'IP Authentication Header, AH (Next Header protocol ID: 51) provides integrity, authentication and non-repudiation',
+          'IP Encapsulating Security Payload, ESP (Next Header protocol ID: 50) provides confidentiality, along with authentication and integrity protection.',
         ],
       },
       {
         type: 'definition',
         heading: 'Security Association',
-        text: 'The basis of IPSec is a Security Association (SA), characterised by the set of security parameters agreed for a secure communication channel between two hosts. Each host can have several SAs in effect for communication with different remote hosts.',
+        text: 'The basis of IPSec is a Security Association (SA), characterized by the set of security parameters agreed upon for a secure communication channel between two communicating hosts. Each host can have several SAs in effect for communication with different remote hosts. A SA is identified using a Security Parameter Index (SPI) – a 32-bit identifier and the IP address of the partner host on the other side of the SA. The SPI and the partner IP address are used to index to the Security Association Database (SADB) that has information about the characteristics of different SAs. A SA is characterized by the following parameters: Encryption algorithm, Encryption key, Encryption parameters like the Initialization Vector, Integrity/Authentication algorithms (keyed-HMAC algorithms and the key) and Lifespan of the SA.',
       },
       {
         type: 'text',
-        text: 'An SA is identified using a Security Parameter Index (SPI) — a 32-bit identifier — and the IP address of the partner host on the other side of the SA. Together these index into the Security Association Database (SADB), which holds information about the characteristics of different SAs. An SA is characterised by the encryption algorithm, the encryption key, encryption parameters such as the initialisation vector, integrity/authentication algorithms (keyed-HMAC algorithms and the key), and the lifespan of the SA.',
+        text: 'A SA is unidirectional. For two hosts to communicate in either direction, SAs have to be established separately in both directions. For host A to securely send data packets to host B, and make host B to believe that the data packet did come from host A, it should establish a SA with host B. Such a SA is said to be “outbound” at A and “inbound” at B. An IPSec header of a datagram sent from host A to host B, should have the secure features of the SA that is “inbound” at B and similarly the IPSec header of a datagram sent from host B to host A should have the secure features of the SA that is “inbound” at A.',
       },
       {
         type: 'text',
-        text: 'An SA is unidirectional. For two hosts to communicate in either direction, SAs have to be established separately in both directions. For host A to securely send data packets to host B, and make host B believe the packet did come from host A, it must establish an SA with host B — such an SA is "outbound" at A and "inbound" at B. An IPSec header of a datagram sent from host A to host B should carry the secure features of the SA that is "inbound" at B, and similarly for datagrams sent from B to A.',
-      },
-      {
-        type: 'text',
-        text: 'Before establishing an IPSec SA, the two end hosts must exchange their public-key certificates, digitally certified by a trusted third-party certificate authority (CA). This is done through the Internet Key Exchange (IKE) protocol. Once the two hosts have exchanged certificates they are said to have established an IKE Security Association (IKE SA), which is a prerequisite for establishing an IPSec SA.',
+        text: 'Prior to establishing an IPSec SA, the two end hosts need to exchange their public-key certificates digitally certified by a trusted third-party certificate authority (CA). This is done through the Internet Key Exchange (IKE) protocol. Once the two hosts have exchanged each other’s public-key certificates, then they are said to have established an IKE Security Association (IKE SA). Establishing an IKE SA is a pre-requisite to establish an IPSec SA. The procedure to establish an IPSec SA is explained as follows:',
       },
       {
         type: 'bullets',
         items: [
-          'Host A, wishing to send data packets to host B, needs to establish an "inbound SA" with host B.',
-          'Host A picks an SPI not yet chosen for communication with B and sends an "SA Establishment Request" message to B.',
-          'The request contains: the SPI for the inbound SA channel at host A (the outbound SA channel at host B); the lifespan of the association, negotiable by host B; the packet-level security protocol chosen (AH or ESP), also negotiable by host B; and the AH header fields if AH is chosen, or the ESP header fields if ESP is chosen.',
+          'Host A wishing to send data packets to host B needs to establish an “inbound SA” with host B.',
+          'Host A picks a SPI that has not been yet chosen for communication with B and sends a "SA Establishment Request" message to B which contains the following: SPI for the inbound SA channel at host A (i.e., the outbound SA channel at host B); Lifespan of the association – negotiable by host B; The packet-level security protocol chosen (AH or ESP) – negotiable by host B.',
+          'If AH is chosen, then the list of keyed-HMAC algorithms that could be used is specified. Host B will choose one from this list if it wishes to receive packets from host A.',
+          'If ESP is chosen, then the list of keyed-HMAC algorithms along with the list of encryption algorithms and key-derivation functions that could be used will be sent.',
+          'All negotiation messages (including the SA Establishment Request) are encrypted at the sender side using the receiver’s public key and decrypted with the receiver’s private key at the receiver side.',
+          'Hosts A and B agree on a shared session key using the Diffie-Hellman exchange algorithm.',
+          'The shared session key would be used for the keyed-HMAC algorithm.',
+          'Each host uses the shared session key and the key-derivation function agreed upon to derive the secret key to be used for encryption and decryption of the data at hosts A and B respectively.',
+        ],
+      },
+      {
+        type: 'note',
+        items: [
+          'This is the only place in the whole manual where Diffie-Hellman is named. If you are asked how the two hosts end up with a shared secret they never transmitted, this bullet is the answer the lecturer wrote.',
         ],
       },
       {
         type: 'definition',
         heading: 'Authentication Header (AH)',
-        text: 'The AH provides integrity, authentication and non-repudiation services for IP datagrams.',
+        text: 'AH provides integrity and data origin authentication for IP datagrams. AH operates on the top of IP, using the IP protocol number 51. The different fields in an AH are described below (also refer Figure 11). The structure of an original IPv4 datagram and IPv4 datagram with AH is shown in Figure 12.',
+      },
+      {
+        type: 'note',
+        items: [
+          'The bullet on the previous page says AH provides "integrity, authentication and non-repudiation"; this section, describing the same header, claims only integrity and data origin authentication. Both are printed as they appear. The narrower claim is the correct one — AH authenticates with a shared-key HMAC, and a value two parties can both compute cannot prove to a third party which of them produced it, which is what non-repudiation requires.',
+        ],
       },
       {
         type: 'image',
         src: `${IMG}/ah-header.webp`,
-        width: 1311, height: 601,
+        width: 649, height: 189,
+        maxWidth: 820,
         caption: 'Figure 11: Structure of an Authentication Header (AH)',
+        alt: 'A 32-bit-wide header laid out over bit positions 0, 8, 16 and 31: Next Header, Payload Length and RESERVED on the first word, then Security Parameters Index (SPI), then Sequence Number, then Authentication Data (variable)',
       },
       {
         type: 'termlist',
         items: [
-          { term: 'Next Header', def: 'Identifies the type of the next header (e.g. TCP or UDP).' },
-          { term: 'Payload Length', def: 'Indicates the length of the AH in 32-bit words, minus 2.' },
-          { term: 'Reserved', def: 'Reserved for future use; currently set to zero.' },
-          { term: 'Security Parameters Index (SPI)', def: 'Identifies the security association.' },
-          { term: 'Sequence Number', def: 'Identifies the datagrams sent as part of an SA. A monotonically increasing identifier, used to assist in anti-replay protection.' },
-          { term: 'Authentication Data', def: 'The integrity/authentication check value (keyed-HMAC) calculated over the entire IP datagram — excluding mutable fields in the IP header — and the AH header. The size of the keyed-HMAC may vary with each SA and may not be an exact multiple of 32 bits, in which case the HMAC is padded.' },
+          { term: 'Next Header', def: 'Identifies the transport layer protocol' },
+          { term: 'Payload Length (AH Length)', def: 'Indicates the length of the whole AH in 32-bit words' },
+          { term: 'Reserved', def: 'Indicates that this field is reserved for future use and it must be set to zero' },
+          { term: 'SPI', def: 'Identifies the security association' },
+          { term: 'Sequence Number', def: 'Identifies the datagrams sent as part of a SA. This field is a monotonically increasing identifier and is used to assist in anti-replay protection' },
+          { term: 'Authentication Data', def: 'Contains the integrity/authentication check value (keyed-HMAC) calculated over the entire packet, including the header fields that do not change at the intermediate hosts. The size of the keyed-HMAC may vary with each SA and may not be exactly multiple of 32 bits. If this is the case, the HMAC will be padded.' },
         ],
       },
       {
         type: 'image',
         src: `${IMG}/ipv4-with-ah.webp`,
-        width: 1287, height: 570,
+        width: 1211, height: 596,
         caption: 'Figure 12: Original IPv4 Datagram and IPv4 Datagram with AH Header',
+        alt: 'Two datagrams side by side. The original: IP header with Protocol = TCP, then TCP header and payload. With AH: the same IP header but Packet Length + AH Size and Protocol = AH, then the AH header (Next Header, Payload Length, RESERVED, SPI, Sequence Number, Authentication Data), then the TCP header and payload. Shading marks the fields used to compute the AH authentication data',
       },
       {
         type: 'definition',
-        heading: 'Encapsulating Security Payload (ESP)',
-        text: 'ESP provides origin authentication, integrity and confidentiality protection for IP datagrams.',
+        heading: 'Encapsulated Security Payload (ESP)',
+        text: 'ESP provides origin authentication, integrity and confidentiality protection for the IP datagrams. The different fields in an ESP header are described below (also refer Figure 13). The structure of an original IPv4 datagram and IPv4 datagram with ESP header is shown in Figure 14.',
+      },
+      {
+        type: 'note',
+        items: [
+          'The manual names this protocol two different ways: the bullet on page 31 calls it the "IP Encapsulating Security Payload", the heading here calls it the "Encapsulated Security Payload". Both are printed as they appear. The RFC name is Encapsulating Security Payload.',
+        ],
       },
       {
         type: 'image',
         src: `${IMG}/esp-header.webp`,
-        width: 1400, height: 710,
+        width: 690, height: 334,
+        maxWidth: 820,
         caption: 'Figure 13: Structure of an Encapsulated Security Payload (ESP) Header',
+        alt: 'A 32-bit-wide header over bit positions 0, 8, 16, 24 and 31: Security Parameters Index (SPI), then Sequence Number, then Payload Data (variable), then Padding (0-255 bytes), then Pad Length and Next Header sharing a word, then Authentication Data (variable)',
       },
       {
         type: 'termlist',
         items: [
-          { term: 'Security Parameters Index (SPI)', def: 'Identifies the security association.' },
-          { term: 'Sequence Number', def: 'Identifies the datagrams sent as part of an SA. A monotonically increasing identifier, used to assist in anti-replay protection.' },
-          { term: 'Payload Data', def: 'Indicates the data to be transferred.' },
-          { term: 'Padding', def: 'Used with certain block ciphers to pad the payload data to a full block length (0–255 bytes).' },
-          { term: 'Pad Length', def: 'Indicates the size of the padding in bytes.' },
-          { term: 'Next Header', def: 'Identifies the transport layer protocol.' },
-          { term: 'Authentication Data', def: 'The integrity/authentication check value (keyed-HMAC) calculated over only the SPI and Sequence Number in the ESP header, the actual data, the padding data, the pad length and the Next Header field.' },
+          { term: 'SPI', def: 'Identifies the security association' },
+          { term: 'Sequence Number', def: 'Identifies the datagrams sent as part of a SA. This field is a monotonically increasing identifier and is used to assist in anti-replay protection' },
+          { term: 'Payload data', def: 'Indicates the data to be transferred' },
+          { term: 'Padding', def: 'Used with certain block ciphers for padding the payload data to a full block length.' },
+          { term: 'Pad length', def: 'Indicates the size of the padding in bytes' },
+          { term: 'Next Header', def: 'Identifies the transport layer protocol' },
+          { term: 'Authentication Data', def: 'This is the integrity/ authentication check value (keyed-HMAC) calculated over only the SPI, Sequence Number in the ESP header, the actual data, padding data, pad length and the Next Header field.' },
         ],
       },
       {
         type: 'image',
         src: `${IMG}/ipv4-with-esp.webp`,
-        width: 1364, height: 570,
+        width: 1223, height: 572,
         caption: 'Figure 14: Original IPv4 Datagram and IPv4 Datagram with ESP Header',
+        alt: 'Two datagrams side by side. The original: IP header with Protocol = TCP, then TCP header and payload. With ESP: the IP header with Protocol = ESP, then the ESP header (SPI, Sequence Number), then the TCP header and payload, Padding (0-255 bytes), Pad Length and Next Header = TCP, then Authentication Data. Brackets mark which span is encrypted and which is authenticated',
       },
       {
         type: 'note',
         items: [
-          'The practical difference between AH and ESP: AH proves who sent a packet and that nobody altered it, but anyone watching the wire can still read the contents. ESP additionally encrypts the payload, so it is what VPNs actually use.',
-          'AH authenticates the whole datagram including parts of the IP header, which is why it breaks through NAT — NAT rewrites addresses that AH has signed. ESP does not sign the outer IP header, so it survives NAT.',
+          'Added for clarity — the manual does not draw this comparison. AH proves who sent a packet and that nobody altered it, but anyone watching the wire can still read the contents; ESP additionally encrypts the payload, which is why VPN deployments use ESP.',
+          'Added for clarity — AH covers the immutable fields of the outer IP header, including the addresses, so a NAT device that rewrites those addresses invalidates the AH check value. ESP authenticates only from the ESP header inwards, so it is unaffected by the rewrite, though ESP still has to be wrapped in UDP (NAT-T) to get through most NAT devices at all.',
         ],
       },
     ],
@@ -793,72 +1191,126 @@ export const cyb221LectureNotes = [
       {
         type: 'definition',
         heading: '24. Kerberos',
-        text: 'Kerberos is an authentication protocol used by processes and hosts communicating over an insecure network to verify each other’s identity securely. It is based on the idea that a central server provides authenticated tokens called "tickets" to requesting applications. A ticket is an unforgeable, non-replayable, authenticated object. The security of the protocol depends on the assumption that the participating machines maintain loosely synchronised time.',
+        text: 'Kerberos [26] is an authentication protocol used by processes/hosts communicating over an insecure network to verify each other’s identity in a secure manner. It is based on the idea that a central server provides authenticated tokens called "tickets" to requesting applications. A ticket is an unforgeable, non-replayable, authenticated object. The security of the protocol depends on the assumption that the participating machines maintain loosely synchronized time. The four entities involved in Kerberos are: (i) Authentication Server, AS; (ii) Ticket Granting Server, TGS; (iii) Service Server; SS and (iv) Ticket Granting Ticket, TGT. A client authenticates itself to the AS once and obtains a ticket that can be used to obtain additional tickets from the SS without requiring the client to re-authenticate itself for every service requested. The sequence of steps of the protocol is described below (also shown in Figure 15):',
       },
       {
-        type: 'termlist',
+        type: 'note',
         items: [
-          { term: 'Authentication Server (AS)', def: 'Authenticates the client once, at logon, and issues the Ticket Granting Ticket.' },
-          { term: 'Ticket Granting Server (TGS)', def: 'Issues Client-to-Server tickets to a client that presents a valid TGT, without the client having to re-authenticate.' },
-          { term: 'Service Server (SS)', def: 'The server hosting the service the client actually wants to use.' },
-          { term: 'Ticket Granting Ticket (TGT)', def: 'The token obtained once from the AS, which can then be used to obtain additional tickets without re-authenticating for every service requested.' },
+          '"obtains a ticket that can be used to obtain additional tickets from the SS" is printed exactly as it appears, and it is wrong. The additional tickets come from the **TGS**, not the SS — that is the whole point of the Ticket Granting Server, and the steps below say so. The SS is the machine hosting the service you finally want to reach.',
         ],
+      },
+      {
+        type: 'text',
+        heading: 'Kerberos Protocol Steps',
+        text: 'Step 1: User Client-based Logon – The user submits the username and password information to the client machine. The client machine uses a one-way function on the entered password to compute the secret key for the user.',
       },
       {
         type: 'image',
         src: `${IMG}/kerberos.webp`,
-        width: 1400, height: 1603,
-        caption: 'Figure 15: Kerberos Protocol',
+        width: 799, height: 494,
+        maxWidth: 820,
+        caption: 'Figure 15: Kerberos Protocol Steps',
+        alt: 'Client exchanging messages with three servers. To the Authentication Server: User ID, back A: E-User-Secret-Key(Client/TGS Session Key) and B: E-TGS-Secret-Key(Ticket Granting Ticket). To the Ticket Granting Server: C: E-TGS-Secret-Key(Ticket Granting Ticket) with Service ID and D: E-Client/TGS Session Key(User ID, Client ID, Timestamp), back F and E. To the Service Server: E: E-Service-Secret-Key(Client-to-Server Ticket) and G: E-Client/Server Session Key(User ID, Client ID, Timestamp), back H: E-Client/Server Session Key(Timestamp++)',
       },
       {
         type: 'text',
-        heading: 'Step 1: User Client-based Logon',
-        text: 'The user submits their username and password to the client machine, and the client uses a one-way hash of the password to compute the secret key for the user. The AS returns two messages. Message A contains the Client/TGS session key, encrypted with the user’s secret key (derived from the user’s password at the AS). Message B contains the Ticket-Granting Ticket (TGT), which includes the username, the network address of the user’s client machine, the validity period of the TGT, and the Client/TGS session key — all encrypted with the TGS secret key. Once the client receives messages A and B, it decrypts message A with the user’s secret key and extracts the Client/TGS session key.',
-      },
-      {
-        type: 'text',
-        heading: 'Step 2: Ticket Granting',
-        text: 'The client sends two messages to the TGS. Message C contains the TGT from message B and identification for the requested service. Message D contains the authentication information for the user/client — the username, the network address of the client machine, and a timestamp — all encrypted with the Client/TGS session key. After receiving message C the TGS decrypts it with its secret key and extracts the Client/TGS session key, then decrypts message D with that session key and sends back two messages. Message E contains the Client-to-Server ticket, which includes the username, the network address of the client machine, the validity period of the ticket and the Client/Server session key, encrypted with the secret key of the server for the requested service. Message F contains the Client/Server session key and the timestamp of message D incremented by 1, both encrypted with the Client/TGS session key. The client uses the Client/TGS session key to decrypt message F and extract the Client/Server session key.',
-      },
-      {
-        type: 'text',
-        heading: 'Step 3: Client Service Request',
-        text: 'The client sends two messages to the SS: message E (received from the TGS), and message G, containing the username, the network address of the client machine and a timestamp, all encrypted with the Client/Server session key. The SS decrypts message E with its own secret key to extract the Client-to-Server ticket and the Client/Server session key, then decrypts message G with the Client/Server session key to extract the client identification information. If the information in message G matches that in the Client-to-Server ticket, the SS responds with message H, containing the timestamp from message G incremented by 1, encrypted with the Client/Server session key. The client decrypts message H with the Client/Server session key, and if the timestamp is the value it expected, the client trusts the server and starts sending service requests to it.',
-      },
-      {
-        type: 'proscons',
-        heading: 'Kerberos: Strengths and Weaknesses',
-        advantages: [
-          'Each ticket has a limited validity period, so long-term cryptanalytic attacks cannot be launched.',
-          'Clocks across all clients and servers are assumed synchronised; a host responds only if the request has a timestamp close to its own current time.',
-          'Kerberos provides mutual authentication — the TGS and SS can access the Client/TGS and Client/Server session keys only after decrypting the messages containing them with their own secret keys, which the client uses to indirectly authenticate the servers.',
-        ],
-        disadvantages: [
-          'Requires continuous availability of a trusted ticket-granting server for all access control and authentication checks.',
-          'Authenticity of servers requires a trusted relationship between the TGS and every service server.',
-          'Timely transactions are required to reduce the chance of a user with a genuine ticket being denied service.',
-          'Password guessing can still recover a user’s valid secret key — the whole system remains dependent on the user password.',
-          'Does not scale well as the number of service servers increases: the TGS has to maintain a trustworthy relationship and a secret key for each SS, and adding backup service servers complicates this further.',
-          'Network services cannot be accessed without obtaining Kerberos authentication — every application run by users on the network must go through it.',
-        ],
-      },
-      {
-        type: 'definition',
-        heading: '25. Mobile Device Security',
-        text: 'Security on phones and mobile devices is as important as on desktop and laptop computers — even more so, because of the additional functionality that comes with an internet-connected device that can go almost anywhere. Phones are now like handheld laptops able to browse the internet, and tablets are used to control other IoT devices.',
+        heading: 'Step 2: Client Authentication',
+        text: 'The client sends the username in plaintext to the Kerberos AS. The AS checks the username in its database, and if an entry exists, the AS sends back two messages:',
       },
       {
         type: 'bullets',
         items: [
-          'Practise the same "think-before-you-click" mindset on mobile devices that you have on desktop and laptop machines. Some phishing specifically targets mobile devices.',
-          'Virus protection is extremely important on cellphones, as they use third-party networks.',
-          'Physical security matters equally, since devices are small and easily slipped out of sight by a would-be thief.',
-          'Mobile Device Management (MDM) software should be used to track devices via GPS and usage, and to remotely wipe them or take photos if the device is lost or stolen.',
-          'Additional anti-theft software should remain installed after a factory reset.',
-          'Avoid online banking on a smartphone or tablet; use a wired connection for added security.',
-          'Use any encryption the device has built into its settings (usually under Security).',
-          'Never connect to unknown WiFi networks.',
-          'Only turn on Bluetooth when you need it.',
+          'Message A: contains the Client/ TGS session key encrypted with the secret key for the user (derived from the user’s password at the AS).',
+          'Message B: contains the Ticket-Granting Ticket, TGT, which includes the following: (i) username, (ii) network address of the user’s client machine, (iii) validity period of the TGT and (iv) Client/ TGS session key. The TGT is encrypted using the secret key of the TGS.',
+        ],
+      },
+      {
+        type: 'text',
+        text: 'Once the client receives messages A and B, the client decrypts message A with the secret key of the user and extracts the Client/ TGS session key.',
+      },
+      {
+        type: 'text',
+        heading: 'Step 3: Client Service Authorization',
+        text: 'The client sends the following two messages to the TGS:',
+      },
+      {
+        type: 'bullets',
+        items: [
+          'Message C: contains the TGT from message B and identification for the requested service.',
+          'Message D: contains the authentication information for the user/client. The authentication information submitted includes the username, the network address of the user/client machine and a timestamp. All of this information is encrypted using the Client/ TGS session key.',
+        ],
+      },
+      {
+        type: 'text',
+        text: 'After receiving message C, the TGS decrypts the message with its secret key and extracts the Client/TGS session key. The TGS then decrypts message D using the Client/ TGS session key and sends back the following two messages to the client:',
+      },
+      {
+        type: 'bullets',
+        items: [
+          'Message E: contains the Client-to-Server Ticket, which includes the username, the network address of the user/client machine, the validity period the ticket and the Client/Server session key. The ticket is encrypted with the secret key of the server for the service requested.',
+          'Message F: contains the Client/Server session key and the timestamp of message D incremented by 1. Both the key and the timestamp are encrypted with the Client/ TGS session key.',
+        ],
+      },
+      {
+        type: 'text',
+        text: 'After the client receives messages E and F, it uses the Client/ TGS session key to decrypt message F to extract the Client/ Server session key.',
+      },
+      {
+        type: 'text',
+        heading: 'Step 4: Client Service Request',
+        text: 'The client sends the following two messages to the SS: (i) message E (received from the TGS) and (ii) message G, containing the username, the network address of the user/client machine and the timestamp, all encrypted with the Client/Server session key. The SS decrypts message E using its secret key and extracts the Client-to-Server ticket and the Client/Server session key. The SS decrypts message G using the Client/Server session key and extracts the user/client identification information. If the user/client identification information in message G matches with the user/client information in the Client-to-Server ticket, the SS increments the timestamp information in message G by 1. The incremented timestamp is encrypted using the Client/Server session key and sent back to the client (as message H). The client on receiving message H decrypts the message with the Client/Server session key. If the timestamp value in message H is the value expected by the client, the client trusts the server and start sending service requests to it.',
+      },
+      {
+        type: 'note',
+        items: [
+          '"the validity period the ticket" in message E is printed as it appears — the manual drops the word "of".',
+          'Figure 15 lists message F above message E on its arrows, in the opposite order to the text. The text is the one to follow.',
+        ],
+      },
+      {
+        type: 'proscons',
+        heading: 'Kerberos Advantages and Kerberos Weaknesses',
+        advantages: [
+          'A user’s password is not sent on the wire (either in plaintext or ciphertext) during session initiation.',
+          'Kerberos provides cryptographic protection against spoofing. Each service access request is mediated by the TGS, which knows that the identity of the user/client is authenticated by the Kerberos AS and processes the user/client request encrypted with the Client/TGS session key',
+          'As each ticket has a limited validity period, long-term cryptanalytic attacks cannot be launched.',
+          'Kerberos assumes that the clocks across all the clients and the servers are synchronized. A host responds back only if the request messages have timestamp value close to the current time at the host.',
+          'Kerberos provides mutual authentication. The TGS and SS can respectively get access to the Client/TGS session key and the Client/Server session key only after they can decrypt the messages containing these keys with their appropriate secret keys. The client uses this approach to indirectly authenticate the servers.',
+        ],
+        disadvantages: [
+          'Kerberos requires continuous availability of a trusted ticket-granting server for all access control and authentication checks.',
+          'Authenticity of servers requires a trusted relationship between the TGS and every service server.',
+          'Timely transactions are required to reduce chances of a user with genuine ticket being denied service.',
+          'Password guessing could still work to get the valid secret key for a user. The whole system is still dependent on the user password.',
+          'Kerberos does not scale well as the number of service servers is increased. The TGS has to maintain a trustworthy relationship and maintain the secret key for each SS. Adding backup service servers further complicates the situation.',
+          'Network services cannot be accessed without obtaining Kerberos authentication. All applications run by the users in the network need to go through Kerberos authentication.',
+        ],
+      },
+
+      {
+        type: 'definition',
+        heading: 'Mobile Device Security',
+        text: 'Technology has jumped by leaps and bounds since the advent of cellphones and mobile devices. At one time a flip phone was considered cutting edge if it had a camera and the ability to text. Nowadays, phones are like handheld laptops, able to browse the internet and tablets are used to control other IOT devices. Security on phones and mobile devices is as important as it is on desktop and laptop computers, even more so because of the additional functionality that comes with an internet-connected device that can go almost anywhere. Here are a few things to consider with regard to mobile devices:',
+      },
+      {
+        type: 'bullets',
+        items: [
+          'Virus protection is extremely important on cellphones as they utilize third-party networks while roaming and connect to an average of 160 different IP addresses daily.',
+          'Physical security is equally important since devices are small and can be easily slipped out of sight by a would-be thief.',
+          'Mobile Device Management (MDM) software should be used to be able to track devices (through GPS) and usage, and even be able to remotely wipe or take photos if the device is lost or stolen.',
+          'Additional anti-theft software can be installed to further protect the device and data, and even remains installed after a factory reset.',
+          'Practice the same ‘think-before-you-click’ mindset on your mobile devices that you have on your desktop and laptop machines. Some phishing specifically targets mobile devices.',
+          'Never do any online banking on a smartphone or tablet; only use a wired connection for added security.',
+          'Utilize any encryption that the device has built into its settings (usually under Security).',
+          'Never connect to unknown WiFi networks,',
+          'Only turn on Bluetooth when you need to use it (i.e. making phone calls in a car).',
+        ],
+      },
+      {
+        type: 'note',
+        items: [
+          'This section is where the manual\'s theory ends, on printed page 38. It has no row in the manual\'s own outline, which stops at row 24 (Kerberos) — so it carries no section number here.',
+          'The manual spells it "IOT"; the usual spelling is IoT, for Internet of Things.',
         ],
       },
     ],
