@@ -3,6 +3,7 @@
 import { cyb121Quiz } from './lectureNotes/cyb121Quiz.js';
 import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
 import { cyb221ExamPrep } from './lectureNotes/cyb221ExamPrep.js';
+import { cyb224ExamPrep } from './lectureNotes/cyb224ExamPrep.js';
 import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
 import { cyb222ExamPrep } from './lectureNotes/cyb222ExamPrep.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
@@ -2222,11 +2223,49 @@ export const courses = [
       'The cloud shared responsibility model is exam-critical: know clearly what the provider vs customer secures',
       'Use OWASP resources on SQL injection and data security — they are free and authoritative',
     ],
+    // Notes 4-22 are transcribed from the lecturer's scanned handout, printed
+    // pages 3-71, and follow its wording and headings.
+    //
+    // Notes 1-3 come from the class sessions instead, and are labelled as such
+    // on the page. They are not in the workbook: the 5Vs, operational-vs-
+    // analytical and big-data-skills material appears nowhere in any of the
+    // five scanned PDFs or their six transcriptions, and two of the three carry
+    // class dates the rest do not. The one genuine overlap is the Vs - the
+    // workbook prints Volume, Velocity and Variety on page 3 as "The 3Vs of Big
+    // Data Security Challenges" (note 4), framed as why traditional controls
+    // fail at scale, while the class session gave all five as characteristics
+    // of big data. Note 1 carries a cross-reference so students do not read the
+    // two as contradicting each other.
+    //
+    // Printing slips in the handout that these notes silently normalise, so a
+    // future editor does not "correct" them back:
+    //   - p.16 numbers both sub-headings "i." (Pattern Recognition and Anomaly
+    //     Detection); the second is rendered "ii." here.
+    //   - pp.42-43 leave Pandas unnumbered and then run "i. NumPy", "ii.
+    //     Matplotlib", "iii. Seaborn", so the run starts one item late.
+    //   - p.62 numbers Pandas "i." but p.63 numbers Scikit-Learn "2."; both are
+    //     rendered as roman numerals here.
+    //   - pp.40-41 truncate three equations and drop two numerals; recorded on
+    //     the page itself, in note 14, because a student needs to know.
+    //   - p.55 heads the K-Means material "THREAT ANALYSIS USING SUPPORT VECTOR
+    //     MACHINE", which describes neither that page nor the ones after it.
+    //   - Bullet lists print inconsistently with and without terminal full
+    //     stops; these notes punctuate them consistently.
+    //
+    // The figures are redrawn for these notes. The handout prints four diagrams
+    // and numbers none of them: the classification tree (p.20) and three SVM
+    // diagrams (two on p.22, one on p.23). All four are reproduced; the rest of
+    // the figures visualise tables the handout prints as text, and their captions
+    // say so.
     lectureNotes: [
       {
         number: '1',
         title: 'Introduction to Big Data Security',
         sections: [
+          {
+            type: 'note',
+            text: 'From the class sessions, not the printed workbook. The workbook itself starts at Concepts of Big Data Security (note 4).',
+          },
           {
             type: 'definition',
             heading: '1.1 Definition',
@@ -2252,6 +2291,10 @@ export const courses = [
               { term: 'Organisational Data', def: 'data produced by businesses and institutions' },
             ],
           },
+          {
+            type: 'note',
+            text: 'Do not confuse the 5Vs above with the 3Vs in note 4. These five describe big data itself. The workbook uses only the first three - Volume, Velocity and Variety - and uses them for a different purpose: to explain why traditional security controls fail at this scale. Both can be asked; read them together.',
+          },
         ],
       },
       {
@@ -2259,6 +2302,10 @@ export const courses = [
         title: 'Operational and Analytical Big Data',
         date: '02/06/2026',
         sections: [
+          {
+            type: 'note',
+            text: 'From the class session of 02/06/2026, not the printed workbook.',
+          },
           {
             type: 'definition',
             heading: '2.1 Operational Big Data',
@@ -2326,6 +2373,10 @@ export const courses = [
         date: '09/06/2026',
         sections: [
           {
+            type: 'note',
+            text: 'From the class session of 09/06/2026, not the printed workbook.',
+          },
+          {
             type: 'definition',
             heading: 'Definition',
             text: 'Big Data Skills are the knowledge, abilities, and competencies required to collect, process, store, analyze, visualize, and interpret large amounts of data.',
@@ -2387,6 +2438,20 @@ export const courses = [
               'Discuss expected benefits and possible challenges',
             ],
           },
+          {
+            type: 'note',
+            text: 'The answers below are worked answers, not the lecturer\'s.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Data sources', def: 'Records the university already holds: semester results and GPA history per course, lecture attendance registers, student-portal login and activity logs, library borrowing and e-resource access, JAMB and O-level entry scores, departmental and level enrolment figures, fee-payment timing, and student feedback or questionnaire responses' },
+              { term: 'Collection and storage', def: 'Most of this starts on paper or in departmental spreadsheets, so the first tasks are digitising it and agreeing one student identifier that works across departments. Structured records go into a central data warehouse; feedback text and portal logs suit a data lake. Loading can be batched at the end of each semester — nothing here needs streaming. Student records are personal data under the Nigeria Data Protection Act, so access control, encryption at rest and anonymisation before analysis belong in the design rather than being added afterwards' },
+              { term: 'Type of analytics', def: 'All four, in order. Descriptive answers what happened — pass rates by course and level. Diagnostic asks why — which factors track with failure. Predictive identifies which students are likely to carry over a course while there is still time to act. Prescriptive recommends which intervention to offer whom' },
+              { term: 'Tools and technology', def: 'Python with pandas for the analysis, PostgreSQL or MySQL for the warehouse, and Power BI or Excel for dashboards that deans will actually open. Hadoop and Spark are the fashionable answer and the wrong one here: a single university produces gigabytes, not petabytes, and one relational database server handles that comfortably. Reach for a cluster only when the volume genuinely stops fitting' },
+              { term: 'Benefits and challenges', def: 'Benefits: at-risk students identified before they carry over a course, better lecturer and timetable allocation, and evidence to support accreditation. Challenges: incomplete and inconsistent records, no single student identifier across departments, staff with no analytics training, unreliable power and connectivity, resistance from those who dislike being measured, and the privacy risk created by concentrating everything about every student in one database' },
+            ],
+          },
         ],
       },
       {
@@ -2395,65 +2460,86 @@ export const courses = [
         sections: [
           {
             type: 'definition',
-            heading: '4.1 Definition',
-            text: 'Big Data security is the collective term for the guardrails, policies, and technologies used to protect massive volumes of data — both structured and unstructured — from unauthorized access, theft, exposure, and modification.',
+            text: 'Big Data security is the collective term for the guardrails, policies, and technologies used to protect massive volumes of data, both structured and unstructured, from unauthorized access, theft, exposure, and modification.',
           },
           {
             type: 'text',
-            heading: '4.2 How It Differs from Traditional Security',
-            text: 'Traditional security focuses on securing perimeter walls (like firewalls) around static databases. Big Data security is unique because the data is constantly moving, changing, and being analysed at an immense scale — so protection has to travel with the data instead of sitting only at the boundary.',
+            text: 'While traditional security focuses on securing perimeter walls (like firewalls) around static databases, Big Data security is unique because the data is constantly moving, changing, and being analyzed at an immense scale. Here is a breakdown of why it is different, the core challenges it addresses, and how it is implemented.',
+          },
+          {
+            type: 'text',
+            heading: 'The 3Vs of Big Data Security Challenges',
+            text: 'Traditional security measures often fail when applied to Big Data because of its fundamental characteristics:',
           },
           {
             type: 'termlist',
-            heading: '4.3 The 3Vs of Big Data Security Challenges',
             items: [
-              { term: 'Volume', def: 'Protecting petabytes or exabytes of data requires security tools that scale dynamically without creating processing bottlenecks' },
-              { term: 'Velocity', def: 'Data streams into systems in real time (IoT sensors, network logs), so encryption and threat detection must happen on the fly without causing latency' },
-              { term: 'Variety', def: 'Structured SQL databases, semi-structured JSON, and unstructured video, audio and text all coexist — a one-size-fits-all security policy does not work' },
+              { term: 'Volume', def: 'Protecting petabytes or exabytes of data requires security tools that can scale dynamically without creating processing bottlenecks.' },
+              { term: 'Velocity', def: 'Data streams into systems in real-time (e.g., IoT sensors, network logs). Security mechanisms like encryption and threat detection must happen on the fly without causing latency.' },
+              { term: 'Variety', def: 'Big Data includes structured SQL databases, semi-structured JSON files, and unstructured data like video, audio, and text. A one-size-fits-all security policy does not work here.' },
             ],
           },
           {
             type: 'text',
-            heading: '4.4 Core Pillars of Big Data Security',
-            text: 'To secure a Big Data ecosystem (such as Hadoop, Spark, or a cloud-based data lake), organisations implement a multi-layered security framework resting on four pillars.',
+            heading: 'Core Pillars of Big Data Security',
+            text: 'To secure a Big Data ecosystem (such as Hadoop, Spark, or cloud-based data lakes), organizations implement a multi-layered security framework:',
+          },
+          {
+            type: 'text',
+            heading: '1. Data Encryption and Privacy',
+            text: 'Because data is constantly in motion across distributed networks, it must be protected at all stages:',
           },
           {
             type: 'termlist',
-            heading: 'Pillar 1 — Data Encryption and Privacy',
             items: [
-              { term: 'Encryption in transit', def: 'Protecting data as it moves between nodes, clusters, or users — typically using TLS/SSL' },
-              { term: 'Encryption at rest', def: 'Safeguarding data stored on disks using strong encryption standards such as AES-256' },
-              { term: 'Data masking & tokenization', def: 'Replacing sensitive data (card numbers, PII) with realistic but fake values or tokens before it enters the analytics pipeline, so data scientists can work with it safely' },
+              { term: 'Encryption in Transit', def: 'Protecting data as it moves between nodes, clusters, or users (typically using TLS/SSL).' },
+              { term: 'Encryption at Rest', def: 'Safeguarding data stored on disks using strong encryption standards (like AES-256).' },
+              { term: 'Data Masking & Tokenization', def: 'Replacing sensitive data (like credit card numbers or PII) with realistic but fake data or tokens before it enters the analytics pipeline so data scientists can work with it safely.' },
             ],
           },
           {
-            type: 'termlist',
-            heading: 'Pillar 2 — Centralized Access Control',
-            items: [
-              { term: 'Role-Based Access Control (RBAC)', def: 'Assigning permissions based on organisational roles' },
-              { term: 'Attribute-Based Access Control (ABAC)', def: 'A finer-grained approach where access is decided by contextual attributes — e.g. allow access only if the user is a Data Analyst AND the request comes from an internal IP during working hours' },
-            ],
+            type: 'text',
+            heading: '2. Centralized Access Control',
+            text: 'When dealing with thousands of users and automated processes, managing who can see what is critical:',
           },
           {
             type: 'termlist',
-            heading: 'Pillar 3 — Endpoint and Infrastructure Security',
             items: [
-              { term: 'Node authentication', def: 'Ensuring only authorised servers/nodes can join the computing cluster — often managed via Kerberos' },
-              { term: 'API security', def: 'Protecting the endpoints and APIs that applications use to connect to and query the data lake' },
+              { term: 'Role-Based Access Control (RBAC)', def: 'Assigning permissions based on organizational roles.' },
+              { term: 'Attribute-Based Access Control (ABAC)', def: 'A finer-grained approach where access is determined by contextual attributes (e.g., "Allow access only if the user is a Data Analyst AND the request comes from an internal IP during working hours").' },
             ],
+          },
+          {
+            type: 'text',
+            heading: '3. Endpoint and Infrastructure Security',
+            text: 'Big Data relies on distributed computing, meaning data is split across hundreds or thousands of server nodes.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Node Authentication', def: 'Ensuring that only authorized servers/nodes can join the computing cluster (often managed via Kerberos).' },
+              { term: 'API Security', def: 'Protecting the endpoints and APIs that applications use to connect to and query the data lake.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '4. Real-Time Monitoring and Auditing',
+            text: 'With massive infrastructure, detecting a breach manually is impossible. Big Data environments use specialized security tools to:',
           },
           {
             type: 'bullets',
-            heading: 'Pillar 4 — Real-Time Monitoring and Auditing',
             items: [
-              'With massive infrastructure, detecting a breach manually is impossible — monitoring must be automated',
-              'Maintain continuous audit logs of who accessed what data and when',
-              'Employ AI and machine-learning-driven User and Entity Behaviour Analytics (UEBA) to spot anomalous data access patterns that may indicate an insider threat or compromised credentials',
+              'Maintain continuous audit logs of who accessed what data and when.',
+              'Employ AI and Machine Learning-driven User and Entity Behavior Analytics (UEBA) to spot anomalous data access patterns that might indicate an insider threat or compromised credentials.',
             ],
           },
           {
+            type: 'text',
+            heading: 'Common Tools in the Big Data Security Ecosystem',
+            text: 'Security in this domain is typically integrated directly into the data architecture. Some widely used tools include:',
+          },
+          {
             type: 'image',
-            heading: '4.5 Common Tools in the Big Data Security Ecosystem',
             src: '/lecture-notes/cyb-224/security-ecosystem.webp',
             width: 1600, height: 238,
             alt: 'Four tools mapped to their functions: Apache Ranger/Sentry to centralized security administration and access control, Kerberos to network authentication, Knox Gateway to secure perimeter access for REST APIs, and SIEM systems (Splunk, Elastic) to log aggregation and analysis at scale',
@@ -2461,12 +2547,12 @@ export const courses = [
           },
           {
             type: 'table',
-            headers: ['Tool / Technology', 'Primary Function'],
+            headers: ['Tool/Technology', 'Primary Function'],
             rows: [
-              ['Apache Ranger / Apache Sentry', 'Centralized security administration and fine-grained access control for Hadoop/Spark ecosystems'],
-              ['Kerberos', 'Network authentication protocol used to verify the identity of users and nodes in a cluster'],
-              ['Knox Gateway', 'Provides a single, secure point of access (perimeter security) for Big Data cluster REST APIs'],
-              ['SIEM systems (Splunk, Elastic)', 'Security Information and Event Management systems used to aggregate and analyse security logs at scale'],
+              ['Apache Ranger / Apache Sentry', 'Centralized security administration and fine-grained access control for Hadoop/Spark ecosystems.'],
+              ['Kerberos', 'Network authentication protocol used to verify the identity of users and nodes in a cluster.'],
+              ['Knox Gateway', 'Provides a single, secure point of access (perimeter security) for Big Data cluster REST APIs.'],
+              ['SIEM Systems (Splunk, Elastic)', 'Security Information and Event Management systems used to aggregate and analyze security logs at scale.'],
             ],
           },
         ],
@@ -2477,22 +2563,20 @@ export const courses = [
         sections: [
           {
             type: 'definition',
-            heading: '5.1 Artificial Intelligence',
-            text: 'Artificial Intelligence (AI) is the branch of computer science that focuses on creating systems capable of performing tasks that typically require human intelligence — learning, reasoning, problem-solving, perception, and language understanding. It spans a wide range of technologies, from rule-based systems to machine learning and deep learning.',
+            text: 'Artificial Intelligence (AI) is the branch of computer science that focuses on creating systems capable of performing tasks that typically require human intelligence. These tasks include learning, reasoning, problem-solving, perception, and language understanding. AI consists a wide range of technologies and methodologies, from rule-based systems to more advanced forms like machine learning and deep learning.',
           },
           {
             type: 'definition',
-            heading: '5.2 Machine Learning',
-            text: 'Machine Learning (ML), a subset of AI, is the study of algorithms and statistical models that let computers perform specific tasks without explicit instructions, relying instead on patterns and inference derived from data. The goal is to build models that generalise from training data to unseen data, making predictions or decisions on new inputs.',
+            text: 'Machine Learning (ML), a subset of AI, is the study of algorithms and statistical models that enable computers to perform specific tasks without using explicit instructions. Instead, ML systems rely on patterns and inference derived from data and information. The primary goal of ML is to build models that can generalize from training data to unseen data, making predictions or decisions based on new inputs.',
           },
           {
             type: 'text',
-            heading: '5.3 Application of ML in Data Security',
-            text: 'Applying AI and ML to network security means analysing large amounts of network data, identifying patterns, and detecting anomalies that may indicate security threats. This enables real-time detection and mitigation, which matters because of the increasing complexity and volume of attacks. The digital landscape is defined by two converging trends: the ubiquity of machine learning, and the increasing vulnerability of interconnected systems (e.g. microprocessor flaws like Spectre and Meltdown).',
+            heading: 'Application of ML in Data Security',
+            text: 'The application of AI and ML in network security involves using these technologies to analyze large amounts of network data, identify patterns, and detect anomalies that may indicate security threats. This approach allows for real-time detection and mitigation of cyber threats, which is crucial given the increasing complexity and volume of attacks. The digital landscape is defined by two converging trends: the ubiquity of machine learning and the increasing vulnerability of interconnected systems (e.g., microprocessors like Spectre/Meltdown). Table 2 shows the breakdown of various security threats in the data.',
           },
           {
             type: 'image',
-            heading: '5.4 Cybersecurity Threat Categories',
+            heading: 'Table 2: Cybersecurity Threat Categories with Definitions and Examples',
             src: '/lecture-notes/cyb-224/threat-taxonomy.webp',
             width: 1400, height: 704,
             alt: 'Mind map of cybersecurity threats in three branches: Malware (worm, trojan, ransomware, bot, rootkit, adware, botnet, spyware, backdoor), Network Attacks (login attack, phishing, spear phishing, keylogger, spam, exploit, account takeover, social engineering, sniffing, scanning, DoS/DDoS) and Advanced Threats (APT, zero-day)',
@@ -2502,93 +2586,80 @@ export const courses = [
             type: 'table',
             headers: ['Threat Category', 'Definition', 'Example'],
             rows: [
-              ['Malware', 'Malicious software designed to damage systems, steal data, or gain unauthorized access', 'A program that secretly deletes company files after installation'],
-              ['Worm', 'Self-replicating malware that spreads automatically across networks without user action', 'A worm spreading through a university network by exploiting a vulnerability'],
-              ['Trojan', 'Malware disguised as legitimate software to trick users into installing it', "A fake 'Free Antivirus' app that installs hidden spyware"],
-              ['Spyware', 'Software that secretly monitors and collects user information without consent', 'A program that tracks browsing history and sends it to attackers'],
-              ['Adware', 'Software that automatically displays unwanted advertisements on a device', 'Constant pop-up ads appearing during internet browsing'],
-              ['Ransomware', 'Malware that encrypts files and demands payment to restore access', "A hospital's records encrypted until ransom is paid"],
-              ['Rootkit', 'A hidden tool that gives attackers privileged access while remaining undetected', 'An attacker installing a rootkit to hide a server intrusion'],
-              ['Backdoor', 'A secret method of bypassing normal authentication to access a system', 'A hidden login password embedded in an application'],
-              ['Bot', 'An infected computer remotely controlled by an attacker', 'A laptop unknowingly sending spam emails under attacker control'],
-              ['Botnet', 'A group of infected devices controlled together by an attacker', 'Thousands of compromised devices launching a coordinated attack'],
-              ['Exploit', 'Code that takes advantage of a specific software weakness', 'Using an unpatched browser flaw to gain system access'],
-              ['Scanning', 'Actively searching systems or networks to identify vulnerabilities', 'Using automated tools to detect open ports on a server'],
-              ['Sniffing', 'Monitoring network traffic to capture sensitive information', 'Capturing login details on unsecured public Wi-Fi'],
-              ['Keylogger', 'A tool that records every keystroke typed on a device', "Recording a victim's banking password as they type"],
-              ['Spam', 'Unwanted bulk electronic messages, often for advertising or malicious purposes', 'Receiving hundreds of unsolicited promotional emails'],
-              ['Login attack', 'Automated attempts to guess usernames and passwords', 'Trying thousands of password combinations to access an account'],
-              ['Account Takeover (ATO)', "Unauthorized access to someone's legitimate account", 'Hackers accessing a social media account and changing the password'],
-              ['Phishing', 'Fraudulent communication pretending to be from a trusted source', 'An email pretending to be from a bank requesting login details'],
-              ['Spear phishing', 'Targeted phishing aimed at a specific individual or organisation', 'An email sent to a CEO pretending to be from a board member'],
-              ['Social engineering', 'Manipulating individuals into revealing confidential information', 'A caller pretending to be IT support asking for credentials'],
-              ['Incendiary speech', 'Harmful or discriminatory speech intended to incite hostility', 'Online posts targeting a group with harmful statements'],
-              ['Denial of Service (DoS/DDoS)', 'Flooding a system with traffic to make it unavailable', 'Overloading an e-commerce website during peak sales'],
-              ['Advanced Persistent Threat (APT)', 'A long-term targeted cyberattack where attackers remain undetected', 'Attackers secretly monitoring a government network for months'],
-              ['Zero-day vulnerability', 'A newly discovered software flaw exploited before a fix is released', 'Hackers exploiting a new OS weakness before patching'],
+              ['Malware', 'Malicious software designed to damage systems, steal data, or gain unauthorized access.', 'A program that secretly deletes company files after installation.'],
+              ['Worm', 'Self-replicating malware that spreads automatically across networks without user action.', 'A worm spreading through a university network by exploiting a vulnerability.'],
+              ['Trojan', 'Malware disguised as legitimate software to trick users into installing it.', "A fake 'Free Antivirus' app that installs hidden spyware."],
+              ['Spyware', 'Software that secretly monitors and collects user information without consent.', 'A program that tracks browsing history and sends it to attackers.'],
+              ['Adware', 'Software that automatically displays unwanted advertisements on a device.', 'Constant pop-up ads appearing during internet browsing.'],
+              ['Ransomware', 'Malware that encrypts files and demands payment to restore access.', "A hospital's records encrypted until ransom is paid."],
+              ['Rootkit', 'A hidden tool that gives attackers privileged access while remaining undetected.', 'An attacker installing a rootkit to hide server intrusion.'],
+              ['Backdoor', 'A secret method of bypassing normal authentication to access a system.', 'A hidden login password embedded in an application.'],
+              ['Bot', 'An infected computer remotely controlled by an attacker.', 'A laptop unknowingly sending spam emails under attacker control.'],
+              ['Botnet', 'A group of infected devices controlled together by an attacker.', 'Thousands of compromised devices launching a coordinated attack.'],
+              ['Exploit', 'Code that takes advantage of a specific software weakness.', 'Using an unpatched browser flaw to gain system access.'],
+              ['Scanning', 'Actively searching systems or networks to identify vulnerabilities.', 'Using automated tools to detect open ports on a server.'],
+              ['Sniffing', 'Monitoring network traffic to capture sensitive information.', 'Capturing login details on unsecured public Wi-Fi.'],
+              ['Keylogger', 'A tool that records every keystroke typed on a device.', "Recording a victim's banking password as they type."],
+              ['Spam', 'Unwanted bulk electronic messages, often for advertising or malicious purposes.', 'Receiving hundreds of unsolicited promotional emails.'],
+              ['Login Attack', 'Automated attempts to guess usernames and passwords.', 'Trying thousands of password combinations to access an account.'],
+              ['Account Takeover (ATO)', "Unauthorized access to someone's legitimate account.", 'Hackers accessing a social media account and changing the password.'],
+              ['Phishing', 'Fraudulent communication pretending to be from a trusted source.', 'An email pretending to be from a bank requesting login details.'],
+              ['Spear Phishing', 'Targeted phishing aimed at a specific individual or organization.', 'An email sent to a CEO pretending to be a board member.'],
+              ['Social Engineering', 'Manipulating individuals into revealing confidential information.', 'A caller pretending to be IT support asking for credentials.'],
+              ['Incendiary Speech', 'Harmful or discriminatory speech intended to incite hostility.', 'Online posts targeting a group with harmful statements.'],
+              ['Denial of Service (DoS/DDoS)', 'Flooding a system with traffic to make it unavailable.', 'Overloading an e-commerce website during peak sales.'],
+              ['Advanced Persistent Threat (APT)', 'A long-term targeted cyberattack where attackers remain undetected.', 'Attackers secretly monitoring a government network for months.'],
+              ['Zero-Day Vulnerability', 'A newly discovered software flaw exploited before a fix is released.', 'Hackers exploiting a new OS weakness before patching.'],
             ],
           },
           {
             type: 'text',
-            heading: '5.5 Protecting ML Systems from Adversarial Attacks',
-            text: 'Just as no modern computer system can be absolutely assured, there is no fail-safe way to protect an AI or ML system — research into defending ML tools is ongoing. The realistic goal is a systems-security approach that reduces the risk and impact of attacks to acceptable levels.',
+            heading: 'How to Protect the System from Adversarial Attacks',
+            text: 'This question aims to prepare you for the fact that, in the same way that no modern computer system can be absolutely assured, there is no fail-safe way to protect an AI or ML system. Research into defending ML tools is ongoing. Responses to this question should acknowledge this fact and take a systems-security approach for reducing the risk and the impact of attacks to acceptable levels. Three important examples of such protection include the following:',
           },
           {
-            type: 'termlist',
-            heading: 'Three Protections to Insist On',
+            type: 'bullets',
             items: [
-              { term: 'Robustness', def: 'Integrity of the tool itself, plus protection of the confidentiality of what it holds' },
-              { term: 'Resilience', def: 'Resistance to attacks during both training and classification' },
-              { term: 'Reliable input', def: 'Evidence that the input data is reliable and representative' },
+              'robustness in the integrity of the tool as well as the protection of confidentiality;',
+              'resilience against attacks during training and classification; and',
+              'evidence that the input data is reliable and representative.',
             ],
           },
           {
             type: 'text',
-            heading: 'Worked Example — The Stop Sign Attack',
-            text: 'ML tools contain well-known vulnerabilities, many of them susceptible to adversary manipulation. Self-driving cars use ML to identify street signs; by deliberately altering a small section of a stop sign with a purpose-designed sticker, an adversary can make these operational ML tools reliably misclassify the stop sign as a 45-mile-per-hour speed limit sign. In cybersecurity the manipulated input is usually far less obvious to an analyst than a sticker on a traffic sign — so any security system built on ML must take these threats seriously.',
+            text: 'ML tools contain well-known vulnerabilities, many of which are susceptible to adversary manipulation. As a poignant example of attacks against ML tools, consider the case of self-driving cars. Such cars use ML tools to identify street signs, among other things. By intentionally manipulating a small section of a stop sign with a purpose-designed sticker, an adversary can make these operational ML tools reliably misclassify a stop sign as a 45-mile-per-hour speed limit sign.',
           },
           {
-            type: 'bullets',
-            heading: 'What to Ask Developers and Suppliers',
-            items: [
-              'How does the design and deployment of the ML tool protect against well-documented classes of attack? (Not an abstract question about all possible attacks.)',
-              "What protections are in place for the integrity of the tool's decisions, during both training and deployment?",
-              'What protects the confidentiality of sensitive information used by the tool?',
-              'What evidence is there that the input data is reliable and representative?',
-              'Cybersecurity cannot prevent all attacks, and does not claim to — any ML tool deployed in a security context should be part of an explicit risk assessment',
-            ],
+            type: 'text',
+            text: 'Adversaries constantly expose cybersecurity tools to input that is likely less obvious to an analyst than a sticker on a traffic-control sign. Therefore, any cybersecurity system you implement using ML tools should take these threats seriously.',
           },
           {
-            type: 'bullets',
-            heading: '5.6 The Upshot — Why Sensitive Data Is Attacked',
-            items: [
-              'The motivations behind cyber-attacks are complex and largely economically driven',
-              'Cybercrime has a functioning marketplace',
-              'Hacking tools are commoditized',
-              'Monetization pathways are layered and indirect',
-              'Defensive systems increase complexity, forcing attackers to adapt',
-              'The result is a continuous adversarial cycle between attackers and defenders',
-            ],
+            type: 'text',
+            text: 'To prepare for such possible manipulation, you should ask the developers and suppliers you are working with how the design and deployment of the ML tool protect against well-known attacks. This is not an',
+          },
+          {
+            type: 'note',
+            text: 'The sentence above breaks off mid-page: printed page 9 is missing from the scanned handout, so the rest of this section is not recorded here.',
           },
           {
             type: 'termlist',
-            heading: '5.7 Activity 1 — Threat Identification from Logs',
+            heading: 'Activity 1: Threat Identification from Logs',
             items: [
-              { term: 'Which patterns may indicate scanning activity?', def: 'Repeated SYN packets without completed handshakes; multiple connection attempts to different ports in a short timeframe from the same IP' },
-              { term: 'Which patterns suggest a brute-force login attempt?', def: 'Repeated failed login attempts from one IP in a short window; a high frequency of authentication requests' },
-              { term: 'Which features would you extract to train an ML model to detect DDoS attacks?', def: 'Number of unique destination ports; packet rate / requests per second' },
+              { term: 'Which patterns may indicate scanning activity?', def: 'Repeated SYN packets without completed handshakes; multiple connection attempts to different ports in a short time, from the same IP address' },
+              { term: 'Which patterns suggest a brute-force login attempt?', def: 'A high frequency of authentication requests; attempts across many usernames from a single source' },
+              { term: 'Which features would you extract to train an ML model to detect DDoS attacks?', def: 'Packet rate; source IP entropy; number of destination ports; SYN-to-ACK ratio' },
             ],
           },
           {
             type: 'table',
-            heading: '5.8 Activity 2 — Threat Classification Mapping',
+            heading: 'Activity 2: Threat Classification Mapping',
             headers: ['Threat Type', 'Main Target'],
             rows: [
-              ['Ransomware', 'Encrypts user or organisation data/files for ransom'],
-              ['Phishing', 'Targets human trust to steal credentials'],
-              ['Botnet', 'Compromises multiple machines to control remotely'],
-              ['Spyware', 'Monitors user activity and steals information'],
-              ['DoS', 'Targets network availability to disrupt service'],
+              ['Ransomware', 'Files and data'],
+              ['Phishing', 'Individuals'],
+              ['Botnet', 'Computers'],
+              ['Spyware', 'User data'],
+              ['DoS', 'Services and network availability'],
             ],
           },
         ],
@@ -2599,17 +2670,15 @@ export const courses = [
         sections: [
           {
             type: 'definition',
-            heading: '6.1 Security as an Economic Problem',
             text: 'Cybersecurity is not only a technical battle but also an economic one. Modern cybercrime operates within a structured financial ecosystem where monetary gain is the primary motivation. Understanding attacker incentives helps security professionals design stronger detection and prevention systems.',
           },
           {
             type: 'text',
-            heading: '6.2 From Reputation to Revenue',
-            text: 'Early cyber-attacks were often motivated by curiosity, mischief, or reputation within hacker communities. Today, most cyber-attacks are financially motivated — as long as cybercrime produces meaningful financial returns, attackers will continue to innovate.',
+            heading: 'From Reputation to Revenue',
+            text: 'Early cyber-attacks were often motivated by curiosity, mischief, or reputation within hacker communities. Today, most cyber-attacks are financially motivated. Modern attackers target:',
           },
           {
             type: 'bullets',
-            heading: 'What Modern Attackers Target',
             items: [
               'Online payment platforms',
               'Financial institutions',
@@ -2621,69 +2690,79 @@ export const courses = [
           },
           {
             type: 'text',
-            heading: '6.3 Marketplace for Hacking Skills',
+            heading: 'Marketplace for Hacking Skills',
             text: 'The commoditization of hacking has lowered the barrier to entry. Darknet marketplaces sell exploits, malware kits, stolen credentials, and even subscription-based hacking services.',
           },
           {
             type: 'text',
-            heading: '6.4 Zero-Day Vulnerability Markets',
-            text: 'Zero-day vulnerabilities are unknown software weaknesses. They can be sold legally through bug bounty programmes or illegally in underground markets. Selling an exploit often provides faster and lower-risk financial returns than launching the attack directly.',
+            heading: 'Zero-Day Vulnerability Markets',
+            text: 'Zero-day vulnerabilities are unknown software weaknesses that can be sold legally through bug bounty programs or illegally in underground markets. Selling exploits often provides faster and lower-risk financial returns than directly launching attacks.',
           },
           {
-            type: 'table',
-            heading: '6.5 Attack Supply Chain Mapping',
-            headers: ['Role in Ecosystem', 'Description'],
-            rows: [
-              ['Vulnerability researcher', 'Finds and documents unpatched security flaws'],
-              ['Exploit developer', 'Writes code that weaponizes a discovered flaw into a usable attack'],
-              ['Malware distributor', 'Spreads the malware to victims via phishing, infected downloads, or botnets'],
-              ['Botnet operator', 'Manages networks of infected devices and rents them out for DDoS attacks'],
-              ['Data reseller', 'Buys and sells stolen data (credentials, card numbers) on dark web markets'],
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '6.6 Activity — Economic Motivation Analysis',
-            items: [
-              { term: 'Why have cyber-attacks shifted from reputation-based to monetary motivations?', def: 'The rise of e-commerce, cryptocurrency, and organised cybercrime markets made data and access directly convertible to cash, turning attacks into a business rather than a hobby' },
-              { term: 'Why might attackers avoid large financial institutions despite the high potential reward?', def: 'Large institutions invest heavily in security — SOC teams for detection, encryption, regulatory compliance — making attacks costly and risky to execute' },
-              { term: 'How do weaker organisations become attractive targets?', def: 'Small businesses often have limited security budgets, no dedicated IT/security staff, and outdated systems' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '6.7 Activity — Machine Learning Implications',
-            items: [
-              { term: 'How does the commercialization of hacking increase attack volume?', def: 'Ready-made hacking tools and malware-as-a-service let low-skill attackers launch attacks at scale, multiplying the number of incidents' },
-              { term: 'Why must machine learning models be scalable in modern environments?', def: 'As data size increases, models need to keep processing in real time without breaking down' },
-              { term: 'How does attacker innovation pressure defensive systems to evolve?', def: 'As attackers develop new evasion techniques, defensive systems must continuously retrain and adapt or become obsolete against novel threats' },
-            ],
+            type: 'note',
+            heading: 'Activities',
+            text: 'The handout prints the questions below with blank answer lines for you to fill in. The answers that follow each set are worked answers, not the lecturer\'s.',
           },
           {
             type: 'casestudy',
-            heading: '6.8 Activity — Case Scenario',
-            prompt: 'A small online retail company experiences a sudden increase in login attempts from multiple geographic locations.',
+            heading: 'Activity 1: Economic Motivation Analysis',
             tasks: [
-              'Why might this company be targeted instead of a major bank?',
-              'What economic incentive might motivate the attacker?',
-              'Which machine learning approach would you recommend — supervised, anomaly detection, or hybrid — and why?',
+              'Why have cyber-attacks shifted from reputation-based motivations to monetary motivations?',
+              'Why might attackers avoid large financial institutions despite high potential reward?',
+              'Explain how weaker organizations become attractive targets in the attacker economy.',
             ],
           },
           {
             type: 'termlist',
             items: [
-              { term: 'Why this company, not a major bank?', def: 'Smaller companies have weaker defences and less monitoring, making them easier and faster to breach even though the payout per victim is smaller' },
+              { term: 'Why the shift to monetary motivations?', def: 'The rise of e-commerce, cryptocurrency, and organised cybercrime markets made data and access directly convertible to cash, turning attacks into a business rather than a hobby' },
+              { term: 'Why avoid large financial institutions?', def: 'Large institutions invest heavily in security — SOC teams for detection, encryption, regulatory compliance — making attacks costly and risky to execute' },
+              { term: 'Why weaker organisations become targets', def: 'Small businesses often have limited security budgets, no dedicated IT/security staff, and outdated systems' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Activity 2: Attack Supply Chain Mapping',
+            headers: ['Role in Ecosystem', 'Description'],
+            rows: [
+              ['Vulnerability Researcher', 'Finds and documents unpatched security flaws'],
+              ['Exploit Developer', 'Writes code that weaponizes a discovered flaw into a usable attack'],
+              ['Malware Distributor', 'Spreads the malware to victims via phishing, infected downloads, or botnets'],
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The handout\'s table runs on past Malware Distributor onto printed page 13, which is missing from the scan. The case scenario that Activity 2 goes on to ask about, and its first question, are on that same missing page — the two questions below are printed on page 14.',
+          },
+          {
+            type: 'casestudy',
+            tasks: [
+              'What economic incentive might motivate the attacker?',
+              'Which machine learning approach would you recommend? (Supervised, Anomaly Detection, Hybrid) Explain your choice.',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
               { term: 'Economic incentive', def: 'Stored payment data, or ransom potential from disrupting a business that cannot afford downtime' },
               { term: 'ML approach', def: 'A hybrid: supervised learning catches known attack patterns effectively, while anomaly detection catches unknown attacks that do not match existing signatures' },
             ],
           },
           {
+            type: 'casestudy',
+            heading: 'Activity',
+            tasks: [
+              'How does understanding attacker economics improve defensive strategy design?',
+              'Why is cybersecurity considered an adversarial machine learning problem?',
+              'In what ways does the underground marketplace accelerate threat evolution?',
+            ],
+          },
+          {
             type: 'termlist',
-            heading: '6.9 Activity — General Understanding',
             items: [
-              { term: 'How does understanding attacker economics improve defensive strategy design?', def: 'Knowing what makes a target profitable (weak security, valuable data) helps a defender prioritise protecting the most attractive assets first' },
-              { term: 'Why is cybersecurity considered an adversarial machine learning problem?', def: 'Unlike static datasets, the data is generated by an intelligent opponent actively adapting to evade detection' },
-              { term: 'In what ways does the underground marketplace accelerate threat evolution?', def: 'Attackers buy, sell, and share tools and techniques instantly, so improvements spread across the criminal community faster than defenders can respond' },
+              { term: 'How attacker economics improves defensive design', def: 'Knowing what makes a target profitable (weak security, valuable data) helps a defender prioritise protecting the most attractive assets first' },
+              { term: 'Why cybersecurity is an adversarial ML problem', def: 'Unlike static datasets, the data is generated by an intelligent opponent actively adapting to evade detection' },
+              { term: 'How the underground marketplace accelerates threats', def: 'Attackers buy, sell, and share tools and techniques instantly, so improvements spread across the criminal community faster than defenders can respond' },
             ],
           },
         ],
@@ -2693,187 +2772,419 @@ export const courses = [
         title: 'Machine Learning for Data Security',
         sections: [
           {
-            type: 'definition',
-            heading: '7.1 What Machine Learning Is',
-            text: 'Machine learning refers to a set of mathematical and statistical techniques that enable computer systems to learn patterns from historical data, generalise beyond observed examples, predict future outcomes, identify similarities and differences, and detect anomalies. At its core, machine learning transforms raw data into meaningful insights through pattern discovery and inference.',
+            type: 'text',
+            heading: 'Machine Learning',
+            text: 'Machine learning refers to a set of mathematical and statistical techniques that enable computer systems to:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Learn patterns from historical data.',
+              'Generalize beyond observed examples.',
+              'Predict future outcomes.',
+              'Identify similarities and differences.',
+              'Detect anomalies.',
+            ],
           },
           {
             type: 'text',
-            heading: 'Why It Matters in Security',
-            text: 'Since the beginning of the technological age, researchers have aimed to design computer systems capable of reasoning, generalising, and making intelligent decisions from complex data — and ML is one of the primary approaches used to achieve it. In security, ML analyses vast amounts of data such as network traffic, learning from historical records and using that knowledge to make predictions about new and unseen events.',
+            text: 'At its core, machine learning transforms raw data into meaningful insights through pattern discovery and inference. Since the beginning of the technological age, researchers have aimed to design computer systems capable of reasoning, generalizing, and making intelligent decisions from complex data. Machine learning (ML) is one of the primary approaches used to achieve this goal. Machine learning allows systems to analyze vast amounts of data such as network traffic. It learns from historical data and uses that knowledge to make predictions about new and unseen events. It is subdivided into supervised and unsupervised learning.',
+          },
+          {
+            type: 'text',
+            heading: 'Types of Machine Learning',
+            text: 'Machine learning methods are categorized into two families:',
+          },
+          {
+            type: 'text',
+            heading: 'Supervised Learning',
+            text: 'In supervised learning:',
           },
           {
             type: 'bullets',
-            heading: '7.2 Supervised Learning',
             items: [
-              'The dataset includes labeled examples',
-              'The algorithm learns from known input and output pairs',
-              'The goal is to predict labels for new data',
-              'Security applications: spam detection, malware classification, phishing detection, malicious URL detection',
-              'Tasks: classification (spam vs legitimate) and regression (predicting numerical values such as risk scores)',
+              'The dataset includes labeled examples.',
+              'The algorithm learns from known input and output pairs.',
+              'The goal is to predict labels for new data.',
             ],
           },
           {
             type: 'bullets',
-            heading: '7.3 Unsupervised Learning',
+            heading: 'Applications in Security',
             items: [
-              'Data is unlabeled',
-              'The algorithm identifies hidden structures or patterns',
-              'It groups data, or detects deviations from normal behaviour',
+              'Spam detection.',
+              'Malware classification.',
+              'Phishing detection.',
+              'Malicious URL detection.',
             ],
           },
           {
             type: 'bullets',
-            heading: '7.4 Use 1 — Pattern Recognition',
+            heading: 'Tasks',
             items: [
-              'Focuses on identifying known characteristics within data',
-              'Examples: spam detection, malware detection, botnet detection, phishing classification',
-              'Works because malicious activity exhibits recognisable features that can be learned',
+              'Classification (e.g., spam vs. legitimate).',
+              'Regression (predicting numerical values such as risk scores).',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Unsupervised Learning',
+            text: 'In unsupervised learning:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Data is unlabeled.',
+              'The algorithm identifies hidden structures or patterns.',
+              'It groups data or detects deviations from normal behavior.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Uses of Machine Learning in Data Security',
+            text: 'Machine learning applications in security generally fall into two categories:',
+          },
+          {
+            type: 'text',
+            heading: 'i. Pattern Recognition',
+            text: 'Pattern recognition focuses on identifying known characteristics within data. Examples:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Spam detection.',
+              'Malware detection.',
+              'Botnet detection.',
+              'Phishing classification.',
+            ],
+          },
+          {
+            type: 'text',
+            text: 'In these cases, malicious activity exhibits recognizable features that can be learned.',
+          },
+          {
+            type: 'text',
+            heading: 'ii. Anomaly Detection',
+            text: 'Anomaly detection defines normal behavior and flagging deviations. E.g.',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Network outlier detection.',
+              'Insider threat detection.',
+              'Access control anomaly detection.',
+              'Behavioral monitoring.',
+            ],
+          },
+          {
+            type: 'text',
+            text: 'Unlike pattern recognition, anomaly detection does not require explicit malicious examples. Instead, it models normal activity and flags deviations.',
+          },
+          {
+            type: 'note',
+            text: 'There may be infinitely many anomalous patterns, including those never observed during training. This makes anomaly detection powerful but also prone to false positives if not carefully designed.',
+          },
+          {
+            type: 'text',
+            heading: 'Access Control and Behavioral Intelligence in Big Data',
+            text: 'Traditional rule-based access control systems are rigid and inflexible. Machine learning enhances access control by:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Learning typical user access patterns.',
+              'Identifying abnormal behavior.',
+              'Providing adaptive responses.',
             ],
           },
           {
             type: 'bullets',
-            heading: '7.5 Use 2 — Anomaly Detection',
+            heading: 'Example scenario',
             items: [
-              'Defines normal behaviour and flags deviations from it',
-              'Examples: network outlier detection, insider threat detection, access control anomaly detection, behavioural monitoring',
-              'Unlike pattern recognition, it does not require explicit malicious examples — it models normal activity instead',
+              'In a hospital:',
+              'Nurses access individual patient records.',
+              'Doctors query multiple patient records for diagnosis.',
+              'An ML system can detect abnormal access patterns without blocking legitimate rare events.',
             ],
           },
           {
             type: 'note',
-            text: 'There may be infinitely many anomalous patterns, including ones never observed during training. That is what makes anomaly detection powerful — and also what makes it prone to false positives if it is not carefully designed.',
+            text: 'The handout prints the two activities below with blank answer lines. The answers under each are worked answers, not the lecturer\'s.',
           },
           {
-            type: 'text',
-            heading: '7.6 Access Control and Behavioural Intelligence',
-            text: 'Traditional rule-based access control systems are rigid and inflexible. Machine learning enhances access control by learning typical user access patterns, identifying abnormal behaviour, and providing adaptive responses.',
-          },
-          {
-            type: 'bullets',
-            heading: 'Example Scenario — A Hospital',
-            items: [
-              'Nurses access individual patient records',
-              'Doctors query multiple patient records for diagnosis',
-              'An ML system can detect abnormal access patterns without blocking legitimate rare events',
+            type: 'casestudy',
+            heading: 'Activity: Machine Learning Application',
+            tasks: [
+              'Which threats are best suited for supervised learning detection models? Why?',
+              'Which threats may require anomaly detection (unsupervised learning)? Why?',
+              'What challenges make cybersecurity data different from standard ML datasets?',
             ],
           },
           {
             type: 'termlist',
-            heading: '7.7 Activity — Machine Learning Application',
             items: [
-              { term: 'Which threats are best suited to supervised learning models, and why?', def: "Well-labeled threats such as phishing, malware and spam — there is plenty of historical labeled data to train on" },
-              { term: 'Which threats require anomaly detection (unsupervised learning), and why?', def: 'Zero-day attacks, insider threats and unusual network behaviour, where no prior labeled examples exist' },
-              { term: 'What makes cybersecurity data different from standard ML datasets?', def: 'Attacks are rare compared with normal traffic; patterns constantly evolve; adversaries actively try to evade detection; and labeled attack data is scarce and sensitive' },
+              { term: 'Best suited to supervised learning', def: 'Well-labeled threats such as phishing, malware and spam — there is plenty of historical labeled data to train on' },
+              { term: 'Requiring anomaly detection', def: 'Zero-day attacks, insider threats and unusual network behaviour, where no prior labeled examples exist' },
+              { term: 'What makes cybersecurity data different', def: 'Attacks are rare compared with normal traffic; patterns constantly evolve; adversaries actively try to evade detection; and labeled attack data is scarce and sensitive' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: 'Activity',
+            tasks: [
+              'Why is it important to understand attacker motivations before designing detection systems?',
+              'How does the adversarial nature of cybersecurity affect machine learning model design?',
+              'Why are zero-day vulnerabilities difficult to detect using signature-based systems?',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Why attacker motivations matter first', def: 'Motivation predicts behaviour — a financially driven attacker goes after payment data and credentials, while an espionage actor goes after long, quiet access. Knowing which you face tells you which assets to instrument, what normal looks like around them, and which detections are worth the false positives' },
+              { term: 'How the adversarial setting changes model design', def: 'The data is produced by an opponent who watches your defences and adapts. Models must therefore be retrained continuously, be robust to deliberately crafted inputs, and avoid relying on features an attacker can cheaply change' },
+              { term: 'Why signatures miss zero-days', def: 'A signature can only match something already seen and catalogued. A zero-day is by definition unseen, so no signature exists for it — which is why behavioural and anomaly-based detection is needed alongside signatures' },
             ],
           },
         ],
       },
       {
         number: '8',
-        title: 'Supervised Learning Algorithms for Intrusion Detection',
+        title: 'Supervised Learning for Data Security',
         sections: [
           {
             type: 'definition',
-            heading: '8.1 The Supervised Learning Set-up',
-            text: 'Supervised learning trains a model on a labeled dataset where every input example xᵢ is paired with its correct output label yᵢ. The goal is to learn a mapping f : x → y that generalises well to unseen data. In network security this is applied to classification tasks such as separating benign from malicious traffic (intrusion detection), spam from non-spam email, or normal from anomalous behaviour.',
-          },
-          {
-            type: 'code',
-            heading: 'Loss Functions',
-            language: 'math',
-            code: 'Binary cross-entropy (binary classification):\n  L(y, ŷ) = −[ y·log(ŷ) + (1 − y)·log(1 − ŷ) ]\n\nCategorical cross-entropy (multi-class):\n  L(y, ŷ) = − Σ(c = 1..C) y_c · log(ŷ_c)\n\nThe model minimises the loss using gradient descent\nor a variant (Adam, SGD with momentum).',
+            text: 'Supervised learning trains a model using a labeled dataset, where every input example, xᵢ, is paired with its correct output label yᵢ. The goal is to learn a mapping function f: x → y that generalizes well to unseen data. In network security, this approach is widely applied to classification tasks, such as distinguishing benign from malicious network traffic (e.g., intrusion detection), spam vs. non-spam emails, or normal and anomalous behavior.',
           },
           {
             type: 'text',
-            heading: '8.2 Decision Trees (DT)',
-            text: 'Decision trees build a tree-like model where internal nodes represent feature tests, branches represent outcomes, and leaf nodes represent class labels or probability distributions. They are interpretable, handle mixed data types well, and require little preprocessing — which makes them popular for initial IDS prototyping.',
+            text: 'The model minimizes a loss function that measures the difference between predicted outputs and true labels. Common loss functions include:',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Binary cross-entropy (for binary classification) is expressed in Equation:\n  L(y, ŷ) = −[ y log(ŷ) + (1 − y) log(1 − ŷ) ]\n\nCategorical cross-entropy (for multi-class) is expressed in Equation:\n  L(y, ŷ) = − Σ(c=1 to C) y_c log(ŷ_c)',
+          },
+          {
+            type: 'text',
+            text: 'Training typically uses optimization algorithms like gradient descent or its variants (e.g., Adam, SGD with momentum). Below are three popular supervised algorithms frequently used in network security, along with their core ideas, key equations, and typical training procedures.',
+          },
+          {
+            type: 'text',
+            heading: 'Decision Trees (DT)',
+            text: 'Decision trees build a tree-like model where internal nodes represent feature tests, branches represent outcomes, and leaf nodes represent class labels (or probability distributions). They are interpretable, handle mixed data types well, and require little preprocessing, making them popular for initial IDS prototyping.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Key algorithm (CART — Classification and Regression Trees)',
+            items: ['Recursively split the data to maximize purity in child nodes.'],
+          },
+          {
+            type: 'code',
+            heading: 'Common splitting criterion (for classification)',
+            language: 'math',
+            code: 'Gini impurity is expressed in Equation:\n  Gini(t) = 1 − Σᵢ₌₁..ₖ pᵢ²\n  where pᵢ is the proportion of class i at node t.\n\nOr Information Gain using entropy:\n  Entropy(S) = − Σᵢ₌₁..ₖ pᵢ log₂(pᵢ)\n  Gain(S, A) = Entropy(S) − Σ over v ∈ Values(A) of (|Sᵥ| / |S|) · Entropy(Sᵥ)',
+          },
+          {
+            type: 'bullets',
+            heading: 'Training procedure (greedy recursive partitioning)',
+            items: [
+              'Start at root with full dataset.',
+              'For each feature and possible split point, compute impurity reduction.',
+              'Choose the split that maximizes gain (or minimizes weighted child impurity).',
+              'Repeat until stopping criteria (max depth, min samples per leaf, min impurity decrease, etc.).',
+              'Assign majority class (or probability) to each leaf.',
+            ],
           },
           {
             type: 'image',
             src: '/lecture-notes/cyb-224/decision-tree.webp',
-            width: 1400, height: 578,
-            alt: 'A decision tree branching from a root node on income (≤ or > $75,000), then on family size (≤ or > 4 members), then on education (≤ or > 12 years), with leaf nodes labelled Purchaser or Non-Purchaser',
-            caption: 'Figure 3: Decision tree structure — each internal node tests a feature, each leaf assigns a class',
-          },
-          {
-            type: 'code',
-            heading: 'CART Splitting Criteria',
-            language: 'math',
-            code: 'Gini impurity:\n  Gini(t) = 1 − Σ(i = 1..k) p_i²\n  where p_i is the proportion of class i at node t\n\nInformation gain using entropy:\n  Entropy(S) = − Σ(i = 1..k) p_i · log₂(p_i)\n  Gain(S, A) = Entropy(S) − Σ(v ∈ Values(A)) (|S_v| / |S|) · Entropy(S_v)',
-          },
-          {
-            type: 'bullets',
-            heading: 'Training Procedure — Greedy Recursive Partitioning',
-            items: [
-              'Start at the root with the full dataset',
-              'For each feature and possible split point, compute the impurity reduction',
-              'Choose the split that maximises gain (or minimises weighted child impurity)',
-              'Repeat until a stopping criterion is met — max depth, min samples per leaf, min impurity decrease',
-              'Assign the majority class (or a probability) to each leaf',
-              'In network security the features might be packet size, inter-arrival time, source/destination ports and flags, with leaves predicting "normal" or a specific attack type',
-            ],
+            width: 1800, height: 640,
+            alt: 'A decision tree headed Root Node (Initial Split), branching on Income <= $75,000 and Income > $75,000, then on <= 4 family members and > 4 family members, then on <= 12 years of education and > 12 years of education, ending in leaves labelled Purchaser and Non-Purchaser',
+            caption: 'Hypothetical Classification Tree (redrawn from the handout, printed page 20)',
           },
           {
             type: 'text',
-            heading: '8.3 Support Vector Machines (SVM)',
-            text: 'SVMs find the optimal hyperplane that separates classes with the maximum margin. They are effective on high-dimensional data and remain popular in intrusion detection because they generalise well from relatively small labeled datasets.',
+            text: 'In network security, features might include packet size, inter-arrival time, source/destination ports, flags, etc., with leaves predicting "normal" or specific attack types.',
+          },
+          {
+            type: 'text',
+            heading: 'Support Vector Machines (SVM)',
+            text: 'SVMs aim to find the optimal hyperplane that separates classes with the maximum margin. They are effective for high-dimensional data and remain popular in intrusion detection due to good generalization with relatively small labeled datasets.',
+          },
+          {
+            type: 'code',
+            heading: 'Core idea (hard-margin SVM — linearly separable case)',
+            language: 'math',
+            code: 'Find w and b such that:\n  yᵢ (wᵀ xᵢ + b) ≥ 1 ∀i\n\nMaximize margin 2/‖w‖ → equivalent to minimizing ½‖w‖².',
+          },
+          {
+            type: 'code',
+            heading: 'Soft-margin SVM (realistic case with slack variables)',
+            language: 'math',
+            code: 'Minimize:  ½‖w‖² + C Σ(i=1 to n) ξᵢ\n\nsubject to:  yᵢ (wᵀ xᵢ + b) ≥ 1 − ξᵢ, ξᵢ ≥ 0\n\nC controls the trade-off between margin maximization\nand classification error.',
+          },
+          {
+            type: 'code',
+            heading: 'Prediction function',
+            language: 'math',
+            code: 'f(x) = sign(wᵀx + b)',
+          },
+          {
+            type: 'code',
+            heading: 'Kernel trick (for non-linear separation)',
+            language: 'math',
+            code: 'Replace xᵢᵀxⱼ with kernel K(xᵢ, xⱼ)\n(e.g., RBF: K(xᵢ, xⱼ) = exp(−γ ‖xᵢ − xⱼ‖²)).',
+          },
+          {
+            type: 'text',
+            text: 'Here are representative SVM diagrams showing the hyperplane and margin:',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/cyb-224/svm-candidates.webp',
+            width: 1500, height: 820,
+            maxWidth: 720,
+            alt: 'A cloud of two kinds of point on unlabelled axes, cut by three thick straight boundaries that meet at a single junction, dividing the plane into three regions. A callout box reading "Hyperplanes that Best Separates Different Classes" points to where the boundaries meet',
+            caption: 'Support Vector Machines (SVM) — hyperplanes that best separate different classes (redrawn from printed page 22)',
           },
           {
             type: 'image',
             src: '/lecture-notes/cyb-224/svm-margin.webp',
-            width: 1100, height: 860,
-            alt: 'Diagram relating support vectors to the positive and negative hyperplanes, with the maximum margin hyperplane sitting between them and the margin measured across the gap',
-            caption: 'Figure 4: SVM geometry — support vectors define the margin around the separating hyperplane',
+            width: 1500, height: 900,
+            maxWidth: 720,
+            alt: 'On X1 and X2 axes, a solid maximum margin hyperplane with a dashed positive hyperplane above right and a dashed negative hyperplane below left. Diamonds lie beyond the positive hyperplane and circles beyond the negative one; the two points sitting on the dashed planes are labelled the support vectors, and the band between the solid line and the positive hyperplane is labelled the maximum margin',
+            caption: 'The maximum margin hyperplane, with the positive and negative hyperplanes either side (redrawn from printed page 22)',
           },
           {
-            type: 'code',
-            heading: 'SVM Equations',
-            language: 'math',
-            code: 'Hard margin (linearly separable case):\n  find w, b such that  y_i(wᵀx_i + b) ≥ 1   for all i\n  maximise margin 2/||w||  ⟺  minimise ½||w||²\n\nSoft margin (realistic case, slack variables ξ):\n  minimise  ½||w||² + C · Σ(i = 1..n) ξ_i\n  subject to  y_i(wᵀx_i + b) ≥ 1 − ξ_i,  ξ_i ≥ 0\n  C trades off margin size against classification error\n\nPrediction:\n  f(x) = sign(wᵀx + b)\n\nKernel trick (non-linear separation) — replace xᵢᵀxⱼ with K(xᵢ, xⱼ):\n  RBF:  K(xᵢ, xⱼ) = exp(−γ·||xᵢ − xⱼ||²)',
-          },
-          {
-            type: 'text',
-            heading: '8.4 Neural Networks (Feedforward / Multi-Layer Perceptron)',
-            text: 'Feedforward neural networks consist of an input layer, one or more hidden layers, and an output layer. They excel at learning complex, non-linear patterns, which suits modern network intrusion detection on large traffic datasets.',
-          },
-          {
-            type: 'code',
-            heading: 'Forward Pass and Training',
-            language: 'math',
-            code: 'Single neuron:\n  z = wᵀx + b\n  a = σ(z)\n  common activations σ: ReLU max(0, z), sigmoid, tanh\n\nL-layer network:\n  a^[l] = σ^[l]( W^[l] · a^[l−1] + b^[l] ),   l = 1, ..., L\n\nTraining loop:\n  1. Forward pass  → compute predictions and loss\n  2. Backward pass → compute gradients ∂L/∂W^[l], ∂L/∂b^[l]\n  3. Update        → W ← W − η · ∂L/∂W   (or Adam, etc.)',
+            type: 'image',
+            src: '/lecture-notes/cyb-224/svm-decision-boundary.webp',
+            width: 1500, height: 880,
+            maxWidth: 720,
+            alt: 'On x1 and x2 axes, three parallel lines: a thin solid hyperplane for the first class on the left, a thick dashed decision boundary in the middle, and a thin solid hyperplane for the second class on the right. Circles lie left of the boundary and squares right of it; three points on the outer planes are ringed as support vectors, and a double-headed arrow between the first-class hyperplane and the decision boundary is labelled the margin',
+            caption: 'The same picture named differently — decision boundary, one hyperplane per class, and the margin between them (redrawn from printed page 23)',
           },
           {
             type: 'text',
-            heading: '8.5 Choosing Between Them',
-            text: 'Each method has trade-offs: decision trees offer interpretability, SVMs provide strong theoretical guarantees in high dimensions, and neural networks deliver top performance on large or complex datasets. Neural approaches work best combined with feature engineering, autoencoders for anomaly-detection preprocessing, or modern variants (CNNs, LSTMs, Transformers) for traffic sequence analysis. In practice many real-world IDS/IPS systems ensemble these methods or use deep learning hybrids.',
+            heading: 'Neural Networks (Feedforward / Multi-Layer Perceptron)',
+            text: 'Feedforward neural networks consist of an input layer, one or more hidden layers, and an output layer. They excel at learning complex, non-linear patterns for modern network intrusion detection systems, especially with large traffic datasets.',
+          },
+          {
+            type: 'code',
+            heading: 'Forward pass (single neuron)',
+            language: 'math',
+            code: 'z = wᵀx + b   a = σ(z)\n\nCommon activations σ: ReLU (max (0, z)), sigmoid, tanh.',
+          },
+          {
+            type: 'code',
+            heading: 'Overall model (L-layer network)',
+            language: 'math',
+            code: 'a⁽ˡ⁾ = σ⁽ˡ⁾( W⁽ˡ⁾ a⁽ˡ⁻¹⁾ + b⁽ˡ⁾ )   l = 1, …, L',
+          },
+          {
+            type: 'text',
+            heading: 'Loss + backpropagation',
+            text: 'Minimize empirical risk (e.g., cross-entropy) using gradient descent. Gradients computed via chain rule → backpropagation algorithm.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Typical training loop',
+            items: [
+              'Forward pass — compute predictions and loss.',
+              'Backward pass — compute gradients ∂L/∂W⁽ˡ⁾, ∂L/∂b⁽ˡ⁾.',
+              'Update parameters: W ← W − η ∂L/∂W (or using Adam, etc.).',
+            ],
+          },
+          {
+            type: 'text',
+            text: 'These models are effective in network security when combined with feature engineering, autoencoders for anomaly-detection preprocessing, or modern variants (CNNs, LSTMs, Transformers) for traffic-sequence analysis. Each method has trade-offs: decision trees offer interpretability, SVMs provide strong theoretical guarantees in high dimensions, and neural networks deliver top performance on large/complex datasets. In practice, many real-world IDS/IPS systems ensemble them or use deep learning hybrids.',
           },
         ],
       },
       {
         number: '9',
-        title: 'Practical — Building Detection Models by Hand',
+        title: 'Practical Activities',
         sections: [
           {
             type: 'text',
-            heading: '9.1 Objective',
-            text: 'These activities combine discussion, manual calculation, and coding practice, to help you understand the strengths and weaknesses of different machine learning algorithms applied to real network security problems.',
+            text: 'This practical manual contains activities designed to help students understand how machine learning algorithms are applied in network intrusion detection systems (IDS). The exercises combine discussion, manual calculations, and coding practice.',
+          },
+          {
+            type: 'text',
+            heading: 'Objective',
+            text: 'To help students understand the strengths and weaknesses of different machine learning algorithms when applied to real network security problems.',
+          },
+          {
+            type: 'text',
+            heading: 'Scenario',
+            text: 'You are designing an Intrusion Detection System (IDS) that analyzes the following network traffic features:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Packet size.',
+              'Source and destination IP address.',
+              'Source and destination port.',
+              'TCP flags (e.g., SYN).',
+              'TTL (Time To Live).',
+              'Packet inter-arrival time.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Task',
+            items: [
+              'Divide students into small groups.',
+              'Assign each group one algorithm: Decision Tree; Support Vector Machine (SVM); Neural Network (MLP).',
+              'Each group should discuss and answer the following questions:',
+            ],
           },
           {
             type: 'casestudy',
-            heading: '9.2 Practical 1 — Algorithm Comparison',
-            prompt: 'You are designing an Intrusion Detection System (IDS) that analyses these network traffic features: packet size, source and destination IP address, source and destination port, TCP flags (e.g. SYN), TTL (Time To Live), and packet inter-arrival time. Work in small groups, each group taking one algorithm — Decision Tree, SVM, or Neural Network (MLP).',
             tasks: [
-              'What are three advantages of your algorithm for IDS?',
+              'What are three advantages of the algorithm for IDS?',
               'What are three disadvantages?',
               'How could overfitting occur when detecting network attacks?',
               'What techniques could reduce overfitting?',
-              'Which model suits a small labeled dataset from a university network, and which suits a massive real-time traffic dataset?',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The handout gives each group one algorithm. All three are answered below so you can revise the whole comparison; these are worked answers, not the lecturer\'s.',
+          },
+          {
+            type: 'table',
+            headers: ['Algorithm', 'Three advantages for IDS', 'Three disadvantages'],
+            rows: [
+              ['Decision Tree', 'Interpretable — an analyst can read the rule that fired and defend it in an incident report; handles the mixed feature types here (packet size and TTL alongside TCP flags) with no preprocessing; fast to train and fast enough to predict at line rate', 'Overfits readily, worst of all on high-cardinality features like port or IP; a small change in the training capture can restructure the whole tree; axis-parallel splits can only approximate a diagonal relationship, such as packet rate against entropy, as a staircase'],
+              ['Support Vector Machine', 'Generalises well from a relatively small labelled capture, which is what a university network can realistically produce; the kernel trick separates classes no straight line can divide; the boundary depends only on the support vectors, so the bulk of ordinary traffic cannot drag it around', 'Training cost grows roughly with the square of the sample count, so a full day of capture is impractical; it outputs a signed distance rather than a probability, so ranking alerts by confidence needs extra calibration; features must be scaled first and C and gamma both have to be tuned'],
+              ['Neural Network (MLP)', 'Learns the non-linear combinations of packet size, TTL and inter-arrival time that mark an attack without being told which to combine; scales to the traffic volume a campus actually generates; extends naturally to sequence models when an attack is spread over time', 'Needs a large labelled dataset, and labelled attack traffic is exactly what is scarce; a decision cannot be explained to an incident-response team; expensive to train and sensitive to architecture and learning-rate choices'],
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'How overfitting arises here', def: 'The model learns the capture instead of the attack. The IP address features are the worst offenders: a tree that splits on a specific source address scores perfectly on the capture and detects nothing once the attacker moves host. Port numbers and TTL do the same more quietly. And because benign traffic outnumbers attacks heavily, a model can report high accuracy while missing every intrusion in the set' },
+              { term: 'Techniques that reduce it', def: 'Drop or generalise identifier-like features — bucket ports into ranges instead of splitting on one number, and prefer behavioural features (packet rate, byte entropy, SYN-to-ACK ratio) that an attacker cannot change for free. Constrain the model: maximum depth, minimum samples per leaf and minimum impurity decrease for trees; L2 or dropout for the MLP; a smaller C for the SVM. Validate on traffic captured on a different day, cross-validate rather than trusting one split, and balance or reweight the classes so the rare attack still counts' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: 'Which model is suitable for',
+            tasks: [
+              'A small labeled dataset from a university network',
+              'A massive real-time traffic dataset',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Small labelled dataset from a university network', def: 'Support Vector Machine. The theory section states that SVMs generalise well from relatively small labelled datasets, and because the margin is fixed by a handful of support vectors, a few hundred labelled flows can still place a usable boundary. A pruned decision tree is the sensible second choice where the analyst has to be able to read the rule' },
+              { term: 'Massive real-time traffic dataset', def: 'Neural network. The theory section puts its best performance on large and complex datasets, and once trained it predicts cheaply, which is what real time depends on. Note what the practicals do at that scale: they switch from the kernel SVM to LinearSVC for precisely this reason, because kernel training does not scale' },
             ],
           },
           {
             type: 'table',
-            heading: '9.3 Practical 2 — Decision Tree Construction',
+            heading: 'PRACTICAL 2: Decision Tree Construction — Dataset',
             headers: ['Packet', 'Packet Size', 'Src Port < 1024', 'SYN Flag', 'Label'],
             rows: [
               ['1', '60', 'Yes', '1', 'Malicious'],
@@ -2886,38 +3197,85 @@ export const courses = [
           },
           {
             type: 'code',
-            heading: 'Step 1 — Root Gini Impurity',
+            heading: 'Step 1: Calculate Root Gini Impurity',
             language: 'math',
-            code: 'Gini = 1 − ( p²_malicious + p²_benign )\n\nmalicious packets = 3,  benign packets = 3\n  p_malicious = 3/6 = 0.5\n  p_benign    = 3/6 = 0.5\n\nGini = 1 − (0.5² + 0.5²)\nGini = 0.5',
+            code: 'Formula:\n  Gini = 1 − ( P²_malicious + P²_benign )\n\nNumber of malicious packets = 3.\nNumber of benign packets = 3.\nP_malicious = 3/6 = 0.5.\nP_benign = 3/6 = 0.5.\n\nGini = 1 − (0.5² + 0.5²)\nGini = 0.5',
           },
           {
-            type: 'code',
-            heading: 'Step 2 — Split on the SYN Flag',
-            language: 'math',
-            code: 'If SYN = 1 → all packets Malicious → Gini = 0\nIf SYN = 0 → all packets Benign    → Gini = 0\n\nA perfect split.\n\nFinal decision rule:\n  IF SYN_Flag = 1 THEN Malicious\n  ELSE Benign\n\nTraining accuracy = 6/6 = 100%',
+            type: 'text',
+            text: 'The SYN flag is a control bit in the Transmission Control Protocol header that is used to start a connection between two computers on a network. "SYN" stands for Synchronize. It is mainly used during the initial stage of communication to synchronize sequence numbers between the sender and receiver.',
           },
           {
-            type: 'casestudy',
-            title: 'Discussion Question',
-            prompt: 'Why might this tree overfit real network traffic data, and how could pruning improve generalisation?',
+            type: 'text',
+            heading: 'Function of SYN Flag',
+            text: 'The SYN flag is used to initiate a TCP connection before data transmission begins. It tells the receiving device that the sender wants to start a communication session.',
           },
           {
-            type: 'definition',
-            heading: 'Background — The SYN Flag',
-            text: 'The SYN ("synchronize") flag is a control bit in the TCP header used to start a connection between two computers on a network. It is used mainly during the initial stage of communication to synchronize sequence numbers between sender and receiver, telling the receiving device that the sender wants to start a session.',
+            type: 'text',
+            heading: 'TCP Three-Way Handshake',
+            text: 'The SYN flag is part of the three-way handshake, which establishes a reliable TCP connection.',
           },
           {
             type: 'termlist',
-            heading: 'The TCP Three-Way Handshake',
             items: [
-              { term: 'Step 1 — SYN (client → server)', def: 'The client sends a packet with SYN = 1, meaning "I want to start a connection"' },
-              { term: 'Step 2 — SYN-ACK (server → client)', def: 'The server replies with SYN = 1 and ACK = 1, meaning "connection request received"' },
-              { term: 'Step 3 — ACK (client → server)', def: 'The client sends ACK = 1, and the connection is now established' },
+              { term: 'Step 1: SYN — Client → Server', def: 'The client sends a packet with SYN = 1. This means "I want to start a connection."' },
+              { term: 'Step 2: SYN-ACK — Server → Client', def: 'The server replies with SYN = 1 and ACK = 1. Meaning "Connection request received."' },
+              { term: 'Step 3: ACK — Client → Server', def: 'The client sends ACK = 1. The connection is now established.' },
             ],
           },
           {
+            type: 'code',
+            heading: 'Step 2: Split Using SYN Flag (The SYN flag is used to initiate a TCP connection before data transmission begins. It tells the receiving device that the sender wants to start a communication session).',
+            language: 'math',
+            code: 'If SYN = 1\n  All packets → Malicious.\n  Gini = 0.\n\nIf SYN = 0\n  All packets → Benign.\n  Gini = 0.\n\nThis produces a perfect split.\n\nFinal Decision Rule:\n  IF SYN_Flag = 1 → Malicious ELSE → Benign\n\nTraining Accuracy:\n  Accuracy = 6/6 = 100%',
+          },
+          {
+            type: 'casestudy',
+            heading: 'Discussion Question',
+            prompt: 'Why might this tree overfit real network traffic data, and how could pruning improve generalization?',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Why the tree overfits', def: 'It was fitted on six packets and one feature. SYN = 1 happened to coincide with Malicious in all three malicious rows, so the split reaches Gini 0 on both sides and 100% training accuracy — but that accuracy is a property of those six rows, not of network traffic. Every normal TCP connection opens with SYN = 1, so on real traffic this rule flags the whole handshake volume of the network as malicious, and it detects nothing that is not a SYN flood' },
+              { term: 'What the tree cannot know', def: 'Packet size splits the same six rows just as perfectly — any threshold between 65 and 70 bytes separates the malicious 55, 60 and 65 from the benign 70, 1400 and 1500. With six rows there is no way to tell which of several perfect splits reflects the real signal, so the tree simply takes the first one it evaluates' },
+              { term: 'How pruning improves generalisation', def: 'Pre-pruning stops the tree before it can memorise: cap the maximum depth, require a minimum number of samples per leaf, and require a minimum impurity decrease before a split is accepted. Post-pruning grows the tree first, then collapses any branch whose removal does not hurt performance on held-out data. Either way only the splits that survive on unseen packets are kept, and a leaf that is 60% confident over many samples is worth more than one that is perfect over two' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Practical Question 3: Support Vector Machine (SVM) for Malicious Traffic Detection',
+            text: 'To use Support Vector Machine (SVM) to classify network traffic as Benign or Malicious using a simple dataset.',
+          },
+          {
             type: 'table',
-            heading: '9.4 Practical 3 — SVM for Malicious Traffic Detection',
+            headers: ['Packet', 'Packet Rate', 'Byte Entropy', 'SYN Flag', 'Label'],
+            rows: [
+              ['1', '12', '0.30', '0', 'Benign'],
+              ['2', '15', '0.35', '0', 'Benign'],
+              ['3', '18', '0.40', '0', 'Benign'],
+              ['4', '40', '0.85', '1', 'Malicious'],
+              ['5', '45', '0.90', '1', 'Malicious'],
+              ['6', '50', '0.95', '1', 'Malicious'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Where',
+            items: [
+              { term: 'Packet Rate', def: 'number of packets per second.' },
+              { term: 'Byte Entropy', def: 'randomness in packet data.' },
+              { term: 'SYN Flag', def: 'indicates connection request.' },
+              { term: 'Label', def: 'traffic type.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Practical Tasks — Question 1',
+            text: 'Convert the labels: Benign → 0. Malicious → 1.',
+          },
+          {
+            type: 'table',
             headers: ['Packet', 'Packet Rate', 'Byte Entropy', 'SYN Flag', 'Label', 'Converted Label'],
             rows: [
               ['1', '12', '0.30', '0', 'Benign', '0'],
@@ -2928,16 +3286,6 @@ export const courses = [
               ['6', '50', '0.95', '1', 'Malicious', '1'],
             ],
           },
-          {
-            type: 'termlist',
-            heading: 'Reading the Dataset',
-            items: [
-              { term: 'Packet rate', def: 'Number of packets per second' },
-              { term: 'Byte entropy', def: 'Randomness in the packet data' },
-              { term: 'SYN flag', def: 'Indicates a connection request' },
-              { term: 'Converted label', def: 'SVMs need numeric targets — Benign → 0, Malicious → 1' },
-            ],
-          },
         ],
       },
       {
@@ -2946,43 +3294,43 @@ export const courses = [
         sections: [
           {
             type: 'definition',
-            heading: '10.1 Unsupervised Learning',
-            text: 'Unsupervised learning trains a model on data without labeled responses. The model learns the underlying structure of the data by identifying patterns and relationships on its own.',
+            heading: 'Unsupervised Learning',
+            text: 'Unsupervised learning involves training a model on data without labeled responses. The model tries to learn the underlying structure of the data by identifying patterns and relationships.',
           },
           {
             type: 'text',
             heading: 'Clustering Algorithms',
-            text: 'Clustering algorithms such as k-means and hierarchical clustering group similar data points together. In network security, clustering identifies groups of similar network behaviours, which helps detect abnormal activity — for example grouping similar login attempts and identifying the outliers that may indicate unauthorized access.',
+            text: 'Clustering algorithms, such as k-means and hierarchical clustering, group similar data points together. In network security, clustering can be used to identify groups of similar network behaviors, which can help in detecting abnormal activities. For example, clustering can be used to group similar login attempts and identify outliers that may indicate unauthorized access attempts.',
           },
           {
             type: 'text',
-            heading: 'Anomaly Detection Techniques',
-            text: 'Anomaly detection identifies data points that deviate significantly from the majority of the data. Gaussian Mixture Models (GMM) and Principal Component Analysis (PCA) are commonly used. In network security this surfaces unusual traffic patterns that may indicate a breach.',
+            heading: 'Anomaly Detection',
+            text: 'Anomaly detection involves identifying data points that deviate significantly from the majority of the data. Techniques such as Gaussian Mixture Models (GMM) and Principal Component Analysis (PCA) are commonly used for this purpose. In network security, anomaly detection can be used to identify unusual network traffic patterns that may indicate a security breach.',
           },
           {
             type: 'definition',
-            heading: '10.2 Reinforcement Learning',
-            text: 'Reinforcement learning trains a model to make a sequence of decisions by learning from the consequences of its actions — rewards for desired behaviour, penalties for undesired behaviour — optimising its actions over time.',
+            heading: 'Reinforcement Learning',
+            text: 'Reinforcement learning involves training a model to make a sequence of decisions by learning from the consequences of its actions. The model receives rewards for desired behaviors and penalties for undesired ones, optimizing its actions over time.',
           },
           {
             type: 'text',
             heading: 'Markov Decision Processes (MDP)',
-            text: 'MDPs provide a mathematical framework for modelling decisions where outcomes are partly random and partly under the control of the decision-maker. In network security, reinforcement learning can develop adaptive security policies that respond to evolving threats — for example dynamically adjusting firewall rules based on detected threats, balancing security against network performance.',
+            text: 'MDPs provide a mathematical framework for modeling decision-making in situations where outcomes are partly random and partly under the control of the decision-maker. In network security, reinforcement learning can be used to develop adaptive security policies that respond to evolving threats. For example, a reinforcement learning model could be trained to dynamically adjust firewall rules based on detected threats, optimizing the balance between security and network performance.',
           },
           {
             type: 'definition',
-            heading: '10.3 Deep Learning',
-            text: 'Deep learning, a subset of ML, uses neural networks with many layers (deep neural networks) to model complex patterns. It is particularly effective on high-dimensional data such as images and speech.',
+            heading: 'Deep Learning',
+            text: 'Deep learning, a subset of ML, involves neural networks with many layers (deep neural networks) that can model complex patterns in data. Deep learning techniques are particularly effective for tasks that involve high-dimensional data, such as image and speech recognition.',
           },
           {
             type: 'text',
             heading: 'Convolutional Neural Networks (CNNs)',
-            text: 'CNNs are specialised networks for grid-like data such as images. In network security, CNNs analyse traffic data represented as images to identify patterns indicative of malicious activity — and can detect malware by analysing the binary code of executable files.',
+            text: 'CNNs are specialized neural networks designed to process grid-like data, such as images. In network security, CNNs can be used to analyze network traffic data represented as images, identifying patterns indicative of malicious activity. For instance, CNNs can be applied to detect malware by analyzing the binary code of executable files.',
           },
           {
             type: 'text',
             heading: 'Recurrent Neural Networks (RNNs)',
-            text: 'RNNs handle sequential data, which suits time-series analysis. In network security, RNNs detect anomalies in network traffic over time, identifying patterns that indicate ongoing attacks or data exfiltration attempts.',
+            text: 'RNNs are designed to handle sequential data, making them suitable for tasks like time-series analysis. In network security, RNNs can be used to detect anomalies in network traffic over time, identifying patterns that indicate ongoing attacks or data exfiltration attempts. By employing these AI/ML techniques, network security systems can achieve higher accuracy in threat detection and response, ultimately enhancing the overall security posture of organizations. The integration of AI/ML into network security not only improves the ability to detect and mitigate threats but also enables proactive defense mechanisms that adapt to the evolving threat landscape.',
           },
         ],
       },
@@ -2992,86 +3340,127 @@ export const courses = [
         sections: [
           {
             type: 'text',
-            heading: '11.1 How AI/ML Changed Threat Detection',
-            text: 'Applying AI and ML to network security has fundamentally transformed how threats are detected and mitigated. These technologies analyse vast amounts of network data in real time, identifying and responding to potential threats more effectively and efficiently than traditional methods, and enabling proactive defences that adapt to the evolving threat landscape.',
+            text: 'The application of AI and ML in network security has fundamentally transformed the approach to detecting and mitigating network threats. These technologies enable the analysis of vast amounts of network data in real-time, providing enhanced capabilities for identifying and responding to potential threats more effectively and efficiently than traditional methods.',
           },
           {
             type: 'image',
             src: '/lecture-notes/cyb-224/ml-detection-pipeline.webp',
-            width: 1000, height: 1174,
+            width: 1000, height: 1294,
             maxWidth: 620,
-            alt: 'A six-stage pipeline: data collection from network traffic, data preprocessing (cleansing and feature extraction), model training with neural networks, decision trees and SVM, real-time monitoring and detection, threat identification and mitigation, then automated response such as blocking IPs and isolating devices',
+            alt: 'A six-stage pipeline: data collection from network traffic, data preprocessing (cleansing and feature extraction), model training with neural networks, decision trees and SVM, real-time monitoring and detection (baseline behavior, anomaly detection), threat identification and mitigation (pattern recognition, predictive modeling), then automated response such as blocking IPs and isolating devices',
             caption: 'Figure 5: The ML threat-detection pipeline, from raw traffic to automated response',
           },
           {
-            type: 'termlist',
-            heading: '11.2 Anomaly Detection',
-            items: [
-              { term: 'Baseline behaviour modeling', def: 'The system first establishes what normal looks like by analysing historical data — typical login times, frequency of data access, common communication patterns — building a profile of regular activity' },
-              { term: 'Real-time monitoring', def: 'Traffic and activity are watched continuously and any deviation from the baseline is flagged; statistical analysis, clustering, and neural networks are common here. A sudden spike in data transfer volume or an unusual login time triggers an alert' },
-              { term: 'Contextual analysis', def: 'User behaviour analytics (UBA) separates normal activity from suspicious action using context — time of day, location, user role — which improves accuracy and reduces false positives' },
-            ],
+            type: 'text',
+            heading: 'Anomaly Detection',
+            text: 'AI and ML models excel at detecting anomalies in network traffic by identifying deviations from established norms. This process involves several key steps:',
           },
           {
             type: 'termlist',
-            heading: '11.3 Threat Identification',
             items: [
-              { term: 'Pattern recognition', def: 'Models are trained to recognise patterns associated with known threats. Signature-based detection uses predefined malware patterns; ML extends this to variations and new patterns signatures would miss, such as polymorphic malware that changes its code to evade detection' },
-              { term: 'Behavioural analysis', def: "Rather than relying only on known patterns, the model analyses how entities behave — a rise in failed logins, unusual data transfers, unexpected communication. This is especially useful for zero-day attacks and APTs, where the attacker's behaviour deviates from normal user activity" },
+              { term: 'Baseline Behavior Modeling', def: 'AI/ML systems first establish a baseline of normal network behavior by analyzing historical data. This involves understanding what constitutes regular traffic, user activities, and system operations. For instance, machine learning models can observe typical login times, frequency of data access, and common communication patterns to create a comprehensive profile of normal activities.' },
+              { term: 'Real-Time Monitoring', def: 'Once the baseline is established, the system continuously monitors network traffic and activities in real-time. Any deviations from the established baseline are flagged as potential anomalies. Techniques such as statistical analysis, clustering, and neural networks are commonly used. For example, a sudden spike in data transfer volume or an unusual login time can trigger an alert for further investigation.' },
+              { term: 'Contextual Analysis', def: 'Advanced AI/ML systems also incorporate contextual data to improve anomaly detection. For instance, user behavior analytics (UBA) can differentiate between normal activities and suspicious actions based on the context, such as time of day, location, and user role. By analyzing this contextual information, AI/ML models can more accurately identify genuine threats and reduce false positives.' },
             ],
           },
           {
+            type: 'text',
+            heading: 'Threat Identification',
+            text: 'AI and ML models are trained to recognize patterns associated with known threats and can identify new, previously unseen threats through behavioral analysis.',
+          },
+          {
             type: 'termlist',
-            heading: '11.4 Predictive Analytics',
             items: [
-              { term: 'Predictive modeling', def: 'Trends and historical data are used to anticipate attacks and identify vulnerabilities before they are exploited — time-series analysis can forecast a potential DDoS by spotting patterns in traffic volume and alerting administrators to act' },
-              { term: 'Risk assessment', def: 'Evaluating the potential impact and likelihood of different threats lets the system prioritise responses and allocate resources — determining the criticality of assets and protecting high-value targets first' },
+              { term: 'Pattern Recognition', def: 'AI/ML models are trained to recognize patterns associated with known threats. For example, signature-based detection systems use predefined patterns of known malware to identify threats. Machine learning enhances this by identifying variations and new patterns that signature-based systems might miss. For instance, machine learning models can detect polymorphic malware that frequently changes its code to evade traditional signature-based detection.' },
+              { term: 'Behavioral Analysis', def: "Instead of relying solely on known patterns, AI/ML can analyze the behavior of entities within the network. For example, an increase in failed login attempts, unusual data transfers, or unexpected communication patterns can trigger alerts. This is particularly useful for detecting zero-day attacks and advanced persistent threats (APTs), where the attacker's behavior may deviate from normal user activities." },
             ],
+          },
+          {
+            type: 'text',
+            heading: 'Predictive Analytics',
+            text: 'AI and ML can predict potential threats by analyzing trends and historical data, enabling proactive measures.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Predictive Modeling', def: 'AI/ML can predict potential threats by analyzing trends and historical data. Predictive models can identify vulnerabilities and anticipate future attacks, enabling proactive measures. For instance, time-series analysis can forecast potential DDoS attacks by identifying patterns in traffic volume and alerting administrators to take preventive actions.' },
+              { term: 'Risk Assessment', def: 'AI/ML systems can assess the risk associated with different types of threats. By evaluating the potential impact and likelihood of various threats, these systems can prioritize responses and allocate resources effectively. For example, a risk assessment model can determine the criticality of different assets and prioritize the protection of high-value targets.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Examples of AI/ML Algorithms Used',
+            text: 'Neural Networks: Neural networks are powerful tools for detecting and mitigating network threats due to their ability to model complex relationships in data.',
+          },
+          {
+            type: 'note',
+            text: 'The handout leaves the four activities below blank for you to fill in. The table entries and the answers that follow each set are worked answers, not the lecturer\'s.',
+          },
+          {
+            type: 'text',
+            heading: 'Activity 2: Supervised vs Unsupervised',
+            text: 'Fill in the table:',
           },
           {
             type: 'table',
-            heading: '11.5 Activity — Supervised or Unsupervised?',
-            headers: ['Scenario', 'Approach', 'Why'],
+            headers: ['Scenario', 'Supervised or Unsupervised?', 'Why?'],
             rows: [
               ['Spam detection', 'Supervised', 'Labeled examples of spam and non-spam are available'],
               ['Unknown network traffic patterns', 'Unsupervised', 'No prior labels exist for new or evolving attack patterns'],
               ['Malware family classification', 'Supervised', 'Historical data exists for the different malware families'],
-              ['Insider behaviour anomaly detection', 'Unsupervised', 'Insider threats are rare and often lack predefined labels'],
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '11.6 Activity — Adversarial Thinking',
-            items: [
-              { term: 'How might attackers use machine learning to bypass security systems?', def: 'To generate evasive malware, craft sophisticated phishing campaigns, or learn to mimic normal user behaviour and avoid detection' },
-              { term: 'Why must ML systems in cybersecurity consider adversarial threats?', def: 'Because attackers actively adapt to evade detection, models must be robust against adversarial examples and continuously updated to counter new evasion techniques' },
-              { term: 'What is adversarial machine learning?', def: 'The field that studies the vulnerability of ML models to malicious inputs (adversarial examples) and develops techniques to make those models more robust' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '11.7 Activity — Pattern Recognition vs Anomaly Detection',
-            items: [
-              { term: 'A problem best solved by pattern recognition?', def: 'Detecting known malware variants from their characteristic code signatures or network traffic patterns' },
-              { term: 'A problem best solved by anomaly detection?', def: 'Identifying a zero-day attack or insider threat, where no signature exists but the behaviour deviates sharply from the established baseline' },
-              { term: 'Why can anomaly detection generate false positives?', def: 'It flags any deviation from normal, so legitimate but unusual events — a new software update, a user working from a new location — can be mistaken for anomalies' },
-              { term: 'Why can there be infinitely many anomalous patterns?', def: 'Anomalies are defined by deviation from the norm, and the ways something can differ from the norm are theoretically infinite — attackers also keep inventing new, unforeseen attack vectors' },
+              ['Insider behavior anomaly detection', 'Unsupervised', 'Insider threats are rare and often lack predefined labels'],
             ],
           },
           {
             type: 'casestudy',
-            heading: '11.8 Activity — Case Study',
-            prompt: 'A company observes that one employee suddenly accesses 50 times more files than usual, at 2:00 AM, from a new geographic location.',
+            heading: 'Activity 3: Adversarial Thinking',
             tasks: [
-              'Is this a pattern recognition or an anomaly detection problem?',
-              'What features would you extract to analyse this case?',
-              'What risks exist if the model makes an incorrect prediction?',
+              'How might attackers use machine learning to bypass security systems?',
+              'Why must machine learning systems in cybersecurity consider adversarial threats?',
+              'What is adversarial machine learning?',
             ],
           },
           {
             type: 'termlist',
             items: [
-              { term: 'Which problem type?', def: "Anomaly detection — the scenario describes a significant deviation from the employee's usual behaviour in time, volume and location" },
+              { term: 'How attackers use ML to bypass defences', def: 'To generate evasive malware, craft sophisticated phishing campaigns, or learn to mimic normal user behaviour and avoid detection' },
+              { term: 'Why adversarial threats must be considered', def: 'Because attackers actively adapt to evade detection, models must be robust against adversarial examples and continuously updated to counter new evasion techniques' },
+              { term: 'Adversarial machine learning', def: 'The field that studies the vulnerability of ML models to malicious inputs (adversarial examples) and develops techniques to make those models more robust' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: 'Activity 4: Pattern Recognition vs Anomaly Detection',
+            tasks: [
+              'Give one example of a security problem best solved using pattern recognition.',
+              'Give one example best solved using anomaly detection.',
+              'Why can anomaly detection generate false positives?',
+              'Explain why there can be infinitely many anomalous patterns.',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Best solved by pattern recognition', def: 'Detecting known malware variants from their characteristic code signatures or network traffic patterns' },
+              { term: 'Best solved by anomaly detection', def: 'Identifying a zero-day attack or insider threat, where no signature exists but the behaviour deviates sharply from the established baseline' },
+              { term: 'Why false positives arise', def: 'It flags any deviation from normal, so legitimate but unusual events — a new software update, a user working from a new location — can be mistaken for anomalies' },
+              { term: 'Why anomalous patterns are unbounded', def: 'Anomalies are defined by deviation from the norm, and the ways something can differ from the norm are theoretically infinite — attackers also keep inventing new, unforeseen attack vectors' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: 'Activity 5: Case Study',
+            prompt: 'Scenario: A company observes that one employee suddenly accesses 50 times more files than usual, at 2:00 AM from a new geographic location.',
+            tasks: [
+              'Would this be a pattern recognition or anomaly detection problem?',
+              'What features would you extract to analyze this case?',
+              'What risks exist if the model makes incorrect predictions?',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Which problem type', def: "Anomaly detection — the scenario describes a significant deviation from the employee's usual behaviour in time, volume and location" },
               { term: 'Features to extract', def: 'Login time; login location (IP address, geo-coordinates); number of files accessed; type of files accessed; historical access patterns for that user; typical access patterns for users in similar roles' },
               { term: 'Risk of a false positive', def: 'Flagging legitimate activity as malicious causes unnecessary investigations, user inconvenience, and erosion of trust in the security system' },
               { term: 'Risk of a false negative', def: 'Missing genuine malicious activity can result in a data breach, financial loss, reputational damage, and compromise of the entire system' },
@@ -3081,105 +3470,215 @@ export const courses = [
       },
       {
         number: '12',
-        title: 'Supervised Machine Learning for Threat Detection',
+        title: 'Machine Learning for Threat Detection in Big Data',
         sections: [
           {
             type: 'definition',
-            heading: '12.1 The Trained Digital Sentry',
-            text: 'In cybersecurity, supervised machine learning acts as a trained digital sentry. It learns from a labeled dataset of past incidents, identifying which patterns are harmless (benign) and which are dangerous (malicious). The two main tasks are classification — is this a threat? — and regression — how high is the risk?',
+            text: 'In cybersecurity, Supervised Machine Learning acts as a trained digital sentry. It functions by learning from a labeled dataset of past incidents, identifying which patterns are harmless (benign) and which are dangerous (malicious).',
+          },
+          {
+            type: 'text',
+            heading: 'The Procedural Workflow',
+            text: 'Before a model can detect a threat, it must undergo a rigorous phase.',
           },
           {
             type: 'termlist',
-            heading: '12.2 The Procedural Workflow',
             items: [
-              { term: 'Data labeling', def: 'Experts provide a dataset where every entry is tagged — for example 1 for malware, 0 for safe' },
-              { term: 'Feature engineering', def: "Identifying the characteristics that signal a threat. For an email that might be the sender's IP, the number of links, or the presence of urgent-sounding keywords" },
-              { term: 'Training', def: 'The algorithm processes the features to find a mathematical boundary between safe and unsafe' },
-              { term: 'Testing / validation', def: 'The model is given new, unlabeled data to see whether it predicts the correct category' },
+              { term: 'Data Labeling', def: 'Experts provide the model with a dataset where every entry is tagged (e.g., 1 for malware, 0 for safe).' },
+              { term: 'Feature Engineering', def: "Identifying specific characteristics that signal a threat. Example: For an email, features include the sender's IP, number of links, or presence of \"urgent\" keywords." },
+              { term: 'Training', def: 'The algorithm (the "engine") processes the features to find a mathematical boundary between safe and unsafe.' },
+              { term: 'Testing/Validation', def: 'The model is given new, unlabeled data to see if it can correctly predict the category.' },
             ],
           },
           {
-            type: 'termlist',
-            heading: '12.3 Network Intrusion Detection (NIDS)',
-            items: [
-              { term: 'Purpose', def: 'Monitors traffic to identify unauthorized access or attacks such as DDoS' },
-              { term: 'Common algorithms', def: 'Random Forest, Support Vector Machines' },
-              { term: 'Indicators used', def: 'Byte counts, packet intervals, TCP flag combinations' },
-              { term: 'How it works', def: 'The model learns the profile of a standard connection; if a connection shows features similar to a labeled SYN flood attack, it triggers an alert' },
-            ],
+            type: 'text',
+            heading: 'Deployment in Threat Detection in Big Data',
+            text: 'Supervised learning is categorized into two main tasks: Classification (Is this a threat?) and Regression (How high is the risk in big data?).',
+          },
+          {
+            type: 'text',
+            heading: '1. Network Intrusion Detection (NIDS)',
+            text: 'NIDS monitors traffic to identify unauthorized access or attacks like DDoS.',
           },
           {
             type: 'termlist',
-            heading: '12.4 Malware Analysis',
             items: [
-              { term: 'Purpose', def: 'Detecting zero-day threats that signature-based antivirus software might miss' },
-              { term: 'Common algorithms', def: 'Decision Trees, K-Nearest Neighbors (KNN)' },
-              { term: 'Indicators used', def: 'File size, API calls made by the code, registry key changes' },
-              { term: 'How it works', def: 'Instead of looking for a specific fingerprint, the model looks at behavioural features — if a file behaves like previously labeled ransomware (rapid file encryption, for instance), it is quarantined' },
+              { term: 'Common Algorithms', def: 'Random Forest, Support Vector Machines (SVM).' },
+              { term: 'Manual Indicators', def: 'Byte counts, packet intervals, and TCP flag combinations.' },
+              { term: 'How it works', def: 'The model learns the "profile" of a standard connection. If a connection show features similar to a labeled "SYN Flood" attack, it triggers an alert.' },
             ],
           },
           {
+            type: 'text',
+            heading: '2. Malware Analysis',
+            text: 'Detecting "Zero-day" threats that signature-based antivirus software might miss.',
+          },
+          {
             type: 'termlist',
-            heading: '12.5 Phishing and Spam Detection',
             items: [
-              { term: 'Purpose', def: 'Analysing communication to stop social engineering' },
-              { term: 'Common algorithms', def: 'Naive Bayes, Logistic Regression' },
-              { term: 'Indicators used', def: 'URL length, use of IP addresses in place of domain names, suspicious call-to-action phrases' },
-              { term: 'How it works', def: 'Naive Bayes calculates the probability that an email is phishing from the frequency of suspicious words seen in past labeled phishing campaigns' },
+              { term: 'Common Algorithms', def: 'Decision Trees, K-Nearest Neighbors (KNN).' },
+              { term: 'Manual Indicators', def: 'File size, API calls made by the code, and registry key changes.' },
+              { term: 'How it works', def: 'Instead of looking for a specific "fingerprint," the model looks at behavioral features. If a file behaves like previously labeled ransomware (e.g., rapid file encryption), it is quarantined.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '3. Phishing and Spam Detection',
+            text: 'Analyzing communication to stop social engineering.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Common Algorithms', def: 'Naive Bayes, Logistic Regression.' },
+              { term: 'Manual Indicators', def: 'URL length, use of IP addresses in place of domain names, and suspicious "call to action" phrases.' },
+              { term: 'How it works', def: 'Naive Bayes calculates the probability that an email is phishing based on the frequency of specific suspicious words found in past "labeled" phishing campaigns.' },
             ],
           },
           {
             type: 'image',
-            heading: '12.6 Algorithm Comparison',
             src: '/lecture-notes/cyb-224/algorithm-comparison.webp',
             width: 1400, height: 596,
             alt: 'Mind map of security algorithms: Naive Bayes (phishing/spam, fast and text-friendly, assumes feature independence), Random Forest (network intrusion, accurate on large data, slow in real time), SVM (malware detection, strong on high-dimensional data, memory intensive), and Logistic Regression (fraud detection, gives a risk score, struggles with non-linear threats)',
-            caption: 'Figure 6: Four supervised algorithms with their security use, strength, and weakness',
+            caption: 'The same four algorithms as a map — drawn for these notes; the handout prints only the table below',
           },
           {
             type: 'table',
-            headers: ['Algorithm', 'Typically Used For', 'Strength', 'Weakness'],
+            heading: 'Algorithm Comparison',
+            headers: ['Algorithm', 'Used', 'Strength', 'Weakness'],
             rows: [
-              ['Naive Bayes', 'Phishing / spam', 'Extremely fast; works well with text', 'Assumes features are independent'],
-              ['Random Forest', 'Network intrusion', 'Highly accurate; handles large data', 'Can be slow to run in real time'],
-              ['SVM', 'Malware detection', 'Excellent for complex, high-dimensional data', 'High memory consumption'],
-              ['Logistic Regression', 'Fraud detection', 'Provides a clear risk score (0–100%)', 'Struggles with non-linear threats'],
+              ['Naive Bayes', 'Phishing/Spam', 'Extremely fast; works well with text.', 'Assumes features are independent.'],
+              ['Random Forest', 'Network Intrusion', 'Highly accurate; handles large data.', 'Can be slow to run in real-time.'],
+              ['SVM', 'Malware Detection', 'Excellent for complex, high-dimensional data.', 'High memory consumption.'],
+              ['Logistic Regression', 'Fraud Detection', 'Provides a clear "Risk Score" (0–100%).', 'Struggles with non-linear threats.'],
             ],
           },
         ],
       },
       {
         number: '13',
-        title: 'Exploratory Data Analysis and the Python Toolkit',
+        title: 'Exploratory Data Analysis (EDA) for Network Security',
         sections: [
           {
             type: 'definition',
-            heading: '13.1 What EDA Is',
-            text: 'Exploratory Data Analysis (EDA) is the process of examining, summarising, and visualising a dataset to understand its main characteristics before applying formal models.',
+            text: 'Exploratory Data Analysis (EDA) is the process of examining, summarizing, and visualizing a dataset to understand its main characteristics before applying formal models.',
           },
           {
-            type: 'bullets',
-            heading: '13.2 What EDA Is For',
-            items: [
-              'Discovering patterns in the data',
-              'Detecting errors or missing values',
-              'Identifying relationships between variables',
-              'Checking the assumptions required for modelling',
-            ],
+            type: 'text',
+            heading: 'Functions of EDA',
+            text: 'It helps discover patterns, detect errors or missing values, identify relationships between variables, and check assumptions for modeling. EDA is typically performed using libraries like: Pandas → data handling, Matplotlib → basic plots, Seaborn → advanced visuals.',
           },
           {
             type: 'termlist',
-            heading: '13.3 Types of EDA',
+            heading: 'TYPES OF EDA',
             items: [
-              { term: 'Univariate (one variable)', def: 'Mean, median, mode; histograms and boxplots — used to understand the distribution of a single feature' },
-              { term: 'Bivariate (two variables)', def: 'Scatter plots and correlation analysis — used to identify relationships between variables' },
-              { term: 'Multivariate (many variables)', def: 'Heatmaps and pair plots — used to understand complex interactions' },
+              { term: 'i. Univariate Analysis (one variable)', def: 'Mean, median, mode. Histogram, boxplot. It helps to understand the distribution of a single feature.' },
+              { term: 'ii. Bivariate Analysis (two variables)', def: 'Scatter plots. Correlation analysis. It helps to identify relationships between variables.' },
+              { term: 'iii. Multivariate Analysis (multiple variables)', def: 'Heatmaps. Pair plots. It helps understand complex interactions.' },
+            ],
+          },
+        ],
+      },
+      {
+        number: '14',
+        title: 'Model Evaluation',
+        sections: [
+          {
+            type: 'definition',
+            text: 'To evaluate the performance of the machine learning models used for threat detection, several evaluation metrics are used. These metrics are derived from the confusion matrix, which summarizes the classification results by comparing the predicted labels with the actual labels.',
+          },
+          {
+            type: 'text',
+            text: 'The confusion matrix consists of four main components:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'True Positive (TP)', def: 'Cases where the model correctly analysis the threat pattern' },
+              { term: 'True Negative (TN)', def: 'Cases where the model correctly predicts that the system does not have threat.' },
+              { term: 'False Positive (FP)', def: 'Cases where the model incorrectly predicts threat when there is no threat.' },
+              { term: 'False Negative (FN)', def: 'Cases where the model fails to detect threat when there is threat in system' },
             ],
           },
           {
             type: 'text',
-            heading: '13.4 Pandas — Data Manipulation and Analysis',
-            text: 'Pandas loads datasets (CSV, Excel and more), organises data into tables called DataFrames, cleans and preprocesses that data, and performs statistical operations.',
+            text: 'These values are used to compute several performance metrics that measure the effectiveness of the classification model. It includes the following',
+          },
+          {
+            type: 'note',
+            text: 'Three of the equations on printed pages 40-41 are cut off in the handout itself - it shows Accuracy = (TP + T)/(TP+TN+FP+FN), Precision = TP/(TP+) and F1 = 2x(Precision x Recall)/(Precision+Re). The complete forms are given below, since those are what you need in the exam. The handout also drops the equation number for Accuracy (Precision, Recall and F1 are numbered 3.19, 3.20 and 3.21), leaves Recall unnumbered in the i/ii/iii run and then numbers F1 Score "i." where it should read "iii.", and its False Positive line carries a stray word "child".',
+          },
+          {
+            type: 'text',
+            heading: 'i. Accuracy',
+            text: 'Accuracy measures the proportion of correctly predicted instances out of the total number of predictions made by the model as shown in Equation',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Accuracy = (TP + TN) / (TP + TN + FP + FN)',
+          },
+          {
+            type: 'text',
+            text: 'Accuracy provides a general measure of how well the model performs overall. A higher accuracy indicates that the model correctly classifies a large proportion of the dataset.',
+          },
+          {
+            type: 'text',
+            heading: 'ii. Precision',
+            text: 'Precision measures the proportion of positive predictions that are actually correct as presented in Equation 3.19',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Precision = TP / (TP + FP)',
+          },
+          {
+            type: 'text',
+            text: 'A high precision value indicates that the model produces fewer false alarms (false positives).',
+          },
+          {
+            type: 'text',
+            heading: 'Recall (Sensitivity)',
+            text: 'Recall, also known as sensitivity, measures the proportion of actual positive cases that are correctly identified by the model in Equation 3.20',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Recall = TP / (TP + FN)',
+          },
+          {
+            type: 'text',
+            text: 'IDS recall is particularly important because failing to detect a true threat case (false negative) may delay early intervention and treatment. Therefore, models used for threat screening are often designed to maximize recall.',
+          },
+          {
+            type: 'text',
+            heading: 'iii. F1 Score',
+            text: 'The F1-score is the harmonic mean of precision and recall, providing a balanced measure when both false positives and false negatives are important as shown in Equation 3.21',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'F1 = 2 × (Precision × Recall) / (Precision + Recall)',
+          },
+          {
+            type: 'text',
+            text: 'The F1-score is useful when the dataset is imbalanced because it considers both precision and recall simultaneously. A high F1-score indicates that the model achieves a good balance between correctly identifying threat cases and minimizing incorrect predictions. (The handout stops at "minimizing incorrect.")',
+          },
+        ],
+      },
+      {
+        number: '15',
+        title: 'Different Libraries for Big Data Manipulation',
+        sections: [
+          {
+            type: 'bullets',
+            heading: 'Pandas (import pandas as pd)',
+            items: [
+              'Function: Pandas is used for data manipulation and analysis.',
+              'Loads datasets (CSV, Excel, etc.).',
+              'Organizes data into tables (DataFrames).',
+              'Cleans and preprocesses data.',
+              'Performs statistical operations.',
+            ],
           },
           {
             type: 'code',
@@ -3192,9 +3691,15 @@ df.describe()                  # Summary statistics
 df.isnull().sum()              # Check missing values`,
           },
           {
-            type: 'text',
-            heading: '13.5 NumPy — Numerical Computation',
-            text: 'NumPy handles large numerical datasets efficiently, supports mathematical operations, and works with multi-dimensional arrays. In simple terms: NumPy is fast maths on numbers and arrays.',
+            type: 'bullets',
+            heading: 'i. NumPy (import numpy as np)',
+            items: [
+              'Function: NumPy is used for numerical computations and array operations.',
+              'Handles large numerical data efficiently.',
+              'Supports mathematical operations.',
+              'Works with multi-dimensional arrays.',
+              'In simple terms: NumPy = fast math operations on numbers and arrays.',
+            ],
           },
           {
             type: 'code',
@@ -3207,9 +3712,16 @@ np.std(arr)    # Standard deviation
 np.max(arr)    # Maximum value`,
           },
           {
-            type: 'text',
-            heading: '13.6 Matplotlib — Basic Visualisation',
-            text: 'Matplotlib creates plots such as line charts, bar charts, and histograms. In simple terms: Matplotlib draws graphs from scratch.',
+            type: 'bullets',
+            heading: 'ii. Matplotlib (import matplotlib.pyplot as plt)',
+            items: [
+              'Function: Matplotlib is used for basic data visualization.',
+              'What it does: Creates plots like:',
+              'Line charts',
+              'Bar charts',
+              'Histograms',
+              'In simple terms: Matplotlib = drawing graphs from scratch.',
+            ],
           },
           {
             type: 'code',
@@ -3221,9 +3733,20 @@ plt.title("Simple Plot")
 plt.show()`,
           },
           {
-            type: 'text',
-            heading: '13.7 Seaborn — Statistical Visualisation',
-            text: 'Seaborn builds on Matplotlib to provide attractive, easy-to-use statistical plots and handles complex visualisations easily. In simple terms: Seaborn draws beautiful and smarter graphs.',
+            type: 'bullets',
+            heading: 'iii. Seaborn (import seaborn as sns)',
+            items: [
+              'Function: Seaborn is used for advanced and attractive statistical visualizations.',
+              'How does it work.',
+              'Builds on Matplotlib.',
+              'Provides beautiful, easy-to-use plots.',
+              'Handles complex visualizations easily.',
+              'In simple terms: Seaborn = beautiful and smarter graphs.',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Two changes to the printed snippet below so it runs: the import line is added (the handout gives it only in the heading), and df.corr() becomes df.corr(numeric_only=True), because corr() cannot handle the text columns in these datasets. The handout also re-prints the two Pandas import lines a second time at the end of its Pandas block, which looks like a copy-paste slip and is not repeated here.',
           },
           {
             type: 'code',
@@ -3240,77 +3763,15 @@ sns.boxplot(x='label', y='value', data=df)    # Boxplot`,
         ],
       },
       {
-        number: '14',
-        title: 'Model Evaluation — Confusion Matrix and Metrics',
-        sections: [
-          {
-            type: 'definition',
-            heading: '14.1 The Confusion Matrix',
-            text: 'Evaluation metrics for threat-detection models are derived from the confusion matrix, which summarises classification results by comparing the predicted labels with the actual labels.',
-          },
-          {
-            type: 'termlist',
-            heading: 'The Four Components',
-            items: [
-              { term: 'True Positive (TP)', def: 'The model correctly identifies a threat pattern' },
-              { term: 'True Negative (TN)', def: 'The model correctly predicts that the system has no threat' },
-              { term: 'False Positive (FP)', def: 'The model predicts a threat where there is none — a false alarm' },
-              { term: 'False Negative (FN)', def: 'The model fails to detect a threat that is present — a miss' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '14.2 Accuracy',
-            text: 'Accuracy measures the proportion of correctly predicted instances out of all predictions made. It gives a general measure of overall performance — a higher accuracy means the model correctly classifies a large proportion of the dataset.',
-          },
-          {
-            type: 'code',
-            language: 'math',
-            code: 'Accuracy = (TP + TN) / (TP + TN + FP + FN)',
-          },
-          {
-            type: 'text',
-            heading: '14.3 Precision',
-            text: 'Precision measures the proportion of positive predictions that are actually correct. A high precision value means the model produces fewer false alarms.',
-          },
-          {
-            type: 'code',
-            language: 'math',
-            code: 'Precision = TP / (TP + FP)',
-          },
-          {
-            type: 'text',
-            heading: '14.4 Recall (Sensitivity)',
-            text: 'Recall measures the proportion of actual positive cases the model correctly identifies. In an IDS, recall matters especially because failing to detect a real threat (a false negative) delays intervention and response — so threat-screening models are often tuned to maximise recall.',
-          },
-          {
-            type: 'code',
-            language: 'math',
-            code: 'Recall = TP / (TP + FN)',
-          },
-          {
-            type: 'text',
-            heading: '14.5 F1 Score',
-            text: 'The F1-score is the harmonic mean of precision and recall, giving a balanced measure when both false positives and false negatives matter. It is especially useful on imbalanced datasets because it considers both quantities simultaneously.',
-          },
-          {
-            type: 'code',
-            language: 'math',
-            code: 'F1 = 2 × (Precision × Recall) / (Precision + Recall)',
-          },
-        ],
-      },
-      {
-        number: '15',
-        title: 'Practical — EDA on the UNSW-NB15 IDS Dataset',
+        number: '16',
+        title: 'Practice Exercise of Exploratory Data Analysis for IDS Data Set',
         sections: [
           {
             type: 'note',
-            text: 'The three blocks below are one continuous script — run them in order in the same notebook. 15.2 and 15.3 reuse df and num_cols from the block before them, so running 15.3 on its own raises a NameError.',
+            text: 'The three blocks below are one continuous script — run them in order in the same notebook. The second and third reuse df and num_cols from the block before them, so running the last one on its own raises a NameError.',
           },
           {
             type: 'code',
-            heading: '15.1 Load and Explore',
             language: 'python',
             code: `# 1. Import Libraries
 import pandas as pd
@@ -3318,6 +3779,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Set style
 sns.set_style("whitegrid")
 
 # 2. Load Dataset
@@ -3335,7 +3797,7 @@ print(df.shape)
 print("\\nColumn Names:")
 print(df.columns)
 
-# 4. Preprocessing - Missing Values
+# 4.  Preprocessing data -Missing Values
 print("\\nMissing Values:")
 missing = df.isnull().sum()
 print(missing[missing > 0])
@@ -3352,9 +3814,10 @@ for col in categorical_cols:
           },
           {
             type: 'code',
-            heading: '15.2 Target and Feature Distributions',
+            heading: 'Target and Feature Distributions',
             language: 'python',
-            code: `# 7. Target Variable Analysis - binary label
+            code: `# 7. Target Variable Analysis
+# Binary label
 plt.figure()
 sns.countplot(x='label', data=df)
 plt.title("Distribution of Target Variable (Label)")
@@ -3382,7 +3845,7 @@ plt.show()`,
           },
           {
             type: 'code',
-            heading: '15.3 Outliers, Relationships and Class Imbalance',
+            heading: 'Outliers, Relationships and Class Imbalance',
             language: 'python',
             code: `# 10. Boxplots for Outlier Detection
 plt.figure(figsize=(15, 10))
@@ -3417,19 +3880,18 @@ print(df['label'].value_counts(normalize=True))`,
         ],
       },
       {
-        number: '16',
+        number: '17',
         title: 'Practical — SVM and KNN for Intrusion Detection',
         sections: [
           {
             type: 'note',
-            text: 'A kernel SVM (SVC) scales roughly with the square of the number of samples, so 16.1 on the full UNSW-NB15 file can run for hours. Train it on a stratified subsample first — or use the LinearSVC version in 16.2, which is built for datasets this size.',
+            text: 'A kernel SVM (SVC) scales roughly with the square of the number of samples, so the first listing below, run on the full UNSW-NB15 file, can take hours. Train it on a stratified subsample first — or use the LinearSVC version under ALTERNATIVE CODES, which is built for datasets this size.',
           },
           {
             type: 'code',
-            heading: '16.1 SVM with an RBF Kernel',
+            heading: 'Practice Exercise Using Support Vector Machine (SVM) for Threat Detection',
             language: 'python',
-            code: `# 1. Import Libraries
-import pandas as pd
+            code: `import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -3442,7 +3904,8 @@ from sklearn.metrics import (accuracy_score, precision_score,
 # 2. Load Dataset
 df = pd.read_csv('/content/UNSW_NB15_dataset.csv')
 
-# 3. Data Preprocessing - drop missing values
+# 3. Data Preprocessing
+# Drop missing values (if any)
 df = df.dropna()
 
 # Encode categorical features
@@ -3507,7 +3970,7 @@ plt.show()`,
           },
           {
             type: 'code',
-            heading: '16.2 Alternative — LinearSVC with an ROC Curve',
+            heading: 'ALTERNATIVE CODES',
             language: 'python',
             code: `import pandas as pd
 import numpy as np
@@ -3527,7 +3990,8 @@ df = pd.read_csv('UNSW_NB15_dataset.csv')
 # and StandardScaler passes NaN straight through to LinearSVC.fit()
 df = df.dropna()
 
-# 2. Preprocessing - drop non-predictive columns and the multiclass target
+# 2. Preprocessing
+# Drop non-predictive columns and the multiclass target 'attack_cat'
 X = df.drop(['id', 'attack_cat', 'label'], axis=1)
 y = df['label']
 
@@ -3537,12 +4001,12 @@ X = pd.get_dummies(X, columns=['proto', 'service', 'state'], drop_first=True)
 # 3. Split into training and testing sets (80/20)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 4. Feature Scaling (crucial for SVM performance)
+# 4. Feature Scaling (Crucial for SVM performance)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# 5. Model Training (LinearSVC is optimised for large datasets)
+# 5. Model Training (LinearSVC is optimized for large datasets)
 svm_model = LinearSVC(dual=False, random_state=42, max_iter=5000)
 svm_model.fit(X_train_scaled, y_train)
 
@@ -3576,7 +4040,7 @@ plt.savefig('roc_curve_svm.png')`,
           },
           {
             type: 'code',
-            heading: '16.3 Intrusion Detection Using KNN',
+            heading: 'Intrusion Detection Using KNN',
             language: 'python',
             code: `import pandas as pd
 import numpy as np
@@ -3605,7 +4069,7 @@ X = pd.get_dummies(X, columns=['proto', 'service', 'state'], drop_first=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
                                                     random_state=42)
 
-# 4. Feature Scaling (mandatory for KNN)
+# 4. Feature Scaling (Mandatory for KNN)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
@@ -3619,7 +4083,7 @@ y_pred = knn.predict(X_test_scaled)
 y_prob = knn.predict_proba(X_test_scaled)[:, 1]
 
 # 7. Print Performance
-print(f'Accuracy: {accuracy_score(y_test, y_pred):.4f}')
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 print(classification_report(y_test, y_pred))
 
 # 8. Plot Confusion Matrix
@@ -3642,21 +4106,21 @@ plt.savefig('roc_curve_knn.png')`,
         ],
       },
       {
-        number: '17',
-        title: 'Practical — Decision Tree for Intrusion Detection',
+        number: '18',
+        title: 'Intrusion Detection Using Decision Tree (DT)',
         sections: [
           {
             type: 'text',
-            heading: '17.1 About This Implementation',
+            heading: 'About This Implementation',
             text: 'A full Decision Tree model for intrusion detection on the UNSW-NB15 dataset: data loading, preprocessing, training, evaluation, and k-fold cross-validation. Note that feature scaling is optional for a decision tree — splits are threshold-based, so the scale of a feature does not change the tree — but it is kept here so the same preprocessing serves other models too.',
           },
           {
             type: 'note',
-            text: '17.2 and 17.3 are one continuous script — 17.3 reuses the model and the split from 17.2. Both drop the id and attack_cat columns before training: attack_cat names the attack family, so a model that can see it is just reading the answer, and the accuracy it reports would be meaningless.',
+            text: 'The two blocks below are one continuous script — the second reuses the model and the split from the first. Both drop the id and attack_cat columns before training: attack_cat names the attack family, so a model that can see it is just reading the answer, and the accuracy it reports would be meaningless.',
           },
           {
             type: 'code',
-            heading: '17.2 Load, Preprocess and Train',
+            heading: 'Intrusion Detection Using Decision Tree (DT)',
             language: 'python',
             code: `# 1. Import Libraries
 import pandas as pd
@@ -3673,7 +4137,8 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score,
 # 2. Load Dataset
 df = pd.read_csv('UNSW_NB15_dataset.csv')
 
-# 3. Data Preprocessing - drop missing values
+# 3. Data Preprocessing
+# Drop missing values (if any)
 df = df.dropna()
 
 # Encode categorical features
@@ -3694,7 +4159,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# 5. Feature Scaling (optional for a Decision Tree)
+# 5. Feature Scaling (Optional for DT)
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
@@ -3712,7 +4177,7 @@ y_pred = dt_model.predict(X_test)`,
           },
           {
             type: 'code',
-            heading: '17.3 Evaluate and Cross-Validate',
+            heading: 'Evaluate and Cross-Validate',
             language: 'python',
             code: `# 8. Evaluation Metrics
 accuracy = accuracy_score(y_test, y_pred)
@@ -3756,51 +4221,69 @@ print("Mean CV Accuracy:", np.mean(cv_scores))`,
         ],
       },
       {
-        number: '18',
-        title: 'Network Anomaly Detection with K-Means',
+        number: '19',
+        title: 'Network Anomaly Detection (K-Means Clustering)',
         sections: [
           {
-            type: 'definition',
-            heading: '18.1 Detecting Patterns, Not Signatures',
-            text: 'In cybersecurity, threat detection often relies on identifying unusual patterns rather than known virus signatures. NumPy, K-Means clustering, and Matplotlib work together to detect anomalies in network behaviour without any labeled attack data.',
+            type: 'note',
+            text: 'Printed page 55 heads this section "THREAT ANALYSIS USING SUPPORT VECTOR MACHINE". Everything under it is K-Means clustering, not SVM - the heading appears to be left over from the previous practical.',
           },
           {
-            type: 'termlist',
-            heading: '18.2 The Tools and Their Roles',
+            type: 'definition',
+            text: 'In cybersecurity, threat detection often relies on identifying unusual patterns instead of known virus signatures. This demonstrates how NumPy, K-Means clustering, and Matplotlib work together to detect anomalies in network behavior.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Required Libraries',
             items: [
-              { term: 'NumPy — data preparation', def: 'Converts raw security logs into structured numerical arrays, which allow fast mathematical computation' },
-              { term: 'Scikit-learn (K-Means) — detection', def: 'An unsupervised algorithm that groups data into clusters; points far from the cluster centres (centroids) are considered anomalies' },
-              { term: 'Matplotlib — visualisation', def: 'Displays the clustered data so analysts can identify suspicious outliers at a glance' },
-              { term: 'Pandas — data handling', def: 'Used for loading, manipulating and analysing the log data before it is turned into arrays' },
+              'NumPy — Numerical data processing',
+              'Scikit-Learn (K-Means) — Clustering algorithm',
+              'Matplotlib — Data visualization',
+              'Pandas is a Python library used for data manipulation and analysis.',
             ],
           },
           {
+            type: 'text',
+            heading: 'NumPy (Data Preparation)',
+            text: 'NumPy converts raw security logs into structured numerical arrays. These arrays allow fast mathematical computation.',
+          },
+          {
+            type: 'text',
+            heading: 'K-Means Clustering (Detection)',
+            text: 'K-Means is an unsupervised learning algorithm that groups data into clusters. Points that are far from cluster centers (centroids) are considered anomalies.',
+          },
+          {
+            type: 'text',
+            heading: 'Matplotlib (Visualization)',
+            text: 'Matplotlib visualizes clustered data so analysts can easily identify suspicious outliers.',
+          },
+          {
             type: 'image',
-            heading: '18.3 Workflow',
+            heading: 'Workflow',
             src: '/lecture-notes/cyb-224/kmeans-workflow.webp',
             width: 1000, height: 1148,
             maxWidth: 560,
-            alt: 'Five-step flow: collect network activity data, convert to a NumPy array, apply K-Means clustering, identify data points far from centroids, then visualise clusters and anomalies',
+            alt: 'Five-step flow: collect network activity data, convert to a NumPy array, apply K-Means clustering, identify data points far from centroids, then visualize clusters and anomalies',
             caption: 'Figure 7: The K-Means anomaly detection workflow',
           },
           {
             type: 'bullets',
             items: [
-              'Collect network activity data — for example bytes transferred and session duration',
-              'Convert the data into a NumPy array',
-              'Apply K-Means clustering to group normal behaviours',
-              'Identify data points far from the cluster centroids',
-              'Visualise clusters and anomalies using Matplotlib',
+              'Step 1: Collect network activity data (e.g., bytes transferred, session duration).',
+              'Step 2: Convert the data into a NumPy array.',
+              'Step 3: Apply K-Means clustering to group normal behaviors.',
+              'Step 4: Identify data points far from cluster centroids.',
+              'Step 5: Visualize clusters and anomalies using Matplotlib.',
             ],
           },
           {
             type: 'casestudy',
-            title: 'Practical Example',
-            prompt: 'A user normally downloads small files of 1–2 MB. Suddenly, one session shows a 10 GB transfer at 3:00 AM. This behaviour would sit far from the cluster of normal sessions and be flagged as anomalous.',
+            heading: 'Practical Example',
+            prompt: 'Example scenario: A user normally downloads small files (1–2MB). Suddenly, one session shows 10GB transfer at 3:00 AM. This behavior may be flagged as anomalous.',
           },
           {
             type: 'code',
-            heading: '18.4 Python Implementation',
+            heading: '7. Python Implementation',
             language: 'python',
             code: `# Import Libraries
 import numpy as np
@@ -3830,7 +4313,6 @@ plt.show()`,
           },
           {
             type: 'code',
-            heading: '18.5 Variant — Simulated Traffic',
             language: 'python',
             code: `import numpy as np
 from sklearn.cluster import KMeans
@@ -3855,63 +4337,80 @@ plt.show()`,
         ],
       },
       {
-        number: '19',
-        title: 'The k-Nearest Neighbours (k-NN) Algorithm',
+        number: '20',
+        title: 'The k-Nearest Neighbors (k-NN) Algorithm',
         sections: [
           {
             type: 'definition',
-            heading: '19.1 Lazy Learning',
-            text: 'The k-Nearest Neighbours (k-NN) algorithm is a simple and well-known example of a lazy learning algorithm. Lazy learners delay most computation until the classification stage instead of doing intensive work during training.',
+            text: 'The k-Nearest Neighbors (k-NN) algorithm is a simple and well-known example of a lazy learning algorithm in machine learning.',
+          },
+          {
+            type: 'text',
+            heading: 'Lazy Learning Concept',
+            text: 'Lazy learning algorithms delay most computations until the classification stage instead of performing intensive computation during training.',
+          },
+          {
+            type: 'text',
+            heading: 'How k-NN Works',
+            text: 'k-NN performs no work up front; the effort moves to the moment a new sample must be classified.',
           },
           {
             type: 'bullets',
-            heading: '19.2 Training Phase',
+            heading: 'Training Phase',
             items: [
-              'Stores all training feature vectors and their corresponding labels',
-              'No model building or parameter learning is performed',
+              'Stores all training feature vectors and their corresponding labels.',
+              'No model building or parameter learning is performed.',
             ],
           },
           {
             type: 'bullets',
-            heading: '19.3 Classification Phase',
+            heading: 'Classification Phase',
             items: [
-              'Calculates the distance between the test sample and all training samples',
-              'Selects the k nearest neighbours',
-              'Assigns the most common label among those neighbours',
+              'Calculates the distance between a test sample and all training samples.',
+              'Selects the k nearest neighbors.',
+              'Assigns the most common label among those neighbors.',
             ],
           },
           {
             type: 'termlist',
-            heading: '19.4 Distance Metrics',
+            heading: 'Distance Metrics',
             items: [
-              { term: 'Euclidean distance', def: 'Used for continuous numerical data' },
-              { term: 'Hamming distance', def: 'Used for discrete or categorical data' },
+              { term: 'Euclidean Distance', def: 'Used for continuous numerical data.' },
+              { term: 'Hamming Distance', def: 'Used for discrete or categorical data.' },
             ],
           },
           {
-            type: 'proscons',
-            heading: '19.5 Advantages and Disadvantages',
-            advantages: [
-              'Simple to understand and implement',
-              'Very fast training phase',
-              'Useful for teaching machine learning concepts',
+            type: 'bullets',
+            heading: 'Advantages',
+            items: [
+              'Simple to understand and implement.',
+              'Very fast training phase.',
+              'Useful for teaching machine learning concepts.',
             ],
-            disadvantages: [
-              'Large memory usage — it stores all the training data',
-              'Slow classification time',
-              'Not efficient for very large datasets',
-              'Performance depends on the choice of k and the distance metric',
+          },
+          {
+            type: 'bullets',
+            heading: 'Disadvantages',
+            items: [
+              'Large memory usage (stores all training data).',
+              'Slow classification time.',
+              'Not efficient for very large datasets.',
+              'Performance depends on the choice of k and distance metric.',
             ],
+          },
+          {
+            type: 'text',
+            text: 'Optimized data structures such as k-d trees can be used to speed up neighbor searching.',
           },
           {
             type: 'note',
-            text: 'Optimised data structures such as k-d trees can speed up the neighbour search. Overall: k-NN is simple and intuitive, storing training data and predicting from similarity — effective on small datasets but inefficient for large-scale real-world applications.',
+            text: 'k-NN is a simple and intuitive classification algorithm that stores training data and makes predictions based on similarity. It is effective for small datasets but inefficient for large-scale real-world applications.',
           },
           {
             type: 'casestudy',
-            heading: '19.6 Activity — k-NN Review Questions',
+            heading: 'Activity',
             tasks: [
-              'Define the k-Nearest Neighbours (k-NN) algorithm.',
+              'Define the k-Nearest Neighbors (k-NN) algorithm.',
               'What is meant by lazy learning?',
               'What happens during the training phase of k-NN?',
               'What happens during the classification phase?',
@@ -3926,57 +4425,98 @@ plt.show()`,
               'Compare k-NN with Random Forest in terms of training time and prediction time.',
             ],
           },
+          {
+            type: 'note',
+            text: 'The answers below are worked answers, not the lecturer\'s.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Definition', def: 'k-NN is a lazy, instance-based classifier: it stores the labelled training vectors, then classifies a new sample by finding the k closest stored samples and taking the most common label among them' },
+              { term: 'Lazy learning', def: 'The algorithm does no work at training time and defers the computation to classification. Nothing is generalised into a model in advance, no parameters are fitted, and every prediction re-reads the training set' },
+              { term: 'Training phase', def: 'It stores all training feature vectors with their labels. No model is built and no parameter is learned, which is why training is effectively instant' },
+              { term: 'Classification phase', def: 'It measures the distance from the test sample to every stored training sample, selects the k nearest, and assigns the label held by the majority of those neighbours' },
+              { term: 'Role of k', def: 'k sets how many neighbours vote, and with it the balance between fitting noise and over-smoothing. A small k follows the data closely and is sensitive to individual mislabelled points; a large k averages over a wider neighbourhood and gives a smoother, more stable boundary' },
+              { term: 'When Hamming distance is used', def: 'For discrete or categorical features, where subtracting one value from another is meaningless — it counts the positions at which two vectors differ. Euclidean distance is used for continuous numerical data' },
+              { term: 'Why it is memory inefficient', def: 'Because the training set is the model. Every vector has to be kept for the lifetime of the classifier and all of it is consulted on each prediction, so memory grows with the size of the dataset rather than with the complexity of the boundary' },
+              { term: 'Purpose of a k-d tree', def: 'It indexes the stored points spatially so the search for nearest neighbours can discard whole regions instead of comparing against every sample. It attacks the slow classification phase, not the memory cost' },
+              { term: 'If k = 1', def: 'Each sample takes the label of its single closest neighbour. Training error falls to zero, which looks perfect and is not: the boundary traces every point including noise and mislabelled traffic, so variance is high and it generalises poorly' },
+              { term: 'If k is too large', def: 'The neighbourhood grows past the structure being detected and predictions drift toward the majority class. In an IDS that is dangerous rather than merely inaccurate — attacks are rare, so a large k dilutes the few malicious neighbours and the model quietly predicts benign for everything' },
+              { term: 'Choosing the best k', def: 'Cross-validate across a range of candidate values and take the k with the best validation score, not the best training score. Use an odd k for a two-class problem so a vote cannot tie, and the square root of the sample count is a reasonable value to start searching around' },
+              { term: 'Effect of feature scaling', def: 'Euclidean distance is dominated by whichever feature has the widest numeric range, so an unscaled byte count in the millions swamps a SYN flag of 0 or 1 and a byte entropy between 0.30 and 0.95 — the model ends up measuring one feature and ignoring the rest. That is why the practicals in this course treat StandardScaler as mandatory before KNeighborsClassifier' },
+              { term: 'k-NN against Random Forest', def: 'The costs are inverted. k-NN trains in almost no time and pays at prediction, because each prediction searches the whole training set; Random Forest pays up front to build its trees, then predicts quickly by dropping a sample through them. For an IDS that has to keep up with live traffic, prediction time is the binding constraint, which favours Random Forest' },
+            ],
+          },
         ],
       },
       {
-        number: '20',
-        title: 'Anomaly Detection with Pandas and Scikit-learn',
+        number: '21',
+        title: 'Anomaly Detection Using Pandas and Scikit-Learn Libraries',
         sections: [
           {
+            type: 'text',
+            heading: 'Functions of Pandas and Scikit-Learn Libraries',
+            text: 'The two libraries below do the work in the intrusion-detection listings: Pandas prepares the data, Scikit-Learn builds and runs the model.',
+          },
+          {
+            type: 'definition',
+            heading: 'i. Pandas Library',
+            text: 'Pandas is a Python library used for data manipulation and analysis.',
+          },
+          {
             type: 'termlist',
-            heading: '20.1 Main Functions of Pandas',
+            heading: 'Main Functions of Pandas',
             items: [
-              { term: 'Data creation', def: 'Build datasets using DataFrame and Series — e.g. df = pd.read_csv(path)' },
-              { term: 'Data cleaning', def: 'Handle missing values, remove duplicates, filter unwanted records' },
-              { term: 'Data selection and filtering', def: 'Select rows and columns — e.g. X = df.drop("label", axis=1)' },
-              { term: 'Data transformation', def: 'Modify columns, convert data types, engineer features' },
-              { term: 'Data exploration', def: 'Summary statistics with df.describe(), first rows with df.head()' },
+              { term: 'Data Creation', def: 'Create datasets using DataFrame and Series. Example: df = pd.read_csv(\'/specify the path\')' },
+              { term: 'Data Cleaning', def: 'Handle missing values. Remove duplicates. Filter unwanted records.' },
+              { term: 'Data Selection and Filtering', def: 'Select rows and columns. Example: X = df.drop("label", axis=1)' },
+              { term: 'Data Transformation', def: 'Modify columns. Convert data types. Perform feature engineering.' },
+              { term: 'Data Exploration', def: 'Summary statistics using df.describe(). View the first rows using df.head().' },
             ],
+          },
+          {
+            type: 'text',
+            heading: 'Application in Intrusion Detection Code',
+            text: 'Pandas is used to:',
           },
           {
             type: 'bullets',
-            heading: 'Pandas in an Intrusion Detection Script',
             items: [
-              'Creating the simulated login dataset',
-              'Organising login attempts and failed attempts',
-              'Separating the input features (X) from the labels (y)',
+              'Create the simulated login dataset.',
+              'Organize login attempts and failed attempts.',
+              'Separate input features (X) and labels (y).',
             ],
           },
           {
+            type: 'definition',
+            heading: 'ii. Scikit-Learn Library',
+            text: 'Scikit-Learn is a Python library used for machine learning and predictive modeling.',
+          },
+          {
             type: 'termlist',
-            heading: '20.2 Main Functions of Scikit-learn',
+            heading: 'Main Functions of Scikit-Learn',
             items: [
-              { term: 'Data splitting', def: 'Split the dataset into training and testing sets with train_test_split()' },
-              { term: 'Model building', def: 'Classification (Random Forest, SVM, Logistic Regression), regression, and clustering' },
-              { term: 'Model training', def: 'Fit the model to the data with model.fit(X_train, y_train)' },
-              { term: 'Prediction', def: 'Predict outcomes with model.predict(X_test)' },
+              { term: 'Data Splitting', def: 'Split the dataset into training and testing sets using train_test_split().' },
+              { term: 'Model Building', def: 'Classification, including Random Forest, SVM, and Logistic Regression. Regression. Clustering.' },
+              { term: 'Model Training', def: 'Fit a model to data: model.fit(X_train, y_train)' },
+              { term: 'Prediction', def: 'Predict outcomes: model.predict(X_test)' },
             ],
           },
           {
             type: 'code',
-            heading: '20.3 Isolation Forest — Unsupervised Anomaly Detection',
+            heading: 'Isolation Forest',
             language: 'python',
             code: `import numpy as np
 from sklearn.ensemble import IsolationForest
 
-# same simulated traffic as 18.5
+# same simulated traffic as the K-Means variant above
 traffic = np.array([[10, 100],
                     [12, 120],
                     [11, 110],
                     [200, 1000],
                     [9, 95]])
 
-model = IsolationForest(contamination=0.2, random_state=42)
+model = IsolationForest(contamination=0.2)
 model.fit(traffic)
 
 anomalies = model.predict(traffic)
@@ -3986,8 +4526,8 @@ print("Anomaly Labels:", anomalies)
         ],
       },
       {
-        number: '21',
-        title: 'Practical — Credit Card Fraud Anomaly Detection',
+        number: '22',
+        title: 'Practical Illustration of Anomaly Detection in Customer Credit Card',
         sections: [
           {
             type: 'resource',
@@ -3998,7 +4538,7 @@ print("Anomaly Labels:", anomalies)
           },
           {
             type: 'code',
-            heading: '21.1 Exploratory Analysis',
+            heading: 'Practical Illustration of Anomaly Detection in Customer Credit Card',
             language: 'python',
             code: `import pandas as pd
 import numpy as np
@@ -4011,6 +4551,8 @@ sns.set_palette("muted")
 
 df = pd.read_csv('/content/creditcard.csv')   # change path if needed
 df.head(5)
+
+# Display the tail of the dataset
 df.tail(5)
 
 print("Shape:", df.shape)
@@ -4063,18 +4605,21 @@ plt.xlim(0, 500)
 
 plt.subplot(1, 2, 2)
 sns.histplot(np.log1p(df['Amount']), bins=60, kde=True)
-plt.title("log1p(Amount) - much better behaved")
+plt.title("log1p(Amount) — much better behaved")
 plt.show()
 
 # Compare amounts by class
 plt.figure(figsize=(10, 6))
-sns.boxplot(x='Class', y='Amount', data=df, showfliers=False)   # hide outliers for a better view
-plt.title("Transaction Amount by Class")
+sns.boxplot(x='Class', y='Amount', data=df, showfliers=False)   # remove outliers for better view
+plt.title("Transaction Amount by Class (with few outliers)")
 plt.yscale('log')
 plt.show()
 
-# PCA features (V1-V28) - density plots, fraud vs non-fraud
-selected = ['V3', 'V4', 'V10', 'V11', 'V12', 'V14', 'V17']   # often the most discriminative
+# PCA features (V1-V28) - distribution comparison
+v_cols = [f'V{i}' for i in range(1, 29)]
+
+# Density plots - fraud vs non-fraud (selected features)
+selected = ['V3', 'V4', 'V10', 'V11', 'V12', 'V14', 'V17']   # often most discriminative
 
 plt.figure(figsize=(14, 10))
 for i, col in enumerate(selected, 1):
@@ -4086,16 +4631,88 @@ for i, col in enumerate(selected, 1):
 plt.tight_layout()
 plt.show()
 
-# Correlation heatmap - focus on the top features plus Class and Amount
+# 7. Correlation heatmap (focus on important parts)
 plt.figure(figsize=(12, 10))
+
+# Full correlation is messy - focus on top features + Class + Amount
 corr_cols = ['Time', 'Amount', 'Class'] + selected
 corr = df[corr_cols].corr()
-sns.heatmap(corr, annot=True, fmt='.2f')
+sns.heatmap(corr, annot=True, fmt='.2f', cmap='coolwarm', vmin=-0.6, vmax=0.6)
+plt.title("Correlation Matrix — Selected Features + Target")
+plt.show()
+
+# 8. Most discriminative features (quick ranking)
+# Absolute point-biserial correlation with Class (a simple univariate signal)
+correlations = {}
+for col in v_cols + ['Time', 'Amount']:
+    correlations[col] = df[col].corr(df['Class'], method='pearson')
+
+corr_df = pd.Series(correlations).sort_values(key=abs, ascending=False)
+print("\\nTop features by absolute correlation with fraud:")
+print(corr_df.head(12))
+
+# 9. Quick outlier / extreme value check (Amount)
+print("\\nTop 10 largest transactions:")
+print(df.nlargest(10, 'Amount')[['Time', 'Amount', 'Class']])`,
+          },
+          {
+            type: 'note',
+            text: 'Report your results',
+          },
+          {
+            type: 'code',
+            heading: 'Exercise on Creditcard',
+            language: 'python',
+            code: `import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset
+df = pd.read_csv('creditcard.csv')
+
+# 1. Basic Information
+print(df.info())
+print(df.describe())
+
+# 2. Check Class Imbalance
+fraud_pct = (df['Class'].value_counts()[1] / len(df)) * 100
+print(f"Fraudulent Transactions: {fraud_pct:.3f}%")
+
+plt.figure(figsize=(8, 6))
+sns.countplot(x='Class', data=df)
+plt.title('Distribution of Classes (0: Normal, 1: Fraud)')
+plt.show()
+
+# 3. Distribution of Amount and Time
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+sns.histplot(df['Amount'], bins=50, ax=ax1, kde=True)
+ax1.set_title('Distribution of Transaction Amount')
+sns.histplot(df['Time'], bins=50, ax=ax2, kde=True)
+ax2.set_title('Distribution of Transaction Time')
+plt.show()
+
+# 4. Correlation Heatmap
+plt.figure(figsize=(12, 10))
+corr = df.corr()
+sns.heatmap(corr, cmap='coolwarm_r', annot=False)
+plt.title('Correlation Matrix Heatmap')
+plt.show()
+
+# 5. Boxplots for key features
+f, axes = plt.subplots(ncols=4, figsize=(20, 4))
+sns.boxplot(x='Class', y='V14', data=df, ax=axes[0])
+axes[0].set_title('V14 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V12', data=df, ax=axes[1])
+axes[1].set_title('V12 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V17', data=df, ax=axes[2])
+axes[2].set_title('V17 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V10', data=df, ax=axes[3])
+axes[3].set_title('V10 vs Class Negative Correlation')
 plt.show()`,
           },
           {
             type: 'code',
-            heading: '21.2 Model Comparison — SVM, KNN, Decision Tree, Random Forest',
+            heading: 'MODEL COMPARISON',
             language: 'python',
             code: `import pandas as pd
 import numpy as np
@@ -4114,18 +4731,19 @@ from sklearn.metrics import (classification_report, confusion_matrix,
 # Load data
 df = pd.read_csv('creditcard.csv')
 
-# Features and target
+# Features and Target
 X = df.drop('Class', axis=1)
 y = df['Class']
 
-# To keep models within time limits, use a stratified 10% sample of the data
+# To ensure models run within time limits, we use a stratified sample (10%) of the data
 X_sample, _, y_sample, _ = train_test_split(X, y, train_size=0.1, stratify=y, random_state=42)
 
-# Now split the sample into training and testing sets
+# Now split the 10% sample into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X_sample, y_sample, test_size=0.3,
                                                     stratify=y_sample, random_state=42)
 
-# Scale Amount and Time AFTER the split, fitting only on the training rows.
+# Preprocessing: Scale Amount and Time - but AFTER the split, fitting only on
+# the training rows.
 # Scaling the whole frame first would let the test set's mean and standard
 # deviation influence the training data, flattering every score below.
 X_train = X_train.copy()
@@ -4169,7 +4787,7 @@ for i, (name, model) in enumerate(models.items()):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    # Probabilities / scores
+    # Probabilities/Scores
     if hasattr(model, "predict_proba"):
         y_score = model.predict_proba(X_test)[:, 1]
     else:
@@ -4219,13 +4837,16 @@ print(summary_df.to_string(index=False))`,
           },
           {
             type: 'table',
-            heading: '21.3 Report Your Results',
-            headers: ['Model', 'Accuracy', 'Precision', 'Recall', 'F1-score'],
+            heading: 'REPORT YOUR RESULTS IN A TABULAR FORM',
+            headers: ['MODEL', 'ACCURACY', 'PRECISION', 'RECALL', 'F1-SCORE'],
             rows: [
-              ['SVM', '', '', '', ''],
-              ['KNN', '', '', '', ''],
-              ['Decision Tree', '', '', '', ''],
-              ['Random Forest', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
             ],
           },
         ],
@@ -4293,14 +4914,13 @@ print(summary_df.to_string(index=False))`,
       { question: "The stop-sign sticker experiment demonstrates that:", options: ["ML models cannot process image data", "A deliberately altered input can make an operational ML tool reliably misclassify it", "Self-driving cars do not use machine learning", "Physical damage to a sign always defeats a camera"], correctIndex: 1, explanation: "Altering a small section of a stop sign made ML tools reliably misclassify it as a 45 mph speed-limit sign — an adversarial input attack." },
       { question: "What is the realistic goal of protecting an AI or ML system from attack?", options: ["Guaranteeing that no attack can ever succeed", "A systems-security approach that reduces the risk and impact of attacks to acceptable levels", "Removing all machine learning from security tools", "Keeping the model architecture secret indefinitely"], correctIndex: 1, explanation: "There is no fail-safe protection; the realistic goal is reducing risk and impact to acceptable levels." },
       { question: "In the log-analysis activity, repeated SYN packets without completed handshakes most likely indicate:", options: ["A successful file transfer", "Scanning activity", "A routine software update", "Normal DNS resolution"], correctIndex: 1, explanation: "Repeated SYN packets without completed handshakes, and connection attempts to many ports from one IP, suggest scanning." },
-      { question: "Which features would you extract to train a model to detect DDoS attacks?", options: ["Number of unique destination ports and packet rate per second", "Username length and password complexity", "File extension and file size", "Screen resolution and browser version"], correctIndex: 0, explanation: "The activity names the number of unique destination ports and the packet/request rate as DDoS features." },
+      { question: "Which features would you extract to train a model to detect DDoS attacks?", options: ["Packet rate, source IP entropy, number of destination ports and SYN-to-ACK ratio", "Username length and password complexity", "File extension and file size", "Screen resolution and browser version"], correctIndex: 0, explanation: "The activity names four features: packet rate, source IP entropy, number of destination ports, and the SYN-to-ACK ratio." },
 
       // Note 6 — The Cyber Attacker's Economy
       { question: "How has attacker motivation changed over time?", options: ["From financial gain toward curiosity and reputation", "From curiosity, mischief and reputation toward financial motivation", "It has always been purely political", "Motivation has not changed at all"], correctIndex: 1, explanation: "Early attacks were driven by curiosity, mischief and reputation; today most are financially motivated." },
       { question: "The commoditization of hacking matters because it:", options: ["Raises the technical barrier to entry", "Lowers the barrier to entry, since darknet markets sell exploits, malware kits and subscription hacking services", "Eliminates the market for stolen credentials", "Makes attacks easier to trace"], correctIndex: 1, explanation: "Commoditization lowers the barrier to entry — exploits, malware kits, stolen credentials and hacking services are all for sale." },
       { question: "Why might an attacker sell a zero-day exploit rather than use it?", options: ["Selling is illegal in every jurisdiction, so it carries no risk", "Selling often provides faster and lower-risk financial returns than launching the attack directly", "Exploits lose all value once discovered", "Buyers are legally required to report the flaw"], correctIndex: 1, explanation: "Selling an exploit often gives faster, lower-risk returns than carrying out the attack, whether through bug bounties or underground markets." },
-      { question: "In the attack supply chain, who manages networks of infected devices and rents them out for DDoS attacks?", options: ["Vulnerability researcher", "Exploit developer", "Botnet operator", "Data reseller"], correctIndex: 2, explanation: "The botnet operator manages infected device networks and rents them out for DDoS attacks." },
-      { question: "In the attack supply chain, the role that writes code weaponizing a discovered flaw is the:", options: ["Exploit developer", "Malware distributor", "Data reseller", "Vulnerability researcher"], correctIndex: 0, explanation: "The exploit developer turns a discovered flaw into a usable attack; the researcher only finds and documents it." },
+      { question: "In the attack supply chain, the role that writes code weaponizing a discovered flaw is the:", options: ["Exploit developer", "Malware distributor", "System administrator", "Vulnerability researcher"], correctIndex: 0, explanation: "The exploit developer turns a discovered flaw into a usable attack; the researcher only finds and documents it." },
       { question: "Why do attackers often avoid large financial institutions despite the high potential reward?", options: ["Large institutions hold no valuable data", "Attacking them is legal but unprofitable", "They invest heavily in security — SOC teams, encryption and compliance — making attacks costly and risky", "Their systems use technology attackers cannot understand"], correctIndex: 2, explanation: "Heavy investment in detection, encryption and compliance makes large institutions costly and risky to attack." },
       { question: "What makes small businesses attractive targets?", options: ["They hold more data than large corporations", "They have limited security budgets, no dedicated security staff and outdated systems", "They are legally exempt from reporting breaches", "Their data is always unencrypted by regulation"], correctIndex: 1, explanation: "Limited budgets, no dedicated IT/security staff and outdated systems make smaller organisations easier and faster to breach." },
       { question: "Why is cybersecurity described as an adversarial machine learning problem?", options: ["Because the datasets are always too small to train on", "Because the data is generated by an intelligent opponent actively adapting to evade detection", "Because security data cannot be labeled", "Because models must run without any training phase"], correctIndex: 1, explanation: "Unlike static datasets, security data comes from an intelligent adversary who adapts specifically to evade detection." },
@@ -4319,7 +4939,7 @@ print(summary_df.to_string(index=False))`,
       { question: "In the hospital access-control example, what does the ML system make possible?", options: ["Blocking every rare access attempt automatically", "Detecting abnormal access patterns without blocking legitimate rare events", "Removing the need for any access control", "Granting all doctors unrestricted access"], correctIndex: 1, explanation: "ML learns typical access patterns so abnormal behaviour is detected while legitimate but rare access is not blocked." },
       { question: "Why is anomaly detection prone to false positives?", options: ["It only ever flags known attacks", "There may be infinitely many anomalous patterns, including ones never seen in training, so any deviation can be flagged", "It requires labeled malicious examples to function", "It ignores the baseline of normal behaviour"], correctIndex: 1, explanation: "Because anomalies are defined by deviation and there can be infinitely many, careless design flags legitimate but unusual events." },
 
-      // Note 8 — Supervised Learning Algorithms for Intrusion Detection
+      // Note 8 — Supervised Learning for Data Security
       { question: "In the supervised learning set-up, the goal is to learn:", options: ["A mapping f : x → y that generalises well to unseen data", "A fixed lookup table of every training example", "A clustering of the data into k groups", "A reward function for sequential decisions"], correctIndex: 0, explanation: "Supervised learning trains on labeled pairs to learn a mapping f : x → y that generalises to unseen data." },
       { question: "Which loss function is used for binary classification?", options: ["Categorical cross-entropy", "Binary cross-entropy", "Gini impurity", "Euclidean distance"], correctIndex: 1, explanation: "Binary cross-entropy, L(y, ŷ) = −[y·log(ŷ) + (1 − y)·log(1 − ŷ)], is the binary classification loss." },
       { question: "The model minimises its loss using:", options: ["Gradient descent or a variant such as Adam or SGD with momentum", "Random sampling of the weights", "Exhaustive search over all possible weights", "The kernel trick"], correctIndex: 0, explanation: "Loss is minimised by gradient descent or variants such as Adam and SGD with momentum." },
@@ -4336,7 +4956,7 @@ print(summary_df.to_string(index=False))`,
       { question: "What is the correct order of one neural network training iteration?", options: ["Backward pass, forward pass, update", "Update, forward pass, backward pass", "Forward pass to compute predictions and loss, backward pass to compute gradients, then update the weights", "Forward pass, update, backward pass"], correctIndex: 2, explanation: "Each iteration runs a forward pass, then a backward pass for gradients, then a weight update." },
       { question: "Which trade-off is stated when choosing between the three algorithms?", options: ["Decision trees offer interpretability, SVMs give strong guarantees in high dimensions, and neural networks perform best on large or complex datasets", "Decision trees always outperform both other methods", "SVMs are the only option for large datasets", "Neural networks require no feature engineering at all"], correctIndex: 0, explanation: "Trees give interpretability, SVMs give theoretical guarantees in high dimensions, and neural networks lead on large or complex data." },
 
-      // Note 9 — Practical: Building Detection Models by Hand
+      // Note 9 — Practical Activities
       { question: "In Practical 2, the dataset has 3 malicious and 3 benign packets. What is the root Gini impurity?", options: ["0.0", "0.25", "0.5", "1.0"], correctIndex: 2, explanation: "With p_malicious = p_benign = 0.5, Gini = 1 − (0.5² + 0.5²) = 0.5." },
       { question: "After splitting on the SYN flag in Practical 2, what is the Gini impurity of each child node?", options: ["0, because each branch contains only one class", "0.5, unchanged from the root", "0.25 for both branches", "1.0, because the split is invalid"], correctIndex: 0, explanation: "SYN = 1 gives all malicious and SYN = 0 all benign, so each child has Gini = 0 — a perfect split." },
       { question: "What training accuracy does the resulting one-rule decision tree achieve on the six packets?", options: ["50%", "75%", "100%", "83%"], correctIndex: 2, explanation: "The rule 'IF SYN_Flag = 1 THEN Malicious ELSE Benign' classifies all six packets correctly — 6/6 = 100%." },
@@ -4370,7 +4990,7 @@ print(summary_df.to_string(index=False))`,
       { question: "In that same scenario, what is the main risk of a false positive?", options: ["A complete data breach", "Unnecessary investigations, user inconvenience and erosion of trust in the security system", "Permanent loss of the audit logs", "The model becoming unable to train"], correctIndex: 1, explanation: "False positives flag legitimate activity, causing wasted investigations, inconvenience and loss of trust in the system." },
       { question: "The employee suddenly accessing 50 times more files than usual, at 2:00 AM, from a new location is:", options: ["A pattern recognition problem, because the behaviour matches a known signature", "An anomaly detection problem, because it is a significant deviation from usual behaviour in time, volume and location", "Neither — it is a hardware fault", "A regression problem, because file counts are numeric"], correctIndex: 1, explanation: "The deviation in time, volume and location makes it an anomaly detection problem, not signature matching." },
 
-      // Note 12 — Supervised Machine Learning for Threat Detection
+      // Note 12 — Machine Learning for Threat Detection in Big Data
       { question: "In supervised threat detection, which two main tasks are distinguished?", options: ["Classification — is this a threat? — and regression — how high is the risk?", "Clustering and dimensionality reduction", "Encryption and decryption", "Labeling and archiving"], correctIndex: 0, explanation: "Classification answers 'is this a threat?' while regression answers 'how high is the risk?'" },
       { question: "In the procedural workflow, what does feature engineering involve?", options: ["Tagging every entry in the dataset as 1 or 0", "Identifying the characteristics that signal a threat — such as sender IP, number of links, or urgent-sounding keywords", "Splitting the model across multiple servers", "Choosing the loss function"], correctIndex: 1, explanation: "Feature engineering identifies the threat-signalling characteristics, e.g. sender IP, link count, urgency keywords in an email." },
       { question: "What is the correct order of the supervised workflow?", options: ["Training, data labeling, feature engineering, testing", "Data labeling, feature engineering, training, testing/validation", "Feature engineering, testing, training, data labeling", "Testing, training, feature engineering, data labeling"], correctIndex: 1, explanation: "The workflow runs data labeling → feature engineering → training → testing/validation on new unlabeled data." },
@@ -4384,7 +5004,7 @@ print(summary_df.to_string(index=False))`,
       { question: "In the algorithm comparison table, SVM's listed weakness is:", options: ["High memory consumption", "Poor performance in high dimensions", "Inability to process numeric features", "Assuming feature independence"], correctIndex: 0, explanation: "SVM excels on complex, high-dimensional data but consumes a lot of memory." },
       { question: "Logistic Regression is listed as typically used for fraud detection because it:", options: ["Handles non-linear threats better than any other model", "Provides a clear risk score from 0 to 100%", "Requires no feature engineering", "Trains without any labeled examples"], correctIndex: 1, explanation: "Logistic Regression gives a clear 0–100% risk score, though it struggles with non-linear threats." },
 
-      // Note 13 — Exploratory Data Analysis and the Python Toolkit
+      // Note 13 — Exploratory Data Analysis (EDA) for Network Security
       { question: "Exploratory Data Analysis (EDA) is the process of:", options: ["Training a final model on the full dataset", "Examining, summarising and visualising a dataset to understand its main characteristics before applying formal models", "Deploying a model into production", "Encrypting a dataset before sharing it"], correctIndex: 1, explanation: "EDA examines, summarises and visualises data to understand its characteristics before formal modelling." },
       { question: "Which is NOT listed as a purpose of EDA?", options: ["Discovering patterns in the data", "Detecting errors or missing values", "Automatically selecting the best hyperparameters for the final model", "Checking the assumptions required for modelling"], correctIndex: 2, explanation: "EDA is for discovering patterns, detecting errors and missing values, identifying relationships and checking modelling assumptions." },
       { question: "Histograms and boxplots used to understand the distribution of a single feature are:", options: ["Univariate EDA", "Bivariate EDA", "Multivariate EDA", "Predictive modelling"], correctIndex: 0, explanation: "Univariate EDA — mean, median, mode, histograms and boxplots — examines one variable at a time." },
@@ -4409,26 +5029,26 @@ print(summary_df.to_string(index=False))`,
       { question: "A model produces TP = 40, FP = 10, FN = 20 and TN = 130. What is its precision?", options: ["0.67", "0.80", "0.85", "0.40"], correctIndex: 1, explanation: "Precision = TP / (TP + FP) = 40 / (40 + 10) = 0.80." },
       { question: "For the same model (TP = 40, FP = 10, FN = 20, TN = 130), what is its recall?", options: ["0.67", "0.80", "0.75", "0.85"], correctIndex: 0, explanation: "Recall = TP / (TP + FN) = 40 / (40 + 20) = 0.67." },
 
-      // Note 15 — Practical: EDA on UNSW-NB15
+      // Note 16 — Practice Exercise of EDA for IDS Data Set
       { question: "Why does running block 15.3 on its own raise a NameError?", options: ["Because the dataset file has not been downloaded", "Because it reuses df and num_cols defined in the earlier blocks — the three blocks are one continuous script", "Because Seaborn must be imported twice", "Because plt.show() can only be called once per session"], correctIndex: 1, explanation: "15.2 and 15.3 reuse df and num_cols from the block before them, so the blocks must run in order in the same notebook." },
       { question: "In the UNSW-NB15 practical, which plot is used to inspect the distribution of the binary target variable?", options: ["sns.heatmap", "sns.countplot(x='label', data=df)", "sns.pairplot", "plt.boxplot of all columns"], correctIndex: 1, explanation: "sns.countplot on the 'label' column shows the distribution of the binary target." },
       { question: "Which plot type does the practical use for outlier detection across numerical features?", options: ["Boxplots", "Line charts", "Correlation heatmaps", "Pie charts"], correctIndex: 0, explanation: "Section 10 of the script draws boxplots of the first ten numerical features for outlier detection." },
       { question: "Why is the pairplot built from sample_df = df.sample(n=1000, random_state=42) rather than the full DataFrame?", options: ["Because pairplot cannot read more than 1000 rows", "For performance — a pairplot over the full dataset would be very slow", "Because only 1000 rows contain attacks", "Because random_state requires a fixed sample size"], correctIndex: 1, explanation: "The pairplot is sampled for performance, as the comment in the script states." },
 
-      // Note 16 — Practical: SVM and KNN
+      // Note 17 — Practical: SVM and KNN
       { question: "Why can running a kernel SVM (SVC) on the full UNSW-NB15 file take hours?", options: ["Because SVC re-reads the CSV on every iteration", "Because a kernel SVM scales roughly with the square of the number of samples", "Because SVC cannot use more than one CPU core", "Because the RBF kernel requires labeled test data"], correctIndex: 1, explanation: "Kernel SVM training scales roughly with the square of the sample count, so a full-size file is very slow." },
       { question: "What two options does the practical give for making SVM training tractable on this dataset?", options: ["Train on a stratified subsample, or use the LinearSVC version built for datasets this size", "Reduce the number of classes to one, or drop the target column", "Disable scaling, or increase the number of features", "Use a smaller random_state, or skip the train/test split"], correctIndex: 0, explanation: "The note recommends a stratified subsample first, or the LinearSVC version designed for datasets this size." },
       { question: "Why must df.dropna() be called before scaling and fitting in these scripts?", options: ["Because dropna reduces the file size on disk", "Because StandardScaler passes NaN straight through, and the estimator then raises an error on fit", "Because NaN values make the plots harder to read", "Because scikit-learn cannot read CSV files containing blanks"], correctIndex: 1, explanation: "The real file has blank service entries; StandardScaler passes NaN through and LinearSVC/KNeighborsClassifier then fail on fit." },
       { question: "What is LabelEncoder used for in the SVM practical?", options: ["Scaling numerical features to zero mean and unit variance", "Encoding categorical (object-typed) columns into numbers", "Splitting the data into training and test sets", "Plotting the ROC curve"], correctIndex: 1, explanation: "The script loops over df.select_dtypes(include=['object']).columns and applies LabelEncoder to each categorical column." },
       { question: "Which scikit-learn function divides the dataset into training and testing portions?", options: ["StandardScaler", "train_test_split", "cross_val_score", "classification_report"], correctIndex: 1, explanation: "train_test_split from sklearn.model_selection performs the split." },
 
-      // Note 17 — Practical: Decision Tree
+      // Note 18 — Intrusion Detection Using Decision Tree (DT)
       { question: "Why do the decision tree scripts drop the attack_cat column before training?", options: ["Because it contains too many missing values", "Because attack_cat names the attack family, so a model that sees it is just reading the answer and its reported accuracy is meaningless", "Because decision trees cannot handle categorical data", "Because it duplicates the id column"], correctIndex: 1, explanation: "attack_cat leaks the answer — a model that can see it is reading the label, making the accuracy meaningless." },
       { question: "Why is feature scaling described as optional for a decision tree?", options: ["Because decision trees ignore numerical features entirely", "Because tree splits are threshold-based, so the scale of a feature does not change the tree", "Because scaling is applied automatically by DecisionTreeClassifier", "Because the dataset is already normalised"], correctIndex: 1, explanation: "Splits are threshold-based, so rescaling a feature does not change the resulting tree — scaling is kept only so the same preprocessing serves other models." },
       { question: "What does cross_val_score add to the evaluation of the decision tree model?", options: ["k-fold cross-validation, testing the model across multiple train/test partitions", "A confusion matrix plot", "Automatic hyperparameter tuning of tree depth", "Encoding of categorical variables"], correctIndex: 0, explanation: "The practical adds k-fold cross-validation via cross_val_score on top of the single train/test evaluation." },
       { question: "Which display class is used to plot the decision tree's confusion matrix?", options: ["classification_report", "ConfusionMatrixDisplay", "roc_curve", "precision_recall_curve"], correctIndex: 1, explanation: "The script builds cm with confusion_matrix and plots it with ConfusionMatrixDisplay." },
 
-      // Note 18 — Network Anomaly Detection with K-Means
+      // Note 19 — Network Anomaly Detection (K-Means Clustering)
       { question: "In K-Means anomaly detection, which points are considered anomalies?", options: ["Points closest to the cluster centroids", "Points far from the cluster centres (centroids)", "Points that belong to the largest cluster", "Points with the smallest feature values"], correctIndex: 1, explanation: "K-Means groups normal behaviour; points far from the centroids are treated as anomalies." },
       { question: "What is the key advantage of using K-Means for network anomaly detection?", options: ["It requires a fully labeled dataset of past attacks", "It detects anomalies without any labeled attack data, since it is unsupervised", "It guarantees zero false positives", "It only works on encrypted traffic"], correctIndex: 1, explanation: "K-Means is unsupervised, so anomalies in network behaviour are found without labeled attack data." },
       { question: "In this workflow, what is NumPy's role?", options: ["Converting raw security logs into structured numerical arrays for fast computation", "Grouping the data into clusters", "Displaying the clusters visually", "Loading and cleaning the log file"], correctIndex: 0, explanation: "NumPy converts raw logs into structured numerical arrays; scikit-learn clusters, Matplotlib visualises, Pandas handles the loading." },
@@ -4436,7 +5056,7 @@ print(summary_df.to_string(index=False))`,
       { question: "In the example implementation, what does KMeans(n_clusters=2) specify?", options: ["That the data has two features", "That the data should be grouped into two clusters", "That two anomalies are expected", "That the model should run for two iterations"], correctIndex: 1, explanation: "n_clusters=2 sets the number of clusters the algorithm groups the data into." },
       { question: "What is the correct order of the K-Means anomaly detection workflow?", options: ["Apply K-Means, collect the data, convert to an array, visualise", "Collect network activity data, convert it to a NumPy array, apply K-Means, identify points far from the centroids, then visualise", "Visualise the raw data, then cluster, then collect more data", "Convert to an array, visualise, collect data, apply K-Means"], correctIndex: 1, explanation: "Collect the activity data, convert to a NumPy array, cluster with K-Means, identify far-from-centroid points, then visualise." },
 
-      // Note 19 — The k-Nearest Neighbours Algorithm
+      // Note 20 — The k-Nearest Neighbors (k-NN) Algorithm
       { question: "k-NN is described as a lazy learning algorithm because it:", options: ["Requires very little training data", "Delays most computation until the classification stage instead of doing intensive work during training", "Produces low-accuracy predictions", "Only runs when the system is idle"], correctIndex: 1, explanation: "Lazy learners postpone the heavy computation to classification time rather than doing it during training." },
       { question: "What happens during the k-NN training phase?", options: ["Weights are learned by gradient descent", "All training feature vectors and their labels are stored, with no model building or parameter learning", "A decision boundary is computed and stored", "The data is clustered into k groups"], correctIndex: 1, explanation: "Training simply stores all feature vectors and labels — no model is built and no parameters are learned." },
       { question: "During k-NN classification, after calculating distances to all training samples, the algorithm:", options: ["Selects the k nearest neighbours and assigns the most common label among them", "Selects the single furthest point and inverts its label", "Retrains the model on the new sample", "Recomputes the cluster centroids"], correctIndex: 0, explanation: "It picks the k nearest neighbours and assigns the most common label among those neighbours." },
@@ -4447,7 +5067,7 @@ print(summary_df.to_string(index=False))`,
       { question: "What is the purpose of a k-d tree in k-NN?", options: ["To visualise the decision boundary", "To speed up the neighbour search", "To reduce the number of features", "To convert categorical data to numeric"], correctIndex: 1, explanation: "Optimised data structures such as k-d trees speed up the nearest-neighbour search." },
       { question: "k-NN performance is stated to depend on:", options: ["The choice of k and the distance metric", "The order in which the training data was collected", "The number of hidden layers configured", "The learning rate used during training"], correctIndex: 0, explanation: "Its listed disadvantages include that performance depends on the choice of k and the distance metric." },
 
-      // Note 20 — Anomaly Detection with Pandas and Scikit-learn
+      // Note 21 — Anomaly Detection Using Pandas and Scikit-Learn Libraries
       { question: "Which Pandas capability covers handling missing values, removing duplicates and filtering unwanted records?", options: ["Data creation", "Data cleaning", "Data transformation", "Data exploration"], correctIndex: 1, explanation: "Data cleaning handles missing values, duplicate removal and filtering of unwanted records." },
       { question: "X = df.drop('label', axis=1) is an example of which Pandas function?", options: ["Data creation", "Data selection and filtering", "Data transformation", "Data exploration"], correctIndex: 1, explanation: "Selecting rows and columns — here separating the input features from the label — is data selection and filtering." },
       { question: "Which pair of scikit-learn calls trains a model and then produces predictions?", options: ["model.fit(X_train, y_train) then model.predict(X_test)", "model.predict(X_train) then model.fit(X_test)", "train_test_split() then df.describe()", "StandardScaler() then df.head()"], correctIndex: 0, explanation: "model.fit trains on the training data; model.predict then produces predictions for the test data." },
@@ -4455,13 +5075,18 @@ print(summary_df.to_string(index=False))`,
       { question: "What does the contamination parameter of IsolationForest represent?", options: ["The expected proportion of anomalies in the data", "The number of trees in the forest", "The random seed used for reproducibility", "The maximum depth of each tree"], correctIndex: 0, explanation: "contamination=0.2 tells the model roughly what proportion of the data is expected to be anomalous." },
       { question: "Isolation Forest is used in this example as:", options: ["A supervised classifier trained on labeled attacks", "An unsupervised anomaly detection method", "A clustering algorithm requiring n_clusters", "A dimensionality-reduction technique"], correctIndex: 1, explanation: "The section presents Isolation Forest as unsupervised anomaly detection over the simulated traffic array." },
 
-      // Note 21 — Practical: Credit Card Fraud Anomaly Detection
+      // Note 22 — Practical Illustration of Anomaly Detection in Customer Credit Card
       { question: "In the credit card fraud practical, why is df['Class'].value_counts() inspected early?", options: ["To confirm the file loaded without errors", "To check the target distribution and reveal the class imbalance", "To remove duplicate transactions", "To select which columns to scale"], correctIndex: 1, explanation: "value_counts on Class shows the target distribution, exposing how imbalanced fraud data is." },
       { question: "Which four models does the practical compare on the fraud dataset?", options: ["SVM, KNN, Decision Tree and Random Forest", "Naive Bayes, Logistic Regression, KNN and PCA", "K-Means, Isolation Forest, GMM and PCA", "CNN, RNN, MLP and SVM"], correctIndex: 0, explanation: "The comparison covers LinearSVC, KNeighborsClassifier, DecisionTreeClassifier and RandomForestClassifier." },
       { question: "On a heavily imbalanced fraud dataset, why is accuracy alone a poor measure of performance?", options: ["Accuracy cannot be computed when classes are imbalanced", "A model can score very high accuracy simply by predicting the majority class, which is why precision, recall and F1 are reported too", "Accuracy is only defined for binary problems", "Accuracy always equals recall on imbalanced data"], correctIndex: 1, explanation: "With very few fraud cases, predicting the majority class alone gives high accuracy — F1 is the metric that considers both error types." },
-      { question: "In the results table for this practical, which metrics are recorded for each model?", options: ["Accuracy, Precision, Recall and F1-score", "Gini, entropy, depth and leaf count", "Volume, Velocity, Variety and Veracity", "Training time, memory, disk and CPU"], correctIndex: 0, explanation: "The 21.3 results table asks for Accuracy, Precision, Recall and F1-score per model." },
+      { question: "In the results table for this practical, which metrics are recorded for each model?", options: ["Accuracy, Precision, Recall and F1-score", "Gini, entropy, depth and leaf count", "Volume, Velocity, Variety and Veracity", "Training time, memory, disk and CPU"], correctIndex: 0, explanation: "The results table at the end of the credit-card practical asks for Accuracy, Precision, Recall and F1-score per model." },
       { question: "Which two curves are imported in the model comparison script for evaluating classifier performance?", options: ["precision_recall_curve and roc_curve", "learning_curve and validation_curve", "calibration_curve and lift_curve", "silhouette_curve and elbow_curve"], correctIndex: 0, explanation: "The script imports precision_recall_curve and roc_curve (with auc) from sklearn.metrics." },
     ],
+    // Written-exam bank alongside the MCQ bank above. The workbook's own
+    // activities are written ones — "define", "differentiate between", "with the
+    // aid of a diagram", "state the steps" — so the course needs both forms.
+    // See src/data/lectureNotes/cyb224ExamPrep.js.
+    examPrep: cyb224ExamPrep,
   },
   {
     code: 'CYB 222',
