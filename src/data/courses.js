@@ -2,6 +2,7 @@
 // plain Node ESM, which does not do Vite's extensionless resolution.
 import { cyb121Quiz } from './lectureNotes/cyb121Quiz.js';
 import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
+import { cyb221ExamPrep } from './lectureNotes/cyb221ExamPrep.js';
 import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
 import { cyb222ExamPrep } from './lectureNotes/cyb222ExamPrep.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
@@ -5984,6 +5985,10 @@ print(summary_df.to_string(index=False))`,
     // src/data/lectureNotes/cyb221.js for provenance and the coverage mapping.
     notesKey: 'cyb221',
     quiz: cyb221Quiz,
+    // Written-exam bank alongside the MCQ one — the manual's own questions are
+    // "define", "list and explain any five", "with the aid of a diagram". See
+    // src/data/lectureNotes/cyb221ExamPrep.js.
+    examPrep: cyb221ExamPrep,
   },
   {
     code: 'UUY-CYB 222',
