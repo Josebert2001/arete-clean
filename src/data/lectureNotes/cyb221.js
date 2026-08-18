@@ -735,7 +735,7 @@ export const cyb221LectureNotes = [
         type: 'note',
         items: [
           '"Each ICMP message is identified by an 8-bit type field in the IP header" is printed exactly as it appears, and it is wrong. The 8-bit Type field belongs to the ICMP header — the first octet of the ICMP message, which travels inside the IP payload. The IP header has its own 8-bit field, Protocol, and a value of 1 there is what says "the payload is ICMP". The two 8-bit fields are easy to conflate; know which is which.',
-          'ECHO Request/Reply is exactly what the `ping` utility sends, so the syllabus item on basic network utilities (ipconfig, ping, tracert, netstat) rests on this paragraph. `tracert` builds on ICMP too: it sends packets with deliberately small TTL values so each router along the path returns an ICMP "time exceeded" message, revealing the route hop by hop.',
+          'ECHO Request/Reply is exactly what the ping utility sends, so the syllabus item on basic network utilities (ipconfig, ping, tracert, netstat) rests on this paragraph. tracert builds on ICMP too: it sends packets with deliberately small TTL values so each router along the path returns an ICMP "time exceeded" message, revealing the route hop by hop.',
         ],
       },
     ],
@@ -1196,7 +1196,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          '"obtains a ticket that can be used to obtain additional tickets from the SS" is printed exactly as it appears, and it is wrong. The additional tickets come from the **TGS**, not the SS — that is the whole point of the Ticket Granting Server, and the steps below say so. The SS is the machine hosting the service you finally want to reach.',
+          '"obtains a ticket that can be used to obtain additional tickets from the SS" is printed exactly as it appears, and it is wrong. The additional tickets come from the TGS, not the SS — that is the whole point of the Ticket Granting Server, and the steps below say so. The SS is the machine hosting the service you finally want to reach.',
         ],
       },
       {
