@@ -9,18 +9,24 @@
 // CYB 224 as Information and Big Data Security. Unresolved — do not "fix"
 // either entry without checking what the department actually examines.
 //
-// SECTION NUMBERS: the manual's body headings carry NO numbers — every printed
-// heading is bare (`CLASSIFICATION OF THREATS`, `CIA Triad`, `Kerberos`…). The
-// numbers used in the headings below are the row numbers of the manual's own
-// `OUTLINES` table on printed pp. 2–3, which has 24 rows. Rows 1–24 are checked
-// against that table one by one; two mismatches were found and fixed:
-//   · outline row 8 is a single row, "Hardware Attacks and Cyber Threat
-//     Categories" — it had been split into two note sections, 8 and a
-//     fabricated 9.
-//   · "Definition of a Firewall" is outline row 9, not 10, and "Firewall
-//     Technologies" is row 10 — it had been left unnumbered.
-// Mobile Device Security (printed p. 38) has NO outline row; the manual's
-// theory simply runs past the end of its own outline.
+// SECTION NUMBERS: the headings below carry none, because the manual's body
+// headings carry none — every printed heading is bare (`CLASSIFICATION OF
+// THREATS`, `CIA Triad`, `Kerberos`…). An earlier transcription prefixed them
+// with the row numbers of the manual's own `OUTLINES` table (printed pp. 2–3,
+// 24 rows). Those were removed: they were not on the page, and they collided
+// with the one numbered run the manual DOES print — `1. Packet Filter Firewall`
+// through `5. Virtual Private Networks` inside Firewall Technologies. That run
+// is the lecturer's own and stays exactly as printed, broken numbering and all
+// (he announces three ICSA categories, numbers the first "1." and the third
+// "2.", then keeps the sequence running into 3, 4 and 5 for DMZ, content
+// filtering and VPN, which are firewall *features*, not ICSA categories).
+//
+// Two ordering facts, checked against the OUTLINES table and worth keeping for
+// whoever edits next: outline row 8 is a single row, "Hardware Attacks and
+// Cyber Threat Categories" (it had been split into two sections, the second
+// fabricated), and "Definition of a Firewall" is row 9 with "Firewall
+// Technologies" row 10. Mobile Device Security (printed p. 38) has no outline
+// row at all — the theory simply runs past the end of its own outline.
 //
 // `covers` / `partial` refer to 1-based indices in the course's `topics` array
 // in courses.js — CourseDetail uses them to show which syllabus items the notes
@@ -60,9 +66,28 @@
 //
 // TRANSCRIPTION POLICY: the lecturer's wording is reproduced as printed,
 // including his own errors, spellings and typography. Where a printed statement
-// conflicts with the standard definition, the statement is KEPT and a `note`
-// section names the conflict — it is never silently corrected. Material added
-// beyond the manual is marked "Added for clarity" or stated in the section text.
+// conflicts with the standard definition, the statement is KEPT — it is never
+// silently corrected.
+//
+// WHAT A `note` IS FOR: teaching the student something about the subject that
+// the printed text leaves unclear or gets wrong. A note explains the concept and
+// says what to write in an exam. It is NOT a place for bibliography — no page
+// numbers, no "printed exactly as it appears", no commentary on the manual's
+// spelling, capitalisation or figure captions. A student reading these notes is
+// revising a subject, not collating an edition. Purely typographic oddities that
+// were once surfaced on the page and are now recorded here instead:
+//   · the seven-layers figure titles itself "CYBERSECURITY", the heading above
+//     it reads "CYBER SECURITY"
+//   · the cyber-attacker tree is printed with no caption and no figure number,
+//     and the sentence introducing it reads "As shown in Figure," — the number
+//     is missing in the print too, not lost in transcription
+//   · "It your security guard as well" (p. 15) drops the word "is"
+//   · "NETWORK SECUITY CONTROLS" (p. 18) drops the R from SECURITY
+//   · "Network Security Controls" is printed as a heading twice, on p. 18 and
+//     again on p. 25; they are genuinely different sections
+//   · "the validity period the ticket" (p. 35) drops the word "of"
+//   · Figure 15 lists message F above message E, the reverse of the text order
+// Material added beyond the manual is stated in the section text.
 
 const IMG = '/lecture-notes/cyb-221';
 
@@ -75,7 +100,7 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '1. Classification of Threats',
+        heading: 'Classification of Threats',
         text: 'A cyber-attack is an exploitation of computer systems and networks. It uses malicious code to alter computer code, logic or data and lead to cybercrimes, such as information and identity theft.',
       },
       {
@@ -137,7 +162,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '2. The 7 Layers of Cyber Security',
+        heading: 'The 7 Layers of Cyber Security',
         text: 'The 7 layers of cyber security should Centre on the mission critical assets you are seeking to protect.',
       },
       {
@@ -150,8 +175,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The figure and the text below it number the layers in opposite directions. The figure counts inwards — 1 is the human layer and 7 is mission-critical assets. The lecturer’s own list, reproduced below, counts outwards — 1 is mission-critical assets and 7 is the human layer. Learn the list, not the badge numbers on the diagram.',
-          'The figure also titles itself "THE 7 LAYERS OF CYBERSECURITY" while the printed section heading reads "THE 7 LAYERS OF CYBER SECURITY".',
+          'The diagram and the list count in opposite directions. The diagram numbers from the outside in, so the human layer is 1 and mission-critical assets are 7; the list below numbers from the inside out, so mission-critical assets are 1 and the human layer is 7. Learn the order of the layers, not the numbers attached to them — an exam question will ask what sits between endpoint security and perimeter security, not what number it carries.',
         ],
       },
       {
@@ -169,7 +193,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '3. Vulnerability, Threat, Harmful Acts',
+        heading: 'Vulnerability, Threat, Harmful Acts',
         text: 'As the recent epidemic of data breaches illustrates, no system is immune to attacks. Any company that manages, transmits, stores, or otherwise handles data has to institute and enforce mechanisms to monitor their cyber environment, identify vulnerabilities, and close up security holes as quickly as possible. Before identifying specific dangers to modern data systems, it is crucial to understand the distinction between cyber threats and vulnerabilities.',
       },
       {
@@ -235,7 +259,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '4. CIA Triad',
+        heading: 'CIA Triad',
         text: 'The CIA Triad is actually a security model that has been developed to help people think about various parts of IT security.',
       },
       {
@@ -289,7 +313,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '5. Assets and Threat',
+        heading: 'Assets and Threat',
         text: 'What is an Asset: An asset is any data, device or other component of an organization’s systems that is valuable – often because it contains sensitive data or can be used to access such information.',
       },
       {
@@ -325,19 +349,13 @@ export const cyb221LectureNotes = [
         type: 'image',
         src: `${IMG}/cyber-attacker-actions.webp`,
         width: 1313, height: 745,
-        caption: 'Cyber-Attacker Actions (printed without a figure number or caption)',
+        caption: 'Cyber-Attacker Actions',
         alt: 'Tree diagram: Cyber-Attacker Actions branches to Inadvertent, Deliberate and Inaction; Deliberate branches further to Political, Economic and Socio-Cultural',
-      },
-      {
-        type: 'note',
-        items: [
-          'The manual prints this diagram with no caption and no figure number, and the sentence above it reads "As shown in Figure," — the number is missing in the printed text too, not lost in transcription.',
-        ],
       },
 
       {
         type: 'definition',
-        heading: '6. Types of Cyber-Attacker Actions',
+        heading: 'Types of Cyber-Attacker Actions',
         text: 'Active attacks: An active attack is a network exploit in which a hacker attempts to make changes to data on the target or data en route to the target.',
       },
       {
@@ -373,7 +391,7 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '7. Software Attacks: Malware',
+        heading: 'Software Attacks: Malware',
         text: 'Software Attacks: Malicious code (sometimes called malware) is a type of software designed to take over or damage a computer user\'s operating system, without the user\'s knowledge or approval. It can be very difficult to remove and very damaging. Common malware examples are listed in the following table:',
       },
       {
@@ -390,13 +408,13 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The virus row lists ".doc" among "executable files". A .doc file is a Word document, not an executable — it is data that Word opens. The reason it belongs on a list of infection vectors is macro viruses: a .doc can carry VBA macro code that runs when the document is opened. Melissa, named two lines later in the same row, was exactly that. Reproduce the lecturer\'s list if he asks for it, but know why .doc is the odd one out.',
+          'A .doc file is not an executable, even though the virus row lists it as one — it is a Word document, data that Word opens. It still belongs on a list of infection vectors, because of macro viruses: a .doc can carry VBA macro code that runs the moment the document is opened. Melissa, named two lines later in the same row, was exactly that. Give the list as it stands if you are asked for it, and be ready to say why .doc is the odd one out.',
         ],
       },
 
       {
         type: 'definition',
-        heading: '8. Hardware Attacks and Cyber Threat Categories',
+        heading: 'Hardware Attacks and Cyber Threat Categories',
         text: 'Hardware Attacks: Common hardware attacks include:',
       },
       {
@@ -413,7 +431,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The first bullet contradicts itself as printed: it appears under "Hardware Attacks" yet says backdoors "aren’t limited to software and hardware". The sense intended is that backdoors are not limited to software — they reach into hardware too, such as RFID chips and memory. The wording above is left exactly as the manual prints it.',
+          'Read the first bullet as: backdoors are not limited to software. That is the point it is making — a backdoor can be built into the hardware itself, including embedded RFID chips and memory, where no amount of patching or reinstalling the operating system will remove it. This is what makes hardware backdoors so much harder to deal with than software ones.',
         ],
       },
       {
@@ -451,7 +469,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The manual\'s sentence stops there. It ends on the dangling word "from" at the foot of printed page 14, and the next line is the heading NETWORK SECURITY-FIREWALL — nothing was lost in transcription, and no continuation appears anywhere later. The missing words are presumably "…from that holder", i.e. the individual, competitor, rival group, government or enemy who owns the information.',
+          'That sentence breaks off unfinished. Complete it as: obtaining secrets and information without the permission and knowledge of the holder — an individual, a competitor, a rival group, a government or an enemy — for personal, economic, political or military advantage. What separates espionage from the other three is the goal: the attacker wants the information itself and wants you not to notice it was taken, so it is quiet by design, where cyber warfare and cyber terrorism aim to be felt.',
         ],
       },
     ],
@@ -464,18 +482,12 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '9. Network Security-Firewall: Definition of Firewall',
+        heading: 'Network Security-Firewall: Definition of Firewall',
         text: 'A firewall is a system that enforces an access control policy between two networks such as your private LAN and the unsafe, public Internet. The firewall determines which inside services can be accessed from the out-side, and vice versa.',
       },
       {
         type: 'text',
         text: 'The actual means by which this is accomplished varies widely, but in principle, the firewall can be thought of as a pair of mechanisms: one to block traffic, and one to permit traffic. A firewall is more than the locked front door to your network. It your security guard as well. Firewalls are also important because they provide a single “choke point” where security and audits can be imposed. A firewall can provide a net-work administrator with data about what kinds and amount of traffic passed through it, how many attempts were made to break into it, and so on. Like a closed-circuit security TV system, your firewall not only prevents access but also monitors who’s been sniffing around, and assists in identifying those who attempt to breach your security.',
-      },
-      {
-        type: 'note',
-        items: [
-          '"It your security guard as well" is printed exactly as it appears — the manual drops the word "is". Read it as "It is your security guard as well."',
-        ],
       },
       {
         type: 'text',
@@ -501,7 +513,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '10. Firewall Technologies',
+        heading: 'Firewall Technologies',
         text: 'Firewalls come in all shapes, sizes, and prices. Choosing the correct one depends mainly on your business requirements and the size of your net-work. This section discusses the different types of firewall technologies and formats available. Above all, no matter what type of firewall you choose or its functionality, you must ensure that it is secure and that a trusted third party, such as the International Computer Security Association (ICSA), has certified it.',
       },
       {
@@ -530,7 +542,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The manual’s numbering here is broken. It announces three ICSA categories, then numbers the first "1." and the third "2.", leaving Application-Level Proxy Server — the second category — with no number and its heading run into the body text. The same running sequence then continues into the next section as "3.", "4." and "5." for DMZ, content filtering and VPN, which are additional firewall *features*, not ICSA categories. The numbers below are reproduced as printed; do not read 3, 4 and 5 as a fourth, fifth and sixth kind of firewall.',
+          'There are three kinds of firewall in the ICSA classification and you have now met all three: packet filter, application-level proxy server, and stateful packet inspection. The numbered items that follow — DMZ, content filtering and virtual private networking — continue the same 1, 2, 3, 4, 5 sequence, but they are not a fourth, fifth and sixth kind of firewall. They are extra features a firewall of any of the three kinds may offer. Asked to name the types of firewall, name three.',
         ],
       },
 
@@ -569,8 +581,8 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'Two things about the sentence above. First, "168-bit Data Encryption Standard (3DES)" mislabels the algorithm: 3DES is Triple DES, which runs DES three times over a 168-bit key. Plain DES is a 56-bit cipher. Write Triple DES in an exam answer.',
-          'Second, "the strongest level of encryption publicly available and deemed unbreakable" was true of the era this passage was written in, not now. NIST deprecated 3DES in 2017 and disallowed it after 2023. AES (128, 192 or 256-bit) is today\'s standard for this role — which Practical 3 in this manual demonstrates when it compares Caesar, DES and AES.',
+          'The algorithm named here is Triple DES, not the Data Encryption Standard. They are different ciphers: plain DES uses a 56-bit key, Triple DES runs DES three times over a 168-bit key to compensate for it. Write Triple DES.',
+          'Triple DES is no longer "the strongest level of encryption publicly available", whatever it was when this passage was written. NIST deprecated it in 2017 and disallowed it after 2023. AES — 128, 192 or 256-bit — is the standard for this role today, which is exactly the comparison Practical 3 in this manual asks you to run between Caesar, DES and AES.',
         ],
       },
       {
@@ -601,7 +613,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'Windows NT dates this passage to the late 1990s / early 2000s, and the manual reproduces it unchanged. The security argument still holds — a purpose-built embedded OS exposes less attack surface than a general-purpose server OS — but read "Windows NT and UNIX" as "a general-purpose server operating system".',
+          'Read "Windows NT and UNIX" as "a general-purpose server operating system" — Windows NT dates the example, not the argument. The argument is sound and worth knowing in its general form: a general-purpose OS ships with services, drivers and utilities a firewall never uses, and every one of them is attack surface that has to be hardened and patched. An embedded OS built for one job ships without them.',
         ],
       },
       {
@@ -619,20 +631,13 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '11. Network Security Controls',
+        heading: 'Network Security Controls',
         text: 'Network security comprises of the measures adopted to protect the resources and integrity of a computer network. This section reviews the basics of computer networks and Internet in order to lay a strong foundation for the reader to understand the rest of this paper on network security.',
-      },
-      {
-        type: 'note',
-        items: [
-          'Printed as "NETWORK SECUITY CONTROLS" — the manual drops the R from SECURITY.',
-          'The manual calls itself "this paper" here, and cites sources as [8], [9] and [26] further on. Everything from this heading to the end of the theory is lifted from a published paper, which is also why its figures are numbered from 1 again even though the manual already had a Figure 1 on page 6.',
-        ],
       },
 
       {
         type: 'definition',
-        heading: '12. ISO-OSI Reference Model',
+        heading: 'ISO-OSI Reference Model',
         text: 'The communication problem in computer networks can be defined as the task of transferring data entered by an application user in one system to an application user in another system through one or more intermediate networks.',
       },
       {
@@ -703,7 +708,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '13. TCP Connection Establishment and ICMP',
+        heading: 'TCP Connection Establishment and ICMP',
         text: 'The two commonly used transport layer protocols in the TCP/IP protocol stack are the Transmission Control Protocol (TCP) and the User Datagram Protocol (UDP) . TCP is a connection-oriented, byte-stream based protocol and provides reliable, in-order data delivery. UDP is a connectionless, message-based protocol and provides only best-effort service for end-to-end data delivery.',
       },
       {
@@ -734,7 +739,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          '"Each ICMP message is identified by an 8-bit type field in the IP header" is printed exactly as it appears, and it is wrong. The 8-bit Type field belongs to the ICMP header — the first octet of the ICMP message, which travels inside the IP payload. The IP header has its own 8-bit field, Protocol, and a value of 1 there is what says "the payload is ICMP". The two 8-bit fields are easy to conflate; know which is which.',
+          'The 8-bit Type field is in the ICMP header, not the IP header. It is the first octet of the ICMP message itself, which travels inside the IP payload, and it says what kind of ICMP message this is — 8 for Echo Request, 0 for Echo Reply, 11 for Time Exceeded. The IP header has its own 8-bit field, Protocol, and a value of 1 there is what says "the payload is ICMP". Two 8-bit fields, two different jobs, two different headers.',
           'ECHO Request/Reply is exactly what the ping utility sends, so the syllabus item on basic network utilities (ipconfig, ping, tracert, netstat) rests on this paragraph. tracert builds on ICMP too: it sends packets with deliberately small TTL values so each router along the path returns an ICMP "time exceeded" message, revealing the route hop by hop.',
         ],
       },
@@ -749,13 +754,13 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '14. Classical Network Attacks',
+        heading: 'Classical Network Attacks',
         text: 'In this section, we describe some of the classical attacks that have exploited the typical vulnerabilities of computer networks and the solutions deployed to combat or reduce the chances of some of these attacks.',
       },
 
       {
         type: 'definition',
-        heading: '15. Threats in Transit',
+        heading: 'Threats in Transit',
         text: 'The network interface card (NIC) of each host in a network is uniquely identified with a hardware address. The NIC will be programmed to pick up only the packets addressed to: (i) The unicast hardware address corresponding to the host, (ii) The multicast hardware address corresponding to the multicast group in which the host is a member of and (iii) The broadcast hardware address. A capable intruder can reprogram the NIC with the hardware address of another host and accept packets addressed to that host. To avoid being caught, the intruder can put a copy of the packet back to the network.',
       },
       {
@@ -781,13 +786,13 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The word "returned" in the optical-fibre reason (i) is printed exactly as it appears. It is a typo for "re-tuned": the point is that a fibre is tuned to hold light inside by total internal reflection, so an attacker cannot simply clamp a tap onto it — the whole network would have to be re-tuned before any light leaked out to be intercepted.',
+          'Reason (i) should read "re-tuned", not "returned". The point is that a fibre is tuned to hold light inside it by total internal reflection: an attacker cannot simply clamp a tap onto the cable and read what leaks out, because nothing leaks out. The whole network would have to be re-tuned first, which is not something that can be done quietly.',
         ],
       },
 
       {
         type: 'definition',
-        heading: '16. TCP Session Hijacking',
+        heading: 'TCP Session Hijacking',
         text: 'TCP Session Hijacking refers to the act of taking over an already established TCP session and injecting packets into the stream that are processed by the receiver as if the packets are coming from the authentic owner of the session. A TCP session is identified by the quadruple: client IP address, client port number, server IP address and server port number. Any packet that reaches either machine with the above identifiers is considered to be part of the existing session. If attackers can spoof these items, they can pass TCP packets to the client or server and have those packets processed as coming from the other machine.',
       },
       {
@@ -826,7 +831,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '17. Echo-Chargen Attack',
+        heading: 'Echo-Chargen Attack',
         text: 'Chargen (Character Generator) [9] is a protocol of the TCP/IP protocol stack and is used for testing and performance measurement purposes. Chargen runs on TCP port 19 and also on UDP port 19. When a client opens a TCP connection with a server on TCP port 19, the server starts sending arbitrary characters back to the client, until the TCP connection is closed. Whenever a host sends a UDP message to a server on UDP port 19, the server responds back with an arbitrary message and the number of characters in the message will be in the range [0...512].',
       },
       {
@@ -868,13 +873,13 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '18. Syn Flood Attack',
+        heading: 'Syn Flood Attack',
         text: 'During the TCP connection establishment process, the server maintains a SYN_RECV queue to keep track of the connection requests for which it has allocated the resources and responded back with a SYN/ACK message, but the corresponding ACK from the client has not yet been received. The server eventually times out waiting for the ACK packet and removes the incomplete connection request from its queue. An attacker can launch a DDOS attack by sending several SYN connection request messages using spoofed non-existing IP addresses and never respond back with the ACK messages. The SYN_RECV queue of the server gets filled up with incomplete connection request messages. Even though these incomplete connection requests are discarded after the timeout, if a genuine client attempts to establish a TCP connection with the server in the meantime, the server discards the SYN request from that client.',
       },
       {
         type: 'note',
         items: [
-          'The paragraph calls this "a DDOS attack". As described it is a plain DoS: one attacker sending SYN packets from spoofed source addresses. A SYN flood becomes a *distributed* denial of service only when it is launched from many compromised machines at once, as in the DDoS section above. The manual\'s own outline names this section "SYN Flood Attack", and the printed heading spells it "Syn Flood Attack".',
+          'What is described here is a plain DoS, not a DDoS. One attacker is sending SYN packets from spoofed source addresses; the spoofing hides where they came from, but they still come from one machine. The attack becomes *distributed* only when it is launched from many compromised machines at once, as in the DDoS section above. Keep the two apart — spoofed does not mean distributed.',
         ],
       },
     ],
@@ -888,14 +893,8 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '19. Network Security Controls',
+        heading: 'Network Security Controls',
         text: 'This section describes several network security controls that have been adopted in modern day computer networks to combat the threats and prevent or reduce the chances of an attack.',
-      },
-      {
-        type: 'note',
-        items: [
-          'The manual prints this heading twice: once on page 18 (as "NETWORK SECUITY CONTROLS", outline row 11) and again here on page 25. The two are different sections — row 11 introduces the network chapter, row 19 introduces the encryption controls. The manual\'s own outline calls this one "Encryption Techniques: Link and End-to-End Encryption".',
-        ],
       },
       {
         type: 'text',
@@ -917,7 +916,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The last row is printed as it appears and it contradicts itself: it says end-to-end encryption leaves data encrypted "at both the end hosts and the intermediate hosts", when the point of end-to-end encryption is that the data is in plaintext at the end hosts — that is where the application encrypts and decrypts it. Read the row as: everything below the application layer is encrypted, all the way through, including at the intermediate hosts.',
+          'The last row needs reading carefully, because taken at face value it contradicts the rest of the table. With end-to-end encryption the data is in plaintext at the end hosts — that is precisely where the application encrypts it before sending and decrypts it after receiving. What the row means is that everywhere below the application layer it stays encrypted, all the way through, including at every intermediate host. That is the whole difference from link encryption, where each hop decrypts and re-encrypts.',
         ],
       },
       {
@@ -927,7 +926,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '20. Virtual Private Networks',
+        heading: 'Virtual Private Networks',
         text: 'There are two types of IP addresses: public and private. A public IP address is globally unique and only one machine connected to the public Internet can have a public IP address. Private IP addresses are one of the solutions to reduce the exhaustion of IP address space. A private IP address has to be unique only within the set of networks of a particular organization. Larger organizations have sites at different locations in the world. The hosts in the different sites of the organization may be identified with a unique private IP address. But the same set of private IP addresses can be used in the networks of different organizations. Hence, a packet with a private IP address as the destination IP address cannot be used to route packets from one site to another site of an organization through the public Internet.',
       },
       {
@@ -960,7 +959,7 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '21. Secure Shell (SSH)',
+        heading: 'Secure Shell (SSH)',
         text: 'Secure Shell (SSH) is a network protocol that allows a user to securely interact with remote machines by establishing a secure channel for data exchange. SSH replaced TELNET and other insecure remote shell programs that were used in the past to send information in plaintext, including passwords, to remote systems. SSH encrypts the information sent over the insecure Internet and thus provides both confidentiality and integrity of data. SSH operates over a sequence of three phases as illustrated by the timeline diagram shown in Figure 9. The three phases are described below:',
       },
       {
@@ -1017,7 +1016,7 @@ export const cyb221LectureNotes = [
 
       {
         type: 'definition',
-        heading: '22. Transport Layer Security (TLS)',
+        heading: 'Transport Layer Security (TLS)',
         text: 'Transport Layer Security (TLS) is the successor of the Secure Sockets Layer (SSL) cryptographic protocol and it provides secure communication of the datagrams of the transport layer protocols as part of an end-to-end connection across the network. TLS has been used for a wide-variety of applications like web browsing, electronic mail, voice-over-IP, instant messaging and etc.',
       },
       {
@@ -1055,7 +1054,7 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '23. IP Security',
+        heading: 'IP Security',
         text: 'The IP Security Protocol suite (IPSec) is implemented at the IP layer, so it does not require any change to existing transport layer and application layer protocols. IPSec is primarily designed to address the fundamental shortcomings of the IP layer such as IP address spoofing, wiretapping and session hijacking. The following two protocols are used to provide packet-level security for both IPv4 and IPv6:',
       },
       {
@@ -1094,7 +1093,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'This is the only place in the whole manual where Diffie-Hellman is named. If you are asked how the two hosts end up with a shared secret they never transmitted, this bullet is the answer the lecturer wrote.',
+          'Notice what the Diffie-Hellman bullet buys you. Everything before it is encrypted with public keys, which is slow and only works because certificates were exchanged first. Diffie-Hellman lets the two hosts arrive at the same shared secret without either of them ever sending it, and from that point the fast symmetric algorithms take over. If you are asked how two hosts end up with a shared key they never transmitted, this is the answer.',
         ],
       },
       {
@@ -1105,7 +1104,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The bullet on the previous page says AH provides "integrity, authentication and non-repudiation"; this section, describing the same header, claims only integrity and data origin authentication. Both are printed as they appear. The narrower claim is the correct one — AH authenticates with a shared-key HMAC, and a value two parties can both compute cannot prove to a third party which of them produced it, which is what non-repudiation requires.',
+          'AH gives you integrity and data origin authentication. It does not give you non-repudiation, despite the earlier bullet listing it: AH authenticates with a keyed HMAC, and both hosts hold that key, so either of them could have produced any given check value. Non-repudiation means proving to a third party which one did it, and that needs a digital signature made with a private key only one party holds. Take the narrower claim as the correct one.',
         ],
       },
       {
@@ -1142,7 +1141,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'The manual names this protocol two different ways: the bullet on page 31 calls it the "IP Encapsulating Security Payload", the heading here calls it the "Encapsulated Security Payload". Both are printed as they appear. The RFC name is Encapsulating Security Payload.',
+          'ESP stands for Encapsulating Security Payload — that is the RFC name, and the one to write. You will see it called "Encapsulated" in places, including the heading just above.',
         ],
       },
       {
@@ -1175,8 +1174,8 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'Added for clarity — the manual does not draw this comparison. AH proves who sent a packet and that nobody altered it, but anyone watching the wire can still read the contents; ESP additionally encrypts the payload, which is why VPN deployments use ESP.',
-          'Added for clarity — AH covers the immutable fields of the outer IP header, including the addresses, so a NAT device that rewrites those addresses invalidates the AH check value. ESP authenticates only from the ESP header inwards, so it is unaffected by the rewrite, though ESP still has to be wrapped in UDP (NAT-T) to get through most NAT devices at all.',
+          'AH or ESP — how to choose. AH proves who sent a packet and that nobody altered it, but anyone watching the wire can still read the contents. ESP does all that and encrypts the payload as well, which is why VPN deployments use ESP.',
+          'AH also breaks through NAT, and it is worth understanding why. AH covers the immutable fields of the outer IP header, addresses included; a NAT device rewrites exactly those addresses, so the check value no longer matches and the packet is discarded. ESP authenticates only from the ESP header inwards, so the rewrite does not disturb it — though ESP still has to be wrapped in UDP (NAT traversal) to get through most NAT devices at all.',
         ],
       },
     ],
@@ -1190,13 +1189,13 @@ export const cyb221LectureNotes = [
     sections: [
       {
         type: 'definition',
-        heading: '24. Kerberos',
+        heading: 'Kerberos',
         text: 'Kerberos [26] is an authentication protocol used by processes/hosts communicating over an insecure network to verify each other’s identity in a secure manner. It is based on the idea that a central server provides authenticated tokens called "tickets" to requesting applications. A ticket is an unforgeable, non-replayable, authenticated object. The security of the protocol depends on the assumption that the participating machines maintain loosely synchronized time. The four entities involved in Kerberos are: (i) Authentication Server, AS; (ii) Ticket Granting Server, TGS; (iii) Service Server; SS and (iv) Ticket Granting Ticket, TGT. A client authenticates itself to the AS once and obtains a ticket that can be used to obtain additional tickets from the SS without requiring the client to re-authenticate itself for every service requested. The sequence of steps of the protocol is described below (also shown in Figure 15):',
       },
       {
         type: 'note',
         items: [
-          '"obtains a ticket that can be used to obtain additional tickets from the SS" is printed exactly as it appears, and it is wrong. The additional tickets come from the TGS, not the SS — that is the whole point of the Ticket Granting Server, and the steps below say so. The SS is the machine hosting the service you finally want to reach.',
+          'The additional tickets come from the TGS, not the SS. That is the entire point of a Ticket Granting Server: you authenticate once to the AS, receive a ticket-granting ticket, and from then on the TGS issues you a ticket per service without your password going anywhere near the network again. The SS is the machine hosting the service you finally want to reach — it issues nothing. The four steps below follow this order; read them, not the sentence above.',
         ],
       },
       {
@@ -1263,8 +1262,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          '"the validity period the ticket" in message E is printed as it appears — the manual drops the word "of".',
-          'Figure 15 lists message F above message E on its arrows, in the opposite order to the text. The text is the one to follow.',
+          'A way to hold the eight messages together: A and B come back from the AS and get you logged in; C and D go to the TGS and E and F come back with a ticket for one particular service; G and H are you presenting that ticket to the service and the service proving it is genuine by returning your timestamp plus one. Every reply that matters is encrypted with a key only the intended recipient can hold, which is what makes the authentication mutual.',
         ],
       },
       {
@@ -1309,8 +1307,7 @@ export const cyb221LectureNotes = [
       {
         type: 'note',
         items: [
-          'This section is where the manual\'s theory ends, on printed page 38. It has no row in the manual\'s own outline, which stops at row 24 (Kerberos) — so it carries no section number here.',
-          'The manual spells it "IOT"; the usual spelling is IoT, for Internet of Things.',
+          'IOT here is IoT, the Internet of Things — the networked cameras, locks, thermostats and sensors a phone or tablet is used to control. It matters to the argument: a compromised phone is not just a compromised phone, it is a way into everything that phone controls.',
         ],
       },
     ],
