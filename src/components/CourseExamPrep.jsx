@@ -110,6 +110,12 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
     onAward(Math.round(earned * 10) / 10);
   };
 
+  // `source` is free text — "§3" in one bank, "Topic 3 · Firewall Technologies"
+  // in another — and an id attribute may not contain whitespace, or the label
+  // stops pointing at the field. Slugify rather than constraining what a bank
+  // may write.
+  const answerFieldId = `answer-${String(q.source).replace(/[^a-zA-Z0-9]+/g, '-')}`;
+
   return (
     <div>
       <p className="text-ink leading-relaxed mb-5">
@@ -119,13 +125,13 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
       {!revealed ? (
         <div>
           <label
-            htmlFor={`answer-${q.source}`}
+            htmlFor={answerFieldId}
             className="block text-xs font-mono uppercase tracking-wider text-coffee-700 mb-2"
           >
             Your answer
           </label>
           <textarea
-            id={`answer-${q.source}`}
+            id={answerFieldId}
             value={answer}
             onChange={(e) => updateAnswer(e.target.value)}
             rows={7}
