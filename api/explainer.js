@@ -82,8 +82,12 @@ export default async function handler(req, res) {
   if (typeof code !== 'string' || !code.trim()) {
     return res.status(400).json({ error: 'No code provided.' });
   }
-  if (code.length > 5000) {
-    return res.status(400).json({ error: 'Code exceeds the 5,000 character limit.' });
+  // 8,000 rather than 5,000 because the in-app "Explain this code" buttons send
+  // whole lecture-note listings, not hand-typed snippets: UUY-CYB 221's
+  // Practical 12 solution alone is 5.6k. Keep MAX_EXPLAIN_CHARS in
+  // src/utils/explainCode.js in step, or those buttons offer a call this rejects.
+  if (code.length > 8000) {
+    return res.status(400).json({ error: 'Code exceeds the 8,000 character limit.' });
   }
 
   const lang = Object.hasOwn(LANGUAGES, language) ? LANGUAGES[language] : undefined; // undefined => let the model auto-detect

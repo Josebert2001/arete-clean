@@ -9,6 +9,15 @@ export function useApiAvailability(url) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // A falsy url means the caller knows the feature is not needed on this
+      // screen (no code on the page, say). Report unavailable without spending
+      // a request, so the probe can be skipped without breaking the rules of
+      // hooks. Set inside the async body, not the effect body, so it does not
+      // land as a synchronous cascading render.
+      if (!url) {
+        if (!cancelled) setStatus('unavailable');
+        return;
+      }
       try {
         const data = await fetchJsonWithFallback(
           url,

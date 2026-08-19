@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
 import {
   PenLine, Play, ArrowLeft, ArrowRight, Eye, CheckCircle2, Circle, XCircle,
-  Award, RotateCcw, Lightbulb, BookOpen,
+  Award, RotateCcw, Lightbulb, BookOpen, Terminal,
 } from 'lucide-react';
 import MathText from './MathText';
+import CodeBlock from './CodeBlock';
+import ExplainCode from './ExplainCode';
 import { useProgress } from './useProgress';
+import { useApiAvailability } from '../utils/apiClient';
 import { examItemId, gradeFromMarks, REVIEW_STORAGE_KEY } from '../utils/reviewSchedule';
 
 // Written-exam practice, as opposed to the MCQ `course.quiz` bank. Nothing
@@ -68,6 +71,15 @@ function matchesItem(answer, item) {
   return candidates.some((c) => c && (a === c || a.includes(c) || c.includes(a)));
 }
 
+// A question is a code question if it prints a listing with the stem (`code`)
+// or answers with one (`modelCode`). Both go through CodeBlock rather than into
+// the question or model-answer prose, because those render as paragraphs — CSS
+// `white-space: pre-line` collapses runs of spaces, so a Python listing pasted
+// into them would lose the indentation that *is* its block structure.
+function isCodeQuestion(q) {
+  return Boolean(q.code || q.modelCode);
+}
+
 function Pill({ children }) {
   return (
     <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-coffee-100 text-coffee-700 whitespace-nowrap">
@@ -89,10 +101,11 @@ function Pill({ children }) {
 // keyboard; jot the five points you would make if you are on a phone or the
 // question wants a diagram, which cannot be typed at all. Either way the text
 // then sits beside the mark scheme, which beats marking against paper.
-function LongformQuestion({ q, courseSlug, awarded, onAward }) {
+function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady }) {
   const [revealed, setRevealed] = useState(false);
   const [ticked, setTicked] = useState([]);
   const [answer, setAnswer] = useState(() => loadAnswer(courseSlug, q.question));
+  const code = isCodeQuestion(q);
 
   const updateAnswer = (text) => {
     setAnswer(text);
@@ -118,9 +131,17 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
 
   return (
     <div>
-      <p className="text-ink leading-relaxed mb-5">
+      <p className={`text-ink leading-relaxed ${q.code ? 'mb-2' : 'mb-5'}`}>
         <MathText text={q.question} />
       </p>
+
+      {/* Line numbers stay on for the stem: a "state the fault" answer names
+          the line it is on, the same way the paper expects. */}
+      {q.code && (
+        <div className="mb-5">
+          <CodeBlock code={q.code} language={q.language || 'python'} />
+        </div>
+      )}
 
       {!revealed ? (
         <div>
@@ -134,13 +155,18 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
             id={answerFieldId}
             value={answer}
             onChange={(e) => updateAnswer(e.target.value)}
-            rows={7}
+            rows={code ? 12 : 7}
+            spellCheck={code ? false : undefined}
             placeholder={
-              q.figure
-                ? 'Type your answer here, and sketch the diagram on paper — you can compare it against the real one once you reveal. Short points are fine.'
-                : 'Type your answer here. Full prose if you are at a keyboard, or just the points you would make — either works.'
+              code
+                ? 'Write the code here, as you would on the paper. Indentation matters in Python and it is marked — type it out rather than describing it.'
+                : q.figure
+                  ? 'Type your answer here, and sketch the diagram on paper — you can compare it against the real one once you reveal. Short points are fine.'
+                  : 'Type your answer here. Full prose if you are at a keyboard, or just the points you would make — either works.'
             }
-            className="w-full px-4 py-3 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-none bg-paper text-ink text-sm leading-relaxed resize-y"
+            className={`w-full px-4 py-3 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-none bg-paper text-ink text-sm leading-relaxed resize-y ${
+              code ? 'font-mono' : ''
+            }`}
           />
           <p className="text-xs text-coffee-700 mt-2 mb-4 leading-relaxed">
             Answer before you look. Reading a model answer feels like knowing it — writing
@@ -170,7 +196,15 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
                 What you wrote
               </p>
               <div className="rounded-xl border-2 border-coffee-200 bg-paper p-4">
-                <p className="text-sm text-ink leading-relaxed whitespace-pre-line">{answer}</p>
+                {/* pre-wrap, not pre-line, for code: the indentation the student
+                    typed is part of what they are marking themselves on. */}
+                <p
+                  className={`text-sm text-ink leading-relaxed ${
+                    code ? 'font-mono whitespace-pre-wrap overflow-x-auto' : 'whitespace-pre-line'
+                  }`}
+                >
+                  {answer}
+                </p>
               </div>
             </div>
           )}
@@ -184,6 +218,26 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
                 <MathText text={q.modelAnswer} />
               </p>
             </div>
+            {q.modelCode && (
+              <CodeBlock
+                code={q.modelCode}
+                language={q.language || 'python'}
+                showLineNumbers={false}
+              />
+            )}
+            {/* Only after the reveal, and never on the stem before it: on a
+                "debug this listing" question the walkthrough names the fault,
+                which is the answer. Once the model answer is on screen there is
+                nothing left to give away, and a student who still cannot follow
+                the code needs it explained line by line more than they need
+                another paragraph of prose. */}
+            {code && (
+              <ExplainCode
+                code={q.modelCode || q.code}
+                language={q.language || 'python'}
+                ready={explainReady}
+              />
+            )}
           </div>
 
           {q.figure && (
@@ -347,6 +401,11 @@ export default function CourseExamPrep({ course }) {
   const { progress, setQuizScore } = useProgress(STORAGE_KEY);
   // Review scheduling keeps its own record — see REVIEW_STORAGE_KEY.
   const { recordReviews } = useProgress(REVIEW_STORAGE_KEY);
+  // Probed only for banks that actually carry listings — a written-only bank
+  // has nothing for the explainer to explain, so it spends no request.
+  const explainStatus = useApiAvailability(
+    bank.some(isCodeQuestion) ? '/api/explainer' : null,
+  );
   const last = progress.quizScores?.[course.slug];
 
   const [questions, setQuestions] = useState(null);
@@ -455,13 +514,26 @@ export default function CourseExamPrep({ course }) {
               Question {current + 1} of {questions.length}
             </span>
             <Pill>[{q.marks} marks]</Pill>
-            <Pill>{q.type === 'recall' ? 'Recall drill' : 'Written answer'}</Pill>
+            <Pill>
+              {q.type === 'recall'
+                ? 'Recall drill'
+                : isCodeQuestion(q) ? 'Code question' : 'Written answer'}
+            </Pill>
             <Pill>notes {q.source}</Pill>
           </div>
 
           {q.type === 'recall'
             ? <RecallQuestion key={current} q={q} awarded={awarded} onAward={award} />
-            : <LongformQuestion key={current} q={q} courseSlug={course.slug} awarded={awarded} onAward={award} />}
+            : (
+              <LongformQuestion
+                key={current}
+                q={q}
+                courseSlug={course.slug}
+                awarded={awarded}
+                onAward={award}
+                explainReady={explainStatus === 'ready'}
+              />
+            )}
 
           <button onClick={next} className="btn-primary w-full justify-center mt-7">
             {current + 1 < questions.length ? 'Next question' : 'See results'}
@@ -475,6 +547,7 @@ export default function CourseExamPrep({ course }) {
   // ── Picker ────────────────────────────────────────────────────
   const longform = bank.filter((q) => q.type === 'longform');
   const recall = bank.filter((q) => q.type === 'recall');
+  const codeQuestions = bank.filter(isCodeQuestion);
   const shuffled = (list, n) => {
     const copy = [...list];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -517,6 +590,9 @@ export default function CourseExamPrep({ course }) {
           <li>· Structure every long answer the same way: <span className="text-ink font-medium">define → explain → example or diagram → link</span> to a neighbouring concept.</li>
           <li>· On a four-from-six paper in two hours, budget 30 minutes a question: 5 planning, 20 writing, 5 checking. Read all six and choose before you write anything.</li>
           <li>· Where a list is long, the question asks for &ldquo;any five&rdquo; — learn five you can explain rather than fifteen you can only name.</li>
+          {codeQuestions.length > 0 && (
+            <li>· {codeQuestions.length} of these ask you to write, debug or explain a listing from the practicals. Write the code out in full, indentation included — a marker cannot award the structure of a Python block you only described in words, and a comment above each step earns the point even when the line below it is imperfect.</li>
+          )}
         </ul>
       </div>
 
@@ -536,6 +612,14 @@ export default function CourseExamPrep({ course }) {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-coffee-200 hover:border-rust hover:bg-rust/5 transition-all text-sm font-medium text-ink"
           >
             <BookOpen size={13} className="text-rust" /> Mock paper · 4 written
+          </button>
+        )}
+        {codeQuestions.length > 0 && (
+          <button
+            onClick={() => start(shuffled(codeQuestions, Math.min(4, codeQuestions.length)))}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-coffee-200 hover:border-rust hover:bg-rust/5 transition-all text-sm font-medium text-ink"
+          >
+            <Terminal size={13} className="text-rust" /> Code questions · 4 of {codeQuestions.length}
           </button>
         )}
         {recall.length > 0 && (

@@ -9,7 +9,7 @@
 // who has finished it. They share the serialiser and the hash, nothing else.
 
 import { fetchJsonWithFallback } from './apiClient';
-import { hashText, sectionToPlainText } from './simplifySection';
+import { hashText, sectionsToPlainText } from './simplifySection';
 
 const CACHE_PREFIX = 'arete:summary:v1:';
 
@@ -25,39 +25,15 @@ export const MAX_SUMMARY_CHARS = 32000;
 // "Exam Focus — The Lecturer's Guaranteed Questions".)
 const ALREADY_A_SUMMARY = /exam focus|key takeaways|revision summary/i;
 
-// Flattens a whole topic into the plain text sent to the API.
-//
-// Reuses sectionToPlainText and does NOT modify it: Simplify gates its button on
-// that function's output length, so widening it there would silently change
-// which sections offer a Simplify button. The extra types folded in here are the
-// ones that carry prose a recap wants but a section-level rewrite does not —
-// `note` clarifications and `casestudy` prompts.
+// Flattens a whole topic into the plain text sent to the API. The section walk
+// itself lives in simplifySection.js, shared with the per-group serialiser so
+// the two views of the same notes can't drift apart.
 export function topicToPlainText(topic) {
   if (!topic?.sections?.length) return '';
-  const parts = [];
-  if (topic.title) parts.push(topic.title);
-
-  for (const section of topic.sections) {
-    const base = sectionToPlainText(section);
-    if (base) {
-      parts.push(base);
-      continue;
-    }
-    if (section?.type === 'note') {
-      const lines = [];
-      if (section.text) lines.push(section.text);
-      if (Array.isArray(section.items)) lines.push(...section.items.map((i) => `- ${i}`));
-      if (lines.length) parts.push(lines.join('\n'));
-    } else if (section?.type === 'casestudy') {
-      const lines = [];
-      if (section.title) lines.push(section.title);
-      if (section.prompt) lines.push(section.prompt);
-      if (Array.isArray(section.tasks)) lines.push(...section.tasks.map((t, i) => `${i + 1}. ${t}`));
-      if (lines.length) parts.push(lines.join('\n'));
-    }
-  }
-
-  return parts.join('\n\n');
+  const body = sectionsToPlainText(topic.sections);
+  // Title kept even when nothing under it serialises, so the return value still
+  // distinguishes "a topic with no summarisable body" from "not a topic".
+  return [topic.title, body].filter(Boolean).join('\n\n');
 }
 
 // Whether to offer the button at all. Length is measured on the serialised text

@@ -46,7 +46,7 @@ Browser → React SPA (Vite)
            ├── useProgress hook (localStorage + Supabase dual sync, 1s debounce)
            └── /api/* (Vercel serverless)
                 ├── api/tutor.js   → model-chain streaming: Gemini 3.5 Flash → Flash-Lite → Groq → OpenRouter (AI Tutor, rate: 8/10min/IP)
-                ├── api/explainer.js → Groq (Code Explainer, rate: 8/10min/IP)
+                ├── api/explainer.js → Groq (Code Explainer page + in-app "Explain this code", rate: 8/10min/IP)
                 ├── api/research.js → Groq compound-mini web search (Explain-this, signed-in, rate: 4/10min/IP)
                 ├── api/extract.js  → text extraction from uploaded course materials (signed-in, rate: 20/10min/IP)
                 ├── api/simplify.js → Groq plain-English rewrite of lecture-note sections (rate: 8/10min/IP)
@@ -77,7 +77,8 @@ Browser → React SPA (Vite)
 | `src/components/CoursePicker.jsx` | Foundation-mode students pin the shared courses their programme takes → `profiles.selected_courses` (NULL = auto-derive; Planner + Courses filter respect it) |
 | `src/data/trackConfig.js` | Track metadata config (java/python/c) |
 | `api/tutor.js` | Streaming tutor on the multi-provider chain (`api/_lib/model.js`) with tools: getStudentProgress, getCourseOutline, getModuleDetail |
-| `api/explainer.js` | Groq code explanation endpoint |
+| `api/explainer.js` | Code explanation endpoint (model chain, `strong`). Backs both the paste-your-own Code Explainer page and the in-app "Explain this code" buttons; 8,000-char cap, kept in step with `MAX_EXPLAIN_CHARS` |
+| `src/components/ExplainCode.jsx` \| `src/utils/explainCode.js` | "Explain this code" — a plain-English walkthrough of a listing, offered under every `code` section in the lecture notes (never on `language: 'output'` blocks) and under an exam-prep code question **after** the reveal, since on a debug question the walkthrough is the answer. Cached in localStorage per language+code, so a listing costs one model call per device, ever. Renders nothing when no provider is configured |
 | `api/research.js` | Explain-this — `groq/compound-mini` web search over a highlighted passage; signed-in only, returns explanation + sources |
 | `src/components/ExplainSelection.jsx` | Wraps readable content; shows "Explain this" on text selection, renders inline explanation card |
 | `api/run.js` | JDoodle proxy — runs Java/C/C++/Python code |
@@ -164,6 +165,8 @@ The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-
 - **Adding a question bank:** A course can carry two independent banks, and which one you want depends on how the course is *examined*, not on what feels easier to write.
   - `quiz` — MCQ, for CBT papers. `{ question, options[] (≥2), correctIndex, explanation }`. Rendered by `CourseQuiz.jsx`; `Quiz.jsx` shuffles the options every attempt, so never encode position into the wording ("both of the above" will break).
   - `examPrep` — written answers, for paper exams. Two types: `longform` (`modelAnswer` + `markScheme[]`, optional `figure`) and `recall` (`items[]` of `{ name, aliases[], explain }`). Rendered by `CourseExamPrep.jsx`. Every question needs a `source` naming the lecture-note section it came from, so a student who drops marks knows what to re-read.
+
+    A `longform` question may also carry a **code listing** — `code` (printed with the question stem, with line numbers, for "debug this" / "explain this") and/or `modelCode` (printed under the model answer, for "write a script"). Either one requires a `language`, which is never defaulted: a Java listing highlighted as Python reads as broken code. Both go through `CodeBlock`, never into the question or `modelAnswer` prose — those render as paragraphs, and `white-space: pre-line` collapses runs of spaces, which destroys the indentation that *is* a Python block. A bank with any such question gets an extra "Code questions" set in the picker automatically. `cyb221ExamPrep.js` is the worked example: twelve practicals, questions in the three forms a lab-manual paper uses (write / debug / explain), the two debug questions built on faults the manual itself contains.
 
   **Keep them separate — do not add written types to `quiz`.** The MCQ shape is hard-wired at three levels (the data shape, `Quiz.jsx`'s `idx === correctIndex` scoring, and the validator's mandatory `options`/`correctIndex`), so a question without options cannot travel through it. The sibling field costs nothing and leaves the existing banks untouched.
 
