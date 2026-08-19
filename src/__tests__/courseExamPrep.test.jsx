@@ -219,11 +219,11 @@ describe('CourseExamPrep', () => {
 
   it('offers a code-questions set only when the bank has some', () => {
     const { unmount } = render(<CourseExamPrep course={courseWith([longform, recall])} />);
-    expect(screen.queryByRole('button', { name: /Code questions/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /code questions/i })).not.toBeInTheDocument();
     unmount();
 
     render(<CourseExamPrep course={courseWith([longform, codeQuestion])} />);
-    expect(screen.getByRole('button', { name: /Code questions/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /code questions/i })).toBeInTheDocument();
   });
 });
 

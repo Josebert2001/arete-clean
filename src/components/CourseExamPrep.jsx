@@ -630,10 +630,10 @@ export default function CourseExamPrep({ course }) {
         )}
         {codeQuestions.length > 0 && (
           <button
-            onClick={() => start(shuffled(codeQuestions, Math.min(4, codeQuestions.length)))}
+            onClick={() => start(shuffled(codeQuestions, codeQuestions.length))}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-coffee-200 hover:border-rust hover:bg-rust/5 transition-all text-sm font-medium text-ink"
           >
-            <Terminal size={13} className="text-rust" /> Code questions · 4 of {codeQuestions.length}
+            <Terminal size={13} className="text-rust" /> All {codeQuestions.length} code questions
           </button>
         )}
         {recall.length > 0 && (
