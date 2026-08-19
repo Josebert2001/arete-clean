@@ -28,13 +28,22 @@ export function canExplainCode(code) {
   return len >= MIN_EXPLAIN_CHARS && len <= MAX_EXPLAIN_CHARS;
 }
 
-function cacheKey(code, language) {
-  return CACHE_PREFIX + hashText(`${language ?? ''}\n${code ?? ''}`);
+// 'walkthrough' — the full explanation, faults and improvements included.
+// 'study' — the same line-by-line reading, with every verdict withheld. Used
+// where the listing IS an exam question: the student must be able to read the
+// code before they can answer, but "the bug is on line 16" is the answer.
+export const EXPLAIN_MODES = ['walkthrough', 'study'];
+
+function cacheKey(code, language, mode) {
+  // Mode is part of the key: the two answers to the same listing are different
+  // text, and serving one where the other was asked for would either leak the
+  // fault or hide it.
+  return CACHE_PREFIX + hashText(`${mode ?? 'walkthrough'}\n${language ?? ''}\n${code ?? ''}`);
 }
 
-export function getCachedExplanation(code, language) {
+export function getCachedExplanation(code, language, mode) {
   try {
-    return localStorage.getItem(cacheKey(code, language));
+    return localStorage.getItem(cacheKey(code, language, mode));
   } catch {
     // localStorage unavailable (private mode / storage disabled) — treat as a
     // cache miss; the feature still works, it just re-fetches.
@@ -42,28 +51,28 @@ export function getCachedExplanation(code, language) {
   }
 }
 
-export function setCachedExplanation(code, language, explanation) {
+export function setCachedExplanation(code, language, explanation, mode) {
   try {
-    localStorage.setItem(cacheKey(code, language), explanation);
+    localStorage.setItem(cacheKey(code, language, mode), explanation);
   } catch {
     // Quota exceeded or storage disabled — skip caching, nothing else to do.
   }
 }
 
 // Calls the API. Resolves to { explanation } | { error } | { aborted: true }.
-export async function requestCodeExplanation({ code, language, signal }) {
+export async function requestCodeExplanation({ code, language, mode, signal }) {
   try {
     const data = await fetchJsonWithFallback(
       '/api/explainer',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, language }),
+        body: JSON.stringify({ code, language, mode }),
         signal,
       },
       'The code explainer is unavailable in local dev without `vercel dev`.'
     );
-    if (data.explanation) setCachedExplanation(code, language, data.explanation);
+    if (data.explanation) setCachedExplanation(code, language, data.explanation, mode);
     return data;
   } catch (err) {
     if (err?.name === 'AbortError') return { aborted: true };
