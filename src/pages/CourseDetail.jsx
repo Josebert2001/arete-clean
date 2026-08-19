@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap, PenLine } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap, PenLine, Terminal } from 'lucide-react';
 import { useCatalogue } from '../data/useCatalogue';
 import { materialsDepartmentFor } from '../data/departments';
 import LectureNotes from '../components/LectureNotes';
+import { explainedKeyFor } from '../data/lectureNotes/explained';
+import CodeWalkthrough from '../components/CodeWalkthrough';
+import { useExplanations } from '../components/useExplanations';
+import { useApiAvailability } from '../utils/apiClient';
+import { topicsWithCode } from '../utils/explainCode';
 import { useLectureNotes } from '../components/useLectureNotes';
 import { useReadingProgress } from '../components/useReadingProgress';
 import CourseQuiz from '../components/CourseQuiz';
@@ -33,6 +38,10 @@ function getStoredTab(slug, course) {
   const hasQuiz = course?.quiz?.length > 0;
   const hasExamPrep = course?.examPrep?.length > 0;
   if (stored === 'notes' && hasNotes) return 'notes';
+  // Whether this course actually has listings is only knowable once the notes
+  // chunk has loaded, so hasNotes is the closest test available here. The tab
+  // body handles the loading window itself.
+  if (stored === 'walkthrough' && hasNotes) return 'walkthrough';
   if (stored === 'quiz' && hasQuiz) return 'quiz';
   if (stored === 'exam' && hasExamPrep) return 'exam';
   if (stored === 'materials') return 'materials';
@@ -99,6 +108,13 @@ export default function CourseDetail() {
   // never read 14/13 after a topic was renamed and left a stale mark behind.
   const reading = useReadingProgress(slug);
   const readCount = lectureNotes.filter((t) => reading.isRead(t)).length;
+
+  // The Code Walkthrough tab exists only for courses whose notes carry program
+  // listings, and only once those notes have loaded — the practicals live in the
+  // lazily-fetched chunk, so the tab appears with them.
+  const codeTopics = topicsWithCode(lectureNotes);
+  const explanations = useExplanations(explainedKeyFor(course));
+  const explainStatus = useApiAvailability(codeTopics.length > 0 ? '/api/explainer' : null);
 
   if (status === 'error') {
     return (
@@ -243,6 +259,12 @@ export default function CourseDetail() {
               : readCount > 0 ? `${readCount}/${lectureNotes.length}`
               : `${lectureNotes.length} ${lectureNotes.length === 1 ? 'topic' : 'topics'}`,
           }] : []),
+          ...(codeTopics.length > 0 ? [{
+            key: 'walkthrough',
+            label: 'Code Walkthrough',
+            icon: Terminal,
+            badge: `${codeTopics.length}`,
+          }] : []),
           ...(hasQuiz ? [{ key: 'quiz', label: 'Practice Quiz', icon: GraduationCap, badge: `${course.quiz.length} Q` }] : []),
           ...(hasExamPrep ? [{ key: 'exam', label: 'Written Exam Prep', icon: PenLine, badge: `${course.examPrep.length} Q` }] : []),
           { key: 'materials', label: 'Materials', icon: Paperclip },
@@ -296,9 +318,29 @@ export default function CourseDetail() {
                 topics={lectureNotes}
                 context={{ courseCode: course.code, courseTitle: course.title }}
                 reading={reading}
+                notesKey={explainedKeyFor(course)}
               />
             </ExplainSelection>
           )}
+        </div>
+      )}
+
+      {/* Code Walkthrough tab */}
+      {activeTab === 'walkthrough' && notesStatus === 'loading' && (
+        <div role="status" className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8 space-y-3 animate-pulse">
+          <span className="sr-only">Loading the practicals…</span>
+          {[0, 1, 2].map(i => <div key={i} className="h-14 rounded-xl bg-coffee-100" />)}
+        </div>
+      )}
+      {activeTab === 'walkthrough' && codeTopics.length > 0 && (
+        <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <CodeWalkthrough
+            topics={lectureNotes}
+            course={course}
+            explainReady={explainStatus === 'ready'}
+            explanations={explanations}
+            onOpenExam={hasExamPrep ? () => setActiveTab('exam') : undefined}
+          />
         </div>
       )}
 

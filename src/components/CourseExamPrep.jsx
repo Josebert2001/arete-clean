@@ -8,6 +8,8 @@ import CodeBlock from './CodeBlock';
 import ExplainCode from './ExplainCode';
 import { useProgress } from './useProgress';
 import { useApiAvailability } from '../utils/apiClient';
+import { useExplanations } from './useExplanations';
+import { explainedKeyFor } from '../data/lectureNotes/explained';
 import { examItemId, gradeFromMarks, REVIEW_STORAGE_KEY } from '../utils/reviewSchedule';
 
 // Written-exam practice, as opposed to the MCQ `course.quiz` bank. Nothing
@@ -101,7 +103,7 @@ function Pill({ children }) {
 // keyboard; jot the five points you would make if you are on a phone or the
 // question wants a diagram, which cannot be typed at all. Either way the text
 // then sits beside the mark scheme, which beats marking against paper.
-function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady }) {
+function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady, explanations }) {
   const [revealed, setRevealed] = useState(false);
   const [ticked, setTicked] = useState([]);
   const [answer, setAnswer] = useState(() => loadAnswer(courseSlug, q.question));
@@ -150,6 +152,7 @@ function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady }) {
             code={q.code}
             language={q.language || 'python'}
             ready={explainReady}
+            {...explanations}
             mode="study"
             label="I don't understand this code"
             hint="Reads the listing line by line without saying whether it is right — that part is the question."
@@ -249,6 +252,7 @@ function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady }) {
                 code={q.modelCode || q.code}
                 language={q.language || 'python'}
                 ready={explainReady}
+                {...explanations}
                 label="Explain the model answer's code"
               />
             )}
@@ -420,6 +424,9 @@ export default function CourseExamPrep({ course }) {
   const explainStatus = useApiAvailability(
     bank.some(isCodeQuestion) ? '/api/explainer' : null,
   );
+  // Pre-generated walkthroughs for this course, when they exist: no call, no
+  // rate limit, and it works with no network at all.
+  const explanations = useExplanations(explainedKeyFor(course));
   const last = progress.quizScores?.[course.slug];
 
   const [questions, setQuestions] = useState(null);
@@ -546,6 +553,7 @@ export default function CourseExamPrep({ course }) {
                 awarded={awarded}
                 onAward={award}
                 explainReady={explainStatus === 'ready'}
+                explanations={explanations}
               />
             )}
 

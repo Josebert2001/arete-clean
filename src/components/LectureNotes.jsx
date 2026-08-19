@@ -3,6 +3,8 @@ import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, Circle, XCircle, Chev
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
 import ExplainCode from './ExplainCode';
+import { useExplanations } from './useExplanations';
+import { loadSimplified } from '../data/lectureNotes/simplified';
 import RichText from './RichText';
 import MathText, { MathBlock } from './MathText';
 import { useApiAvailability } from '../utils/apiClient';
@@ -309,8 +311,9 @@ function FiveVs({ items }) {
 // heads — supplied by TopicAccordion, which is the only level that knows which
 // sections belong under which heading. Sections that don't head a group (and the
 // `resource` cards, which have nothing to rewrite) get none and show no button.
-function Section({ section, simplifyReady, explainReady, simplifyText, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
+function Section({ section, simplifyReady, explainReady, explanations, simplifyText, bundledSimplified, plainEnglishMode, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
   const [simplify, setSimplify] = useState({ status: 'idle', text: '', error: '' });
+  const [showOriginal, setShowOriginal] = useState(false);
   const abortRef = useRef(null);
   useEffect(() => () => abortRef.current?.abort(), []);
   const open = !collapsible || isOpen;
@@ -318,9 +321,22 @@ function Section({ section, simplifyReady, explainReady, simplifyText, context, 
   const plain = simplifyText ?? '';
   const canSimplify = simplifyReady && Boolean(section.heading) && canSimplifyGroup(plain);
 
+  // The topic-level Plain English toggle takes this heading over entirely when
+  // a bundled rewrite exists for it — no fetch, no manual click, shown the
+  // instant the panel is open. Sections without one (too short to pre-generate,
+  // or added after the script last ran) are unaffected by the toggle.
+  const showBundled = plainEnglishMode && Boolean(bundledSimplified);
+
   const onSimplify = async () => {
     if (simplify.status === 'done') {
       setSimplify({ status: 'idle', text: '', error: '' });
+      return;
+    }
+    // A pre-generated rewrite answers a manual click instantly too, toggle or
+    // not — most headings that qualify for Simplify have one, since the script
+    // generates for the same population canSimplifyGroup gates on.
+    if (bundledSimplified) {
+      setSimplify({ status: 'done', text: bundledSimplified, error: '' });
       return;
     }
     const cached = getCachedSimplification(plain);
@@ -372,7 +388,7 @@ function Section({ section, simplifyReady, explainReady, simplifyText, context, 
               )}
             </>
           )}
-          {canSimplify && open && (
+          {canSimplify && open && !showBundled && (
             <button
               type="button"
               onClick={onSimplify}
@@ -397,47 +413,63 @@ function Section({ section, simplifyReady, explainReady, simplifyText, context, 
             </p>
           )}
 
-          {simplify.status === 'done' && (
+          {(simplify.status === 'done' || showBundled) && (
             <div className="bg-coffee-50 border border-coffee-200 rounded-xl p-4 mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles size={13} className="text-ember-500 shrink-0" />
-                <span className="text-xs font-mono font-bold text-coffee-600 uppercase tracking-wider">In plain English</span>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={13} className="text-ember-500 shrink-0" />
+                  <span className="text-xs font-mono font-bold text-coffee-600 uppercase tracking-wider">In plain English</span>
+                </div>
+                {showBundled && (
+                  <button
+                    type="button"
+                    onClick={() => setShowOriginal((v) => !v)}
+                    className="text-xs font-mono font-medium text-coffee-500 hover:text-ink transition-colors shrink-0"
+                  >
+                    {showOriginal ? 'Hide original wording' : 'Show original wording'}
+                  </button>
+                )}
               </div>
               <div className="text-reading text-ink">
-                <RichText text={simplify.text} />
+                <RichText text={showBundled ? bundledSimplified : simplify.text} />
               </div>
             </div>
           )}
 
-          {section.type === 'definition' && section.text && <DefinitionBox text={section.text} />}
-          {section.type === 'fivers' && <FiveVs items={section.items} />}
-          {section.type === 'termlist' && <TermList items={section.items} />}
-          {section.type === 'bullets' && <BulletList items={section.items} />}
-          {section.type === 'proscons' && <ProsCons advantages={section.advantages} disadvantages={section.disadvantages} />}
-          {/* heading is rendered by the section-level <h4> above, like every other type — don't repeat it inside the table */}
-          {section.type === 'table' && <ComparisonTable headers={section.headers} rows={section.rows} />}
-          {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
-          {section.type === 'text' && <p className="text-reading text-coffee-700 mb-3"><MathText text={section.text} /></p>}
-          {section.type === 'math' && <MathBlock tex={section.tex} caption={section.caption} />}
-          {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
-          {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} maxWidth={section.maxWidth} />}
-          {section.type === 'code' && (
+          {(!showBundled || showOriginal) && (
             <>
-              <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />
-              {/* Program listings only. A `language: 'output'` block is the run
-                  transcript, not code, and the explainer would try to read it
-                  as a program. */}
-              {section.language !== 'output' && (
-                <ExplainCode
-                  code={section.code}
-                  language={section.language || 'python'}
-                  ready={explainReady}
-                />
+              {section.type === 'definition' && section.text && <DefinitionBox text={section.text} />}
+              {section.type === 'fivers' && <FiveVs items={section.items} />}
+              {section.type === 'termlist' && <TermList items={section.items} />}
+              {section.type === 'bullets' && <BulletList items={section.items} />}
+              {section.type === 'proscons' && <ProsCons advantages={section.advantages} disadvantages={section.disadvantages} />}
+              {/* heading is rendered by the section-level <h4> above, like every other type — don't repeat it inside the table */}
+              {section.type === 'table' && <ComparisonTable headers={section.headers} rows={section.rows} />}
+              {section.type === 'casestudy' && <CaseStudy title={section.title} prompt={section.prompt} tasks={section.tasks} />}
+              {section.type === 'text' && <p className="text-reading text-coffee-700 mb-3"><MathText text={section.text} /></p>}
+              {section.type === 'math' && <MathBlock tex={section.tex} caption={section.caption} />}
+              {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
+              {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} maxWidth={section.maxWidth} />}
+              {section.type === 'code' && (
+                <>
+                  <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />
+                  {/* Program listings only. A `language: 'output'` block is the run
+                      transcript, not code, and the explainer would try to read it
+                      as a program. */}
+                  {section.language !== 'output' && (
+                    <ExplainCode
+                      code={section.code}
+                      language={section.language || 'python'}
+                      ready={explainReady}
+                      {...(explanations ?? {})}
+                    />
+                  )}
+                </>
               )}
+              {section.type === 'mosca' && <MoscaCalculator />}
+              {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
             </>
           )}
-          {section.type === 'mosca' && <MoscaCalculator />}
-          {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
         </>
       )}
     </div>
@@ -518,7 +550,7 @@ function KeyPoints({ topic, plain, context }) {
   );
 }
 
-function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explainReady, summarizeReady, context, tracksReading, isRead, onSetRead }) {
+function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplifiedMap, explainReady, explanations, summarizeReady, context, tracksReading, isRead, onSetRead }) {
   const panelId = `lecture-panel-${index}`;
   const buttonId = `lecture-header-${index}`;
 
@@ -548,6 +580,28 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explain
     return map;
   }, [items]);
 
+  // Bundled rewrite per heading section (keyed by the section object itself, so
+  // both render branches below — grouped and flat — can look it up the same way
+  // `groupText` already does). A miss means the group is either too short to
+  // pre-generate or was added after the script last ran; that heading just
+  // behaves as it did before this feature.
+  const simplifiedForGroup = useMemo(() => {
+    const map = new Map();
+    if (!simplifiedMap) return map;
+    for (const it of items) {
+      if (!it.head) continue;
+      const text = groupText.get(it.head);
+      const rewrite = text && simplifiedMap[hashText(text)];
+      if (rewrite) map.set(it.head, rewrite);
+    }
+    return map;
+  }, [items, groupText, simplifiedMap]);
+  const hasBundledContent = simplifiedForGroup.size > 0;
+
+  // One click swaps every heading in the topic to its plain-English rewrite at
+  // once, instead of un-collapsing and clicking Simplify on each in turn.
+  const [plainEnglish, setPlainEnglish] = useState(false);
+
   const firstGroupIdx = items.findIndex((it) => it.head);
   const headedIndices = items.reduce((acc, it, ii) => (it.head ? [...acc, ii] : acc), []);
   // Sub-sections collapse only when there are enough of them to feel like a
@@ -555,6 +609,17 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explain
   const collapsibleSections = headedIndices.length >= 2;
   const [openSections, setOpenSections] = useState(() => new Set(firstGroupIdx >= 0 ? [firstGroupIdx] : []));
   const allSectionsOpen = headedIndices.every((ii) => openSections.has(ii));
+
+  const togglePlainEnglish = () => {
+    setPlainEnglish((prev) => {
+      const next = !prev;
+      // Turning it on also opens every sub-section — the whole point is reading
+      // straight through without un-collapsing anything first. Turning it off
+      // leaves sections as they are; collapsing them back would be surprising.
+      if (next) setOpenSections(new Set(headedIndices));
+      return next;
+    });
+  };
 
   const sectionContext = { ...context, topicTitle: topic.title };
 
@@ -628,12 +693,30 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explain
             <span className="sm:hidden text-xs font-mono text-coffee-500 mb-4 block">Lecture date: {topic.date}</span>
           )}
 
+          {hasBundledContent && (
+            <div className="flex justify-end mb-3">
+              <button
+                type="button"
+                onClick={togglePlainEnglish}
+                aria-pressed={plainEnglish}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-mono font-medium transition-colors ${
+                  plainEnglish
+                    ? 'border-ember-500/40 bg-ember-500/10 text-ember-500'
+                    : 'border-coffee-200 bg-paper text-coffee-600 hover:border-coffee-400 hover:text-ink'
+                }`}
+              >
+                <Sparkles size={12} className="text-ember-500" />
+                {plainEnglish ? 'Original wording' : 'Plain English'}
+              </button>
+            </div>
+          )}
+
           {showKeyPoints && <KeyPoints topic={topic} plain={plain} context={context} />}
 
           {collapsibleSections ? (
             <>
               {lead.map((it, ii) => (
-                <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} context={sectionContext} />
+                <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
               ))}
 
               {headedIndices.length >= 4 && (
@@ -672,7 +755,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explain
                 const ii = firstGroupIdx + i;
                 if (it.standalone) {
                   return (
-                    <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} context={sectionContext} />
+                    <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
                   );
                 }
                 const openG = openSections.has(ii);
@@ -681,8 +764,10 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explain
                     <Section
                       section={it.head}
                       simplifyReady={simplifyReady}
-                      explainReady={explainReady}
+                      explainReady={explainReady} explanations={explanations}
                       simplifyText={groupText.get(it.head)}
+                      bundledSimplified={simplifiedForGroup.get(it.head)}
+                      plainEnglishMode={plainEnglish}
                       context={sectionContext}
                       collapsible
                       isOpen={openG}
@@ -690,7 +775,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explain
                       anchorId={`${panelId}-sec-${ii}`}
                     />
                     {openG && it.tail.map((s, si) => (
-                      <Section key={si} section={s} simplifyReady={simplifyReady} explainReady={explainReady} context={sectionContext} />
+                      <Section key={si} section={s} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
                     ))}
                   </div>
                 );
@@ -702,8 +787,10 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explain
                 key={si}
                 section={section}
                 simplifyReady={simplifyReady}
-                explainReady={explainReady}
+                explainReady={explainReady} explanations={explanations}
                 simplifyText={groupText.get(section)}
+                bundledSimplified={simplifiedForGroup.get(section)}
+                plainEnglishMode={plainEnglish}
                 context={sectionContext}
               />
             ))
@@ -749,19 +836,34 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explain
  *   (if currently unused) mode, not a fallback — a caller that does not track
  *   reading gets no progress bar rather than a bar that silently does nothing.
  */
-export default function LectureNotes({ topics, context, reading }) {
+export default function LectureNotes({ topics, context, reading, notesKey }) {
   // Split so the availability probes in the inner component only fire on
   // courses that actually have lecture notes.
   if (!topics?.length) return null;
-  return <LectureNotesInner topics={topics} context={context} reading={reading} />;
+  return <LectureNotesInner topics={topics} context={context} reading={reading} notesKey={notesKey} />;
 }
 
-function LectureNotesInner({ topics, context, reading }) {
+function LectureNotesInner({ topics, context, reading, notesKey }) {
   // First topic open by default; rest collapsed.
   const [openSet, setOpenSet] = useState(() => new Set([0]));
   const simplifyStatus = useApiAvailability('/api/simplify');
   const explainStatus = useApiAvailability('/api/explainer');
+  // Bundled walkthroughs for this course's listings, when they have been
+  // generated — checked before the live call, and the reason the button can
+  // appear at all offline.
+  const explanations = useExplanations(notesKey);
   const summarizeStatus = useApiAvailability('/api/summarize');
+
+  // Pre-generated plain-English rewrites for this course, loaded once and
+  // shared by every topic below. Undefined while loading, null once it's clear
+  // there is no generated file for this course — both render as "not bundled
+  // yet" to a topic, which just falls back to the live per-heading button.
+  const [simplifiedMap, setSimplifiedMap] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    loadSimplified(notesKey).then((map) => { if (!cancelled) setSimplifiedMap(map); });
+    return () => { cancelled = true; };
+  }, [notesKey]);
 
   const tracksReading = Boolean(reading);
   const isRead = (topic) => Boolean(reading?.isRead(topic));
@@ -833,7 +935,9 @@ function LectureNotesInner({ topics, context, reading }) {
             isOpen={openSet.has(ti)}
             onToggle={() => toggle(ti)}
             simplifyReady={simplifyStatus === 'ready'}
+            simplifiedMap={simplifiedMap}
             explainReady={explainStatus === 'ready'}
+            explanations={explanations}
             summarizeReady={summarizeStatus === 'ready'}
             context={context}
             tracksReading={tracksReading}

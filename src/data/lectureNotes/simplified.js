@@ -20,12 +20,11 @@
 // catches them, so a course read once keeps working offline.
 const modules = import.meta.glob('./generated/*.simplified.json');
 
-// Which key a course's rewrites live under: its shared `notesKey` when it has
-// one, else its own slug (four courses still hold their notes inline).
-export function simplifiedKeyFor(course) {
-  return course?.notesKey || course?.slug || null;
-}
-
+// Keyed by the same identifier as everywhere else a course's notes get a
+// generated per-course chunk — see explainedKeyFor() in explained.js, which
+// this deliberately mirrors rather than introduces a second key function for.
+// LectureNotes.jsx already receives that value as its `notesKey` prop.
+//
 // Resolves to { [hash]: rewrite } — or null when this course has no generated
 // file yet, which is not an error: the per-heading button still works live.
 export async function loadSimplified(key) {

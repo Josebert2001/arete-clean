@@ -27,7 +27,7 @@ const COMMON_RULES = `Rules:
 - NEVER use LaTeX or math notation (no \`$\`, \`$$\`, or backslash commands like \`\\times\`) — the app doesn't render it. Write maths in plain text or \`inline code\`, e.g. \`O(n^2)\`, \`sum = n * (n + 1) / 2\`
 - Use the conventions of the code's actual language (e.g. pointers for C, indentation for Python)`;
 
-const SYSTEM_PROMPT = `You are Areté's code explainer for beginner university students.
+export const SYSTEM_PROMPT = `You are Areté's code explainer for beginner university students.
 When given code in any language (Java, Python, C, or C++), explain it clearly and simply.
 
 Structure your response like this:
@@ -47,7 +47,7 @@ ${COMMON_RULES}`;
 // the reveal was the wrong fix: a student who cannot read the listing cannot
 // attempt the question at all. So the code is taught in full and the verdict is
 // withheld instead.
-const STUDY_SYSTEM_PROMPT = `You are Areté's code explainer, helping a university student read a code listing that has been set as an exam question. They were never taught this code in class. Your job is to make sure they can READ it, so that they can then answer the question themselves.
+export const STUDY_SYSTEM_PROMPT = `You are Areté's code explainer, helping a university student read a code listing that has been set as an exam question. They were never taught this code in class. Your job is to make sure they can READ it, so that they can then answer the question themselves.
 
 Structure your response like this:
 1. **What it does** — one or two sentences on the program as a whole
@@ -71,6 +71,18 @@ const LANGUAGES = {
   c:      { label: 'C',      fence: 'c' },
   cpp:    { label: 'C++',    fence: 'cpp' },
 };
+
+// Built here rather than inline in the handler so that
+// scripts/pregenerate-explanations.mjs sends the identical prompt — the text a
+// student reads offline must be the answer the endpoint would have given, not a
+// near miss.
+export function buildExplainPrompt(code, language, mode) {
+  const lang = Object.hasOwn(LANGUAGES, language) ? LANGUAGES[language] : undefined;
+  const opening = mode === 'study'
+    ? 'Teach this listing line by line so the student can read it themselves. Remember: no verdict on whether it is correct.'
+    : 'Explain this';
+  return `${opening} ${lang ? lang.label : ''} code${lang ? '' : ' (detect the language first)'}:\n\n\`\`\`${lang ? lang.fence : ''}\n${code}\n\`\`\``;
+}
 
 const RATE_LIMIT = {
   namespace: 'explainer',
@@ -123,8 +135,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Code exceeds the 8,000 character limit.' });
   }
 
-  const lang = Object.hasOwn(LANGUAGES, language) ? LANGUAGES[language] : undefined; // undefined => let the model auto-detect
-
   // Anything other than an explicit 'study' gets the full walkthrough, so the
   // paste-your-own Code Explainer page is unaffected by the new mode.
   const study = mode === 'study';
@@ -133,17 +143,19 @@ export default async function handler(req, res) {
     const outcome = await generateTextWithFallback({
       chain,
       system: study ? STUDY_SYSTEM_PROMPT : SYSTEM_PROMPT,
-      prompt: `${study
-        ? 'Teach this listing line by line so the student can read it themselves. Remember: no verdict on whether it is correct.'
-        : 'Explain this'} ${lang ? lang.label : ''} code${lang ? '' : ' (detect the language first)'}:\n\n\`\`\`${lang ? lang.fence : ''}\n${code}\n\`\`\``,
-      // Reasoning tokens share this budget; the chain keeps effort low so the
-      // explanation isn't cut off. Line-by-line output is long — a 100-line
-      // practical listing needs the headroom, and a walkthrough that stops in
-      // the middle of the file is worse than none.
-      maxOutputTokens: 3000,
+      prompt: buildExplainPrompt(code, language, mode),
+      // Reasoning tokens share this budget on Groq (capped via reasoningEffort
+      // in model.js) and Gemini 3.5 Flash, which is NOT capped by default and
+      // was measured spending up to ~900 of this budget on hidden thinking for
+      // one listing — leaving too little for the visible answer and producing
+      // walkthroughs that cut off mid-sentence, sometimes with reasoning-style
+      // phrasing bleeding into the last line. thinkingBudget: 0 below (Gemini
+      // only) fixes that; explaining a listing needs no multi-step reasoning.
+      maxOutputTokens: 6000,
       // Lower temperature for accurate, deterministic explanations; applied to
       // Groq/OpenRouter only, never to Gemini (see model.js).
       temperature: 0.5,
+      providerOptions: { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
     });
 
     if (outcome.text) {
