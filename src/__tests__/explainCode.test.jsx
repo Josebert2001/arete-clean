@@ -18,6 +18,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ExplainCode from '../components/ExplainCode';
 import {
   canExplainCode,
+  listingsInTopic,
+  listingsInExamPrep,
+  explanationHash,
   getCachedExplanation,
   setCachedExplanation,
   MIN_EXPLAIN_CHARS,
@@ -59,6 +62,43 @@ describe('canExplainCode', () => {
   it('refuses a listing past the endpoint limit', () => {
     expect(canExplainCode('#'.repeat(MAX_EXPLAIN_CHARS + 1))).toBe(false);
     expect(canExplainCode('#'.repeat(MAX_EXPLAIN_CHARS))).toBe(true);
+  });
+});
+
+// The generator fills exactly the set the UI can ask for, by calling these.
+// A collector that drifts from the buttons means either wasted model calls or,
+// worse, a listing a student can ask about that was never generated — which
+// only shows up as a spinner on a phone with no signal.
+describe('the pre-generation collectors', () => {
+  it('takes program listings from a topic and skips run transcripts', () => {
+    const topic = {
+      title: 'Practical 1',
+      sections: [
+        { type: 'code', language: 'python', code: LISTING, heading: 'Program Listing' },
+        { type: 'code', language: 'output', code: 'Original String: Hello, World!\nReversed: !dlroW ,olleH\nand more output than the minimum length' },
+        { type: 'code', language: 'python', code: 'x = 1' },
+        { type: 'bullets', items: ['not code'] },
+      ],
+    };
+    const found = listingsInTopic(topic);
+    expect(found).toHaveLength(1);
+    expect(found[0]).toMatchObject({ language: 'python', mode: 'walkthrough' });
+    expect(found[0].hash).toBe(explanationHash(LISTING, 'python', 'walkthrough'));
+  });
+
+  // A stem is only ever offered in study mode and a model answer only in
+  // walkthrough mode, so generating the other half would be waste that also
+  // sits in the bundle a student downloads.
+  it('generates a stem for study and a model answer for walkthrough', () => {
+    const found = listingsInExamPrep([
+      { type: 'longform', language: 'python', code: LISTING, modelCode: `${LISTING}
+# fixed`, source: 'Topic 10' },
+      { type: 'longform', language: 'python', modelCode: LISTING, source: 'Topic 14' },
+      { type: 'recall', items: [], source: 'Topic 1' },
+    ]);
+    expect(found.map((l) => l.mode)).toEqual(['study', 'walkthrough', 'walkthrough']);
+    expect(found[0].code).toBe(LISTING);
+    expect(found[1].code).toContain('# fixed');
   });
 });
 
@@ -127,6 +167,50 @@ describe('ExplainCode', () => {
     render(<ExplainCode code={LISTING} language="python" ready />);
     explain();
     expect(await screen.findByText('It reverses the file.')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  // The whole point of pre-generation: no call, and — because the availability
+  // probe cannot succeed with no network — the button must still appear.
+  it('serves a pre-generated walkthrough without calling the API', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const getPregenerated = vi.fn(async () => 'The bundled walkthrough.');
+
+    render(
+      <ExplainCode
+        code={LISTING}
+        language="python"
+        ready={false}
+        hasPregenerated
+        getPregenerated={getPregenerated}
+      />,
+    );
+    explain();
+
+    expect(await screen.findByText('The bundled walkthrough.')).toBeInTheDocument();
+    expect(getPregenerated).toHaveBeenCalledWith(LISTING, 'python', 'walkthrough');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  // A listing added after the last generation run misses the map. The live API
+  // has to cover it, or the newest question is the one that cannot be explained.
+  it('falls back to the API when the bundle has no entry for this listing', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ explanation: 'Freshly explained.' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <ExplainCode
+        code={LISTING}
+        language="python"
+        ready
+        hasPregenerated
+        getPregenerated={async () => null}
+      />,
+    );
+    explain();
+
+    expect(await screen.findByText('Freshly explained.')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

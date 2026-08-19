@@ -11,8 +11,8 @@
 // more here than for Simplify, because the practicals are a fixed set of
 // listings that a whole class will ask about the same week.
 
-import { fetchJsonWithFallback } from './apiClient';
-import { hashText } from './simplifySection';
+import { fetchJsonWithFallback } from './apiClient.js';
+import { hashText } from './simplifySection.js';
 
 const CACHE_PREFIX = 'arete:explain-code:v1:';
 
@@ -34,11 +34,21 @@ export function canExplainCode(code) {
 // code before they can answer, but "the bug is on line 16" is the answer.
 export const EXPLAIN_MODES = ['walkthrough', 'study'];
 
+// The identity of one explanation. Mode is part of it: the two answers to the
+// same listing are different text, and serving one where the other was asked
+// for would either leak the fault or hide it.
+//
+// Shared by the localStorage cache and the pre-generated bundles, so the map
+// written by scripts/pregenerate-explanations.mjs is looked up by exactly the
+// key the runtime asks for. Content-addressed: edit a listing and its entry
+// stops matching, and the live API covers it rather than a stale walkthrough
+// being served for code that has changed.
+export function explanationHash(code, language, mode) {
+  return hashText(`${mode ?? 'walkthrough'}\n${language ?? ''}\n${code ?? ''}`);
+}
+
 function cacheKey(code, language, mode) {
-  // Mode is part of the key: the two answers to the same listing are different
-  // text, and serving one where the other was asked for would either leak the
-  // fault or hide it.
-  return CACHE_PREFIX + hashText(`${mode ?? 'walkthrough'}\n${language ?? ''}\n${code ?? ''}`);
+  return CACHE_PREFIX + explanationHash(code, language, mode);
 }
 
 export function getCachedExplanation(code, language, mode) {
@@ -57,6 +67,64 @@ export function setCachedExplanation(code, language, explanation, mode) {
   } catch {
     // Quota exceeded or storage disabled — skip caching, nothing else to do.
   }
+}
+
+// ── What is explainable, and in which mode ───────────────────────────────────
+//
+// Both collectors below answer the same question the UI answers when it decides
+// whether to show a button, so the pre-generation script fills exactly the set
+// a student can ask for — no wasted calls, no gaps. Kept here rather than in the
+// script because the two must not drift.
+
+// The topics that carry at least one program listing — the practicals, for a
+// course whose notes mix theory and code. Drives the Code Walkthrough tab's
+// contents and whether it is offered at all.
+export function topicsWithCode(topics) {
+  return (topics ?? []).filter((t) => listingsInTopic(t).length > 0);
+}
+
+// A topic's program listings. `language: 'output'` blocks are run transcripts,
+// not code, and are skipped — the same test CourseDetail's notes make.
+export function listingsInTopic(topic) {
+  const out = [];
+  for (const section of topic?.sections ?? []) {
+    if (section?.type !== 'code') continue;
+    const language = section.language || 'python';
+    if (language === 'output') continue;
+    if (!canExplainCode(section.code)) continue;
+    out.push({
+      code: section.code,
+      language,
+      mode: 'walkthrough',
+      hash: explanationHash(section.code, language, 'walkthrough'),
+      label: section.heading || topic?.title || '',
+    });
+  }
+  return out;
+}
+
+// An exam bank's listings. A question stem is only ever offered in study mode
+// (it is the question — the walkthrough would answer it), and the model answer
+// only in walkthrough mode, so each listing appears once per mode it is
+// actually asked for.
+export function listingsInExamPrep(bank) {
+  const out = [];
+  for (const q of bank ?? []) {
+    const language = q?.language || 'python';
+    const add = (code, mode) => {
+      if (!canExplainCode(code)) return;
+      out.push({
+        code,
+        language,
+        mode,
+        hash: explanationHash(code, language, mode),
+        label: q.source || q.question?.slice(0, 60) || '',
+      });
+    };
+    if (q?.code) add(q.code, 'study');
+    if (q?.code || q?.modelCode) add(q.modelCode || q.code, 'walkthrough');
+  }
+  return out;
 }
 
 // Calls the API. Resolves to { explanation } | { error } | { aborted: true }.

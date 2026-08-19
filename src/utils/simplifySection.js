@@ -12,8 +12,8 @@
 // was missing from most headings — the substance usually lives in the sections
 // that follow, so the heading alone fell under the length floor.
 
-import { fetchJsonWithFallback } from './apiClient';
-import { hashText } from './noteText';
+import { fetchJsonWithFallback } from './apiClient.js';
+import { hashText } from './noteText.js';
 
 export {
   hashText,
@@ -26,7 +26,7 @@ export {
   simplifiableGroups,
   MIN_SIMPLIFY_CHARS,
   MAX_SIMPLIFY_CHARS,
-} from './noteText';
+} from './noteText.js';
 
 const CACHE_PREFIX = 'arete:simplify:v1:';
 

@@ -26,13 +26,19 @@ export default function ExplainCode({
   mode = 'walkthrough',
   label,
   hint,
+  getPregenerated,
+  hasPregenerated = false,
   className = '',
 }) {
   const [state, setState] = useState({ status: 'idle', text: '', error: '' });
   const abortRef = useRef(null);
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  if (!ready || !canExplainCode(code)) return null;
+  // `ready` is the live endpoint; `hasPregenerated` is a bundled file for this
+  // course. Either is enough to offer the button — and the second is what makes
+  // the feature work offline, where the availability probe cannot succeed by
+  // definition.
+  if ((!ready && !hasPregenerated) || !canExplainCode(code)) return null;
 
   const onExplain = async () => {
     if (state.status === 'done') {
@@ -45,6 +51,17 @@ export default function ExplainCode({
       return;
     }
     setState({ status: 'loading', text: '', error: '' });
+
+    // Pre-generated before the live call: these listings are static, so the
+    // bundled walkthrough is the same text the API would return, minus the
+    // wait, the rate limit and the need for a network. See
+    // src/data/lectureNotes/explained.js.
+    const bundled = await getPregenerated?.(code, language, mode);
+    if (bundled) {
+      setState({ status: 'done', text: bundled, error: '' });
+      return;
+    }
+
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
