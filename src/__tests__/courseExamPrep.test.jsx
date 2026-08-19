@@ -19,6 +19,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import CourseExamPrep from '../components/CourseExamPrep';
 import { cyb122ExamPrep } from '../data/lectureNotes/cyb122ExamPrep';
+import { cyb221ExamPrep } from '../data/lectureNotes/cyb221ExamPrep';
 
 const longform = {
   type: 'longform',
@@ -43,6 +44,21 @@ const recall = {
     { name: 'Risk assessment', aliases: ['assessment'], explain: 'Determining exposure.' },
     { name: 'Risk control', aliases: ['control'], explain: 'Applying controls.' },
   ],
+};
+
+// A code question carries a listing with the stem, an answer listing, or both.
+// The two must be told apart: the stem is visible from the start, the answer
+// listing only after the reveal.
+const codeQuestion = {
+  type: 'longform',
+  marks: 4,
+  language: 'python',
+  source: 'Topic 10 · Practical 1',
+  question: 'Find the fault in the echo server below.',
+  code: 'while True:\n    data = conn.recv(1024)\n    conn.close()',
+  modelAnswer: 'close() is inside the loop, so the second read fails.',
+  modelCode: 'while True:\n    data = conn.recv(1024)\nconn.close()  # after the loop',
+  markScheme: ['Fault located (2)', 'Correction given (2)'],
 };
 
 const courseWith = (examPrep) => ({ slug: 'test-course', code: 'TST 101', examPrep });
@@ -186,6 +202,29 @@ describe('CourseExamPrep', () => {
       expect(screen.getByText(item.explain)).toBeInTheDocument();
     }
   });
+
+  // The listing has to go through CodeBlock rather than into the question or
+  // model-answer prose: those render as paragraphs, and CSS collapses runs of
+  // spaces there, which would destroy the indentation that is the answer.
+  it('shows a code question its stem listing, and withholds the answer listing', () => {
+    const { container } = render(<CourseExamPrep course={courseWith([codeQuestion])} />);
+    startEverything();
+
+    expect(container.textContent).toContain('data = conn.recv(1024)');
+    expect(container.textContent).not.toContain('# after the loop');
+
+    answerThen('close() runs too early');
+    expect(container.textContent).toContain('# after the loop');
+  });
+
+  it('offers a code-questions set only when the bank has some', () => {
+    const { unmount } = render(<CourseExamPrep course={courseWith([longform, recall])} />);
+    expect(screen.queryByRole('button', { name: /Code questions/ })).not.toBeInTheDocument();
+    unmount();
+
+    render(<CourseExamPrep course={courseWith([longform, codeQuestion])} />);
+    expect(screen.getByRole('button', { name: /Code questions/ })).toBeInTheDocument();
+  });
 });
 
 describe('the shipped CYB 122 written-exam bank', () => {
@@ -214,6 +253,26 @@ describe('the shipped CYB 122 written-exam bank', () => {
         expect(item.name).toBeTruthy();
         expect(item.explain).toBeTruthy();
       }
+    }
+  });
+});
+
+// Half of UUY-CYB 221's manual is twelve Python practicals, and students
+// expect the paper to set "write / debug / explain this listing" questions on
+// them. A bank that quietly stops at the theory is the failure mode this
+// guards against, one practical at a time.
+describe('the shipped UUY-CYB 221 written-exam bank', () => {
+  const PRACTICAL_TOPICS = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+
+  it.each(PRACTICAL_TOPICS)('covers the practical in Topic %i', (topic) => {
+    const questions = cyb221ExamPrep.filter((q) => q.source.startsWith(`Topic ${topic} ·`));
+    expect(questions.length).toBeGreaterThan(0);
+  });
+
+  it('carries a listing on every practical question, in a named language', () => {
+    for (const q of cyb221ExamPrep.filter((x) => x.code || x.modelCode)) {
+      expect(q.type).toBe('longform');
+      expect(q.language, `language missing on "${q.question}"`).toBeTruthy();
     }
   });
 });

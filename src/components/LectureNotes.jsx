@@ -2,11 +2,15 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, Circle, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink, ListChecks } from 'lucide-react';
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
+import ExplainCode from './ExplainCode';
 import RichText from './RichText';
 import MathText, { MathBlock } from './MathText';
 import { useApiAvailability } from '../utils/apiClient';
 import {
-  sectionToPlainText,
+  buildOutline,
+  groupToPlainText,
+  hashText,
+  canSimplifyGroup,
   getCachedSimplification,
   requestSimplification,
 } from '../utils/simplifySection';
@@ -301,25 +305,18 @@ function FiveVs({ items }) {
   );
 }
 
-// Section types worth an AI rewrite; text/image/note/casestudy are either
-// already plain, already editorial, or have no prose to simplify.
-const SIMPLIFIABLE_TYPES = new Set(['definition', 'bullets', 'termlist', 'table', 'proscons']);
-const MIN_SIMPLIFY_CHARS = 260;
-const MAX_SIMPLIFY_CHARS = 4000;
-
-function Section({ section, simplifyReady, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
+// `simplifyText` is the serialised text of the whole heading group this section
+// heads — supplied by TopicAccordion, which is the only level that knows which
+// sections belong under which heading. Sections that don't head a group (and the
+// `resource` cards, which have nothing to rewrite) get none and show no button.
+function Section({ section, simplifyReady, explainReady, simplifyText, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
   const [simplify, setSimplify] = useState({ status: 'idle', text: '', error: '' });
   const abortRef = useRef(null);
   useEffect(() => () => abortRef.current?.abort(), []);
   const open = !collapsible || isOpen;
 
-  const plain = sectionToPlainText(section);
-  const canSimplify =
-    simplifyReady &&
-    Boolean(section.heading) &&
-    SIMPLIFIABLE_TYPES.has(section.type) &&
-    plain.length >= MIN_SIMPLIFY_CHARS &&
-    plain.length <= MAX_SIMPLIFY_CHARS;
+  const plain = simplifyText ?? '';
+  const canSimplify = simplifyReady && Boolean(section.heading) && canSimplifyGroup(plain);
 
   const onSimplify = async () => {
     if (simplify.status === 'done') {
@@ -424,35 +421,27 @@ function Section({ section, simplifyReady, context, collapsible = false, isOpen 
           {section.type === 'math' && <MathBlock tex={section.tex} caption={section.caption} />}
           {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
           {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} maxWidth={section.maxWidth} />}
-          {section.type === 'code' && <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />}
+          {section.type === 'code' && (
+            <>
+              <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />
+              {/* Program listings only. A `language: 'output'` block is the run
+                  transcript, not code, and the explainer would try to read it
+                  as a program. */}
+              {section.language !== 'output' && (
+                <ExplainCode
+                  code={section.code}
+                  language={section.language || 'python'}
+                  ready={explainReady}
+                />
+              )}
+            </>
+          )}
           {section.type === 'mosca' && <MoscaCalculator />}
           {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
         </>
       )}
     </div>
   );
-}
-
-// Splits a topic's flat section list into an outline: each heading-bearing
-// section starts a collapsible group that absorbs the headingless sections
-// after it. `resource` download cards stay standalone (always visible) so a
-// collapsed last section can't bury them.
-function buildOutline(sections) {
-  const items = [];
-  let lastGroup = null;
-  for (const s of sections) {
-    if (s.type === 'resource') {
-      items.push({ standalone: s });
-    } else if (s.heading) {
-      lastGroup = { head: s, tail: [] };
-      items.push(lastGroup);
-    } else if (lastGroup) {
-      lastGroup.tail.push(s);
-    } else {
-      items.push({ standalone: s });
-    }
-  }
-  return items;
 }
 
 // The revision recap for a whole topic. Distinct from the per-section Simplify
@@ -529,7 +518,7 @@ function KeyPoints({ topic, plain, context }) {
   );
 }
 
-function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, summarizeReady, context, tracksReading, isRead, onSetRead }) {
+function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, explainReady, summarizeReady, context, tracksReading, isRead, onSetRead }) {
   const panelId = `lecture-panel-${index}`;
   const buttonId = `lecture-header-${index}`;
 
@@ -545,6 +534,20 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, summari
   });
 
   const items = useMemo(() => buildOutline(topic.sections), [topic.sections]);
+
+  // Simplify text per heading group, keyed by the heading section itself so
+  // either render branch below can look it up. Built here because buildOutline
+  // is what knows which sections fall under which heading — a Section on its own
+  // can only see itself, which is why the button used to be missing from most
+  // headings.
+  const groupText = useMemo(() => {
+    const map = new Map();
+    for (const it of items) {
+      if (it.head) map.set(it.head, groupToPlainText(it.head, it.tail));
+    }
+    return map;
+  }, [items]);
+
   const firstGroupIdx = items.findIndex((it) => it.head);
   const headedIndices = items.reduce((acc, it, ii) => (it.head ? [...acc, ii] : acc), []);
   // Sub-sections collapse only when there are enough of them to feel like a
@@ -630,7 +633,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, summari
           {collapsibleSections ? (
             <>
               {lead.map((it, ii) => (
-                <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} context={sectionContext} />
+                <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} context={sectionContext} />
               ))}
 
               {headedIndices.length >= 4 && (
@@ -669,7 +672,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, summari
                 const ii = firstGroupIdx + i;
                 if (it.standalone) {
                   return (
-                    <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} context={sectionContext} />
+                    <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} context={sectionContext} />
                   );
                 }
                 const openG = openSections.has(ii);
@@ -678,6 +681,8 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, summari
                     <Section
                       section={it.head}
                       simplifyReady={simplifyReady}
+                      explainReady={explainReady}
+                      simplifyText={groupText.get(it.head)}
                       context={sectionContext}
                       collapsible
                       isOpen={openG}
@@ -685,7 +690,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, summari
                       anchorId={`${panelId}-sec-${ii}`}
                     />
                     {openG && it.tail.map((s, si) => (
-                      <Section key={si} section={s} simplifyReady={simplifyReady} context={sectionContext} />
+                      <Section key={si} section={s} simplifyReady={simplifyReady} explainReady={explainReady} context={sectionContext} />
                     ))}
                   </div>
                 );
@@ -693,7 +698,14 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, summari
             </>
           ) : (
             topic.sections.map((section, si) => (
-              <Section key={si} section={section} simplifyReady={simplifyReady} context={sectionContext} />
+              <Section
+                key={si}
+                section={section}
+                simplifyReady={simplifyReady}
+                explainReady={explainReady}
+                simplifyText={groupText.get(section)}
+                context={sectionContext}
+              />
             ))
           )}
 
@@ -748,6 +760,7 @@ function LectureNotesInner({ topics, context, reading }) {
   // First topic open by default; rest collapsed.
   const [openSet, setOpenSet] = useState(() => new Set([0]));
   const simplifyStatus = useApiAvailability('/api/simplify');
+  const explainStatus = useApiAvailability('/api/explainer');
   const summarizeStatus = useApiAvailability('/api/summarize');
 
   const tracksReading = Boolean(reading);
@@ -820,6 +833,7 @@ function LectureNotesInner({ topics, context, reading }) {
             isOpen={openSet.has(ti)}
             onToggle={() => toggle(ti)}
             simplifyReady={simplifyStatus === 'ready'}
+            explainReady={explainStatus === 'ready'}
             summarizeReady={summarizeStatus === 'ready'}
             context={context}
             tracksReading={tracksReading}

@@ -284,6 +284,19 @@ for (const { department, courses } of catalogues) {
       check(isNonEmptyString(q?.source), where(qi, 'source missing — students need the section to re-read'));
       check(typeof q?.marks === 'number' && q.marks > 0, where(qi, 'marks must be a positive number'));
 
+      // A code question prints a listing with the stem (`code`) or answers with
+      // one (`modelCode`). `language` is mandatory alongside either, and not
+      // defaulted: a Java listing highlighted as Python reads as broken code.
+      const hasListing = q?.code !== undefined || q?.modelCode !== undefined;
+      check(q?.code === undefined || isNonEmptyString(q.code),
+            where(qi, 'code must be a non-empty string when present'));
+      check(q?.modelCode === undefined || isNonEmptyString(q.modelCode),
+            where(qi, 'modelCode must be a non-empty string when present'));
+      check(!hasListing || isNonEmptyString(q?.language),
+            where(qi, 'language missing — a question carrying code must name its language'));
+      check(!hasListing || q?.type === 'longform',
+            where(qi, 'code/modelCode belong to a longform question, not a recall drill'));
+
       if (q?.type === 'longform') {
         check(isNonEmptyString(q?.modelAnswer), where(qi, 'modelAnswer missing'));
         check(Array.isArray(q?.markScheme) && q.markScheme.length > 0,

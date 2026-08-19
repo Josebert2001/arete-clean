@@ -20,6 +20,11 @@
 // DES ("168-bit Data Encryption Standard"), AH and non-repudiation, and the
 // SYN flood called a DDoS.
 //
+// Topics 1–9 are the theory. Topics 10–21 are the twelve Python practicals,
+// and their questions carry a listing in `code` (printed with the stem) or
+// `modelCode` (printed with the model answer) — see the section header further
+// down for why those exist and what the students asked for.
+//
 // `figure` paths point at the manual's own diagrams under
 // public/lecture-notes/cyb-221/, shown on reveal so a student can compare
 // their sketch with the real thing.
@@ -792,6 +797,705 @@ export const cyb221ExamPrep = [
       'Fourth measure named and explained (1.25)',
       'Fifth measure named and explained (1.25)',
       'Sixth measure named and explained (1.25)',
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  //  TOPICS 10–21 — THE PRACTICALS
+  //
+  //  Half the manual is twelve Python practicals, and until now this bank
+  //  stopped at Topic 9. Students raised it directly: the fear is a paper
+  //  that says "write a script for encryption", "debug these lines" or
+  //  "explain what this code does" — the three forms the practicals
+  //  themselves use, and the ones no amount of prose revision prepares you
+  //  for. Every practical below therefore carries at least one question in
+  //  one of those forms, weighted towards Practicals 1–5.
+  //
+  //  A code question prints its listing through `code` (the stem) and
+  //  `modelCode` (the answer) rather than inside the prose, because a
+  //  paragraph collapses the indentation that is Python's block structure.
+  //  `language` is mandatory alongside either.
+  //
+  //  The two debug questions are not invented faults. They are the manual's
+  //  own: Practical 1's echo server closes the connection inside its read
+  //  loop, and Practical 2's Caesar cipher applies lower-case arithmetic to
+  //  every non-letter. Both are documented in the note blocks in cyb221.js,
+  //  and both stay hidden under the manual's own test input — which is
+  //  exactly what makes them worth setting.
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 10 · Practical 1 · Program Listing',
+    question: 'Study the listing below, taken from Practical 1. (a) State what each of the two functions does. (b) State exactly what the script prints when it is run. (c) State the contents of output.txt if input.txt contains the single line hello CYB221 lab.',
+    code: String.raw`# String Manipulation Function
+def reverse_string(s):
+    return s[::-1]
+
+# File Read and Write Function
+def read_and_reverse_write(input_file, output_file):
+    with open(input_file, 'r') as file:
+        content = file.read()
+        reversed_content = reverse_string(content)
+    with open(output_file, 'w') as file:
+        file.write(reversed_content)
+
+if __name__ == "__main__":
+    original_string = "Hello, World!"
+    reversed_str = reverse_string(original_string)
+    print(f"Original String: {original_string}")
+    print(f"Reversed String: {reversed_str}")
+    read_and_reverse_write('input.txt', 'output.txt')`,
+    modelAnswer: "(a) reverse_string(s) returns the string it is given in reverse order. It does this with the slice s[::-1]: the two empty positions mean start at the beginning and run to the end, and the step of -1 means walk that range backwards. read_and_reverse_write(input_file, output_file) opens the input file for reading, reads the whole of it into content as a single string, passes that string to reverse_string, then opens the output file for writing and writes the reversed content into it. The mode 'r' opens a file for reading, and 'w' opens it for writing and truncates it, so any previous contents of output.txt are discarded. Both files are opened with the with statement, which closes the file automatically when the block ends — including when an error is raised inside it, which a bare open() followed by close() would not.\n\n(b) The script prints two lines:\nOriginal String: Hello, World!\nReversed String: !dlroW ,olleH\nNote that the reversal is character by character, so the comma, the space and the exclamation mark move as well.\n\n(c) output.txt would contain bal 122BYC olleh — the whole file content reversed, not the words reversed in place.",
+    markScheme: [
+      'reverse_string explained — returns the string reversed, using the slice s[::-1] (1.5)',
+      'read_and_reverse_write explained — reads the whole input file, reverses that content, writes it to the output file (1.5)',
+      "States what the modes mean — 'r' reads, 'w' writes and truncates (1)",
+      'The with statement explained — the file is closed automatically, even if an error is raised (1)',
+      'First printed line given: Original String: Hello, World! (1)',
+      'Second printed line given: Reversed String: !dlroW ,olleH (1)',
+      'output.txt contains bal 122BYC olleh (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    language: 'python',
+    source: 'Topic 10 · Practical 1 · Program Listing',
+    question: 'The echo server below is the one printed in Practical 1. It echoes the first message a client sends, then fails when the client sends a second. Identify the fault and the line it is on, state the error it produces and why the manual\'s own demonstration never shows it, and rewrite the function correctly.',
+    code: String.raw`import socket
+
+# Basic Network Communication Function
+def simple_server(port):
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('localhost', port))
+    server_socket.listen(1)
+    print(f"Server listening on port {port}...")
+    conn, addr = server_socket.accept()
+    print(f"Connected by {addr}")
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            break
+        conn.sendall(data)
+        conn.close()`,
+    modelAnswer: "The fault is the indentation of conn.close() on line 16. It sits inside the body of the while loop, at the same level as conn.recv and conn.sendall, so it runs after the very first message is echoed rather than after the conversation has finished. Control then returns to the top of the loop and calls conn.recv(1024) on a socket that has already been closed, which raises OSError: [Errno 9] Bad file descriptor.\n\nThe fault is invisible under the manual's own demonstration because the test client sends exactly one message and then disconnects: the server echoes it, closes the connection and, from the outside, looks as though it worked. It is a second message that exposes it — which is why a fault of this kind survives into a printed manual.\n\nThe correction is to dedent conn.close() so that it runs once, after the loop has ended. The loop already has a proper exit: conn.recv returns an empty bytes object when the client disconnects, if not data is true, and break leaves the loop. The listening socket should be closed as well, since nothing else closes it. Better still, wrap both sockets in with blocks, as Practical 5 does — the socket object is a context manager, so each is closed even if an exception is raised inside the block.",
+    modelCode: String.raw`import socket
+
+def simple_server(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.bind(('localhost', port))
+        server_socket.listen(1)
+        print(f"Server listening on port {port}...")
+        conn, addr = server_socket.accept()
+        with conn:
+            print(f"Connected by {addr}")
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break            # client disconnected
+                conn.sendall(data)
+        # conn is closed here, once the conversation has finished --
+        # not inside the loop, and the listening socket closes with the
+        # outer block.`,
+    markScheme: [
+      'Fault located — conn.close() is indented inside the while loop, on the last line of the loop body (line 16) (2)',
+      'Consequence stated — the connection is closed after the first message is echoed (1.5)',
+      'Error named — the next conn.recv raises an OSError, [Errno 9] Bad file descriptor, on the closed socket (1.5)',
+      'Explains why the manual never sees it — its test client sends only one message (1)',
+      'Correction: conn.close() dedented so it runs once, after the loop ends (2)',
+      'The listening socket closed too, or both sockets written as with blocks (1)',
+      'Rewritten function is otherwise complete and correctly indented, and keeps the empty-data break (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    language: 'python',
+    source: 'Topic 11 · Practical 2 · Program Listing',
+    question: 'The Caesar cipher below is the one printed in Practical 2. It round-trips HelloWorld correctly, but corrupts any text containing a space, a digit or a punctuation mark. Explain why. Trace the character , (comma) through encryption and then decryption with a shift of 4 to prove the round trip fails, and rewrite the function so that non-alphabetic characters pass through unchanged.',
+    code: String.raw`def caesar_cipher_encrypt(text, shift):
+    result = ""
+    for i in range(len(text)):
+        char = text[i]
+        if char.isupper():
+            result += chr((ord(char) + shift - 65) % 26 + 65)
+        else:
+            result += chr((ord(char) + shift - 97) % 26 + 97)
+    return result
+
+def caesar_cipher_decrypt(text, shift):
+    return caesar_cipher_encrypt(text, -shift)`,
+    modelAnswer: "The function never tests whether the character is a letter at all. Its only test is char.isupper(), so the if branch handles upper-case letters and the else branch handles everything else — which means every space, digit and punctuation mark is put through the lower-case arithmetic, with 97 (the code of 'a') subtracted from it and the result forced into the 26-character range starting at 'a'. Any non-letter is therefore replaced by a letter, and the shift-by-26 arithmetic that makes the cipher reversible for letters does not hold for a character that never came from that range.\n\nTrace of the comma, with shift = 4. Encryption: ord(',') is 44, and ',' is not upper case, so the else branch computes (44 + 4 - 97) mod 26 + 97 = (-49) mod 26 + 97. In Python the modulus of a negative number is non-negative, so (-49) mod 26 = 3, giving 3 + 97 = 100, which is chr(100) = 'd'. Decryption applies the same function with shift = -4 to that 'd': ord('d') is 100, so (100 - 4 - 97) mod 26 + 97 = (-1) mod 26 + 97 = 25 + 97 = 122, which is chr(122) = 'z'.\n\nSo the comma encrypts to 'd' and decrypts back to 'z'. The round trip is lossy, and the cipher is not merely untidy on such text but wrong: the plaintext cannot be recovered. The manual never notices because the only input it is given is HelloWorld, which is all letters.\n\nThe correction is to test ch.isalpha() first, choose the base from the case of the letter, and append anything that is not a letter unchanged.",
+    modelCode: String.raw`def caesar_cipher(text, shift, mode="encrypt"):
+    """Shift each alphabetic character by 'shift' places, preserving case.
+    Non-alphabetic characters are passed through unchanged."""
+    if mode == "decrypt":
+        shift = -shift
+    result = []
+    for ch in text:
+        if ch.isalpha():
+            base = ord('A') if ch.isupper() else ord('a')
+            result.append(chr((ord(ch) - base + shift) % 26 + base))
+        else:
+            result.append(ch)
+    return "".join(result)`,
+    markScheme: [
+      'Identifies the missing test — there is no isalpha() check; the if/else only separates upper case from everything else (2)',
+      'States that the else branch applies the lower-case arithmetic, base 97, to every non-letter (1.5)',
+      "Trace, encryption: ord(',') = 44, (44 + 4 - 97) mod 26 + 97 = 3 + 97 = 100 -> 'd' (1.5)",
+      "Trace, decryption: 'd' with shift -4 gives (100 - 4 - 97) mod 26 + 97 = 25 + 97 = 122 -> 'z' (1.5)",
+      'Concludes the round trip is lossy — the comma returns as z, so the plaintext cannot be recovered (1)',
+      'Notes that the fault is hidden by the all-letter test input HelloWorld (0.5)',
+      'Correction: ch.isalpha() tested first, non-letters appended unchanged (1.5)',
+      "Correction: base chosen as ord('A') or ord('a') by case, so case is preserved (0.5)",
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 11 · Practical 2 · Program Listing',
+    question: 'Explain what the AES functions below do. Your answer must state why the plaintext is padded, what cipher.iv is and why it has to be returned alongside the ciphertext, why base64 is applied, and why the printed ciphertext is different on every run even when the same plaintext is encrypted.',
+    code: String.raw`def aes_encrypt(plain_text, key):
+    cipher = AES.new(key, AES.MODE_CBC)
+    ct_bytes = cipher.encrypt(pad(plain_text.encode('utf-8'), AES.block_size))
+    iv = base64.b64encode(cipher.iv).decode('utf-8')
+    ct = base64.b64encode(ct_bytes).decode('utf-8')
+    return iv, ct
+
+def aes_decrypt(iv, ct, key):
+    iv = base64.b64decode(iv)
+    ct = base64.b64decode(ct)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    pt = unpad(cipher.decrypt(ct), AES.block_size)
+    return pt.decode('utf-8')`,
+    modelAnswer: "AES.new(key, AES.MODE_CBC) creates an AES cipher object in Cipher Block Chaining mode. Because no initialisation vector is supplied, the library generates a random one and exposes it as cipher.iv.\n\nAES is a block cipher: it encrypts fixed-size blocks of 16 bytes, so the input must be a whole number of blocks. pad(..., AES.block_size) appends bytes to bring the plaintext up to the next multiple of the block size, and unpad removes them again after decryption so the recovered text matches the original exactly. The call to .encode('utf-8') is needed because the cipher operates on bytes, not on a Python str.\n\nThe IV is the random starting block that CBC mode combines with the first plaintext block before encrypting it, so that identical plaintexts encrypted under the same key do not produce identical ciphertexts. It is not secret, but it is essential: without the same IV the decryptor cannot recover the first block, which is why it is returned to the caller and passed back in as the third argument to AES.new on the decryption side.\n\nbase64 is applied because the ciphertext is arbitrary binary data, which cannot be printed or put into a text field or a JSON document safely. Base64 re-encodes those bytes as printable ASCII characters, and b64decode reverses it before decryption.\n\nThe ciphertext differs on every run for two reasons: the key itself is generated fresh by get_random_bytes on each run, and CBC generates a new random IV each time a cipher object is created. Only the Caesar line in the practical's output is reproducible.",
+    markScheme: [
+      'AES.new(key, AES.MODE_CBC) explained — a CBC cipher object, with a random IV generated for it (1)',
+      'Padding explained — AES is a block cipher, so the input must be a whole number of 16-byte blocks (1.5)',
+      "encode('utf-8') explained — the cipher operates on bytes, not on a str (0.5)",
+      'IV explained — the random starting block CBC combines with the first plaintext block (1)',
+      'States the IV must be kept and passed back for decryption, and that it is not secret (1.5)',
+      'base64 explained — renders arbitrary ciphertext bytes as printable ASCII, and is reversed before decrypting (1)',
+      'Ciphertext differs per run — fresh random key from get_random_bytes and a fresh IV each time (1)',
+      'unpad on decryption removes the padding so the recovered plaintext matches exactly (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    language: 'python',
+    source: 'Topic 12 · Practical 3 · Suggested Solution',
+    question: 'A legacy system encrypts files with a Caesar cipher and is to be migrated to AES. Write a Python function aes_encrypt_decrypt(plaintext) that generates a 256-bit key, encrypts the plaintext with AES in CBC mode, decrypts it again, and returns the base64-encoded ciphertext together with the recovered plaintext. Then state what you would report about DES and about AES to justify dropping DES from the system.',
+    modelAnswer: "The function generates a 32-byte (256-bit) key with get_random_bytes, creates an AES cipher in CBC mode and keeps the IV that the library generates for it, pads the encoded plaintext up to the block size and encrypts it. To decrypt it must build a second cipher object — a cipher object cannot be reused for both directions — passing the same key and the same IV, then unpad the result and decode it back to a string. The ciphertext is base64-encoded before being returned so that it can be printed.\n\nOn the evaluation: DES uses a 64-bit key of which only 56 bits are effective, which is small enough to be broken by brute force in hours on modern hardware; it is deprecated and must not be used for new work. AES-256 has a 256-bit key and no practical attack against it, and is the current standard. For completeness the Caesar cipher it replaces has only 25 possible keys and is broken by brute force instantly.",
+    modelCode: String.raw`import base64
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+from Crypto.Util.Padding import pad, unpad
+
+def aes_encrypt_decrypt(plaintext):
+    """Encrypt then decrypt with AES-256 in CBC mode.
+    Returns (ciphertext_b64, recovered)."""
+    aes_key = get_random_bytes(32)                  # 256-bit key
+    cipher = AES.new(aes_key, AES.MODE_CBC)         # random IV generated for us
+    iv = cipher.iv
+    ciphertext = cipher.encrypt(pad(plaintext.encode(), AES.block_size))
+
+    decipher = AES.new(aes_key, AES.MODE_CBC, iv)   # same key AND same IV
+    recovered = unpad(decipher.decrypt(ciphertext), AES.block_size).decode()
+    return base64.b64encode(ciphertext).decode(), recovered`,
+    markScheme: [
+      'get_random_bytes(32) — a 256-bit key (1)',
+      'AES.new(key, AES.MODE_CBC) created and the IV kept from cipher.iv (1.5)',
+      'pad(plaintext.encode(), AES.block_size) applied before encrypting (1.5)',
+      'A second cipher object built for decryption with the same key AND the same IV (1.5)',
+      'unpad(...).decode() used to recover the original string (1.5)',
+      'base64.b64encode(...).decode() applied to the ciphertext before returning (1)',
+      'Both values returned, as the question asks (0.5)',
+      'DES evaluated — 64-bit key, 56-bit effective, broken in hours, deprecated (1)',
+      'AES-256 evaluated — no practical attack, the current standard (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    language: 'python',
+    source: 'Topic 13 · Practical 4 · Program Listing',
+    question: 'You are verifying a downloaded patch against the vendor\'s published SHA-256 hash, and separately checking a plaintext string against a legacy MD5 hash recovered from a system log. Write two Python functions: generate_hashes(input_string), returning both the MD5 and the SHA-256 hex digests of the string; and verify_hash(input_string, known_hash), which works out which algorithm to use from the length of known_hash and returns True only if the recomputed digest matches it.',
+    modelAnswer: "Both functions rely on hashlib from the standard library, and both must convert the string to bytes with .encode(\"utf-8\") first, because hashing algorithms take byte inputs and will not accept a Python str.\n\ngenerate_hashes builds an MD5 object and a SHA-256 object over the same encoded bytes and returns both hex digests. verify_hash decides which algorithm produced the known hash from its length, since the digest length is fixed per algorithm: an MD5 digest is always 32 hexadecimal characters and a SHA-256 digest is always 64. Any other length is not a hash it can check, so the function reports the error and returns False rather than silently treating it as a match. The comparison is made with .lower() applied to both sides, because hex digests are sometimes published in upper case and a case difference is not a mismatch.",
+    modelCode: String.raw`import hashlib
+
+def generate_hashes(input_string):
+    """Generates both MD5 and SHA-256 hashes for a given input string."""
+    # Convert string to bytes since hashing algorithms require byte inputs
+    encoded_bytes = input_string.encode("utf-8")
+    md5_hex = hashlib.md5(encoded_bytes).hexdigest()
+    sha256_hex = hashlib.sha256(encoded_bytes).hexdigest()
+    return md5_hex, sha256_hex
+
+def verify_hash(input_string, known_hash):
+    """Checks a string against a known MD5 or SHA-256 hash, identifying
+    the algorithm from the length of the hash."""
+    if len(known_hash) == 32:            # MD5 is always 32 hex characters
+        calculated_hash = hashlib.md5(input_string.encode("utf-8")).hexdigest()
+    elif len(known_hash) == 64:          # SHA-256 is always 64 hex characters
+        calculated_hash = hashlib.sha256(input_string.encode("utf-8")).hexdigest()
+    else:
+        print("[ERROR] Unknown hash format. Length must be 32 or 64.")
+        return False
+    return calculated_hash.lower() == known_hash.lower()`,
+    markScheme: [
+      'hashlib imported (0.5)',
+      'input_string.encode("utf-8") applied — hashing operates on bytes, not on a str (1.5)',
+      'hashlib.md5(...).hexdigest() used (1)',
+      'hashlib.sha256(...).hexdigest() used (1)',
+      'generate_hashes returns both digests (0.5)',
+      'A length of 32 identified as MD5 (1.5)',
+      'A length of 64 identified as SHA-256 (1.5)',
+      'Any other length handled explicitly — an error reported and False returned, not a silent pass (1.5)',
+      'Comparison made case-insensitively, with .lower() on both sides (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Topic 13 · Practical 4 · Notes',
+    question: 'The Practical 4 script hashes the string SecureData2026, then verifies the altered string SecureData2026! against the SHA-256 digest of the original and prints False. (a) Name and explain the property of a cryptographic hash function that makes this a reliable test for tampering. (b) State why an analyst compares hashes rather than comparing the files themselves. (c) MD5 is used in the same script — state whether you would use it for a new integrity check, and justify your answer.',
+    modelAnswer: "(a) The property is the avalanche effect: changing a single character of the input produces a completely different digest, not a similar one. Adding one exclamation mark to SecureData2026 changes the whole SHA-256 output, so any modification of a file — however small, and whether accidental corruption in transit or deliberate tampering by a man in the middle — is immediately visible. The function is also deterministic, so the same input always gives the same digest, and one-way, so the digest can be published without revealing the input.\n\n(b) A digest is a short fixed-length value: 64 hexadecimal characters for SHA-256, whatever the size of the file. That is small enough for a vendor to publish on a web page and for an analyst to compare by eye or in one line of code, and it means the analyst does not need a second, trusted copy of the file to compare against — which is the thing they do not have, since the copy they hold is exactly the one under suspicion.\n\n(c) No. MD5 appears in the script only because the scenario involves a legacy system log that already contains MD5 hashes. Its collision resistance has been broken since 2004, meaning two different inputs can be constructed with the same digest, so it cannot prove that a file has not been substituted. SHA-256 is the right default for any new integrity or password work.",
+    markScheme: [
+      'Avalanche effect named — one changed character changes the entire digest (1.5)',
+      'States the function is deterministic and one-way, so the digest can be published safely (1)',
+      'A digest is short and fixed-length whatever the file size, so it can be published and compared cheaply (1)',
+      'States the analyst has no trusted second copy of the file to compare against — only the vendor\'s published digest (1)',
+      'MD5 rejected for new work (0.5)',
+      'Justification — collision resistance broken since 2004; SHA-256 is the right default (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    language: 'python',
+    source: 'Topic 14 · Practical 5 · Program Listing',
+    question: 'Write a Python function start_server(host="127.0.0.1", port=65432) implementing a TCP echo server: it must bind to the address, listen for connections, accept one client, then print and echo back every message the client sends until the client disconnects. Comment the socket calls to show you know what each does.',
+    modelAnswer: "The server creates a socket with socket.AF_INET, which selects the IPv4 address family, and socket.SOCK_STREAM, which selects TCP — the connection-oriented, reliable, in-order transport. It is created inside a with block so that it is closed automatically when the function returns.\n\nbind takes the address and port as a single tuple and attaches the socket to them. listen puts the socket into the listening state, in which the operating system will answer an incoming SYN and complete the three-way handshake on the server's behalf. accept then blocks until a client has connected, and returns two things: conn, a new socket representing that one conversation, and addr, the client's address and port. All further reading and writing happens on conn, not on the listening socket, which stays open to accept further clients.\n\nThe conversation itself is a loop. conn.recv(1024) reads up to 1024 bytes and blocks until something arrives. When the client disconnects, recv returns an empty bytes object; if not data is then true and break leaves the loop — this is the loop's exit condition and must not be omitted, or the server spins on a dead connection. conn.sendall(data) writes the received bytes straight back, and sendall rather than send because send may write only part of a large buffer. The connection is closed after the loop ends, not inside it.",
+    modelCode: String.raw`import socket
+
+def start_server(host="127.0.0.1", port=65432):
+    """Starts a simple TCP Echo Server."""
+    # AF_INET = IPv4, SOCK_STREAM = TCP
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((host, port))        # address and port as ONE tuple
+        s.listen()                  # now ready to answer a SYN
+        print(f"[SERVER] Listening on {host}:{port}")
+        # accept() blocks until a client connects; conn is that conversation
+        conn, addr = s.accept()
+        with conn:
+            print(f"[SERVER] Connected successfully by client address: {addr}")
+            while True:
+                data = conn.recv(1024)          # up to 1024 bytes
+                if not data:
+                    break                       # empty read = client gone
+                print(f"[SERVER] Received: '{data.decode()}' -> Echoing back.")
+                conn.sendall(data)              # echo the exact bytes back
+        print("[SERVER] Server closed cleanly.")`,
+    markScheme: [
+      'socket.socket(socket.AF_INET, socket.SOCK_STREAM), with AF_INET identified as IPv4 and SOCK_STREAM as TCP (2)',
+      's.bind((host, port)) — the address and port passed as a single tuple (1.5)',
+      's.listen() called before any connection is accepted (1)',
+      'conn, addr = s.accept(), identified as blocking until a client connects and returning a new socket for that conversation (1.5)',
+      'A loop reading with conn.recv(1024) (1)',
+      'The empty-read test that breaks the loop when the client disconnects (1.5)',
+      'conn.sendall(data) echoing the exact bytes back (1.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 14 · Practical 5 · Program Listing',
+    question: 'Write the matching TCP client for the Practical 5 echo server: it connects to 127.0.0.1 on port 65432, sends a message, and prints the echo it receives back. Then explain why the practical runs the server in a background thread with daemon=True, and why the client sleeps for one second before connecting.',
+    modelAnswer: "The client creates a socket of the same family and type as the server — AF_INET and SOCK_STREAM — then calls connect with the server's address and port as a single tuple, which sends the SYN that opens the three-way handshake. The message is a Python string, so it must be encoded to bytes with .encode('utf-8') before sendall will accept it, and the reply from recv comes back as bytes and must be decoded before it is printed.\n\nThe server runs in a background thread because s.accept() blocks: it does not return until a client connects. If the server and the client ran one after the other in the same thread, the program would stop at accept() and the client code would never be reached. Running the server in its own thread lets both halves make progress. daemon=True marks that thread as one that must not keep the process alive — once the client finishes in the main thread, the interpreter can exit without waiting for the server loop to end.\n\nThe time.sleep(1) is a start-up race guard. The client thread may reach connect before the server thread has finished binding and listening, and connecting to a port with nothing listening on it fails immediately with ConnectionRefusedError. Sleeping for a second gives the server time to reach s.listen(). It is a demonstration convenience rather than a robust technique — production code would retry the connection, or have the server signal readiness explicitly.",
+    modelCode: String.raw`import socket
+import time
+
+def start_client(host="127.0.0.1", port=65432):
+    """Starts a TCP Client to send a message to the server."""
+    # Wait briefly to ensure the background server thread has started up
+    time.sleep(1)
+    print(f"[CLIENT] Attempting to connect to server at {host}:{port}...")
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((host, port))                 # sends the SYN
+        print("[CLIENT] Connected!")
+        message = "Hello, TCP Server! This is SecureData2026."
+        s.sendall(message.encode('utf-8'))      # str -> bytes before sending
+        data = s.recv(1024)
+        print(f"[CLIENT] Received echo from server: '{data.decode('utf-8')}'")`,
+    markScheme: [
+      'Socket created with AF_INET and SOCK_STREAM, matching the server (1)',
+      's.connect((host, port)) with the address as a single tuple (1.5)',
+      "message.encode('utf-8') before sending, and sendall used (1.5)",
+      "s.recv(1024) and .decode('utf-8') applied to the reply (1.5)",
+      'Threading explained — accept() blocks, so server and client cannot run one after the other in one thread (1.5)',
+      'daemon=True explained — the thread does not keep the process alive after the main thread finishes (0.5)',
+      'sleep(1) explained — lets the server bind and listen first, or connect would be refused (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Topic 14 · Practical 5 · Notes',
+    question: 'Map the socket calls in the Practical 5 client and server onto the TCP three-way handshake: state which call causes each of the SYN, the SYN/ACK and the final ACK to be sent. Then state what the value (\'127.0.0.1\', 38936) in the server\'s output represents, and why the number is different on every run.',
+    modelAnswer: "s.listen() on the server does not send anything. It puts the socket into the listening state, which is the state in which the operating system will answer an incoming SYN rather than reject it; without it the connection attempt is refused.\n\ns.connect() on the client sends the SYN. The server's kernel replies with the SYN/ACK — not accept(), which is important: the handshake is completed by the operating system's TCP implementation, and the connection sits in a completed-connection queue. accept() only hands the application a socket for a connection that has already been established, which is why a server that is slow to call accept() still completes handshakes. The client's kernel sends the final ACK, and connect() returns once it has.\n\nThe value ('127.0.0.1', 38936) is addr, the second value returned by accept(): the client's IP address and the port it is connecting from. The port is an ephemeral port — one the operating system picks from a high range for the duration of the connection — so it differs on every run. The server's own port, 65432, is fixed because the client has to know in advance where to connect.",
+    markScheme: [
+      's.listen() explained — sends nothing, but puts the server in the state where a SYN will be answered (1.5)',
+      's.connect() on the client sends the SYN (1.5)',
+      'The SYN/ACK is sent by the server\'s kernel, not by accept() — accept() returns an already-established connection (1.5)',
+      "The client's kernel sends the final ACK, and connect() returns once the handshake completes (0.5)",
+      'The tuple identified as addr — the client\'s IP address and source port, returned by accept() (0.5)',
+      'The port is ephemeral, chosen by the operating system per connection, so it changes every run (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 15 · Practical 6 · Corrected Program Listing',
+    question: 'Using scapy, write the callback function process_packet(packet) required by Practical 6. For each captured packet it must print the source and destination IP addresses where an IP layer is present, identify whether the transport protocol is TCP or UDP and print the source and destination ports, and decode and print any raw application payload. Then state what sniff(prn=process_packet, count=5, timeout=10) does, and what privilege the script requires.',
+    modelAnswer: "The callback is passed one packet at a time. Every field access must be guarded by a haslayer test, because a captured frame may not carry the layer being asked for and indexing a missing layer raises an error.\n\npacket.haslayer(IP) is tested first, and the source and destination addresses read as packet[IP].src and packet[IP].dst. The transport check is written as an if for TCP and an elif for UDP, because a packet cannot be both — an elif also avoids a second pointless test once TCP has matched. The ports come from packet[TCP].sport and .dport, or the UDP equivalents.\n\nThe Raw layer test is a separate if, not another elif, because a packet has both a transport layer and a payload; chaining it onto the transport test would mean a payload was only ever printed for packets that were neither TCP nor UDP. packet[Raw].load is the payload as bytes, and it is decoded with errors=\"ignore\" so that binary payloads produce partial readable output instead of raising UnicodeDecodeError.\n\nsniff(prn=process_packet, count=5, timeout=10) captures live traffic and calls process_packet once for each packet as it arrives. count=5 stops after five packets and timeout=10 stops after ten seconds, whichever happens first, so the script always terminates.\n\nThe script requires administrator or root privilege, because capturing traffic that is not addressed to this host means putting the network interface into promiscuous mode. It must only ever be run on a network you are authorised to monitor.",
+    modelCode: String.raw`from scapy.all import IP, Raw, TCP, UDP, sniff
+
+def process_packet(packet):
+    """Analyze the layers and payload of one captured packet."""
+    print(f'Captured Packet: {packet.summary()}')
+    if packet.haslayer(IP):
+        src_ip = packet[IP].src
+        dst_ip = packet[IP].dst
+        print(f"[IP LAYER] Source: {src_ip} -> Destination: {dst_ip}")
+
+        if packet.haslayer(TCP):
+            print(f"[TRANSPORT LAYER] Protocol: TCP | Src Port: "
+                  f"{packet[TCP].sport} -> Dst Port: {packet[TCP].dport}")
+        elif packet.haslayer(UDP):
+            print(f"[TRANSPORT LAYER] Protocol: UDP | Src Port: "
+                  f"{packet[UDP].sport} -> Dst Port: {packet[UDP].dport}")
+
+        # A separate if, NOT an elif: a packet has a transport layer AND
+        # a payload.
+        if packet.haslayer(Raw):
+            decoded = packet[Raw].load.decode("utf-8", errors="ignore")
+            print(f"[APPLICATION PAYLOAD] Raw Data: '{decoded}'")
+    else:
+        print("[NON-IP LAYER] Layer 2 or alternative broadcast frame captured.")`,
+    markScheme: [
+      'packet.haslayer(IP) tested before any IP field is read (1)',
+      'packet[IP].src and packet[IP].dst extracted and printed (1)',
+      'TCP branch reading packet[TCP].sport and .dport (1)',
+      'UDP branch written as an elif, since a packet cannot be both (1)',
+      'The Raw payload tested in a separate if, not chained onto the transport test (1)',
+      'packet[Raw].load decoded with errors="ignore" so a binary payload does not raise (1.5)',
+      'sniff explained — prn is the per-packet callback; count=5 and timeout=10 stop it, whichever comes first (1)',
+      'Root or administrator privilege required, because capture puts the interface into promiscuous mode (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    language: 'python',
+    source: 'Topic 16 · Practical 7 · Program Listing',
+    question: 'The listing below is from Practical 7. Explain what stream=True and iter_content(chunk_size=8192) do and why they are used together, why the file is opened in "wb" mode, and what each of the two checks in the function guards against. The manual\'s objective for this practical mentions BeautifulSoup — state whether this listing parses any HTML.',
+    code: String.raw`def download_pdf(url, output_filename):
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        if 'application/pdf' in response.headers.get('Content-Type', ""):
+            with open(output_filename, 'wb') as pdf_file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    pdf_file.write(chunk)
+            print(f'Success! Saved as: {output_filename}')
+        else:
+            print("Warning: The URL did not point to a valid PDF file.")
+    else:
+        print(f"Failed to retrieve the file. Status code: {response.status_code}")`,
+    modelAnswer: "stream=True tells requests not to download the response body when the request returns. Only the status line and the headers are read, and the body is left on the connection to be pulled later. iter_content(chunk_size=8192) is what pulls it, yielding the body 8192 bytes at a time, and each chunk is written straight to disk before the next is fetched. Together they mean that a large PDF never has to fit in memory as a single object — which is the right pattern for any file download whose size you do not control. Without stream=True the whole body would already be in memory before the loop began, and the chunking would achieve nothing.\n\nThe file is opened in 'wb', binary write mode, because a PDF is not text. In text mode Python would apply an encoding and translate line endings, both of which corrupt binary content.\n\nThe first check, status_code == 200, confirms the request actually succeeded rather than returning a 404 or a redirect. The second check guards against a subtler failure: a server can return HTTP 200 with an HTML error page, a login form or a captcha in the body, so the Content-Type header is inspected for application/pdf before anything is written. Note the .get('Content-Type', \"\") with a default of an empty string, so a response with no such header does not raise a KeyError.\n\nNo HTML parsing takes place. BeautifulSoup is mentioned in the objective but is never imported or used; the listing is a straight HTTP file download with requests.",
+    markScheme: [
+      'stream=True explained — the body is not downloaded into memory when the request returns (1)',
+      'iter_content(8192) explained — the body is pulled and written in 8 KB chunks, so a large file never has to fit in memory (1.5)',
+      "'wb' explained — binary write mode; text mode would apply an encoding and line-ending translation and corrupt the PDF (1.5)",
+      'status_code == 200 checked — the request actually succeeded (1)',
+      'Content-Type checked — a server can return 200 with an HTML error page instead of the PDF (0.5)',
+      'States that no HTML parsing takes place; BeautifulSoup is never imported or used (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 17 · Practical 8 · Program Listing — Port Scanner',
+    question: 'Write a Python port scanner as in Practical 8: a function scan_port(ip, port) that returns True when a TCP port is open, and port_scanner(target_ip, port_range) that scans a range of ports and prints each open one. Explain why connect_ex is used rather than connect, what a return value of 0 means, and why settimeout(1) is necessary. State the condition under which you may lawfully run it.',
+    modelAnswer: "scan_port opens a fresh TCP socket for each port, sets a timeout on it, and attempts to connect. connect_ex is used rather than connect because it returns an error code instead of raising an exception on failure: in a scan, most ports are expected to fail, and a function that raises on every closed port would need an exception handler around every attempt and would be far slower. A return value of 0 means no error occurred — the TCP three-way handshake completed — so the port is open. Any non-zero value is the error code for the failure.\n\nsettimeout(1) bounds how long one attempt may take. A closed port normally answers immediately with a TCP RST, but a filtered port behind a firewall silently drops the packet and never answers at all; without a timeout the socket would wait on the operating system's default, which can be over a minute, and a 1024-port scan would never finish. The try/except socket.error is a second layer of safety, so that an unreachable host or a local socket error returns False rather than aborting the whole scan.\n\nport_scanner loops over the range and prints each port for which scan_port returns True. The socket is created inside a with block so that each one is closed as soon as its attempt finishes, rather than leaving a thousand descriptors open.\n\nOn legality: a port scan may only be run against a host you own or have written permission to test. Scanning a host without authorisation is an offence in most jurisdictions, including under Nigeria's Cybercrimes Act. The comment in the manual's listing — \"the target IP address you have permission to scan\" — is the operative instruction, not a formality.",
+    modelCode: String.raw`import socket
+
+def scan_port(ip, port):
+    """Scans a single TCP port on the target IP address."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(1)                     # do not hang on a filtered port
+            result = s.connect_ex((ip, port))   # returns a code, does not raise
+            return result == 0                  # 0 = handshake completed = open
+    except socket.error:
+        return False
+
+def port_scanner(target_ip, port_range):
+    """Loops through the specified range of ports and prints open ones."""
+    print(f"Starting scan on host: {target_ip}")
+    for port in range(*port_range):
+        if scan_port(target_ip, port):
+            print(f"Port {port} is open")`,
+    markScheme: [
+      'A socket created per port with AF_INET / SOCK_STREAM, inside a with block (1)',
+      's.settimeout(1) set before the connection attempt (1)',
+      'result = s.connect_ex((ip, port)) used (1.5)',
+      'connect_ex explained — returns an error code instead of raising, which is what makes a scan loop practical (1.5)',
+      'A return of 0 explained — the TCP handshake completed, so the port is open (1)',
+      'Timeout justified — a filtered port never answers, and the scan would otherwise hang on the default (1)',
+      'The range looped and each open port printed, with socket.error caught so one failure does not abort the scan (0.5)',
+      'States that scanning requires ownership or written permission — unauthorised scanning is an offence under the Cybercrimes Act (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 18 · Practical 9 · Program Listing',
+    question: String.raw`Write the two core functions of the Practical 9 static-analysis script: calculate_hash(filename), returning the SHA-256 digest of a file, and extract_strings(filename), returning every printable ASCII sequence of four characters or more that the file contains. Explain what the pattern b'[\x20-\x7E]{4,}' matches and why the minimum length is set, and state what makes this analysis "static".`,
+    modelAnswer: "Both functions open the file in 'rb', binary read mode, because a suspect executable is not text and must be read as raw bytes.\n\ncalculate_hash creates a hashlib.sha256() object, reads the file, passes the bytes to .update() and returns .hexdigest(). FileNotFoundError is caught, so a mistyped path produces a clear message instead of a traceback. The digest is the sample's identifier: it can be searched for in a threat-intelligence database or compared against a known-bad list without sending the file anywhere.\n\nextract_strings runs a regular expression over the file's bytes. The pattern is a bytes pattern, matching a bytes subject. The character class covers the byte values 0x20 to 0x7E, which is the printable ASCII range from the space character up to the tilde — everything a human can read, excluding control characters. The quantifier {4,} requires a run of at least four such bytes; without a minimum, the output would be swamped by two- and three-character sequences that occur by chance inside compiled code and carry no meaning. Each match is decoded with errors='ignore' so that a run which is not valid UTF-8 does not raise.\n\nThe analysis is static because the file is examined without ever being executed. That is the safe first step with a suspect sample — running it is dynamic analysis and needs a sandbox. The strings recovered are the real signal: names like CreateRemoteThread and VirtualAllocEx are the classic API pair for injecting code into another running process, and seeing them in a sample is a strong indicator on its own.",
+    modelCode: String.raw`import hashlib
+import re
+import sys
+
+def calculate_hash(filename):
+    """SHA-256 digest of the whole file."""
+    hasher = hashlib.sha256()
+    try:
+        with open(filename, 'rb') as file:      # binary: it is not text
+            buf = file.read()
+            hasher.update(buf)
+            return hasher.hexdigest()
+    except FileNotFoundError:
+        print(f"Error: The file '{filename}' was not found.")
+        sys.exit(1)
+
+def extract_strings(filename):
+    """Printable ASCII sequences of 4 characters or more."""
+    with open(filename, 'rb') as file:
+        content = file.read()
+        # 0x20-0x7E = space through tilde, i.e. printable ASCII
+        strings = re.findall(b'[\x20-\x7E]{4,}', content)
+        return [s.decode('utf-8', errors='ignore') for s in strings]`,
+    markScheme: [
+      "Both files opened in binary mode, 'rb' (1)",
+      'hashlib.sha256() used with .update(buf) and .hexdigest() (1.5)',
+      'FileNotFoundError handled rather than allowed to crash (1)',
+      're.findall used with a bytes pattern over the file\'s bytes (1)',
+      'The range 0x20–0x7E identified as printable ASCII, space through tilde (1.5)',
+      '{4,} explained — runs of four or more, which filters out chance byte sequences in compiled code (1)',
+      "Each match decoded with errors='ignore' (0.5)",
+      'Static analysis defined — the file is examined without being executed, the safe first step with a suspect sample (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    language: 'python',
+    source: 'Topic 19 · Practical 10 · Corrected Program Listing',
+    question: 'A legacy intranet server at 192.168.1.1 is being flooded on port 80 by one misconfigured host on the LAN. Write a threshold-based intrusion detector in Python and scapy: it must count requests per source IP over a fixed monitoring window, and afterwards raise an alert naming any source that sent more than 50 requests to that server. Then state TWO attacks this detector would fail to catch.',
+    modelAnswer: "The detector has three parts: configuration, a per-packet callback, and an analysis pass after the capture window closes.\n\nThe monitoring duration, the alert threshold and the address of the server being protected are named constants at the top, so the detector can be re-pointed without editing its logic. A collections.Counter keyed by source IP holds the counts; a Counter is used rather than a plain dict because it returns zero for a key it has not seen, so no initialisation is needed.\n\nThe callback runs for every packet. It tests haslayer(IP) and haslayer(TCP) before reading any field, since a captured frame may carry neither. It then counts the packet only if its destination address is the target server and its destination port is 80 — without both tests the counter would fill with unrelated traffic and every busy host on the network would look like an attacker. sniff is called with prn set to the callback, timeout set to the monitoring duration, and store=False so that scapy does not also accumulate every packet in memory. PermissionError is caught, because capture needs root and the failure otherwise looks like a bug.\n\nWhen the window closes, the counter is iterated and any source whose count exceeds the threshold is reported with its address and its count. The case where nothing crossed the threshold is reported explicitly, so a clean run is distinguishable from a crashed one.\n\nTwo attacks it would miss. First, a slow attack: an attacker who stays below 50 requests in the window passes unnoticed, and can simply pace themselves. Second, a distributed attack: the count is per source IP, so a botnet sending 20 requests each from a hundred addresses would flood the server without any single source crossing the line. It also cannot distinguish a misconfigured bot from a deliberate attacker — it measures volume, not intent.",
+    modelCode: String.raw`from scapy.all import sniff, IP, TCP
+from collections import Counter
+import sys
+
+# Configuration
+MONITOR_DURATION = 20        # seconds to capture traffic
+THRESHOLD_REQUESTS = 50      # alert above this many requests from one IP
+TARGET_IP = "192.168.1.1"    # the server we are protecting
+
+request_counter = Counter()
+
+def process_packet(packet):
+    # Verify the layers exist BEFORE reading any field
+    if packet.haslayer(IP) and packet.haslayer(TCP):
+        ip_src = packet[IP].src
+        ip_dst = packet[IP].dst
+        tcp_dport = packet[TCP].dport
+        # Only traffic aimed at our server, on HTTP port 80
+        if ip_dst == TARGET_IP and tcp_dport == 80:
+            request_counter[ip_src] += 1
+
+def detect_intrusion():
+    print(f"[*] Monitoring traffic to {TARGET_IP} on port 80 "
+          f"for {MONITOR_DURATION}s...")
+    try:
+        sniff(prn=process_packet, timeout=MONITOR_DURATION, store=False)
+    except PermissionError:
+        print("\n[!] Scapy requires root privileges to sniff raw packets.")
+        sys.exit(1)
+
+    alert_triggered = False
+    for ip, count in request_counter.items():
+        if count > THRESHOLD_REQUESTS:
+            print(f"[ALERT] Potential DoS detected from Source IP: {ip}")
+            print(f"        Total requests: {count} "
+                  f"(Threshold: {THRESHOLD_REQUESTS})")
+            alert_triggered = True
+    if not alert_triggered:
+        print("[*] No thresholds exceeded.")
+
+if __name__ == "__main__":
+    detect_intrusion()`,
+    markScheme: [
+      'Named constants for the monitoring duration, the threshold and the target IP (1)',
+      'A Counter (or dict) keyed by source IP accumulating the counts (1)',
+      'The callback tests haslayer(IP) and haslayer(TCP) before reading any field (1.5)',
+      'Only packets destined for the target IP on port 80 are counted (2)',
+      'sniff called with prn, timeout and store=False so the capture is not held in memory (1.5)',
+      'After the window, the counter iterated and every source above the threshold reported with its count (1.5)',
+      'The no-alert case reported explicitly rather than printing nothing (0.5)',
+      'Misses a slow attack that paces itself below the threshold (0.5)',
+      'Misses a distributed attack, where each of many sources stays under the threshold (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 20 · Practical 11 · Corrected Program Listing',
+    question: 'Complete the function check_ip_threat_details(filename, api_url) from Practical 11: it reads a single IP address from a file, builds a prompt about it, sends that prompt to a threat-intelligence API as a JSON POST, and returns the IP address, whether the risk level is high, the country of origin and the reason given. Explain why the exercise replaces requests.post with a mock, and identify the shadowing fault in the mock itself.',
+    modelAnswer: "The function reads the file and applies .strip() to what it reads. That is not cosmetic: the file ends with a newline, and an IP address with a trailing newline would be sent to the API as a different string and would not match anything.\n\nIt then builds the prompt from the IP address, wraps it in the payload dictionary {\"prompt\": prompt}, and passes it as requests.post(api_url, json=payload) — the json keyword serialises the dictionary and sets the Content-Type header, which posting a raw string would not. response.json() parses the reply back into a dictionary.\n\nThe four values are pulled out with .get() rather than square brackets, so a response missing a field returns the default instead of raising a KeyError. The risk level is compared against \"high\" to produce a boolean, and the function returns all four values as a tuple.\n\nThe mock exists so the exercise runs with no network connection and no API key: requests.post is reassigned to a function that returns a canned MockResponse for the known IP address and a low-risk default for anything else, so the code under test is exercised exactly as written while the network call never happens.\n\nThe shadowing fault is in the mock's signature, def mock_api_call(url, json=None). The parameter is named json, which is also the name of the module imported at the top of the script. Inside that function the name json refers to the parameter, so the module is unreachable there. It happens to work only because the module is never used inside the function — a single json.dumps() in that body would fail with an AttributeError on a dictionary.",
+    modelCode: String.raw`def check_ip_threat_details(filename, api_url):
+    """Reads an IP from a file, queries the threat-intel API, and returns
+    complete threat information."""
+    # 1. Read the IP address from the file and strip whitespace
+    with open(filename, "r") as f:
+        ip_address = f.read().strip()          # strip(): the file ends in \n
+
+    # 2. Build the prompt and 3. the JSON payload
+    prompt = f"Analyze this IP address for security threats: {ip_address}"
+    payload = {"prompt": prompt}
+
+    # 4. POST it and parse the JSON response
+    response = requests.post(api_url, json=payload)
+    response_data = response.json()
+
+    # .get() with defaults: a missing field must not raise
+    is_high_risk = response_data.get("risk_level") == "high"
+    country = response_data.get("country", "Unknown")
+    reason = response_data.get("reason", "No reason provided.")
+    return ip_address, is_high_risk, country, reason`,
+    markScheme: [
+      'The file read and .strip() applied, so the trailing newline is not sent (1.5)',
+      'A prompt built from the IP address (1)',
+      'Payload posted as {"prompt": prompt} via requests.post(api_url, json=payload) (1.5)',
+      'response.json() used to parse the reply (0.5)',
+      '.get() used with defaults, so a missing field does not raise a KeyError (1.5)',
+      'All four values returned (0.5)',
+      'Mock explained — it lets the exercise run with no network connection and no API key (1)',
+      'Shadowing identified — the mock\'s parameter is named json, hiding the imported json module inside that function (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    language: 'python',
+    source: 'Topic 21 · Practical 12 · Suggested Solution',
+    question: 'Practical 12 states the problem and instructs you to write Python code that addresses it. Write the screening logic for a monitoring firewall: given a captured packet it must classify the packet as INCOMING, OUTGOING or FORWARDED relative to this machine, translate the port into a human-readable application type, add the packet size to a running total, and flag any packet touching a watch-listed address. Show also how the machine\'s own local IP address is determined.',
+    modelAnswer: "The configuration is a set of flagged addresses, a dictionary mapping well-known port numbers to readable application names — 80 to HTTP, 443 to HTTPS, 53 to DNS, 22 to SSH and so on — and a stats dictionary holding the running totals.\n\nThe local IP is found by opening a UDP socket and connecting it to an external address such as 8.8.8.8, then reading socket.getsockname()[0]. Because UDP is connectionless, no packet is actually sent by that call: it only asks the operating system to select the route it would use, and the socket then knows which local interface address that route goes out of. That is what makes it correct where socket.gethostbyname(socket.gethostname()) often is not, since the latter can return 127.0.0.1. An OSError is caught in case there is no route at all, and the socket is closed in a finally block.\n\nDirection is decided by comparison against that address. If the destination is the local IP the packet is INCOMING; if the source is the local IP it is OUTGOING; if neither, the machine is neither sender nor recipient and the packet is FORWARDED — it is only visible because the interface is in promiscuous mode.\n\nThe application is identified by looking up the destination port in the map first and the source port second. Destination first is deliberate: for an outbound request the destination is the well-known service port, while the source is an ephemeral one; for the reply the two are the other way round, and taking the source as a fallback catches it. Anything in neither position falls back to a label showing the protocol and port, so nothing is silently dropped.\n\nEach screened packet adds len(pkt) to the byte total and one to the packet count, and an alert is appended to the log line when either address appears in the flagged set. This is a screening firewall in the sense of Topic 3 — it inspects source, destination, port and direction and applies a policy — but it logs rather than blocking, which makes it a monitor rather than an enforcement point.",
+    modelCode: String.raw`import socket
+from scapy.all import IP, TCP, UDP
+
+FLAGGED_IPS = {"8.8.8.8", "185.220.101.38"}   # watch-list addresses
+PORT_MAP = {
+    20: "FTP-Data", 21: "FTP", 22: "SSH", 23: "Telnet", 25: "SMTP",
+    53: "DNS (Domain Lookups)", 80: "HTTP (Unencrypted Web)",
+    443: "HTTPS (Secure Web)", 445: "SMB", 3389: "RDP",
+}
+stats = {"packets": 0, "bytes": 0, "in": 0, "out": 0, "fwd": 0, "alerts": 0}
+
+def get_local_ip():
+    """The address this machine uses to reach the local network."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))   # no data is sent; just selects a route
+        return s.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
+    finally:
+        s.close()
+
+LOCAL_IP = get_local_ip()
+
+def classify_direction(src, dst):
+    if dst == LOCAL_IP:
+        stats["in"] += 1
+        return "INCOMING"
+    if src == LOCAL_IP:
+        stats["out"] += 1
+        return "OUTGOING"
+    stats["fwd"] += 1
+    return "FORWARDED"
+
+def identify_application(pkt):
+    if pkt.haslayer(TCP):
+        proto, sport, dport = "TCP", pkt[TCP].sport, pkt[TCP].dport
+    elif pkt.haslayer(UDP):
+        proto, sport, dport = "UDP", pkt[UDP].sport, pkt[UDP].dport
+    else:
+        return "Other IP protocol", None, None
+    # Destination first: it is the service port on a request, the source
+    # port on the reply.
+    app = PORT_MAP.get(dport) or PORT_MAP.get(sport) or f"Unknown ({proto} {dport})"
+    return app, sport, dport
+
+def screen_packet(pkt):
+    if not pkt.haslayer(IP):
+        return
+    src, dst = pkt[IP].src, pkt[IP].dst
+    stats["packets"] += 1
+    stats["bytes"] += len(pkt)
+    direction = classify_direction(src, dst)
+    app, sport, dport = identify_application(pkt)
+    line = f"[{direction:<10}] {src:>15} -> {dst:<15} | {app:<24} | {len(pkt):>5} bytes"
+    if src in FLAGGED_IPS or dst in FLAGGED_IPS:
+        stats["alerts"] += 1
+        line += "   [!!! SECURITY ALERT !!!]"
+    print(line)`,
+    markScheme: [
+      'A dictionary mapping well-known ports to application names, including 80 HTTP, 443 HTTPS and 53 DNS (1.5)',
+      'A set of flagged addresses and a stats structure holding the running totals (1)',
+      'Local IP found by connecting a UDP socket to an external address and reading getsockname()[0] (1.5)',
+      'States that no data is sent by that connect — it only selects the route (0.5)',
+      'Destination equal to the local IP classified as INCOMING (1)',
+      'Source equal to the local IP classified as OUTGOING, and neither as FORWARDED (1.5)',
+      'Port looked up on the destination first, then the source, with a fallback for unknown ports (1)',
+      'len(pkt) added to the byte total and the packet count incremented (0.5)',
+      'An alert raised when either address is in the flagged set (1.5)',
     ],
   },
 
