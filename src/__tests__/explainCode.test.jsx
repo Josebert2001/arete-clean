@@ -40,7 +40,7 @@ const jsonResponse = (body) => ({
   json: async () => body,
 });
 
-const explain = () => fireEvent.click(screen.getByRole('button', { name: /Explain this code/ }));
+const explain = () => fireEvent.click(screen.getByRole('button', { name: /line by line/ }));
 
 describe('canExplainCode', () => {
   it('refuses a snippet too short to walk through', () => {
@@ -69,6 +69,16 @@ describe('the explanation cache', () => {
     setCachedExplanation(LISTING, 'python', 'a python walkthrough');
     expect(getCachedExplanation(LISTING, 'python')).toBe('a python walkthrough');
     expect(getCachedExplanation(LISTING, 'java')).toBeNull();
+  });
+
+  // Study mode withholds every verdict and the walkthrough does not. Serving
+  // one where the other was asked for would either leak the fault a debug
+  // question is asking for, or hide one the student came for.
+  it('keeps the study and walkthrough answers apart', () => {
+    setCachedExplanation(LISTING, 'python', 'no verdict here', 'study');
+    expect(getCachedExplanation(LISTING, 'python', 'study')).toBe('no verdict here');
+    expect(getCachedExplanation(LISTING, 'python', 'walkthrough')).toBeNull();
+    expect(getCachedExplanation(LISTING, 'python')).toBeNull();
   });
 });
 
@@ -100,7 +110,7 @@ describe('ExplainCode', () => {
       language: 'python',
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /Hide walkthrough/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Hide explanation/ }));
     expect(screen.queryByText('It reverses the file.')).not.toBeInTheDocument();
   });
 
@@ -129,6 +139,27 @@ describe('ExplainCode', () => {
 
     expect(await screen.findByText('The AI is busy.')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('button', { name: /Retry/ })).toBeInTheDocument());
+  });
+
+  // The listings come from a lab manual the class was never taught from, so the
+  // explanation has to be available BEFORE the student answers. What keeps that
+  // honest is the mode, not hiding the button: study mode is told to withhold
+  // every verdict.
+  it('asks for study mode when told to, and labels itself accordingly', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ explanation: 'Line 1 opens a socket.' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <ExplainCode code={LISTING} language="python" ready mode="study" label="I don't understand this code" hint="No verdicts." />,
+    );
+    expect(screen.getByText('No verdicts.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /I don't understand this code/ }));
+    await screen.findByText('Line 1 opens a socket.');
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ mode: 'study' });
+    // The caveat has served its purpose once the explanation is up.
+    expect(screen.queryByText('No verdicts.')).not.toBeInTheDocument();
   });
 
   it('surfaces a network failure rather than hanging', async () => {

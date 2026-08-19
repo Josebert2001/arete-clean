@@ -140,6 +140,20 @@ function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady }) {
       {q.code && (
         <div className="mb-5">
           <CodeBlock code={q.code} language={q.language || 'python'} />
+          {/* Offered BEFORE the answer, deliberately. These listings come from a
+              lab manual the class was never taught from, and a student who
+              cannot read the code cannot attempt the question at all. Study
+              mode teaches the listing line by line and withholds every verdict,
+              so a debug question still has to be answered by the student —
+              see STUDY_SYSTEM_PROMPT in api/explainer.js. */}
+          <ExplainCode
+            code={q.code}
+            language={q.language || 'python'}
+            ready={explainReady}
+            mode="study"
+            label="I don't understand this code"
+            hint="Reads the listing line by line without saying whether it is right — that part is the question."
+          />
         </div>
       )}
 
@@ -225,17 +239,17 @@ function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady }) {
                 showLineNumbers={false}
               />
             )}
-            {/* Only after the reveal, and never on the stem before it: on a
-                "debug this listing" question the walkthrough names the fault,
-                which is the answer. Once the model answer is on screen there is
-                nothing left to give away, and a student who still cannot follow
-                the code needs it explained line by line more than they need
-                another paragraph of prose. */}
+            {/* The full walkthrough, faults and all. Safe here because the
+                model answer is already on screen — nothing left to give away —
+                and it explains the *answer's* listing, which is the one the
+                student has not seen before. The pre-reveal button above is the
+                withholding one. */}
             {code && (
               <ExplainCode
                 code={q.modelCode || q.code}
                 language={q.language || 'python'}
                 ready={explainReady}
+                label="Explain the model answer's code"
               />
             )}
           </div>

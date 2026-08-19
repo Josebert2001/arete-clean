@@ -32,7 +32,9 @@ import { fileURLToPath } from 'node:url';
 
 import { noteLoaders } from '../src/data/lectureNotes/index.js';
 import { courses } from '../src/data/courses.js';
-import { simplifiableGroups } from '../src/utils/simplifySection.js';
+// noteText, not simplifySection: the latter pulls in apiClient (and therefore
+// React), which has no business in a build script.
+import { simplifiableGroups } from '../src/utils/noteText.js';
 import { SYSTEM_PROMPT } from '../api/simplify.js';
 import { buildModelChain, generateTextWithFallback } from '../api/_lib/model.js';
 

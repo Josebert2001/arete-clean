@@ -19,7 +19,15 @@ import {
 // Renders nothing at all when no model provider is configured, or when the
 // snippet is too short to be worth a call — the AI features in this project
 // degrade to absent, never to a button that errors.
-export default function ExplainCode({ code, language = 'python', ready, className = '' }) {
+export default function ExplainCode({
+  code,
+  language = 'python',
+  ready,
+  mode = 'walkthrough',
+  label,
+  hint,
+  className = '',
+}) {
   const [state, setState] = useState({ status: 'idle', text: '', error: '' });
   const abortRef = useRef(null);
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -31,7 +39,7 @@ export default function ExplainCode({ code, language = 'python', ready, classNam
       setState({ status: 'idle', text: '', error: '' });
       return;
     }
-    const cached = getCachedExplanation(code, language);
+    const cached = getCachedExplanation(code, language, mode);
     if (cached) {
       setState({ status: 'done', text: cached, error: '' });
       return;
@@ -40,7 +48,7 @@ export default function ExplainCode({ code, language = 'python', ready, classNam
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    const data = await requestCodeExplanation({ code, language, signal: controller.signal });
+    const data = await requestCodeExplanation({ code, language, mode, signal: controller.signal });
     if (controller.signal.aborted || data.aborted) return;
     if (data.explanation) {
       setState({ status: 'done', text: data.explanation, error: '' });
@@ -62,10 +70,16 @@ export default function ExplainCode({ code, language = 'python', ready, classNam
           className={state.status === 'loading' ? 'animate-pulse text-ember-500' : 'text-ember-500'}
         />
         {state.status === 'loading' ? 'Reading the code…'
-          : state.status === 'done' ? 'Hide walkthrough'
+          : state.status === 'done' ? 'Hide explanation'
             : state.status === 'error' ? 'Retry'
-              : 'Explain this code'}
+              : label || 'Explain this code line by line'}
       </button>
+
+      {/* Only while idle: once the explanation is on screen it speaks for
+          itself, and the caveat would just push it down the page. */}
+      {hint && state.status === 'idle' && (
+        <p className="mt-1.5 text-xs text-coffee-600 leading-relaxed">{hint}</p>
+      )}
 
       {state.status === 'error' && (
         <p className="mt-2 rounded-lg border border-rust/25 bg-rust/10 px-3 py-2 text-sm text-rust">
