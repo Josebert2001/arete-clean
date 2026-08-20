@@ -21,12 +21,12 @@ export const SYSTEM_PROMPT = `You are Areté's lecture-note simplifier for Unive
 
 Structure your response like this:
 1. One sentence stating the core idea in everyday words
-2. 3-6 short bullet points covering the key facts — spell out every acronym in parentheses the first time it appears
+2. Short bullet points covering the key facts — spell out every acronym in parentheses the first time it appears. Most excerpts need only 3-6 bullets. If the excerpt itself is a long enumerated list (e.g. a dozen+ named factors, traits, or steps), do NOT give each item its own bullet — group them into a handful of bullets by shared theme instead, naming the items briefly within each group
 3. If (and only if) it genuinely helps, end with one relatable everyday analogy on its own line starting with "**Think of it like this:**"
 
 Rules:
-- Stay under 200 words total
-- Cover every distinct point the excerpt makes — a student who reads only your version should not be missing something the notes taught
+- Stay under 220 words total
+- Cover every distinct point the excerpt makes — a student who reads only your version should not be missing something the notes taught. For a long list, "covering" a point means its theme appears somewhere, not that it gets a dedicated line
 - Plain English — no jargon unless you define it in the same sentence
 - Keep the lecturer's own name for anything named or numbered; a student is examined on those words
 - Do not invent facts that are not in the excerpt; simplify, don't expand
@@ -71,11 +71,13 @@ export default async function handler(req, res) {
     });
   }
 
-  // Strong tier. The light one was enough when the input was a single section,
-  // but a whole heading group is several times longer and flash-lite starts
-  // dropping points from the back of it — which is exactly the failure a student
-  // cannot detect, because the rewrite still reads complete.
-  const chain = buildModelChain('strong');
+  // Light tier (flash-lite) — cheaper and faster. This endpoint briefly moved
+  // to the strong model because gemini-3.1-flash-lite dropped points from the
+  // back of a whole heading group; the move to gemini-3.5-flash-lite plus the
+  // zeroed thinking budget below is meant to fix both the cost and that
+  // failure at once. Re-check output completeness against a long heading group
+  // if this ever regresses.
+  const chain = buildModelChain('light');
   if (chain.length === 0) {
     return res.status(200).json({
       notConfigured: true,
@@ -108,6 +110,12 @@ export default async function handler(req, res) {
       // Low temperature keeps the rewrite faithful ("simplify, don't expand");
       // applied to Groq/OpenRouter only, never to Gemini (see model.js).
       temperature: 0.4,
+      // Gemini 3.x is NOT capped by default and spends hidden thinking out of
+      // this same budget — with only 1400 tokens to work with, that leaves too
+      // little for the visible rewrite and produces answers that cut off
+      // mid-bullet. Same fix as explainer.js: this is a plain-English rewrite,
+      // not multi-step reasoning.
+      providerOptions: { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
     });
 
     if (outcome.text) {
