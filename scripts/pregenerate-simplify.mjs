@@ -96,13 +96,16 @@ async function simplify(chain, text, setting) {
     prompt: `${setting ? `Course context: ${setting}\n\n` : ''}Lecture-note excerpt:\n\n${text}`,
     maxOutputTokens: 1400,
     temperature: 0.4,
+    // Keep in step with api/simplify.js — Gemini 3.5 Flash otherwise spends
+    // hidden thinking out of this same budget and truncates the rewrite.
+    providerOptions: { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
   });
   if (outcome.text) return outcome.text;
   throw outcome.error ?? new Error('no text returned');
 }
 
 async function main() {
-  const chain = dry ? [] : buildModelChain('strong');
+  const chain = dry ? [] : buildModelChain('light');
   if (!dry && chain.length === 0) {
     console.error('No model provider key set (GEMINI_API_KEY / GROQ_API_KEY / OPENROUTER_API_KEY).');
     process.exit(1);

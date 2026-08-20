@@ -32,7 +32,7 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 // gemini-3.5-flash is GA/stable and Google's most capable Flash model — strong
 // at the tutor's agentic tool loop and coding, while staying fast/affordable.
 const GEMINI_STRONG_MODEL = process.env.GEMINI_MODEL_STRONG || 'gemini-3.5-flash';
-const GEMINI_LIGHT_MODEL = process.env.GEMINI_MODEL_LIGHT || 'gemini-3.1-flash-lite';
+const GEMINI_LIGHT_MODEL = process.env.GEMINI_MODEL_LIGHT || 'gemini-3.5-flash-lite';
 
 /**
  * Build the ordered provider chain from whatever keys are configured.
