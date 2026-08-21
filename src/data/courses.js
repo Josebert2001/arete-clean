@@ -1,6 +1,7 @@
 // Extension is required: scripts/validate-modules.mjs imports this file through
 // plain Node ESM, which does not do Vite's extensionless resolution.
 import { cyb121Quiz } from './lectureNotes/cyb121Quiz.js';
+import { cyb123Quiz } from './lectureNotes/cyb123Quiz.js';
 import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
 import { cyb221ExamPrep } from './lectureNotes/cyb221ExamPrep.js';
 import { cyb224ExamPrep } from './lectureNotes/cyb224ExamPrep.js';
@@ -605,6 +606,10 @@ export const courses = [
     // code CSC 121) — see src/data/lectureNotes/cyb123.js for provenance and the
     // coverage mapping. Topic 7 (XSS/CSRF) is not covered by the manual.
     notesKey: 'cyb123',
+    // CBT paper, so an MCQ bank rather than examPrep. Drawn note by note from
+    // the manual — see src/data/lectureNotes/cyb123Quiz.js. It stops where the
+    // notes stop: topic 7 (XSS/CSRF) is not examined by this bank.
+    quiz: cyb123Quiz,
   },
   {
     code: 'UUY-CYB 122',
