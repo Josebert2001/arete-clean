@@ -1052,6 +1052,18 @@ export const courses = [
       'Areté Java modules cover the programming foundation; use them for the Java component of this course',
     ],
     notesKey: 'cos221',
+    // Shared with Data Science — see src/data/lectureNotes/cos221.js. Modules
+    // 1-4 (fundamentals, flow control, arrays, methods) are COS 211 review and
+    // land on no item here; module 7 is not yet transcribed. Items 3-5
+    // (Collections API, searching/sorting, recursion) have no module reaching
+    // them yet either — left uncovered rather than force-fit, same as ENT 221's
+    // item 9 before chapter 15 arrived.
+    noteCoverage: {
+      5: { partial: [1] },
+      6: { covers: [1], partial: [2] },
+      8: { covers: [7] },
+      12: { covers: [8], partial: [6] },
+    },
   },
   {
     code: 'INS 224',
