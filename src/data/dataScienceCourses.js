@@ -32,6 +32,7 @@
 // (description/topics/studyTips) stays department-specific; notes come from
 // the single copy in ./lectureNotes/ so a fix there reaches every department.
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
+import { cos221ExamPrep } from './lectureNotes/cos221ExamPrep.js';
 
 export const courses = [
 
@@ -1111,6 +1112,7 @@ export const courses = [
       8: { covers: [7] },
       12: { covers: [8], partial: [6] },
     },
+    examPrep: cos221ExamPrep,
   },
   {
     code: 'CSC 223',

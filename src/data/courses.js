@@ -7,6 +7,7 @@ import { cyb221ExamPrep } from './lectureNotes/cyb221ExamPrep.js';
 import { cyb224ExamPrep } from './lectureNotes/cyb224ExamPrep.js';
 import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
 import { cyb222ExamPrep } from './lectureNotes/cyb222ExamPrep.js';
+import { cos221ExamPrep } from './lectureNotes/cos221ExamPrep.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 
 export const courses = [
@@ -1064,6 +1065,7 @@ export const courses = [
       8: { covers: [7] },
       12: { covers: [8], partial: [6] },
     },
+    examPrep: cos221ExamPrep,
   },
   {
     code: 'INS 224',
