@@ -45,7 +45,7 @@ export const NOTE_KEYS = Object.keys(noteLoaders);
 // fails if any count here has drifted, so it cannot go quietly stale.
 export const NOTE_TOPIC_COUNTS = {
   cos121: 9,
-  cos221: 1,
+  cos221: 12,
   cyb121: 7,
   cyb122: 12,
   cyb123: 20,
