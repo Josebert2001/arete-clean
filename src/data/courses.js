@@ -7,6 +7,7 @@ import { cyb221ExamPrep } from './lectureNotes/cyb221ExamPrep.js';
 import { cyb224ExamPrep } from './lectureNotes/cyb224ExamPrep.js';
 import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
 import { cyb222ExamPrep } from './lectureNotes/cyb222ExamPrep.js';
+import { cybInnovationExamPrep } from './lectureNotes/cybInnovationExamPrep.js';
 import { cos221ExamPrep } from './lectureNotes/cos221ExamPrep.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 
@@ -6021,7 +6022,113 @@ print(summary_df.to_string(index=False))`,
       {
         number: '5',
         title: 'Cloud Native Security',
-        sections: [],
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 5 research project — by Akpan D. Chinemerem and Udoh I. Nsikak-abasi. An assigned project topic for CYB 222, examining cloud native security — the threats, models, and tooling that secure applications built as containers orchestrated by platforms such as Kubernetes.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Cloud native computing builds applications as loosely coupled microservices, packaged in containers, and orchestrated dynamically by platforms such as Kubernetes',
+              'Ephemeral workloads, distributed trust boundaries, and heavy automation mean security can no longer be a perimeter concern applied after the fact — it must be embedded across the whole lifecycle, from source code to runtime',
+              'The 4C model nests four layers — Cloud, Cluster, Container, Code — each secured independently; a weakness at one layer undermines every layer above it',
+              'Zero Trust (authenticate, authorize, and encrypt every request regardless of origin) and Shift-Left security (catching issues in development, before production) are the two guiding strategies',
+              'Misconfiguration — not novel exploits — causes more breaches: overly permissive RBAC, misconfigured images, exposed dashboards',
+              'Best practice is least privilege, image scanning, network segmentation, secrets management, continuous runtime monitoring, and treating infrastructure as immutable',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'Cloud native computing builds applications as loosely coupled microservices, packaged in lightweight containers, and orchestrated dynamically by platforms such as Kubernetes — fully exploiting cloud elasticity and automation. This shift delivers major gains in scalability and deployment speed, but introduces new categories of risk. Ephemeral workloads, distributed trust boundaries, and heavy automation mean security can no longer be a perimeter concern applied after the fact. Instead, it must be embedded across the entire application lifecycle — from source code to runtime — spanning every layer: code, container, cluster, and cloud.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Key Security Challenges',
+            items: [
+              { term: 'Expanded Attack Surface', def: 'Every container, microservice, and API endpoint is a potential entry point; one weak link enables lateral movement.' },
+              { term: 'Ephemeral & Dynamic Infrastructure', def: 'Containers spin up and down in minutes, breaking conventional asset inventory and monitoring approaches.' },
+              { term: 'Misconfiguration', def: 'Misconfigured images, overly permissive RBAC, and exposed dashboards cause more breaches than novel exploits.' },
+              { term: 'Supply Chain Risk', def: 'Third-party base images, open-source libraries, and CI/CD dependencies create a chain a single compromise can propagate through.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Why Invest in Cloud Native Security',
+            items: [
+              'Faster, safer delivery — shift-left catches issues in development, shortening remediation cycles',
+              'Improved resilience — immutable infrastructure lets compromised containers be replaced in minutes',
+              'Granular access control — Zero Trust and RBAC scope permissions tightly, shrinking blast radius',
+              'Real-time visibility — runtime tools like Falco detect threats as they happen, not at audit time',
+              'Consistent, auditable policy — policy-as-code makes compliance testable and version-controlled',
+              'Supply chain assurance — image scanning, SBOMs, and SLSA verify what\'s really running in production',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'The 4C Model',
+            items: [
+              { term: 'Cloud', def: 'AWS, Azure, GCP, or on-prem hardware — the outermost layer.' },
+              { term: 'Cluster', def: 'API server access and network policies.' },
+              { term: 'Container', def: 'Container images and runtime configuration.' },
+              { term: 'Code', def: 'Source code, dependencies, and secrets handling — the innermost layer.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The 4C model is a Kubernetes community framework: nested layers, each secured independently. A weakness at any one layer can undermine every layer above it.',
+          },
+          {
+            type: 'definition',
+            heading: 'Zero Trust Architecture',
+            text: 'Discards the assumption that anything inside the network perimeter is trustworthy. Every request — user or service-to-service — must be authenticated, authorized, and encrypted, regardless of origin. In cloud native systems this is commonly implemented through service meshes enforcing mutual TLS and fine-grained access policies.',
+          },
+          {
+            type: 'definition',
+            heading: 'Shift-Left Security',
+            text: 'Moves security checks earlier in the software development lifecycle. Vulnerability scanning, static analysis, and policy enforcement are integrated directly into CI/CD pipelines. The goal is to catch misconfigurations and vulnerable dependencies before they reach production — cutting cost and risk relative to post-deployment detection.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Tooling Landscape',
+            items: [
+              { term: 'Docker (Container Runtime)', def: 'Builds and runs containerized applications; image configuration is a key security control point.' },
+              { term: 'Kubernetes (Orchestration)', def: 'Manages container deployment and scaling; RBAC and network policies are central to securing it.' },
+              { term: 'Falco (Runtime Threat Detection)', def: 'Monitors system calls in real time to detect anomalous or malicious container behavior.' },
+              { term: 'Prisma Cloud (CNAPP)', def: 'Provides unified visibility across posture management, vulnerability scanning, and compliance.' },
+              { term: 'Aqua Security (CNAPP)', def: 'Covers image scanning, runtime protection, and supply chain security for containers.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Best Practices',
+            items: [
+              'Least privilege access — restrict RBAC roles and service permissions to the minimum required per workload',
+              'Image scanning — scan container images for known vulnerabilities before pushing to a registry',
+              'Network segmentation — use Kubernetes network policies to limit which services can communicate',
+              'Secrets management — store credentials and keys in dedicated secrets managers, never in code',
+              'Continuous monitoring — deploy runtime detection tools to catch anomalous behavior as it happens',
+              'Immutable infrastructure — treat containers as disposable; patch by rebuilding and redeploying',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Future Trends',
+            items: [
+              { term: 'Policy-as-Code', def: 'Security and compliance rules become version-controlled, testable artifacts alongside application code.' },
+              { term: 'AI-Assisted Threat Detection', def: 'Runtime monitoring integrates AI to spot subtle behavioral anomalies rule-based systems miss.' },
+              { term: 'Software Supply Chain Security', def: 'SLSA standards and SBOM documentation gain prominence for tracking dependencies.' },
+              { term: 'Confidential Computing', def: 'Encrypts data even while processed in memory, extending the security perimeter to hardware.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Conclusion',
+            text: 'Cloud native security is not a single product or checkpoint — it is a discipline spanning infrastructure, orchestration, application code, and organizational process. The 4C model, Zero Trust, and Shift-Left security provide complementary lenses for reasoning about risk at each layer of the stack, while tools like Falco, Prisma Cloud, and Aqua Security operationalize these principles in practice. Organizations that embed security throughout the development lifecycle — rather than bolting it on afterward — will be best positioned to manage the risks of distributed, dynamic infrastructure.',
+          },
+        ],
       },
       {
         number: '6',
@@ -6493,6 +6600,268 @@ print(summary_df.to_string(index=False))`,
         title: 'Deepfake Detection',
         sections: [],
       },
+      {
+        number: '10',
+        title: 'Secure Access Service Edge (SASE)',
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 10 research project. An assigned project topic for CYB 222, examining Secure Access Service Edge (SASE) — the convergence of networking and security into a single, cloud-delivered, identity-driven platform.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Traditional perimeter security assumed users, apps and data all lived inside a defended corporate data center — cloud migration and remote work broke that assumption',
+              'Backhauling cloud-bound traffic to a central data center for inspection adds latency, cost and inconsistent enforcement',
+              'SASE (Gartner, 2019) converges SD-WAN with cloud-delivered security into one identity-driven platform — access follows the user, not the network location',
+              'Built from five components: SD-WAN, SWG, CASB, FWaaS and ZTNA; the four security pieces together are called Security Service Edge (SSE)',
+              'Users connect to the nearest cloud Point of Presence (PoP), where identity checks and inspection happen in-line before traffic reaches its destination',
+              'Adoption is still maturing — most organisations report deployment challenges, and only a small fraction report full maturity',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Perimeter Model Is Breaking Down',
+            text: 'Traditional network security assumed a defended perimeter — users, apps, and data all lived inside the corporate data center. That assumption no longer holds: cloud and SaaS migration moved applications and data off-premises, out of reach of centralized inspection; hybrid and remote work means employees connect from anywhere, not fixed office locations; and personal devices, IoT, and multi-cloud infrastructure widen the attack surface.',
+          },
+          {
+            type: 'bullets',
+            heading: 'The Backhaul Problem',
+            items: [
+              'Under the legacy model, even cloud-bound traffic is routed back through a central data center for inspection before reaching its destination',
+              'This causes higher latency and a degraded user experience',
+              'It increases operational cost and complexity',
+              'It produces inconsistent, location-based security enforcement',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Security enforced where the traffic actually is — not where the network happens to route it.',
+          },
+          {
+            type: 'definition',
+            heading: 'What Is SASE?',
+            text: 'Secure Access Service Edge (SASE, pronounced "sassy") is a cloud-native architecture that converges wide-area networking (SD-WAN) with a full stack of cloud-delivered security services into a single, identity-driven platform — coined by Gartner in 2019.',
+          },
+          {
+            type: 'termlist',
+            heading: 'SASE Principles',
+            items: [
+              { term: 'Identity-Centric', def: 'Access decisions follow the verified user or device — not network location.' },
+              { term: 'Cloud-Native', def: 'Delivered from distributed points of presence, not on-prem appliances.' },
+              { term: 'Context-Aware', def: 'Policy factors device posture, geolocation, time, and real-time risk.' },
+              { term: 'Zero Trust Default', def: 'No implicit trust — continuous authentication and authorization.' },
+              { term: 'Consolidated', def: 'Replaces siloed point products with one unified platform.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Five Core Building Blocks',
+            items: [
+              { term: 'SD-WAN (Software-Defined WAN)', def: 'Intelligently routes traffic across MPLS, broadband, and LTE/5G based on application needs.' },
+              { term: 'SWG (Secure Web Gateway)', def: 'Inspects outbound web traffic, blocking malware and enforcing acceptable-use policy.' },
+              { term: 'CASB (Cloud Access Security Broker)', def: 'Governs sanctioned and shadow-IT SaaS usage; enforces data protection policy.' },
+              { term: 'FWaaS (Firewall as a Service)', def: 'Delivers next-gen firewall and intrusion prevention as a cloud service.' },
+              { term: 'ZTNA (Zero Trust Network Access)', def: 'Grants least-privilege, per-app access based on continuous verification.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'SWG + CASB + FWaaS + ZTNA together form "Security Service Edge (SSE)" — the security half of SASE, often adopted first.',
+          },
+          {
+            type: 'definition',
+            heading: 'How SASE Works: The PoP Model',
+            text: 'Rather than backhauling traffic to a data center, users connect to the nearest cloud Point of Presence (PoP), where identity verification and security inspection happen in-line — before traffic is routed directly to its destination. Traffic is routed via the most efficient path — no unnecessary backhaul, security enforced close to the source.',
+          },
+          {
+            type: 'proscons',
+            heading: 'Single-Vendor vs. Multi-Vendor SASE',
+            advantages: [
+              'Single-vendor: one vendor delivers networking and the full security stack, with a unified management console and simpler, consistent enforcement (trade-off: greater dependency on one vendor\'s roadmap)',
+              'Multi-vendor / managed: best-of-breed SD-WAN and SSE components combined, or delivered via a managed service provider, giving greater flexibility and avoiding lock-in (trade-off: added integration complexity)',
+            ],
+            disadvantages: [
+              'Integration complexity with legacy MPLS and appliances',
+              'A cross-disciplinary networking-plus-security skills gap',
+              'Lack of standardization across vendor implementations',
+              'Data privacy, residency and sovereignty requirements',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Why Organizations Adopt SASE',
+            items: [
+              'Reduced complexity — consolidates point products into one managed platform',
+              'Improved performance — eliminates backhaul, cutting latency for cloud/SaaS access',
+              'Stronger, consistent security — uniform identity-based policy for every user, everywhere',
+              'Scalability — cloud-delivered capacity scales from hundreds to over 100,000 users',
+              'Cost efficiency — less spend on appliance refresh cycles and MPLS circuits',
+              'Zero Trust enablement — provides the architecture to implement Zero Trust at scale',
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'SASE vs. Traditional Perimeter Security',
+            headers: ['Dimension', 'Traditional Model', 'SASE Model'],
+            rows: [
+              ['Trust model', 'Implicit trust inside the perimeter', 'Zero Trust — continuous verification'],
+              ['Traffic routing', 'Backhauled to central data center', 'Inspected at the nearest cloud PoP'],
+              ['Architecture', 'Hardware appliances, fixed locations', 'Cloud-native, globally delivered'],
+              ['Scalability', 'Requires new hardware to scale', 'Elastic — scales on demand'],
+              ['Remote access', 'VPN with broad network access', 'ZTNA — least-privilege, per-app access'],
+              ['Management', 'Multiple disparate consoles', 'Single unified policy plane'],
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Real-World Use Cases',
+            items: [
+              'Secure hybrid workforce access — ZTNA replaces broad-access VPNs with least-privilege, per-app access',
+              'Branch and retail connectivity — SD-WAN plus cloud security replaces costly MPLS and on-site appliances',
+              'SaaS and shadow IT governance — CASB provides visibility and policy over sanctioned and unsanctioned apps',
+              'M&A / divestiture agility — cloud policy extends to new entities fast, without re-architecting networks',
+              'Securing IoT and OT devices — Zero Trust segmentation extends to industrial and operational environments',
+              'Regulated industries — centralized policy, logging and DLP support BFSI, healthcare and government compliance',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Future of SASE',
+            text: 'Expected directions include AI-native security operations (embedded AI/ML for threat analytics, anomaly detection, and governance of agentic AI use), post-quantum readiness (early investment in cryptography for the quantum era), sovereign and data-residency controls as jurisdiction-aware policy demand grows, and deeper convergence between SASE, SSE and Zero Trust as category lines continue to blur.',
+          },
+        ],
+      },
+      {
+        number: '11',
+        title: 'Extended Detection and Response (XDR)',
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 11 research project. An assigned project topic for CYB 222, examining Extended Detection and Response (XDR) — a unified security platform that correlates telemetry across an organisation\'s security tools to detect and respond to threats faster.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Modern organisations run separate tools for email, cloud, firewall, endpoint, identity and network security — each sees only its own slice of an attack, producing alert fatigue and missed threats',
+              'Security technology evolved from antivirus (1980s) through firewalls, IDS, SIEM and EDR before XDR (2020+) extended endpoint detection across the whole environment',
+              'XDR gathers telemetry from endpoints, email, network, cloud and identity, correlates it with AI, detects advanced threats, and can respond automatically',
+              'A six-step cycle — attack, data collection, correlation, threat detection, investigation, automated response — replaces four disconnected alerts with one correlated incident',
+              'Benefits: faster detection, reduced alert fatigue, faster response, improved visibility, lower operational cost, better analyst productivity',
+              'Limits: cost, integration complexity, training and expertise needs, alert tuning, privacy/compliance risk, scalability, and dependency on data quality',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Challenge: Disconnected Security Tools',
+            text: 'Modern organizations use many different security tools, each protecting a different part of the digital environment — email security against phishing and malware, cloud security for data stored in the cloud, a firewall to block unauthorized network traffic, endpoint protection for laptops, desktops and servers, identity management to control who can access what, and network monitoring to watch for suspicious activity. The problem: these tools work separately and don\'t share context, so each sees only part of the attack. The result is alert fatigue — analysts get flooded with alerts, most are false alarms, and real attacks can slip through.',
+          },
+          {
+            type: 'termlist',
+            heading: 'How We Got Here: The Evolution of Cybersecurity',
+            items: [
+              { term: '1980s — Antivirus', def: 'First defense against computer viruses. Scanned files for known malware.' },
+              { term: '1990s — Firewall', def: 'Controlled incoming and outgoing traffic. Blocked unauthorized connections.' },
+              { term: '2000s — Intrusion Detection System (IDS)', def: 'Monitored network traffic for suspicious patterns. Detected attacks in progress.' },
+              { term: '2010s — SIEM', def: 'Security Information and Event Management. Collected logs from multiple tools and correlated events; manual investigation was still needed.' },
+              { term: '2015+ — EDR', def: 'Endpoint Detection and Response. Protected individual devices and used AI to spot suspicious behaviour; could respond automatically.' },
+              { term: '2020+ — XDR', def: 'Extended Detection and Response. Extends EDR across the whole environment, correlating data from all security tools for a unified response.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'What Is XDR?',
+            text: 'Simple definition: XDR is like a super-smart security guard who watches all the doors, windows, and cameras at once — if something suspicious happens, it quickly understands it and stops the threat. Technical definition: Extended Detection and Response (XDR) is a unified security platform that gathers telemetry from endpoints, email, network, cloud, and identity, correlates events with AI, detects advanced threats, and automatically responds. Key takeaway: XDR connects security tools into one system that sees the full picture and responds automatically.',
+          },
+          {
+            type: 'note',
+            text: 'Protecting a house might mean CCTV at the door, window alarms, a guard dog, a security guard, and police for emergencies. If they don\'t communicate, gaps appear between them. XDR connects every signal so the full picture is shared and the response is coordinated.',
+          },
+          {
+            type: 'bullets',
+            heading: 'How XDR Works: The Six-Step Process',
+            items: [
+              'Attack occurs — a threat actor attempts to compromise the organisation through phishing, malware, stolen credentials, or network intrusion',
+              'Data collection — XDR collects telemetry across security domains; email, endpoint, identity, and network tools capture the suspicious activity',
+              'Correlation — the AI engine analyses the data and links related events, identifying the phishing email, malware, and login as one attack chain',
+              'Threat detection — XDR confirms the attack pattern as a real threat, assigns a risk score, and creates an incident',
+              'Investigation — XDR traces the attack path, identifies affected systems, and determines the scope of compromise',
+              'Automated response — XDR responds by isolating devices, blocking IPs, revoking credentials, and quarantining malicious email',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Real-World Example: A Phishing Attack',
+            text: 'A shortened timeline: Day 1, a phishing email reaches 100 employees. Hour 1, the email system flags it, but 5 users already clicked. Hour 2, one device is infected and alerted. Hour 3, stolen credentials are used from an unusual location. Hour 4, unusual file transfers are detected as data exfiltration. Without XDR, that\'s four separate alerts with no clear link. With XDR, all alerts are correlated, the device is isolated, the IP is blocked, and credentials are revoked — contained in minutes, not hours.',
+          },
+          {
+            type: 'table',
+            heading: 'Traditional Security vs. XDR',
+            headers: ['Metric', 'Traditional Security', 'XDR'],
+            rows: [
+              ['Visibility', 'Each tool sees only its domain', 'Complete visibility across all domains'],
+              ['Speed of detection', 'Hours to days', 'Minutes'],
+              ['Automation', 'Limited, mostly manual', 'Extensive, mostly automated'],
+              ['Investigation', 'Manual correlation required', 'Automatic correlation'],
+              ['Alert volume', 'Hundreds of alerts daily', 'Prioritized, actionable alerts'],
+              ['Accuracy', 'High false positive rate', 'Low false positive rate'],
+              ['Response time', 'Hours', 'Minutes'],
+              ['Management', 'Multiple consoles to monitor', 'Single unified console'],
+            ],
+          },
+          {
+            type: 'proscons',
+            heading: 'Benefits & Challenges of XDR',
+            advantages: [
+              'Faster threat detection — correlates data across all domains instantly, surfacing attack patterns invisible to individual tools',
+              'Reduced alert fatigue — prioritised, actionable incidents instead of hundreds of disconnected alerts',
+              'Faster incident response — automated actions isolate devices, revoke credentials, and quarantine files without human intervention',
+              'Improved security posture — complete visibility across the environment means fewer blind spots',
+              'Reduced operational costs — consolidating tools cuts licensing, training, and management overhead',
+              'Better analyst productivity — less time on false positives, more time on strategic security work',
+            ],
+            disadvantages: [
+              'Cost — can be expensive to implement and maintain',
+              'Integration complexity — connecting XDR to existing security tools can be technically difficult',
+              'Training and expertise — teams need training and skilled analysts to use it effectively',
+              'Alert tuning — alerts must be continually tuned to reduce false positives',
+              'Privacy and compliance — collecting data across domains can create privacy and compliance risks',
+              'Scalability and data quality — XDR must scale as data volumes grow, and is only as effective as the data it receives',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Where XDR Is Used',
+            items: [
+              'Financial services — banks use XDR to stop fraud and protect customer data',
+              'Healthcare — providers use XDR to safeguard patient data and system uptime',
+              'Government — agencies use XDR to protect sensitive information and infrastructure',
+              'Technology — tech companies use XDR to defend IP, data, and cloud systems',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'The Future of XDR',
+            items: [
+              'AI and machine learning that detect novel attacks more accurately over time',
+              'Autonomous threat hunting — proactively hunting for threats without waiting for alerts',
+              'Generative AI assistants that summarise incidents and suggest next steps',
+              'Zero Trust integration — verifying every access request',
+              'Cloud-native security — protecting containers and serverless apps as architectures evolve',
+              'Automatic threat intelligence integration for faster defence',
+              'Self-healing systems that automatically remediate and restore to a known-good state',
+              'Expanded coverage beyond IT into IoT, OT, and other attack surfaces',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Bottom Line',
+            text: 'XDR is becoming essential as cyber threats grow faster, smarter, and more coordinated. It unifies security tools into one view, detects attacks faster with AI correlation, responds automatically before damage spreads, and strengthens the security team and overall posture. It takes investment and tuning, but for serious defense, XDR is the path forward.',
+          },
+        ],
+      },
     ],
     quiz: [
       { question: "Which quantum algorithm breaks RSA and ECC by solving factorization and discrete logarithms in polynomial time?", options: ["Grover's Algorithm", "Shor's Algorithm", "Mosca's Theorem", "The Quantum Fourier Sieve"], correctIndex: 1, explanation: "Shor's Algorithm (1994) solves both integer factorization and the discrete logarithm problem in polynomial time, breaking RSA, ECC and Diffie-Hellman." },
@@ -6591,6 +6960,10 @@ print(summary_df.to_string(index=False))`,
       { question: "What long-term cryptographic threat does the report identify for blockchain's elliptic curve cryptography (ECDSA)?", options: ["Classical brute-force attacks", "Shor's algorithm on future quantum computers", "SQL injection", "DDoS flooding of mining pools"], correctIndex: 1, explanation: "Future quantum computers running Shor's algorithm may break the elliptic curve cryptography protecting digital signatures and wallets, motivating a shift to post-quantum cryptography." },
       { question: "What design principle is the XRP Ledger following in its post-quantum migration roadmap?", options: ["Committing permanently to a single quantum-resistant algorithm", "\"Cryptographic agility\" — the ability to adopt new NIST-standardised algorithms as the landscape matures", "Ignoring quantum computing until it becomes an active threat", "Abandoning blockchain entirely in favour of centralized databases"], correctIndex: 1, explanation: "The XRP Ledger is designing for cryptographic agility so the network can adopt new NIST-standardised PQC algorithms without committing to just one scheme." },
     ],
+    // Written-exam bank — the group research topics rewritten as define /
+    // list-and-explain / differentiate questions. See
+    // src/data/lectureNotes/cybInnovationExamPrep.js.
+    examPrep: cybInnovationExamPrep,
   },
   {
     code: 'UUY-CYB 221',
