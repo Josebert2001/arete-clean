@@ -12,7 +12,10 @@
 // it among four options. So every question here takes the form a written
 // paper actually uses — "define", "list and explain", "differentiate
 // between" — with a model answer plus a per-point mark scheme the student
-// ticks off against what they actually wrote.
+// ticks off against what they actually wrote. A handful per group are
+// scenario questions — "Scenario: ..." — that put the student in a situation
+// drawn from (or modelled on) the group's own case studies and ask them to
+// apply the concepts, not just recite them.
 //
 // Question types:
 //   longform — question + marks + modelAnswer + markScheme[]
@@ -25,10 +28,7 @@
 // asserts both. Every question carries a `source` naming the group/topic it
 // came from.
 //
-// Coverage: groups 0–6, 8, 10 and 11 (the topics that carry lecture-note
-// content). Groups 7 (Automated Vulnerability Research) and 9 (Deepfake
-// Detection) are still placeholder titles with no notes and are not
-// examinable yet — add questions here once those groups are written up.
+// Coverage: all twelve groups (0-11).
 
 export const cybInnovationExamPrep = [
 
@@ -380,6 +380,126 @@ export const cybInnovationExamPrep = [
   },
 
   // ══════════════════════════════════════════════════════════════════
+  //  Group 7 — Automated Vulnerability Research
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type: 'longform',
+    marks: 7,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'Define Automated Vulnerability Research (AVR) and state its four objectives.',
+    modelAnswer: 'Automated Vulnerability Research (AVR) is the use of automated systems, software tools, and intelligent technologies to identify, analyse, and validate — and sometimes exploit — vulnerabilities in computer systems, networks, websites, and applications. Its four objectives are: to detect weaknesses before an attacker finds them; to reduce the manual workload on security teams; to improve defences by feeding findings back into remediation; and to test reliability, confirming a system holds up under adversarial conditions.',
+    markScheme: [
+      'AVR defined — automated systems, tools and intelligent technologies used to identify, analyse and validate vulnerabilities (3)',
+      'Objective — detect weaknesses early (1)',
+      'Objective — reduce workload (1)',
+      'Objective — improve defences (1)',
+      'Objective — test reliability (1)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 6,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'List the six components of AVR.',
+    items: [
+      { name: 'Static analysis', aliases: ['static'], explain: 'Checks the code for hidden flaws without ever running the program.' },
+      { name: 'Dynamic analysis', aliases: ['dynamic'], explain: 'Monitors how the software behaves and looks for crashes while it is actively running.' },
+      { name: 'Fuzz testing', aliases: ['fuzzing'], explain: 'Throws massive amounts of random, messy data at an app to see if it breaks.' },
+      { name: 'Symbolic execution', aliases: [], explain: 'Uses maths and placeholders instead of real data to uncover hidden paths in the code.' },
+      { name: 'Binary analysis', aliases: [], explain: 'Reverse-engineers compiled programs to understand how they work without the original source code.' },
+      { name: 'Artificial intelligence and machine learning', aliases: ['AI/ML', 'AI and ML'], explain: 'Uses past data to train computers to automatically predict and spot new security risks.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'Differentiate between static analysis and dynamic analysis as components of AVR, giving one tool example for each.',
+    modelAnswer: "Static analysis checks source code for hidden flaws without ever running the program, using tools such as SonarQube or CodeQL. Dynamic analysis instead monitors how the software behaves and looks for crashes while it is actively running, using tools such as Valgrind or Burp Suite. The key difference is timing: static analysis examines the code at rest, before execution, while dynamic analysis observes the program's real behaviour while it runs.",
+    markScheme: [
+      'Static analysis defined — examines code without running it (2)',
+      'Static analysis tool example (SonarQube/CodeQL) (1)',
+      'Dynamic analysis defined — monitors behaviour and crashes while running (2)',
+      'Dynamic analysis tool example (Valgrind/Burp Suite/OWASP ZAP/Dynatrace) (1)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 8,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'List the eight stages of the AVR architecture framework, in order.',
+    items: [
+      { name: 'Target systems', aliases: [], explain: 'Apps, APIs, IoT, networks, cloud, binaries and infrastructure — everything AVR is pointed at.' },
+      { name: 'Asset discovery & enumeration', aliases: ['asset discovery'], explain: 'Subdomains, hosts, open ports & services, technologies & versions, APIs & endpoints, attack-surface mapping.' },
+      { name: 'Data collection', aliases: [], explain: 'Scanning, web crawling, API requests, traffic monitoring, configuration dumping, banner grabbing.' },
+      { name: 'Vulnerability detection engine', aliases: ['detection engine'], explain: 'Signature/rule-based matching, AI/ML models, fuzzing & dynamic analysis, static analysis, pattern matching, known-vulnerability databases.' },
+      { name: 'Validation engine', aliases: [], explain: 'Confirms vulnerabilities, removes false positives, verifies exploitability, builds a proof of concept.' },
+      { name: 'Risk assessment', aliases: [], explain: 'Severity (CVSS), exploitability, impact analysis, asset criticality, business context, risk scoring.' },
+      { name: 'Report generation & recommendations', aliases: ['report generation'], explain: 'Vulnerability details, affected assets, severity & CVSS, evidence & PoC, remediation steps, references.' },
+      { name: 'Continuous monitoring & learning', aliases: ['continuous monitoring'], explain: 'Continuous scanning, change & drift detection, threat-intelligence feed, rule & model updates, feedback loop.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'Scenario: A university student portal suffers a SQL injection vulnerability on its login form, exposing student data. Using the notes, describe how AVR was used to detect and fix it.',
+    modelAnswer: 'Security teams deployed Burp Suite, Nessus and fuzzing together to detect the SQL injection. Once confirmed, the vulnerability was patched with parameterised queries, which prevent user input from being interpreted as SQL code. The fix was then kept under continuous monitoring so any regression or new flaw would be caught early. The result was that the vulnerability was removed and student data was protected.',
+    markScheme: [
+      'Vulnerability identified — SQL injection on the login form (2)',
+      'Detection tools named — Burp Suite, Nessus and fuzzing (2)',
+      'Remediation — parameterised queries (2)',
+      'Continuous monitoring after the fix (1)',
+      'Result stated — vulnerability removed, data protected (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: "Scenario: An organisation's AI-based vulnerability scanner reports zero critical issues on its public-facing web application for six months. It is then breached through a flaw disclosed only two weeks earlier as a zero-day, which the scanner never flagged. Explain why the scanner missed this vulnerability and recommend one change to the organisation's process that would reduce this risk in future.",
+    modelAnswer: "AVR tools are dependent on known-vulnerability databases: they detect and prioritise issues that have already been catalogued as CVEs or match a known signature. A zero-day, by definition, has no such record until it is disclosed, so a scanner checking against those databases has nothing to match it against and reports a clean result. This is exactly the 'dependent on vulnerability databases — misses zero-days' limitation covered in the notes. To reduce this risk, the organisation should pair automated scanning with periodic human-led penetration testing and a live threat-intelligence feed, since human testers and fresh intelligence can surface novel logic flaws and freshly disclosed issues that a database-driven scanner cannot yet know about.",
+    markScheme: [
+      'Explains the scanner is limited to known-vulnerability databases/signatures (3)',
+      'Explains a zero-day has no record until disclosed, so it is invisible to that kind of scan (2)',
+      'Recommendation given — e.g. periodic human penetration testing and/or a live threat-intelligence feed (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'State and briefly explain two benefits and two limitations of AVR.',
+    modelAnswer: 'Benefits: Speed — AVR scans far faster than a human review team could manage. Scalability — it handles large networks that would be impractical to assess by hand. Limitations: False positives and negatives — automated tools can flag issues that are not real, or miss ones that are. Dependence on vulnerability databases — because AVR checks against known-vulnerability databases, it can miss zero-day flaws that have not yet been catalogued.',
+    markScheme: [
+      'Benefit 1 named and explained (2)',
+      'Benefit 2 named and explained (2)',
+      'Limitation 1 named and explained (2)',
+      'Limitation 2 named and explained (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'Explain the significance of the 2016 DARPA Cyber Grand Challenge and the Mayhem system to the field of AVR.',
+    modelAnswer: 'The 2016 DARPA Cyber Grand Challenge (CGC) was a competition in which teams built completely autonomous supercomputers that had to defend their own networks while attacking others, with no human touching a keyboard during the contest itself. Mayhem, developed by ForAllSecure, is remembered as the most famous public demonstration of advanced AVR — proof that a fully automated system could discover, validate and even exploit vulnerabilities in real time, at machine speed, without a human in the loop.',
+    markScheme: [
+      'DARPA CGC (2016) described — autonomous systems defending and attacking without human intervention (3)',
+      'Mayhem named and attributed to ForAllSecure (2)',
+      'Significance — proof that automated systems can find/validate vulnerabilities at machine speed unaided (1)',
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════
   //  Group 8 — Agentic AI
   // ══════════════════════════════════════════════════════════════════
 
@@ -422,6 +542,210 @@ export const cybInnovationExamPrep = [
       'Reason and plan — analyses the information and creates a plan (1)',
       'Act — executes the required actions, interacting with software or tools (1)',
       'Monitor and adapt — continuously monitors results and adjusts actions (1)',
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  //  Group 9 — Deepfake Detection
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type: 'longform',
+    marks: 5,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Define a deepfake, and explain what distinguishes it from traditional photo or audio editing.',
+    modelAnswer: 'A deepfake is synthetic media — an image, video, or audio recording — generated or altered with artificial intelligence so that it depicts a person saying or doing something that never actually happened. Unlike traditional photo editing or dubbed audio, the manipulation is produced by a trained model rather than manual editing, which allows the output to be generated at scale and with a level of realism traditional tools could not achieve.',
+    markScheme: [
+      'Deepfake defined — AI-generated/altered synthetic media depicting something that never happened (3)',
+      'Distinction — produced by a trained model, generated at scale, with realism manual editing could not achieve (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 4,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'List the four ways to build a deepfake, and what each abbreviation stands for.',
+    items: [
+      { name: 'GAN', aliases: ['generative adversarial network', 'generative adversarial networks'], explain: "A generator and a discriminator compete, improving round after round until the output is hard to distinguish from real data." },
+      { name: 'AE', aliases: ['autoencoder', 'autoencoders'], explain: "Compresses a face into a shared internal code, then decodes it through a different identity's decoder — the core face-swap mechanism." },
+      { name: 'DM', aliases: ['diffusion model', 'diffusion models'], explain: 'Learns to reverse a noise process, gradually rebuilding a coherent image step by step.' },
+      { name: 'VC', aliases: ['voice cloning'], explain: "Learns a target's vocal characteristics from sample audio, then generates new speech in that voice." },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 9 — Deepfake Detection',
+    question: "Describe how \"audio-jacking\" works, as demonstrated by IBM Security's X-Force team in 2024.",
+    modelAnswer: "Audio-jacking is a live-call attack in which a hidden third party silently intercepts and alters a genuine phone call between two real speakers in real time, with no recording and no rehearsed script. The intercepted pipeline runs speech-to-text, into a large language model watching for a keyword trigger, into a voice clone, out through text-to-speech. In IBM's proof of concept, the system listened for the phrase \"bank account\"; whenever either speaker said it, the LLM silently replaced the real number with an attacker-controlled one and regenerated it in a cloned voice matching the speaker, mid-sentence, without either party noticing anything had changed.",
+    markScheme: [
+      'Defined — live-call interception and real-time alteration by a hidden third party (2)',
+      'Pipeline — speech-to-text (1)',
+      'Pipeline — LLM keyword trigger (1)',
+      'Pipeline — voice clone (1)',
+      'Pipeline — text-to-speech (1)',
+      'Worked example — "bank account" trigger replacing the number mid-sentence in a cloned voice (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Compare the Arup Hong Kong fraud and the Slovak election deepfake, including how each was ultimately caught.',
+    modelAnswer: "In January 2024, a finance employee at engineering firm Arup's Hong Kong office authorised 15 fraudulent wire transfers, totalling $25.6M, after joining a video call where every other participant — including a person who appeared to be the company's CFO — was an AI-generated deepfake built from public footage of real executives. It was caught only by a phone call to headquarters, not by detection software. In September 2023, two days before Slovakia's parliamentary election, a fabricated audio clip of party leader Michal Šimečka discussing plans to rig the vote spread widely, circulated during a legally mandated media-silence window that blocked timely fact-checking. It was addressed only by public denial from those involved, after polls had already opened. In both cases, the deepfake was caught by human verification after the fact, not by automated detection.",
+    markScheme: [
+      'Arup case — amount and date ($25.6M, January 2024) (2)',
+      'Arup case — deepfake CFO on a video call, 15 fraudulent transfers (1)',
+      'Arup case — caught by a phone call to headquarters, not detection software (1)',
+      'Slovak case — Šimečka audio clip, September 2023, two days before the election (2)',
+      'Slovak case — spread during the legally mandated media-silence window (1)',
+      'Slovak case — caught by public denial after polls opened (1)',
+      'Shared lesson — neither case was caught by automated detection software (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 9 — Deepfake Detection',
+    question: "Scenario: You are a finance manager. You receive a video call from someone who looks and sounds exactly like your company's CFO, instructing you to urgently wire $500,000 to a new supplier account before close of business, citing a confidential pending acquisition. Describe three actions you should take before authorising the transfer, and name the real-world case this scenario resembles.",
+    modelAnswer: "This scenario resembles the Arup Hong Kong fraud, where a deepfake CFO on a video call convinced a finance employee to authorise 15 fraudulent wire transfers. Before authorising the transfer, three actions should be taken: treat the request with healthy scepticism precisely because it combines urgency and money, the classic pressure combination; verify the instruction out-of-band, by calling the CFO back on a number already saved rather than one provided in the call itself, or by phoning company headquarters directly, as ultimately caught the Arup fraud; and use a pre-agreed personal code word or a second, separate confirmation channel before moving any funds, refusing to act on the video call alone no matter how convincing it looks or sounds.",
+    markScheme: [
+      'Identifies the resemblance to the Arup Hong Kong deepfake CFO fraud (2)',
+      'Action — healthy scepticism given the urgency + money combination (2)',
+      'Action — out-of-band verification (e.g. call back on a saved number, or call headquarters directly) (2)',
+      'Action — a further distinct safeguard (e.g. personal code word, refusing to act on the call alone) (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 9 — Deepfake Detection',
+    question: "Scenario: While discussing an unrelated issue on a call to your bank's customer service line, you mention your account number twice. Minutes later, someone attempts a large transfer from your account using a voice that sounds exactly like yours. Explain which deepfake technique most likely enabled this, how it works, and one behavioural change that would reduce this specific risk.",
+    modelAnswer: "This is most likely audio-jacking: a hidden party intercepting the live call in real time and running the intercepted audio through a pipeline of speech-to-text, into an LLM watching for a keyword trigger — here, the spoken account number — into a voice clone, then out through text-to-speech, letting the attacker reproduce the victim's voice on demand. The behavioural change that most directly reduces this risk is to paraphrase sensitive details instead of reading them back verbatim — for example describing the account rather than stating the digits aloud — which disrupts the keyword trigger the interception pipeline depends on.",
+    markScheme: [
+      'Identifies audio-jacking (2)',
+      'Describes the pipeline — speech-to-text, LLM keyword trigger, voice clone, text-to-speech (2)',
+      'Explains the mechanism — triggered by the spoken account number and cloned in real time (2)',
+      'Behavioural change — paraphrase sensitive details instead of repeating them verbatim (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 6,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'List the six categories of malicious use of deepfakes.',
+    items: [
+      { name: 'Financial fraud', aliases: [], explain: 'Grandparent scams and corporate impersonation, e.g. the $35M UAE voice-cloning heist and $25.6M Hong Kong video-call fraud.' },
+      { name: 'Political disinformation', aliases: [], explain: 'Fabricated audio/video of public figures, e.g. the 2024 New Hampshire robocall.' },
+      { name: 'Non-consensual content', aliases: [], explain: 'The most prevalent form by volume, overwhelmingly targeting women without consent.' },
+      { name: 'Identity theft & impersonation', aliases: ['identity theft'], explain: 'Combined with stolen documents to defeat facial-recognition checks in fraudulent applications.' },
+      { name: 'Extortion', aliases: [], explain: 'Fabricated compromising media or a cloned voice used to pressure victims into urgent payment.' },
+      { name: 'False positives & judicial doubt', aliases: ['judicial doubt'], explain: 'The mere existence of deepfakes lets genuine evidence be dismissed as fake, or fake evidence trusted as real.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Distinguish between the two broad tracks in deepfake detection research, with one example technique from each.',
+    modelAnswer: 'Track one, handcrafted features, has a researcher define the detection pattern in advance — for example, frequency-domain analysis, where a Fourier transform reveals grid-like GAN signatures. Track two, deep learning, has a model learn the difference directly from large volumes of labelled real and fake examples without an engineer specifying the exact artefact — for example, a CNN-based classifier such as XceptionNet or EfficientNet.',
+    markScheme: [
+      'Handcrafted features defined — researcher defines the pattern in advance (2)',
+      'Handcrafted example given (e.g. frequency-domain/Fourier analysis, blur/blending-boundary, landmark inconsistency) (1)',
+      'Deep learning defined — model learns the difference directly from labelled data (2)',
+      'Deep learning example given (e.g. CNN/XceptionNet/EfficientNet, RNN/LSTM, ViT, capsule networks) (1)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 4,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'List four deep learning detection architectures covered in the notes.',
+    items: [
+      { name: 'CNN-based (XceptionNet, EfficientNet)', aliases: ['CNN'], explain: 'The standard baseline; a 5-model EfficientNet ensemble won the 2020 DFDC challenge.' },
+      { name: 'RNN / LSTM temporal models', aliases: ['RNN', 'LSTM'], explain: 'Track how a face moves and changes across a sequence of frames, not just one image.' },
+      { name: 'Vision Transformer (ViT)', aliases: ['ViT'], explain: 'Self-attention relates distant regions, e.g. a swapped face vs. the real neck.' },
+      { name: 'Capsule networks', aliases: [], explain: 'Preserve part-to-whole facial relationships with far fewer parameters than a CNN.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Explain how remote photoplethysmography (rPPG) detects deepfakes, and why it remains a durable defence.',
+    modelAnswer: "rPPG measures tiny blood-flow-driven skin colour shifts that a generative model does not replicate, since those signals come from a real, living circulatory system rather than a learned visual pattern. Intel's FakeCatcher reports 96% accuracy internally using this approach, and DeepFakesON-Phys similarly uses heart-rate-derived features. Because generative models are not designed to reproduce this biological signal, rPPG-based detection is expected to stay durable even as generation methods otherwise improve.",
+    markScheme: [
+      'rPPG defined — measures blood-flow-driven skin colour shifts (2)',
+      'Example tool named (Intel FakeCatcher or DeepFakesON-Phys) (1)',
+      'Accuracy figure cited (96% internal, FakeCatcher) (1)',
+      'Reason for durability — generative models are not designed to replicate biological signals (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 5,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'What does the 17-point accuracy gap of the 2020 DFDC-winning model (82% on its own test set vs 65% on unfamiliar clips) demonstrate about deepfake detection?',
+    modelAnswer: "The 2020 DFDC-winning model scored 82% on the competition's own controlled test set but only 65% on entirely new, unfamiliar clips — a 17-point drop. This demonstrates that generalisation, not raw accuracy, is the harder problem in deepfake detection: a model can perform well on data resembling its training set while still failing badly against manipulation techniques it has not seen before. It is the central reason no detector generalises perfectly in the real world.",
+    markScheme: [
+      'Figures cited — 82% own test set, 65% unfamiliar clips (2)',
+      'Conclusion — generalisation, not raw accuracy, is the harder problem (2)',
+      'Implication — no detector generalises perfectly (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 9,
+    source: 'Group 9 — Deepfake Detection',
+    question: "Outline Nigeria's current legal and institutional challenges in responding to deepfakes, and state two of the study's recommendations.",
+    modelAnswer: "Nigeria has no dedicated deepfake law, relying instead on the Cybercrimes Act 2015. Enforcement capacity is limited — NITDA, the EFCC and the Police have limited capacity to handle AI-generated evidence — and a 2020 ECOWAS Court ruling went against a key section of the Cybercrimes Act. Public digital literacy is also low, leaving citizens poorly equipped to recognise fabricated media. Among the study's recommendations: amend the Cybercrimes Act to explicitly address AI-generated and manipulated media, and extend NITDA's platform accountability rules to require AI-content labelling.",
+    markScheme: [
+      'No dedicated deepfake law — reliant on the Cybercrimes Act 2015 (2)',
+      'Limited NITDA/EFCC/Police capacity for AI-generated evidence (2)',
+      '2020 ECOWAS Court ruling against a key section of the Cybercrimes Act (2)',
+      'Low public digital literacy (1)',
+      'Two recommendations named (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 9,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'List the nine primary defenses against deepfake attacks recommended in the study.',
+    items: [
+      { name: 'Education & sensitisation', aliases: [], explain: 'Regularly train yourself, your family and your organisation to recognise deepfake red flags.' },
+      { name: 'Healthy scepticism', aliases: [], explain: 'Treat urgent voice or video requests involving money with default suspicion; verify before acting.' },
+      { name: 'Out-of-band verification', aliases: [], explain: 'Confirm sensitive requests through a separate, already-trusted channel.' },
+      { name: 'Personal code words', aliases: [], explain: 'Agree a private code word with close family/colleagues that only they would know.' },
+      { name: "Paraphrase, don't repeat", aliases: ['paraphrase'], explain: 'Rephrase sensitive details instead of reading them back verbatim, disrupting keyword-triggered interception.' },
+      { name: 'Keep software patched', aliases: [], explain: 'Apply security updates promptly, since many attacks piggyback on separately-exploited vulnerabilities.' },
+      { name: "Don't click unknown links", aliases: [], explain: 'Avoid opening links or emails from unverified senders — phishing is the most common entry point.' },
+      { name: 'Verify app sources', aliases: [], explain: 'Only install apps from official, verified stores.' },
+      { name: 'Use MFA & passkeys', aliases: ['multi-factor authentication'], explain: "Enable multi-factor authentication or passkeys everywhere, so a cloned voice or face alone can't pass a second factor." },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 4,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Explain the "liar\'s dividend" and its social cost.',
+    modelAnswer: 'The "liar\'s dividend" is the effect by which the mere existence of deepfakes gives bad actors a plausible excuse to dismiss genuine, incriminating evidence as fabricated. Its social cost is a broader erosion of shared trust in recorded media generally — once any video or audio can plausibly be denied as fake, the evidentiary value of real recordings is undermined too.',
+    markScheme: [
+      "Liar's dividend defined — existence of deepfakes lets real evidence be dismissed as fake (2)",
+      'Social cost — broader erosion of trust in recorded media (2)',
     ],
   },
 
