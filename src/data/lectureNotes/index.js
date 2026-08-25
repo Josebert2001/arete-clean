@@ -21,6 +21,7 @@
 // resolves the same file (see the note on shared notes in CLAUDE.md).
 export const noteLoaders = {
   cos121: () => import('./cos121.js').then((m) => m.cos121LectureNotes),
+  cos221: () => import('./cos221.js').then((m) => m.cos221LectureNotes),
   cyb121: () => import('./cyb121.js').then((m) => m.cyb121LectureNotes),
   cyb122: () => import('./cyb122.js').then((m) => m.cyb122LectureNotes),
   cyb123: () => import('./cyb123.js').then((m) => m.cyb123LectureNotes),
@@ -32,6 +33,36 @@ export const noteLoaders = {
 };
 
 export const NOTE_KEYS = Object.keys(noteLoaders);
+
+// How many topics each note file holds, without downloading it.
+//
+// The reading-progress bars need a denominator on surfaces that must not pull
+// note chunks — the course list renders ~57 cards, and loading all ten files to
+// count their topics would undo the code-splitting this module exists for.
+//
+// Hand-maintained, because the whole point is that it is readable without the
+// data. `scripts/validate-modules.mjs` loads the real files at prebuild and
+// fails if any count here has drifted, so it cannot go quietly stale.
+export const NOTE_TOPIC_COUNTS = {
+  cos121: 9,
+  cos221: 12,
+  cyb121: 7,
+  cyb122: 12,
+  cyb123: 20,
+  cyb221: 21,
+  ent221: 18,
+  gst121: 2,
+  mth121: 6,
+  phy128: 4,
+};
+
+// Topic count for a course, synchronously. Keyed courses read the map above;
+// the handful that still hold their notes inline (UUY-CYB 222 among them)
+// already have the array to hand.
+export function noteTopicCount(course) {
+  if (course?.notesKey) return NOTE_TOPIC_COUNTS[course.notesKey] ?? 0;
+  return course?.lectureNotes?.length ?? 0;
+}
 
 // Resolves a course's notes to an array, or [] when it has none. Every caller
 // is async already (a React effect, or the tutor's tool execute()), so this

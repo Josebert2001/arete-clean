@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react';
 import {
   PenLine, Play, ArrowLeft, ArrowRight, Eye, CheckCircle2, Circle, XCircle,
-  Award, RotateCcw, Lightbulb, BookOpen,
+  Award, RotateCcw, Lightbulb, BookOpen, Terminal, ListFilter,
 } from 'lucide-react';
 import MathText from './MathText';
+import CodeBlock from './CodeBlock';
+import ExplainCode from './ExplainCode';
 import { useProgress } from './useProgress';
+import { useApiAvailability } from '../utils/apiClient';
+import { useExplanations } from './useExplanations';
+import { explainedKeyFor } from '../data/lectureNotes/explained';
+import { examItemId, gradeFromMarks, REVIEW_STORAGE_KEY } from '../utils/reviewSchedule';
 
 // Written-exam practice, as opposed to the MCQ `course.quiz` bank. Nothing
 // here is auto-scored against a correct option, because a written answer has
@@ -67,6 +73,15 @@ function matchesItem(answer, item) {
   return candidates.some((c) => c && (a === c || a.includes(c) || c.includes(a)));
 }
 
+// A question is a code question if it prints a listing with the stem (`code`)
+// or answers with one (`modelCode`). Both go through CodeBlock rather than into
+// the question or model-answer prose, because those render as paragraphs — CSS
+// `white-space: pre-line` collapses runs of spaces, so a Python listing pasted
+// into them would lose the indentation that *is* its block structure.
+function isCodeQuestion(q) {
+  return Boolean(q.code || q.modelCode);
+}
+
 function Pill({ children }) {
   return (
     <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-coffee-100 text-coffee-700 whitespace-nowrap">
@@ -88,10 +103,11 @@ function Pill({ children }) {
 // keyboard; jot the five points you would make if you are on a phone or the
 // question wants a diagram, which cannot be typed at all. Either way the text
 // then sits beside the mark scheme, which beats marking against paper.
-function LongformQuestion({ q, courseSlug, awarded, onAward }) {
+function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady, explanations }) {
   const [revealed, setRevealed] = useState(false);
   const [ticked, setTicked] = useState([]);
   const [answer, setAnswer] = useState(() => loadAnswer(courseSlug, q.question));
+  const code = isCodeQuestion(q);
 
   const updateAnswer = (text) => {
     setAnswer(text);
@@ -109,31 +125,65 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
     onAward(Math.round(earned * 10) / 10);
   };
 
+  // `source` is free text — "§3" in one bank, "Topic 3 · Firewall Technologies"
+  // in another — and an id attribute may not contain whitespace, or the label
+  // stops pointing at the field. Slugify rather than constraining what a bank
+  // may write.
+  const answerFieldId = `answer-${String(q.source).replace(/[^a-zA-Z0-9]+/g, '-')}`;
+
   return (
     <div>
-      <p className="text-ink leading-relaxed mb-5">
+      <p className={`text-ink leading-relaxed ${q.code ? 'mb-2' : 'mb-5'}`}>
         <MathText text={q.question} />
       </p>
+
+      {/* Line numbers stay on for the stem: a "state the fault" answer names
+          the line it is on, the same way the paper expects. */}
+      {q.code && (
+        <div className="mb-5">
+          <CodeBlock code={q.code} language={q.language || 'python'} />
+          {/* Offered BEFORE the answer, deliberately. These listings come from a
+              lab manual the class was never taught from, and a student who
+              cannot read the code cannot attempt the question at all. Study
+              mode teaches the listing line by line and withholds every verdict,
+              so a debug question still has to be answered by the student —
+              see STUDY_SYSTEM_PROMPT in api/explainer.js. */}
+          <ExplainCode
+            code={q.code}
+            language={q.language || 'python'}
+            ready={explainReady}
+            {...explanations}
+            mode="study"
+            label="I don't understand this code"
+            hint="Reads the listing line by line without saying whether it is right — that part is the question."
+          />
+        </div>
+      )}
 
       {!revealed ? (
         <div>
           <label
-            htmlFor={`answer-${q.source}`}
+            htmlFor={answerFieldId}
             className="block text-xs font-mono uppercase tracking-wider text-coffee-700 mb-2"
           >
             Your answer
           </label>
           <textarea
-            id={`answer-${q.source}`}
+            id={answerFieldId}
             value={answer}
             onChange={(e) => updateAnswer(e.target.value)}
-            rows={7}
+            rows={code ? 12 : 7}
+            spellCheck={code ? false : undefined}
             placeholder={
-              q.figure
-                ? 'Type your answer here, and sketch the diagram on paper — you can compare it against the real one once you reveal. Short points are fine.'
-                : 'Type your answer here. Full prose if you are at a keyboard, or just the points you would make — either works.'
+              code
+                ? 'Write the code here, as you would on the paper. Indentation matters in Python and it is marked — type it out rather than describing it.'
+                : q.figure
+                  ? 'Type your answer here, and sketch the diagram on paper — you can compare it against the real one once you reveal. Short points are fine.'
+                  : 'Type your answer here. Full prose if you are at a keyboard, or just the points you would make — either works.'
             }
-            className="w-full px-4 py-3 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-none bg-paper text-ink text-sm leading-relaxed resize-y"
+            className={`w-full px-4 py-3 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-none bg-paper text-ink text-sm leading-relaxed resize-y ${
+              code ? 'font-mono' : ''
+            }`}
           />
           <p className="text-xs text-coffee-700 mt-2 mb-4 leading-relaxed">
             Answer before you look. Reading a model answer feels like knowing it — writing
@@ -163,7 +213,15 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
                 What you wrote
               </p>
               <div className="rounded-xl border-2 border-coffee-200 bg-paper p-4">
-                <p className="text-sm text-ink leading-relaxed whitespace-pre-line">{answer}</p>
+                {/* pre-wrap, not pre-line, for code: the indentation the student
+                    typed is part of what they are marking themselves on. */}
+                <p
+                  className={`text-sm text-ink leading-relaxed ${
+                    code ? 'font-mono whitespace-pre-wrap overflow-x-auto' : 'whitespace-pre-line'
+                  }`}
+                >
+                  {answer}
+                </p>
               </div>
             </div>
           )}
@@ -177,6 +235,27 @@ function LongformQuestion({ q, courseSlug, awarded, onAward }) {
                 <MathText text={q.modelAnswer} />
               </p>
             </div>
+            {q.modelCode && (
+              <CodeBlock
+                code={q.modelCode}
+                language={q.language || 'python'}
+                showLineNumbers={false}
+              />
+            )}
+            {/* The full walkthrough, faults and all. Safe here because the
+                model answer is already on screen — nothing left to give away —
+                and it explains the *answer's* listing, which is the one the
+                student has not seen before. The pre-reveal button above is the
+                withholding one. */}
+            {code && (
+              <ExplainCode
+                code={q.modelCode || q.code}
+                language={q.language || 'python'}
+                ready={explainReady}
+                {...explanations}
+                label="Explain the model answer's code"
+              />
+            )}
           </div>
 
           {q.figure && (
@@ -336,14 +415,45 @@ function RecallQuestion({ q, awarded, onAward }) {
 }
 
 export default function CourseExamPrep({ course }) {
-  const bank = course.examPrep || [];
+  const bank = useMemo(() => course.examPrep || [], [course.examPrep]);
   const { progress, setQuizScore } = useProgress(STORAGE_KEY);
+  // Review scheduling keeps its own record — see REVIEW_STORAGE_KEY.
+  const { recordReviews } = useProgress(REVIEW_STORAGE_KEY);
+  // Probed only for banks that actually carry listings — a written-only bank
+  // has nothing for the explainer to explain, so it spends no request.
+  const explainStatus = useApiAvailability(
+    bank.some(isCodeQuestion) ? '/api/explainer' : null,
+  );
+  // Pre-generated walkthroughs for this course, when they exist: no call, no
+  // rate limit, and it works with no network at all.
+  const explanations = useExplanations(explainedKeyFor(course));
   const last = progress.quizScores?.[course.slug];
 
   const [questions, setQuestions] = useState(null);
   const [current, setCurrent] = useState(0);
   const [awards, setAwards] = useState({});
   const [finished, setFinished] = useState(false);
+  const [selectedTopics, setSelectedTopics] = useState([]);
+
+  // One entry per distinct `source` — for a bank like CYB 222's, where every
+  // question already carries the topic it was written from ("Group 7 —
+  // Automated Vulnerability Research"), that string *is* the revision unit a
+  // student thinks in. Order follows first appearance in the bank, which
+  // follows topic order since the bank is authored topic by topic.
+  const topics = useMemo(() => {
+    const bySource = new Map();
+    for (const q of bank) {
+      if (!bySource.has(q.source)) bySource.set(q.source, []);
+      bySource.get(q.source).push(q);
+    }
+    return [...bySource.entries()];
+  }, [bank]);
+
+  const toggleTopic = (source) => {
+    setSelectedTopics((prev) => (
+      prev.includes(source) ? prev.filter((s) => s !== source) : [...prev, source]
+    ));
+  };
 
   const start = (list) => {
     setQuestions(list);
@@ -423,6 +533,14 @@ export default function CourseExamPrep({ course }) {
         setFinished(true);
         const pct = totalMarks ? Math.round((earnedMarks / totalMarks) * 100) : 0;
         setQuizScore(course.slug, pct, 100);
+        // One write for the whole set, not one per question — useProgress
+        // re-uploads the entire blob on every change. A self-marked answer is
+        // graded pass/fail against the question's marks (see REVIEW_PASS_FRACTION),
+        // since the scheduler wants a binary outcome.
+        recordReviews(questions.map((question, i) => ({
+          id: examItemId(course.slug, question),
+          correct: gradeFromMarks(awards[i] ?? 0, question.marks),
+        })));
       }
     };
 
@@ -438,13 +556,27 @@ export default function CourseExamPrep({ course }) {
               Question {current + 1} of {questions.length}
             </span>
             <Pill>[{q.marks} marks]</Pill>
-            <Pill>{q.type === 'recall' ? 'Recall drill' : 'Written answer'}</Pill>
+            <Pill>
+              {q.type === 'recall'
+                ? 'Recall drill'
+                : isCodeQuestion(q) ? 'Code question' : 'Written answer'}
+            </Pill>
             <Pill>notes {q.source}</Pill>
           </div>
 
           {q.type === 'recall'
             ? <RecallQuestion key={current} q={q} awarded={awarded} onAward={award} />
-            : <LongformQuestion key={current} q={q} courseSlug={course.slug} awarded={awarded} onAward={award} />}
+            : (
+              <LongformQuestion
+                key={current}
+                q={q}
+                courseSlug={course.slug}
+                awarded={awarded}
+                onAward={award}
+                explainReady={explainStatus === 'ready'}
+                explanations={explanations}
+              />
+            )}
 
           <button onClick={next} className="btn-primary w-full justify-center mt-7">
             {current + 1 < questions.length ? 'Next question' : 'See results'}
@@ -458,6 +590,7 @@ export default function CourseExamPrep({ course }) {
   // ── Picker ────────────────────────────────────────────────────
   const longform = bank.filter((q) => q.type === 'longform');
   const recall = bank.filter((q) => q.type === 'recall');
+  const codeQuestions = bank.filter(isCodeQuestion);
   const shuffled = (list, n) => {
     const copy = [...list];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -500,6 +633,9 @@ export default function CourseExamPrep({ course }) {
           <li>· Structure every long answer the same way: <span className="text-ink font-medium">define → explain → example or diagram → link</span> to a neighbouring concept.</li>
           <li>· On a four-from-six paper in two hours, budget 30 minutes a question: 5 planning, 20 writing, 5 checking. Read all six and choose before you write anything.</li>
           <li>· Where a list is long, the question asks for &ldquo;any five&rdquo; — learn five you can explain rather than fifteen you can only name.</li>
+          {codeQuestions.length > 0 && (
+            <li>· {codeQuestions.length} of these ask you to write, debug or explain a listing from the practicals. Write the code out in full, indentation included — a marker cannot award the structure of a Python block you only described in words, and a comment above each step earns the point even when the line below it is imperfect.</li>
+          )}
         </ul>
       </div>
 
@@ -521,6 +657,14 @@ export default function CourseExamPrep({ course }) {
             <BookOpen size={13} className="text-rust" /> Mock paper · 4 written
           </button>
         )}
+        {codeQuestions.length > 0 && (
+          <button
+            onClick={() => start(shuffled(codeQuestions, codeQuestions.length))}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-coffee-200 hover:border-rust hover:bg-rust/5 transition-all text-sm font-medium text-ink"
+          >
+            <Terminal size={13} className="text-rust" /> All {codeQuestions.length} code questions
+          </button>
+        )}
         {recall.length > 0 && (
           <button
             onClick={() => start(shuffled(recall, recall.length))}
@@ -536,6 +680,48 @@ export default function CourseExamPrep({ course }) {
           <Play size={13} /> Everything · all {bank.length}
         </button>
       </div>
+
+      {topics.length > 1 && (
+        <div className="mt-7">
+          <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-3 flex items-center gap-2">
+            <ListFilter size={14} /> Or pick by topic
+          </p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {topics.map(([source, qs]) => {
+              const on = selectedTopics.includes(source);
+              return (
+                <button
+                  key={source}
+                  onClick={() => toggleTopic(source)}
+                  aria-pressed={on}
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 transition-all text-sm text-left ${
+                    on ? 'border-rust bg-rust/10 text-ink' : 'border-coffee-200 hover:border-coffee-500 text-coffee-700'
+                  }`}
+                >
+                  {on
+                    ? <CheckCircle2 size={14} className="text-rust shrink-0" />
+                    : <Circle size={14} className="text-coffee-300 shrink-0" />}
+                  {source}
+                  <span className="text-xs text-coffee-500">({qs.length})</span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => {
+              const picked = bank.filter((q) => selectedTopics.includes(q.source));
+              start(shuffled(picked, picked.length));
+            }}
+            disabled={selectedTopics.length === 0}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-coffee-200 hover:border-rust hover:bg-rust/5 transition-all text-sm font-medium text-ink disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-coffee-200 disabled:hover:bg-transparent"
+          >
+            <Play size={13} className="text-rust" />
+            {selectedTopics.length === 0
+              ? 'Select one or more topics above'
+              : `Start · ${bank.filter((q) => selectedTopics.includes(q.source)).length} question${bank.filter((q) => selectedTopics.includes(q.source)).length === 1 ? '' : 's'} from ${selectedTopics.length} topic${selectedTopics.length === 1 ? '' : 's'}`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

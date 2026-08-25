@@ -1,0 +1,257 @@
+// "Explain this code" is the answer to a student saying they do not understand
+// a listing. Three things carry real risk and are guarded here:
+//
+//   1. It must be absent, not broken, when no model provider is configured —
+//      every AI feature in this project degrades to nothing, and a button that
+//      always errors is worse than no button.
+//   2. The localStorage cache must actually hit. The practicals are a fixed set
+//      of listings a whole class asks about in the same week, and every miss is
+//      a model call charged against an 8-per-10-minute budget.
+//   3. A failed call must say so and stay retryable, rather than hanging on
+//      "Reading the code…".
+//
+// Interaction goes through fireEvent, matching the other component tests —
+// user-event is not a dependency of this project.
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import ExplainCode from '../components/ExplainCode';
+import {
+  canExplainCode,
+  listingsInTopic,
+  listingsInExamPrep,
+  explanationHash,
+  getCachedExplanation,
+  setCachedExplanation,
+  MIN_EXPLAIN_CHARS,
+  MAX_EXPLAIN_CHARS,
+} from '../utils/explainCode';
+
+const LISTING = `def reverse_string(s):
+    return s[::-1]
+
+def read_and_reverse_write(input_file, output_file):
+    with open(input_file, 'r') as file:
+        content = file.read()
+    with open(output_file, 'w') as file:
+        file.write(reverse_string(content))`;
+
+// fetchJsonWithFallback bails out unless the response claims to be JSON.
+const jsonResponse = (body) => ({
+  headers: { get: () => 'application/json' },
+  status: 200,
+  json: async () => body,
+});
+
+const explain = () => fireEvent.click(screen.getByRole('button', { name: /line by line/ }));
+
+describe('canExplainCode', () => {
+  it('refuses a snippet too short to walk through', () => {
+    expect(canExplainCode('x = 1')).toBe(false);
+    expect(canExplainCode('')).toBe(false);
+    expect(canExplainCode(null)).toBe(false);
+  });
+
+  it('accepts a real listing', () => {
+    expect(canExplainCode(LISTING)).toBe(true);
+    expect(LISTING.length).toBeGreaterThan(MIN_EXPLAIN_CHARS);
+  });
+
+  // The endpoint rejects anything longer with a 400, so the button must not
+  // offer the call. Both limits live in explainCode.js beside each other.
+  it('refuses a listing past the endpoint limit', () => {
+    expect(canExplainCode('#'.repeat(MAX_EXPLAIN_CHARS + 1))).toBe(false);
+    expect(canExplainCode('#'.repeat(MAX_EXPLAIN_CHARS))).toBe(true);
+  });
+});
+
+// The generator fills exactly the set the UI can ask for, by calling these.
+// A collector that drifts from the buttons means either wasted model calls or,
+// worse, a listing a student can ask about that was never generated — which
+// only shows up as a spinner on a phone with no signal.
+describe('the pre-generation collectors', () => {
+  it('takes program listings from a topic and skips run transcripts', () => {
+    const topic = {
+      title: 'Practical 1',
+      sections: [
+        { type: 'code', language: 'python', code: LISTING, heading: 'Program Listing' },
+        { type: 'code', language: 'output', code: 'Original String: Hello, World!\nReversed: !dlroW ,olleH\nand more output than the minimum length' },
+        { type: 'code', language: 'python', code: 'x = 1' },
+        { type: 'bullets', items: ['not code'] },
+      ],
+    };
+    const found = listingsInTopic(topic);
+    expect(found).toHaveLength(1);
+    expect(found[0]).toMatchObject({ language: 'python', mode: 'walkthrough' });
+    expect(found[0].hash).toBe(explanationHash(LISTING, 'python', 'walkthrough'));
+  });
+
+  // A stem is only ever offered in study mode and a model answer only in
+  // walkthrough mode, so generating the other half would be waste that also
+  // sits in the bundle a student downloads.
+  it('generates a stem for study and a model answer for walkthrough', () => {
+    const found = listingsInExamPrep([
+      { type: 'longform', language: 'python', code: LISTING, modelCode: `${LISTING}
+# fixed`, source: 'Topic 10' },
+      { type: 'longform', language: 'python', modelCode: LISTING, source: 'Topic 14' },
+      { type: 'recall', items: [], source: 'Topic 1' },
+    ]);
+    expect(found.map((l) => l.mode)).toEqual(['study', 'walkthrough', 'walkthrough']);
+    expect(found[0].code).toBe(LISTING);
+    expect(found[1].code).toContain('# fixed');
+  });
+});
+
+describe('the explanation cache', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('keys on the language as well as the code', () => {
+    setCachedExplanation(LISTING, 'python', 'a python walkthrough');
+    expect(getCachedExplanation(LISTING, 'python')).toBe('a python walkthrough');
+    expect(getCachedExplanation(LISTING, 'java')).toBeNull();
+  });
+
+  // Study mode withholds every verdict and the walkthrough does not. Serving
+  // one where the other was asked for would either leak the fault a debug
+  // question is asking for, or hide one the student came for.
+  it('keeps the study and walkthrough answers apart', () => {
+    setCachedExplanation(LISTING, 'python', 'no verdict here', 'study');
+    expect(getCachedExplanation(LISTING, 'python', 'study')).toBe('no verdict here');
+    expect(getCachedExplanation(LISTING, 'python', 'walkthrough')).toBeNull();
+    expect(getCachedExplanation(LISTING, 'python')).toBeNull();
+  });
+});
+
+describe('ExplainCode', () => {
+  beforeEach(() => localStorage.clear());
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('renders nothing when no model provider is configured', () => {
+    const { container } = render(<ExplainCode code={LISTING} language="python" ready={false} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('renders nothing for a snippet too short to be worth a call', () => {
+    const { container } = render(<ExplainCode code="x = 1" language="python" ready />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('fetches a walkthrough, shows it, and lets the student hide it again', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ explanation: 'It reverses the file.' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<ExplainCode code={LISTING} language="python" ready />);
+    explain();
+
+    expect(await screen.findByText('It reverses the file.')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+      code: LISTING,
+      language: 'python',
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Hide explanation/ }));
+    expect(screen.queryByText('It reverses the file.')).not.toBeInTheDocument();
+  });
+
+  // One model call per listing per device, ever — the whole point of the cache.
+  it('serves a second reader from the cache without calling the API', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ explanation: 'It reverses the file.' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const first = render(<ExplainCode code={LISTING} language="python" ready />);
+    explain();
+    await screen.findByText('It reverses the file.');
+    first.unmount();
+
+    render(<ExplainCode code={LISTING} language="python" ready />);
+    explain();
+    expect(await screen.findByText('It reverses the file.')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  // The whole point of pre-generation: no call, and — because the availability
+  // probe cannot succeed with no network — the button must still appear.
+  it('serves a pre-generated walkthrough without calling the API', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const getPregenerated = vi.fn(async () => 'The bundled walkthrough.');
+
+    render(
+      <ExplainCode
+        code={LISTING}
+        language="python"
+        ready={false}
+        hasPregenerated
+        getPregenerated={getPregenerated}
+      />,
+    );
+    explain();
+
+    expect(await screen.findByText('The bundled walkthrough.')).toBeInTheDocument();
+    expect(getPregenerated).toHaveBeenCalledWith(LISTING, 'python', 'walkthrough');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  // A listing added after the last generation run misses the map. The live API
+  // has to cover it, or the newest question is the one that cannot be explained.
+  it('falls back to the API when the bundle has no entry for this listing', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ explanation: 'Freshly explained.' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <ExplainCode
+        code={LISTING}
+        language="python"
+        ready
+        hasPregenerated
+        getPregenerated={async () => null}
+      />,
+    );
+    explain();
+
+    expect(await screen.findByText('Freshly explained.')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces an API error and offers a retry', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ error: 'The AI is busy.' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<ExplainCode code={LISTING} language="python" ready />);
+    explain();
+
+    expect(await screen.findByText('The AI is busy.')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: /Retry/ })).toBeInTheDocument());
+  });
+
+  // The listings come from a lab manual the class was never taught from, so the
+  // explanation has to be available BEFORE the student answers. What keeps that
+  // honest is the mode, not hiding the button: study mode is told to withhold
+  // every verdict.
+  it('asks for study mode when told to, and labels itself accordingly', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ explanation: 'Line 1 opens a socket.' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <ExplainCode code={LISTING} language="python" ready mode="study" label="I don't understand this code" hint="No verdicts." />,
+    );
+    expect(screen.getByText('No verdicts.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /I don't understand this code/ }));
+    await screen.findByText('Line 1 opens a socket.');
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ mode: 'study' });
+    // The caveat has served its purpose once the explanation is up.
+    expect(screen.queryByText('No verdicts.')).not.toBeInTheDocument();
+  });
+
+  it('surfaces a network failure rather than hanging', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+
+    render(<ExplainCode code={LISTING} language="python" ready />);
+    explain();
+
+    expect(await screen.findByText(/Network error/)).toBeInTheDocument();
+  });
+});

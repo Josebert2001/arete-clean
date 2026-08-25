@@ -32,6 +32,7 @@
 // (description/topics/studyTips) stays department-specific; notes come from
 // the single copy in ./lectureNotes/ so a fix there reaches every department.
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
+import { cos221ExamPrep } from './lectureNotes/cos221ExamPrep.js';
 
 export const courses = [
 
@@ -1067,37 +1068,51 @@ export const courses = [
     subject: 'cs',
     crossDepartmental: true,
     hasInteractiveModules: true,
-    interactiveTrackPath: '/tracks/c',
-    interactiveLabel: 'C',
-    interactiveModuleCount: 12,
-    description: 'Programming closer to the machine, plus the data structures and algorithms that make code fast. Pointers, memory management, and the classic structures — lists, stacks, queues, trees, hash tables — with their complexity analysis.',
+    interactiveTrackPath: '/tracks/java',
+    interactiveLabel: 'Java',
+    interactiveModuleCount: 13,
+    description: 'Advanced programming building on COS 211: deeper object-oriented programming (polymorphism, abstract classes, interfaces), the Collections API, searching/sorting/recursion, event-driven and GUI programming. The data structures and complexity analysis here are what later data-heavy courses like DTS 312 assume you already have.',
     topics: [
-      'Program structure, compilation, and the memory model: stack vs heap',
-      'Pointers, pointer arithmetic and dynamic memory allocation',
-      'Structures, unions and user-defined types',
-      'File handling and string manipulation',
-      'Algorithm analysis: big-O notation, time and space complexity',
-      'Linear data structures: arrays, linked lists, stacks and queues',
-      'Trees: binary trees, binary search trees, traversals',
-      'Hashing and hash tables; collision resolution',
-      'Sorting and searching algorithms: insertion, merge, quick sort; linear and binary search',
+      'Advanced OOP review: polymorphism, abstract classes, and interfaces',
+      'Class hierarchies and programme organization using packages/namespaces',
+      'Collections API: iterators/enumerators, List, Stack, Queue',
+      'Searching and sorting algorithms',
+      'Recursive algorithms',
+      'Event-driven programming: event-handling methods and event propagation',
+      'Exception handling',
+      'Graphical User Interface (GUI) programming',
     ],
     textbooks: [
-      { title: 'The C Programming Language', authors: 'Brian Kernighan & Dennis Ritchie', note: '2nd ed. — the definitive, famously concise reference' },
-      { title: 'Data Structures and Algorithm Analysis in C', authors: 'Mark Allen Weiss', note: '2nd ed. — rigorous and well-paced' },
+      { title: 'Data Structures and Algorithms in Java', authors: 'Robert Lafore', note: '2nd ed. — beginner-friendly bridge from COS 211' },
+      { title: 'Introduction to Algorithms (CLRS)', authors: 'Cormen, Leiserson, Rivest, Stein', note: '4th ed. — the definitive algorithms reference' },
     ],
     searchTerms: [
-      'C programming full course for beginners',
-      'Pointers in C explained visually',
-      'Big O notation explained with examples',
-      'Data structures and algorithms full course',
+      'Data structures and algorithms full course Java freeCodeCamp',
+      'Big O notation explained for beginners',
+      'Sorting algorithms visualised comparison',
+      'VisuAlgo data structures animations free',
     ],
     studyTips: [
-      'Areté has 12 interactive C modules covering this course — the pointer modules in particular repay slow, careful work',
-      'Draw the memory diagram every single time you work with a pointer. Everyone who skips this stage struggles',
-      'Big-O is not academic ceremony: it is why your 10-million-row job finishes in a minute or in a week. DTS 312 assumes you have it',
-      'Implement a linked list, a stack, a BST and a hash table from scratch at least once — interviewers still ask',
+      'VisuAlgo (visualgo.net) provides free visual animations for every data structure — use it constantly',
+      'Implement every data structure from scratch at least once — never just read about it',
+      'Trace sorting algorithms step by step on a 5-element array by hand before every exam',
+      'Big-O is not academic ceremony: it is why your 10-million-row job finishes in a minute or in a week — DTS 312 assumes you have it',
+      'Areté Java modules cover the programming foundation; use them for the Java component of this course',
     ],
+    notesKey: 'cos221',
+    // Shared with Cybersecurity — see src/data/lectureNotes/cos221.js. Modules
+    // 1-4 (fundamentals, flow control, arrays, methods) are COS 211 review and
+    // land on no item here; module 7 is not yet transcribed. Items 3-5
+    // (Collections API, searching/sorting, recursion) have no module reaching
+    // them yet either — left uncovered rather than force-fit, same as ENT 221's
+    // item 9 before chapter 15 arrived.
+    noteCoverage: {
+      5: { partial: [1] },
+      6: { covers: [1], partial: [2] },
+      8: { covers: [7] },
+      12: { covers: [8], partial: [6] },
+    },
+    examPrep: cos221ExamPrep,
   },
   {
     code: 'CSC 223',

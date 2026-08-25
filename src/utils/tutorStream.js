@@ -69,6 +69,7 @@ export async function streamTutor({ messages, moduleContext, signal, onChunk, on
   const decoder = new TextDecoder();
   let answer = '';
   let aborted = false;
+  let networkFailed = false;
   let lastStatus = '';
   try {
     for (;;) {
@@ -89,11 +90,16 @@ export async function streamTutor({ messages, moduleContext, signal, onChunk, on
     }
     answer += decoder.decode();
   } catch (err) {
-    // Abort or dropped connection mid-stream — keep whatever arrived.
+    // Keep whatever arrived either way, but the two cases mean different things.
+    // An abort is the caller cancelling deliberately. Anything else — a dropped
+    // mobile connection, the serverless function killed mid-stream — means the
+    // text we have is incomplete, so it must be flagged rather than handed back
+    // as a finished answer.
     if (err?.name === 'AbortError') aborted = true;
+    else networkFailed = true;
   }
 
-  const hadStreamError = answer.includes(STREAM_ERROR_MARKER);
+  const hadStreamError = networkFailed || answer.includes(STREAM_ERROR_MARKER);
   const text = toDisplayText(answer).trim();
 
   if (aborted) return { aborted: true, answer: text };

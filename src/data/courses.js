@@ -1,7 +1,14 @@
 // Extension is required: scripts/validate-modules.mjs imports this file through
 // plain Node ESM, which does not do Vite's extensionless resolution.
+import { cyb121Quiz } from './lectureNotes/cyb121Quiz.js';
+import { cyb123Quiz } from './lectureNotes/cyb123Quiz.js';
 import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
+import { cyb221ExamPrep } from './lectureNotes/cyb221ExamPrep.js';
+import { cyb224ExamPrep } from './lectureNotes/cyb224ExamPrep.js';
 import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
+import { cyb222ExamPrep } from './lectureNotes/cyb222ExamPrep.js';
+import { cybInnovationExamPrep } from './lectureNotes/cybInnovationExamPrep.js';
+import { cos221ExamPrep } from './lectureNotes/cos221ExamPrep.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 
 export const courses = [
@@ -560,6 +567,10 @@ export const courses = [
     // The guide stops at the data link / physical layers, so topics 6-8
     // (network, transport and application layers) are not covered by it.
     notesKey: 'cyb121',
+    // CBT paper, so an MCQ bank rather than examPrep. Drawn note by note from
+    // the guide — see src/data/lectureNotes/cyb121Quiz.js. It stops where the
+    // guide stops: topics 6-8 are not examined by this bank.
+    quiz: cyb121Quiz,
   },
   {
     code: 'UUY-CYB 123',
@@ -597,6 +608,10 @@ export const courses = [
     // code CSC 121) — see src/data/lectureNotes/cyb123.js for provenance and the
     // coverage mapping. Topic 7 (XSS/CSRF) is not covered by the manual.
     notesKey: 'cyb123',
+    // CBT paper, so an MCQ bank rather than examPrep. Drawn note by note from
+    // the manual — see src/data/lectureNotes/cyb123Quiz.js. It stops where the
+    // notes stop: topic 7 (XSS/CSRF) is not examined by this bank.
+    quiz: cyb123Quiz,
   },
   {
     code: 'UUY-CYB 122',
@@ -1038,6 +1053,20 @@ export const courses = [
       'Trace sorting algorithms step by step on a 5-element array by hand before every exam',
       'Areté Java modules cover the programming foundation; use them for the Java component of this course',
     ],
+    notesKey: 'cos221',
+    // Shared with Data Science — see src/data/lectureNotes/cos221.js. Modules
+    // 1-4 (fundamentals, flow control, arrays, methods) are COS 211 review and
+    // land on no item here; module 7 is not yet transcribed. Items 3-5
+    // (Collections API, searching/sorting, recursion) have no module reaching
+    // them yet either — left uncovered rather than force-fit, same as ENT 221's
+    // item 9 before chapter 15 arrived.
+    noteCoverage: {
+      5: { partial: [1] },
+      6: { covers: [1], partial: [2] },
+      8: { covers: [7] },
+      12: { covers: [8], partial: [6] },
+    },
+    examPrep: cos221ExamPrep,
   },
   {
     code: 'INS 224',
@@ -2214,11 +2243,49 @@ export const courses = [
       'The cloud shared responsibility model is exam-critical: know clearly what the provider vs customer secures',
       'Use OWASP resources on SQL injection and data security — they are free and authoritative',
     ],
+    // Notes 4-22 are transcribed from the lecturer's scanned handout, printed
+    // pages 3-71, and follow its wording and headings.
+    //
+    // Notes 1-3 come from the class sessions instead, and are labelled as such
+    // on the page. They are not in the workbook: the 5Vs, operational-vs-
+    // analytical and big-data-skills material appears nowhere in any of the
+    // five scanned PDFs or their six transcriptions, and two of the three carry
+    // class dates the rest do not. The one genuine overlap is the Vs - the
+    // workbook prints Volume, Velocity and Variety on page 3 as "The 3Vs of Big
+    // Data Security Challenges" (note 4), framed as why traditional controls
+    // fail at scale, while the class session gave all five as characteristics
+    // of big data. Note 1 carries a cross-reference so students do not read the
+    // two as contradicting each other.
+    //
+    // Printing slips in the handout that these notes silently normalise, so a
+    // future editor does not "correct" them back:
+    //   - p.16 numbers both sub-headings "i." (Pattern Recognition and Anomaly
+    //     Detection); the second is rendered "ii." here.
+    //   - pp.42-43 leave Pandas unnumbered and then run "i. NumPy", "ii.
+    //     Matplotlib", "iii. Seaborn", so the run starts one item late.
+    //   - p.62 numbers Pandas "i." but p.63 numbers Scikit-Learn "2."; both are
+    //     rendered as roman numerals here.
+    //   - pp.40-41 truncate three equations and drop two numerals; recorded on
+    //     the page itself, in note 14, because a student needs to know.
+    //   - p.55 heads the K-Means material "THREAT ANALYSIS USING SUPPORT VECTOR
+    //     MACHINE", which describes neither that page nor the ones after it.
+    //   - Bullet lists print inconsistently with and without terminal full
+    //     stops; these notes punctuate them consistently.
+    //
+    // The figures are redrawn for these notes. The handout prints four diagrams
+    // and numbers none of them: the classification tree (p.20) and three SVM
+    // diagrams (two on p.22, one on p.23). All four are reproduced; the rest of
+    // the figures visualise tables the handout prints as text, and their captions
+    // say so.
     lectureNotes: [
       {
         number: '1',
         title: 'Introduction to Big Data Security',
         sections: [
+          {
+            type: 'note',
+            text: 'From the class sessions, not the printed workbook. The workbook itself starts at Concepts of Big Data Security (note 4).',
+          },
           {
             type: 'definition',
             heading: '1.1 Definition',
@@ -2244,6 +2311,10 @@ export const courses = [
               { term: 'Organisational Data', def: 'data produced by businesses and institutions' },
             ],
           },
+          {
+            type: 'note',
+            text: 'Do not confuse the 5Vs above with the 3Vs in note 4. These five describe big data itself. The workbook uses only the first three - Volume, Velocity and Variety - and uses them for a different purpose: to explain why traditional security controls fail at this scale. Both can be asked; read them together.',
+          },
         ],
       },
       {
@@ -2251,6 +2322,10 @@ export const courses = [
         title: 'Operational and Analytical Big Data',
         date: '02/06/2026',
         sections: [
+          {
+            type: 'note',
+            text: 'From the class session of 02/06/2026, not the printed workbook.',
+          },
           {
             type: 'definition',
             heading: '2.1 Operational Big Data',
@@ -2318,6 +2393,10 @@ export const courses = [
         date: '09/06/2026',
         sections: [
           {
+            type: 'note',
+            text: 'From the class session of 09/06/2026, not the printed workbook.',
+          },
+          {
             type: 'definition',
             heading: 'Definition',
             text: 'Big Data Skills are the knowledge, abilities, and competencies required to collect, process, store, analyze, visualize, and interpret large amounts of data.',
@@ -2379,6 +2458,20 @@ export const courses = [
               'Discuss expected benefits and possible challenges',
             ],
           },
+          {
+            type: 'note',
+            text: 'The answers below are worked answers, not the lecturer\'s.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Data sources', def: 'Records the university already holds: semester results and GPA history per course, lecture attendance registers, student-portal login and activity logs, library borrowing and e-resource access, JAMB and O-level entry scores, departmental and level enrolment figures, fee-payment timing, and student feedback or questionnaire responses' },
+              { term: 'Collection and storage', def: 'Most of this starts on paper or in departmental spreadsheets, so the first tasks are digitising it and agreeing one student identifier that works across departments. Structured records go into a central data warehouse; feedback text and portal logs suit a data lake. Loading can be batched at the end of each semester — nothing here needs streaming. Student records are personal data under the Nigeria Data Protection Act, so access control, encryption at rest and anonymisation before analysis belong in the design rather than being added afterwards' },
+              { term: 'Type of analytics', def: 'All four, in order. Descriptive answers what happened — pass rates by course and level. Diagnostic asks why — which factors track with failure. Predictive identifies which students are likely to carry over a course while there is still time to act. Prescriptive recommends which intervention to offer whom' },
+              { term: 'Tools and technology', def: 'Python with pandas for the analysis, PostgreSQL or MySQL for the warehouse, and Power BI or Excel for dashboards that deans will actually open. Hadoop and Spark are the fashionable answer and the wrong one here: a single university produces gigabytes, not petabytes, and one relational database server handles that comfortably. Reach for a cluster only when the volume genuinely stops fitting' },
+              { term: 'Benefits and challenges', def: 'Benefits: at-risk students identified before they carry over a course, better lecturer and timetable allocation, and evidence to support accreditation. Challenges: incomplete and inconsistent records, no single student identifier across departments, staff with no analytics training, unreliable power and connectivity, resistance from those who dislike being measured, and the privacy risk created by concentrating everything about every student in one database' },
+            ],
+          },
         ],
       },
       {
@@ -2387,65 +2480,86 @@ export const courses = [
         sections: [
           {
             type: 'definition',
-            heading: '4.1 Definition',
-            text: 'Big Data security is the collective term for the guardrails, policies, and technologies used to protect massive volumes of data — both structured and unstructured — from unauthorized access, theft, exposure, and modification.',
+            text: 'Big Data security is the collective term for the guardrails, policies, and technologies used to protect massive volumes of data, both structured and unstructured, from unauthorized access, theft, exposure, and modification.',
           },
           {
             type: 'text',
-            heading: '4.2 How It Differs from Traditional Security',
-            text: 'Traditional security focuses on securing perimeter walls (like firewalls) around static databases. Big Data security is unique because the data is constantly moving, changing, and being analysed at an immense scale — so protection has to travel with the data instead of sitting only at the boundary.',
+            text: 'While traditional security focuses on securing perimeter walls (like firewalls) around static databases, Big Data security is unique because the data is constantly moving, changing, and being analyzed at an immense scale. Here is a breakdown of why it is different, the core challenges it addresses, and how it is implemented.',
+          },
+          {
+            type: 'text',
+            heading: 'The 3Vs of Big Data Security Challenges',
+            text: 'Traditional security measures often fail when applied to Big Data because of its fundamental characteristics:',
           },
           {
             type: 'termlist',
-            heading: '4.3 The 3Vs of Big Data Security Challenges',
             items: [
-              { term: 'Volume', def: 'Protecting petabytes or exabytes of data requires security tools that scale dynamically without creating processing bottlenecks' },
-              { term: 'Velocity', def: 'Data streams into systems in real time (IoT sensors, network logs), so encryption and threat detection must happen on the fly without causing latency' },
-              { term: 'Variety', def: 'Structured SQL databases, semi-structured JSON, and unstructured video, audio and text all coexist — a one-size-fits-all security policy does not work' },
+              { term: 'Volume', def: 'Protecting petabytes or exabytes of data requires security tools that can scale dynamically without creating processing bottlenecks.' },
+              { term: 'Velocity', def: 'Data streams into systems in real-time (e.g., IoT sensors, network logs). Security mechanisms like encryption and threat detection must happen on the fly without causing latency.' },
+              { term: 'Variety', def: 'Big Data includes structured SQL databases, semi-structured JSON files, and unstructured data like video, audio, and text. A one-size-fits-all security policy does not work here.' },
             ],
           },
           {
             type: 'text',
-            heading: '4.4 Core Pillars of Big Data Security',
-            text: 'To secure a Big Data ecosystem (such as Hadoop, Spark, or a cloud-based data lake), organisations implement a multi-layered security framework resting on four pillars.',
+            heading: 'Core Pillars of Big Data Security',
+            text: 'To secure a Big Data ecosystem (such as Hadoop, Spark, or cloud-based data lakes), organizations implement a multi-layered security framework:',
+          },
+          {
+            type: 'text',
+            heading: '1. Data Encryption and Privacy',
+            text: 'Because data is constantly in motion across distributed networks, it must be protected at all stages:',
           },
           {
             type: 'termlist',
-            heading: 'Pillar 1 — Data Encryption and Privacy',
             items: [
-              { term: 'Encryption in transit', def: 'Protecting data as it moves between nodes, clusters, or users — typically using TLS/SSL' },
-              { term: 'Encryption at rest', def: 'Safeguarding data stored on disks using strong encryption standards such as AES-256' },
-              { term: 'Data masking & tokenization', def: 'Replacing sensitive data (card numbers, PII) with realistic but fake values or tokens before it enters the analytics pipeline, so data scientists can work with it safely' },
+              { term: 'Encryption in Transit', def: 'Protecting data as it moves between nodes, clusters, or users (typically using TLS/SSL).' },
+              { term: 'Encryption at Rest', def: 'Safeguarding data stored on disks using strong encryption standards (like AES-256).' },
+              { term: 'Data Masking & Tokenization', def: 'Replacing sensitive data (like credit card numbers or PII) with realistic but fake data or tokens before it enters the analytics pipeline so data scientists can work with it safely.' },
             ],
           },
           {
-            type: 'termlist',
-            heading: 'Pillar 2 — Centralized Access Control',
-            items: [
-              { term: 'Role-Based Access Control (RBAC)', def: 'Assigning permissions based on organisational roles' },
-              { term: 'Attribute-Based Access Control (ABAC)', def: 'A finer-grained approach where access is decided by contextual attributes — e.g. allow access only if the user is a Data Analyst AND the request comes from an internal IP during working hours' },
-            ],
+            type: 'text',
+            heading: '2. Centralized Access Control',
+            text: 'When dealing with thousands of users and automated processes, managing who can see what is critical:',
           },
           {
             type: 'termlist',
-            heading: 'Pillar 3 — Endpoint and Infrastructure Security',
             items: [
-              { term: 'Node authentication', def: 'Ensuring only authorised servers/nodes can join the computing cluster — often managed via Kerberos' },
-              { term: 'API security', def: 'Protecting the endpoints and APIs that applications use to connect to and query the data lake' },
+              { term: 'Role-Based Access Control (RBAC)', def: 'Assigning permissions based on organizational roles.' },
+              { term: 'Attribute-Based Access Control (ABAC)', def: 'A finer-grained approach where access is determined by contextual attributes (e.g., "Allow access only if the user is a Data Analyst AND the request comes from an internal IP during working hours").' },
             ],
+          },
+          {
+            type: 'text',
+            heading: '3. Endpoint and Infrastructure Security',
+            text: 'Big Data relies on distributed computing, meaning data is split across hundreds or thousands of server nodes.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Node Authentication', def: 'Ensuring that only authorized servers/nodes can join the computing cluster (often managed via Kerberos).' },
+              { term: 'API Security', def: 'Protecting the endpoints and APIs that applications use to connect to and query the data lake.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '4. Real-Time Monitoring and Auditing',
+            text: 'With massive infrastructure, detecting a breach manually is impossible. Big Data environments use specialized security tools to:',
           },
           {
             type: 'bullets',
-            heading: 'Pillar 4 — Real-Time Monitoring and Auditing',
             items: [
-              'With massive infrastructure, detecting a breach manually is impossible — monitoring must be automated',
-              'Maintain continuous audit logs of who accessed what data and when',
-              'Employ AI and machine-learning-driven User and Entity Behaviour Analytics (UEBA) to spot anomalous data access patterns that may indicate an insider threat or compromised credentials',
+              'Maintain continuous audit logs of who accessed what data and when.',
+              'Employ AI and Machine Learning-driven User and Entity Behavior Analytics (UEBA) to spot anomalous data access patterns that might indicate an insider threat or compromised credentials.',
             ],
           },
           {
+            type: 'text',
+            heading: 'Common Tools in the Big Data Security Ecosystem',
+            text: 'Security in this domain is typically integrated directly into the data architecture. Some widely used tools include:',
+          },
+          {
             type: 'image',
-            heading: '4.5 Common Tools in the Big Data Security Ecosystem',
             src: '/lecture-notes/cyb-224/security-ecosystem.webp',
             width: 1600, height: 238,
             alt: 'Four tools mapped to their functions: Apache Ranger/Sentry to centralized security administration and access control, Kerberos to network authentication, Knox Gateway to secure perimeter access for REST APIs, and SIEM systems (Splunk, Elastic) to log aggregation and analysis at scale',
@@ -2453,12 +2567,12 @@ export const courses = [
           },
           {
             type: 'table',
-            headers: ['Tool / Technology', 'Primary Function'],
+            headers: ['Tool/Technology', 'Primary Function'],
             rows: [
-              ['Apache Ranger / Apache Sentry', 'Centralized security administration and fine-grained access control for Hadoop/Spark ecosystems'],
-              ['Kerberos', 'Network authentication protocol used to verify the identity of users and nodes in a cluster'],
-              ['Knox Gateway', 'Provides a single, secure point of access (perimeter security) for Big Data cluster REST APIs'],
-              ['SIEM systems (Splunk, Elastic)', 'Security Information and Event Management systems used to aggregate and analyse security logs at scale'],
+              ['Apache Ranger / Apache Sentry', 'Centralized security administration and fine-grained access control for Hadoop/Spark ecosystems.'],
+              ['Kerberos', 'Network authentication protocol used to verify the identity of users and nodes in a cluster.'],
+              ['Knox Gateway', 'Provides a single, secure point of access (perimeter security) for Big Data cluster REST APIs.'],
+              ['SIEM Systems (Splunk, Elastic)', 'Security Information and Event Management systems used to aggregate and analyze security logs at scale.'],
             ],
           },
         ],
@@ -2469,22 +2583,20 @@ export const courses = [
         sections: [
           {
             type: 'definition',
-            heading: '5.1 Artificial Intelligence',
-            text: 'Artificial Intelligence (AI) is the branch of computer science that focuses on creating systems capable of performing tasks that typically require human intelligence — learning, reasoning, problem-solving, perception, and language understanding. It spans a wide range of technologies, from rule-based systems to machine learning and deep learning.',
+            text: 'Artificial Intelligence (AI) is the branch of computer science that focuses on creating systems capable of performing tasks that typically require human intelligence. These tasks include learning, reasoning, problem-solving, perception, and language understanding. AI consists a wide range of technologies and methodologies, from rule-based systems to more advanced forms like machine learning and deep learning.',
           },
           {
             type: 'definition',
-            heading: '5.2 Machine Learning',
-            text: 'Machine Learning (ML), a subset of AI, is the study of algorithms and statistical models that let computers perform specific tasks without explicit instructions, relying instead on patterns and inference derived from data. The goal is to build models that generalise from training data to unseen data, making predictions or decisions on new inputs.',
+            text: 'Machine Learning (ML), a subset of AI, is the study of algorithms and statistical models that enable computers to perform specific tasks without using explicit instructions. Instead, ML systems rely on patterns and inference derived from data and information. The primary goal of ML is to build models that can generalize from training data to unseen data, making predictions or decisions based on new inputs.',
           },
           {
             type: 'text',
-            heading: '5.3 Application of ML in Data Security',
-            text: 'Applying AI and ML to network security means analysing large amounts of network data, identifying patterns, and detecting anomalies that may indicate security threats. This enables real-time detection and mitigation, which matters because of the increasing complexity and volume of attacks. The digital landscape is defined by two converging trends: the ubiquity of machine learning, and the increasing vulnerability of interconnected systems (e.g. microprocessor flaws like Spectre and Meltdown).',
+            heading: 'Application of ML in Data Security',
+            text: 'The application of AI and ML in network security involves using these technologies to analyze large amounts of network data, identify patterns, and detect anomalies that may indicate security threats. This approach allows for real-time detection and mitigation of cyber threats, which is crucial given the increasing complexity and volume of attacks. The digital landscape is defined by two converging trends: the ubiquity of machine learning and the increasing vulnerability of interconnected systems (e.g., microprocessors like Spectre/Meltdown). Table 2 shows the breakdown of various security threats in the data.',
           },
           {
             type: 'image',
-            heading: '5.4 Cybersecurity Threat Categories',
+            heading: 'Table 2: Cybersecurity Threat Categories with Definitions and Examples',
             src: '/lecture-notes/cyb-224/threat-taxonomy.webp',
             width: 1400, height: 704,
             alt: 'Mind map of cybersecurity threats in three branches: Malware (worm, trojan, ransomware, bot, rootkit, adware, botnet, spyware, backdoor), Network Attacks (login attack, phishing, spear phishing, keylogger, spam, exploit, account takeover, social engineering, sniffing, scanning, DoS/DDoS) and Advanced Threats (APT, zero-day)',
@@ -2494,93 +2606,80 @@ export const courses = [
             type: 'table',
             headers: ['Threat Category', 'Definition', 'Example'],
             rows: [
-              ['Malware', 'Malicious software designed to damage systems, steal data, or gain unauthorized access', 'A program that secretly deletes company files after installation'],
-              ['Worm', 'Self-replicating malware that spreads automatically across networks without user action', 'A worm spreading through a university network by exploiting a vulnerability'],
-              ['Trojan', 'Malware disguised as legitimate software to trick users into installing it', "A fake 'Free Antivirus' app that installs hidden spyware"],
-              ['Spyware', 'Software that secretly monitors and collects user information without consent', 'A program that tracks browsing history and sends it to attackers'],
-              ['Adware', 'Software that automatically displays unwanted advertisements on a device', 'Constant pop-up ads appearing during internet browsing'],
-              ['Ransomware', 'Malware that encrypts files and demands payment to restore access', "A hospital's records encrypted until ransom is paid"],
-              ['Rootkit', 'A hidden tool that gives attackers privileged access while remaining undetected', 'An attacker installing a rootkit to hide a server intrusion'],
-              ['Backdoor', 'A secret method of bypassing normal authentication to access a system', 'A hidden login password embedded in an application'],
-              ['Bot', 'An infected computer remotely controlled by an attacker', 'A laptop unknowingly sending spam emails under attacker control'],
-              ['Botnet', 'A group of infected devices controlled together by an attacker', 'Thousands of compromised devices launching a coordinated attack'],
-              ['Exploit', 'Code that takes advantage of a specific software weakness', 'Using an unpatched browser flaw to gain system access'],
-              ['Scanning', 'Actively searching systems or networks to identify vulnerabilities', 'Using automated tools to detect open ports on a server'],
-              ['Sniffing', 'Monitoring network traffic to capture sensitive information', 'Capturing login details on unsecured public Wi-Fi'],
-              ['Keylogger', 'A tool that records every keystroke typed on a device', "Recording a victim's banking password as they type"],
-              ['Spam', 'Unwanted bulk electronic messages, often for advertising or malicious purposes', 'Receiving hundreds of unsolicited promotional emails'],
-              ['Login attack', 'Automated attempts to guess usernames and passwords', 'Trying thousands of password combinations to access an account'],
-              ['Account Takeover (ATO)', "Unauthorized access to someone's legitimate account", 'Hackers accessing a social media account and changing the password'],
-              ['Phishing', 'Fraudulent communication pretending to be from a trusted source', 'An email pretending to be from a bank requesting login details'],
-              ['Spear phishing', 'Targeted phishing aimed at a specific individual or organisation', 'An email sent to a CEO pretending to be from a board member'],
-              ['Social engineering', 'Manipulating individuals into revealing confidential information', 'A caller pretending to be IT support asking for credentials'],
-              ['Incendiary speech', 'Harmful or discriminatory speech intended to incite hostility', 'Online posts targeting a group with harmful statements'],
-              ['Denial of Service (DoS/DDoS)', 'Flooding a system with traffic to make it unavailable', 'Overloading an e-commerce website during peak sales'],
-              ['Advanced Persistent Threat (APT)', 'A long-term targeted cyberattack where attackers remain undetected', 'Attackers secretly monitoring a government network for months'],
-              ['Zero-day vulnerability', 'A newly discovered software flaw exploited before a fix is released', 'Hackers exploiting a new OS weakness before patching'],
+              ['Malware', 'Malicious software designed to damage systems, steal data, or gain unauthorized access.', 'A program that secretly deletes company files after installation.'],
+              ['Worm', 'Self-replicating malware that spreads automatically across networks without user action.', 'A worm spreading through a university network by exploiting a vulnerability.'],
+              ['Trojan', 'Malware disguised as legitimate software to trick users into installing it.', "A fake 'Free Antivirus' app that installs hidden spyware."],
+              ['Spyware', 'Software that secretly monitors and collects user information without consent.', 'A program that tracks browsing history and sends it to attackers.'],
+              ['Adware', 'Software that automatically displays unwanted advertisements on a device.', 'Constant pop-up ads appearing during internet browsing.'],
+              ['Ransomware', 'Malware that encrypts files and demands payment to restore access.', "A hospital's records encrypted until ransom is paid."],
+              ['Rootkit', 'A hidden tool that gives attackers privileged access while remaining undetected.', 'An attacker installing a rootkit to hide server intrusion.'],
+              ['Backdoor', 'A secret method of bypassing normal authentication to access a system.', 'A hidden login password embedded in an application.'],
+              ['Bot', 'An infected computer remotely controlled by an attacker.', 'A laptop unknowingly sending spam emails under attacker control.'],
+              ['Botnet', 'A group of infected devices controlled together by an attacker.', 'Thousands of compromised devices launching a coordinated attack.'],
+              ['Exploit', 'Code that takes advantage of a specific software weakness.', 'Using an unpatched browser flaw to gain system access.'],
+              ['Scanning', 'Actively searching systems or networks to identify vulnerabilities.', 'Using automated tools to detect open ports on a server.'],
+              ['Sniffing', 'Monitoring network traffic to capture sensitive information.', 'Capturing login details on unsecured public Wi-Fi.'],
+              ['Keylogger', 'A tool that records every keystroke typed on a device.', "Recording a victim's banking password as they type."],
+              ['Spam', 'Unwanted bulk electronic messages, often for advertising or malicious purposes.', 'Receiving hundreds of unsolicited promotional emails.'],
+              ['Login Attack', 'Automated attempts to guess usernames and passwords.', 'Trying thousands of password combinations to access an account.'],
+              ['Account Takeover (ATO)', "Unauthorized access to someone's legitimate account.", 'Hackers accessing a social media account and changing the password.'],
+              ['Phishing', 'Fraudulent communication pretending to be from a trusted source.', 'An email pretending to be from a bank requesting login details.'],
+              ['Spear Phishing', 'Targeted phishing aimed at a specific individual or organization.', 'An email sent to a CEO pretending to be a board member.'],
+              ['Social Engineering', 'Manipulating individuals into revealing confidential information.', 'A caller pretending to be IT support asking for credentials.'],
+              ['Incendiary Speech', 'Harmful or discriminatory speech intended to incite hostility.', 'Online posts targeting a group with harmful statements.'],
+              ['Denial of Service (DoS/DDoS)', 'Flooding a system with traffic to make it unavailable.', 'Overloading an e-commerce website during peak sales.'],
+              ['Advanced Persistent Threat (APT)', 'A long-term targeted cyberattack where attackers remain undetected.', 'Attackers secretly monitoring a government network for months.'],
+              ['Zero-Day Vulnerability', 'A newly discovered software flaw exploited before a fix is released.', 'Hackers exploiting a new OS weakness before patching.'],
             ],
           },
           {
             type: 'text',
-            heading: '5.5 Protecting ML Systems from Adversarial Attacks',
-            text: 'Just as no modern computer system can be absolutely assured, there is no fail-safe way to protect an AI or ML system — research into defending ML tools is ongoing. The realistic goal is a systems-security approach that reduces the risk and impact of attacks to acceptable levels.',
+            heading: 'How to Protect the System from Adversarial Attacks',
+            text: 'This question aims to prepare you for the fact that, in the same way that no modern computer system can be absolutely assured, there is no fail-safe way to protect an AI or ML system. Research into defending ML tools is ongoing. Responses to this question should acknowledge this fact and take a systems-security approach for reducing the risk and the impact of attacks to acceptable levels. Three important examples of such protection include the following:',
           },
           {
-            type: 'termlist',
-            heading: 'Three Protections to Insist On',
+            type: 'bullets',
             items: [
-              { term: 'Robustness', def: 'Integrity of the tool itself, plus protection of the confidentiality of what it holds' },
-              { term: 'Resilience', def: 'Resistance to attacks during both training and classification' },
-              { term: 'Reliable input', def: 'Evidence that the input data is reliable and representative' },
+              'robustness in the integrity of the tool as well as the protection of confidentiality;',
+              'resilience against attacks during training and classification; and',
+              'evidence that the input data is reliable and representative.',
             ],
           },
           {
             type: 'text',
-            heading: 'Worked Example — The Stop Sign Attack',
-            text: 'ML tools contain well-known vulnerabilities, many of them susceptible to adversary manipulation. Self-driving cars use ML to identify street signs; by deliberately altering a small section of a stop sign with a purpose-designed sticker, an adversary can make these operational ML tools reliably misclassify the stop sign as a 45-mile-per-hour speed limit sign. In cybersecurity the manipulated input is usually far less obvious to an analyst than a sticker on a traffic sign — so any security system built on ML must take these threats seriously.',
+            text: 'ML tools contain well-known vulnerabilities, many of which are susceptible to adversary manipulation. As a poignant example of attacks against ML tools, consider the case of self-driving cars. Such cars use ML tools to identify street signs, among other things. By intentionally manipulating a small section of a stop sign with a purpose-designed sticker, an adversary can make these operational ML tools reliably misclassify a stop sign as a 45-mile-per-hour speed limit sign.',
           },
           {
-            type: 'bullets',
-            heading: 'What to Ask Developers and Suppliers',
-            items: [
-              'How does the design and deployment of the ML tool protect against well-documented classes of attack? (Not an abstract question about all possible attacks.)',
-              "What protections are in place for the integrity of the tool's decisions, during both training and deployment?",
-              'What protects the confidentiality of sensitive information used by the tool?',
-              'What evidence is there that the input data is reliable and representative?',
-              'Cybersecurity cannot prevent all attacks, and does not claim to — any ML tool deployed in a security context should be part of an explicit risk assessment',
-            ],
+            type: 'text',
+            text: 'Adversaries constantly expose cybersecurity tools to input that is likely less obvious to an analyst than a sticker on a traffic-control sign. Therefore, any cybersecurity system you implement using ML tools should take these threats seriously.',
           },
           {
-            type: 'bullets',
-            heading: '5.6 The Upshot — Why Sensitive Data Is Attacked',
-            items: [
-              'The motivations behind cyber-attacks are complex and largely economically driven',
-              'Cybercrime has a functioning marketplace',
-              'Hacking tools are commoditized',
-              'Monetization pathways are layered and indirect',
-              'Defensive systems increase complexity, forcing attackers to adapt',
-              'The result is a continuous adversarial cycle between attackers and defenders',
-            ],
+            type: 'text',
+            text: 'To prepare for such possible manipulation, you should ask the developers and suppliers you are working with how the design and deployment of the ML tool protect against well-known attacks. This is not an',
+          },
+          {
+            type: 'note',
+            text: 'The sentence above breaks off mid-page: printed page 9 is missing from the scanned handout, so the rest of this section is not recorded here.',
           },
           {
             type: 'termlist',
-            heading: '5.7 Activity 1 — Threat Identification from Logs',
+            heading: 'Activity 1: Threat Identification from Logs',
             items: [
-              { term: 'Which patterns may indicate scanning activity?', def: 'Repeated SYN packets without completed handshakes; multiple connection attempts to different ports in a short timeframe from the same IP' },
-              { term: 'Which patterns suggest a brute-force login attempt?', def: 'Repeated failed login attempts from one IP in a short window; a high frequency of authentication requests' },
-              { term: 'Which features would you extract to train an ML model to detect DDoS attacks?', def: 'Number of unique destination ports; packet rate / requests per second' },
+              { term: 'Which patterns may indicate scanning activity?', def: 'Repeated SYN packets without completed handshakes; multiple connection attempts to different ports in a short time, from the same IP address' },
+              { term: 'Which patterns suggest a brute-force login attempt?', def: 'A high frequency of authentication requests; attempts across many usernames from a single source' },
+              { term: 'Which features would you extract to train an ML model to detect DDoS attacks?', def: 'Packet rate; source IP entropy; number of destination ports; SYN-to-ACK ratio' },
             ],
           },
           {
             type: 'table',
-            heading: '5.8 Activity 2 — Threat Classification Mapping',
+            heading: 'Activity 2: Threat Classification Mapping',
             headers: ['Threat Type', 'Main Target'],
             rows: [
-              ['Ransomware', 'Encrypts user or organisation data/files for ransom'],
-              ['Phishing', 'Targets human trust to steal credentials'],
-              ['Botnet', 'Compromises multiple machines to control remotely'],
-              ['Spyware', 'Monitors user activity and steals information'],
-              ['DoS', 'Targets network availability to disrupt service'],
+              ['Ransomware', 'Files and data'],
+              ['Phishing', 'Individuals'],
+              ['Botnet', 'Computers'],
+              ['Spyware', 'User data'],
+              ['DoS', 'Services and network availability'],
             ],
           },
         ],
@@ -2591,17 +2690,15 @@ export const courses = [
         sections: [
           {
             type: 'definition',
-            heading: '6.1 Security as an Economic Problem',
             text: 'Cybersecurity is not only a technical battle but also an economic one. Modern cybercrime operates within a structured financial ecosystem where monetary gain is the primary motivation. Understanding attacker incentives helps security professionals design stronger detection and prevention systems.',
           },
           {
             type: 'text',
-            heading: '6.2 From Reputation to Revenue',
-            text: 'Early cyber-attacks were often motivated by curiosity, mischief, or reputation within hacker communities. Today, most cyber-attacks are financially motivated — as long as cybercrime produces meaningful financial returns, attackers will continue to innovate.',
+            heading: 'From Reputation to Revenue',
+            text: 'Early cyber-attacks were often motivated by curiosity, mischief, or reputation within hacker communities. Today, most cyber-attacks are financially motivated. Modern attackers target:',
           },
           {
             type: 'bullets',
-            heading: 'What Modern Attackers Target',
             items: [
               'Online payment platforms',
               'Financial institutions',
@@ -2613,69 +2710,79 @@ export const courses = [
           },
           {
             type: 'text',
-            heading: '6.3 Marketplace for Hacking Skills',
+            heading: 'Marketplace for Hacking Skills',
             text: 'The commoditization of hacking has lowered the barrier to entry. Darknet marketplaces sell exploits, malware kits, stolen credentials, and even subscription-based hacking services.',
           },
           {
             type: 'text',
-            heading: '6.4 Zero-Day Vulnerability Markets',
-            text: 'Zero-day vulnerabilities are unknown software weaknesses. They can be sold legally through bug bounty programmes or illegally in underground markets. Selling an exploit often provides faster and lower-risk financial returns than launching the attack directly.',
+            heading: 'Zero-Day Vulnerability Markets',
+            text: 'Zero-day vulnerabilities are unknown software weaknesses that can be sold legally through bug bounty programs or illegally in underground markets. Selling exploits often provides faster and lower-risk financial returns than directly launching attacks.',
           },
           {
-            type: 'table',
-            heading: '6.5 Attack Supply Chain Mapping',
-            headers: ['Role in Ecosystem', 'Description'],
-            rows: [
-              ['Vulnerability researcher', 'Finds and documents unpatched security flaws'],
-              ['Exploit developer', 'Writes code that weaponizes a discovered flaw into a usable attack'],
-              ['Malware distributor', 'Spreads the malware to victims via phishing, infected downloads, or botnets'],
-              ['Botnet operator', 'Manages networks of infected devices and rents them out for DDoS attacks'],
-              ['Data reseller', 'Buys and sells stolen data (credentials, card numbers) on dark web markets'],
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '6.6 Activity — Economic Motivation Analysis',
-            items: [
-              { term: 'Why have cyber-attacks shifted from reputation-based to monetary motivations?', def: 'The rise of e-commerce, cryptocurrency, and organised cybercrime markets made data and access directly convertible to cash, turning attacks into a business rather than a hobby' },
-              { term: 'Why might attackers avoid large financial institutions despite the high potential reward?', def: 'Large institutions invest heavily in security — SOC teams for detection, encryption, regulatory compliance — making attacks costly and risky to execute' },
-              { term: 'How do weaker organisations become attractive targets?', def: 'Small businesses often have limited security budgets, no dedicated IT/security staff, and outdated systems' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '6.7 Activity — Machine Learning Implications',
-            items: [
-              { term: 'How does the commercialization of hacking increase attack volume?', def: 'Ready-made hacking tools and malware-as-a-service let low-skill attackers launch attacks at scale, multiplying the number of incidents' },
-              { term: 'Why must machine learning models be scalable in modern environments?', def: 'As data size increases, models need to keep processing in real time without breaking down' },
-              { term: 'How does attacker innovation pressure defensive systems to evolve?', def: 'As attackers develop new evasion techniques, defensive systems must continuously retrain and adapt or become obsolete against novel threats' },
-            ],
+            type: 'note',
+            heading: 'Activities',
+            text: 'The handout prints the questions below with blank answer lines for you to fill in. The answers that follow each set are worked answers, not the lecturer\'s.',
           },
           {
             type: 'casestudy',
-            heading: '6.8 Activity — Case Scenario',
-            prompt: 'A small online retail company experiences a sudden increase in login attempts from multiple geographic locations.',
+            heading: 'Activity 1: Economic Motivation Analysis',
             tasks: [
-              'Why might this company be targeted instead of a major bank?',
-              'What economic incentive might motivate the attacker?',
-              'Which machine learning approach would you recommend — supervised, anomaly detection, or hybrid — and why?',
+              'Why have cyber-attacks shifted from reputation-based motivations to monetary motivations?',
+              'Why might attackers avoid large financial institutions despite high potential reward?',
+              'Explain how weaker organizations become attractive targets in the attacker economy.',
             ],
           },
           {
             type: 'termlist',
             items: [
-              { term: 'Why this company, not a major bank?', def: 'Smaller companies have weaker defences and less monitoring, making them easier and faster to breach even though the payout per victim is smaller' },
+              { term: 'Why the shift to monetary motivations?', def: 'The rise of e-commerce, cryptocurrency, and organised cybercrime markets made data and access directly convertible to cash, turning attacks into a business rather than a hobby' },
+              { term: 'Why avoid large financial institutions?', def: 'Large institutions invest heavily in security — SOC teams for detection, encryption, regulatory compliance — making attacks costly and risky to execute' },
+              { term: 'Why weaker organisations become targets', def: 'Small businesses often have limited security budgets, no dedicated IT/security staff, and outdated systems' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Activity 2: Attack Supply Chain Mapping',
+            headers: ['Role in Ecosystem', 'Description'],
+            rows: [
+              ['Vulnerability Researcher', 'Finds and documents unpatched security flaws'],
+              ['Exploit Developer', 'Writes code that weaponizes a discovered flaw into a usable attack'],
+              ['Malware Distributor', 'Spreads the malware to victims via phishing, infected downloads, or botnets'],
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The handout\'s table runs on past Malware Distributor onto printed page 13, which is missing from the scan. The case scenario that Activity 2 goes on to ask about, and its first question, are on that same missing page — the two questions below are printed on page 14.',
+          },
+          {
+            type: 'casestudy',
+            tasks: [
+              'What economic incentive might motivate the attacker?',
+              'Which machine learning approach would you recommend? (Supervised, Anomaly Detection, Hybrid) Explain your choice.',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
               { term: 'Economic incentive', def: 'Stored payment data, or ransom potential from disrupting a business that cannot afford downtime' },
               { term: 'ML approach', def: 'A hybrid: supervised learning catches known attack patterns effectively, while anomaly detection catches unknown attacks that do not match existing signatures' },
             ],
           },
           {
+            type: 'casestudy',
+            heading: 'Activity',
+            tasks: [
+              'How does understanding attacker economics improve defensive strategy design?',
+              'Why is cybersecurity considered an adversarial machine learning problem?',
+              'In what ways does the underground marketplace accelerate threat evolution?',
+            ],
+          },
+          {
             type: 'termlist',
-            heading: '6.9 Activity — General Understanding',
             items: [
-              { term: 'How does understanding attacker economics improve defensive strategy design?', def: 'Knowing what makes a target profitable (weak security, valuable data) helps a defender prioritise protecting the most attractive assets first' },
-              { term: 'Why is cybersecurity considered an adversarial machine learning problem?', def: 'Unlike static datasets, the data is generated by an intelligent opponent actively adapting to evade detection' },
-              { term: 'In what ways does the underground marketplace accelerate threat evolution?', def: 'Attackers buy, sell, and share tools and techniques instantly, so improvements spread across the criminal community faster than defenders can respond' },
+              { term: 'How attacker economics improves defensive design', def: 'Knowing what makes a target profitable (weak security, valuable data) helps a defender prioritise protecting the most attractive assets first' },
+              { term: 'Why cybersecurity is an adversarial ML problem', def: 'Unlike static datasets, the data is generated by an intelligent opponent actively adapting to evade detection' },
+              { term: 'How the underground marketplace accelerates threats', def: 'Attackers buy, sell, and share tools and techniques instantly, so improvements spread across the criminal community faster than defenders can respond' },
             ],
           },
         ],
@@ -2685,187 +2792,419 @@ export const courses = [
         title: 'Machine Learning for Data Security',
         sections: [
           {
-            type: 'definition',
-            heading: '7.1 What Machine Learning Is',
-            text: 'Machine learning refers to a set of mathematical and statistical techniques that enable computer systems to learn patterns from historical data, generalise beyond observed examples, predict future outcomes, identify similarities and differences, and detect anomalies. At its core, machine learning transforms raw data into meaningful insights through pattern discovery and inference.',
+            type: 'text',
+            heading: 'Machine Learning',
+            text: 'Machine learning refers to a set of mathematical and statistical techniques that enable computer systems to:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Learn patterns from historical data.',
+              'Generalize beyond observed examples.',
+              'Predict future outcomes.',
+              'Identify similarities and differences.',
+              'Detect anomalies.',
+            ],
           },
           {
             type: 'text',
-            heading: 'Why It Matters in Security',
-            text: 'Since the beginning of the technological age, researchers have aimed to design computer systems capable of reasoning, generalising, and making intelligent decisions from complex data — and ML is one of the primary approaches used to achieve it. In security, ML analyses vast amounts of data such as network traffic, learning from historical records and using that knowledge to make predictions about new and unseen events.',
+            text: 'At its core, machine learning transforms raw data into meaningful insights through pattern discovery and inference. Since the beginning of the technological age, researchers have aimed to design computer systems capable of reasoning, generalizing, and making intelligent decisions from complex data. Machine learning (ML) is one of the primary approaches used to achieve this goal. Machine learning allows systems to analyze vast amounts of data such as network traffic. It learns from historical data and uses that knowledge to make predictions about new and unseen events. It is subdivided into supervised and unsupervised learning.',
+          },
+          {
+            type: 'text',
+            heading: 'Types of Machine Learning',
+            text: 'Machine learning methods are categorized into two families:',
+          },
+          {
+            type: 'text',
+            heading: 'Supervised Learning',
+            text: 'In supervised learning:',
           },
           {
             type: 'bullets',
-            heading: '7.2 Supervised Learning',
             items: [
-              'The dataset includes labeled examples',
-              'The algorithm learns from known input and output pairs',
-              'The goal is to predict labels for new data',
-              'Security applications: spam detection, malware classification, phishing detection, malicious URL detection',
-              'Tasks: classification (spam vs legitimate) and regression (predicting numerical values such as risk scores)',
+              'The dataset includes labeled examples.',
+              'The algorithm learns from known input and output pairs.',
+              'The goal is to predict labels for new data.',
             ],
           },
           {
             type: 'bullets',
-            heading: '7.3 Unsupervised Learning',
+            heading: 'Applications in Security',
             items: [
-              'Data is unlabeled',
-              'The algorithm identifies hidden structures or patterns',
-              'It groups data, or detects deviations from normal behaviour',
+              'Spam detection.',
+              'Malware classification.',
+              'Phishing detection.',
+              'Malicious URL detection.',
             ],
           },
           {
             type: 'bullets',
-            heading: '7.4 Use 1 — Pattern Recognition',
+            heading: 'Tasks',
             items: [
-              'Focuses on identifying known characteristics within data',
-              'Examples: spam detection, malware detection, botnet detection, phishing classification',
-              'Works because malicious activity exhibits recognisable features that can be learned',
+              'Classification (e.g., spam vs. legitimate).',
+              'Regression (predicting numerical values such as risk scores).',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Unsupervised Learning',
+            text: 'In unsupervised learning:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Data is unlabeled.',
+              'The algorithm identifies hidden structures or patterns.',
+              'It groups data or detects deviations from normal behavior.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Uses of Machine Learning in Data Security',
+            text: 'Machine learning applications in security generally fall into two categories:',
+          },
+          {
+            type: 'text',
+            heading: 'i. Pattern Recognition',
+            text: 'Pattern recognition focuses on identifying known characteristics within data. Examples:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Spam detection.',
+              'Malware detection.',
+              'Botnet detection.',
+              'Phishing classification.',
+            ],
+          },
+          {
+            type: 'text',
+            text: 'In these cases, malicious activity exhibits recognizable features that can be learned.',
+          },
+          {
+            type: 'text',
+            heading: 'ii. Anomaly Detection',
+            text: 'Anomaly detection defines normal behavior and flagging deviations. E.g.',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Network outlier detection.',
+              'Insider threat detection.',
+              'Access control anomaly detection.',
+              'Behavioral monitoring.',
+            ],
+          },
+          {
+            type: 'text',
+            text: 'Unlike pattern recognition, anomaly detection does not require explicit malicious examples. Instead, it models normal activity and flags deviations.',
+          },
+          {
+            type: 'note',
+            text: 'There may be infinitely many anomalous patterns, including those never observed during training. This makes anomaly detection powerful but also prone to false positives if not carefully designed.',
+          },
+          {
+            type: 'text',
+            heading: 'Access Control and Behavioral Intelligence in Big Data',
+            text: 'Traditional rule-based access control systems are rigid and inflexible. Machine learning enhances access control by:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Learning typical user access patterns.',
+              'Identifying abnormal behavior.',
+              'Providing adaptive responses.',
             ],
           },
           {
             type: 'bullets',
-            heading: '7.5 Use 2 — Anomaly Detection',
+            heading: 'Example scenario',
             items: [
-              'Defines normal behaviour and flags deviations from it',
-              'Examples: network outlier detection, insider threat detection, access control anomaly detection, behavioural monitoring',
-              'Unlike pattern recognition, it does not require explicit malicious examples — it models normal activity instead',
+              'In a hospital:',
+              'Nurses access individual patient records.',
+              'Doctors query multiple patient records for diagnosis.',
+              'An ML system can detect abnormal access patterns without blocking legitimate rare events.',
             ],
           },
           {
             type: 'note',
-            text: 'There may be infinitely many anomalous patterns, including ones never observed during training. That is what makes anomaly detection powerful — and also what makes it prone to false positives if it is not carefully designed.',
+            text: 'The handout prints the two activities below with blank answer lines. The answers under each are worked answers, not the lecturer\'s.',
           },
           {
-            type: 'text',
-            heading: '7.6 Access Control and Behavioural Intelligence',
-            text: 'Traditional rule-based access control systems are rigid and inflexible. Machine learning enhances access control by learning typical user access patterns, identifying abnormal behaviour, and providing adaptive responses.',
-          },
-          {
-            type: 'bullets',
-            heading: 'Example Scenario — A Hospital',
-            items: [
-              'Nurses access individual patient records',
-              'Doctors query multiple patient records for diagnosis',
-              'An ML system can detect abnormal access patterns without blocking legitimate rare events',
+            type: 'casestudy',
+            heading: 'Activity: Machine Learning Application',
+            tasks: [
+              'Which threats are best suited for supervised learning detection models? Why?',
+              'Which threats may require anomaly detection (unsupervised learning)? Why?',
+              'What challenges make cybersecurity data different from standard ML datasets?',
             ],
           },
           {
             type: 'termlist',
-            heading: '7.7 Activity — Machine Learning Application',
             items: [
-              { term: 'Which threats are best suited to supervised learning models, and why?', def: "Well-labeled threats such as phishing, malware and spam — there is plenty of historical labeled data to train on" },
-              { term: 'Which threats require anomaly detection (unsupervised learning), and why?', def: 'Zero-day attacks, insider threats and unusual network behaviour, where no prior labeled examples exist' },
-              { term: 'What makes cybersecurity data different from standard ML datasets?', def: 'Attacks are rare compared with normal traffic; patterns constantly evolve; adversaries actively try to evade detection; and labeled attack data is scarce and sensitive' },
+              { term: 'Best suited to supervised learning', def: 'Well-labeled threats such as phishing, malware and spam — there is plenty of historical labeled data to train on' },
+              { term: 'Requiring anomaly detection', def: 'Zero-day attacks, insider threats and unusual network behaviour, where no prior labeled examples exist' },
+              { term: 'What makes cybersecurity data different', def: 'Attacks are rare compared with normal traffic; patterns constantly evolve; adversaries actively try to evade detection; and labeled attack data is scarce and sensitive' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: 'Activity',
+            tasks: [
+              'Why is it important to understand attacker motivations before designing detection systems?',
+              'How does the adversarial nature of cybersecurity affect machine learning model design?',
+              'Why are zero-day vulnerabilities difficult to detect using signature-based systems?',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Why attacker motivations matter first', def: 'Motivation predicts behaviour — a financially driven attacker goes after payment data and credentials, while an espionage actor goes after long, quiet access. Knowing which you face tells you which assets to instrument, what normal looks like around them, and which detections are worth the false positives' },
+              { term: 'How the adversarial setting changes model design', def: 'The data is produced by an opponent who watches your defences and adapts. Models must therefore be retrained continuously, be robust to deliberately crafted inputs, and avoid relying on features an attacker can cheaply change' },
+              { term: 'Why signatures miss zero-days', def: 'A signature can only match something already seen and catalogued. A zero-day is by definition unseen, so no signature exists for it — which is why behavioural and anomaly-based detection is needed alongside signatures' },
             ],
           },
         ],
       },
       {
         number: '8',
-        title: 'Supervised Learning Algorithms for Intrusion Detection',
+        title: 'Supervised Learning for Data Security',
         sections: [
           {
             type: 'definition',
-            heading: '8.1 The Supervised Learning Set-up',
-            text: 'Supervised learning trains a model on a labeled dataset where every input example xᵢ is paired with its correct output label yᵢ. The goal is to learn a mapping f : x → y that generalises well to unseen data. In network security this is applied to classification tasks such as separating benign from malicious traffic (intrusion detection), spam from non-spam email, or normal from anomalous behaviour.',
-          },
-          {
-            type: 'code',
-            heading: 'Loss Functions',
-            language: 'math',
-            code: 'Binary cross-entropy (binary classification):\n  L(y, ŷ) = −[ y·log(ŷ) + (1 − y)·log(1 − ŷ) ]\n\nCategorical cross-entropy (multi-class):\n  L(y, ŷ) = − Σ(c = 1..C) y_c · log(ŷ_c)\n\nThe model minimises the loss using gradient descent\nor a variant (Adam, SGD with momentum).',
+            text: 'Supervised learning trains a model using a labeled dataset, where every input example, xᵢ, is paired with its correct output label yᵢ. The goal is to learn a mapping function f: x → y that generalizes well to unseen data. In network security, this approach is widely applied to classification tasks, such as distinguishing benign from malicious network traffic (e.g., intrusion detection), spam vs. non-spam emails, or normal and anomalous behavior.',
           },
           {
             type: 'text',
-            heading: '8.2 Decision Trees (DT)',
-            text: 'Decision trees build a tree-like model where internal nodes represent feature tests, branches represent outcomes, and leaf nodes represent class labels or probability distributions. They are interpretable, handle mixed data types well, and require little preprocessing — which makes them popular for initial IDS prototyping.',
+            text: 'The model minimizes a loss function that measures the difference between predicted outputs and true labels. Common loss functions include:',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Binary cross-entropy (for binary classification) is expressed in Equation:\n  L(y, ŷ) = −[ y log(ŷ) + (1 − y) log(1 − ŷ) ]\n\nCategorical cross-entropy (for multi-class) is expressed in Equation:\n  L(y, ŷ) = − Σ(c=1 to C) y_c log(ŷ_c)',
+          },
+          {
+            type: 'text',
+            text: 'Training typically uses optimization algorithms like gradient descent or its variants (e.g., Adam, SGD with momentum). Below are three popular supervised algorithms frequently used in network security, along with their core ideas, key equations, and typical training procedures.',
+          },
+          {
+            type: 'text',
+            heading: 'Decision Trees (DT)',
+            text: 'Decision trees build a tree-like model where internal nodes represent feature tests, branches represent outcomes, and leaf nodes represent class labels (or probability distributions). They are interpretable, handle mixed data types well, and require little preprocessing, making them popular for initial IDS prototyping.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Key algorithm (CART — Classification and Regression Trees)',
+            items: ['Recursively split the data to maximize purity in child nodes.'],
+          },
+          {
+            type: 'code',
+            heading: 'Common splitting criterion (for classification)',
+            language: 'math',
+            code: 'Gini impurity is expressed in Equation:\n  Gini(t) = 1 − Σᵢ₌₁..ₖ pᵢ²\n  where pᵢ is the proportion of class i at node t.\n\nOr Information Gain using entropy:\n  Entropy(S) = − Σᵢ₌₁..ₖ pᵢ log₂(pᵢ)\n  Gain(S, A) = Entropy(S) − Σ over v ∈ Values(A) of (|Sᵥ| / |S|) · Entropy(Sᵥ)',
+          },
+          {
+            type: 'bullets',
+            heading: 'Training procedure (greedy recursive partitioning)',
+            items: [
+              'Start at root with full dataset.',
+              'For each feature and possible split point, compute impurity reduction.',
+              'Choose the split that maximizes gain (or minimizes weighted child impurity).',
+              'Repeat until stopping criteria (max depth, min samples per leaf, min impurity decrease, etc.).',
+              'Assign majority class (or probability) to each leaf.',
+            ],
           },
           {
             type: 'image',
             src: '/lecture-notes/cyb-224/decision-tree.webp',
-            width: 1400, height: 578,
-            alt: 'A decision tree branching from a root node on income (≤ or > $75,000), then on family size (≤ or > 4 members), then on education (≤ or > 12 years), with leaf nodes labelled Purchaser or Non-Purchaser',
-            caption: 'Figure 3: Decision tree structure — each internal node tests a feature, each leaf assigns a class',
-          },
-          {
-            type: 'code',
-            heading: 'CART Splitting Criteria',
-            language: 'math',
-            code: 'Gini impurity:\n  Gini(t) = 1 − Σ(i = 1..k) p_i²\n  where p_i is the proportion of class i at node t\n\nInformation gain using entropy:\n  Entropy(S) = − Σ(i = 1..k) p_i · log₂(p_i)\n  Gain(S, A) = Entropy(S) − Σ(v ∈ Values(A)) (|S_v| / |S|) · Entropy(S_v)',
-          },
-          {
-            type: 'bullets',
-            heading: 'Training Procedure — Greedy Recursive Partitioning',
-            items: [
-              'Start at the root with the full dataset',
-              'For each feature and possible split point, compute the impurity reduction',
-              'Choose the split that maximises gain (or minimises weighted child impurity)',
-              'Repeat until a stopping criterion is met — max depth, min samples per leaf, min impurity decrease',
-              'Assign the majority class (or a probability) to each leaf',
-              'In network security the features might be packet size, inter-arrival time, source/destination ports and flags, with leaves predicting "normal" or a specific attack type',
-            ],
+            width: 1800, height: 640,
+            alt: 'A decision tree headed Root Node (Initial Split), branching on Income <= $75,000 and Income > $75,000, then on <= 4 family members and > 4 family members, then on <= 12 years of education and > 12 years of education, ending in leaves labelled Purchaser and Non-Purchaser',
+            caption: 'Hypothetical Classification Tree (redrawn from the handout, printed page 20)',
           },
           {
             type: 'text',
-            heading: '8.3 Support Vector Machines (SVM)',
-            text: 'SVMs find the optimal hyperplane that separates classes with the maximum margin. They are effective on high-dimensional data and remain popular in intrusion detection because they generalise well from relatively small labeled datasets.',
+            text: 'In network security, features might include packet size, inter-arrival time, source/destination ports, flags, etc., with leaves predicting "normal" or specific attack types.',
+          },
+          {
+            type: 'text',
+            heading: 'Support Vector Machines (SVM)',
+            text: 'SVMs aim to find the optimal hyperplane that separates classes with the maximum margin. They are effective for high-dimensional data and remain popular in intrusion detection due to good generalization with relatively small labeled datasets.',
+          },
+          {
+            type: 'code',
+            heading: 'Core idea (hard-margin SVM — linearly separable case)',
+            language: 'math',
+            code: 'Find w and b such that:\n  yᵢ (wᵀ xᵢ + b) ≥ 1 ∀i\n\nMaximize margin 2/‖w‖ → equivalent to minimizing ½‖w‖².',
+          },
+          {
+            type: 'code',
+            heading: 'Soft-margin SVM (realistic case with slack variables)',
+            language: 'math',
+            code: 'Minimize:  ½‖w‖² + C Σ(i=1 to n) ξᵢ\n\nsubject to:  yᵢ (wᵀ xᵢ + b) ≥ 1 − ξᵢ, ξᵢ ≥ 0\n\nC controls the trade-off between margin maximization\nand classification error.',
+          },
+          {
+            type: 'code',
+            heading: 'Prediction function',
+            language: 'math',
+            code: 'f(x) = sign(wᵀx + b)',
+          },
+          {
+            type: 'code',
+            heading: 'Kernel trick (for non-linear separation)',
+            language: 'math',
+            code: 'Replace xᵢᵀxⱼ with kernel K(xᵢ, xⱼ)\n(e.g., RBF: K(xᵢ, xⱼ) = exp(−γ ‖xᵢ − xⱼ‖²)).',
+          },
+          {
+            type: 'text',
+            text: 'Here are representative SVM diagrams showing the hyperplane and margin:',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/cyb-224/svm-candidates.webp',
+            width: 1500, height: 820,
+            maxWidth: 720,
+            alt: 'A cloud of two kinds of point on unlabelled axes, cut by three thick straight boundaries that meet at a single junction, dividing the plane into three regions. A callout box reading "Hyperplanes that Best Separates Different Classes" points to where the boundaries meet',
+            caption: 'Support Vector Machines (SVM) — hyperplanes that best separate different classes (redrawn from printed page 22)',
           },
           {
             type: 'image',
             src: '/lecture-notes/cyb-224/svm-margin.webp',
-            width: 1100, height: 860,
-            alt: 'Diagram relating support vectors to the positive and negative hyperplanes, with the maximum margin hyperplane sitting between them and the margin measured across the gap',
-            caption: 'Figure 4: SVM geometry — support vectors define the margin around the separating hyperplane',
+            width: 1500, height: 900,
+            maxWidth: 720,
+            alt: 'On X1 and X2 axes, a solid maximum margin hyperplane with a dashed positive hyperplane above right and a dashed negative hyperplane below left. Diamonds lie beyond the positive hyperplane and circles beyond the negative one; the two points sitting on the dashed planes are labelled the support vectors, and the band between the solid line and the positive hyperplane is labelled the maximum margin',
+            caption: 'The maximum margin hyperplane, with the positive and negative hyperplanes either side (redrawn from printed page 22)',
           },
           {
-            type: 'code',
-            heading: 'SVM Equations',
-            language: 'math',
-            code: 'Hard margin (linearly separable case):\n  find w, b such that  y_i(wᵀx_i + b) ≥ 1   for all i\n  maximise margin 2/||w||  ⟺  minimise ½||w||²\n\nSoft margin (realistic case, slack variables ξ):\n  minimise  ½||w||² + C · Σ(i = 1..n) ξ_i\n  subject to  y_i(wᵀx_i + b) ≥ 1 − ξ_i,  ξ_i ≥ 0\n  C trades off margin size against classification error\n\nPrediction:\n  f(x) = sign(wᵀx + b)\n\nKernel trick (non-linear separation) — replace xᵢᵀxⱼ with K(xᵢ, xⱼ):\n  RBF:  K(xᵢ, xⱼ) = exp(−γ·||xᵢ − xⱼ||²)',
-          },
-          {
-            type: 'text',
-            heading: '8.4 Neural Networks (Feedforward / Multi-Layer Perceptron)',
-            text: 'Feedforward neural networks consist of an input layer, one or more hidden layers, and an output layer. They excel at learning complex, non-linear patterns, which suits modern network intrusion detection on large traffic datasets.',
-          },
-          {
-            type: 'code',
-            heading: 'Forward Pass and Training',
-            language: 'math',
-            code: 'Single neuron:\n  z = wᵀx + b\n  a = σ(z)\n  common activations σ: ReLU max(0, z), sigmoid, tanh\n\nL-layer network:\n  a^[l] = σ^[l]( W^[l] · a^[l−1] + b^[l] ),   l = 1, ..., L\n\nTraining loop:\n  1. Forward pass  → compute predictions and loss\n  2. Backward pass → compute gradients ∂L/∂W^[l], ∂L/∂b^[l]\n  3. Update        → W ← W − η · ∂L/∂W   (or Adam, etc.)',
+            type: 'image',
+            src: '/lecture-notes/cyb-224/svm-decision-boundary.webp',
+            width: 1500, height: 880,
+            maxWidth: 720,
+            alt: 'On x1 and x2 axes, three parallel lines: a thin solid hyperplane for the first class on the left, a thick dashed decision boundary in the middle, and a thin solid hyperplane for the second class on the right. Circles lie left of the boundary and squares right of it; three points on the outer planes are ringed as support vectors, and a double-headed arrow between the first-class hyperplane and the decision boundary is labelled the margin',
+            caption: 'The same picture named differently — decision boundary, one hyperplane per class, and the margin between them (redrawn from printed page 23)',
           },
           {
             type: 'text',
-            heading: '8.5 Choosing Between Them',
-            text: 'Each method has trade-offs: decision trees offer interpretability, SVMs provide strong theoretical guarantees in high dimensions, and neural networks deliver top performance on large or complex datasets. Neural approaches work best combined with feature engineering, autoencoders for anomaly-detection preprocessing, or modern variants (CNNs, LSTMs, Transformers) for traffic sequence analysis. In practice many real-world IDS/IPS systems ensemble these methods or use deep learning hybrids.',
+            heading: 'Neural Networks (Feedforward / Multi-Layer Perceptron)',
+            text: 'Feedforward neural networks consist of an input layer, one or more hidden layers, and an output layer. They excel at learning complex, non-linear patterns for modern network intrusion detection systems, especially with large traffic datasets.',
+          },
+          {
+            type: 'code',
+            heading: 'Forward pass (single neuron)',
+            language: 'math',
+            code: 'z = wᵀx + b   a = σ(z)\n\nCommon activations σ: ReLU (max (0, z)), sigmoid, tanh.',
+          },
+          {
+            type: 'code',
+            heading: 'Overall model (L-layer network)',
+            language: 'math',
+            code: 'a⁽ˡ⁾ = σ⁽ˡ⁾( W⁽ˡ⁾ a⁽ˡ⁻¹⁾ + b⁽ˡ⁾ )   l = 1, …, L',
+          },
+          {
+            type: 'text',
+            heading: 'Loss + backpropagation',
+            text: 'Minimize empirical risk (e.g., cross-entropy) using gradient descent. Gradients computed via chain rule → backpropagation algorithm.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Typical training loop',
+            items: [
+              'Forward pass — compute predictions and loss.',
+              'Backward pass — compute gradients ∂L/∂W⁽ˡ⁾, ∂L/∂b⁽ˡ⁾.',
+              'Update parameters: W ← W − η ∂L/∂W (or using Adam, etc.).',
+            ],
+          },
+          {
+            type: 'text',
+            text: 'These models are effective in network security when combined with feature engineering, autoencoders for anomaly-detection preprocessing, or modern variants (CNNs, LSTMs, Transformers) for traffic-sequence analysis. Each method has trade-offs: decision trees offer interpretability, SVMs provide strong theoretical guarantees in high dimensions, and neural networks deliver top performance on large/complex datasets. In practice, many real-world IDS/IPS systems ensemble them or use deep learning hybrids.',
           },
         ],
       },
       {
         number: '9',
-        title: 'Practical — Building Detection Models by Hand',
+        title: 'Practical Activities',
         sections: [
           {
             type: 'text',
-            heading: '9.1 Objective',
-            text: 'These activities combine discussion, manual calculation, and coding practice, to help you understand the strengths and weaknesses of different machine learning algorithms applied to real network security problems.',
+            text: 'This practical manual contains activities designed to help students understand how machine learning algorithms are applied in network intrusion detection systems (IDS). The exercises combine discussion, manual calculations, and coding practice.',
+          },
+          {
+            type: 'text',
+            heading: 'Objective',
+            text: 'To help students understand the strengths and weaknesses of different machine learning algorithms when applied to real network security problems.',
+          },
+          {
+            type: 'text',
+            heading: 'Scenario',
+            text: 'You are designing an Intrusion Detection System (IDS) that analyzes the following network traffic features:',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Packet size.',
+              'Source and destination IP address.',
+              'Source and destination port.',
+              'TCP flags (e.g., SYN).',
+              'TTL (Time To Live).',
+              'Packet inter-arrival time.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Task',
+            items: [
+              'Divide students into small groups.',
+              'Assign each group one algorithm: Decision Tree; Support Vector Machine (SVM); Neural Network (MLP).',
+              'Each group should discuss and answer the following questions:',
+            ],
           },
           {
             type: 'casestudy',
-            heading: '9.2 Practical 1 — Algorithm Comparison',
-            prompt: 'You are designing an Intrusion Detection System (IDS) that analyses these network traffic features: packet size, source and destination IP address, source and destination port, TCP flags (e.g. SYN), TTL (Time To Live), and packet inter-arrival time. Work in small groups, each group taking one algorithm — Decision Tree, SVM, or Neural Network (MLP).',
             tasks: [
-              'What are three advantages of your algorithm for IDS?',
+              'What are three advantages of the algorithm for IDS?',
               'What are three disadvantages?',
               'How could overfitting occur when detecting network attacks?',
               'What techniques could reduce overfitting?',
-              'Which model suits a small labeled dataset from a university network, and which suits a massive real-time traffic dataset?',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The handout gives each group one algorithm. All three are answered below so you can revise the whole comparison; these are worked answers, not the lecturer\'s.',
+          },
+          {
+            type: 'table',
+            headers: ['Algorithm', 'Three advantages for IDS', 'Three disadvantages'],
+            rows: [
+              ['Decision Tree', 'Interpretable — an analyst can read the rule that fired and defend it in an incident report; handles the mixed feature types here (packet size and TTL alongside TCP flags) with no preprocessing; fast to train and fast enough to predict at line rate', 'Overfits readily, worst of all on high-cardinality features like port or IP; a small change in the training capture can restructure the whole tree; axis-parallel splits can only approximate a diagonal relationship, such as packet rate against entropy, as a staircase'],
+              ['Support Vector Machine', 'Generalises well from a relatively small labelled capture, which is what a university network can realistically produce; the kernel trick separates classes no straight line can divide; the boundary depends only on the support vectors, so the bulk of ordinary traffic cannot drag it around', 'Training cost grows roughly with the square of the sample count, so a full day of capture is impractical; it outputs a signed distance rather than a probability, so ranking alerts by confidence needs extra calibration; features must be scaled first and C and gamma both have to be tuned'],
+              ['Neural Network (MLP)', 'Learns the non-linear combinations of packet size, TTL and inter-arrival time that mark an attack without being told which to combine; scales to the traffic volume a campus actually generates; extends naturally to sequence models when an attack is spread over time', 'Needs a large labelled dataset, and labelled attack traffic is exactly what is scarce; a decision cannot be explained to an incident-response team; expensive to train and sensitive to architecture and learning-rate choices'],
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'How overfitting arises here', def: 'The model learns the capture instead of the attack. The IP address features are the worst offenders: a tree that splits on a specific source address scores perfectly on the capture and detects nothing once the attacker moves host. Port numbers and TTL do the same more quietly. And because benign traffic outnumbers attacks heavily, a model can report high accuracy while missing every intrusion in the set' },
+              { term: 'Techniques that reduce it', def: 'Drop or generalise identifier-like features — bucket ports into ranges instead of splitting on one number, and prefer behavioural features (packet rate, byte entropy, SYN-to-ACK ratio) that an attacker cannot change for free. Constrain the model: maximum depth, minimum samples per leaf and minimum impurity decrease for trees; L2 or dropout for the MLP; a smaller C for the SVM. Validate on traffic captured on a different day, cross-validate rather than trusting one split, and balance or reweight the classes so the rare attack still counts' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: 'Which model is suitable for',
+            tasks: [
+              'A small labeled dataset from a university network',
+              'A massive real-time traffic dataset',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Small labelled dataset from a university network', def: 'Support Vector Machine. The theory section states that SVMs generalise well from relatively small labelled datasets, and because the margin is fixed by a handful of support vectors, a few hundred labelled flows can still place a usable boundary. A pruned decision tree is the sensible second choice where the analyst has to be able to read the rule' },
+              { term: 'Massive real-time traffic dataset', def: 'Neural network. The theory section puts its best performance on large and complex datasets, and once trained it predicts cheaply, which is what real time depends on. Note what the practicals do at that scale: they switch from the kernel SVM to LinearSVC for precisely this reason, because kernel training does not scale' },
             ],
           },
           {
             type: 'table',
-            heading: '9.3 Practical 2 — Decision Tree Construction',
+            heading: 'PRACTICAL 2: Decision Tree Construction — Dataset',
             headers: ['Packet', 'Packet Size', 'Src Port < 1024', 'SYN Flag', 'Label'],
             rows: [
               ['1', '60', 'Yes', '1', 'Malicious'],
@@ -2878,38 +3217,85 @@ export const courses = [
           },
           {
             type: 'code',
-            heading: 'Step 1 — Root Gini Impurity',
+            heading: 'Step 1: Calculate Root Gini Impurity',
             language: 'math',
-            code: 'Gini = 1 − ( p²_malicious + p²_benign )\n\nmalicious packets = 3,  benign packets = 3\n  p_malicious = 3/6 = 0.5\n  p_benign    = 3/6 = 0.5\n\nGini = 1 − (0.5² + 0.5²)\nGini = 0.5',
+            code: 'Formula:\n  Gini = 1 − ( P²_malicious + P²_benign )\n\nNumber of malicious packets = 3.\nNumber of benign packets = 3.\nP_malicious = 3/6 = 0.5.\nP_benign = 3/6 = 0.5.\n\nGini = 1 − (0.5² + 0.5²)\nGini = 0.5',
           },
           {
-            type: 'code',
-            heading: 'Step 2 — Split on the SYN Flag',
-            language: 'math',
-            code: 'If SYN = 1 → all packets Malicious → Gini = 0\nIf SYN = 0 → all packets Benign    → Gini = 0\n\nA perfect split.\n\nFinal decision rule:\n  IF SYN_Flag = 1 THEN Malicious\n  ELSE Benign\n\nTraining accuracy = 6/6 = 100%',
+            type: 'text',
+            text: 'The SYN flag is a control bit in the Transmission Control Protocol header that is used to start a connection between two computers on a network. "SYN" stands for Synchronize. It is mainly used during the initial stage of communication to synchronize sequence numbers between the sender and receiver.',
           },
           {
-            type: 'casestudy',
-            title: 'Discussion Question',
-            prompt: 'Why might this tree overfit real network traffic data, and how could pruning improve generalisation?',
+            type: 'text',
+            heading: 'Function of SYN Flag',
+            text: 'The SYN flag is used to initiate a TCP connection before data transmission begins. It tells the receiving device that the sender wants to start a communication session.',
           },
           {
-            type: 'definition',
-            heading: 'Background — The SYN Flag',
-            text: 'The SYN ("synchronize") flag is a control bit in the TCP header used to start a connection between two computers on a network. It is used mainly during the initial stage of communication to synchronize sequence numbers between sender and receiver, telling the receiving device that the sender wants to start a session.',
+            type: 'text',
+            heading: 'TCP Three-Way Handshake',
+            text: 'The SYN flag is part of the three-way handshake, which establishes a reliable TCP connection.',
           },
           {
             type: 'termlist',
-            heading: 'The TCP Three-Way Handshake',
             items: [
-              { term: 'Step 1 — SYN (client → server)', def: 'The client sends a packet with SYN = 1, meaning "I want to start a connection"' },
-              { term: 'Step 2 — SYN-ACK (server → client)', def: 'The server replies with SYN = 1 and ACK = 1, meaning "connection request received"' },
-              { term: 'Step 3 — ACK (client → server)', def: 'The client sends ACK = 1, and the connection is now established' },
+              { term: 'Step 1: SYN — Client → Server', def: 'The client sends a packet with SYN = 1. This means "I want to start a connection."' },
+              { term: 'Step 2: SYN-ACK — Server → Client', def: 'The server replies with SYN = 1 and ACK = 1. Meaning "Connection request received."' },
+              { term: 'Step 3: ACK — Client → Server', def: 'The client sends ACK = 1. The connection is now established.' },
             ],
           },
           {
+            type: 'code',
+            heading: 'Step 2: Split Using SYN Flag (The SYN flag is used to initiate a TCP connection before data transmission begins. It tells the receiving device that the sender wants to start a communication session).',
+            language: 'math',
+            code: 'If SYN = 1\n  All packets → Malicious.\n  Gini = 0.\n\nIf SYN = 0\n  All packets → Benign.\n  Gini = 0.\n\nThis produces a perfect split.\n\nFinal Decision Rule:\n  IF SYN_Flag = 1 → Malicious ELSE → Benign\n\nTraining Accuracy:\n  Accuracy = 6/6 = 100%',
+          },
+          {
+            type: 'casestudy',
+            heading: 'Discussion Question',
+            prompt: 'Why might this tree overfit real network traffic data, and how could pruning improve generalization?',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Why the tree overfits', def: 'It was fitted on six packets and one feature. SYN = 1 happened to coincide with Malicious in all three malicious rows, so the split reaches Gini 0 on both sides and 100% training accuracy — but that accuracy is a property of those six rows, not of network traffic. Every normal TCP connection opens with SYN = 1, so on real traffic this rule flags the whole handshake volume of the network as malicious, and it detects nothing that is not a SYN flood' },
+              { term: 'What the tree cannot know', def: 'Packet size splits the same six rows just as perfectly — any threshold between 65 and 70 bytes separates the malicious 55, 60 and 65 from the benign 70, 1400 and 1500. With six rows there is no way to tell which of several perfect splits reflects the real signal, so the tree simply takes the first one it evaluates' },
+              { term: 'How pruning improves generalisation', def: 'Pre-pruning stops the tree before it can memorise: cap the maximum depth, require a minimum number of samples per leaf, and require a minimum impurity decrease before a split is accepted. Post-pruning grows the tree first, then collapses any branch whose removal does not hurt performance on held-out data. Either way only the splits that survive on unseen packets are kept, and a leaf that is 60% confident over many samples is worth more than one that is perfect over two' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Practical Question 3: Support Vector Machine (SVM) for Malicious Traffic Detection',
+            text: 'To use Support Vector Machine (SVM) to classify network traffic as Benign or Malicious using a simple dataset.',
+          },
+          {
             type: 'table',
-            heading: '9.4 Practical 3 — SVM for Malicious Traffic Detection',
+            headers: ['Packet', 'Packet Rate', 'Byte Entropy', 'SYN Flag', 'Label'],
+            rows: [
+              ['1', '12', '0.30', '0', 'Benign'],
+              ['2', '15', '0.35', '0', 'Benign'],
+              ['3', '18', '0.40', '0', 'Benign'],
+              ['4', '40', '0.85', '1', 'Malicious'],
+              ['5', '45', '0.90', '1', 'Malicious'],
+              ['6', '50', '0.95', '1', 'Malicious'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Where',
+            items: [
+              { term: 'Packet Rate', def: 'number of packets per second.' },
+              { term: 'Byte Entropy', def: 'randomness in packet data.' },
+              { term: 'SYN Flag', def: 'indicates connection request.' },
+              { term: 'Label', def: 'traffic type.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Practical Tasks — Question 1',
+            text: 'Convert the labels: Benign → 0. Malicious → 1.',
+          },
+          {
+            type: 'table',
             headers: ['Packet', 'Packet Rate', 'Byte Entropy', 'SYN Flag', 'Label', 'Converted Label'],
             rows: [
               ['1', '12', '0.30', '0', 'Benign', '0'],
@@ -2920,16 +3306,6 @@ export const courses = [
               ['6', '50', '0.95', '1', 'Malicious', '1'],
             ],
           },
-          {
-            type: 'termlist',
-            heading: 'Reading the Dataset',
-            items: [
-              { term: 'Packet rate', def: 'Number of packets per second' },
-              { term: 'Byte entropy', def: 'Randomness in the packet data' },
-              { term: 'SYN flag', def: 'Indicates a connection request' },
-              { term: 'Converted label', def: 'SVMs need numeric targets — Benign → 0, Malicious → 1' },
-            ],
-          },
         ],
       },
       {
@@ -2938,43 +3314,43 @@ export const courses = [
         sections: [
           {
             type: 'definition',
-            heading: '10.1 Unsupervised Learning',
-            text: 'Unsupervised learning trains a model on data without labeled responses. The model learns the underlying structure of the data by identifying patterns and relationships on its own.',
+            heading: 'Unsupervised Learning',
+            text: 'Unsupervised learning involves training a model on data without labeled responses. The model tries to learn the underlying structure of the data by identifying patterns and relationships.',
           },
           {
             type: 'text',
             heading: 'Clustering Algorithms',
-            text: 'Clustering algorithms such as k-means and hierarchical clustering group similar data points together. In network security, clustering identifies groups of similar network behaviours, which helps detect abnormal activity — for example grouping similar login attempts and identifying the outliers that may indicate unauthorized access.',
+            text: 'Clustering algorithms, such as k-means and hierarchical clustering, group similar data points together. In network security, clustering can be used to identify groups of similar network behaviors, which can help in detecting abnormal activities. For example, clustering can be used to group similar login attempts and identify outliers that may indicate unauthorized access attempts.',
           },
           {
             type: 'text',
-            heading: 'Anomaly Detection Techniques',
-            text: 'Anomaly detection identifies data points that deviate significantly from the majority of the data. Gaussian Mixture Models (GMM) and Principal Component Analysis (PCA) are commonly used. In network security this surfaces unusual traffic patterns that may indicate a breach.',
+            heading: 'Anomaly Detection',
+            text: 'Anomaly detection involves identifying data points that deviate significantly from the majority of the data. Techniques such as Gaussian Mixture Models (GMM) and Principal Component Analysis (PCA) are commonly used for this purpose. In network security, anomaly detection can be used to identify unusual network traffic patterns that may indicate a security breach.',
           },
           {
             type: 'definition',
-            heading: '10.2 Reinforcement Learning',
-            text: 'Reinforcement learning trains a model to make a sequence of decisions by learning from the consequences of its actions — rewards for desired behaviour, penalties for undesired behaviour — optimising its actions over time.',
+            heading: 'Reinforcement Learning',
+            text: 'Reinforcement learning involves training a model to make a sequence of decisions by learning from the consequences of its actions. The model receives rewards for desired behaviors and penalties for undesired ones, optimizing its actions over time.',
           },
           {
             type: 'text',
             heading: 'Markov Decision Processes (MDP)',
-            text: 'MDPs provide a mathematical framework for modelling decisions where outcomes are partly random and partly under the control of the decision-maker. In network security, reinforcement learning can develop adaptive security policies that respond to evolving threats — for example dynamically adjusting firewall rules based on detected threats, balancing security against network performance.',
+            text: 'MDPs provide a mathematical framework for modeling decision-making in situations where outcomes are partly random and partly under the control of the decision-maker. In network security, reinforcement learning can be used to develop adaptive security policies that respond to evolving threats. For example, a reinforcement learning model could be trained to dynamically adjust firewall rules based on detected threats, optimizing the balance between security and network performance.',
           },
           {
             type: 'definition',
-            heading: '10.3 Deep Learning',
-            text: 'Deep learning, a subset of ML, uses neural networks with many layers (deep neural networks) to model complex patterns. It is particularly effective on high-dimensional data such as images and speech.',
+            heading: 'Deep Learning',
+            text: 'Deep learning, a subset of ML, involves neural networks with many layers (deep neural networks) that can model complex patterns in data. Deep learning techniques are particularly effective for tasks that involve high-dimensional data, such as image and speech recognition.',
           },
           {
             type: 'text',
             heading: 'Convolutional Neural Networks (CNNs)',
-            text: 'CNNs are specialised networks for grid-like data such as images. In network security, CNNs analyse traffic data represented as images to identify patterns indicative of malicious activity — and can detect malware by analysing the binary code of executable files.',
+            text: 'CNNs are specialized neural networks designed to process grid-like data, such as images. In network security, CNNs can be used to analyze network traffic data represented as images, identifying patterns indicative of malicious activity. For instance, CNNs can be applied to detect malware by analyzing the binary code of executable files.',
           },
           {
             type: 'text',
             heading: 'Recurrent Neural Networks (RNNs)',
-            text: 'RNNs handle sequential data, which suits time-series analysis. In network security, RNNs detect anomalies in network traffic over time, identifying patterns that indicate ongoing attacks or data exfiltration attempts.',
+            text: 'RNNs are designed to handle sequential data, making them suitable for tasks like time-series analysis. In network security, RNNs can be used to detect anomalies in network traffic over time, identifying patterns that indicate ongoing attacks or data exfiltration attempts. By employing these AI/ML techniques, network security systems can achieve higher accuracy in threat detection and response, ultimately enhancing the overall security posture of organizations. The integration of AI/ML into network security not only improves the ability to detect and mitigate threats but also enables proactive defense mechanisms that adapt to the evolving threat landscape.',
           },
         ],
       },
@@ -2984,86 +3360,127 @@ export const courses = [
         sections: [
           {
             type: 'text',
-            heading: '11.1 How AI/ML Changed Threat Detection',
-            text: 'Applying AI and ML to network security has fundamentally transformed how threats are detected and mitigated. These technologies analyse vast amounts of network data in real time, identifying and responding to potential threats more effectively and efficiently than traditional methods, and enabling proactive defences that adapt to the evolving threat landscape.',
+            text: 'The application of AI and ML in network security has fundamentally transformed the approach to detecting and mitigating network threats. These technologies enable the analysis of vast amounts of network data in real-time, providing enhanced capabilities for identifying and responding to potential threats more effectively and efficiently than traditional methods.',
           },
           {
             type: 'image',
             src: '/lecture-notes/cyb-224/ml-detection-pipeline.webp',
-            width: 1000, height: 1174,
+            width: 1000, height: 1294,
             maxWidth: 620,
-            alt: 'A six-stage pipeline: data collection from network traffic, data preprocessing (cleansing and feature extraction), model training with neural networks, decision trees and SVM, real-time monitoring and detection, threat identification and mitigation, then automated response such as blocking IPs and isolating devices',
+            alt: 'A six-stage pipeline: data collection from network traffic, data preprocessing (cleansing and feature extraction), model training with neural networks, decision trees and SVM, real-time monitoring and detection (baseline behavior, anomaly detection), threat identification and mitigation (pattern recognition, predictive modeling), then automated response such as blocking IPs and isolating devices',
             caption: 'Figure 5: The ML threat-detection pipeline, from raw traffic to automated response',
           },
           {
-            type: 'termlist',
-            heading: '11.2 Anomaly Detection',
-            items: [
-              { term: 'Baseline behaviour modeling', def: 'The system first establishes what normal looks like by analysing historical data — typical login times, frequency of data access, common communication patterns — building a profile of regular activity' },
-              { term: 'Real-time monitoring', def: 'Traffic and activity are watched continuously and any deviation from the baseline is flagged; statistical analysis, clustering, and neural networks are common here. A sudden spike in data transfer volume or an unusual login time triggers an alert' },
-              { term: 'Contextual analysis', def: 'User behaviour analytics (UBA) separates normal activity from suspicious action using context — time of day, location, user role — which improves accuracy and reduces false positives' },
-            ],
+            type: 'text',
+            heading: 'Anomaly Detection',
+            text: 'AI and ML models excel at detecting anomalies in network traffic by identifying deviations from established norms. This process involves several key steps:',
           },
           {
             type: 'termlist',
-            heading: '11.3 Threat Identification',
             items: [
-              { term: 'Pattern recognition', def: 'Models are trained to recognise patterns associated with known threats. Signature-based detection uses predefined malware patterns; ML extends this to variations and new patterns signatures would miss, such as polymorphic malware that changes its code to evade detection' },
-              { term: 'Behavioural analysis', def: "Rather than relying only on known patterns, the model analyses how entities behave — a rise in failed logins, unusual data transfers, unexpected communication. This is especially useful for zero-day attacks and APTs, where the attacker's behaviour deviates from normal user activity" },
+              { term: 'Baseline Behavior Modeling', def: 'AI/ML systems first establish a baseline of normal network behavior by analyzing historical data. This involves understanding what constitutes regular traffic, user activities, and system operations. For instance, machine learning models can observe typical login times, frequency of data access, and common communication patterns to create a comprehensive profile of normal activities.' },
+              { term: 'Real-Time Monitoring', def: 'Once the baseline is established, the system continuously monitors network traffic and activities in real-time. Any deviations from the established baseline are flagged as potential anomalies. Techniques such as statistical analysis, clustering, and neural networks are commonly used. For example, a sudden spike in data transfer volume or an unusual login time can trigger an alert for further investigation.' },
+              { term: 'Contextual Analysis', def: 'Advanced AI/ML systems also incorporate contextual data to improve anomaly detection. For instance, user behavior analytics (UBA) can differentiate between normal activities and suspicious actions based on the context, such as time of day, location, and user role. By analyzing this contextual information, AI/ML models can more accurately identify genuine threats and reduce false positives.' },
             ],
           },
           {
+            type: 'text',
+            heading: 'Threat Identification',
+            text: 'AI and ML models are trained to recognize patterns associated with known threats and can identify new, previously unseen threats through behavioral analysis.',
+          },
+          {
             type: 'termlist',
-            heading: '11.4 Predictive Analytics',
             items: [
-              { term: 'Predictive modeling', def: 'Trends and historical data are used to anticipate attacks and identify vulnerabilities before they are exploited — time-series analysis can forecast a potential DDoS by spotting patterns in traffic volume and alerting administrators to act' },
-              { term: 'Risk assessment', def: 'Evaluating the potential impact and likelihood of different threats lets the system prioritise responses and allocate resources — determining the criticality of assets and protecting high-value targets first' },
+              { term: 'Pattern Recognition', def: 'AI/ML models are trained to recognize patterns associated with known threats. For example, signature-based detection systems use predefined patterns of known malware to identify threats. Machine learning enhances this by identifying variations and new patterns that signature-based systems might miss. For instance, machine learning models can detect polymorphic malware that frequently changes its code to evade traditional signature-based detection.' },
+              { term: 'Behavioral Analysis', def: "Instead of relying solely on known patterns, AI/ML can analyze the behavior of entities within the network. For example, an increase in failed login attempts, unusual data transfers, or unexpected communication patterns can trigger alerts. This is particularly useful for detecting zero-day attacks and advanced persistent threats (APTs), where the attacker's behavior may deviate from normal user activities." },
             ],
+          },
+          {
+            type: 'text',
+            heading: 'Predictive Analytics',
+            text: 'AI and ML can predict potential threats by analyzing trends and historical data, enabling proactive measures.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Predictive Modeling', def: 'AI/ML can predict potential threats by analyzing trends and historical data. Predictive models can identify vulnerabilities and anticipate future attacks, enabling proactive measures. For instance, time-series analysis can forecast potential DDoS attacks by identifying patterns in traffic volume and alerting administrators to take preventive actions.' },
+              { term: 'Risk Assessment', def: 'AI/ML systems can assess the risk associated with different types of threats. By evaluating the potential impact and likelihood of various threats, these systems can prioritize responses and allocate resources effectively. For example, a risk assessment model can determine the criticality of different assets and prioritize the protection of high-value targets.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Examples of AI/ML Algorithms Used',
+            text: 'Neural Networks: Neural networks are powerful tools for detecting and mitigating network threats due to their ability to model complex relationships in data.',
+          },
+          {
+            type: 'note',
+            text: 'The handout leaves the four activities below blank for you to fill in. The table entries and the answers that follow each set are worked answers, not the lecturer\'s.',
+          },
+          {
+            type: 'text',
+            heading: 'Activity 2: Supervised vs Unsupervised',
+            text: 'Fill in the table:',
           },
           {
             type: 'table',
-            heading: '11.5 Activity — Supervised or Unsupervised?',
-            headers: ['Scenario', 'Approach', 'Why'],
+            headers: ['Scenario', 'Supervised or Unsupervised?', 'Why?'],
             rows: [
               ['Spam detection', 'Supervised', 'Labeled examples of spam and non-spam are available'],
               ['Unknown network traffic patterns', 'Unsupervised', 'No prior labels exist for new or evolving attack patterns'],
               ['Malware family classification', 'Supervised', 'Historical data exists for the different malware families'],
-              ['Insider behaviour anomaly detection', 'Unsupervised', 'Insider threats are rare and often lack predefined labels'],
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '11.6 Activity — Adversarial Thinking',
-            items: [
-              { term: 'How might attackers use machine learning to bypass security systems?', def: 'To generate evasive malware, craft sophisticated phishing campaigns, or learn to mimic normal user behaviour and avoid detection' },
-              { term: 'Why must ML systems in cybersecurity consider adversarial threats?', def: 'Because attackers actively adapt to evade detection, models must be robust against adversarial examples and continuously updated to counter new evasion techniques' },
-              { term: 'What is adversarial machine learning?', def: 'The field that studies the vulnerability of ML models to malicious inputs (adversarial examples) and develops techniques to make those models more robust' },
-            ],
-          },
-          {
-            type: 'termlist',
-            heading: '11.7 Activity — Pattern Recognition vs Anomaly Detection',
-            items: [
-              { term: 'A problem best solved by pattern recognition?', def: 'Detecting known malware variants from their characteristic code signatures or network traffic patterns' },
-              { term: 'A problem best solved by anomaly detection?', def: 'Identifying a zero-day attack or insider threat, where no signature exists but the behaviour deviates sharply from the established baseline' },
-              { term: 'Why can anomaly detection generate false positives?', def: 'It flags any deviation from normal, so legitimate but unusual events — a new software update, a user working from a new location — can be mistaken for anomalies' },
-              { term: 'Why can there be infinitely many anomalous patterns?', def: 'Anomalies are defined by deviation from the norm, and the ways something can differ from the norm are theoretically infinite — attackers also keep inventing new, unforeseen attack vectors' },
+              ['Insider behavior anomaly detection', 'Unsupervised', 'Insider threats are rare and often lack predefined labels'],
             ],
           },
           {
             type: 'casestudy',
-            heading: '11.8 Activity — Case Study',
-            prompt: 'A company observes that one employee suddenly accesses 50 times more files than usual, at 2:00 AM, from a new geographic location.',
+            heading: 'Activity 3: Adversarial Thinking',
             tasks: [
-              'Is this a pattern recognition or an anomaly detection problem?',
-              'What features would you extract to analyse this case?',
-              'What risks exist if the model makes an incorrect prediction?',
+              'How might attackers use machine learning to bypass security systems?',
+              'Why must machine learning systems in cybersecurity consider adversarial threats?',
+              'What is adversarial machine learning?',
             ],
           },
           {
             type: 'termlist',
             items: [
-              { term: 'Which problem type?', def: "Anomaly detection — the scenario describes a significant deviation from the employee's usual behaviour in time, volume and location" },
+              { term: 'How attackers use ML to bypass defences', def: 'To generate evasive malware, craft sophisticated phishing campaigns, or learn to mimic normal user behaviour and avoid detection' },
+              { term: 'Why adversarial threats must be considered', def: 'Because attackers actively adapt to evade detection, models must be robust against adversarial examples and continuously updated to counter new evasion techniques' },
+              { term: 'Adversarial machine learning', def: 'The field that studies the vulnerability of ML models to malicious inputs (adversarial examples) and develops techniques to make those models more robust' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: 'Activity 4: Pattern Recognition vs Anomaly Detection',
+            tasks: [
+              'Give one example of a security problem best solved using pattern recognition.',
+              'Give one example best solved using anomaly detection.',
+              'Why can anomaly detection generate false positives?',
+              'Explain why there can be infinitely many anomalous patterns.',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Best solved by pattern recognition', def: 'Detecting known malware variants from their characteristic code signatures or network traffic patterns' },
+              { term: 'Best solved by anomaly detection', def: 'Identifying a zero-day attack or insider threat, where no signature exists but the behaviour deviates sharply from the established baseline' },
+              { term: 'Why false positives arise', def: 'It flags any deviation from normal, so legitimate but unusual events — a new software update, a user working from a new location — can be mistaken for anomalies' },
+              { term: 'Why anomalous patterns are unbounded', def: 'Anomalies are defined by deviation from the norm, and the ways something can differ from the norm are theoretically infinite — attackers also keep inventing new, unforeseen attack vectors' },
+            ],
+          },
+          {
+            type: 'casestudy',
+            heading: 'Activity 5: Case Study',
+            prompt: 'Scenario: A company observes that one employee suddenly accesses 50 times more files than usual, at 2:00 AM from a new geographic location.',
+            tasks: [
+              'Would this be a pattern recognition or anomaly detection problem?',
+              'What features would you extract to analyze this case?',
+              'What risks exist if the model makes incorrect predictions?',
+            ],
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Which problem type', def: "Anomaly detection — the scenario describes a significant deviation from the employee's usual behaviour in time, volume and location" },
               { term: 'Features to extract', def: 'Login time; login location (IP address, geo-coordinates); number of files accessed; type of files accessed; historical access patterns for that user; typical access patterns for users in similar roles' },
               { term: 'Risk of a false positive', def: 'Flagging legitimate activity as malicious causes unnecessary investigations, user inconvenience, and erosion of trust in the security system' },
               { term: 'Risk of a false negative', def: 'Missing genuine malicious activity can result in a data breach, financial loss, reputational damage, and compromise of the entire system' },
@@ -3073,105 +3490,215 @@ export const courses = [
       },
       {
         number: '12',
-        title: 'Supervised Machine Learning for Threat Detection',
+        title: 'Machine Learning for Threat Detection in Big Data',
         sections: [
           {
             type: 'definition',
-            heading: '12.1 The Trained Digital Sentry',
-            text: 'In cybersecurity, supervised machine learning acts as a trained digital sentry. It learns from a labeled dataset of past incidents, identifying which patterns are harmless (benign) and which are dangerous (malicious). The two main tasks are classification — is this a threat? — and regression — how high is the risk?',
+            text: 'In cybersecurity, Supervised Machine Learning acts as a trained digital sentry. It functions by learning from a labeled dataset of past incidents, identifying which patterns are harmless (benign) and which are dangerous (malicious).',
+          },
+          {
+            type: 'text',
+            heading: 'The Procedural Workflow',
+            text: 'Before a model can detect a threat, it must undergo a rigorous phase.',
           },
           {
             type: 'termlist',
-            heading: '12.2 The Procedural Workflow',
             items: [
-              { term: 'Data labeling', def: 'Experts provide a dataset where every entry is tagged — for example 1 for malware, 0 for safe' },
-              { term: 'Feature engineering', def: "Identifying the characteristics that signal a threat. For an email that might be the sender's IP, the number of links, or the presence of urgent-sounding keywords" },
-              { term: 'Training', def: 'The algorithm processes the features to find a mathematical boundary between safe and unsafe' },
-              { term: 'Testing / validation', def: 'The model is given new, unlabeled data to see whether it predicts the correct category' },
+              { term: 'Data Labeling', def: 'Experts provide the model with a dataset where every entry is tagged (e.g., 1 for malware, 0 for safe).' },
+              { term: 'Feature Engineering', def: "Identifying specific characteristics that signal a threat. Example: For an email, features include the sender's IP, number of links, or presence of \"urgent\" keywords." },
+              { term: 'Training', def: 'The algorithm (the "engine") processes the features to find a mathematical boundary between safe and unsafe.' },
+              { term: 'Testing/Validation', def: 'The model is given new, unlabeled data to see if it can correctly predict the category.' },
             ],
           },
           {
-            type: 'termlist',
-            heading: '12.3 Network Intrusion Detection (NIDS)',
-            items: [
-              { term: 'Purpose', def: 'Monitors traffic to identify unauthorized access or attacks such as DDoS' },
-              { term: 'Common algorithms', def: 'Random Forest, Support Vector Machines' },
-              { term: 'Indicators used', def: 'Byte counts, packet intervals, TCP flag combinations' },
-              { term: 'How it works', def: 'The model learns the profile of a standard connection; if a connection shows features similar to a labeled SYN flood attack, it triggers an alert' },
-            ],
+            type: 'text',
+            heading: 'Deployment in Threat Detection in Big Data',
+            text: 'Supervised learning is categorized into two main tasks: Classification (Is this a threat?) and Regression (How high is the risk in big data?).',
+          },
+          {
+            type: 'text',
+            heading: '1. Network Intrusion Detection (NIDS)',
+            text: 'NIDS monitors traffic to identify unauthorized access or attacks like DDoS.',
           },
           {
             type: 'termlist',
-            heading: '12.4 Malware Analysis',
             items: [
-              { term: 'Purpose', def: 'Detecting zero-day threats that signature-based antivirus software might miss' },
-              { term: 'Common algorithms', def: 'Decision Trees, K-Nearest Neighbors (KNN)' },
-              { term: 'Indicators used', def: 'File size, API calls made by the code, registry key changes' },
-              { term: 'How it works', def: 'Instead of looking for a specific fingerprint, the model looks at behavioural features — if a file behaves like previously labeled ransomware (rapid file encryption, for instance), it is quarantined' },
+              { term: 'Common Algorithms', def: 'Random Forest, Support Vector Machines (SVM).' },
+              { term: 'Manual Indicators', def: 'Byte counts, packet intervals, and TCP flag combinations.' },
+              { term: 'How it works', def: 'The model learns the "profile" of a standard connection. If a connection show features similar to a labeled "SYN Flood" attack, it triggers an alert.' },
             ],
           },
           {
+            type: 'text',
+            heading: '2. Malware Analysis',
+            text: 'Detecting "Zero-day" threats that signature-based antivirus software might miss.',
+          },
+          {
             type: 'termlist',
-            heading: '12.5 Phishing and Spam Detection',
             items: [
-              { term: 'Purpose', def: 'Analysing communication to stop social engineering' },
-              { term: 'Common algorithms', def: 'Naive Bayes, Logistic Regression' },
-              { term: 'Indicators used', def: 'URL length, use of IP addresses in place of domain names, suspicious call-to-action phrases' },
-              { term: 'How it works', def: 'Naive Bayes calculates the probability that an email is phishing from the frequency of suspicious words seen in past labeled phishing campaigns' },
+              { term: 'Common Algorithms', def: 'Decision Trees, K-Nearest Neighbors (KNN).' },
+              { term: 'Manual Indicators', def: 'File size, API calls made by the code, and registry key changes.' },
+              { term: 'How it works', def: 'Instead of looking for a specific "fingerprint," the model looks at behavioral features. If a file behaves like previously labeled ransomware (e.g., rapid file encryption), it is quarantined.' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: '3. Phishing and Spam Detection',
+            text: 'Analyzing communication to stop social engineering.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Common Algorithms', def: 'Naive Bayes, Logistic Regression.' },
+              { term: 'Manual Indicators', def: 'URL length, use of IP addresses in place of domain names, and suspicious "call to action" phrases.' },
+              { term: 'How it works', def: 'Naive Bayes calculates the probability that an email is phishing based on the frequency of specific suspicious words found in past "labeled" phishing campaigns.' },
             ],
           },
           {
             type: 'image',
-            heading: '12.6 Algorithm Comparison',
             src: '/lecture-notes/cyb-224/algorithm-comparison.webp',
             width: 1400, height: 596,
             alt: 'Mind map of security algorithms: Naive Bayes (phishing/spam, fast and text-friendly, assumes feature independence), Random Forest (network intrusion, accurate on large data, slow in real time), SVM (malware detection, strong on high-dimensional data, memory intensive), and Logistic Regression (fraud detection, gives a risk score, struggles with non-linear threats)',
-            caption: 'Figure 6: Four supervised algorithms with their security use, strength, and weakness',
+            caption: 'The same four algorithms as a map — drawn for these notes; the handout prints only the table below',
           },
           {
             type: 'table',
-            headers: ['Algorithm', 'Typically Used For', 'Strength', 'Weakness'],
+            heading: 'Algorithm Comparison',
+            headers: ['Algorithm', 'Used', 'Strength', 'Weakness'],
             rows: [
-              ['Naive Bayes', 'Phishing / spam', 'Extremely fast; works well with text', 'Assumes features are independent'],
-              ['Random Forest', 'Network intrusion', 'Highly accurate; handles large data', 'Can be slow to run in real time'],
-              ['SVM', 'Malware detection', 'Excellent for complex, high-dimensional data', 'High memory consumption'],
-              ['Logistic Regression', 'Fraud detection', 'Provides a clear risk score (0–100%)', 'Struggles with non-linear threats'],
+              ['Naive Bayes', 'Phishing/Spam', 'Extremely fast; works well with text.', 'Assumes features are independent.'],
+              ['Random Forest', 'Network Intrusion', 'Highly accurate; handles large data.', 'Can be slow to run in real-time.'],
+              ['SVM', 'Malware Detection', 'Excellent for complex, high-dimensional data.', 'High memory consumption.'],
+              ['Logistic Regression', 'Fraud Detection', 'Provides a clear "Risk Score" (0–100%).', 'Struggles with non-linear threats.'],
             ],
           },
         ],
       },
       {
         number: '13',
-        title: 'Exploratory Data Analysis and the Python Toolkit',
+        title: 'Exploratory Data Analysis (EDA) for Network Security',
         sections: [
           {
             type: 'definition',
-            heading: '13.1 What EDA Is',
-            text: 'Exploratory Data Analysis (EDA) is the process of examining, summarising, and visualising a dataset to understand its main characteristics before applying formal models.',
+            text: 'Exploratory Data Analysis (EDA) is the process of examining, summarizing, and visualizing a dataset to understand its main characteristics before applying formal models.',
           },
           {
-            type: 'bullets',
-            heading: '13.2 What EDA Is For',
-            items: [
-              'Discovering patterns in the data',
-              'Detecting errors or missing values',
-              'Identifying relationships between variables',
-              'Checking the assumptions required for modelling',
-            ],
+            type: 'text',
+            heading: 'Functions of EDA',
+            text: 'It helps discover patterns, detect errors or missing values, identify relationships between variables, and check assumptions for modeling. EDA is typically performed using libraries like: Pandas → data handling, Matplotlib → basic plots, Seaborn → advanced visuals.',
           },
           {
             type: 'termlist',
-            heading: '13.3 Types of EDA',
+            heading: 'TYPES OF EDA',
             items: [
-              { term: 'Univariate (one variable)', def: 'Mean, median, mode; histograms and boxplots — used to understand the distribution of a single feature' },
-              { term: 'Bivariate (two variables)', def: 'Scatter plots and correlation analysis — used to identify relationships between variables' },
-              { term: 'Multivariate (many variables)', def: 'Heatmaps and pair plots — used to understand complex interactions' },
+              { term: 'i. Univariate Analysis (one variable)', def: 'Mean, median, mode. Histogram, boxplot. It helps to understand the distribution of a single feature.' },
+              { term: 'ii. Bivariate Analysis (two variables)', def: 'Scatter plots. Correlation analysis. It helps to identify relationships between variables.' },
+              { term: 'iii. Multivariate Analysis (multiple variables)', def: 'Heatmaps. Pair plots. It helps understand complex interactions.' },
+            ],
+          },
+        ],
+      },
+      {
+        number: '14',
+        title: 'Model Evaluation',
+        sections: [
+          {
+            type: 'definition',
+            text: 'To evaluate the performance of the machine learning models used for threat detection, several evaluation metrics are used. These metrics are derived from the confusion matrix, which summarizes the classification results by comparing the predicted labels with the actual labels.',
+          },
+          {
+            type: 'text',
+            text: 'The confusion matrix consists of four main components:',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'True Positive (TP)', def: 'Cases where the model correctly analysis the threat pattern' },
+              { term: 'True Negative (TN)', def: 'Cases where the model correctly predicts that the system does not have threat.' },
+              { term: 'False Positive (FP)', def: 'Cases where the model incorrectly predicts threat when there is no threat.' },
+              { term: 'False Negative (FN)', def: 'Cases where the model fails to detect threat when there is threat in system' },
             ],
           },
           {
             type: 'text',
-            heading: '13.4 Pandas — Data Manipulation and Analysis',
-            text: 'Pandas loads datasets (CSV, Excel and more), organises data into tables called DataFrames, cleans and preprocesses that data, and performs statistical operations.',
+            text: 'These values are used to compute several performance metrics that measure the effectiveness of the classification model. It includes the following',
+          },
+          {
+            type: 'note',
+            text: 'Three of the equations on printed pages 40-41 are cut off in the handout itself - it shows Accuracy = (TP + T)/(TP+TN+FP+FN), Precision = TP/(TP+) and F1 = 2x(Precision x Recall)/(Precision+Re). The complete forms are given below, since those are what you need in the exam. The handout also drops the equation number for Accuracy (Precision, Recall and F1 are numbered 3.19, 3.20 and 3.21), leaves Recall unnumbered in the i/ii/iii run and then numbers F1 Score "i." where it should read "iii.", and its False Positive line carries a stray word "child".',
+          },
+          {
+            type: 'text',
+            heading: 'i. Accuracy',
+            text: 'Accuracy measures the proportion of correctly predicted instances out of the total number of predictions made by the model as shown in Equation',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Accuracy = (TP + TN) / (TP + TN + FP + FN)',
+          },
+          {
+            type: 'text',
+            text: 'Accuracy provides a general measure of how well the model performs overall. A higher accuracy indicates that the model correctly classifies a large proportion of the dataset.',
+          },
+          {
+            type: 'text',
+            heading: 'ii. Precision',
+            text: 'Precision measures the proportion of positive predictions that are actually correct as presented in Equation 3.19',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Precision = TP / (TP + FP)',
+          },
+          {
+            type: 'text',
+            text: 'A high precision value indicates that the model produces fewer false alarms (false positives).',
+          },
+          {
+            type: 'text',
+            heading: 'Recall (Sensitivity)',
+            text: 'Recall, also known as sensitivity, measures the proportion of actual positive cases that are correctly identified by the model in Equation 3.20',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'Recall = TP / (TP + FN)',
+          },
+          {
+            type: 'text',
+            text: 'IDS recall is particularly important because failing to detect a true threat case (false negative) may delay early intervention and treatment. Therefore, models used for threat screening are often designed to maximize recall.',
+          },
+          {
+            type: 'text',
+            heading: 'iii. F1 Score',
+            text: 'The F1-score is the harmonic mean of precision and recall, providing a balanced measure when both false positives and false negatives are important as shown in Equation 3.21',
+          },
+          {
+            type: 'code',
+            language: 'math',
+            code: 'F1 = 2 × (Precision × Recall) / (Precision + Recall)',
+          },
+          {
+            type: 'text',
+            text: 'The F1-score is useful when the dataset is imbalanced because it considers both precision and recall simultaneously. A high F1-score indicates that the model achieves a good balance between correctly identifying threat cases and minimizing incorrect predictions. (The handout stops at "minimizing incorrect.")',
+          },
+        ],
+      },
+      {
+        number: '15',
+        title: 'Different Libraries for Big Data Manipulation',
+        sections: [
+          {
+            type: 'bullets',
+            heading: 'Pandas (import pandas as pd)',
+            items: [
+              'Function: Pandas is used for data manipulation and analysis.',
+              'Loads datasets (CSV, Excel, etc.).',
+              'Organizes data into tables (DataFrames).',
+              'Cleans and preprocesses data.',
+              'Performs statistical operations.',
+            ],
           },
           {
             type: 'code',
@@ -3184,9 +3711,15 @@ df.describe()                  # Summary statistics
 df.isnull().sum()              # Check missing values`,
           },
           {
-            type: 'text',
-            heading: '13.5 NumPy — Numerical Computation',
-            text: 'NumPy handles large numerical datasets efficiently, supports mathematical operations, and works with multi-dimensional arrays. In simple terms: NumPy is fast maths on numbers and arrays.',
+            type: 'bullets',
+            heading: 'i. NumPy (import numpy as np)',
+            items: [
+              'Function: NumPy is used for numerical computations and array operations.',
+              'Handles large numerical data efficiently.',
+              'Supports mathematical operations.',
+              'Works with multi-dimensional arrays.',
+              'In simple terms: NumPy = fast math operations on numbers and arrays.',
+            ],
           },
           {
             type: 'code',
@@ -3199,9 +3732,16 @@ np.std(arr)    # Standard deviation
 np.max(arr)    # Maximum value`,
           },
           {
-            type: 'text',
-            heading: '13.6 Matplotlib — Basic Visualisation',
-            text: 'Matplotlib creates plots such as line charts, bar charts, and histograms. In simple terms: Matplotlib draws graphs from scratch.',
+            type: 'bullets',
+            heading: 'ii. Matplotlib (import matplotlib.pyplot as plt)',
+            items: [
+              'Function: Matplotlib is used for basic data visualization.',
+              'What it does: Creates plots like:',
+              'Line charts',
+              'Bar charts',
+              'Histograms',
+              'In simple terms: Matplotlib = drawing graphs from scratch.',
+            ],
           },
           {
             type: 'code',
@@ -3213,9 +3753,20 @@ plt.title("Simple Plot")
 plt.show()`,
           },
           {
-            type: 'text',
-            heading: '13.7 Seaborn — Statistical Visualisation',
-            text: 'Seaborn builds on Matplotlib to provide attractive, easy-to-use statistical plots and handles complex visualisations easily. In simple terms: Seaborn draws beautiful and smarter graphs.',
+            type: 'bullets',
+            heading: 'iii. Seaborn (import seaborn as sns)',
+            items: [
+              'Function: Seaborn is used for advanced and attractive statistical visualizations.',
+              'How does it work.',
+              'Builds on Matplotlib.',
+              'Provides beautiful, easy-to-use plots.',
+              'Handles complex visualizations easily.',
+              'In simple terms: Seaborn = beautiful and smarter graphs.',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Two changes to the printed snippet below so it runs: the import line is added (the handout gives it only in the heading), and df.corr() becomes df.corr(numeric_only=True), because corr() cannot handle the text columns in these datasets. The handout also re-prints the two Pandas import lines a second time at the end of its Pandas block, which looks like a copy-paste slip and is not repeated here.',
           },
           {
             type: 'code',
@@ -3232,77 +3783,15 @@ sns.boxplot(x='label', y='value', data=df)    # Boxplot`,
         ],
       },
       {
-        number: '14',
-        title: 'Model Evaluation — Confusion Matrix and Metrics',
-        sections: [
-          {
-            type: 'definition',
-            heading: '14.1 The Confusion Matrix',
-            text: 'Evaluation metrics for threat-detection models are derived from the confusion matrix, which summarises classification results by comparing the predicted labels with the actual labels.',
-          },
-          {
-            type: 'termlist',
-            heading: 'The Four Components',
-            items: [
-              { term: 'True Positive (TP)', def: 'The model correctly identifies a threat pattern' },
-              { term: 'True Negative (TN)', def: 'The model correctly predicts that the system has no threat' },
-              { term: 'False Positive (FP)', def: 'The model predicts a threat where there is none — a false alarm' },
-              { term: 'False Negative (FN)', def: 'The model fails to detect a threat that is present — a miss' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: '14.2 Accuracy',
-            text: 'Accuracy measures the proportion of correctly predicted instances out of all predictions made. It gives a general measure of overall performance — a higher accuracy means the model correctly classifies a large proportion of the dataset.',
-          },
-          {
-            type: 'code',
-            language: 'math',
-            code: 'Accuracy = (TP + TN) / (TP + TN + FP + FN)',
-          },
-          {
-            type: 'text',
-            heading: '14.3 Precision',
-            text: 'Precision measures the proportion of positive predictions that are actually correct. A high precision value means the model produces fewer false alarms.',
-          },
-          {
-            type: 'code',
-            language: 'math',
-            code: 'Precision = TP / (TP + FP)',
-          },
-          {
-            type: 'text',
-            heading: '14.4 Recall (Sensitivity)',
-            text: 'Recall measures the proportion of actual positive cases the model correctly identifies. In an IDS, recall matters especially because failing to detect a real threat (a false negative) delays intervention and response — so threat-screening models are often tuned to maximise recall.',
-          },
-          {
-            type: 'code',
-            language: 'math',
-            code: 'Recall = TP / (TP + FN)',
-          },
-          {
-            type: 'text',
-            heading: '14.5 F1 Score',
-            text: 'The F1-score is the harmonic mean of precision and recall, giving a balanced measure when both false positives and false negatives matter. It is especially useful on imbalanced datasets because it considers both quantities simultaneously.',
-          },
-          {
-            type: 'code',
-            language: 'math',
-            code: 'F1 = 2 × (Precision × Recall) / (Precision + Recall)',
-          },
-        ],
-      },
-      {
-        number: '15',
-        title: 'Practical — EDA on the UNSW-NB15 IDS Dataset',
+        number: '16',
+        title: 'Practice Exercise of Exploratory Data Analysis for IDS Data Set',
         sections: [
           {
             type: 'note',
-            text: 'The three blocks below are one continuous script — run them in order in the same notebook. 15.2 and 15.3 reuse df and num_cols from the block before them, so running 15.3 on its own raises a NameError.',
+            text: 'The three blocks below are one continuous script — run them in order in the same notebook. The second and third reuse df and num_cols from the block before them, so running the last one on its own raises a NameError.',
           },
           {
             type: 'code',
-            heading: '15.1 Load and Explore',
             language: 'python',
             code: `# 1. Import Libraries
 import pandas as pd
@@ -3310,6 +3799,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Set style
 sns.set_style("whitegrid")
 
 # 2. Load Dataset
@@ -3327,7 +3817,7 @@ print(df.shape)
 print("\\nColumn Names:")
 print(df.columns)
 
-# 4. Preprocessing - Missing Values
+# 4.  Preprocessing data -Missing Values
 print("\\nMissing Values:")
 missing = df.isnull().sum()
 print(missing[missing > 0])
@@ -3344,9 +3834,10 @@ for col in categorical_cols:
           },
           {
             type: 'code',
-            heading: '15.2 Target and Feature Distributions',
+            heading: 'Target and Feature Distributions',
             language: 'python',
-            code: `# 7. Target Variable Analysis - binary label
+            code: `# 7. Target Variable Analysis
+# Binary label
 plt.figure()
 sns.countplot(x='label', data=df)
 plt.title("Distribution of Target Variable (Label)")
@@ -3374,7 +3865,7 @@ plt.show()`,
           },
           {
             type: 'code',
-            heading: '15.3 Outliers, Relationships and Class Imbalance',
+            heading: 'Outliers, Relationships and Class Imbalance',
             language: 'python',
             code: `# 10. Boxplots for Outlier Detection
 plt.figure(figsize=(15, 10))
@@ -3409,19 +3900,18 @@ print(df['label'].value_counts(normalize=True))`,
         ],
       },
       {
-        number: '16',
+        number: '17',
         title: 'Practical — SVM and KNN for Intrusion Detection',
         sections: [
           {
             type: 'note',
-            text: 'A kernel SVM (SVC) scales roughly with the square of the number of samples, so 16.1 on the full UNSW-NB15 file can run for hours. Train it on a stratified subsample first — or use the LinearSVC version in 16.2, which is built for datasets this size.',
+            text: 'A kernel SVM (SVC) scales roughly with the square of the number of samples, so the first listing below, run on the full UNSW-NB15 file, can take hours. Train it on a stratified subsample first — or use the LinearSVC version under ALTERNATIVE CODES, which is built for datasets this size.',
           },
           {
             type: 'code',
-            heading: '16.1 SVM with an RBF Kernel',
+            heading: 'Practice Exercise Using Support Vector Machine (SVM) for Threat Detection',
             language: 'python',
-            code: `# 1. Import Libraries
-import pandas as pd
+            code: `import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -3434,7 +3924,8 @@ from sklearn.metrics import (accuracy_score, precision_score,
 # 2. Load Dataset
 df = pd.read_csv('/content/UNSW_NB15_dataset.csv')
 
-# 3. Data Preprocessing - drop missing values
+# 3. Data Preprocessing
+# Drop missing values (if any)
 df = df.dropna()
 
 # Encode categorical features
@@ -3499,7 +3990,7 @@ plt.show()`,
           },
           {
             type: 'code',
-            heading: '16.2 Alternative — LinearSVC with an ROC Curve',
+            heading: 'ALTERNATIVE CODES',
             language: 'python',
             code: `import pandas as pd
 import numpy as np
@@ -3519,7 +4010,8 @@ df = pd.read_csv('UNSW_NB15_dataset.csv')
 # and StandardScaler passes NaN straight through to LinearSVC.fit()
 df = df.dropna()
 
-# 2. Preprocessing - drop non-predictive columns and the multiclass target
+# 2. Preprocessing
+# Drop non-predictive columns and the multiclass target 'attack_cat'
 X = df.drop(['id', 'attack_cat', 'label'], axis=1)
 y = df['label']
 
@@ -3529,12 +4021,12 @@ X = pd.get_dummies(X, columns=['proto', 'service', 'state'], drop_first=True)
 # 3. Split into training and testing sets (80/20)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 4. Feature Scaling (crucial for SVM performance)
+# 4. Feature Scaling (Crucial for SVM performance)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# 5. Model Training (LinearSVC is optimised for large datasets)
+# 5. Model Training (LinearSVC is optimized for large datasets)
 svm_model = LinearSVC(dual=False, random_state=42, max_iter=5000)
 svm_model.fit(X_train_scaled, y_train)
 
@@ -3568,7 +4060,7 @@ plt.savefig('roc_curve_svm.png')`,
           },
           {
             type: 'code',
-            heading: '16.3 Intrusion Detection Using KNN',
+            heading: 'Intrusion Detection Using KNN',
             language: 'python',
             code: `import pandas as pd
 import numpy as np
@@ -3597,7 +4089,7 @@ X = pd.get_dummies(X, columns=['proto', 'service', 'state'], drop_first=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
                                                     random_state=42)
 
-# 4. Feature Scaling (mandatory for KNN)
+# 4. Feature Scaling (Mandatory for KNN)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
@@ -3611,7 +4103,7 @@ y_pred = knn.predict(X_test_scaled)
 y_prob = knn.predict_proba(X_test_scaled)[:, 1]
 
 # 7. Print Performance
-print(f'Accuracy: {accuracy_score(y_test, y_pred):.4f}')
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 print(classification_report(y_test, y_pred))
 
 # 8. Plot Confusion Matrix
@@ -3634,21 +4126,21 @@ plt.savefig('roc_curve_knn.png')`,
         ],
       },
       {
-        number: '17',
-        title: 'Practical — Decision Tree for Intrusion Detection',
+        number: '18',
+        title: 'Intrusion Detection Using Decision Tree (DT)',
         sections: [
           {
             type: 'text',
-            heading: '17.1 About This Implementation',
+            heading: 'About This Implementation',
             text: 'A full Decision Tree model for intrusion detection on the UNSW-NB15 dataset: data loading, preprocessing, training, evaluation, and k-fold cross-validation. Note that feature scaling is optional for a decision tree — splits are threshold-based, so the scale of a feature does not change the tree — but it is kept here so the same preprocessing serves other models too.',
           },
           {
             type: 'note',
-            text: '17.2 and 17.3 are one continuous script — 17.3 reuses the model and the split from 17.2. Both drop the id and attack_cat columns before training: attack_cat names the attack family, so a model that can see it is just reading the answer, and the accuracy it reports would be meaningless.',
+            text: 'The two blocks below are one continuous script — the second reuses the model and the split from the first. Both drop the id and attack_cat columns before training: attack_cat names the attack family, so a model that can see it is just reading the answer, and the accuracy it reports would be meaningless.',
           },
           {
             type: 'code',
-            heading: '17.2 Load, Preprocess and Train',
+            heading: 'Intrusion Detection Using Decision Tree (DT)',
             language: 'python',
             code: `# 1. Import Libraries
 import pandas as pd
@@ -3665,7 +4157,8 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score,
 # 2. Load Dataset
 df = pd.read_csv('UNSW_NB15_dataset.csv')
 
-# 3. Data Preprocessing - drop missing values
+# 3. Data Preprocessing
+# Drop missing values (if any)
 df = df.dropna()
 
 # Encode categorical features
@@ -3686,7 +4179,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# 5. Feature Scaling (optional for a Decision Tree)
+# 5. Feature Scaling (Optional for DT)
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
@@ -3704,7 +4197,7 @@ y_pred = dt_model.predict(X_test)`,
           },
           {
             type: 'code',
-            heading: '17.3 Evaluate and Cross-Validate',
+            heading: 'Evaluate and Cross-Validate',
             language: 'python',
             code: `# 8. Evaluation Metrics
 accuracy = accuracy_score(y_test, y_pred)
@@ -3748,51 +4241,69 @@ print("Mean CV Accuracy:", np.mean(cv_scores))`,
         ],
       },
       {
-        number: '18',
-        title: 'Network Anomaly Detection with K-Means',
+        number: '19',
+        title: 'Network Anomaly Detection (K-Means Clustering)',
         sections: [
           {
-            type: 'definition',
-            heading: '18.1 Detecting Patterns, Not Signatures',
-            text: 'In cybersecurity, threat detection often relies on identifying unusual patterns rather than known virus signatures. NumPy, K-Means clustering, and Matplotlib work together to detect anomalies in network behaviour without any labeled attack data.',
+            type: 'note',
+            text: 'Printed page 55 heads this section "THREAT ANALYSIS USING SUPPORT VECTOR MACHINE". Everything under it is K-Means clustering, not SVM - the heading appears to be left over from the previous practical.',
           },
           {
-            type: 'termlist',
-            heading: '18.2 The Tools and Their Roles',
+            type: 'definition',
+            text: 'In cybersecurity, threat detection often relies on identifying unusual patterns instead of known virus signatures. This demonstrates how NumPy, K-Means clustering, and Matplotlib work together to detect anomalies in network behavior.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Required Libraries',
             items: [
-              { term: 'NumPy — data preparation', def: 'Converts raw security logs into structured numerical arrays, which allow fast mathematical computation' },
-              { term: 'Scikit-learn (K-Means) — detection', def: 'An unsupervised algorithm that groups data into clusters; points far from the cluster centres (centroids) are considered anomalies' },
-              { term: 'Matplotlib — visualisation', def: 'Displays the clustered data so analysts can identify suspicious outliers at a glance' },
-              { term: 'Pandas — data handling', def: 'Used for loading, manipulating and analysing the log data before it is turned into arrays' },
+              'NumPy — Numerical data processing',
+              'Scikit-Learn (K-Means) — Clustering algorithm',
+              'Matplotlib — Data visualization',
+              'Pandas is a Python library used for data manipulation and analysis.',
             ],
           },
           {
+            type: 'text',
+            heading: 'NumPy (Data Preparation)',
+            text: 'NumPy converts raw security logs into structured numerical arrays. These arrays allow fast mathematical computation.',
+          },
+          {
+            type: 'text',
+            heading: 'K-Means Clustering (Detection)',
+            text: 'K-Means is an unsupervised learning algorithm that groups data into clusters. Points that are far from cluster centers (centroids) are considered anomalies.',
+          },
+          {
+            type: 'text',
+            heading: 'Matplotlib (Visualization)',
+            text: 'Matplotlib visualizes clustered data so analysts can easily identify suspicious outliers.',
+          },
+          {
             type: 'image',
-            heading: '18.3 Workflow',
+            heading: 'Workflow',
             src: '/lecture-notes/cyb-224/kmeans-workflow.webp',
             width: 1000, height: 1148,
             maxWidth: 560,
-            alt: 'Five-step flow: collect network activity data, convert to a NumPy array, apply K-Means clustering, identify data points far from centroids, then visualise clusters and anomalies',
+            alt: 'Five-step flow: collect network activity data, convert to a NumPy array, apply K-Means clustering, identify data points far from centroids, then visualize clusters and anomalies',
             caption: 'Figure 7: The K-Means anomaly detection workflow',
           },
           {
             type: 'bullets',
             items: [
-              'Collect network activity data — for example bytes transferred and session duration',
-              'Convert the data into a NumPy array',
-              'Apply K-Means clustering to group normal behaviours',
-              'Identify data points far from the cluster centroids',
-              'Visualise clusters and anomalies using Matplotlib',
+              'Step 1: Collect network activity data (e.g., bytes transferred, session duration).',
+              'Step 2: Convert the data into a NumPy array.',
+              'Step 3: Apply K-Means clustering to group normal behaviors.',
+              'Step 4: Identify data points far from cluster centroids.',
+              'Step 5: Visualize clusters and anomalies using Matplotlib.',
             ],
           },
           {
             type: 'casestudy',
-            title: 'Practical Example',
-            prompt: 'A user normally downloads small files of 1–2 MB. Suddenly, one session shows a 10 GB transfer at 3:00 AM. This behaviour would sit far from the cluster of normal sessions and be flagged as anomalous.',
+            heading: 'Practical Example',
+            prompt: 'Example scenario: A user normally downloads small files (1–2MB). Suddenly, one session shows 10GB transfer at 3:00 AM. This behavior may be flagged as anomalous.',
           },
           {
             type: 'code',
-            heading: '18.4 Python Implementation',
+            heading: '7. Python Implementation',
             language: 'python',
             code: `# Import Libraries
 import numpy as np
@@ -3822,7 +4333,6 @@ plt.show()`,
           },
           {
             type: 'code',
-            heading: '18.5 Variant — Simulated Traffic',
             language: 'python',
             code: `import numpy as np
 from sklearn.cluster import KMeans
@@ -3847,63 +4357,80 @@ plt.show()`,
         ],
       },
       {
-        number: '19',
-        title: 'The k-Nearest Neighbours (k-NN) Algorithm',
+        number: '20',
+        title: 'The k-Nearest Neighbors (k-NN) Algorithm',
         sections: [
           {
             type: 'definition',
-            heading: '19.1 Lazy Learning',
-            text: 'The k-Nearest Neighbours (k-NN) algorithm is a simple and well-known example of a lazy learning algorithm. Lazy learners delay most computation until the classification stage instead of doing intensive work during training.',
+            text: 'The k-Nearest Neighbors (k-NN) algorithm is a simple and well-known example of a lazy learning algorithm in machine learning.',
+          },
+          {
+            type: 'text',
+            heading: 'Lazy Learning Concept',
+            text: 'Lazy learning algorithms delay most computations until the classification stage instead of performing intensive computation during training.',
+          },
+          {
+            type: 'text',
+            heading: 'How k-NN Works',
+            text: 'k-NN performs no work up front; the effort moves to the moment a new sample must be classified.',
           },
           {
             type: 'bullets',
-            heading: '19.2 Training Phase',
+            heading: 'Training Phase',
             items: [
-              'Stores all training feature vectors and their corresponding labels',
-              'No model building or parameter learning is performed',
+              'Stores all training feature vectors and their corresponding labels.',
+              'No model building or parameter learning is performed.',
             ],
           },
           {
             type: 'bullets',
-            heading: '19.3 Classification Phase',
+            heading: 'Classification Phase',
             items: [
-              'Calculates the distance between the test sample and all training samples',
-              'Selects the k nearest neighbours',
-              'Assigns the most common label among those neighbours',
+              'Calculates the distance between a test sample and all training samples.',
+              'Selects the k nearest neighbors.',
+              'Assigns the most common label among those neighbors.',
             ],
           },
           {
             type: 'termlist',
-            heading: '19.4 Distance Metrics',
+            heading: 'Distance Metrics',
             items: [
-              { term: 'Euclidean distance', def: 'Used for continuous numerical data' },
-              { term: 'Hamming distance', def: 'Used for discrete or categorical data' },
+              { term: 'Euclidean Distance', def: 'Used for continuous numerical data.' },
+              { term: 'Hamming Distance', def: 'Used for discrete or categorical data.' },
             ],
           },
           {
-            type: 'proscons',
-            heading: '19.5 Advantages and Disadvantages',
-            advantages: [
-              'Simple to understand and implement',
-              'Very fast training phase',
-              'Useful for teaching machine learning concepts',
+            type: 'bullets',
+            heading: 'Advantages',
+            items: [
+              'Simple to understand and implement.',
+              'Very fast training phase.',
+              'Useful for teaching machine learning concepts.',
             ],
-            disadvantages: [
-              'Large memory usage — it stores all the training data',
-              'Slow classification time',
-              'Not efficient for very large datasets',
-              'Performance depends on the choice of k and the distance metric',
+          },
+          {
+            type: 'bullets',
+            heading: 'Disadvantages',
+            items: [
+              'Large memory usage (stores all training data).',
+              'Slow classification time.',
+              'Not efficient for very large datasets.',
+              'Performance depends on the choice of k and distance metric.',
             ],
+          },
+          {
+            type: 'text',
+            text: 'Optimized data structures such as k-d trees can be used to speed up neighbor searching.',
           },
           {
             type: 'note',
-            text: 'Optimised data structures such as k-d trees can speed up the neighbour search. Overall: k-NN is simple and intuitive, storing training data and predicting from similarity — effective on small datasets but inefficient for large-scale real-world applications.',
+            text: 'k-NN is a simple and intuitive classification algorithm that stores training data and makes predictions based on similarity. It is effective for small datasets but inefficient for large-scale real-world applications.',
           },
           {
             type: 'casestudy',
-            heading: '19.6 Activity — k-NN Review Questions',
+            heading: 'Activity',
             tasks: [
-              'Define the k-Nearest Neighbours (k-NN) algorithm.',
+              'Define the k-Nearest Neighbors (k-NN) algorithm.',
               'What is meant by lazy learning?',
               'What happens during the training phase of k-NN?',
               'What happens during the classification phase?',
@@ -3918,57 +4445,98 @@ plt.show()`,
               'Compare k-NN with Random Forest in terms of training time and prediction time.',
             ],
           },
+          {
+            type: 'note',
+            text: 'The answers below are worked answers, not the lecturer\'s.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'Definition', def: 'k-NN is a lazy, instance-based classifier: it stores the labelled training vectors, then classifies a new sample by finding the k closest stored samples and taking the most common label among them' },
+              { term: 'Lazy learning', def: 'The algorithm does no work at training time and defers the computation to classification. Nothing is generalised into a model in advance, no parameters are fitted, and every prediction re-reads the training set' },
+              { term: 'Training phase', def: 'It stores all training feature vectors with their labels. No model is built and no parameter is learned, which is why training is effectively instant' },
+              { term: 'Classification phase', def: 'It measures the distance from the test sample to every stored training sample, selects the k nearest, and assigns the label held by the majority of those neighbours' },
+              { term: 'Role of k', def: 'k sets how many neighbours vote, and with it the balance between fitting noise and over-smoothing. A small k follows the data closely and is sensitive to individual mislabelled points; a large k averages over a wider neighbourhood and gives a smoother, more stable boundary' },
+              { term: 'When Hamming distance is used', def: 'For discrete or categorical features, where subtracting one value from another is meaningless — it counts the positions at which two vectors differ. Euclidean distance is used for continuous numerical data' },
+              { term: 'Why it is memory inefficient', def: 'Because the training set is the model. Every vector has to be kept for the lifetime of the classifier and all of it is consulted on each prediction, so memory grows with the size of the dataset rather than with the complexity of the boundary' },
+              { term: 'Purpose of a k-d tree', def: 'It indexes the stored points spatially so the search for nearest neighbours can discard whole regions instead of comparing against every sample. It attacks the slow classification phase, not the memory cost' },
+              { term: 'If k = 1', def: 'Each sample takes the label of its single closest neighbour. Training error falls to zero, which looks perfect and is not: the boundary traces every point including noise and mislabelled traffic, so variance is high and it generalises poorly' },
+              { term: 'If k is too large', def: 'The neighbourhood grows past the structure being detected and predictions drift toward the majority class. In an IDS that is dangerous rather than merely inaccurate — attacks are rare, so a large k dilutes the few malicious neighbours and the model quietly predicts benign for everything' },
+              { term: 'Choosing the best k', def: 'Cross-validate across a range of candidate values and take the k with the best validation score, not the best training score. Use an odd k for a two-class problem so a vote cannot tie, and the square root of the sample count is a reasonable value to start searching around' },
+              { term: 'Effect of feature scaling', def: 'Euclidean distance is dominated by whichever feature has the widest numeric range, so an unscaled byte count in the millions swamps a SYN flag of 0 or 1 and a byte entropy between 0.30 and 0.95 — the model ends up measuring one feature and ignoring the rest. That is why the practicals in this course treat StandardScaler as mandatory before KNeighborsClassifier' },
+              { term: 'k-NN against Random Forest', def: 'The costs are inverted. k-NN trains in almost no time and pays at prediction, because each prediction searches the whole training set; Random Forest pays up front to build its trees, then predicts quickly by dropping a sample through them. For an IDS that has to keep up with live traffic, prediction time is the binding constraint, which favours Random Forest' },
+            ],
+          },
         ],
       },
       {
-        number: '20',
-        title: 'Anomaly Detection with Pandas and Scikit-learn',
+        number: '21',
+        title: 'Anomaly Detection Using Pandas and Scikit-Learn Libraries',
         sections: [
           {
+            type: 'text',
+            heading: 'Functions of Pandas and Scikit-Learn Libraries',
+            text: 'The two libraries below do the work in the intrusion-detection listings: Pandas prepares the data, Scikit-Learn builds and runs the model.',
+          },
+          {
+            type: 'definition',
+            heading: 'i. Pandas Library',
+            text: 'Pandas is a Python library used for data manipulation and analysis.',
+          },
+          {
             type: 'termlist',
-            heading: '20.1 Main Functions of Pandas',
+            heading: 'Main Functions of Pandas',
             items: [
-              { term: 'Data creation', def: 'Build datasets using DataFrame and Series — e.g. df = pd.read_csv(path)' },
-              { term: 'Data cleaning', def: 'Handle missing values, remove duplicates, filter unwanted records' },
-              { term: 'Data selection and filtering', def: 'Select rows and columns — e.g. X = df.drop("label", axis=1)' },
-              { term: 'Data transformation', def: 'Modify columns, convert data types, engineer features' },
-              { term: 'Data exploration', def: 'Summary statistics with df.describe(), first rows with df.head()' },
+              { term: 'Data Creation', def: 'Create datasets using DataFrame and Series. Example: df = pd.read_csv(\'/specify the path\')' },
+              { term: 'Data Cleaning', def: 'Handle missing values. Remove duplicates. Filter unwanted records.' },
+              { term: 'Data Selection and Filtering', def: 'Select rows and columns. Example: X = df.drop("label", axis=1)' },
+              { term: 'Data Transformation', def: 'Modify columns. Convert data types. Perform feature engineering.' },
+              { term: 'Data Exploration', def: 'Summary statistics using df.describe(). View the first rows using df.head().' },
             ],
+          },
+          {
+            type: 'text',
+            heading: 'Application in Intrusion Detection Code',
+            text: 'Pandas is used to:',
           },
           {
             type: 'bullets',
-            heading: 'Pandas in an Intrusion Detection Script',
             items: [
-              'Creating the simulated login dataset',
-              'Organising login attempts and failed attempts',
-              'Separating the input features (X) from the labels (y)',
+              'Create the simulated login dataset.',
+              'Organize login attempts and failed attempts.',
+              'Separate input features (X) and labels (y).',
             ],
           },
           {
+            type: 'definition',
+            heading: 'ii. Scikit-Learn Library',
+            text: 'Scikit-Learn is a Python library used for machine learning and predictive modeling.',
+          },
+          {
             type: 'termlist',
-            heading: '20.2 Main Functions of Scikit-learn',
+            heading: 'Main Functions of Scikit-Learn',
             items: [
-              { term: 'Data splitting', def: 'Split the dataset into training and testing sets with train_test_split()' },
-              { term: 'Model building', def: 'Classification (Random Forest, SVM, Logistic Regression), regression, and clustering' },
-              { term: 'Model training', def: 'Fit the model to the data with model.fit(X_train, y_train)' },
-              { term: 'Prediction', def: 'Predict outcomes with model.predict(X_test)' },
+              { term: 'Data Splitting', def: 'Split the dataset into training and testing sets using train_test_split().' },
+              { term: 'Model Building', def: 'Classification, including Random Forest, SVM, and Logistic Regression. Regression. Clustering.' },
+              { term: 'Model Training', def: 'Fit a model to data: model.fit(X_train, y_train)' },
+              { term: 'Prediction', def: 'Predict outcomes: model.predict(X_test)' },
             ],
           },
           {
             type: 'code',
-            heading: '20.3 Isolation Forest — Unsupervised Anomaly Detection',
+            heading: 'Isolation Forest',
             language: 'python',
             code: `import numpy as np
 from sklearn.ensemble import IsolationForest
 
-# same simulated traffic as 18.5
+# same simulated traffic as the K-Means variant above
 traffic = np.array([[10, 100],
                     [12, 120],
                     [11, 110],
                     [200, 1000],
                     [9, 95]])
 
-model = IsolationForest(contamination=0.2, random_state=42)
+model = IsolationForest(contamination=0.2)
 model.fit(traffic)
 
 anomalies = model.predict(traffic)
@@ -3978,8 +4546,8 @@ print("Anomaly Labels:", anomalies)
         ],
       },
       {
-        number: '21',
-        title: 'Practical — Credit Card Fraud Anomaly Detection',
+        number: '22',
+        title: 'Practical Illustration of Anomaly Detection in Customer Credit Card',
         sections: [
           {
             type: 'resource',
@@ -3990,7 +4558,7 @@ print("Anomaly Labels:", anomalies)
           },
           {
             type: 'code',
-            heading: '21.1 Exploratory Analysis',
+            heading: 'Practical Illustration of Anomaly Detection in Customer Credit Card',
             language: 'python',
             code: `import pandas as pd
 import numpy as np
@@ -4003,6 +4571,8 @@ sns.set_palette("muted")
 
 df = pd.read_csv('/content/creditcard.csv')   # change path if needed
 df.head(5)
+
+# Display the tail of the dataset
 df.tail(5)
 
 print("Shape:", df.shape)
@@ -4055,18 +4625,21 @@ plt.xlim(0, 500)
 
 plt.subplot(1, 2, 2)
 sns.histplot(np.log1p(df['Amount']), bins=60, kde=True)
-plt.title("log1p(Amount) - much better behaved")
+plt.title("log1p(Amount) — much better behaved")
 plt.show()
 
 # Compare amounts by class
 plt.figure(figsize=(10, 6))
-sns.boxplot(x='Class', y='Amount', data=df, showfliers=False)   # hide outliers for a better view
-plt.title("Transaction Amount by Class")
+sns.boxplot(x='Class', y='Amount', data=df, showfliers=False)   # remove outliers for better view
+plt.title("Transaction Amount by Class (with few outliers)")
 plt.yscale('log')
 plt.show()
 
-# PCA features (V1-V28) - density plots, fraud vs non-fraud
-selected = ['V3', 'V4', 'V10', 'V11', 'V12', 'V14', 'V17']   # often the most discriminative
+# PCA features (V1-V28) - distribution comparison
+v_cols = [f'V{i}' for i in range(1, 29)]
+
+# Density plots - fraud vs non-fraud (selected features)
+selected = ['V3', 'V4', 'V10', 'V11', 'V12', 'V14', 'V17']   # often most discriminative
 
 plt.figure(figsize=(14, 10))
 for i, col in enumerate(selected, 1):
@@ -4078,16 +4651,88 @@ for i, col in enumerate(selected, 1):
 plt.tight_layout()
 plt.show()
 
-# Correlation heatmap - focus on the top features plus Class and Amount
+# 7. Correlation heatmap (focus on important parts)
 plt.figure(figsize=(12, 10))
+
+# Full correlation is messy - focus on top features + Class + Amount
 corr_cols = ['Time', 'Amount', 'Class'] + selected
 corr = df[corr_cols].corr()
-sns.heatmap(corr, annot=True, fmt='.2f')
+sns.heatmap(corr, annot=True, fmt='.2f', cmap='coolwarm', vmin=-0.6, vmax=0.6)
+plt.title("Correlation Matrix — Selected Features + Target")
+plt.show()
+
+# 8. Most discriminative features (quick ranking)
+# Absolute point-biserial correlation with Class (a simple univariate signal)
+correlations = {}
+for col in v_cols + ['Time', 'Amount']:
+    correlations[col] = df[col].corr(df['Class'], method='pearson')
+
+corr_df = pd.Series(correlations).sort_values(key=abs, ascending=False)
+print("\\nTop features by absolute correlation with fraud:")
+print(corr_df.head(12))
+
+# 9. Quick outlier / extreme value check (Amount)
+print("\\nTop 10 largest transactions:")
+print(df.nlargest(10, 'Amount')[['Time', 'Amount', 'Class']])`,
+          },
+          {
+            type: 'note',
+            text: 'Report your results',
+          },
+          {
+            type: 'code',
+            heading: 'Exercise on Creditcard',
+            language: 'python',
+            code: `import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset
+df = pd.read_csv('creditcard.csv')
+
+# 1. Basic Information
+print(df.info())
+print(df.describe())
+
+# 2. Check Class Imbalance
+fraud_pct = (df['Class'].value_counts()[1] / len(df)) * 100
+print(f"Fraudulent Transactions: {fraud_pct:.3f}%")
+
+plt.figure(figsize=(8, 6))
+sns.countplot(x='Class', data=df)
+plt.title('Distribution of Classes (0: Normal, 1: Fraud)')
+plt.show()
+
+# 3. Distribution of Amount and Time
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+sns.histplot(df['Amount'], bins=50, ax=ax1, kde=True)
+ax1.set_title('Distribution of Transaction Amount')
+sns.histplot(df['Time'], bins=50, ax=ax2, kde=True)
+ax2.set_title('Distribution of Transaction Time')
+plt.show()
+
+# 4. Correlation Heatmap
+plt.figure(figsize=(12, 10))
+corr = df.corr()
+sns.heatmap(corr, cmap='coolwarm_r', annot=False)
+plt.title('Correlation Matrix Heatmap')
+plt.show()
+
+# 5. Boxplots for key features
+f, axes = plt.subplots(ncols=4, figsize=(20, 4))
+sns.boxplot(x='Class', y='V14', data=df, ax=axes[0])
+axes[0].set_title('V14 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V12', data=df, ax=axes[1])
+axes[1].set_title('V12 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V17', data=df, ax=axes[2])
+axes[2].set_title('V17 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V10', data=df, ax=axes[3])
+axes[3].set_title('V10 vs Class Negative Correlation')
 plt.show()`,
           },
           {
             type: 'code',
-            heading: '21.2 Model Comparison — SVM, KNN, Decision Tree, Random Forest',
+            heading: 'MODEL COMPARISON',
             language: 'python',
             code: `import pandas as pd
 import numpy as np
@@ -4106,18 +4751,19 @@ from sklearn.metrics import (classification_report, confusion_matrix,
 # Load data
 df = pd.read_csv('creditcard.csv')
 
-# Features and target
+# Features and Target
 X = df.drop('Class', axis=1)
 y = df['Class']
 
-# To keep models within time limits, use a stratified 10% sample of the data
+# To ensure models run within time limits, we use a stratified sample (10%) of the data
 X_sample, _, y_sample, _ = train_test_split(X, y, train_size=0.1, stratify=y, random_state=42)
 
-# Now split the sample into training and testing sets
+# Now split the 10% sample into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X_sample, y_sample, test_size=0.3,
                                                     stratify=y_sample, random_state=42)
 
-# Scale Amount and Time AFTER the split, fitting only on the training rows.
+# Preprocessing: Scale Amount and Time - but AFTER the split, fitting only on
+# the training rows.
 # Scaling the whole frame first would let the test set's mean and standard
 # deviation influence the training data, flattering every score below.
 X_train = X_train.copy()
@@ -4161,7 +4807,7 @@ for i, (name, model) in enumerate(models.items()):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    # Probabilities / scores
+    # Probabilities/Scores
     if hasattr(model, "predict_proba"):
         y_score = model.predict_proba(X_test)[:, 1]
     else:
@@ -4211,13 +4857,16 @@ print(summary_df.to_string(index=False))`,
           },
           {
             type: 'table',
-            heading: '21.3 Report Your Results',
-            headers: ['Model', 'Accuracy', 'Precision', 'Recall', 'F1-score'],
+            heading: 'REPORT YOUR RESULTS IN A TABULAR FORM',
+            headers: ['MODEL', 'ACCURACY', 'PRECISION', 'RECALL', 'F1-SCORE'],
             rows: [
-              ['SVM', '', '', '', ''],
-              ['KNN', '', '', '', ''],
-              ['Decision Tree', '', '', '', ''],
-              ['Random Forest', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
+              ['', '', '', '', ''],
             ],
           },
         ],
@@ -4285,14 +4934,13 @@ print(summary_df.to_string(index=False))`,
       { question: "The stop-sign sticker experiment demonstrates that:", options: ["ML models cannot process image data", "A deliberately altered input can make an operational ML tool reliably misclassify it", "Self-driving cars do not use machine learning", "Physical damage to a sign always defeats a camera"], correctIndex: 1, explanation: "Altering a small section of a stop sign made ML tools reliably misclassify it as a 45 mph speed-limit sign — an adversarial input attack." },
       { question: "What is the realistic goal of protecting an AI or ML system from attack?", options: ["Guaranteeing that no attack can ever succeed", "A systems-security approach that reduces the risk and impact of attacks to acceptable levels", "Removing all machine learning from security tools", "Keeping the model architecture secret indefinitely"], correctIndex: 1, explanation: "There is no fail-safe protection; the realistic goal is reducing risk and impact to acceptable levels." },
       { question: "In the log-analysis activity, repeated SYN packets without completed handshakes most likely indicate:", options: ["A successful file transfer", "Scanning activity", "A routine software update", "Normal DNS resolution"], correctIndex: 1, explanation: "Repeated SYN packets without completed handshakes, and connection attempts to many ports from one IP, suggest scanning." },
-      { question: "Which features would you extract to train a model to detect DDoS attacks?", options: ["Number of unique destination ports and packet rate per second", "Username length and password complexity", "File extension and file size", "Screen resolution and browser version"], correctIndex: 0, explanation: "The activity names the number of unique destination ports and the packet/request rate as DDoS features." },
+      { question: "Which features would you extract to train a model to detect DDoS attacks?", options: ["Packet rate, source IP entropy, number of destination ports and SYN-to-ACK ratio", "Username length and password complexity", "File extension and file size", "Screen resolution and browser version"], correctIndex: 0, explanation: "The activity names four features: packet rate, source IP entropy, number of destination ports, and the SYN-to-ACK ratio." },
 
       // Note 6 — The Cyber Attacker's Economy
       { question: "How has attacker motivation changed over time?", options: ["From financial gain toward curiosity and reputation", "From curiosity, mischief and reputation toward financial motivation", "It has always been purely political", "Motivation has not changed at all"], correctIndex: 1, explanation: "Early attacks were driven by curiosity, mischief and reputation; today most are financially motivated." },
       { question: "The commoditization of hacking matters because it:", options: ["Raises the technical barrier to entry", "Lowers the barrier to entry, since darknet markets sell exploits, malware kits and subscription hacking services", "Eliminates the market for stolen credentials", "Makes attacks easier to trace"], correctIndex: 1, explanation: "Commoditization lowers the barrier to entry — exploits, malware kits, stolen credentials and hacking services are all for sale." },
       { question: "Why might an attacker sell a zero-day exploit rather than use it?", options: ["Selling is illegal in every jurisdiction, so it carries no risk", "Selling often provides faster and lower-risk financial returns than launching the attack directly", "Exploits lose all value once discovered", "Buyers are legally required to report the flaw"], correctIndex: 1, explanation: "Selling an exploit often gives faster, lower-risk returns than carrying out the attack, whether through bug bounties or underground markets." },
-      { question: "In the attack supply chain, who manages networks of infected devices and rents them out for DDoS attacks?", options: ["Vulnerability researcher", "Exploit developer", "Botnet operator", "Data reseller"], correctIndex: 2, explanation: "The botnet operator manages infected device networks and rents them out for DDoS attacks." },
-      { question: "In the attack supply chain, the role that writes code weaponizing a discovered flaw is the:", options: ["Exploit developer", "Malware distributor", "Data reseller", "Vulnerability researcher"], correctIndex: 0, explanation: "The exploit developer turns a discovered flaw into a usable attack; the researcher only finds and documents it." },
+      { question: "In the attack supply chain, the role that writes code weaponizing a discovered flaw is the:", options: ["Exploit developer", "Malware distributor", "System administrator", "Vulnerability researcher"], correctIndex: 0, explanation: "The exploit developer turns a discovered flaw into a usable attack; the researcher only finds and documents it." },
       { question: "Why do attackers often avoid large financial institutions despite the high potential reward?", options: ["Large institutions hold no valuable data", "Attacking them is legal but unprofitable", "They invest heavily in security — SOC teams, encryption and compliance — making attacks costly and risky", "Their systems use technology attackers cannot understand"], correctIndex: 2, explanation: "Heavy investment in detection, encryption and compliance makes large institutions costly and risky to attack." },
       { question: "What makes small businesses attractive targets?", options: ["They hold more data than large corporations", "They have limited security budgets, no dedicated security staff and outdated systems", "They are legally exempt from reporting breaches", "Their data is always unencrypted by regulation"], correctIndex: 1, explanation: "Limited budgets, no dedicated IT/security staff and outdated systems make smaller organisations easier and faster to breach." },
       { question: "Why is cybersecurity described as an adversarial machine learning problem?", options: ["Because the datasets are always too small to train on", "Because the data is generated by an intelligent opponent actively adapting to evade detection", "Because security data cannot be labeled", "Because models must run without any training phase"], correctIndex: 1, explanation: "Unlike static datasets, security data comes from an intelligent adversary who adapts specifically to evade detection." },
@@ -4311,7 +4959,7 @@ print(summary_df.to_string(index=False))`,
       { question: "In the hospital access-control example, what does the ML system make possible?", options: ["Blocking every rare access attempt automatically", "Detecting abnormal access patterns without blocking legitimate rare events", "Removing the need for any access control", "Granting all doctors unrestricted access"], correctIndex: 1, explanation: "ML learns typical access patterns so abnormal behaviour is detected while legitimate but rare access is not blocked." },
       { question: "Why is anomaly detection prone to false positives?", options: ["It only ever flags known attacks", "There may be infinitely many anomalous patterns, including ones never seen in training, so any deviation can be flagged", "It requires labeled malicious examples to function", "It ignores the baseline of normal behaviour"], correctIndex: 1, explanation: "Because anomalies are defined by deviation and there can be infinitely many, careless design flags legitimate but unusual events." },
 
-      // Note 8 — Supervised Learning Algorithms for Intrusion Detection
+      // Note 8 — Supervised Learning for Data Security
       { question: "In the supervised learning set-up, the goal is to learn:", options: ["A mapping f : x → y that generalises well to unseen data", "A fixed lookup table of every training example", "A clustering of the data into k groups", "A reward function for sequential decisions"], correctIndex: 0, explanation: "Supervised learning trains on labeled pairs to learn a mapping f : x → y that generalises to unseen data." },
       { question: "Which loss function is used for binary classification?", options: ["Categorical cross-entropy", "Binary cross-entropy", "Gini impurity", "Euclidean distance"], correctIndex: 1, explanation: "Binary cross-entropy, L(y, ŷ) = −[y·log(ŷ) + (1 − y)·log(1 − ŷ)], is the binary classification loss." },
       { question: "The model minimises its loss using:", options: ["Gradient descent or a variant such as Adam or SGD with momentum", "Random sampling of the weights", "Exhaustive search over all possible weights", "The kernel trick"], correctIndex: 0, explanation: "Loss is minimised by gradient descent or variants such as Adam and SGD with momentum." },
@@ -4328,7 +4976,7 @@ print(summary_df.to_string(index=False))`,
       { question: "What is the correct order of one neural network training iteration?", options: ["Backward pass, forward pass, update", "Update, forward pass, backward pass", "Forward pass to compute predictions and loss, backward pass to compute gradients, then update the weights", "Forward pass, update, backward pass"], correctIndex: 2, explanation: "Each iteration runs a forward pass, then a backward pass for gradients, then a weight update." },
       { question: "Which trade-off is stated when choosing between the three algorithms?", options: ["Decision trees offer interpretability, SVMs give strong guarantees in high dimensions, and neural networks perform best on large or complex datasets", "Decision trees always outperform both other methods", "SVMs are the only option for large datasets", "Neural networks require no feature engineering at all"], correctIndex: 0, explanation: "Trees give interpretability, SVMs give theoretical guarantees in high dimensions, and neural networks lead on large or complex data." },
 
-      // Note 9 — Practical: Building Detection Models by Hand
+      // Note 9 — Practical Activities
       { question: "In Practical 2, the dataset has 3 malicious and 3 benign packets. What is the root Gini impurity?", options: ["0.0", "0.25", "0.5", "1.0"], correctIndex: 2, explanation: "With p_malicious = p_benign = 0.5, Gini = 1 − (0.5² + 0.5²) = 0.5." },
       { question: "After splitting on the SYN flag in Practical 2, what is the Gini impurity of each child node?", options: ["0, because each branch contains only one class", "0.5, unchanged from the root", "0.25 for both branches", "1.0, because the split is invalid"], correctIndex: 0, explanation: "SYN = 1 gives all malicious and SYN = 0 all benign, so each child has Gini = 0 — a perfect split." },
       { question: "What training accuracy does the resulting one-rule decision tree achieve on the six packets?", options: ["50%", "75%", "100%", "83%"], correctIndex: 2, explanation: "The rule 'IF SYN_Flag = 1 THEN Malicious ELSE Benign' classifies all six packets correctly — 6/6 = 100%." },
@@ -4362,7 +5010,7 @@ print(summary_df.to_string(index=False))`,
       { question: "In that same scenario, what is the main risk of a false positive?", options: ["A complete data breach", "Unnecessary investigations, user inconvenience and erosion of trust in the security system", "Permanent loss of the audit logs", "The model becoming unable to train"], correctIndex: 1, explanation: "False positives flag legitimate activity, causing wasted investigations, inconvenience and loss of trust in the system." },
       { question: "The employee suddenly accessing 50 times more files than usual, at 2:00 AM, from a new location is:", options: ["A pattern recognition problem, because the behaviour matches a known signature", "An anomaly detection problem, because it is a significant deviation from usual behaviour in time, volume and location", "Neither — it is a hardware fault", "A regression problem, because file counts are numeric"], correctIndex: 1, explanation: "The deviation in time, volume and location makes it an anomaly detection problem, not signature matching." },
 
-      // Note 12 — Supervised Machine Learning for Threat Detection
+      // Note 12 — Machine Learning for Threat Detection in Big Data
       { question: "In supervised threat detection, which two main tasks are distinguished?", options: ["Classification — is this a threat? — and regression — how high is the risk?", "Clustering and dimensionality reduction", "Encryption and decryption", "Labeling and archiving"], correctIndex: 0, explanation: "Classification answers 'is this a threat?' while regression answers 'how high is the risk?'" },
       { question: "In the procedural workflow, what does feature engineering involve?", options: ["Tagging every entry in the dataset as 1 or 0", "Identifying the characteristics that signal a threat — such as sender IP, number of links, or urgent-sounding keywords", "Splitting the model across multiple servers", "Choosing the loss function"], correctIndex: 1, explanation: "Feature engineering identifies the threat-signalling characteristics, e.g. sender IP, link count, urgency keywords in an email." },
       { question: "What is the correct order of the supervised workflow?", options: ["Training, data labeling, feature engineering, testing", "Data labeling, feature engineering, training, testing/validation", "Feature engineering, testing, training, data labeling", "Testing, training, feature engineering, data labeling"], correctIndex: 1, explanation: "The workflow runs data labeling → feature engineering → training → testing/validation on new unlabeled data." },
@@ -4376,7 +5024,7 @@ print(summary_df.to_string(index=False))`,
       { question: "In the algorithm comparison table, SVM's listed weakness is:", options: ["High memory consumption", "Poor performance in high dimensions", "Inability to process numeric features", "Assuming feature independence"], correctIndex: 0, explanation: "SVM excels on complex, high-dimensional data but consumes a lot of memory." },
       { question: "Logistic Regression is listed as typically used for fraud detection because it:", options: ["Handles non-linear threats better than any other model", "Provides a clear risk score from 0 to 100%", "Requires no feature engineering", "Trains without any labeled examples"], correctIndex: 1, explanation: "Logistic Regression gives a clear 0–100% risk score, though it struggles with non-linear threats." },
 
-      // Note 13 — Exploratory Data Analysis and the Python Toolkit
+      // Note 13 — Exploratory Data Analysis (EDA) for Network Security
       { question: "Exploratory Data Analysis (EDA) is the process of:", options: ["Training a final model on the full dataset", "Examining, summarising and visualising a dataset to understand its main characteristics before applying formal models", "Deploying a model into production", "Encrypting a dataset before sharing it"], correctIndex: 1, explanation: "EDA examines, summarises and visualises data to understand its characteristics before formal modelling." },
       { question: "Which is NOT listed as a purpose of EDA?", options: ["Discovering patterns in the data", "Detecting errors or missing values", "Automatically selecting the best hyperparameters for the final model", "Checking the assumptions required for modelling"], correctIndex: 2, explanation: "EDA is for discovering patterns, detecting errors and missing values, identifying relationships and checking modelling assumptions." },
       { question: "Histograms and boxplots used to understand the distribution of a single feature are:", options: ["Univariate EDA", "Bivariate EDA", "Multivariate EDA", "Predictive modelling"], correctIndex: 0, explanation: "Univariate EDA — mean, median, mode, histograms and boxplots — examines one variable at a time." },
@@ -4401,26 +5049,26 @@ print(summary_df.to_string(index=False))`,
       { question: "A model produces TP = 40, FP = 10, FN = 20 and TN = 130. What is its precision?", options: ["0.67", "0.80", "0.85", "0.40"], correctIndex: 1, explanation: "Precision = TP / (TP + FP) = 40 / (40 + 10) = 0.80." },
       { question: "For the same model (TP = 40, FP = 10, FN = 20, TN = 130), what is its recall?", options: ["0.67", "0.80", "0.75", "0.85"], correctIndex: 0, explanation: "Recall = TP / (TP + FN) = 40 / (40 + 20) = 0.67." },
 
-      // Note 15 — Practical: EDA on UNSW-NB15
+      // Note 16 — Practice Exercise of EDA for IDS Data Set
       { question: "Why does running block 15.3 on its own raise a NameError?", options: ["Because the dataset file has not been downloaded", "Because it reuses df and num_cols defined in the earlier blocks — the three blocks are one continuous script", "Because Seaborn must be imported twice", "Because plt.show() can only be called once per session"], correctIndex: 1, explanation: "15.2 and 15.3 reuse df and num_cols from the block before them, so the blocks must run in order in the same notebook." },
       { question: "In the UNSW-NB15 practical, which plot is used to inspect the distribution of the binary target variable?", options: ["sns.heatmap", "sns.countplot(x='label', data=df)", "sns.pairplot", "plt.boxplot of all columns"], correctIndex: 1, explanation: "sns.countplot on the 'label' column shows the distribution of the binary target." },
       { question: "Which plot type does the practical use for outlier detection across numerical features?", options: ["Boxplots", "Line charts", "Correlation heatmaps", "Pie charts"], correctIndex: 0, explanation: "Section 10 of the script draws boxplots of the first ten numerical features for outlier detection." },
       { question: "Why is the pairplot built from sample_df = df.sample(n=1000, random_state=42) rather than the full DataFrame?", options: ["Because pairplot cannot read more than 1000 rows", "For performance — a pairplot over the full dataset would be very slow", "Because only 1000 rows contain attacks", "Because random_state requires a fixed sample size"], correctIndex: 1, explanation: "The pairplot is sampled for performance, as the comment in the script states." },
 
-      // Note 16 — Practical: SVM and KNN
+      // Note 17 — Practical: SVM and KNN
       { question: "Why can running a kernel SVM (SVC) on the full UNSW-NB15 file take hours?", options: ["Because SVC re-reads the CSV on every iteration", "Because a kernel SVM scales roughly with the square of the number of samples", "Because SVC cannot use more than one CPU core", "Because the RBF kernel requires labeled test data"], correctIndex: 1, explanation: "Kernel SVM training scales roughly with the square of the sample count, so a full-size file is very slow." },
       { question: "What two options does the practical give for making SVM training tractable on this dataset?", options: ["Train on a stratified subsample, or use the LinearSVC version built for datasets this size", "Reduce the number of classes to one, or drop the target column", "Disable scaling, or increase the number of features", "Use a smaller random_state, or skip the train/test split"], correctIndex: 0, explanation: "The note recommends a stratified subsample first, or the LinearSVC version designed for datasets this size." },
       { question: "Why must df.dropna() be called before scaling and fitting in these scripts?", options: ["Because dropna reduces the file size on disk", "Because StandardScaler passes NaN straight through, and the estimator then raises an error on fit", "Because NaN values make the plots harder to read", "Because scikit-learn cannot read CSV files containing blanks"], correctIndex: 1, explanation: "The real file has blank service entries; StandardScaler passes NaN through and LinearSVC/KNeighborsClassifier then fail on fit." },
       { question: "What is LabelEncoder used for in the SVM practical?", options: ["Scaling numerical features to zero mean and unit variance", "Encoding categorical (object-typed) columns into numbers", "Splitting the data into training and test sets", "Plotting the ROC curve"], correctIndex: 1, explanation: "The script loops over df.select_dtypes(include=['object']).columns and applies LabelEncoder to each categorical column." },
       { question: "Which scikit-learn function divides the dataset into training and testing portions?", options: ["StandardScaler", "train_test_split", "cross_val_score", "classification_report"], correctIndex: 1, explanation: "train_test_split from sklearn.model_selection performs the split." },
 
-      // Note 17 — Practical: Decision Tree
+      // Note 18 — Intrusion Detection Using Decision Tree (DT)
       { question: "Why do the decision tree scripts drop the attack_cat column before training?", options: ["Because it contains too many missing values", "Because attack_cat names the attack family, so a model that sees it is just reading the answer and its reported accuracy is meaningless", "Because decision trees cannot handle categorical data", "Because it duplicates the id column"], correctIndex: 1, explanation: "attack_cat leaks the answer — a model that can see it is reading the label, making the accuracy meaningless." },
       { question: "Why is feature scaling described as optional for a decision tree?", options: ["Because decision trees ignore numerical features entirely", "Because tree splits are threshold-based, so the scale of a feature does not change the tree", "Because scaling is applied automatically by DecisionTreeClassifier", "Because the dataset is already normalised"], correctIndex: 1, explanation: "Splits are threshold-based, so rescaling a feature does not change the resulting tree — scaling is kept only so the same preprocessing serves other models." },
       { question: "What does cross_val_score add to the evaluation of the decision tree model?", options: ["k-fold cross-validation, testing the model across multiple train/test partitions", "A confusion matrix plot", "Automatic hyperparameter tuning of tree depth", "Encoding of categorical variables"], correctIndex: 0, explanation: "The practical adds k-fold cross-validation via cross_val_score on top of the single train/test evaluation." },
       { question: "Which display class is used to plot the decision tree's confusion matrix?", options: ["classification_report", "ConfusionMatrixDisplay", "roc_curve", "precision_recall_curve"], correctIndex: 1, explanation: "The script builds cm with confusion_matrix and plots it with ConfusionMatrixDisplay." },
 
-      // Note 18 — Network Anomaly Detection with K-Means
+      // Note 19 — Network Anomaly Detection (K-Means Clustering)
       { question: "In K-Means anomaly detection, which points are considered anomalies?", options: ["Points closest to the cluster centroids", "Points far from the cluster centres (centroids)", "Points that belong to the largest cluster", "Points with the smallest feature values"], correctIndex: 1, explanation: "K-Means groups normal behaviour; points far from the centroids are treated as anomalies." },
       { question: "What is the key advantage of using K-Means for network anomaly detection?", options: ["It requires a fully labeled dataset of past attacks", "It detects anomalies without any labeled attack data, since it is unsupervised", "It guarantees zero false positives", "It only works on encrypted traffic"], correctIndex: 1, explanation: "K-Means is unsupervised, so anomalies in network behaviour are found without labeled attack data." },
       { question: "In this workflow, what is NumPy's role?", options: ["Converting raw security logs into structured numerical arrays for fast computation", "Grouping the data into clusters", "Displaying the clusters visually", "Loading and cleaning the log file"], correctIndex: 0, explanation: "NumPy converts raw logs into structured numerical arrays; scikit-learn clusters, Matplotlib visualises, Pandas handles the loading." },
@@ -4428,7 +5076,7 @@ print(summary_df.to_string(index=False))`,
       { question: "In the example implementation, what does KMeans(n_clusters=2) specify?", options: ["That the data has two features", "That the data should be grouped into two clusters", "That two anomalies are expected", "That the model should run for two iterations"], correctIndex: 1, explanation: "n_clusters=2 sets the number of clusters the algorithm groups the data into." },
       { question: "What is the correct order of the K-Means anomaly detection workflow?", options: ["Apply K-Means, collect the data, convert to an array, visualise", "Collect network activity data, convert it to a NumPy array, apply K-Means, identify points far from the centroids, then visualise", "Visualise the raw data, then cluster, then collect more data", "Convert to an array, visualise, collect data, apply K-Means"], correctIndex: 1, explanation: "Collect the activity data, convert to a NumPy array, cluster with K-Means, identify far-from-centroid points, then visualise." },
 
-      // Note 19 — The k-Nearest Neighbours Algorithm
+      // Note 20 — The k-Nearest Neighbors (k-NN) Algorithm
       { question: "k-NN is described as a lazy learning algorithm because it:", options: ["Requires very little training data", "Delays most computation until the classification stage instead of doing intensive work during training", "Produces low-accuracy predictions", "Only runs when the system is idle"], correctIndex: 1, explanation: "Lazy learners postpone the heavy computation to classification time rather than doing it during training." },
       { question: "What happens during the k-NN training phase?", options: ["Weights are learned by gradient descent", "All training feature vectors and their labels are stored, with no model building or parameter learning", "A decision boundary is computed and stored", "The data is clustered into k groups"], correctIndex: 1, explanation: "Training simply stores all feature vectors and labels — no model is built and no parameters are learned." },
       { question: "During k-NN classification, after calculating distances to all training samples, the algorithm:", options: ["Selects the k nearest neighbours and assigns the most common label among them", "Selects the single furthest point and inverts its label", "Retrains the model on the new sample", "Recomputes the cluster centroids"], correctIndex: 0, explanation: "It picks the k nearest neighbours and assigns the most common label among those neighbours." },
@@ -4439,7 +5087,7 @@ print(summary_df.to_string(index=False))`,
       { question: "What is the purpose of a k-d tree in k-NN?", options: ["To visualise the decision boundary", "To speed up the neighbour search", "To reduce the number of features", "To convert categorical data to numeric"], correctIndex: 1, explanation: "Optimised data structures such as k-d trees speed up the nearest-neighbour search." },
       { question: "k-NN performance is stated to depend on:", options: ["The choice of k and the distance metric", "The order in which the training data was collected", "The number of hidden layers configured", "The learning rate used during training"], correctIndex: 0, explanation: "Its listed disadvantages include that performance depends on the choice of k and the distance metric." },
 
-      // Note 20 — Anomaly Detection with Pandas and Scikit-learn
+      // Note 21 — Anomaly Detection Using Pandas and Scikit-Learn Libraries
       { question: "Which Pandas capability covers handling missing values, removing duplicates and filtering unwanted records?", options: ["Data creation", "Data cleaning", "Data transformation", "Data exploration"], correctIndex: 1, explanation: "Data cleaning handles missing values, duplicate removal and filtering of unwanted records." },
       { question: "X = df.drop('label', axis=1) is an example of which Pandas function?", options: ["Data creation", "Data selection and filtering", "Data transformation", "Data exploration"], correctIndex: 1, explanation: "Selecting rows and columns — here separating the input features from the label — is data selection and filtering." },
       { question: "Which pair of scikit-learn calls trains a model and then produces predictions?", options: ["model.fit(X_train, y_train) then model.predict(X_test)", "model.predict(X_train) then model.fit(X_test)", "train_test_split() then df.describe()", "StandardScaler() then df.head()"], correctIndex: 0, explanation: "model.fit trains on the training data; model.predict then produces predictions for the test data." },
@@ -4447,13 +5095,18 @@ print(summary_df.to_string(index=False))`,
       { question: "What does the contamination parameter of IsolationForest represent?", options: ["The expected proportion of anomalies in the data", "The number of trees in the forest", "The random seed used for reproducibility", "The maximum depth of each tree"], correctIndex: 0, explanation: "contamination=0.2 tells the model roughly what proportion of the data is expected to be anomalous." },
       { question: "Isolation Forest is used in this example as:", options: ["A supervised classifier trained on labeled attacks", "An unsupervised anomaly detection method", "A clustering algorithm requiring n_clusters", "A dimensionality-reduction technique"], correctIndex: 1, explanation: "The section presents Isolation Forest as unsupervised anomaly detection over the simulated traffic array." },
 
-      // Note 21 — Practical: Credit Card Fraud Anomaly Detection
+      // Note 22 — Practical Illustration of Anomaly Detection in Customer Credit Card
       { question: "In the credit card fraud practical, why is df['Class'].value_counts() inspected early?", options: ["To confirm the file loaded without errors", "To check the target distribution and reveal the class imbalance", "To remove duplicate transactions", "To select which columns to scale"], correctIndex: 1, explanation: "value_counts on Class shows the target distribution, exposing how imbalanced fraud data is." },
       { question: "Which four models does the practical compare on the fraud dataset?", options: ["SVM, KNN, Decision Tree and Random Forest", "Naive Bayes, Logistic Regression, KNN and PCA", "K-Means, Isolation Forest, GMM and PCA", "CNN, RNN, MLP and SVM"], correctIndex: 0, explanation: "The comparison covers LinearSVC, KNeighborsClassifier, DecisionTreeClassifier and RandomForestClassifier." },
       { question: "On a heavily imbalanced fraud dataset, why is accuracy alone a poor measure of performance?", options: ["Accuracy cannot be computed when classes are imbalanced", "A model can score very high accuracy simply by predicting the majority class, which is why precision, recall and F1 are reported too", "Accuracy is only defined for binary problems", "Accuracy always equals recall on imbalanced data"], correctIndex: 1, explanation: "With very few fraud cases, predicting the majority class alone gives high accuracy — F1 is the metric that considers both error types." },
-      { question: "In the results table for this practical, which metrics are recorded for each model?", options: ["Accuracy, Precision, Recall and F1-score", "Gini, entropy, depth and leaf count", "Volume, Velocity, Variety and Veracity", "Training time, memory, disk and CPU"], correctIndex: 0, explanation: "The 21.3 results table asks for Accuracy, Precision, Recall and F1-score per model." },
+      { question: "In the results table for this practical, which metrics are recorded for each model?", options: ["Accuracy, Precision, Recall and F1-score", "Gini, entropy, depth and leaf count", "Volume, Velocity, Variety and Veracity", "Training time, memory, disk and CPU"], correctIndex: 0, explanation: "The results table at the end of the credit-card practical asks for Accuracy, Precision, Recall and F1-score per model." },
       { question: "Which two curves are imported in the model comparison script for evaluating classifier performance?", options: ["precision_recall_curve and roc_curve", "learning_curve and validation_curve", "calibration_curve and lift_curve", "silhouette_curve and elbow_curve"], correctIndex: 0, explanation: "The script imports precision_recall_curve and roc_curve (with auc) from sklearn.metrics." },
     ],
+    // Written-exam bank alongside the MCQ bank above. The workbook's own
+    // activities are written ones — "define", "differentiate between", "with the
+    // aid of a diagram", "state the steps" — so the course needs both forms.
+    // See src/data/lectureNotes/cyb224ExamPrep.js.
+    examPrep: cyb224ExamPrep,
   },
   {
     code: 'CYB 222',
@@ -5369,7 +6022,113 @@ print(summary_df.to_string(index=False))`,
       {
         number: '5',
         title: 'Cloud Native Security',
-        sections: [],
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 5 research project — by Akpan D. Chinemerem and Udoh I. Nsikak-abasi. An assigned project topic for CYB 222, examining cloud native security — the threats, models, and tooling that secure applications built as containers orchestrated by platforms such as Kubernetes.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Cloud native computing builds applications as loosely coupled microservices, packaged in containers, and orchestrated dynamically by platforms such as Kubernetes',
+              'Ephemeral workloads, distributed trust boundaries, and heavy automation mean security can no longer be a perimeter concern applied after the fact — it must be embedded across the whole lifecycle, from source code to runtime',
+              'The 4C model nests four layers — Cloud, Cluster, Container, Code — each secured independently; a weakness at one layer undermines every layer above it',
+              'Zero Trust (authenticate, authorize, and encrypt every request regardless of origin) and Shift-Left security (catching issues in development, before production) are the two guiding strategies',
+              'Misconfiguration — not novel exploits — causes more breaches: overly permissive RBAC, misconfigured images, exposed dashboards',
+              'Best practice is least privilege, image scanning, network segmentation, secrets management, continuous runtime monitoring, and treating infrastructure as immutable',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'Cloud native computing builds applications as loosely coupled microservices, packaged in lightweight containers, and orchestrated dynamically by platforms such as Kubernetes — fully exploiting cloud elasticity and automation. This shift delivers major gains in scalability and deployment speed, but introduces new categories of risk. Ephemeral workloads, distributed trust boundaries, and heavy automation mean security can no longer be a perimeter concern applied after the fact. Instead, it must be embedded across the entire application lifecycle — from source code to runtime — spanning every layer: code, container, cluster, and cloud.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Key Security Challenges',
+            items: [
+              { term: 'Expanded Attack Surface', def: 'Every container, microservice, and API endpoint is a potential entry point; one weak link enables lateral movement.' },
+              { term: 'Ephemeral & Dynamic Infrastructure', def: 'Containers spin up and down in minutes, breaking conventional asset inventory and monitoring approaches.' },
+              { term: 'Misconfiguration', def: 'Misconfigured images, overly permissive RBAC, and exposed dashboards cause more breaches than novel exploits.' },
+              { term: 'Supply Chain Risk', def: 'Third-party base images, open-source libraries, and CI/CD dependencies create a chain a single compromise can propagate through.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Why Invest in Cloud Native Security',
+            items: [
+              'Faster, safer delivery — shift-left catches issues in development, shortening remediation cycles',
+              'Improved resilience — immutable infrastructure lets compromised containers be replaced in minutes',
+              'Granular access control — Zero Trust and RBAC scope permissions tightly, shrinking blast radius',
+              'Real-time visibility — runtime tools like Falco detect threats as they happen, not at audit time',
+              'Consistent, auditable policy — policy-as-code makes compliance testable and version-controlled',
+              'Supply chain assurance — image scanning, SBOMs, and SLSA verify what\'s really running in production',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'The 4C Model',
+            items: [
+              { term: 'Cloud', def: 'AWS, Azure, GCP, or on-prem hardware — the outermost layer.' },
+              { term: 'Cluster', def: 'API server access and network policies.' },
+              { term: 'Container', def: 'Container images and runtime configuration.' },
+              { term: 'Code', def: 'Source code, dependencies, and secrets handling — the innermost layer.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The 4C model is a Kubernetes community framework: nested layers, each secured independently. A weakness at any one layer can undermine every layer above it.',
+          },
+          {
+            type: 'definition',
+            heading: 'Zero Trust Architecture',
+            text: 'Discards the assumption that anything inside the network perimeter is trustworthy. Every request — user or service-to-service — must be authenticated, authorized, and encrypted, regardless of origin. In cloud native systems this is commonly implemented through service meshes enforcing mutual TLS and fine-grained access policies.',
+          },
+          {
+            type: 'definition',
+            heading: 'Shift-Left Security',
+            text: 'Moves security checks earlier in the software development lifecycle. Vulnerability scanning, static analysis, and policy enforcement are integrated directly into CI/CD pipelines. The goal is to catch misconfigurations and vulnerable dependencies before they reach production — cutting cost and risk relative to post-deployment detection.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Tooling Landscape',
+            items: [
+              { term: 'Docker (Container Runtime)', def: 'Builds and runs containerized applications; image configuration is a key security control point.' },
+              { term: 'Kubernetes (Orchestration)', def: 'Manages container deployment and scaling; RBAC and network policies are central to securing it.' },
+              { term: 'Falco (Runtime Threat Detection)', def: 'Monitors system calls in real time to detect anomalous or malicious container behavior.' },
+              { term: 'Prisma Cloud (CNAPP)', def: 'Provides unified visibility across posture management, vulnerability scanning, and compliance.' },
+              { term: 'Aqua Security (CNAPP)', def: 'Covers image scanning, runtime protection, and supply chain security for containers.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Best Practices',
+            items: [
+              'Least privilege access — restrict RBAC roles and service permissions to the minimum required per workload',
+              'Image scanning — scan container images for known vulnerabilities before pushing to a registry',
+              'Network segmentation — use Kubernetes network policies to limit which services can communicate',
+              'Secrets management — store credentials and keys in dedicated secrets managers, never in code',
+              'Continuous monitoring — deploy runtime detection tools to catch anomalous behavior as it happens',
+              'Immutable infrastructure — treat containers as disposable; patch by rebuilding and redeploying',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Future Trends',
+            items: [
+              { term: 'Policy-as-Code', def: 'Security and compliance rules become version-controlled, testable artifacts alongside application code.' },
+              { term: 'AI-Assisted Threat Detection', def: 'Runtime monitoring integrates AI to spot subtle behavioral anomalies rule-based systems miss.' },
+              { term: 'Software Supply Chain Security', def: 'SLSA standards and SBOM documentation gain prominence for tracking dependencies.' },
+              { term: 'Confidential Computing', def: 'Encrypts data even while processed in memory, extending the security perimeter to hardware.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Conclusion',
+            text: 'Cloud native security is not a single product or checkpoint — it is a discipline spanning infrastructure, orchestration, application code, and organizational process. The 4C model, Zero Trust, and Shift-Left security provide complementary lenses for reasoning about risk at each layer of the stack, while tools like Falco, Prisma Cloud, and Aqua Security operationalize these principles in practice. Organizations that embed security throughout the development lifecycle — rather than bolting it on afterward — will be best positioned to manage the risks of distributed, dynamic infrastructure.',
+          },
+        ],
       },
       {
         number: '6',
@@ -5652,7 +6411,155 @@ print(summary_df.to_string(index=False))`,
       {
         number: '7',
         title: 'Automated Vulnerability Research',
-        sections: [],
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 7 research project. An assigned project topic for CYB 222 — a study of Automated Vulnerability Research (AVR): what it is, how it works, and the tools and framework that turn it from a manual chore into a continuous defensive process.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'AVR is the use of automated systems, software tools and intelligent technologies to identify, analyse and validate — and sometimes exploit — vulnerabilities in computer systems, networks, websites and applications',
+              'It traces from curious 1960s–70s mainframe probing through the 1988 Morris Worm and the 1995 SATAN scanner to today’s fuzzing, symbolic execution, AI/ML and automated exploit generation',
+              'Six components combine to do the work: static analysis, dynamic analysis, fuzz testing, symbolic execution, binary analysis, and AI/ML',
+              'Benefits — speed, accuracy, scalability, 24/7 monitoring, early detection — are offset by real limitations: false positives/negatives, no grasp of business logic, dependence on known-vulnerability databases (so zero-days are missed), and attacks advanced enough to bypass automation entirely',
+              'An eight-stage framework — target, discover, collect, detect, validate, prioritise, report, improve — turns AVR into a continuous loop rather than a one-off scan',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Introduction',
+            text: 'Cyber threats grow exponentially in complexity and frequency across critical infrastructure, and millions of lines of code now power the systems that infrastructure depends on. A vulnerability is a weakness or flaw in a computer system, network, application or device that a malicious actor can exploit to gain unauthorised access. Automated Vulnerability Research bridges theory and real-world security — it is the backbone of modern defensive strategy, because no team of humans can read millions of lines of code, or scan every host on a large network, at the speed and scale attackers now operate at.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Brief History of AVR',
+            items: [
+              { term: '1960s–70s', def: 'Early hackers probe mainframes out of curiosity — vulnerability research begins as manual exploration, not a discipline.' },
+              { term: '1988 — the Morris Worm', def: 'Exploits a UNIX buffer overflow and infects roughly 6,000 machines, an early demonstration of how a single automatable flaw can propagate at scale.' },
+              { term: '1995 — SATAN', def: 'The first automated network vulnerability scanner, turning what had been manual probing into a repeatable, tool-driven process.' },
+              { term: 'Early 2000s — fuzzing introduced', def: 'Random data injection to find crashes becomes a standard research technique, discovering flaws no one had thought to test for by hand.' },
+              { term: '2010s–now', def: 'AI, machine learning, large language models, symbolic execution and automated exploit generation move AVR from finding flaws to reasoning about them.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'AVR: Definition & Objectives',
+            text: 'Automated Vulnerability Research (AVR) refers to the use of automated systems, software tools, and intelligent technologies to identify, analyse, and validate — and sometimes exploit — vulnerabilities in computer systems, networks, websites, and applications.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Objectives',
+            items: [
+              'Detect weaknesses before an attacker finds them',
+              'Reduce the manual workload on security teams',
+              'Improve defences by feeding findings back into remediation',
+              'Test reliability — confirm that a system holds up under adversarial conditions',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Types of AVR',
+            items: [
+              { term: 'Network scanning', def: 'Nessus, OpenVAS, Rapid7 and NMAP sweep hosts, ports and services for known weaknesses.' },
+              { term: 'Web application research', def: 'Burp Suite, OWASP ZAP, SQLmap and Acunetix probe websites and web apps for injection, authentication and configuration flaws.' },
+              { term: 'Malware analysis', def: 'CAPE Sandbox, Ghidra, YARA and Joe Sandbox detonate and dissect suspicious binaries to understand what they do.' },
+              { term: 'AI-based research', def: 'Snyk, Pentera and Microsoft Security Copilot apply machine learning to prioritise findings and reason about novel attack paths.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Role of AVR in Cybersecurity',
+            text: 'Automated Vulnerability Research helps improve cybersecurity by finding and managing security weaknesses before attackers can exploit them.',
+          },
+          {
+            type: 'bullets',
+            items: [
+              'Detects vulnerabilities early',
+              'Scans, prioritises, fixes, verifies, and reports security issues',
+              'Supports red team and penetration testing',
+              'Protects critical infrastructure',
+              'Works with security experts to improve overall security',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'AVR also supports red team and penetration testing and national/critical-infrastructure security, and it operates within a human–automation collaboration model known as augmented security intelligence — the tooling does the scanning at scale, a human still decides what the findings mean.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Components of AVR',
+            items: [
+              { term: 'Static analysis', def: 'Checks the code for hidden flaws without ever running the program. Tools: SonarQube, CodeQL.' },
+              { term: 'Dynamic analysis', def: 'Monitors how the software behaves and looks for crashes while it is actively running. Tools: Valgrind, Burp Suite, OWASP ZAP, Dynatrace.' },
+              { term: 'Fuzz testing (fuzzing)', def: 'Throws massive amounts of random, messy data at an app to see if it breaks. Tools: AFL++, libFuzzer, Peach Fuzzer.' },
+              { term: 'Symbolic execution', def: 'Uses maths and placeholders instead of real data to uncover hidden paths in the code. Tools: KLEE, angr, SAGE, Triton.' },
+              { term: 'Binary analysis', def: 'Reverse-engineers compiled programs to understand how they work when the original source code is not available. Tools: Ghidra, IDA Pro, Radare2, Binary Ninja.' },
+              { term: 'Artificial intelligence and machine learning', def: 'Uses past data to train computers to automatically predict and spot new security risks. Tools: TensorFlow, PyTorch, OpenAI-based security assistants.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Benefits & Limitations of AVR',
+            headers: ['Benefits', 'Limitations'],
+            rows: [
+              ['Speed — scans faster than humans', 'False positives & negatives'],
+              ['Accuracy — reduces human error', 'Limited business-logic understanding'],
+              ['Scalability — handles large networks', 'Dependent on vulnerability databases — misses zero-days'],
+              ['24/7 monitoring — continuous checks', 'Advanced attacks may bypass automation'],
+              ['Early detection — catches weaknesses before attackers', 'Human expertise still required'],
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Scenario & Solution',
+            text: 'A university student portal suffers a SQL injection vulnerability on its login form, exposing student data to fraud and reputational damage. The response: deploy Burp Suite, Nessus and fuzzing together to detect the SQL injection, patch it with parameterised queries, then keep the fix under continuous monitoring. Result: the vulnerability is removed and the data is protected.',
+          },
+          {
+            type: 'termlist',
+            heading: 'AVR Architecture Framework',
+            items: [
+              { term: '1. Target systems', def: 'Apps, APIs, IoT, networks, cloud, binaries and infrastructure — everything AVR is pointed at.' },
+              { term: '2. Asset discovery & enumeration', def: 'Subdomains, hosts, open ports & services, technologies & versions, APIs & endpoints, attack-surface mapping.' },
+              { term: '3. Data collection', def: 'Scanning (port, network), web crawling, API requests, traffic monitoring, configuration dumping, banner grabbing.' },
+              { term: '4. Vulnerability detection engine', def: 'Signature/rule-based matching, AI/ML models, fuzzing & dynamic analysis, static analysis, pattern matching, known-vulnerability databases.' },
+              { term: '5. Validation engine', def: 'Confirms vulnerabilities, removes false positives, verifies exploitability, builds proof of concept (PoC).' },
+              { term: '6. Risk assessment', def: 'Severity (CVSS), exploitability, impact analysis, asset criticality, business context, risk scoring.' },
+              { term: '7. Report generation & recommendations', def: 'Vulnerability details, affected assets, severity & CVSS, evidence & PoC, remediation steps, references (CVE, CWE).' },
+              { term: '8. Continuous monitoring & learning', def: 'Continuous scanning, change & drift detection, threat-intelligence feed, rule & model updates, feedback and learning loop — which feeds back into stage 1.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'AVR Workflow in Action',
+            items: [
+              'Discover assets → collect data → detect vulnerabilities → validate findings → prioritise risk → report results → improve continuously',
+              'Goal: identify, validate, prioritise and report security vulnerabilities efficiently and continuously',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The most famous public demonstration of advanced AVR was Mayhem, developed by ForAllSecure for the 2016 DARPA Cyber Grand Challenge (CGC). Teams built completely autonomous supercomputers that had to defend their own networks while attacking others — no human touched a keyboard during the competition itself.',
+          },
+          {
+            type: 'definition',
+            heading: 'Conclusion',
+            text: 'AVR is essential to modern cybersecurity operations. It improves the speed, accuracy and efficiency of vulnerability identification and enables continuous monitoring and rapid threat response. But automation augments human expertise, it does not replace it — and AI and machine learning will keep advancing what AVR defences can do. As Bruce Schneier put it: "Security is a process, not a product."',
+          },
+          {
+            type: 'bullets',
+            heading: 'References',
+            items: [
+              'Anderson, R. (2020). Security Engineering: A Guide to Building Dependable Distributed Systems (3rd ed.). Wiley.',
+              'CISA. (2023). Known Exploited Vulnerabilities Catalog. U.S. Cybersecurity and Infrastructure Security Agency.',
+              'Google Project Zero. (2021). 0day "In the Wild" tracking project.',
+              'MITRE Corporation. (2023). Common Vulnerabilities and Exposures (CVE).',
+              'NIST. (2023). National Vulnerability Database (NVD). National Institute of Standards and Technology.',
+              'OWASP Foundation. (2023). OWASP Top 10 Web Application Security Risks.',
+            ],
+          },
+        ],
       },
       {
         number: '8',
@@ -5839,7 +6746,530 @@ print(summary_df.to_string(index=False))`,
       {
         number: '9',
         title: 'Deepfake Detection',
-        sections: [],
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 9 research project — by Udey Marvelous Ntamishor, Abasiodu Etimbuk Ekwere, Etim Kufre-Abasi Michael, Daniel Maurice Eyo, Baturua Idiongomfon, Fortress Victor Bassey and Solomon Baribor Progress. An assigned project topic for CYB 222 — a comprehensive review of deepfake detection: the technology behind deepfakes, the techniques and architectures used to detect them, and a practical demonstration of two of those techniques.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'A deepfake is synthetic media — image, video or audio — generated or altered by a trained model so a person appears to say or do something that never happened; unlike manual editing, the manipulation scales and reaches a realism traditional tools could not',
+              'Six categories of malicious use dominate — financial fraud, political disinformation, non-consensual content, identity theft, extortion and judicial doubt — and two documented cases from 2023–2024, a $25.6M Hong Kong video-call fraud and a Slovak election audio clip, were each caught by human verification, not detection software',
+              'Audio-jacking, demonstrated by IBM Security’s X-Force team in 2024, silently intercepts and re-voices a genuine live phone call in real time, replacing a spoken bank account number mid-sentence in a cloned voice',
+              'Detection research runs two tracks — handcrafted features (blur, landmark inconsistency, frequency-domain analysis) and deep learning (CNNs, RNN/LSTM, Vision Transformers, capsule networks, two-stream/hybrid, autoencoder anomaly detection) — plus biological-signal (rPPG), audio and multimodal methods beyond the pixel',
+              'The 2020 DFDC-winning model scored 82% on its own test set but only 65% on entirely new clips — a 17-point drop that shows generalisation, not raw accuracy, is the harder problem, and no detector generalises perfectly',
+              'Nigeria has no dedicated deepfake law, relying instead on the Cybercrimes Act 2015, against a backdrop of limited NITDA/EFCC/Police capacity and a 2020 ECOWAS Court ruling against part of that Act',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'What Is a Deepfake?',
+            text: 'A deepfake is synthetic media — an image, video, or audio recording — generated or altered with artificial intelligence so that it depicts a person saying or doing something that never actually happened. Unlike traditional photo editing or dubbed audio, the manipulation is produced by a trained model rather than manual editing, which allows the output to be generated at scale and with a level of realism traditional tools could not achieve.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Evolution at a Glance',
+            items: [
+              { term: '1997 — Video Rewrite', def: 'Bregler, Covell & Slaney match speech to mouth movement — the technical root of facial reenactment.' },
+              { term: '2014 — Generative Adversarial Networks', def: 'Ian Goodfellow introduces GANs, transforming the field permanently.' },
+              { term: '2017 — "Deepfake" is coined', def: 'A Reddit user coins the term while sharing face-swapped clips; FakeApp brings the technique to consumer PCs.' },
+              { term: '2019 — FaceForensics++', def: 'Rössler et al. release the FaceForensics++ benchmark; XceptionNet becomes the standard detection baseline.' },
+              { term: '2022+ — diffusion models', def: 'Diffusion models drive a new surge in realism; deepfake volume online rises an estimated 500%+ between 2019 and 2023.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Aim, Objectives & Scope',
+            text: 'The aim of this study is to produce a comprehensive study of deepfake detection, covering the technology that makes deepfakes possible, the detection techniques and architectures used to counter them, and practical guidance for cybersecurity students and professionals.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Key Objectives',
+            items: [
+              'Examine the origin, evolution, and underlying mechanisms of deepfake technology',
+              'Evaluate legitimate applications, malicious uses, and general limitations',
+              'Review detection techniques and architectures in depth, with strengths and weaknesses',
+              'Demonstrate practical detection concepts using open-source tools and public datasets',
+              'Identify challenges specific to Nigeria and propose realistic, locally grounded solutions',
+              'Outline the likely future direction of both generation and detection technology',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Scope: this study covers concept, history, generation methods, malicious use, and detection architectures, plus a practical demonstration using existing pretrained models and public datasets (FaceForensics++, Celeb-DF). It does not involve training a new detection model from scratch, and no deepfake content was generated of any real, identifiable individual.',
+          },
+          {
+            type: 'definition',
+            heading: 'Detection Has Gotten Much Harder',
+            text: 'Early deepfakes carried obvious visual flaws — unnatural blinking, mismatched lighting, blurred edges — that made manual detection relatively easy. Diffusion-based generation has largely erased those visible tells. Meanwhile, detection knowledge remains scattered across academic papers, vendor reports, and technical blogs rather than consolidated into a single practical reference. Many cybersecurity students can define a deepfake; far fewer can explain how a detector actually works, what its limits are, or how to apply one.',
+          },
+          {
+            type: 'table',
+            heading: '2020 DFDC Winning Model — the Generalisation Gap',
+            headers: ['Test set', 'Accuracy'],
+            rows: [
+              ['The competition’s own controlled test set', '82%'],
+              ['Entirely new, unfamiliar clips', '65%'],
+            ],
+          },
+          {
+            type: 'note',
+            text: 'That 17-point drop is the clearest evidence in this field that generalisation, not raw accuracy, is the harder problem — and it is why deepfake content online is estimated to have risen more than 500% between 2019 and 2023 even as detection research accelerated.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Four Ways to Build a Deepfake',
+            items: [
+              { term: 'GAN — Generative Adversarial Networks', def: 'A generator and a discriminator compete: the generator improves by learning from the discriminator’s feedback, round after round, until its output is very difficult to distinguish from real data.' },
+              { term: 'AE — Autoencoders', def: 'Compress a face into a shared internal code, then decode it through a different identity’s decoder — the core mechanism behind most face-swap tools.' },
+              { term: 'DM — Diffusion Models', def: 'Learn to reverse a noise process, gradually rebuilding a coherent image step by step — today’s most photorealistic and increasingly accessible method.' },
+              { term: 'VC — Voice Cloning', def: 'Learn a target’s vocal characteristics, tone, and speech patterns from sample audio, then generate new speech in that voice from arbitrary text.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Not All Deepfakes Look the Same — Categories',
+            items: [
+              { term: 'Face swap', def: 'One person’s face superimposed onto another’s body in an image or video — the most well-known category, typically built on the autoencoder method.' },
+              { term: 'Lip sync', def: 'Only the mouth movements of an existing video are altered to match new audio, making it appear a person said something they never said.' },
+              { term: 'Voice / audio', def: 'Entirely synthetic or cloned speech generated to imitate a specific individual’s voice, from arbitrary text or converted speaker input.' },
+              { term: 'Full-body puppetry', def: 'A more advanced category in which an entire person’s body movements and gestures are generated or transferred from a source performer onto a target.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Legitimate Applications',
+            items: [
+              { term: 'Film & TV', def: 'A younger Luke Skywalker recreated in The Mandalorian and The Book of Boba Fett; the late Peter Cushing’s brief return in Rogue One (2016).' },
+              { term: 'Dubbing & localisation', def: 'The "Malaria Must Die" awareness campaign used deepfake lip-sync to show footballer David Beckham speaking fluently in nine languages.' },
+              { term: 'Accessibility & education', def: 'The Dalí Museum in Florida uses a deepfake recreation of artist Salvador Dalí to engage visitors as part of its educational programming.' },
+              { term: 'Corporate & marketing', def: 'Commercial platforms such as Synthesia build legitimate businesses around AI-generated video for corporate training and marketing.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'What separates legitimate use from harm is not the underlying technology itself, but three factors: consent of the depicted individual, honesty about the content’s synthetic origin, and the intent behind its creation and distribution.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Six Categories of Malicious Use',
+            items: [
+              { term: '1. Financial fraud', def: 'Grandparent scams targeting families; corporate impersonation including a $35M voice-cloning heist in the UAE (2020) and a $25.6M video-call fraud in Hong Kong (2024).' },
+              { term: '2. Political disinformation', def: 'Fabricated audio/video of public figures. A 2024 AI robocall impersonating a sitting US president urged New Hampshire voters to skip the state primary, timed two days before polls opened.' },
+              { term: '3. Non-consensual content', def: 'By volume, the most prevalent form of deepfake misuse, overwhelmingly targeting women, including private individuals, without consent.' },
+              { term: '4. Identity theft & impersonation', def: 'Deepfake techniques combined with stolen documents have been used to defeat facial-recognition checks in fraudulent loan and account applications.' },
+              { term: '5. Extortion', def: 'Fabricated compromising audio, images, or video used to demand payment for non-release, or a cloned voice used in fake emergency calls to pressure victims into urgent payment.' },
+              { term: '6. False positives & judicial doubt', def: 'The mere existence of deepfakes creates doubt in courts: genuine evidence can be dismissed as fake, or fabricated evidence trusted as real. Either error produces a wrongful outcome.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Inside a Live Call: Audio-Jacking',
+            text: 'IBM Security’s X-Force team demonstrated in 2024 that a live phone call between two genuine speakers can be silently intercepted and altered in real time — no recording, no rehearsed script, just a hidden third party sitting on the call. The intercepted pipeline runs speech-to-text, into an LLM watching for a keyword trigger, into a voice clone, out through text-to-speech. In IBM’s proof of concept, the system listened for the phrase "bank account." Whenever either speaker mentioned their bank account, the LLM silently replaced the real number with an attacker-controlled one, then regenerated it in a cloned voice matching the speaker, mid-sentence, without either party noticing anything had changed.',
+          },
+          {
+            type: 'note',
+            text: 'This is the same mechanism behind the $35M UAE and $25.6M Hong Kong fraud cases: the attacker doesn’t need to fool a machine, only the two humans on the call — neither of whom is looking for an intruder in a conversation that otherwise sounds completely normal.',
+          },
+          {
+            type: 'table',
+            heading: 'Two Cases That Changed the Conversation',
+            headers: ['Case', 'What happened', 'Caught by'],
+            rows: [
+              ['The Arup Hong Kong fraud — financial fraud, January 2024, $25.6M', 'A finance employee at engineering firm Arup’s Hong Kong office authorised 15 fraudulent wire transfers after joining a video call where every other participant, including a person who appeared to be the company’s CFO, was an AI-generated deepfake built from public footage of real executives.', 'A phone call to headquarters, not detection software'],
+              ['The Slovak election deepfake — political disinformation, September 2023, 48 hours before the vote', 'A fabricated audio clip of party leader Michal Šimečka discussing plans to rig the vote spread widely, circulated during a legally mandated media-silence window that blocked timely fact-checking.', 'Public denial from those involved, after polls opened'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'The Wider Cost of Deepfake Harm',
+            items: [
+              { term: 'Social', def: 'A broader erosion of shared trust in recorded media, plus the "liar’s dividend," where the mere existence of deepfakes gives bad actors a plausible excuse to dismiss genuine, incriminating evidence as fabricated.' },
+              { term: 'Psychological', def: 'Individuals targeted by non-consensual deepfake content, particularly explicit material, frequently experience harm comparable to other forms of image-based abuse, including distress and reputational damage.' },
+              { term: 'Economic', def: 'Deepfake-enabled fraud losses have grown sharply, pushing organisations to revise identity-verification procedures that previously relied on visual or voice confirmation alone.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Primary Defenses Against Deepfake Attacks',
+            items: [
+              { term: '1. Education & sensitisation', def: 'Regularly train yourself, your family, and your organisation to recognise deepfake red flags. Awareness is the first and cheapest line of defence.' },
+              { term: '2. Healthy scepticism', def: 'Treat urgent voice or video requests, especially involving money, with default suspicion. Verify before acting, never after.' },
+              { term: '3. Out-of-band verification', def: 'Confirm sensitive requests through a separate channel — e.g. call back on a number you already had saved, not one provided in the suspicious message itself.' },
+              { term: '4. Personal code words', def: 'Agree on a private code word with close family and colleagues that only they would know. Ask for it whenever a call or message feels off.' },
+              { term: '5. Paraphrase, don’t repeat', def: 'Rephrase sensitive details — account numbers, passwords — instead of reading them back verbatim. This can help disrupt keyword-triggered interception like audio-jacking.' },
+              { term: '6. Keep software patched', def: 'Apply security updates promptly. Many deepfake-enabled attacks piggyback on separately-exploited software vulnerabilities to gain a foothold.' },
+              { term: '7. Don’t click unknown links', def: 'Avoid opening links or emails from unverified senders. Phishing remains the most common entry point that sets up a deepfake-enabled attack.' },
+              { term: '8. Verify app sources', def: 'Only install apps from official, verified stores. Unofficial apps can act as backdoors that enable deepfake-based surveillance or fraud.' },
+              { term: '9. Use MFA & passkeys', def: 'Enable multi-factor authentication or passkeys everywhere. This blunts the impact of a successful impersonation, since a cloned voice or face alone can’t pass a second factor.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Two Broad Detection Tracks',
+            text: 'Deepfake detection is fundamentally a classification problem: decide whether a piece of media is authentic or synthetic. Research has evolved along two complementary tracks. Track one, handcrafted features, has a researcher define the pattern in advance — blending-boundary and blur detection (e.g. Microsoft Video Authenticator), head-pose and facial landmark inconsistency across changing angles, and frequency-domain analysis, where a Fourier transform reveals grid-like GAN signatures. Track two, deep learning, has models learn the difference directly from data: no engineer specifies the exact artifact, the model discovers it from large volumes of labelled real and fake examples. Most modern detectors fall into this category.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Deep Learning Detection Architectures, Part 1',
+            items: [
+              { term: 'CNN-based (XceptionNet, EfficientNet)', def: 'The standard baseline; a 5-model EfficientNet ensemble won the 2020 DFDC challenge.' },
+              { term: 'RNN / LSTM temporal models', def: 'Track how a face moves and changes across a sequence of frames, not just one image.' },
+              { term: 'Vision Transformer (ViT)', def: 'Self-attention relates distant regions, e.g. a swapped face vs. the real neck.' },
+              { term: 'Capsule networks', def: 'Preserve part-to-whole facial relationships with far fewer parameters than a CNN.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Deep Learning Detection Architectures, Part 2',
+            items: [
+              { term: 'Two-stream networks', def: 'A spatial RGB stream and a frequency/noise stream are processed in parallel, then fused before the final decision.' },
+              { term: 'Hybrid CNN-Transformer + attention', def: 'Combines local CNN features with long-range modelling, often producing Grad-CAM explainability heatmaps.' },
+              { term: 'Autoencoder anomaly detection', def: 'Trained only on real faces; a high reconstruction error on a given input signals a likely fake — no labelled fake examples needed.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Beyond the Pixel — Biological, Audio & Multimodal Detection',
+            items: [
+              { term: 'rPPG — biological signal', def: 'Remote photoplethysmography measures tiny blood-flow-driven skin colour shifts a generative model doesn’t replicate. Intel’s FakeCatcher reports 96% accuracy internally; DeepFakesON-Phys similarly uses heart-rate-derived features.' },
+              { term: 'Audio detection', def: 'Raw audio becomes a spectrogram analysed by CNNs for irregular patterns human speech doesn’t naturally produce. Real-time voice conversion during live calls remains one of the hardest open problems.' },
+              { term: 'Multimodal fusion', def: 'Checks whether video and audio stay consistent with each other — e.g. whether lip movement genuinely matches speech — a cross-check neither channel can perform alone.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'No Detector Generalises Perfectly',
+            text: 'Detection tools in active use today include Microsoft Video Authenticator, Intel FakeCatcher, Sensity, Reality Defender, and Deepware Scanner. They are trained and benchmarked against public datasets: FaceForensics++ (1,000 real videos, 4 manipulation methods, 5,000 total clips), Celeb-DF v2 (590 real + 5,639 deepfake celebrity videos), and Meta’s DFDC (19,000+ real videos, 100,000+ manipulated clips, 8 methods). Yet both real-world case studies in this review were caught by human verification, not automated detection. Compression, re-encoding, and an ongoing arms race with new generation methods further erode robustness in the real world.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Implications for Cybersecurity Professionals',
+            items: [
+              'Layer complementary methods — no single architecture is a complete solution; pair a CNN-based visual classifier with a biological signal-based method, since the two are unlikely to fail against the same attack',
+              'Verification is still central — detection is one layer within a broader process; out-of-band confirmation for sensitive transactions matters as much as any tool',
+              'Question vendor claims — a tool’s advertised accuracy figure is only meaningful once you know what dataset it was measured against, and whether that reflects familiar or unfamiliar manipulation techniques',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Hands-On: Putting the Theory to the Test',
+            text: 'Using open-source Python tools and sample images/frames drawn from public research datasets, the group applied two detection concepts directly, requiring no model training, only direct analysis. Demonstration one, frequency-domain visualisation, converts a real photo and a known deepfake image each to their frequency spectrum with a Fast Fourier Transform and compares them side by side — illustrating the handcrafted frequency-domain method in action. Demonstration two, landmark and blink analysis, tracks facial landmarks across consecutive video frames, monitoring blink consistency in a real vs. a deepfake video to illustrate biological signal-based detection. Both demonstrations reinforce a central argument: deepfake detection relies on identifiable, explainable technical signals, even when invisible to the unaided human eye.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Law, Ethics & Policy',
+            items: [
+              { term: 'EU AI Act, Article 50', def: 'AI-generated content resembling real people must be clearly labelled, regardless of intent. Non-compliance risks fines running into millions of euros.' },
+              { term: 'Platform responsibility', def: 'The EU Digital Services Act pushes platforms toward detecting and removing manipulated content; Nigeria’s NITDA Code of Practice sets similar local takedown duties.' },
+              { term: 'Media literacy', def: 'Microsoft’s "Spot the Deepfake" quiz, built with the University of Washington and Sensity, helps ordinary users evaluate suspicious content themselves.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Consent to use a person’s likeness sits at the centre of the ethics debate, alongside the "liar’s dividend" — where the mere existence of deepfakes lets bad actors dismiss real evidence as fake. Outside the EU, most jurisdictions still lean on existing fraud, defamation, and identity-theft law rather than deepfake-specific legislation.',
+          },
+          {
+            type: 'definition',
+            heading: 'Nigeria Is Not Insulated From These Trends',
+            text: 'In May 2025, a fabricated video clip circulated widely showing Nigerian politician Peter Obi appearing to address Burkina Faso’s military leader — later debunked, but only after wide social media spread.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Key Challenges for Nigeria',
+            items: [
+              'No dedicated deepfake law — reliant on the Cybercrimes Act 2015',
+              'Limited NITDA, EFCC and Police capacity to handle AI-generated evidence',
+              'A 2020 ECOWAS Court ruling against a key section of the Cybercrimes Act',
+              'Low public digital literacy',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Recommendations',
+            items: [
+              'Amend the Cybercrimes Act to explicitly address AI-generated and manipulated media',
+              'Extend NITDA’s platform accountability rules to require AI-content labelling',
+              'Train law enforcement and judicial officers to recognise and handle AI-generated evidence',
+              'Have universities and cybersecurity departments lead public education initiatives',
+              'Sustain local research investment into Nigerian-relevant datasets and case documentation',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Where This Is Heading',
+            text: 'On the generation side, diffusion models keep lowering the compute and skill required for realistic fakes, and real-time generation — live face-swapping and voice conversion during video calls, as in the Arup fraud case — removes preparation time entirely, a particularly significant frontier. On the detection side, biological-signal methods (rPPG) stay durable since generative models aren’t designed to replicate them, and multimodal detection plus content-provenance and cryptographic watermarking raise the bar for attackers, aiming to make genuine content verifiably authentic from capture. Most researchers, including Microsoft in its own public statements, acknowledge detection alone is unlikely to ever fully "solve" the deepfake problem — the field is shifting toward a layered strategy of detection, provenance, platform accountability, legal reform, and public literacy.',
+          },
+          {
+            type: 'definition',
+            heading: 'Conclusion — Key Takeaways',
+            text: 'Neither case study in this review was caught by software alone: detection, verification, law, and literacy must work together. Understanding how a CNN, transformer, or rPPG detector works lets a professional judge vendor accuracy claims critically, and a headline accuracy number means little without knowing whether it was tested on familiar or unfamiliar manipulation techniques. Nigeria specifically needs its own response — legislative reform, institutional capacity, and locally relevant research are still catching up to the scale of the threat.',
+          },
+        ],
+      },
+      {
+        number: '10',
+        title: 'Secure Access Service Edge (SASE)',
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 10 research project. An assigned project topic for CYB 222, examining Secure Access Service Edge (SASE) — the convergence of networking and security into a single, cloud-delivered, identity-driven platform.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Traditional perimeter security assumed users, apps and data all lived inside a defended corporate data center — cloud migration and remote work broke that assumption',
+              'Backhauling cloud-bound traffic to a central data center for inspection adds latency, cost and inconsistent enforcement',
+              'SASE (Gartner, 2019) converges SD-WAN with cloud-delivered security into one identity-driven platform — access follows the user, not the network location',
+              'Built from five components: SD-WAN, SWG, CASB, FWaaS and ZTNA; the four security pieces together are called Security Service Edge (SSE)',
+              'Users connect to the nearest cloud Point of Presence (PoP), where identity checks and inspection happen in-line before traffic reaches its destination',
+              'Adoption is still maturing — most organisations report deployment challenges, and only a small fraction report full maturity',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Perimeter Model Is Breaking Down',
+            text: 'Traditional network security assumed a defended perimeter — users, apps, and data all lived inside the corporate data center. That assumption no longer holds: cloud and SaaS migration moved applications and data off-premises, out of reach of centralized inspection; hybrid and remote work means employees connect from anywhere, not fixed office locations; and personal devices, IoT, and multi-cloud infrastructure widen the attack surface.',
+          },
+          {
+            type: 'bullets',
+            heading: 'The Backhaul Problem',
+            items: [
+              'Under the legacy model, even cloud-bound traffic is routed back through a central data center for inspection before reaching its destination',
+              'This causes higher latency and a degraded user experience',
+              'It increases operational cost and complexity',
+              'It produces inconsistent, location-based security enforcement',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Security enforced where the traffic actually is — not where the network happens to route it.',
+          },
+          {
+            type: 'definition',
+            heading: 'What Is SASE?',
+            text: 'Secure Access Service Edge (SASE, pronounced "sassy") is a cloud-native architecture that converges wide-area networking (SD-WAN) with a full stack of cloud-delivered security services into a single, identity-driven platform — coined by Gartner in 2019.',
+          },
+          {
+            type: 'termlist',
+            heading: 'SASE Principles',
+            items: [
+              { term: 'Identity-Centric', def: 'Access decisions follow the verified user or device — not network location.' },
+              { term: 'Cloud-Native', def: 'Delivered from distributed points of presence, not on-prem appliances.' },
+              { term: 'Context-Aware', def: 'Policy factors device posture, geolocation, time, and real-time risk.' },
+              { term: 'Zero Trust Default', def: 'No implicit trust — continuous authentication and authorization.' },
+              { term: 'Consolidated', def: 'Replaces siloed point products with one unified platform.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Five Core Building Blocks',
+            items: [
+              { term: 'SD-WAN (Software-Defined WAN)', def: 'Intelligently routes traffic across MPLS, broadband, and LTE/5G based on application needs.' },
+              { term: 'SWG (Secure Web Gateway)', def: 'Inspects outbound web traffic, blocking malware and enforcing acceptable-use policy.' },
+              { term: 'CASB (Cloud Access Security Broker)', def: 'Governs sanctioned and shadow-IT SaaS usage; enforces data protection policy.' },
+              { term: 'FWaaS (Firewall as a Service)', def: 'Delivers next-gen firewall and intrusion prevention as a cloud service.' },
+              { term: 'ZTNA (Zero Trust Network Access)', def: 'Grants least-privilege, per-app access based on continuous verification.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'SWG + CASB + FWaaS + ZTNA together form "Security Service Edge (SSE)" — the security half of SASE, often adopted first.',
+          },
+          {
+            type: 'definition',
+            heading: 'How SASE Works: The PoP Model',
+            text: 'Rather than backhauling traffic to a data center, users connect to the nearest cloud Point of Presence (PoP), where identity verification and security inspection happen in-line — before traffic is routed directly to its destination. Traffic is routed via the most efficient path — no unnecessary backhaul, security enforced close to the source.',
+          },
+          {
+            type: 'proscons',
+            heading: 'Single-Vendor vs. Multi-Vendor SASE',
+            advantages: [
+              'Single-vendor: one vendor delivers networking and the full security stack, with a unified management console and simpler, consistent enforcement (trade-off: greater dependency on one vendor\'s roadmap)',
+              'Multi-vendor / managed: best-of-breed SD-WAN and SSE components combined, or delivered via a managed service provider, giving greater flexibility and avoiding lock-in (trade-off: added integration complexity)',
+            ],
+            disadvantages: [
+              'Integration complexity with legacy MPLS and appliances',
+              'A cross-disciplinary networking-plus-security skills gap',
+              'Lack of standardization across vendor implementations',
+              'Data privacy, residency and sovereignty requirements',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Why Organizations Adopt SASE',
+            items: [
+              'Reduced complexity — consolidates point products into one managed platform',
+              'Improved performance — eliminates backhaul, cutting latency for cloud/SaaS access',
+              'Stronger, consistent security — uniform identity-based policy for every user, everywhere',
+              'Scalability — cloud-delivered capacity scales from hundreds to over 100,000 users',
+              'Cost efficiency — less spend on appliance refresh cycles and MPLS circuits',
+              'Zero Trust enablement — provides the architecture to implement Zero Trust at scale',
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'SASE vs. Traditional Perimeter Security',
+            headers: ['Dimension', 'Traditional Model', 'SASE Model'],
+            rows: [
+              ['Trust model', 'Implicit trust inside the perimeter', 'Zero Trust — continuous verification'],
+              ['Traffic routing', 'Backhauled to central data center', 'Inspected at the nearest cloud PoP'],
+              ['Architecture', 'Hardware appliances, fixed locations', 'Cloud-native, globally delivered'],
+              ['Scalability', 'Requires new hardware to scale', 'Elastic — scales on demand'],
+              ['Remote access', 'VPN with broad network access', 'ZTNA — least-privilege, per-app access'],
+              ['Management', 'Multiple disparate consoles', 'Single unified policy plane'],
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Real-World Use Cases',
+            items: [
+              'Secure hybrid workforce access — ZTNA replaces broad-access VPNs with least-privilege, per-app access',
+              'Branch and retail connectivity — SD-WAN plus cloud security replaces costly MPLS and on-site appliances',
+              'SaaS and shadow IT governance — CASB provides visibility and policy over sanctioned and unsanctioned apps',
+              'M&A / divestiture agility — cloud policy extends to new entities fast, without re-architecting networks',
+              'Securing IoT and OT devices — Zero Trust segmentation extends to industrial and operational environments',
+              'Regulated industries — centralized policy, logging and DLP support BFSI, healthcare and government compliance',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Future of SASE',
+            text: 'Expected directions include AI-native security operations (embedded AI/ML for threat analytics, anomaly detection, and governance of agentic AI use), post-quantum readiness (early investment in cryptography for the quantum era), sovereign and data-residency controls as jurisdiction-aware policy demand grows, and deeper convergence between SASE, SSE and Zero Trust as category lines continue to blur.',
+          },
+        ],
+      },
+      {
+        number: '11',
+        title: 'Extended Detection and Response (XDR)',
+        sections: [
+          {
+            type: 'text',
+            text: 'Group 11 research project. An assigned project topic for CYB 222, examining Extended Detection and Response (XDR) — a unified security platform that correlates telemetry across an organisation\'s security tools to detect and respond to threats faster.',
+          },
+          {
+            type: 'bullets',
+            heading: 'In brief',
+            items: [
+              'Modern organisations run separate tools for email, cloud, firewall, endpoint, identity and network security — each sees only its own slice of an attack, producing alert fatigue and missed threats',
+              'Security technology evolved from antivirus (1980s) through firewalls, IDS, SIEM and EDR before XDR (2020+) extended endpoint detection across the whole environment',
+              'XDR gathers telemetry from endpoints, email, network, cloud and identity, correlates it with AI, detects advanced threats, and can respond automatically',
+              'A six-step cycle — attack, data collection, correlation, threat detection, investigation, automated response — replaces four disconnected alerts with one correlated incident',
+              'Benefits: faster detection, reduced alert fatigue, faster response, improved visibility, lower operational cost, better analyst productivity',
+              'Limits: cost, integration complexity, training and expertise needs, alert tuning, privacy/compliance risk, scalability, and dependency on data quality',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Challenge: Disconnected Security Tools',
+            text: 'Modern organizations use many different security tools, each protecting a different part of the digital environment — email security against phishing and malware, cloud security for data stored in the cloud, a firewall to block unauthorized network traffic, endpoint protection for laptops, desktops and servers, identity management to control who can access what, and network monitoring to watch for suspicious activity. The problem: these tools work separately and don\'t share context, so each sees only part of the attack. The result is alert fatigue — analysts get flooded with alerts, most are false alarms, and real attacks can slip through.',
+          },
+          {
+            type: 'termlist',
+            heading: 'How We Got Here: The Evolution of Cybersecurity',
+            items: [
+              { term: '1980s — Antivirus', def: 'First defense against computer viruses. Scanned files for known malware.' },
+              { term: '1990s — Firewall', def: 'Controlled incoming and outgoing traffic. Blocked unauthorized connections.' },
+              { term: '2000s — Intrusion Detection System (IDS)', def: 'Monitored network traffic for suspicious patterns. Detected attacks in progress.' },
+              { term: '2010s — SIEM', def: 'Security Information and Event Management. Collected logs from multiple tools and correlated events; manual investigation was still needed.' },
+              { term: '2015+ — EDR', def: 'Endpoint Detection and Response. Protected individual devices and used AI to spot suspicious behaviour; could respond automatically.' },
+              { term: '2020+ — XDR', def: 'Extended Detection and Response. Extends EDR across the whole environment, correlating data from all security tools for a unified response.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'What Is XDR?',
+            text: 'Simple definition: XDR is like a super-smart security guard who watches all the doors, windows, and cameras at once — if something suspicious happens, it quickly understands it and stops the threat. Technical definition: Extended Detection and Response (XDR) is a unified security platform that gathers telemetry from endpoints, email, network, cloud, and identity, correlates events with AI, detects advanced threats, and automatically responds. Key takeaway: XDR connects security tools into one system that sees the full picture and responds automatically.',
+          },
+          {
+            type: 'note',
+            text: 'Protecting a house might mean CCTV at the door, window alarms, a guard dog, a security guard, and police for emergencies. If they don\'t communicate, gaps appear between them. XDR connects every signal so the full picture is shared and the response is coordinated.',
+          },
+          {
+            type: 'bullets',
+            heading: 'How XDR Works: The Six-Step Process',
+            items: [
+              'Attack occurs — a threat actor attempts to compromise the organisation through phishing, malware, stolen credentials, or network intrusion',
+              'Data collection — XDR collects telemetry across security domains; email, endpoint, identity, and network tools capture the suspicious activity',
+              'Correlation — the AI engine analyses the data and links related events, identifying the phishing email, malware, and login as one attack chain',
+              'Threat detection — XDR confirms the attack pattern as a real threat, assigns a risk score, and creates an incident',
+              'Investigation — XDR traces the attack path, identifies affected systems, and determines the scope of compromise',
+              'Automated response — XDR responds by isolating devices, blocking IPs, revoking credentials, and quarantining malicious email',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Real-World Example: A Phishing Attack',
+            text: 'A shortened timeline: Day 1, a phishing email reaches 100 employees. Hour 1, the email system flags it, but 5 users already clicked. Hour 2, one device is infected and alerted. Hour 3, stolen credentials are used from an unusual location. Hour 4, unusual file transfers are detected as data exfiltration. Without XDR, that\'s four separate alerts with no clear link. With XDR, all alerts are correlated, the device is isolated, the IP is blocked, and credentials are revoked — contained in minutes, not hours.',
+          },
+          {
+            type: 'table',
+            heading: 'Traditional Security vs. XDR',
+            headers: ['Metric', 'Traditional Security', 'XDR'],
+            rows: [
+              ['Visibility', 'Each tool sees only its domain', 'Complete visibility across all domains'],
+              ['Speed of detection', 'Hours to days', 'Minutes'],
+              ['Automation', 'Limited, mostly manual', 'Extensive, mostly automated'],
+              ['Investigation', 'Manual correlation required', 'Automatic correlation'],
+              ['Alert volume', 'Hundreds of alerts daily', 'Prioritized, actionable alerts'],
+              ['Accuracy', 'High false positive rate', 'Low false positive rate'],
+              ['Response time', 'Hours', 'Minutes'],
+              ['Management', 'Multiple consoles to monitor', 'Single unified console'],
+            ],
+          },
+          {
+            type: 'proscons',
+            heading: 'Benefits & Challenges of XDR',
+            advantages: [
+              'Faster threat detection — correlates data across all domains instantly, surfacing attack patterns invisible to individual tools',
+              'Reduced alert fatigue — prioritised, actionable incidents instead of hundreds of disconnected alerts',
+              'Faster incident response — automated actions isolate devices, revoke credentials, and quarantine files without human intervention',
+              'Improved security posture — complete visibility across the environment means fewer blind spots',
+              'Reduced operational costs — consolidating tools cuts licensing, training, and management overhead',
+              'Better analyst productivity — less time on false positives, more time on strategic security work',
+            ],
+            disadvantages: [
+              'Cost — can be expensive to implement and maintain',
+              'Integration complexity — connecting XDR to existing security tools can be technically difficult',
+              'Training and expertise — teams need training and skilled analysts to use it effectively',
+              'Alert tuning — alerts must be continually tuned to reduce false positives',
+              'Privacy and compliance — collecting data across domains can create privacy and compliance risks',
+              'Scalability and data quality — XDR must scale as data volumes grow, and is only as effective as the data it receives',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Where XDR Is Used',
+            items: [
+              'Financial services — banks use XDR to stop fraud and protect customer data',
+              'Healthcare — providers use XDR to safeguard patient data and system uptime',
+              'Government — agencies use XDR to protect sensitive information and infrastructure',
+              'Technology — tech companies use XDR to defend IP, data, and cloud systems',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'The Future of XDR',
+            items: [
+              'AI and machine learning that detect novel attacks more accurately over time',
+              'Autonomous threat hunting — proactively hunting for threats without waiting for alerts',
+              'Generative AI assistants that summarise incidents and suggest next steps',
+              'Zero Trust integration — verifying every access request',
+              'Cloud-native security — protecting containers and serverless apps as architectures evolve',
+              'Automatic threat intelligence integration for faster defence',
+              'Self-healing systems that automatically remediate and restore to a known-good state',
+              'Expanded coverage beyond IT into IoT, OT, and other attack surfaces',
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'The Bottom Line',
+            text: 'XDR is becoming essential as cyber threats grow faster, smarter, and more coordinated. It unifies security tools into one view, detects attacks faster with AI correlation, responds automatically before damage spreads, and strengthens the security team and overall posture. It takes investment and tuning, but for serious defense, XDR is the path forward.',
+          },
+        ],
       },
     ],
     quiz: [
@@ -5938,7 +7368,48 @@ print(summary_df.to_string(index=False))`,
       { question: "Why are cross-chain bridges a frequent attack target?", options: ["They contain no valuable assets", "They hold large amounts of locked value while often relying on more centralised or experimental security models", "They are immune to smart contract bugs", "They only connect private blockchains"], correctIndex: 1, explanation: "Bridges connecting different blockchains hold significant locked value but often use less mature security models than the chains they connect." },
       { question: "What long-term cryptographic threat does the report identify for blockchain's elliptic curve cryptography (ECDSA)?", options: ["Classical brute-force attacks", "Shor's algorithm on future quantum computers", "SQL injection", "DDoS flooding of mining pools"], correctIndex: 1, explanation: "Future quantum computers running Shor's algorithm may break the elliptic curve cryptography protecting digital signatures and wallets, motivating a shift to post-quantum cryptography." },
       { question: "What design principle is the XRP Ledger following in its post-quantum migration roadmap?", options: ["Committing permanently to a single quantum-resistant algorithm", "\"Cryptographic agility\" — the ability to adopt new NIST-standardised algorithms as the landscape matures", "Ignoring quantum computing until it becomes an active threat", "Abandoning blockchain entirely in favour of centralized databases"], correctIndex: 1, explanation: "The XRP Ledger is designing for cryptographic agility so the network can adopt new NIST-standardised PQC algorithms without committing to just one scheme." },
+      { question: "What does Automated Vulnerability Research (AVR) refer to?", options: ["Manually reading source code line by line for bugs", "The use of automated systems, software tools and intelligent technologies to identify, analyse and validate vulnerabilities", "A single antivirus product", "A firewall configuration standard"], correctIndex: 1, explanation: "AVR is the use of automated systems, software tools, and intelligent technologies to identify, analyse, and validate — and sometimes exploit — vulnerabilities in systems, networks, websites and applications." },
+      { question: "Which 1995 tool was the first automated network vulnerability scanner?", options: ["Nessus", "SATAN", "NMAP", "Metasploit"], correctIndex: 1, explanation: "SATAN (1995) was the first automated network vulnerability scanner, turning manual probing into a repeatable, tool-driven process." },
+      { question: "What did the 1988 Morris Worm exploit to infect roughly 6,000 machines?", options: ["A UNIX buffer overflow", "A weak default password", "A phishing email", "A misconfigured firewall"], correctIndex: 0, explanation: "The Morris Worm exploited a UNIX buffer overflow, an early demonstration of how a single automatable flaw can propagate at scale." },
+      { question: "Which technique, introduced in the early 2000s, throws massive amounts of random, messy data at software to see if it breaks?", options: ["Static analysis", "Fuzzing", "Binary analysis", "Symbolic execution"], correctIndex: 1, explanation: "Fuzz testing (fuzzing) injects random data to find crashes; tools include AFL++, libFuzzer and Peach Fuzzer." },
+      { question: "Which AVR type uses tools like Nessus, OpenVAS, Rapid7 and NMAP?", options: ["Malware analysis", "AI-based research", "Network scanning", "Web application research"], correctIndex: 2, explanation: "Network scanning sweeps hosts, ports and services for known weaknesses using tools such as Nessus, OpenVAS, Rapid7 and NMAP." },
+      { question: "Which AVR component checks source code for hidden flaws without ever running the program?", options: ["Dynamic analysis", "Fuzz testing", "Static analysis", "Binary analysis"], correctIndex: 2, explanation: "Static analysis (SonarQube, CodeQL) checks code for hidden flaws without executing it." },
+      { question: "Which AVR component uses maths and placeholders instead of real data to uncover hidden paths in code?", options: ["Symbolic execution", "Dynamic analysis", "AI/ML", "Binary analysis"], correctIndex: 0, explanation: "Symbolic execution (KLEE, angr, SAGE, Triton) uses mathematical placeholders instead of concrete values to explore hidden code paths." },
+      { question: "Which of these is a limitation of AVR rather than a benefit?", options: ["24/7 monitoring", "Scalability across large networks", "Dependence on vulnerability databases, which misses zero-days", "Speed compared to manual review"], correctIndex: 2, explanation: "AVR tools rely on known-vulnerability databases, so unknown, never-catalogued zero-day flaws can slip past them." },
+      { question: "In the group's scenario, what vulnerability was found on the university student portal's login form?", options: ["Cross-site scripting (XSS)", "SQL injection", "A denial-of-service flaw", "An insecure direct object reference"], correctIndex: 1, explanation: "The scenario describes SQL injection on the login form, remediated with Burp Suite, Nessus and fuzzing, then patched with parameterised queries." },
+      { question: "In the AVR architecture framework, which stage directly follows Data Collection?", options: ["Report Generation & Recommendations", "Vulnerability Detection Engine", "Risk Assessment", "Continuous Monitoring & Learning"], correctIndex: 1, explanation: "The framework runs Target Systems → Asset Discovery → Data Collection → Vulnerability Detection Engine → Validation Engine → Risk Assessment → Report Generation → Continuous Monitoring & Learning." },
+      { question: "Which stage of the AVR framework confirms vulnerabilities, removes false positives and builds a proof of concept?", options: ["Risk Assessment", "Asset Discovery & Enumeration", "Validation Engine", "Report Generation & Recommendations"], correctIndex: 2, explanation: "The Validation Engine confirms findings, strips out false positives, verifies exploitability and produces a proof of concept (PoC)." },
+      { question: "Mayhem, demonstrated at the 2016 DARPA Cyber Grand Challenge, was an example of:", options: ["A manual penetration-testing checklist", "A fully autonomous AVR system that found and patched vulnerabilities with no human intervention during the competition", "An early antivirus signature database", "A phishing simulation platform"], correctIndex: 1, explanation: "Mayhem, built by ForAllSecure, was the most famous public demonstration of advanced AVR — teams built autonomous systems that defended their own networks while attacking others, unassisted during the contest." },
+      { question: "Who is credited with the quote \"Security is a process, not a product\"?", options: ["Kevin Mitnick", "Bruce Schneier", "John McCarthy", "Ian Goodfellow"], correctIndex: 1, explanation: "The AVR group's conclusion closes with this quote, attributed to security researcher Bruce Schneier." },
+      { question: "What is a deepfake?", options: ["Any video shot with a low-quality camera", "Synthetic media — image, video, or audio — generated or altered with AI so a person appears to say or do something that never happened", "A deleted social media post", "A manually Photoshopped image only"], correctIndex: 1, explanation: "A deepfake is produced by a trained model rather than manual editing, allowing it to be generated at scale with a realism traditional tools could not achieve." },
+      { question: "Which 1997 work is considered the technical root of facial reenactment, matching speech to mouth movement?", options: ["Video Rewrite (Bregler, Covell & Slaney)", "FaceForensics++", "The original GAN paper", "DeepFace"], correctIndex: 0, explanation: "Video Rewrite (1997) matched speech to mouth movement, the technical root of the facial reenactment techniques deepfakes later built on." },
+      { question: "Who introduced Generative Adversarial Networks (GANs) in 2014?", options: ["Ian Goodfellow", "Cynthia Dwork", "Andrew Yao", "Satoshi Nakamoto"], correctIndex: 0, explanation: "Ian Goodfellow introduced GANs in 2014, transforming the field of synthetic media generation permanently." },
+      { question: "Where and when was the term \"deepfake\" coined?", options: ["A 2017 Reddit user sharing face-swapped clips", "A 1997 academic paper", "A 2020 Microsoft press release", "A 2014 Goodfellow publication"], correctIndex: 0, explanation: "A Reddit user coined \"deepfake\" in 2017 while sharing face-swapped clips; the consumer tool FakeApp followed soon after." },
+      { question: "What did Rössler et al.'s 2019 release establish as the standard detection baseline?", options: ["The DFDC dataset", "FaceForensics++ and XceptionNet", "Celeb-DF v2", "Intel FakeCatcher"], correctIndex: 1, explanation: "The 2019 FaceForensics++ benchmark, paired with the XceptionNet classifier, became the standard baseline for deepfake detection research." },
+      { question: "The 2020 DFDC-winning model scored 82% on its own test set. What did it score on entirely new, unfamiliar clips?", options: ["82% — identical performance", "95%", "65%", "40%"], correctIndex: 2, explanation: "It scored 65% on unfamiliar clips, a 17-point drop showing that generalisation, not raw accuracy, is the harder problem in deepfake detection." },
+      { question: "Which generation method compresses a face into a shared internal code, then decodes it through a different identity's decoder — the core mechanism behind most face-swap tools?", options: ["Diffusion Models", "Voice Cloning", "Autoencoders", "GANs"], correctIndex: 2, explanation: "Autoencoders (AE) compress a face into a shared latent code and decode it through another identity's decoder, underlying most face-swap tools." },
+      { question: "Which deepfake generation method works by learning to reverse a noise process, gradually rebuilding a coherent image step by step?", options: ["Diffusion Models", "Autoencoders", "GANs", "Voice Cloning"], correctIndex: 0, explanation: "Diffusion Models learn to reverse a noise process, rebuilding a coherent image step by step — today's most photorealistic and increasingly accessible generation method." },
+      { question: "Which deepfake category alters only the mouth movements of an existing video to match new audio?", options: ["Face swap", "Full-body puppetry", "Lip sync", "Voice / audio"], correctIndex: 2, explanation: "Lip sync alters only mouth movements to match new audio, making it appear a person said something they never said." },
+      { question: "In the \"Malaria Must Die\" awareness campaign, deepfake lip-sync was used to show which footballer speaking nine languages?", options: ["Cristiano Ronaldo", "David Beckham", "Lionel Messi", "Didier Drogba"], correctIndex: 1, explanation: "The campaign used deepfake lip-sync to show David Beckham speaking fluently in nine languages to raise malaria awareness." },
+      { question: "What three factors separate a legitimate deepfake use from a harmful one?", options: ["Video resolution, file size, and platform", "Consent of the depicted individual, honesty about the synthetic origin, and intent", "Cost, speed, and popularity", "Whether a celebrity or a private individual is depicted"], correctIndex: 1, explanation: "The technology itself is neutral — what separates legitimate use from harm is consent, honesty about the content's synthetic origin, and the intent behind its creation and distribution." },
+      { question: "The 2020 UAE corporate impersonation fraud and the 2024 Hong Kong video-call fraud both fall under which category of malicious use?", options: ["Political disinformation", "Non-consensual content", "Financial fraud", "Extortion"], correctIndex: 2, explanation: "Both the $35M UAE voice-cloning heist and the $25.6M Hong Kong video-call fraud are financial fraud cases." },
+      { question: "What did IBM Security's X-Force team demonstrate in 2024 with \"audio-jacking\"?", options: ["A prerecorded deepfake video played over a fake video call", "Live interception and alteration of a genuine phone call in real time by a hidden third party", "A phishing email containing a deepfake attachment", "A brute-force attack on voicemail passwords"], correctIndex: 1, explanation: "Audio-jacking silently intercepts a live call between two genuine speakers, using speech-to-text → LLM keyword trigger → voice clone → text-to-speech to alter it in real time." },
+      { question: "In IBM's audio-jacking proof of concept, what keyword phrase triggered the interception?", options: ["\"Password reset\"", "\"Bank account\"", "\"Emergency transfer\"", "\"Wire confirmation\""], correctIndex: 1, explanation: "The system listened for the phrase \"bank account\" and, when spoken, silently replaced the real number with an attacker-controlled one in a cloned voice." },
+      { question: "How was the $25.6M Arup Hong Kong deepfake fraud (January 2024) ultimately caught?", options: ["Automated detection software flagged the video call", "A phone call to headquarters, not detection software", "The bank blocked the transfer automatically", "An employee recognised visual glitches in the deepfake"], correctIndex: 1, explanation: "Despite 15 fraudulent wire transfers authorised on a call full of deepfake participants, the fraud was caught only by an independent phone call to headquarters." },
+      { question: "The Slovak election deepfake (September 2023) spread during a legally mandated media-silence window. How was it eventually addressed?", options: ["Automated fact-checking software removed it within minutes", "Public denial from those involved, after polls had already opened", "It was proven false before the election by a detection tool", "It was never resolved"], correctIndex: 1, explanation: "The fabricated audio clip was only addressed by public denial after polls opened — the media-silence window blocked timely fact-checking." },
+      { question: "In deepfake detection, what characterises the \"handcrafted features\" track?", options: ["A model discovers artifacts on its own from large labelled datasets", "A researcher defines the detection pattern in advance, e.g. blending-boundary/blur or frequency-domain analysis", "It requires no analysis of the media at all", "It only works on audio, never video"], correctIndex: 1, explanation: "Handcrafted-feature detection has a researcher define the pattern in advance — blending-boundary/blur detection, landmark inconsistency, or Fourier-based frequency-domain analysis." },
+      { question: "Which architecture won the 2020 DFDC challenge as a 5-model ensemble?", options: ["Vision Transformer (ViT)", "Capsule Networks", "EfficientNet", "RNN/LSTM"], correctIndex: 2, explanation: "A 5-model EfficientNet ensemble, a CNN-based architecture, won the 2020 DFDC challenge." },
+      { question: "What does rPPG (remote photoplethysmography) detect that a generative model does not naturally replicate?", options: ["Password reuse across accounts", "Tiny blood-flow-driven skin colour shifts", "GPS location metadata", "File compression artifacts"], correctIndex: 1, explanation: "rPPG measures subtle blood-flow-driven skin colour changes; Intel's FakeCatcher reports 96% internal accuracy using this biological signal." },
+      { question: "What does multimodal fusion detection check for?", options: ["Whether the video resolution matches the audio bitrate", "Whether video and audio stay consistent with each other, e.g. lip movement matching speech", "Whether the file was uploaded from a mobile device", "Whether the video has been watermarked"], correctIndex: 1, explanation: "Multimodal fusion cross-checks whether video and audio remain consistent — such as whether lip movement genuinely matches speech — something neither channel can verify alone." },
+      { question: "Under the EU AI Act's Article 50, what is required of AI-generated content resembling real people?", options: ["It must be deleted within 24 hours", "It must be clearly labelled, regardless of intent", "It can only be created by licensed studios", "It must be encrypted before distribution"], correctIndex: 1, explanation: "Article 50 requires AI-generated content resembling real people to be clearly labelled regardless of intent, with non-compliance risking multi-million-euro fines." },
+      { question: "What law does Nigeria currently rely on in the absence of a dedicated deepfake statute?", options: ["The Cybercrimes Act 2015", "The Nigeria Data Protection Act 2023", "The NITDA Code of Practice alone", "There is no applicable law at all"], correctIndex: 0, explanation: "Nigeria has no dedicated deepfake law and relies on the Cybercrimes Act 2015, alongside limited NITDA/EFCC/Police capacity and a 2020 ECOWAS Court ruling against part of that Act." },
+      { question: "What happened in Nigeria in May 2025 involving a fabricated video of Peter Obi?", options: ["It was immediately blocked by NITDA before any spread occurred", "A fabricated clip showing him addressing Burkina Faso's military leader circulated widely before being debunked", "A court ordered its creator prosecuted under a dedicated deepfake law", "It was proven genuine after investigation"], correctIndex: 1, explanation: "The fabricated clip spread widely on social media before being debunked — illustrating Nigeria's exposure despite having no dedicated deepfake legislation." },
+      { question: "According to the group's conclusion, what is the central lesson from both the Arup and Slovak election case studies?", options: ["Detection software alone is now sufficient to catch deepfakes", "Neither case was caught by software alone — detection, verification, law and literacy must work together", "Deepfakes are no longer a practical threat", "Only political figures are targeted by deepfakes"], correctIndex: 1, explanation: "Both real-world cases were caught by human verification, not automated detection — reinforcing that no single layer (technical, legal, or educational) is enough on its own." },
     ],
+    // Written-exam bank — the group research topics rewritten as define /
+    // list-and-explain / differentiate questions. See
+    // src/data/lectureNotes/cybInnovationExamPrep.js.
+    examPrep: cybInnovationExamPrep,
   },
   {
     code: 'UUY-CYB 221',
@@ -5977,6 +7448,10 @@ print(summary_df.to_string(index=False))`,
     // src/data/lectureNotes/cyb221.js for provenance and the coverage mapping.
     notesKey: 'cyb221',
     quiz: cyb221Quiz,
+    // Written-exam bank alongside the MCQ one — the manual's own questions are
+    // "define", "list and explain any five", "with the aid of a diagram". See
+    // src/data/lectureNotes/cyb221ExamPrep.js.
+    examPrep: cyb221ExamPrep,
   },
   {
     code: 'UUY-CYB 222',
@@ -6015,13 +7490,24 @@ print(summary_df.to_string(index=False))`,
       'For every vulnerability, know: how it works, how to exploit it, and how to fix it',
       'Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies',
     ],
-    // Topics 1–3 and 5–8 are the class lecture notes. Topics 9–10, and the
-    // additions marked as exam wording throughout, come from the lecturer's
+    // Topics 1–3 and 7–10 are the class lecture notes. Topics 11 and 13, and
+    // the additions marked as exam wording throughout, come from the lecturer's
     // handout "Cybersecurity Concepts: Web and Mobile Application Security"
     // plus the exam guidance he gave in class (the six flagged questions in
-    // Topic 10). Topic 4 covers outline item 3 (secure mobile development),
-    // which the class notes leave uncovered — it sits at position 4 so the
-    // topics read in outline order, which is why the later numbers skip.
+    // Topic 13). Topic 12 is the OWASP Top 10, worked up from Ian Ross's
+    // ANZTB 2017 talk "Introduction to web security" — it teaches the 2013
+    // edition, because the figures and ratings are that edition's, and closes
+    // with a 2013→2021 mapping so nobody mistakes it for the current list.
+    //
+    // Topics 4–6 cover outline item 3 (secure mobile development), which the
+    // class notes leave uncovered; they sit at positions 4–6 so the topics read
+    // in outline order, which is why the later numbers skip. They were one
+    // 351-line topic until it was split three ways — threats and developer
+    // practice, then the two platform security models, then the bearer layers
+    // (WAP, Bluetooth, SMS/MMS, location) that sit below both. No content from
+    // the handout was dropped in the split: the OWASP Mobile Top 10 moved up
+    // beside the other risk material, and the single Key Takeaways list was
+    // rewritten as one per topic.
     lectureNotes: [
       {
         number: '1',
@@ -6097,8 +7583,8 @@ print(summary_df.to_string(index=False))`,
           {
             type: 'note',
             items: [
-              'Read the Security row alongside the “Web Risk vs Mobile App Risk” table in Topic 5 — it is the same distinction the lecturer expects in the exam: web risk is centralised on the server, mobile risk is decentralised onto individual devices.',
-              'A mobile app is not automatically “more secure”. Storing data on the device removes the single-server blast radius, but it hands the data to a device an attacker may physically hold — which is why Topic 5 lists insecure data storage and reverse engineering as the top mobile risks.',
+              'Read the Security row alongside the “Web Risk vs Mobile App Risk” table in Topic 7 — it is the same distinction the lecturer expects in the exam: web risk is centralised on the server, mobile risk is decentralised onto individual devices.',
+              'A mobile app is not automatically “more secure”. Storing data on the device removes the single-server blast radius, but it hands the data to a device an attacker may physically hold — which is why Topic 7 lists insecure data storage and reverse engineering as the top mobile risks.',
               'Watch the Performance and Access rows: a mobile app can work offline, a web app cannot. Several of the guaranteed exam answers turn on exactly that point.',
             ],
           },
@@ -6281,6 +7767,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'Keep this list apart from the one that follows. This one answers why a system is attacked — the motive — while the next answers who attacks it. They overlap in wording, since “activism” is a motive and “activists” are the people holding it, so read the heading of the question carefully: a question asking you to list threat actors earns nothing for a list of motives.',
+          },
+          {
             type: 'termlist',
             heading: 'Threat Actor Profiles',
             items: [
@@ -6325,13 +7815,17 @@ print(summary_df.to_string(index=False))`,
             heading: 'What a Strong Password Policy Requires',
             items: [
               'A minimum length — at least six characters, though longer is stronger',
-              'Mixed case (“camel casing”) — at least one uppercase letter combined with lowercase letters',
+              'Mixed case — at least one uppercase letter combined with lowercase letters',
               'At least one special character or symbol — e.g. @, #, comma, full stop, hyphen, underscore, forward slash, or backslash',
             ],
           },
           {
             type: 'note',
-            text: 'Beyond the lecture: current guidelines such as NIST SP 800-63B now favour length and passphrase uniqueness over forced complexity, and recommend checking new passwords against known breached-password lists. The point worth holding on to is that complexity rules alone do not guarantee a password has not been reused somewhere else that has already been breached.',
+            items: [
+              'The handout calls that second requirement “camel casing”. It is a loose use of the term, and worth getting right because you will meet the real one in programming. camelCase is a naming convention for identifiers: the words are run together with no spaces and every word after the first is capitalised, as in “myVariableName” or “totalStudentCount”. It says nothing about passwords. What the policy is actually asking for is mixed case — that the password contain both capital and small letters. If a question uses the lecturer’s wording, answer that it means mixed case; the requirement is the same either way, only the label is borrowed.',
+              'Beyond the lecture: current guidelines such as NIST SP 800-63B now favour length and passphrase uniqueness over forced complexity, and recommend checking new passwords against known breached-password lists. The point worth holding on to is that complexity rules alone do not guarantee a password has not been reused somewhere else that has already been breached.',
+              'The six-character minimum is the lecturer’s figure and is what to reproduce if he asks. In practice it is far too short — six characters falls to an offline brute-force attack in seconds, which is why the modern advice is a long passphrase rather than a short password decorated with symbols.',
+            ],
           },
           {
             type: 'definition',
@@ -6345,12 +7839,36 @@ print(summary_df.to_string(index=False))`,
           {
             type: 'definition',
             heading: 'Three-Factor Authentication (3FA)',
-            text: '3FA differs from 2FA in requiring authorization from two or more distinct devices, rather than allowing a single device to both request and approve access. A request initiated on a phone may need to be approved from a separate computer, or a transaction started on one workstation may need sign-off from another. This is typical of banking-sector workflows, where a transaction is initiated by one staff member, reviewed by a second, and authorized by a branch manager before it completes — sometimes with a deliberate delay built in while approvals are finalized.',
+            text: '3FA requires evidence from three independent categories of proof, not merely three steps or three devices. The three factors are: something you know — a password, PIN or passphrase; something you have — a phone, hardware token or smart card; and something you are — a fingerprint, face or iris. The strength comes from the categories being independent: an attacker who steals your password has one factor, an attacker who steals your phone has another, and neither alone gets in. Adding a second password would not be a third factor at all, because it is more of something you already had.',
+          },
+          {
+            type: 'termlist',
+            heading: 'The Three Factors',
+            items: [
+              { term: 'Something you know', def: 'a secret held in memory — password, PIN, passphrase or answer to a security question. Cheap to deploy, but it can be guessed, phished, or reused from a site that has already been breached' },
+              { term: 'Something you have', def: 'a physical object in your possession — a registered phone receiving an OTP, a hardware token, or a smart card. It resists remote attack, because the attacker must obtain the object, but it can be lost or stolen' },
+              { term: 'Something you are', def: 'a biometric measured from your body — fingerprint, face or iris. Hard to steal remotely, but it cannot be reissued: a leaked password can be changed, a leaked fingerprint cannot' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: 'Dual Control & Multi-Device Approval',
+            text: 'Separately from the factors above, a system may require that a request initiated on one device be approved from a different one, so that no single device can both request and approve access. A transaction started on one workstation needs sign-off from another; a request raised on a phone must be confirmed from a separate computer. This is typical of banking-sector workflows, where a transaction is initiated by one staff member, reviewed by a second, and authorized by a branch manager before it completes — sometimes with a deliberate delay built in while approvals are finalized. It is often called dual control, or the four-eyes principle.',
           },
           {
             type: 'definition',
             heading: 'Multi-Party Authentication',
             text: 'In multi-party authentication, the individual originating a request must wait for a second individual with higher-level credentials to approve it before access is granted. A familiar consumer example is location- or device-based step-up verification: if a user’s VPN shows them logging in from one country and, within an implausibly short time, a new login attempt appears from a different country, providers such as Google or Apple may require verification from another trusted device or person before granting access — precisely because the same credentials used from two “impossible” locations in a short window is a strong signal of compromise.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Read this one carefully, because the handout and the standard definition disagree. The handout defines 3FA as approval arriving from two or more separate devices. That is not what three-factor authentication means anywhere else — in the textbooks, in NIST SP 800-63B, and in industry, the three factors are the three categories of evidence above: something you know, something you have, something you are. This course uses the standard definition, because it is the one an examiner outside this room, an interviewer, or a certification paper will expect.',
+              'What the handout was actually describing is dual control — a second device or a second officer approving the request — which is a real and important control, just not a third factor. It now has its own heading above, so nothing from the lecture is lost; it is only filed under the right name.',
+              'The exam risk is real, so plan for it. If a question simply says “explain three-factor authentication”, give the three factors and name one example of each. If it says “explain 3FA as covered in this course”, or the marks clearly expect the device answer, give the three factors first and then add one sentence: “the course notes also use 3FA for dual-device approval, where a request raised on one device must be approved from another.” That sentence costs you nothing and covers both mark schemes.',
+              'The three factors and dual control answer different questions. The factors ask how confident we are that you are who you claim to be. Dual control asks whether one person acting alone should be able to do this at all — which is why banks use it for large transfers even when the operator has already authenticated perfectly.',
+              'The “impossible travel” case is the one to reach for in an exam — a login from Uyo followed eight minutes later by one from London on the same account. Nobody travels that fast, so the same credentials are almost certainly in two pairs of hands.',
+            ],
           },
           {
             type: 'definition',
@@ -6383,6 +7901,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'A concrete picture: an online store finds that its product-review module is being exploited. Graceful degradation means switching reviews off and leaving browsing, the cart and checkout running, rather than pulling the whole site down while the fix is written. It is the same instinct as a circuit breaker tripping one room instead of the whole building — and it is why the Key Takeaways at the end of this topic describe it as containing a breach rather than preventing one.',
+          },
+          {
             type: 'definition',
             heading: 'Biometric Authentication & Liveness Detection',
             text: 'Biometric authentication verifies identity using a physical characteristic rather than — or in addition to — a password. Liveness detection is used alongside it to confirm that the biometric sample comes from a live person and not a photograph, mask, or other spoof.',
@@ -6405,6 +7927,13 @@ print(summary_df.to_string(index=False))`,
             type: 'definition',
             heading: 'Input & Request Filtering',
             text: 'Every request or input directed at a system — a login attempt, a save operation, a data request — carries a “signature” that can be inspected for consistency. A common check is whether the requesting device’s IP address remains stable within a short window, for example 60 seconds. If the IP address changes unexpectedly within that window it may indicate the use of a VPN or another anomaly, and the system can flag or restrict the request rather than granting it outright. The same principle underlies geo-gating, where access from IP ranges associated with certain regions is blocked, and VPN detection, where traffic identified as coming from a VPN is denied access to protected resources.',
+          },
+          {
+            type: 'note',
+            items: [
+              'The “signature” of a request here is not a cryptographic signature. It is the bundle of properties that travel with the request — source IP address, browser user-agent, timing, the order the form fields were filled in — which should stay consistent for one genuine user in one sitting.',
+              'Name the trade-off if the question asks you to evaluate this control: geo-gating and VPN detection block real customers too. A student in Uyo studying over a VPN, or a traveller whose IP changes mid-session, looks exactly like the anomaly the filter is hunting, which is why sensible systems flag and re-challenge rather than deny outright.',
+            ],
           },
           {
             type: 'definition',
@@ -6444,7 +7973,8 @@ print(summary_df.to_string(index=False))`,
             rows: [
               ['Password policy', 'Weak or easily guessed credentials', 'Account sign-up requirements'],
               ['2FA', 'Stolen or guessed password used alone', 'Bank OTP on large transfers'],
-              ['3FA', 'Single-device compromise', 'Multi-officer transaction approval'],
+              ['3FA', 'A stolen password and a stolen device used together', 'Banking app: PIN, registered phone and fingerprint'],
+              ['Dual control (multi-device approval)', 'One compromised account or device acting alone', 'Multi-officer transaction approval'],
               ['Multi-party authentication', 'Anomalous access patterns', 'Impossible-travel login alerts'],
               ['Time/volume-constrained access', 'Bulk data exfiltration; idle-session hijack', 'Auto session timeout; download caps'],
               ['Graceful degradation', 'Full-system outage during an attack', 'Isolating a compromised module'],
@@ -6479,9 +8009,9 @@ print(summary_df.to_string(index=False))`,
       },
       {
         number: '4',
-        title: 'Secure Program Development for Mobile (Android & iOS)',
+        title: 'Mobile Threats & Secure Development Practices',
         covers: [3],
-        partial: [6, 8],
+        partial: [6],
         sections: [
           {
             type: 'definition',
@@ -6490,7 +8020,7 @@ print(summary_df.to_string(index=False))`,
           },
           {
             type: 'note',
-            text: 'Read this topic against the web-vs-mobile comparison in Topic 1 and the risk tables in Topic 5. The distinction the lecturer keeps returning to is where the blast radius sits: web risk is centralised on the server, so one compromised server affects every user; mobile risk is decentralised onto thousands of individual devices, each of which an attacker may physically hold.',
+            text: 'Read this topic against the web-vs-mobile comparison in Topic 1 and the risk tables in Topic 7. The distinction the lecturer keeps returning to is where the blast radius sits: web risk is centralised on the server, so one compromised server affects every user; mobile risk is decentralised onto thousands of individual devices, each of which an attacker may physically hold.',
           },
           {
             type: 'termlist',
@@ -6541,6 +8071,53 @@ print(summary_df.to_string(index=False))`,
           {
             type: 'note',
             text: 'The threat-modelling tip is the one that ties the list together. The STRIDE categories used by the OWASP mobile threat model — spoofing, tampering, repudiation, information disclosure, denial of service and elevation of privilege — give you a checklist for enumerating threats rather than guessing at them.',
+          },
+          {
+            type: 'termlist',
+            heading: 'The OWASP Mobile Top 10 Risks',
+            items: [
+              { term: 'Insecure data storage', def: 'Store only what is absolutely required, never in a public area such as an SD card. Use secure containers and the platform’s encryption APIs, and never mark files world-readable or world-writable.' },
+              { term: 'Weak server-side controls', def: 'A mobile front end does not remove the server’s obligations. Apply the existing body of knowledge — the OWASP Web, Cloud and Web Services Top 10s, the cheat sheets and development guides — to the backend the app talks to.' },
+              { term: 'Insufficient transport layer protection', def: 'Encrypt all sensitive data leaving the device, over carrier networks, Wi-Fi and NFC alike. When the platform throws a security exception it is usually right — do not suppress it.' },
+              { term: 'Client-side injection', def: 'Sanitise or escape untrusted data before rendering or executing it, use prepared statements for database calls rather than string concatenation, and minimise the native capabilities exposed to hybrid web content.' },
+              { term: 'Poor authorisation and authentication', def: 'Contextual signals help only as part of a genuine multi-factor scheme. Out-of-band verification is meaningless when both factors arrive on the same device, and a device ID or subscriber ID must never be the sole authenticator.' },
+              { term: 'Improper session handling', def: 'Do not be afraid to re-authenticate periodically, make sure tokens can be revoked quickly when a device is lost or stolen, and generate tokens from high-entropy, well-tested sources.' },
+              { term: 'Security decisions via untrusted inputs', def: 'Check the caller’s permissions at every input boundary, prompt for additional authorisation before acting, and where a permission check is impossible require extra steps before a sensitive action can run.' },
+              { term: 'Side-channel data leakage', def: 'Never log credentials or personal data to system logs. Strip sensitive data before screenshots, disable keystroke logging per field, apply anti-caching directives to web content, watch what files your app creates while debugging, review third-party libraries and the data they consume, and test across as many platform versions as possible.' },
+              { term: 'Broken cryptography', def: 'Storing the key alongside the encrypted data negates the encryption entirely. Use battle-tested crypto libraries rather than writing your own, and take advantage of what the platform already provides.' },
+              { term: 'Sensitive information disclosure', def: 'Private API keys are private for a reason — keep them off the client. Keep proprietary business logic on the server, and accept that there is almost never a legitimate reason to hardcode a password.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Read this alongside the website attacks in Topic 8 and the best practices in Topic 9. Injection, weak authentication and sensitive-data exposure appear on both the web and the mobile list, but insecure data storage, side-channel leakage and improper session handling on a lost device are mobile-specific — they exist precisely because the client is a device the attacker can hold.',
+          },
+          {
+            type: 'bullets',
+            heading: 'Key Takeaways',
+            items: [
+              'Secure mobile development begins from a different assumption than web development: the client device is under the attacker’s physical control, so nothing stored, computed or hidden on it can be trusted',
+              'Most of the sixteen issues collapse into four underlying problems — an attacker who holds the device, data written where it can be read, credentials too weak to type on a small keyboard, and input arriving from channels the developer does not control',
+              'Separate what you can fix from what you cannot: storage, transport, authentication and input handling are the developer’s; patching delays and insecure drivers belong to the vendor and the carrier',
+              'Threat-model rather than guess — STRIDE gives you the checklist, and consciously accepting a risk you have named is very different from never having considered it',
+              'The OWASP Mobile Top 10 is the risk vocabulary an examiner expects; know each risk by name and by the one control that answers it',
+            ],
+          },
+        ],
+      },
+      {
+        number: '5',
+        title: 'Mobile Platform Security Models — iOS vs Android',
+        covers: [3],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'What This Topic Answers',
+            text: 'Topic 4 established what an attacker can do to a device the developer does not control. This topic is the other half of the answer: what the two dominant platforms already do about it, and where their protections stop. Both iOS and Android isolate applications from each other and harden memory against overflow attacks — but they reach that isolation by different routes, and the differences decide what a developer must supply themselves.',
+          },
+          {
+            type: 'note',
+            text: 'Read the comparison table first and treat it as the map. Everything after it is detail filling in one cell or another, and the exam-usable contrasts — distribution and review, code signing, how isolation is enforced, when permissions are granted, and where credentials are stored — are all in the table.',
           },
           {
             type: 'table',
@@ -6649,6 +8226,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'The two isolation mechanisms are worth picturing rather than memorising. Android gives every installed application its own Linux user account, so the operating system keeps two applications apart in exactly the way it keeps two people’s home folders apart on a shared computer — ordinary file permissions do all the work. iOS instead installs each application into its own directory named by a GUID, a long randomly generated identifier, and refuses reads and writes across those directories. Same outcome, different machinery — and on both platforms the standing exception is the memory card, covered further down.',
+          },
+          {
             type: 'bullets',
             heading: 'Google Android — Manifest Permissions',
             items: [
@@ -6693,6 +8274,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'Self-signing sounds weaker than it is, and the distinction is a favourite exam point. A self-signed certificate is simply one the developer generated themselves, so nobody vouches for who they are — Android accepts this, Apple does not. What it still guarantees is continuity: only whoever holds that same key can publish an update to that application, which is what stops a stranger pushing a malicious “update” to your users. Signing proves the same hands wrote both versions; it says nothing at all about whether either version is secure.',
+          },
+          {
             type: 'bullets',
             heading: 'Google Android — Memory-Management Hardening',
             items: [
@@ -6707,6 +8292,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'None of these are things a developer switches on — they are protections the compiler and the operating system apply for you, which is why the answer to “how does the platform harden memory?” is a list of names. The two to know are NX (No eXecute), which marks the stack and heap as data-only so code an attacker manages to write there cannot be run, and ASLR (Address Space Layout Randomisation), which shuffles where things sit in memory on every run so the attacker cannot predict an address to jump to. ProPolice, safe_iop and the hardened OpenBSD allocators are the same idea aimed at specific bug classes — stack overruns, integer overflows and double-frees — and the flaw they all exist to blunt is the buffer overflow defined in Topic 8.',
+          },
+          {
             type: 'bullets',
             heading: 'Google Android — Files, Preferences and Mass Storage',
             items: [
@@ -6717,24 +8306,12 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
-            type: 'termlist',
-            heading: 'The OWASP Mobile Top 10 Risks',
-            items: [
-              { term: 'Insecure data storage', def: 'Store only what is absolutely required, never in a public area such as an SD card. Use secure containers and the platform’s encryption APIs, and never mark files world-readable or world-writable.' },
-              { term: 'Weak server-side controls', def: 'A mobile front end does not remove the server’s obligations. Apply the existing body of knowledge — the OWASP Web, Cloud and Web Services Top 10s, the cheat sheets and development guides — to the backend the app talks to.' },
-              { term: 'Insufficient transport layer protection', def: 'Encrypt all sensitive data leaving the device, over carrier networks, Wi-Fi and NFC alike. When the platform throws a security exception it is usually right — do not suppress it.' },
-              { term: 'Client-side injection', def: 'Sanitise or escape untrusted data before rendering or executing it, use prepared statements for database calls rather than string concatenation, and minimise the native capabilities exposed to hybrid web content.' },
-              { term: 'Poor authorisation and authentication', def: 'Contextual signals help only as part of a genuine multi-factor scheme. Out-of-band verification is meaningless when both factors arrive on the same device, and a device ID or subscriber ID must never be the sole authenticator.' },
-              { term: 'Improper session handling', def: 'Do not be afraid to re-authenticate periodically, make sure tokens can be revoked quickly when a device is lost or stolen, and generate tokens from high-entropy, well-tested sources.' },
-              { term: 'Security decisions via untrusted inputs', def: 'Check the caller’s permissions at every input boundary, prompt for additional authorisation before acting, and where a permission check is impossible require extra steps before a sensitive action can run.' },
-              { term: 'Side-channel data leakage', def: 'Never log credentials or personal data to system logs. Strip sensitive data before screenshots, disable keystroke logging per field, apply anti-caching directives to web content, watch what files your app creates while debugging, review third-party libraries and the data they consume, and test across as many platform versions as possible.' },
-              { term: 'Broken cryptography', def: 'Storing the key alongside the encrypted data negates the encryption entirely. Use battle-tested crypto libraries rather than writing your own, and take advantage of what the platform already provides.' },
-              { term: 'Sensitive information disclosure', def: 'Private API keys are private for a reason — keep them off the client. Keep proprietary business logic on the server, and accept that there is almost never a legitimate reason to hardcode a password.' },
-            ],
-          },
-          {
             type: 'note',
-            text: 'Read this alongside the website attacks in Topic 6 and the best practices in Topic 7. Injection, weak authentication and sensitive-data exposure appear on both the web and the mobile list, but insecure data storage, side-channel leakage and improper session handling on a lost device are mobile-specific — they exist precisely because the client is a device the attacker can hold.',
+            items: [
+              'The Keychain and SharedPreferences sit in the same row of the comparison table, but they are not equivalents. The Keychain is a purpose-built encrypted store for secrets; SharedPreferences is an ordinary file in the application’s own directory, protected by nothing more than the UNIX permissions described above.',
+              'That gap opens the moment a device is rooted, because rooting removes the very user-account boundary the Android model rests on, and a SharedPreferences file that was private becomes readable. Topic 7 lists jailbreak and rooting as a mobile vulnerability for exactly this reason.',
+              'The rule that survives on either platform: put secrets in the platform’s own credential store, and treat anything you write yourself as something somebody will eventually read.',
+            ],
           },
           {
             type: 'termlist',
@@ -6751,6 +8328,34 @@ print(summary_df.to_string(index=False))`,
           },
           {
             type: 'bullets',
+            heading: 'Key Takeaways',
+            items: [
+              'Both platforms enforce isolation, but by different means — iOS through App Store review, mandatory Apple-issued code signing and per-GUID directories; Android through per-application Linux UIDs, manifest permissions and self-signed certificates',
+              'Permission timing is the sharpest contrast between the two: Android grants everything at install and freezes it, iOS prompts in context at the moment of use',
+              'Code signing on either platform proves provenance and sets privileges — it is never a statement that the code is secure',
+              'The platform gives you encryption, credential stores, sandboxing and memory hardening for free; the recurring failures are developer decisions to bypass them — clear-text storage, disabled TLS checks, unsanitised input, keys shipped in the binary',
+              'External storage is the standing exception to the sandbox: anything written to a memory card leaves the protection of the per-application UID and is readable by any other application',
+              'Neither platform prevents reverse engineering, so no secret may live in the binary on either one',
+            ],
+          },
+        ],
+      },
+      {
+        number: '6',
+        title: 'Mobile Bearer Layers — WAP, Bluetooth, SMS/MMS & Location',
+        partial: [3, 8],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'What This Topic Answers',
+            text: 'Topics 4 and 5 dealt with the application and the platform it runs on. Everything in this topic sits below both: the bearers that carry data to and from the handset — the WAP gateway, the Bluetooth radio, the SMS and MMS messaging stack, and the positioning systems that tell an application where it is. Each one is a channel the application does not control, delivering input the application must not trust, and each has a failure history of its own.',
+          },
+          {
+            type: 'note',
+            text: 'The pattern to carry through all four is the same one Topic 4 opened with, pushed one layer down: wherever data changes hands, ask who can read it in transit, who can forge it, and what the receiving code does with a malformed message. The WAP gap, Bluetooth’s negotiable key length, the SMS PDU and the EXIF thumbnail parser are four instances of that single question.',
+          },
+          {
+            type: 'bullets',
             heading: 'Mobile Service Layers — WAP and Mobile HTML',
             items: [
               'WAP was the original method of reaching the internet from a mobile device, with a WAP gateway acting as a proxy that translated content between the handset and an ordinary HTTP server',
@@ -6760,6 +8365,14 @@ print(summary_df.to_string(index=False))`,
               'Crossover between SMS and mobile HTML applications adds exposure — an application that returns an account balance to any SMS with the right caller ID trusts a value that is trivially spoofed',
               'Traditional web attacks work against mobile HTML sites: XSS, SQL injection, CSRF, malicious HTTP redirects, phishing, session fixation and non-SSL login',
               'Mobile browsers have their own weaknesses: incomplete support for the HTTPOnly and SECURE cookie flags, permissive cache handling, and the general limitations of WAP',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The acronyms, expanded once: WAP is the Wireless Application Protocol, the pre-smartphone way of reaching the internet from a handset; WTLS is Wireless TLS, a cut-down TLS built for slow radio links; WSP is the Wireless Session Protocol, WAP’s equivalent of HTTP.',
+              'A gateway here is simply a proxy standing between the phone and an ordinary web server, translating between the two. The “WAP gap” is what that translation costs you — the gateway must decrypt the WTLS traffic arriving from the phone before re-encrypting it as TLS towards the server, so for an instant your data sits in plain text on a machine belonging neither to you nor to the site you are visiting.',
+              'This is why “end-to-end” is worth reading literally. WAP 1.0 encrypts each half of the journey separately, which is not end-to-end at all; WAP 2.0 encrypts the whole journey in one TLS session, which is precisely why the gateway becomes optional.',
             ],
           },
           {
@@ -6783,6 +8396,14 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            items: [
+              'The four “blue” attacks are easy to mix up, so order them by severity and they stay put: bluejacking pushes an unwanted message to a nearby device (a nuisance), bluesnarfing steals data such as contacts from it without pairing (a breach), bluebugging takes control of the device to place calls or read messages (a full compromise), and car whispering is bluesnarfing aimed at hands-free car kits still using their default PIN.',
+              '“The encryption key length is negotiable down to a single byte” is the sharpest line on this page. One byte is eight bits, which is 256 possible keys — an attacker can try every one of them faster than you can read this sentence. The two devices agree that length between themselves, so the weaker device sets the standard for both, and configuring a maximum key size is the recommendation that answers it.',
+              'Notice how much of this section is version history rather than design: the unit key before v1.2, short PINs and a repeating keystream before v2.1. On a device you cannot update, the mitigation is operational — keep it non-discoverable, pair only when you must, and unpair anything you no longer hold.',
+            ],
+          },
+          {
             type: 'bullets',
             heading: 'SMS and MMS Attack Surface',
             items: [
@@ -6793,6 +8414,10 @@ print(summary_df.to_string(index=False))`,
               'Application attacks target the software that consumes the message, and unlike protocol attacks they are highly specific to the software version — historically the browser, the MMS client or the image parser',
               'Two classic examples: a mobile Safari heap overflow triggered by viewing a malicious page, allowing arbitrary code execution; and a Motorola RAZR overflow in the way it parsed thumbnails in a JPEG EXIF header',
             ],
+          },
+          {
+            type: 'note',
+            text: 'The split to hold on to is who the attacker is talking to. A protocol attack talks to the phone’s messaging stack itself — the PDU is the raw wire format of an SMS, carrying header fields for sender, encoding and length alongside the text — and it works broadly, because every handset on the network parses that same format. An application attack talks to whatever software opens the message, which is why the Motorola RAZR case is so narrow: the flaw was in the code that drew the small preview image tucked inside a photograph’s EXIF header, so only that model running that firmware was vulnerable. Both are the Topic 4 lesson one layer down — the message is untrusted input, and the parser is the attack surface.',
           },
           {
             type: 'table',
@@ -6819,18 +8444,18 @@ print(summary_df.to_string(index=False))`,
             type: 'bullets',
             heading: 'Key Takeaways',
             items: [
-              'Secure mobile development begins from a different assumption than web development: the client device is under the attacker’s physical control, so nothing stored, computed or hidden on it can be trusted',
-              'Both major platforms enforce isolation, but by different means — iOS through App Store review, mandatory Apple-issued code signing and per-GUID directories; Android through per-application Linux UIDs, manifest permissions and self-signed certificates',
-              'Permission timing is the sharpest contrast between the two: Android grants everything at install and freezes it, iOS prompts in context at the moment of use',
-              'The platform gives you encryption, credential stores, sandboxing and memory hardening for free — the recurring failures are developer decisions to bypass them: clear-text storage, disabled TLS checks, unsanitised input, keys shipped in the binary',
-              'External storage is the standing exception to the sandbox: anything written to a memory card leaves the protection of the per-application UID',
               'Everything below the application layer — WAP gateways, Bluetooth pairing, SMS PDUs, geolocation lookups — is another untrusted input channel, and each has to be threat-modelled rather than assumed safe',
+              'The WAP gap is the standing example of encryption that is end-to-end in name only: WAP 1.0 decrypts and re-encrypts at the gateway, WAP 2.0 closes it with full end-to-end TLS',
+              'Small keyboards drive the whole layer towards weak secrets — 4-to-8-digit mobile PINs and Bluetooth PINs alike — which is why brute force is a live threat here rather than a theoretical one',
+              'Bluetooth’s protections are only as strong as what the pair negotiated: the encryption key length can be negotiated down to a single byte, and pre-2.1 devices allow short PINs and a repeating keystream',
+              'Messaging splits into two attack classes worth naming separately: protocol attacks abuse hidden provisioning traffic and work broadly, while application attacks target one parser in one software version',
+              'Location data is a liability as much as a feature — collect the least precise fix that works, keep it anonymous, discard it after use, and make tracking visible and opt-in',
             ],
           },
         ],
       },
       {
-        number: '5',
+        number: '7',
         title: 'Risks & Threats',
         covers: [4],
         sections: [
@@ -6894,6 +8519,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: 'Man-in-the-Middle deserves a picture, because it is the one term here that is pure jargon. You join free Wi-Fi in a café, but the access point named “Free_WiFi” belongs to the person sitting two tables away. Every request your phone makes now passes through their laptop on its way to the internet, so anything sent without encryption is theirs to read and to alter. It is the same failure as the WAP gap in Topic 6 — readable at a point in the middle — and it takes the same answer: encrypt end to end, and never suppress the certificate warnings the platform raises.',
+          },
+          {
             type: 'definition',
             heading: 'Web App Risks / Threats',
             text: 'Web app threats refer to vulnerabilities and attacks that exploit weaknesses in web-based systems. These threats lead to unauthorized access, data breaches, and service disruption — driven especially by the growth of online banking and e-commerce transactions. This historical progression has driven an ever-increasing sophistication among cybercriminals, alongside a continuous need for advancement in IT security measures.',
@@ -6903,7 +8532,14 @@ print(summary_df.to_string(index=False))`,
             heading: 'Common Threats to Web Apps',
             items: [
               'Injection vulnerabilities — e.g. SQL injection, Cross-Site Scripting (XSS)',
-              'Remote remediation — e.g. email phishing, privacy risk (cookies), financial risk (DoS — Denial of Service), operational/network risk (subject to user mistakes)',
+              'Broader web-based risks — e.g. email phishing, privacy risk (cookies), financial risk (DoS — Denial of Service), operational/network risk (subject to user mistakes)',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The handout labels that second bullet “remote remediation”. Remediation means fixing a problem, not causing one, so the label is a transcription slip — everything listed under it is a risk, not a remedy. It has been relabelled here so the two bullets read as what they are: the injection flaws, and then everything else.',
+              'The items in that second bullet are the same categories set out in the next section, just written out in a line. If a question asks for common threats to web applications, lead with the injection flaws — SQL injection and XSS, both worked through in Topic 8 — and then name the broader categories.',
             ],
           },
           {
@@ -6917,6 +8553,10 @@ print(summary_df.to_string(index=False))`,
               'Operational risk',
               'Network risk — subject to user mistakes',
             ],
+          },
+          {
+            type: 'note',
+            text: 'Watch the odd one out. Five of these six name a kind of harm — security, privacy, financial, operational, network. Denial of Service names an attack, not a harm; the harm it does is the financial and operational loss that follows. Reproduce all six as given if you are asked to list them, because that is the lecturer’s list — but if you are asked to explain them, say that DoS is the attack through which the financial and operational risks are realised. Topic 12 makes the same distinction in OWASP’s language, where the attack and the impact are two separate stages of one risk path.',
           },
           {
             type: 'termlist',
@@ -6958,7 +8598,7 @@ print(summary_df.to_string(index=False))`,
         ],
       },
       {
-        number: '6',
+        number: '8',
         title: 'Website Attacks',
         covers: [4],
         sections: [
@@ -6980,6 +8620,14 @@ print(summary_df.to_string(index=False))`,
             items: [
               'Telling them apart: SQL injection targets the database (backend) to extract or manipulate stored data; XSS targets other users’ browsers (frontend) by getting a malicious script to run when they view the page.',
               'Backend vs frontend: the backend is the server-side logic and database a user never sees directly; the frontend is everything rendered in the browser that the user interacts with.',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'What SQL injection actually looks like: a login form builds its query by pasting whatever you typed into a string, so entering \' OR \'1\'=\'1 in the username box turns “find the user whose name is X” into a condition that is always true, and the database hands back the first account in the table. The fix is not to ban that one string but to use parameterised queries, so input can never be read as part of the command.',
+              'What XSS actually looks like: a comment box that saves what you type and shows it to the next visitor will just as happily save a <script> tag, and that script then runs in their browser, inside their logged-in session — which is how a stolen cookie becomes a hijacked account.',
+              'Two flavours of XSS are worth naming: stored XSS is saved on the server and hits every visitor who loads the page, while reflected XSS is bounced straight back from a crafted URL and only hits the person who clicked the link. Stored is the more damaging, reflected the more common in phishing.',
             ],
           },
           {
@@ -7038,7 +8686,7 @@ print(summary_df.to_string(index=False))`,
         ],
       },
       {
-        number: '7',
+        number: '9',
         title: 'Strengths, Weaknesses & Best Practice',
         covers: [4, 5, 6],
         sections: [
@@ -7075,6 +8723,10 @@ print(summary_df.to_string(index=False))`,
             ],
           },
           {
+            type: 'note',
+            text: '“Security” appears as an advantage here, yet the comparison table in Topic 1 lists the web app as the more exposed of the two. Both are true, and an examiner will accept either provided you say which sense you mean. The strength is centralised control: one patch on the server protects every user at once, and nobody is left running last year’s version. The weakness is exposure: that same server is reachable by anyone with an internet connection, which is why every attack in Topic 8 is aimed straight at it.',
+          },
+          {
             type: 'bullets',
             heading: 'Solutions to These Challenges',
             items: ['Regular security audits', 'Regular software updates'],
@@ -7100,6 +8752,10 @@ print(summary_df.to_string(index=False))`,
               'An easy way to keep SAST and DAST apart: SAST is like proofreading a recipe before you cook (reading the source code); DAST is like tasting the finished dish (probing the running app from the outside, the way an attacker would).',
               'IAST is often described as combining SAST and DAST: it runs during testing like DAST, but has visibility into the actual code like SAST.',
             ],
+          },
+          {
+            type: 'note',
+            text: 'SCA is the odd one out of the four, because it does not examine code you wrote at all. A modern application is mostly assembled from third-party libraries, so SCA reads your list of dependencies and checks each one against public vulnerability databases — catching the case where your own code is faultless but the logging library you imported has a known hole in it. That is why “regular software updates” sits in the solutions list above, and it is the tooling answer to the OWASP risk of vulnerable and outdated components.',
           },
           {
             type: 'termlist',
@@ -7129,13 +8785,13 @@ print(summary_df.to_string(index=False))`,
             type: 'note',
             items: [
               'These six are their own exam question. Keep them separate from the web/mobile risk answers — the lecturer specifically warned against mixing the two, because a best-practice question earns no marks for describing risks.',
-              'Each best practice pairs with a risk from Topic 5: input validation answers injection and XSS, up-to-date encryption answers interception, stronger authentication answers brute force, API tracking and change records answer misconfiguration. If a question asks you to justify a practice, name the risk it closes.',
+              'Each best practice pairs with a risk from Topic 7: input validation answers injection and XSS, up-to-date encryption answers interception, stronger authentication answers brute force, API tracking and change records answer misconfiguration. If a question asks you to justify a practice, name the risk it closes.',
             ],
           },
         ],
       },
       {
-        number: '8',
+        number: '10',
         title: 'Audit, Compliance & Quality Assurance',
         date: '8 Jul 2026',
         covers: [7],
@@ -7200,7 +8856,7 @@ print(summary_df.to_string(index=False))`,
         ],
       },
       {
-        number: '9',
+        number: '11',
         title: 'Web Application Security & the Security Lifecycle',
         covers: [5],
         partial: [9],
@@ -7228,7 +8884,7 @@ print(summary_df.to_string(index=False))`,
             type: 'note',
             items: [
               'A positive test asks “does the login form accept a valid password?” A negative test asks “what happens if I put a quote mark, 10,000 characters, or a script tag in the username field?” Security lives almost entirely in the second question.',
-              'The value of vulnerability and security assessment is that it converts an unknown risk into a known, prioritised defect that can be scheduled, fixed and verified — which is precisely what the audit and QA discipline in Topic 8 then has to evidence.',
+              'The value of vulnerability and security assessment is that it converts an unknown risk into a known, prioritised defect that can be scheduled, fixed and verified — which is precisely what the audit and QA discipline in Topic 10 then has to evidence.',
             ],
           },
           {
@@ -7241,12 +8897,367 @@ print(summary_df.to_string(index=False))`,
           },
           {
             type: 'note',
-            text: 'Ideally an organisation employs both methods, not one. The individual tools are defined in Topic 7 — this topic is about where each of them sits in the lifecycle: SAST and SCA during development, IAST and DAST during testing and staging, WAF and RASP in production.',
+            text: 'Ideally an organisation employs both methods, not one. The individual tools are defined in Topic 9 — this topic is about where each of them sits in the lifecycle: SAST and SCA during development, IAST and DAST during testing and staging, WAF and RASP in production.',
           },
         ],
       },
       {
-        number: '10',
+        number: '12',
+        title: 'The OWASP Top 10 — Ranking Web Application Risk',
+        covers: [4],
+        partial: [5, 9],
+        sections: [
+          {
+            type: 'definition',
+            heading: 'The OWASP Top 10',
+            text: 'The OWASP Top 10 is a published list of the ten most critical security risks facing web applications. Each entry is named after the type of attack, the type of weakness, or the type of impact it causes — OWASP chose whichever name was already best known, because the primary aim of the list is to educate. It is a place to start and an awareness document, not a complete catalogue of everything that can go wrong with an application.',
+          },
+          {
+            type: 'note',
+            items: [
+              'OWASP is the Open Web Application Security Project, a non-profit that publishes the list along with free tools and testing guides. Nobody is obliged to adopt it; it carries weight because the industry settled on it as the common vocabulary for web risk.',
+              'This topic teaches the 2013 edition, because the ratings and the figures below are that edition’s and the numbering has to match. The current edition is 2021, and the last table in this topic maps every 2013 entry onto where it now sits. Whenever you quote the Top 10 — in an exam answer or a report — say which edition you mean.',
+              'Topic 7 already named seven of these risks. This topic is where that vocabulary comes from, and it adds the part Topic 7 leaves out: how OWASP decides that one risk outranks another.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Traditional Areas of Concern',
+            items: [
+              { term: 'Confidentiality', def: 'only those authorised to see the data can see it' },
+              { term: 'Integrity', def: 'the data is what it is supposed to be, and any unauthorised change is prevented or detected' },
+              { term: 'Availability', def: 'the system is there and working when a legitimate user needs it' },
+              { term: 'Accountability', def: 'every action can be traced back to whoever performed it, so nobody can plausibly deny what they did' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Topic 7 and CYB 122 teach the first three of these as the CIA triad. Neither list is wrong. Accountability is the fourth property practitioners add once a system has real users, because confidentiality, integrity and availability can all be intact while nobody can say who made a change. If a question asks for the triad, give three; if it asks what security protects, four is the better answer — and name the fourth as accountability, the property that makes non-repudiation possible.',
+              'Security is dependent on context. A teaching hospital’s records, a student portal and a payment gateway do not want the same balance of these four, so an organisation’s security requirements follow from what it actually does rather than from a standard list.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'Three Levels of Security',
+            items: [
+              { term: 'Physical', def: 'doors, walls and locks — controlling who can reach the machine at all' },
+              { term: 'Network', def: 'the operating system, the network itself, and the firewalls between its segments' },
+              { term: 'Application', def: 'the software running at the application layer, and the data it handles' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Every risk in this topic lives at the third level, and that is the whole reason the list exists. A firewall doing its job perfectly still forwards an injection payload, because the payload arrives inside an ordinary HTTP request on a port the firewall is meant to leave open. Physical and network controls cannot see it — only the application can.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Perceived Security vs Actual Security',
+            items: [
+              { term: 'Security theatre', def: 'a control that looks reassuring but changes nothing an attacker actually has to do' },
+              { term: 'FUD — fear, uncertainty and doubt', def: 'justifying a control by frightening people rather than by naming the risk it closes' },
+              { term: 'Absolutism', def: 'the belief that a system can be made totally secure. Nothing is. Security raises the cost of an attack; it does not reduce risk to zero' },
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'The Risk Path',
+            text: 'Attackers can potentially use many different paths through your application to do harm to your business or organisation, and each of those paths represents a risk that may — or may not — be serious enough to warrant attention. OWASP models a single path as a chain of six stages, and every entry in the Top 10 is named after one stage or another of that chain.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/01-risk-path-model.webp',
+            width: 1400, height: 168, maxWidth: 720,
+            alt: 'A single left-to-right chain of six stages joined by dotted blue arrows: a stick figure labelled "Threat Agents" glowing yellow, then an "Attack Vector" arrow-shaped box, then a wide "Weakness" box with a white arrow entering it, then a "Control" box, then a database cylinder labelled "Technical Impacts", and finally a document-shaped box labelled "Business Impacts"',
+            caption: 'Figure 1: one path through an application — threat agent, attack vector, weakness, control, technical impact, business impact.',
+          },
+          {
+            type: 'termlist',
+            heading: 'The Six Stages, Defined',
+            items: [
+              { term: 'Threat agent', def: 'an individual or group that can manifest a threat. It is fundamental to identify who would want to exploit the assets of a company, and how they might use them against the company' },
+              { term: 'Attack', def: 'the techniques attackers use to exploit vulnerabilities in applications' },
+              { term: 'Vulnerability', def: 'a hole or weakness in the application — a design flaw or an implementation bug — that allows an attacker to cause harm to the stakeholders of an application. The term is often used very loosely' },
+              { term: 'Control', def: 'a defensive technology or module used to detect, deter or deny attacks. A weakness or design flaw in a control, or the absence of a necessary control, is itself a vulnerability' },
+              { term: 'Technical impact', def: 'the system damage resulting from a successful breach — the effect on the technology only, not on the business' },
+              { term: 'Business impact', def: 'the impact on the business, generally counted in money, lives, reputation, customers or speed' },
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'Read the chain as one sentence: a threat agent detects a weakness in the application and its controls, then launches an attack that causes both technical and business impacts.',
+              'The last link is the one engineers skip and the one that gets the work funded. “The orders table can be read” is a technical impact; “every customer’s address and card reference can be read, which is a regulatory penalty and a front-page story” is the business impact. The business risk is what justifies investment in fixing the security problem.',
+              'Notice that a vulnerability gets defined twice over — as a weakness in the application, and as a missing or flawed control. That is deliberate: forgetting to add a check is exactly as exploitable as writing a broken one.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'Many Paths, One Risk',
+            text: 'A real application does not offer one path; it offers hundreds. The next figure fans the same six stages out into every route an attacker might take through a system, and then picks one of those routes out in red.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/02-example-security-risk.webp',
+            width: 1400, height: 639, maxWidth: 720,
+            alt: 'The risk-path diagram fanned out into many parallel routes. On the left two threat-agent stick figures, one glowing yellow; three "Attack Vector" boxes lead right into four rows of "Weakness" and "Control" boxes, which converge on two "Technical Impacts" database cylinders and then on three "Business Impacts" documents. Blue dotted lines show all the possible routes; one route is picked out in thick red dotted line and yellow highlighting — the glowing threat agent takes an attack vector, drops down past the controls to an unprotected weakness on the bottom row, through a control shaded red to show it was bypassed, and up into a technical impact and a business impact',
+            caption: 'Figure 2: every route an attacker might take, with one successful route highlighted.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Follow the red route. The highlighted threat agent picks one attack vector out of three, drops past the rows where a control stands in front of the weakness, and reaches the one weakness on the bottom row with nothing guarding it — the control shaded red is the one that was bypassed. From there the route runs into a technical impact and out into a business impact.',
+              'That is the lesson of the picture: the controls above did not fail, and they did not matter. An attacker needs one open path; a defender has to close every one. Since no team can close every one, the work has to be ordered by risk.',
+              'OWASP orders it as Risk = Likelihood × Impact. Likelihood is how plausible the path is, impact is what it costs at the end of it. A frightening-looking weakness nobody can reach scores low; a mundane one sitting on an open path scores high.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'How OWASP Rates a Risk',
+            text: 'Every entry in the Top 10 carries the same four ratings, and each rating sits over a stage of the risk path. Exploitability, prevalence and detectability together estimate the likelihood; impact estimates the cost. The strip below is the one OWASP published for A1 Injection — the other nine ratings are gathered into the table that follows.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/03-a1-injection-rating.webp',
+            width: 1400, height: 253, maxWidth: 700,
+            alt: 'OWASP\'s risk-rating strip for A1 Injection. A blue band across the top repeats the risk path — Threat Agents, Attack Vector, Weakness, Technical Impacts, Business Impacts — and a band of coloured cells beneath rates each stage: Exploitability EASY on red, Prevalence COMMON on amber, detectability AVERAGE on amber, Impact SEVERE on red. The threat-agent and business-impact cells are grey and left blank, because those are application-specific',
+            caption: 'Figure 3: how OWASP rates one risk — the ratings sit directly over the stages of the risk path.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Read the four columns as questions. Exploitability: how much skill and effort does the attack take? Prevalence: how often does this weakness turn up in real applications? Detectability: how easily can an attacker find it — not how easily your own team can. Impact: how much technical damage does it do when it works?',
+              'Two cells in the strip are grey and deliberately empty. Who would attack your application, and what a breach would cost your organisation, are specific to your application — OWASP cannot fill them in for you, and filling them in is exactly what a real risk assessment is.',
+              'Injection is EASY to exploit, COMMON, and SEVERE in impact, which is what put it at number one. Its detectability is only AVERAGE — easy to exploit and not especially easy to spot is a worse combination than merely widespread.',
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'The Ten Risks, and How the 2013 List Rated Them',
+            headers: ['#', 'Risk', 'Exploitability', 'Prevalence', 'Detectability', 'Impact'],
+            rows: [
+              ['A1', 'Injection', 'EASY', 'COMMON', 'AVERAGE', 'SEVERE'],
+              ['A2', 'Broken Authentication and Session Management', 'AVERAGE', 'COMMON', 'AVERAGE', 'SEVERE'],
+              ['A3', 'Cross-Site Scripting (XSS)', 'AVERAGE', 'VERY WIDESPREAD', 'EASY', 'MODERATE'],
+              ['A4', 'Insecure Direct Object References', 'EASY', 'COMMON', 'EASY', 'MODERATE'],
+              ['A5', 'Security Misconfiguration', 'EASY', 'COMMON', 'EASY', 'MODERATE'],
+              ['A6', 'Sensitive Data Exposure', 'DIFFICULT', 'UNCOMMON', 'AVERAGE', 'SEVERE'],
+              ['A7', 'Missing Function Level Access Control', 'EASY', 'UNCOMMON', 'AVERAGE', 'MODERATE'],
+              ['A8', 'Cross-Site Request Forgery (CSRF)', 'AVERAGE', 'WIDESPREAD', 'EASY', 'MODERATE'],
+              ['A9', 'Using Components with Known Vulnerabilities', 'AVERAGE', 'WIDESPREAD', 'DIFFICULT', 'MODERATE'],
+              ['A10', 'Unvalidated Redirects and Forwards', 'AVERAGE', 'UNCOMMON', 'EASY', 'MODERATE'],
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'A6 is the instructive row. It is DIFFICULT to exploit and UNCOMMON, and it still made the list — because the impact is SEVERE. That is Risk = Likelihood × Impact doing its work: a rare, hard attack outranks a frequent easy one once the loss is large enough.',
+              'A3 carries the highest prevalence on the list, VERY WIDESPREAD, but only MODERATE impact. Common is not the same as serious, and an exam answer that ranks risks by how often they occur has missed half the formula.',
+              'A9 is the only entry rated DIFFICULT to detect, and that is from the defender’s side as much as the attacker’s: most teams cannot list the third-party components their own application depends on, which is precisely why the risk survives.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: 'What Each of the Ten Means',
+            items: [
+              { term: 'A1 Injection', def: 'Injection flaws, such as SQL, OS and LDAP injection, occur when untrusted data is sent to an interpreter as part of a command or query. The attacker’s hostile data can trick the interpreter into executing unintended commands or accessing unauthorized data.' },
+              { term: 'A2 Broken Authentication and Session Management', def: 'Application functions related to authentication and session management are often not implemented correctly, allowing attackers to compromise passwords, keys or session tokens, or to exploit other implementation flaws to assume other users’ identities.' },
+              { term: 'A3 Cross-Site Scripting (XSS)', def: 'XSS flaws occur whenever an application takes untrusted data and sends it to a web browser without proper validation and escaping. XSS allows attackers to execute scripts in the victim’s browser, which can hijack user sessions, deface web sites, or redirect the user to malicious sites.' },
+              { term: 'A4 Insecure Direct Object References', def: 'A direct object reference occurs when a developer exposes a reference to an internal implementation object, such as a file, directory or database key. Without an access control check or other protection, attackers can manipulate these references to access unauthorized data.' },
+              { term: 'A5 Security Misconfiguration', def: 'Good security requires a secure configuration defined and deployed for the application, frameworks, application server, web server, database server and platform. All these settings should be defined, implemented and maintained, as many are not shipped with secure defaults.' },
+              { term: 'A6 Sensitive Data Exposure', def: 'Many web applications do not properly protect sensitive data — credit cards, national identity numbers, authentication credentials — with appropriate encryption or hashing. Attackers may steal or modify such weakly protected data to conduct identity theft, credit card fraud, or other crimes.' },
+              { term: 'A7 Missing Function Level Access Control', def: 'Not all users should have access to all functions. Sometimes function level protection is managed through configuration and the system is misconfigured; sometimes developers simply forget to include the proper checks.' },
+              { term: 'A8 Cross-Site Request Forgery (CSRF)', def: 'A CSRF attack forces a logged-on victim’s browser to send a forged HTTP request, including the victim’s session cookie and any other automatically included authentication information, to a vulnerable web application. This forces the victim’s browser to generate requests the application thinks are legitimate.' },
+              { term: 'A9 Using Components with Known Vulnerabilities', def: 'Virtually every application has these issues, because most development teams do not focus on keeping their components and libraries up to date. In many cases the developers do not even know all the components they are using, never mind their versions. Component dependencies make things even worse.' },
+              { term: 'A10 Unvalidated Redirects and Forwards', def: 'Web applications frequently redirect and forward users to other pages and websites, and use untrusted data to determine the destination pages. Without proper validation, attackers can redirect victims to phishing or malware sites, or use forwards to access unauthorized pages.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Learn these ten as a vocabulary, not as ten separate essays. Four of them — A1, A3, A5 and A8 — you already met under different headings in Topics 7 and 8, and the mobile equivalents of most of them are in Topic 4’s OWASP Mobile Top 10. The five sections that follow take one risk each and show what it looks like from the outside, which is the part a definition cannot give you.',
+          },
+          {
+            type: 'text',
+            heading: 'A1 Injection — Watching It Happen',
+            text: 'The demonstration used a bank’s messaging feature: three pages, each of which takes the message the user typed and hands it on to something that interprets text.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/04-injection-demo-flow.webp',
+            width: 1400, height: 258, maxWidth: 700,
+            alt: 'Three rounded slate-grey boxes joined left to right by grey block arrows. First, "LeaveMsg.asp — allows user to enter a message for the bank; only one message per user at a time". Second, "confirmMsg.asp — saves message into queue (form\'s target); confirms message saved". Third, "Email.asp — generates HTML for email to user"',
+            caption: 'Figure 4: the injection demonstration — one message, three interpreters.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Trace the untrusted string. The user types it on LeaveMsg.asp; confirmMsg.asp writes it into a database queue, where it is read as part of a SQL statement; Email.asp reads it back out and builds HTML from it. One piece of input, three chances to be treated as code rather than as text — which is why injection and XSS keep appearing together.',
+              'Injection is not only SQL. Any interpreter that takes a string can be injected: the shell (OS command injection), a directory service (LDAP injection), an XML parser, a template engine. The rule is the same everywhere — never build a command by pasting input into a string, and use parameterised queries or the equivalent so input can never cross into the command.',
+              'Topic 8 shows the payload itself and the always-true condition that gets you past a login form; this flow shows why it is so hard to stamp out. If you want the joke that makes it stick, it is xkcd 327, “Exploits of a Mom”, at https://xkcd.com/327/ — a mother whose son’s registered name is written so that the school’s database reads it as a command to delete the students table. Sanitise your database inputs.',
+              'The bank in this demonstration was a deliberately vulnerable practice site, and it has been offline since around 2017 — as have the other demonstration sites in this topic. The flows are the teaching material; do not go looking for the sites, and never point a tool at a system you do not own or have written permission to test.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'A6 Sensitive Data Exposure — Reading an Error Page',
+            text: 'Sensitive data exposure is usually taught as unencrypted card numbers, but its cheapest form is an error message. The screenshot below took no tool and no payload: a page expects a record identifier in the URL, and the tester replaced it with the word “foo”.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/05-sensitive-data-exposure.webp',
+            width: 1325, height: 941, maxWidth: 660,
+            alt: 'An Internet Explorer window whose address bar, ringed in red, reads "http://localhost:62275/Genre.aspx?ID=foo". The page is an ASP.NET yellow-screen-of-death: a red heading "Server Error in \'/\' Application", the message "Conversion failed when converting from a character string to uniqueidentifier", then Description, Exception Details naming System.Data.SqlClient.SqlException, Source Error, and a Stack Trace panel listing internal .NET database calls such as SqlConnection.OnError, TdsParser.ThrowExceptionAndWarning and SqlDataReader.ReadInternal',
+            caption: 'Figure 5: one wrong parameter, and the application describes its own internals.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Work through what the page gives away. The address bar, ringed in red, ends in ?ID=foo — that is the whole attack. Anyone can edit a URL, so this is a test every user of the site could run by accident.',
+              'The message — “Conversion failed when converting from a character string to uniqueidentifier” — says the ID column is a GUID, and that the value went from the URL into the query without ever being validated as a GUID first. That is the same missing check an injection attempt would exploit.',
+              'The exception type, System.Data.SqlClient.SqlException, names the data access provider, so the attacker now knows the backend is Microsoft SQL Server reached through ADO.NET — and therefore which dialect of SQL to write, and which quoting and comment syntax will work.',
+              'The stack trace lists internal calls such as SqlConnection.OnError, TdsParser.ThrowExceptionAndWarning and SqlDataReader.ReadInternal. That is the shape of the data-access layer, the framework in use, and often its version. None of it is customer data, but it is the map that makes finding customer data quick.',
+              'The fix has two halves, and both are needed. Validate the parameter before it reaches the query, so “foo” is rejected as a bad request rather than passed to the database. And configure production to show a plain, custom error page while the detail goes to a server-side log — a debug configuration deployed to production is A5 Security Misconfiguration handing an attacker A6.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'A8 Cross-Site Request Forgery — A Request You Never Made',
+            text: 'The CSRF demonstration targeted a home router rather than a bank, and the flow is worth following because of what the middle step does not require.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/06-csrf-demo-flow.webp',
+            width: 1400, height: 320, maxWidth: 700,
+            alt: 'Three rounded boxes joined left to right by grey block arrows. First, "Login.asp — user logs in and is given session cookie". Second, drawn in black to mark it as the attacker\'s step, "User opens another page in new browser tab — img tab sends request \'on behalf of user\' to one of routers CGI pages". Third, "Router system processes message as if it was a user request"',
+            caption: 'Figure 6: the attacker’s step is the black box in the middle — and it is only an image tag.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Topic 8 explains the bank-transfer version of CSRF and the token that stops it. Two things this flow adds. First, the forged request needs no form and no click: an image tag whose source is not an image but an administration URL is enough, because the browser fetches image sources automatically as it renders the page.',
+              'Second, look at the target. The router’s administration interface is not reachable from the internet — but it is reachable from your browser, which sits inside your network. CSRF turns the victim’s browser into a bridge across that boundary, which is why the technique is used against routers, printers and internal dashboards as much as against banks.',
+              'The application cannot tell the difference on its own, because the request is genuinely well formed and genuinely carries the user’s session cookie. That is why the defence has to add something the attacker’s page cannot know — a per-session CSRF token — rather than trying to inspect the request more carefully.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'A9 Components with Known Vulnerabilities — the Conference’s Own Site',
+            text: 'The best example of this risk in the original talk was the website of the conference the talk was given at. It had been defaced through a component nobody had patched.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/07-defacement-anztb.webp',
+            width: 586, height: 1039, maxWidth: 320,
+            alt: 'An iPhone screenshot of the site anztb.org in Safari. The top of the page still shows the legitimate ANZTB and ISTQB logos, the navigation bar, a banner for "ANZTB Test 2017, Testing for Tomorrow, 5 May 2017 in Wellington", and four content tiles. Below that the page has been overwritten with a grid of defacement images — orange and black graphics reading "TURKHACKTEAM", a Turkish flag crest, and a black banner captioned "TURK HACK TEAM" between rows of stars',
+            caption: 'Figure 7: the conference site, still showing its own logos above the defacement.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Nobody had to invent an exploit here. The vulnerability was public, the patch was public, and the only thing missing was somebody applying it — which is what makes this risk different in kind from the others. It is not a coding mistake; it is an operational one.',
+              'Notice that the site’s own header survives above the defacement. Defacement is defined in Topic 8 as replacing the page with the attacker’s message, and it is the loudest possible use of that access. The same foothold could have been used quietly to read the site’s database instead, and nobody would have known.',
+              'The tooling answer is SCA from Topic 9 — it reads your dependency list and checks each entry against public vulnerability databases — and the operational answer is the “regular software updates” line in the same topic. Between them they turn “we did not know we were running that” into a report somebody has to act on.',
+            ],
+          },
+          {
+            type: 'text',
+            heading: 'A10 Unvalidated Redirects and Forwards — Login, Then Surprise',
+            text: 'The last demonstration is the subtlest, and the slide is a PowerPoint build, so the flow appears twice with one copy offset behind the other. The run you can read is the one that starts from a link in an email.',
+          },
+          {
+            type: 'image',
+            src: '/lecture-notes/uuy-cyb-222/08-redirect-demo-flow.webp',
+            width: 1400, height: 273, maxWidth: 700,
+            alt: 'Three rounded boxes joined left to right by grey block arrows, each drawn with a second identical box stacked behind it to show a second run of the same flow. In front: "Link to site in email — user is not logined in, redirect to login.asp", then "Login.asp — user logs in and is given session cookie", then a black box reading "Surprise!"',
+            caption: 'Figure 8: the redirect demonstration — a genuine login, then a destination nobody validated.',
+          },
+          {
+            type: 'note',
+            items: [
+              'Follow it. A link in an email points at the real site. The user is not logged in, so the application redirects them to its own login page; they log in and are given a session cookie; and then the application forwards them on to wherever the original link said they were going — the “Surprise!” box. The destination came from the untrusted link, and nothing checked it.',
+              'This works on careful people, and that is the point. Every piece of advice students are given about phishing — check the domain, do not log in from an emailed link — is satisfied here. The domain is real, the login page is real, the password went to the right server. Only the last hop was the attacker’s.',
+              'The fix is to stop putting destinations in parameters at all. Redirect to a fixed page, or send a short key that the server maps to an approved destination on its own side. If a full URL genuinely must travel in the request, check it against an allow-list of your own hosts before you obey it.',
+            ],
+          },
+          {
+            type: 'table',
+            heading: 'Where Each 2013 Risk Went in the 2021 List',
+            headers: ['2013 entry', 'In the OWASP Top 10 2021'],
+            rows: [
+              ['A1 Injection', 'A03:2021 Injection — still here, but XSS was folded into it'],
+              ['A2 Broken Authentication and Session Management', 'A07:2021 Identification and Authentication Failures (renamed)'],
+              ['A3 Cross-Site Scripting', 'Merged into A03:2021 Injection — XSS is no longer its own entry'],
+              ['A4 Insecure Direct Object References', 'Merged into A01:2021 Broken Access Control'],
+              ['A5 Security Misconfiguration', 'A05:2021 Security Misconfiguration (unchanged)'],
+              ['A6 Sensitive Data Exposure', 'A02:2021 Cryptographic Failures — renamed to name the cause rather than the symptom'],
+              ['A7 Missing Function Level Access Control', 'Merged into A01:2021 Broken Access Control'],
+              ['A8 Cross-Site Request Forgery', 'Merged into A01:2021 Broken Access Control; dropped as its own entry in 2017, once frameworks shipped protection by default'],
+              ['A9 Using Components with Known Vulnerabilities', 'A06:2021 Vulnerable and Outdated Components (renamed)'],
+              ['A10 Unvalidated Redirects and Forwards', 'Dropped from the Top 10 in 2017; the access-control half now sits under A01:2021'],
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'New in 2021, With No 2013 Ancestor',
+            items: [
+              'A04:2021 Insecure Design — flaws that no amount of careful coding can fix, because the design itself was wrong',
+              'A08:2021 Software and Data Integrity Failures — trusting code, updates or serialised data whose integrity was never verified',
+              'A09:2021 Security Logging and Monitoring Failures — the breach nobody noticed, because nothing was recorded or watched',
+              'A10:2021 Server-Side Request Forgery (SSRF) — making the server itself fetch a URL an attacker chose',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The headline change is A01:2021 Broken Access Control, now the largest category in the list. It absorbed three separate 2013 entries — A4, A7 and A8 — because all three were the same failure wearing different names: the application did not check whether this user was allowed to do this thing.',
+              'CSRF is the encouraging story in this table. It stopped needing its own entry once the major web frameworks began shipping token protection switched on by default. A Top 10 entry can be retired by better defaults, which is a stronger fix than any amount of testing.',
+              'A09:2021 has no 2013 ancestor at all, and it is worth pausing on: it is the only entry about not knowing. Everything else on the list is a hole in the application; this one is a hole in what the organisation can see, and it is why the audit and logging material in Topic 10 is a security control rather than paperwork.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'Tools to Try This Yourself',
+            items: [
+              'Your browser’s developer tools — the Network panel shows every request and its parameters, and the Storage panel shows the cookies a session actually carries',
+              'OWASP ZAP — a free proxy and scanner from OWASP itself, which sits between browser and site so you can read and modify requests',
+              'Burp Suite Community Edition — the same idea, and the tool most of the industry uses; the free edition is enough for everything in this topic',
+              'PortSwigger Web Security Academy — free labs for every risk on the list, with a deliberately vulnerable target you are allowed to attack',
+            ],
+          },
+          {
+            type: 'note',
+            items: [
+              'The 2017 talk this topic follows recommended a set of Firefox add-ons that no longer exist — Firefox replaced its extension system that year, and browser developer tools have since absorbed most of what they did. The four above are the current equivalents.',
+              'Practise only on a target you own or have been explicitly permitted to test. Under the Cybercrimes Act 2015, unauthorised access to a computer system is an offence in Nigeria whether or not anything was damaged, and “I was only learning” is not a defence. The Academy labs exist precisely so you do not need one.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: 'What the Top 10 Is Actually For',
+            items: [
+              'The Top 10 is a place to start. It does not define all the possible threats.',
+              'Its role is to educate — to introduce a number of critical threats, in language a whole team can share.',
+              'Testing for weaknesses does not provide as much assurance as having a secure development lifecycle.',
+              'Build security in; do not bolt it on.',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The last two points are Topic 11’s argument arriving from the other direction. Assessment is worth doing — it is how an unknown risk becomes a scheduled, verifiable defect — but a list of ten risks is a checklist for finding problems, not a method for not creating them. A team that only tests against the Top 10 will keep finding Top 10 problems.',
+          },
+          {
+            type: 'note',
+            heading: 'Source & Attribution',
+            items: [
+              'This topic follows “Introduction to web security”, a talk given by Ian Ross at the ANZTB conference in March 2017. The demonstrations, the defaced-site screenshot and the framing are his.',
+              'The risk-path diagrams and the risk-rating tables are OWASP’s own, from the OWASP Top 10 2013, used here under the Creative Commons Attribution-ShareAlike 3.0 licence (CC BY-SA 3.0).',
+              'The 2013-to-2021 mapping, and the tooling list, are this course’s additions — the talk predates the 2021 edition, and its tools have not survived.',
+            ],
+          },
+        ],
+      },
+      {
+        number: '13',
         title: 'Exam Focus — The Lecturer’s Guaranteed Questions',
         covers: [],  // revision aid over the topics above, not an outline item
         sections: [
@@ -7268,12 +9279,12 @@ print(summary_df.to_string(index=False))`,
             type: 'termlist',
             heading: 'Model Answers at a Glance',
             items: [
-              { term: 'Write short notes on quality assurance / list the evaluation metrics', def: 'QA ensures software products meet the desired standard. The metrics are Functionality, Performance, Reliability, Usability, Compatibility and Security. (Topic 8)' },
-              { term: 'Define web-based risk', def: 'Any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption. (Topic 5)' },
-              { term: 'Differentiate web application risk from mobile application risk', def: 'Web: centralized risk, client–server attacks landing on the server, a breach affecting the entire database, and an internet connection required. Mobile: decentralized risk, attacks on the individual device, data leakage usually following physical loss of the device, and the ability to work offline. (Topic 5)' },
+              { term: 'Write short notes on quality assurance / list the evaluation metrics', def: 'QA ensures software products meet the desired standard. The metrics are Functionality, Performance, Reliability, Usability, Compatibility and Security. (Topic 10)' },
+              { term: 'Define web-based risk', def: 'Any threat, vulnerability, or exposure associated with using the internet that can result in data breaches, financial losses, and service disruption. (Topic 7)' },
+              { term: 'Differentiate web application risk from mobile application risk', def: 'Web: centralized risk, client–server attacks landing on the server, a breach affecting the entire database, and an internet connection required. Mobile: decentralized risk, attacks on the individual device, data leakage usually following physical loss of the device, and the ability to work offline. (Topic 7)' },
               { term: 'Explain the security/tracking models — authentication vs authorization', def: 'Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information — a bank teller has a transaction limit, while the branch manager holds higher clearance. (Topic 3)' },
               { term: 'Distinguish symmetrical from asymmetrical encryption', def: 'Encryption converts information into ciphertext, which is unreadable to unauthorized users. Symmetrical encryption uses a single key to both lock and unlock; asymmetrical encryption uses two keys — a public key and a private key. (Topic 3)' },
-              { term: 'Define a website attack and give five examples', def: 'Any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions. Five examples: SQL injection (SQLi), cross-site scripting (XSS), malware/backdoor attacks, brute-force login attacks, and phishing. (Topic 6)' },
+              { term: 'Define a website attack and give five examples', def: 'Any malicious action aimed at compromising a site’s availability, integrity, or confidentiality by exploiting web code or server–user interactions. Five examples: SQL injection (SQLi), cross-site scripting (XSS), malware/backdoor attacks, brute-force login attacks, and phishing. (Topic 8)' },
             ],
           },
           {
@@ -7285,7 +9296,7 @@ print(summary_df.to_string(index=False))`,
             items: [
               'A structure that protects your marks: one sentence of definition using the question’s own keywords, then the list, then one line per item only if the question asks you to explain. Writing the list before the explanation means a shortage of time costs you the elaboration, not the marks.',
               'Where a question says “differentiate” or “distinguish”, answer in contrasting pairs rather than describing one side and then the other — it makes each contrast visible to whoever is marking.',
-              'These six are the flagged questions, not the whole syllabus. Topics 1–8 remain examinable, and the outline items on secure mobile/web development and next-generation challenges are not yet covered by any topic here.',
+              'These six are the flagged questions, not the whole syllabus. Topics 1–12 all remain examinable — note that none of the six touch the mobile material in Topics 4–6, which covers outline item 3 and can still be asked.',
             ],
           },
         ],
@@ -7294,485 +9305,496 @@ print(summary_df.to_string(index=False))`,
     quiz: [
       {
         question: 'What is a web application?',
-        options: ['Software installed directly on a device that runs without any server', 'Software controlled by a centralized server and accessed through a browser with an internet connection', 'A collection of static hyperlinks and text with no underlying program code', 'A hardware firewall that filters web traffic'],
+        options: ['Software installed on a device that runs with no server', 'Software on a centralized server, reached through a browser', 'A set of fixed pages and hyperlinks with no program code', 'A server-side scripting language such as PHP or ASP.NET'],
         correctIndex: 1,
-        explanation: 'A web application is software controlled by a centralized server and accessed through browsers over an internet connection.',
+        explanation: 'A web application is software controlled by a centralized server and accessed through a browser over an internet connection. Software that runs with no server is a desktop or mobile app; fixed pages with no program code make a static website; and PHP is one of the server-side languages a web app is built with, not the app itself.',
       },
       {
         question: 'Which of these is a server-side technology used by web apps?',
-        options: ['HTML', 'CSS', 'PHP', 'A browser cookie'],
+        options: ['HTML', 'CSS', 'PHP', 'DOM'],
         correctIndex: 2,
-        explanation: 'PHP (like ASP.NET) is a server-side language that runs on the web server — for example talking to a database or processing a login.',
+        explanation: 'PHP, like ASP.NET, runs on the web server — talking to a database or processing a login. HTML and CSS are client-side markup and styling, and the DOM is the browser’s own model of the page, so all three of those live in the browser.',
       },
       {
         question: 'What do HTML and CSS control in a web application?',
-        options: ['Database storage and retrieval on the server', 'The end-to-end encryption of network traffic in transit', 'Server-side authentication logic', 'What the page looks like in the user\'s browser (client side)'],
+        options: ['How data is stored and retrieved on the server', 'How traffic is encrypted while it is in transit', 'How the server decides who is allowed to log in', 'What the page looks like in the browser'],
         correctIndex: 3,
-        explanation: 'HTML and CSS are client-side — they run in the browser and control what the page looks like.',
+        explanation: 'HTML and CSS are client-side — they run in the browser and control what the page looks like. Storage and retrieval, authentication logic and transport encryption all sit on the server side of the request.',
       },
       {
         question: 'Which protocol is commonly used by web applications?',
         options: ['HTTP', 'SMTP', 'FTP', 'SSH'],
         correctIndex: 0,
-        explanation: 'Web apps support protocols such as HTTP (Hypertext Transfer Protocol).',
+        explanation: 'Web apps support protocols such as HTTP (Hypertext Transfer Protocol). SMTP carries mail, FTP transfers files and SSH is for remote shell access.',
       },
       {
         question: 'What best describes a mobile application?',
-        options: ['Software that only runs inside a web browser', 'Software installed directly on a user\'s device (iOS or Android)', 'A server-side script written in the ASP.NET web application framework', 'A type of web cookie'],
+        options: ['Software that runs only inside a web browser', 'Software installed directly on a phone or tablet', 'A web page reformatted to fit a small phone screen', 'Server-side code written in the ASP.NET framework'],
         correctIndex: 1,
-        explanation: 'A mobile application is software installed directly on a user\'s device, designed to run on a mobile device or tablet.',
+        explanation: 'A mobile application is software installed directly on a user’s device (iOS or Android), designed to run on a mobile device or tablet. A page merely reformatted for a small screen is still a website, served from the same central server.',
       },
       {
         question: 'Why is web risk described as "centralized"?',
-        options: ['Because every user must install the same app', 'Because individual mobile devices store all of the data', 'Because compromising the central server can potentially affect every user', 'Because the risk only affects one user at a time'],
+        options: ['Because every user must install the same version', 'Because each device stores its own copy of the data', 'Because compromising the central server affects every user', 'Because only one attacker can exploit it at a time'],
         correctIndex: 2,
-        explanation: 'Web apps depend on a central server, so anyone who compromises that server can potentially affect every single user.',
+        explanation: 'Web apps depend on a central server, so anyone who compromises that server can potentially affect every single user. Data held on each individual device is the decentralized case — that is mobile risk.',
       },
       {
         question: 'A key practical difference of mobile apps compared to web apps is that mobile apps typically:',
-        options: ['Never need an internet connection', 'Run entirely on the web server', 'Cannot store any data locally on the device', 'Require a separate version built for each platform (iOS, Android)'],
+        options: ['work only while the device has an internet connection', 'run their interface code on the web server, not the device', 'store no data on the device, keeping it all on the server', 'need a separate version built for iOS and for Android'],
         correctIndex: 3,
-        explanation: 'Mobile apps typically require a version built for each platform and run on the device itself.',
+        explanation: 'Mobile apps typically require a version built for each platform, and they run on the device itself. It is the web app that needs a live connection and leaves the data on the server.',
       },
       {
         question: 'Mobile app risk primarily refers to attacks associated with:',
-        options: ['The device and OS features when apps connect to the internet', 'The centralized web server only', 'Printed documentation', 'The internal HTML and CSS rendering engine inside a web browser'],
+        options: ['the device and its OS features when the app goes online', 'the web server database that the app connects to for data', 'the browser sandbox that limits access to the device', 'the store review process that approves each app build'],
         correctIndex: 0,
-        explanation: 'Mobile app risk refers to attacks associated with the device and OS features — flaws that occur when mobile apps connect to the internet for data exchange.',
+        explanation: 'Mobile app risk refers to attacks associated with the device and OS features — flaws that occur when mobile apps connect to the internet for data exchange. Attacks on the central database are web risk, and the browser sandbox constrains web apps rather than installed ones.',
       },
       {
         question: 'What is "insecure data storage" on a mobile device?',
-        options: ['Using HTTPS to send data', 'Storing sensitive data in plain, unencrypted form on the device', 'Encrypting all authentication tokens before saving them', 'Refusing to store any data at all'],
+        options: ['Sending data over the network without using TLS', 'Keeping sensitive data unencrypted on disk', 'Shipping the app with an API key inside its code', 'Storing the app’s secrets in the platform keychain'],
         correctIndex: 1,
-        explanation: 'Insecure data storage means sensitive data (passwords, tokens, personal info) is saved on the device unencrypted, so anyone with device access can read it.',
+        explanation: 'Insecure data storage means sensitive data (passwords, tokens, personal info) is saved on the device unencrypted, so anyone with device access can read it. Unencrypted traffic is insufficient transport layer protection, a hardcoded key is broken cryptography, and the platform keychain is the control that fixes the problem rather than an example of it.',
       },
       {
         question: 'In a mobile context, what is "reverse engineering and code tampering"?',
-        options: ['Encrypting the app\'s source code', 'Updating the app through the official store', 'Decompiling the app to study its code, find secrets, or modify it to bypass security checks', 'Flooding the central web server with junk network traffic'],
+        options: ['Rewriting the app’s server code to add new features', 'Updating the installed app through the official store', 'Decompiling the app to read its code or to bypass checks', 'Rebuilding an object from bytes an attacker supplied'],
         correctIndex: 2,
-        explanation: 'Attackers decompile the app to study its code, find hidden secrets like API keys, or modify it to bypass security checks.',
+        explanation: 'Attackers decompile the app binary to study its code, extract hardcoded secrets such as API keys, or modify it to bypass security checks. Rebuilding an object from attacker-supplied bytes is insecure deserialization, a server-side flaw.',
       },
       {
         question: 'Why does a jailbroken or rooted phone increase security risk?',
-        options: ['It speeds up the processor', 'It automatically encrypts all application data on the device by default', 'It blocks all internet connections', 'It removes the manufacturer\'s built-in security restrictions, making it easier for malicious apps to access protected data'],
+        options: ['It stops the platform from encrypting stored app data', 'It forces every installed app to run outside a sandbox', 'It blocks the official store from delivering updates', 'It removes the built-in restrictions that protect the data'],
         correctIndex: 3,
-        explanation: 'A jailbroken/rooted phone removes built-in security restrictions, making it far easier for malicious apps to access data they shouldn\'t.',
+        explanation: 'A jailbroken or rooted phone removes the manufacturer’s built-in security restrictions, making it far easier for a malicious app to reach data it should never see. It does not switch off encryption or the sandbox wholesale, and updates keep arriving — the protections around them are simply weaker.',
       },
       {
         question: 'What is "permission abuse" by a mobile app?',
-        options: ['Requesting far more device permissions than the app actually needs', 'Refusing all permissions', 'Asking the user to log in twice', 'Silently encrypting the device camera feed in the background'],
+        options: ['Requesting more permissions than the app needs', 'Granting itself system access by shipping a driver', 'Reading another app’s files by escaping the sandbox', 'Using a permission after the user has revoked it'],
         correctIndex: 0,
-        explanation: 'Permission abuse is when apps request more permissions (camera, contacts, location) than needed, increasing damage if the app is compromised.',
+        explanation: 'Permission abuse is an app requesting more permissions (camera, contacts, location) than it needs, which increases the damage if the app is malicious or compromised. Escaping the sandbox is an application-isolation failure, and a third-party driver with system access is the insecure-device-driver problem.',
       },
       {
         question: 'Web application threats are vulnerabilities and attacks that exploit weaknesses in:',
-        options: ['Only offline desktop software that never connects to the internet', 'Web-based systems, leading to unauthorized access, data breaches, and service disruption', 'Physical hardware locks', 'Printer drivers'],
+        options: ['desktop software that never connects to a network', 'web-based systems, causing data breaches and disruption', 'the device and OS features an installed app uses', 'the physical security of the server room and racks'],
         correctIndex: 1,
-        explanation: 'Web app threats exploit weaknesses in web-based systems, leading to unauthorized access, data breaches, and service disruption.',
+        explanation: 'Web app threats exploit weaknesses in web-based systems, leading to unauthorized access, data breaches and service disruption. Weaknesses in the device and its OS features are the definition of mobile app risk — the two are examined as a contrasting pair.',
       },
       {
         question: 'Which pair are examples of injection vulnerabilities?',
-        options: ['Device jailbreaking and rooting', 'WAF and RASP', 'SQL injection and Cross-Site Scripting (XSS)', 'SAST and DAST'],
+        options: ['DDoS and CSRF', 'WAF and RASP', 'SQLi and XSS', 'SAST and DAST'],
         correctIndex: 2,
-        explanation: 'Injection vulnerabilities include SQL injection and Cross-Site Scripting (XSS).',
+        explanation: 'Injection vulnerabilities include SQL injection and Cross-Site Scripting. DDoS and CSRF are also web attacks but neither injects code into an interpreter; WAF and RASP are protective mechanisms; SAST and DAST are testing methodologies.',
       },
       {
         question: 'In the web-based risk categories, cookies are given as an example of which risk?',
-        options: ['Financial risk', 'Denial of Service', 'Network risk', 'Privacy risk'],
+        options: ['Financial risk', 'Denial of Service', 'Operational risk', 'Privacy risk'],
         correctIndex: 3,
-        explanation: 'Privacy risk is exemplified by cookies in the web-based risk categories.',
+        explanation: 'Privacy risk is exemplified by cookies in the web-based risk categories. The six categories are security, privacy, financial, Denial of Service, operational and network risk.',
       },
       {
         question: 'According to the web-vs-mobile comparison, where does a web attack typically take place?',
-        options: ['On the server, distributed across users', 'Directly on the victim\'s individual device', 'Only on paper records', 'Inside the phone\'s SIM card'],
+        options: ['On the server, with the impact shared across users', 'On the victim’s own device, one handset at a time', 'In the browser sandbox, isolated from the server code', 'On the network link between two trusted servers'],
         correctIndex: 0,
-        explanation: 'For web risk the attack is on the server and distributed across users, whereas mobile attacks are on the client/device side.',
+        explanation: 'For web risk the attack lands on the server and is distributed across users; a mobile attack lands directly on the victim’s own device. That is the centralized-versus-decentralized contrast the comparison turns on.',
       },
       {
         question: 'In the comparison, a data breach in a web app most directly affects:',
-        options: ['A single lost phone', 'The whole database/server', 'Only the attacker\'s device', 'Nothing — web apps store no data'],
+        options: ['One lost or stolen handset and the data on it', 'The whole database, and every user recorded in it', 'Only the accounts that were logged in at the time', 'The browser cache of whoever visited that day'],
         correctIndex: 1,
-        explanation: 'A web data breach affects the whole database/server, while mobile data leakage is typically from a single lost or stolen device.',
+        explanation: 'A web data breach affects the whole database and therefore every user in it, while mobile data leakage is typically from a single lost or stolen device.',
       },
       {
         question: 'Which set of attacks is listed as common for WEB risk in the comparison?',
-        options: ['Reverse engineering, code tampering, permission abuse', 'Jailbreaking and rooting', 'SQL injection, DDoS, CSRF', 'Insecure data storage and push spam'],
+        options: ['Reverse engineering and tampering', 'Insecure storage and rooting', 'SQL injection, DDoS and CSRF', 'Jailbreaking and push spam'],
         correctIndex: 2,
-        explanation: 'Common web attack types listed are SQL injection, DDoS, and CSRF.',
+        explanation: 'The comparison lists SQL injection, DDoS and CSRF as the common web attack types. Every other option here is drawn from the mobile column.',
       },
       {
         question: 'Which set of attacks is listed as common for MOBILE app risk in the comparison?',
-        options: ['SQL injection, DDoS, CSRF', 'Widespread website defacement and large-scale phishing campaigns', 'SAST and DAST', 'Reverse engineering, code tampering, permission abuse'],
+        options: ['SQL injection, DDoS attacks and CSRF', 'Defacement and credential stuffing', 'Buffer overflow and XXE injection', 'Code tampering and permission abuse'],
         correctIndex: 3,
-        explanation: 'Common mobile attack types listed are reverse engineering, code tampering, and permission abuse.',
+        explanation: 'The comparison lists reverse engineering, code tampering and permission abuse as the common mobile attack types. Defacement, credential stuffing, buffer overflow and XXE are all attacks on the server side.',
       },
       {
-        question: 'A website attack is any malicious action aimed at compromising a site\'s:',
-        options: ['Availability, integrity, and confidentiality', 'The website color scheme and fonts', 'Domain name length', 'Marketing budget'],
+        question: 'A website attack is any malicious action aimed at compromising a site’s:',
+        options: ['availability, integrity, confidentiality', 'availability, usability, compatibility', 'authentication, authorization, accounting', 'performance, reliability, functionality'],
         correctIndex: 0,
-        explanation: 'A website attack aims to compromise a site\'s availability, integrity, and confidentiality.',
+        explanation: 'A website attack aims to compromise a site’s availability, integrity and confidentiality. Usability, compatibility, performance, reliability and functionality are QA evaluation metrics — a different list, from Topic 10.',
       },
       {
         question: 'How does SQL injection typically work?',
-        options: ['By flooding the target web server with junk traffic from many devices', 'By injecting malicious code into input fields so the backend database reveals sensitive data', 'By replacing the homepage with a political message', 'By tricking a logged-in user into submitting a request'],
+        options: ['By flooding the server with traffic from many devices', 'By putting code in an input field so the database leaks', 'By saving a script that runs in the next visitor’s browser', 'By replaying an object rebuilt from attacker-sent bytes'],
         correctIndex: 1,
-        explanation: 'SQL injection injects malicious code into input fields (search bars, login forms), prompting the backend database to reveal sensitive data.',
+        explanation: 'SQL injection injects malicious code into input fields — a search bar or login form — prompting the backend database to reveal sensitive data. A script saved for the next visitor is stored XSS, the frontend counterpart.',
       },
       {
         question: 'Cross-Site Scripting (XSS) involves:',
-        options: ['Deliberately overloading a target web server with a huge volume of junk traffic', 'Decompiling a mobile app', 'Injecting harmful scripts into web pages that are then viewed by other users', 'Encrypting the database'],
+        options: ['overloading a target server with a huge volume of traffic', 'decompiling a mobile app to extract its hardcoded keys', 'injecting a script that runs in another user’s browser', 'sending crafted input that the database then executes'],
         correctIndex: 2,
-        explanation: 'XSS injects harmful scripts into web pages that are then viewed (and run) by other users.',
+        explanation: 'XSS injects harmful scripts into web pages that are then viewed — and run — by other users. Crafted input executed by the database is SQL injection, the backend counterpart.',
       },
       {
         question: 'What is the key difference between SQL injection and XSS?',
-        options: ['SQL injection targets web browsers, whereas XSS targets the database', 'They are two names for the same attack', 'Neither involves injecting code', 'SQL injection targets the database (backend); XSS targets other users\' browsers (frontend)'],
+        options: ['SQLi targets browsers; XSS targets the database', 'SQLi is an input flaw; XSS is a configuration flaw', 'SQLi needs a logged-in victim; XSS does not', 'SQLi targets the database; XSS targets users’ browsers'],
         correctIndex: 3,
-        explanation: 'SQL injection targets the database/backend; XSS targets other users\' browsers/frontend.',
+        explanation: 'SQL injection targets the database (backend); XSS targets other users’ browsers (frontend). Both are input-handling failures, and neither depends on the victim being logged in — that is the distinguishing feature of CSRF.',
       },
       {
         question: 'Which statement correctly describes "backend" vs "frontend"?',
-        options: ['The backend is the server-side logic and database the user never sees directly; the frontend is what is rendered in the browser', 'The backend is what the user sees; the frontend is the database', 'Both run only on the user\'s phone', 'The frontend is the part that stores user passwords in unencrypted plain text'],
+        options: ['The backend is the server and database; the frontend is the browser', 'The backend is the browser; the frontend is the server and database', 'The backend is the operating system; the frontend is the application', 'The backend is the database only; the frontend is everything else'],
         correctIndex: 0,
-        explanation: 'The backend is server-side logic and the database (unseen by users); the frontend is everything rendered in the browser.',
+        explanation: 'The backend is the server-side logic and the database, which the user never sees directly; the frontend is everything rendered in the browser. The backend is more than the database alone — the application logic sits there too.',
       },
       {
         question: 'A Distributed Denial of Service (DDoS) attack works by:',
-        options: ['Stealing data quietly from a database', 'Using a network of compromised devices to flood a site with traffic until it is unavailable', 'Replacing the homepage with the attacker\'s message', 'Tricking a user into clicking a malicious phishing link'],
+        options: ['Quietly copying records out of a database over time', 'Flooding a site from a botnet until it stops responding', 'Overrunning a memory buffer until the server crashes', 'Replacing the homepage so the site cannot be used'],
         correctIndex: 1,
-        explanation: 'DDoS uses a network of compromised devices to flood a website with excessive traffic, overloading the server and making it unavailable.',
+        explanation: 'DDoS uses a network of compromised devices to flood a website with excessive traffic, overloading the server and making it unavailable. A buffer overflow can also crash a server, but by overwriting adjacent memory rather than by volume of traffic.',
       },
       {
         question: 'Website "defacement" refers to:',
-        options: ['Encrypting the entire website and demanding a ransom payment to decrypt it', 'Sending spam push notifications', 'Gaining unauthorized access to hosting files and replacing the homepage with the attacker\'s own message', 'Reverse engineering a mobile app'],
+        options: ['Encrypting the site’s files and demanding a ransom', 'Injecting a script that steals the visitor’s cookie', 'Replacing the homepage with an attacker’s message', 'Cloning the site at a lookalike domain to trick users'],
         correctIndex: 2,
-        explanation: 'Defacement is gaining unauthorized access to hosting files and replacing the homepage, often with a political statement.',
+        explanation: 'Defacement is gaining unauthorized access to hosting files and replacing the homepage, often with a political statement. A convincing clone on a lookalike domain is phishing or spoofing — the original site is left untouched.',
       },
       {
         question: 'Phishing and spoofing are examples of which category of attack?',
-        options: ['Injection attacks', 'Availability attacks', 'Permission abuse', 'Deception attacks'],
+        options: ['Code injection attacks', 'Availability attacks', 'Defacement attacks', 'Deception attacks'],
         correctIndex: 3,
-        explanation: 'Phishing and spoofing are deception attacks — creating a fake site or message to trick users.',
+        explanation: 'Phishing and spoofing are deception attacks — a fake version of a site or message that tricks users. Defacement sits beside them in the notes but alters the real site rather than imitating it.',
       },
       {
         question: 'Cross-Site Request Forgery (CSRF) works by:',
-        options: ['Tricking a victim into unknowingly submitting a malicious request using their logged-in identity', 'Flooding the target server with junk network traffic requests', 'Injecting SQL into a login form', 'Decompiling the application code'],
+        options: ['Tricking a logged-in user into submitting the request', 'Stealing the session cookie with an injected script', 'Guessing the victim’s password with automated bots', 'Sending the victim to a convincing fake login page'],
         correctIndex: 0,
-        explanation: 'CSRF tricks a victim into unknowingly submitting a malicious request, exploiting their logged-in identity and privileges.',
+        explanation: 'CSRF tricks a victim into unknowingly submitting a malicious request, exploiting their logged-in identity and privileges. Stealing the cookie outright is XSS; guessing credentials is a brute-force attack.',
       },
       {
         question: 'Which is listed as a strength of a website?',
-        options: ['It works without any internet connection', 'It is universally accessible from any device with an internet connection and a browser', 'It requires installing a separate version per platform', 'It cannot be updated or changed once it has been deployed'],
+        options: ['It keeps working when the user has no connection', 'It is reachable from any device with a browser', 'It needs a separate build for each platform', 'It stores its data on the user’s own device'],
         correctIndex: 1,
-        explanation: 'A website is universally accessible from any device with an internet connection and a browser.',
+        explanation: 'A website is universally accessible from any device with an internet connection and a browser. Offline use, per-platform builds and on-device storage all describe the installed mobile app instead.',
       },
       {
         question: 'Why are updates and maintenance simpler for websites than for installed apps?',
-        options: ['Because users must manually reinstall each time', 'Because websites never change', 'Because developers update directly on the server, making changes instant', 'Because every user has to compile the code themselves'],
+        options: ['Because users reinstall from the store each time', 'Because the browser re-downloads the site each visit', 'Because updating the server updates it for everyone', 'Because the carrier pushes updates to every handset'],
         correctIndex: 2,
-        explanation: 'Updates are simple and instant because developers update directly on the server.',
+        explanation: 'Updates are simple and instant because developers update directly on the server, so the change is live for every user at once. Carrier and vendor coordination is exactly what makes mobile patching slow.',
       },
       {
         question: 'What distinguishes a dynamic website from a static one?',
-        options: ['A dynamic website always shows the same fixed content to every visitor', 'A static website requires a database for every page', 'A static website changes for each visitor', 'A dynamic website generates content based on user input, database queries, or other variables'],
+        options: ['A dynamic site serves the same fixed page to everyone', 'A static site queries a database for every page view', 'A dynamic site must be installed before it can be used', 'A dynamic site builds its pages from user input and queries'],
         correctIndex: 3,
-        explanation: 'A static site shows fixed content to all visitors; a dynamic site generates content based on input, database queries, or variables.',
+        explanation: 'A static site shows the same fixed content to every visitor; a dynamic site generates content from user input, database queries or other variables. Neither kind is installed — both are served to the browser.',
       },
       {
         question: 'Which is a disadvantage of web apps mentioned in the notes?',
-        options: ['They cannot be used without an internet connection', 'They are impossible to update or change', 'They never work in a browser', 'They require no testing'],
+        options: ['They do not work at all without an internet connection', 'They must be built separately for each platform', 'They take up storage space on the user’s device', 'They cannot be updated once they are deployed'],
         correctIndex: 0,
-        explanation: 'A key disadvantage is that web apps cannot be used without an internet connection, and performance depends on connection speed.',
+        explanation: 'A key disadvantage is that web apps cannot be used without an internet connection, and performance depends on connection speed. Per-platform builds and device storage are the mobile app’s costs, not the web app’s.',
       },
       {
         question: 'Which two solutions are recommended for addressing web app challenges?',
-        options: ['Jailbreaking and rooting', 'Regular security audits and regular software updates', 'Disabling the network firewall and deleting all the logs', 'Storing passwords in plain text'],
+        options: ['Stronger passwords and shorter session timeouts', 'Regular audits and regular software updates', 'Browser testing and better code minification', 'Wider bandwidth and a faster hosting provider'],
         correctIndex: 1,
-        explanation: 'The notes list regular security audits and regular software updates as solutions.',
+        explanation: 'The notes list regular security audits and regular software updates as the solutions. The other options are real engineering measures, but none of them is the pair given.',
       },
       {
         question: 'The two broad approaches to defending web & mobile apps are:',
-        options: ['Jailbreaking and rooting', 'Phishing and spoofing', 'Testing methodologies that find vulnerabilities, and protective mechanisms that block attacks in real time', 'The differences between static and dynamic websites and how each is built'],
+        options: ['Authentication controls and behavioural controls', 'Symmetric encryption and asymmetric encryption', 'Testing methodologies and protective mechanisms', 'Compliance auditing and quality assurance testing'],
         correctIndex: 2,
-        explanation: 'Defense splits into testing methodologies (find vulnerabilities) and protective mechanisms (block attacks in real time).',
+        explanation: 'Defence splits into testing methodologies that find vulnerabilities and protective mechanisms that block attacks in real time. Authentication versus behavioural controls is a genuine pairing too, but it divides secure design in Topic 3, not app defence.',
       },
       {
         question: 'Static Application Security Testing (SAST) analyzes:',
-        options: ['The app while it is running in production', 'Network traffic passing through the perimeter firewall', 'Only third-party libraries', 'The app\'s source code during development, before the app is running'],
+        options: ['the running app from the outside, as an attacker would', 'the third-party libraries that the app depends on', 'the running app from inside, while tests exercise it', 'the source code during development, before it runs'],
         correctIndex: 3,
-        explanation: 'SAST analyzes the app\'s source code during development, before the app is running.',
+        explanation: 'SAST analyzes the app’s source code during development, before the app is running. Probing from outside is DAST, watching from inside a running app is IAST, and checking dependencies is SCA.',
       },
       {
         question: 'Software Composition Analysis (SCA) is mainly used to:',
-        options: ['Identify known vulnerabilities in third-party libraries and open-source components', 'Flood a server with traffic', 'Replace the homepage', 'Encrypt the backend database at rest on disk'],
+        options: ['find known flaws in third-party and open-source components', 'find flaws in the source code the team wrote itself', 'watch the running app and block attacks in real time', 'check the app against its six QA evaluation metrics'],
         correctIndex: 0,
-        explanation: 'SCA identifies known vulnerabilities in third-party libraries and open-source components used in the app.',
+        explanation: 'SCA identifies known vulnerabilities in third-party libraries and open-source components. It is the odd one out of the four testing methodologies precisely because it never examines code the team wrote — that is SAST’s job.',
       },
       {
         question: 'Interactive Application Security Testing (IAST) performs analysis by:',
-        options: ['Reading only static source code', 'Observing app behavior from inside the running application at run time', 'Scanning printed documentation', 'Filtering incoming and outgoing HTTP traffic much like a network firewall'],
+        options: ['reading the source code before the app is built', 'watching behaviour inside the running app', 'probing the running app from outside over HTTP', 'checking the dependency list against a CVE database'],
         correctIndex: 1,
-        explanation: 'IAST observes app behavior (input, output, data flow, logic) to conduct run-time analysis from inside the running application.',
+        explanation: 'IAST observes app behaviour — input, output, data flow and logic — to conduct run-time analysis from inside the running application. Probing from outside over HTTP is DAST; IAST has the code visibility DAST lacks.',
       },
       {
         question: 'Dynamic Application Security Testing (DAST) analyzes the app:',
-        options: ['Before it is written', 'Only by reading its source code', 'While it is running, including servers, typically requiring manual configuration', 'By decompiling the compiled mobile application binary'],
+        options: ['before any code is written, from the design documents', 'by reading its source code line by line, offline', 'while it runs, servers included, after manual setup', 'by decompiling the compiled mobile app binary'],
         correctIndex: 2,
-        explanation: 'DAST analyzes the app while it is running (including servers) and typically requires manual configuration.',
+        explanation: 'DAST analyzes the app while it is running, including servers, and typically requires manual configuration. Reading source code offline is SAST, and decompiling a binary is what an attacker does to a mobile app.',
       },
       {
         question: 'IAST is often described as combining which two approaches?',
-        options: ['WAF and RASP', 'Phishing and spoofing', 'SQLi and XSS', 'SAST and DAST'],
+        options: ['SCA and DAST', 'DAST and RASP', 'SAST and SCA', 'SAST and DAST'],
         correctIndex: 3,
-        explanation: 'IAST combines SAST and DAST: it runs during testing like DAST but has visibility into the code like SAST.',
+        explanation: 'IAST combines SAST and DAST: it runs during testing like DAST but has visibility into the code like SAST. RASP is a protective mechanism, not a testing methodology, and SCA only reads the dependency list.',
       },
       {
         question: 'A Web Application Firewall (WAF) protects a web app by:',
-        options: ['Filtering and monitoring HTTP traffic to block malicious attacks', 'Decompiling mobile apps', 'Encrypting all of the application source code files', 'Rooting the device'],
+        options: ['filtering and monitoring the HTTP traffic it receives', 'blocking attacks from within the running application itself', 'scanning the app’s source code for injection flaws', 'encrypting the traffic between browser and server'],
         correctIndex: 0,
-        explanation: 'A WAF protects a web app by filtering and monitoring HTTP traffic.',
+        explanation: 'A WAF stands in front of the application, filtering and monitoring HTTP traffic before it arrives. Blocking from inside the running application is RASP; encrypting the channel is TLS.',
       },
       {
         question: 'Runtime Application Self-Protection (RASP) works by:',
-        options: ['Analyzing source code before deployment', 'Using app instrumentation inside the running application to detect and block attacks', 'Only scanning third-party open-source libraries', 'Sending phishing emails to test users'],
+        options: ['reading the source code before the app is deployed', 'using instrumentation inside the running app itself', 'filtering HTTP traffic in front of the application tier', 'checking open-source components against advisories'],
         correctIndex: 1,
-        explanation: 'RASP detects, protects against, and blocks attacks using app instrumentation directly inside the running application.',
+        explanation: 'RASP detects, protects against and blocks attacks using app instrumentation directly inside the running application, stopping an attack at the moment the code would execute it. Filtering traffic in front of the app is the WAF’s role.',
       },
       {
         question: 'WAF and RASP are examples of which category of defense?',
-        options: ['Testing methodologies', 'Injection attacks', 'Protective mechanisms', 'Deception attacks'],
+        options: ['Testing methodologies', 'Behavioural controls', 'Protective mechanisms', 'Compliance measures'],
         correctIndex: 2,
-        explanation: 'WAF and RASP are protective mechanisms that actively block attacks, as opposed to testing methodologies.',
+        explanation: 'WAF and RASP are protective mechanisms that actively block attacks in real time, as opposed to testing methodologies such as SAST, SCA, IAST and DAST, which only find the flaw.',
       },
       {
         question: 'Which is listed among the additional best practices for securing apps?',
-        options: ['Disable all authentication', 'Store API keys in the frontend', 'Avoid recording any code changes', 'Execute input validation and authorization'],
+        options: ['Give every user the administrator role by default', 'Keep API keys in the frontend for faster calls', 'Skip version control so releases are quicker', 'Validate input and enforce authorization'],
         correctIndex: 3,
-        explanation: 'Additional best practices include input validation & authorization, enhanced authentication, recording code changes, and tracking API usage.',
+        explanation: 'The best practices include input validation, enhanced authentication and authorization with role-based access control, tracking API usage, and recording code changes in version control. Each of the other options inverts one of those practices.',
       },
       {
-        question: "Why can a web app NOT freely use the phone's camera or contacts the way an installed mobile app can?",
-        options: ['Because HTTP forbids any use of hardware', "Because web apps run inside the browser's sandbox, without direct access to device functionality", 'Because web servers cannot process images', 'Because HTML automatically encrypts the camera feed'],
+        question: 'Why can a web app NOT freely use the phone’s camera or contacts the way an installed mobile app can?',
+        options: ['Because HTTP cannot carry camera or contact data', 'Because the browser sandbox keeps it off the device', 'Because the OS permission model covers native apps only', 'Because a web app runs no code on the device at all'],
         correctIndex: 1,
-        explanation: "Web apps run inside the browser's sandbox and lack direct access to device functionality — a deliberate browser security feature.",
+        explanation: 'Web apps run inside the browser’s sandbox and lack direct access to device functionality — a deliberate browser security feature. A web app does run code on the device, in the browser; what it lacks is the reach beyond the sandbox.',
       },
       {
         question: 'The "network of compromised devices" used to launch a DDoS attack is known as:',
-        options: ['A botnet', 'A firewall', 'A sandbox', 'A honeypot'],
+        options: ['A botnet', 'A proxy', 'A sandbox', 'A rootkit'],
         correctIndex: 0,
-        explanation: 'A botnet is a network of infected computers, phones, and smart devices that an attacker remotely commands to flood a target with traffic.',
+        explanation: 'A botnet is a network of infected computers, phones and smart devices that an attacker remotely commands to flood a target with traffic. A rootkit hides an attacker on one machine; a sandbox isolates code; a proxy relays traffic.',
       },
       {
         question: 'In the CSRF example, why does the bank accept the forged transfer request?',
-        options: ['Because the bank has no database', 'Because the attacker guessed the password', "Because the victim's browser automatically attaches their logged-in session cookie to the request", 'Because DDoS traffic overloaded the bank'],
+        options: ['Because the attacker replayed the victim’s password', 'Because the request came from the bank’s own server', 'Because the browser sends the session cookie regardless', 'Because the transfer stayed under the 2FA threshold'],
         correctIndex: 2,
-        explanation: 'The browser automatically attaches the logged-in session cookie to every request to that site, so the bank believes the victim made the request.',
+        explanation: 'The browser automatically attaches the logged-in session cookie to every request to that site, so the bank believes the victim made the request. The attacker never needs the password — that is what makes CSRF different from credential theft.',
       },
       {
         question: 'Spyware on a mobile device is best described as:',
-        options: ['A firewall that filters HTTP traffic', 'A tool for testing app source code', 'An app update delivered through the official store', 'Malicious software that secretly monitors your activity and reports it to an attacker'],
+        options: ['malware that encrypts the files and demands a ransom', 'malware that copies itself across a network alone', 'a hidden route back into the system for later use', 'malware that secretly monitors and reports back'],
         correctIndex: 3,
-        explanation: 'Spyware secretly monitors what you do on the device (messages, calls, location) and reports it back to an attacker.',
+        explanation: 'Spyware secretly monitors what you do on the device — messages, calls, location — and reports it back to an attacker. Self-copying malware is a worm, and a hidden route back in is a backdoor.',
       },
       {
         question: '"Cryptographic issues" in mobile apps refer to:',
-        options: ['Using too much encryption', 'Weak or wrongly implemented encryption, such as outdated algorithms or hardcoded keys', 'Encrypting data with a WAF', 'Refusing to store any data on the device'],
+        options: ['encryption so heavy that the whole app slows down', 'weak or wrong encryption, or a hardcoded key', 'data that was never encrypted before storage', 'encrypted data sent over an untrusted network'],
         correctIndex: 1,
-        explanation: 'Cryptographic issues are weak or wrongly implemented encryption — like outdated algorithms or hardcoding the key inside the app where a reverse engineer can find it.',
+        explanation: 'Cryptographic issues are weak or wrongly implemented encryption — an outdated algorithm, or a key hardcoded inside the app where a reverse engineer can find it. Storing data with no encryption at all is insecure data storage, a separate risk.',
       },
       {
         question: 'In the recipe analogy for security testing, "tasting the finished dish" corresponds to:',
-        options: ['SAST — reading the source code', 'SCA — scanning third-party libraries', 'DAST — probing the running app from the outside', 'WAF — filtering HTTP traffic'],
+        options: ['SAST — proofreading the recipe before cooking', 'SCA — checking the shop-bought ingredients', 'DAST — probing the app once it is running', 'WAF — turning diners away at the door'],
         correctIndex: 2,
-        explanation: 'DAST probes the running application from the outside, like tasting the finished dish; SAST is proofreading the recipe (source code) before cooking.',
+        explanation: 'DAST probes the running application from the outside, the way an attacker would — tasting the finished dish. SAST is proofreading the recipe (the source code) before you cook.',
       },
       {
         question: 'Why are web apps described as cost-effective compared to mobile apps?',
-        options: ['One version works across platforms, so there is no need to maintain separate iOS and Android builds', 'They never need a server', 'They require no developers at all', 'Browsers pay for the hosting'],
+        options: ['One version runs everywhere, so there is one build', 'They need no server, so there is no hosting to pay for', 'They are written only in HTML, so they are quick to build', 'Browser vendors meet the cost of hosting the pages'],
         correctIndex: 0,
-        explanation: 'A single web version works across platforms, avoiding the cost of building and maintaining separate iOS and Android apps.',
+        explanation: 'A single web version works across platforms, avoiding the cost of building and maintaining separate iOS and Android apps. A web app still needs a server, and it still needs server-side code as well as HTML.',
       },
       {
         question: 'What is e-commerce?',
-        options: ['A programming language for online stores', 'Markets enabled by the internet — the buying and selling of goods and services online', 'A type of teleconferencing', 'A firewall for retail websites'],
+        options: ['A platform language used to build online stores', 'The buying and selling of goods and services online', 'Coordinating the flow of goods along a supply chain', 'Meeting across locations using digital technology'],
         correctIndex: 1,
-        explanation: 'E-commerce refers to markets enabled by the internet, involving the buying and selling of goods and services online.',
+        explanation: 'E-commerce refers to markets enabled by the internet — the buying and selling of goods and services online. Coordinating the flow of goods is supply chain and logistics, and meeting across locations is teleconferencing.',
       },
       {
         question: 'Alibaba.com is given as an example of which e-commerce model?',
         options: ['Business-to-Consumer (B2C)', 'Consumer-to-Business (C2B)', 'Business-to-Business (B2B)', 'Consumer-to-Consumer (C2C)'],
         correctIndex: 2,
-        explanation: 'Alibaba.com is the classic B2B example — businesses dealing with other businesses, including manufacturers.',
+        explanation: 'Alibaba.com is the classic B2B example — businesses dealing with other businesses, including manufacturers. Read each model left to right as seller-to-buyer and the four stay apart.',
       },
       {
         question: 'Konga, Jumia and Temu are examples of which e-commerce model?',
         options: ['Business-to-Consumer (B2C)', 'Business-to-Business (B2B)', 'Consumer-to-Business (C2B)', 'Consumer-to-Consumer (C2C)'],
         correctIndex: 0,
-        explanation: 'They sell directly to consumers — the business (or manufacturer) sends products straight to the customer, which is B2C.',
+        explanation: 'They sell directly to consumers — the business or manufacturer sends products straight to the customer, which is B2C.',
       },
       {
         question: 'In the Consumer-to-Consumer (C2C) model:',
-        options: ['A manufacturer ships directly to shoppers', 'Consumers provide goods and services to other consumers', 'Big businesses connect with smaller businesses', 'A consumer offers services to a business'],
+        options: ['a manufacturer ships goods straight to the shopper', 'consumers supply goods and services to consumers', 'a big business deals with smaller businesses', 'a consumer offers products or services to a business'],
         correctIndex: 1,
-        explanation: 'C2C deals with the process by which some consumers provide goods and services to other consumers.',
+        explanation: 'C2C deals with the process by which some consumers provide goods and services to other consumers, usually through a platform that connects them. A consumer selling to a business is C2B — the reverse of B2C.',
       },
       {
         question: 'Which of these is listed as a benefit of e-commerce to business?',
-        options: ['It shortens the operating hours of the business', 'It guarantees zero cybersecurity risk', 'It removes the need for marketing', 'It reduces operational cost and extends the operating hours of the business'],
+        options: ['It removes the need to market the business at all', 'It shortens the hours the business has to trade', 'It guarantees the business faces no cyber risk', 'It cuts cost and extends the trading hours'],
         correctIndex: 3,
-        explanation: 'E-commerce reduces operational cost, extends operating hours (an online store never closes), increases sales conversion, and optimises processes.',
+        explanation: 'E-commerce reduces operational cost, extends operating hours — an online store never closes — increases sales conversion and optimises processes. It widens the attack surface rather than removing risk.',
       },
       {
         question: 'What is teleconferencing?',
-        options: ['Using digital technology to communicate between businesses or individuals in different geographical areas', 'A method of encrypting phone calls', 'Selling goods to other businesses online', 'A search-engine keyword strategy'],
+        options: ['Using digital technology to communicate across distances', 'Using digital technology to sell goods across borders', 'Using digital technology to track goods in transit', 'Using digital technology to encrypt calls end to end'],
         correctIndex: 0,
-        explanation: 'Teleconferencing is the use of digital technology to communicate between businesses or individuals located in different geographical areas.',
+        explanation: 'Teleconferencing is the use of digital technology to communicate between businesses or individuals located in different geographical areas. Selling online is e-commerce; tracking goods is supply chain and logistics.',
       },
       {
         question: 'Audio conferencing differs from video conferencing in that it:',
-        options: ['Requires participants to be in the same room', 'Uses voice communication only, with nothing shown visually', 'Always includes shared screens and slides', 'Combines in-person and remote participants'],
+        options: ['joins people in the room with people who are remote', 'carries voice only, with nothing shown visually', 'adds shared screens, slides and documents to the call', 'records the meeting instead of streaming it live'],
         correctIndex: 1,
-        explanation: 'Audio conferencing is communication by voice only; video conferencing lets participants see and hear each other; hybrid combines in-person and remote.',
+        explanation: 'Audio conferencing is communication by voice only; video conferencing lets participants see and hear each other. Shared screens and documents make it web conferencing, and mixing in-person with remote participants makes it hybrid.',
       },
       {
         question: 'When a cookie is "dropped" on a platform after a user searches for an item, what does it enable?',
-        options: ['Automatic virus scanning of the device', 'Free products for the user', 'Targeted advertising and customer engagement based on what the person searched for', 'Faster internet bandwidth'],
+        options: ['Keyword research that lifts a page up the results', 'A faster connection between browser and server', 'Adverts targeted at what the person searched for', 'Encrypted storage of the shopper’s card details'],
         correctIndex: 2,
-        explanation: 'The cookie records that the person searched for a particular item, letting the business show targeted adverts later.',
+        explanation: 'The cookie records that the person searched for a particular item, letting the business show them targeted adverts later. Researching keywords to climb the results is SEO, a separate marketing method.',
       },
       {
         question: 'Search Engine Optimization (SEO) involves:',
-        options: ['Optimising activities and research so that keywords attract relevant traffic', 'Sending bulk advertising by SMS', 'Paying consumers to advertise a business', 'Encrypting search results'],
+        options: ['researching the right keywords to attract relevant traffic', 'paying a platform to place the page above the results', 'emailing offers to customers who have already bought', 'paying a partner a commission for each sale referred'],
         correctIndex: 0,
-        explanation: 'SEO is about researching and using the right keywords so a page attracts relevant search traffic.',
+        explanation: 'SEO is about researching and using the right keywords so a page attracts relevant search traffic. Paying for placement, email marketing and affiliate commission are the other advertising types listed beside it.',
       },
       {
         question: 'Which of these is listed as a CHALLENGE for businesses impacted by the internet?',
-        options: ['Two-way communication with customers', 'Cybersecurity threats and data privacy/compliance', 'Faster decision making', 'Higher return on investment'],
+        options: ['Two-way communication with the customer base', 'Cybersecurity threats and privacy compliance', 'A higher return on investment from advertising', 'Faster decision-making across remote teams'],
         correctIndex: 1,
-        explanation: 'The challenges listed are cybersecurity threats, data privacy and compliance, high cost, and bandwidth management of internet services.',
+        explanation: 'The challenges listed are cybersecurity threats, data privacy and compliance, high cost, and bandwidth management. The other three options are benefits — of marketing and of teleconferencing.',
       },
       {
         question: 'Why does Multi-Factor Authentication (MFA) improve security?',
-        options: ['It makes passwords longer', 'It encrypts data at rest', 'It removes the need for passwords entirely', 'A stolen password alone is not enough to log in — a second proof of identity is required'],
+        options: ['It makes the stored password hash harder to crack', 'It replaces the password with a biometric check', 'It encrypts the session so it cannot be hijacked', 'A stolen password alone is not enough to log in'],
         correctIndex: 3,
-        explanation: 'MFA asks for a second proof of identity (a one-time code, phone prompt, or fingerprint) on top of the password.',
+        explanation: 'MFA asks for a second proof of identity — a one-time code, phone prompt or fingerprint — on top of the password. It adds a factor rather than replacing the password, and it does nothing to the stored hash or the session.',
       },
       {
         question: 'Which of these is among the practical measures for audit compliance and quality assurance?',
-        options: ['Perform regular audits and keep proper documentation of all system and network configurations', 'Disable software updates to keep systems stable', 'Share one admin password across the team', 'Avoid staff training to save costs'],
+        options: ['Run regular audits and document every configuration', 'Keep one shared administrator password for the team', 'Defer patches until the next major release cycle', 'Limit staff training to the security team only'],
         correctIndex: 0,
-        explanation: 'The measures include regular audits, proper documentation, regular updates and patches, staff threat-awareness training, MFA, and encryption.',
+        explanation: 'The measures include regular audits, proper documentation of system and network configurations, regular updates and patches, staff threat-awareness training, MFA and encryption. Each of the other options is the opposite of one of them.',
       },
       {
         question: 'What is the difference between an audit and quality assurance (QA)?',
-        options: ['They are the same activity', 'An audit blocks attacks in real time; QA is a type of firewall', 'An audit reviews what was actually done (logs, configurations) after the fact; QA tests that the app behaves correctly and securely', 'QA is only for mobile apps; audits are only for web apps'],
+        options: ['An audit tests that the app behaves correctly; QA reviews logs later', 'An audit checks conformance to law; QA checks the customer contract', 'An audit reviews what was done after the fact; QA tests behaviour', 'An audit runs during development; QA runs only after deployment'],
         correctIndex: 2,
-        explanation: 'An audit is a check of what you actually did; compliance means meeting required rules; QA is testing that the app behaves correctly and securely.',
+        explanation: 'An audit is a check of what you actually did — reviewing logs and configurations after the fact — while QA is testing that the app behaves correctly and securely, before and after release. Meeting the rules a standard or law requires is the third term in the set: compliance.',
       },
       {
         question: 'Why is proper documentation of system and network configurations a security control in its own right?',
-        options: ['It replaces the need for encryption', 'You cannot audit, patch, or recover a system whose configuration nobody has written down', 'It makes the system run faster', 'Auditors are only allowed to read documents, not systems'],
+        options: ['It meets the encryption requirement of most standards', 'You cannot audit or rebuild an undocumented system', 'It proves to an auditor that the system was tested', 'It lets the QA team skip a round of regression tests'],
         correctIndex: 1,
-        explanation: 'Without documented configurations there is nothing reliable to audit against, patch consistently, or rebuild from after an incident.',
+        explanation: 'Without documented configurations there is nothing reliable to audit against, patch consistently, or rebuild from after an incident. Documentation evidences an audit; it does not replace encryption or testing.',
       },
       {
         question: 'How do operational measures like patching and audits relate to testing methodologies like SAST and DAST?',
-        options: ['They replace testing entirely', 'Testing finds flaws in the code, while audits, patching and documentation keep the running system secure over time', 'Operational measures only apply before release', 'SAST and DAST are operational measures'],
+        options: ['Testing replaces audits once the app reaches production', 'Testing finds the flaws; audits and patching keep them fixed', 'Operational measures apply only before the first release', 'SAST and DAST are the operational side of the same work'],
         correctIndex: 1,
-        explanation: 'A vulnerability found in testing is only truly fixed once the patch is deployed and the change is documented and audited.',
+        explanation: 'Testing finds flaws in the code, while audits, patching and documentation keep the running system secure over time. A vulnerability found in testing is only truly fixed once the patch is deployed and the change is documented and audited.',
       },
       {
         question: 'Which motive is described as the most common driver of serious cybercrime?',
-        options: ['Fame', 'Recreational curiosity', 'Financial gain', 'Coercion'],
+        options: ['Recreation — curiosity or a technical challenge', 'Fame — recognition within a hacking community', 'Financial gain — fraud, extortion, data resale', 'Coercion — being blackmailed into an attack'],
         correctIndex: 2,
-        explanation: 'Financial gain — fraud, extortion and data resale — is the most common driver of serious cybercrime.',
+        explanation: 'Financial gain — fraud, extortion and data resale — is the most common driver of serious cybercrime. The others are real motives on the same list, but none accounts for as much of it.',
       },
       {
         question: 'Why are insiders a uniquely dangerous category of threat actor?',
-        options: ['They have the most advanced hacking tools', 'They already hold legitimate access, so authentication controls alone do not stop them', 'They always act for financial gain', 'They can only attack from outside the network'],
+        options: ['They have the best tools and the deepest technical skill', 'They already hold the access authentication grants', 'They reach the network only from outside the building', 'They always act for financial gain rather than for a cause'],
         correctIndex: 1,
-        explanation: 'Insiders are employees or contractors who already hold valid credentials — which is why behavioural controls like time/volume limits and request filtering matter as much as authentication.',
+        explanation: 'Insiders are employees or contractors who already hold valid credentials, so an authentication-only strategy never sees them — which is why behavioural controls such as time and volume limits and request filtering matter as much as authentication.',
       },
       {
         question: 'What does "hacktivism" refer to as a motive for attack?',
-        options: ['Attacking systems for a political, social or ideological cause', 'Attacking systems purely for the technical challenge', 'Being blackmailed into compromising a system', 'Gathering confidential information for a state'],
+        options: ['Attacking to advance an ideological cause', 'Attacking purely for the technical challenge', 'Attacking to gather secrets for a state or a rival', 'Attacking after being blackmailed into doing so'],
         correctIndex: 0,
-        explanation: 'Activism, or "hacktivism", means attacking in pursuit of a political, social or ideological cause rather than for personal gain.',
+        explanation: 'Activism, or hacktivism, means attacking in pursuit of a political, social or ideological cause rather than for personal gain. Curiosity is recreation, gathering secrets is espionage, and being forced into it is coercion.',
       },
       {
         question: 'The principle of layering several independent security controls, so that one failure does not expose the whole system, is known as:',
-        options: ['Graceful degradation', 'Defence in depth', 'Multi-party authentication', 'Steganography'],
+        options: ['Graceful degradation', 'Defence in depth', 'Multi-party approval', 'Least-privilege access'],
         correctIndex: 1,
-        explanation: 'Defence in depth means combining controls so that if one layer fails, another still limits the damage.',
+        explanation: 'Defence in depth means combining controls so that if one layer fails, another still limits the damage. Graceful degradation is what happens after a breach — containing it — and least privilege narrows one account’s reach rather than layering controls.',
       },
       {
         question: 'According to the password policy in the notes, "camel casing" in a password means:',
-        options: ['Using at least six characters', 'Using a special character such as @ or #', 'Mixing at least one uppercase letter with lowercase letters', 'Never reusing a password across sites'],
+        options: ['Using at least six characters in total', 'Using a special character such as @ or #', 'Mixing uppercase with lowercase letters', 'Avoiding words found in a dictionary'],
         correctIndex: 2,
-        explanation: 'Camel casing refers to mixed case — at least one uppercase letter combined with lowercase letters.',
+        explanation: 'In the notes it means mixed case — at least one uppercase letter combined with lowercase letters. A six-character minimum and a special character are the other two requirements of the same policy. Note that the term is borrowed loosely: real camelCase is a programming naming convention for identifiers such as “myVariableName”, where words are run together and each one after the first is capitalised. It has nothing to do with password strength, so give the mixed-case answer whichever wording the question uses.',
       },
       {
-        question: 'What distinguishes Three-Factor Authentication (3FA) from Two-Factor Authentication (2FA) in these notes?',
-        options: ['3FA requires a biometric as the third factor', '3FA requires authorization from two or more distinct devices rather than one', '3FA sends a longer one-time code', '3FA applies only to mobile applications'],
-        correctIndex: 1,
-        explanation: '3FA requires authorization from two or more distinct devices — a request initiated on a phone may need approval from a separate computer.',
+        question: 'Three-Factor Authentication (3FA) requires evidence from three independent categories. Which set names them correctly?',
+        options: ['Something you know, something you have, something you are', 'Something you know, something you have, somewhere you are', 'A password, a PIN and a passphrase — three separate secrets', 'Approval from three devices the account already trusts'],
+        correctIndex: 0,
+        explanation: 'The three factors are independent categories of evidence: something you know (password or PIN), something you have (phone, token or smart card), and something you are (fingerprint, face or iris). Three passwords are not three factors — they are three helpings of the same one. Location is used as a signal in multi-party authentication and request filtering, but it is not one of the three categories, and approval from several devices is dual control.',
       },
       {
-        question: 'A criminal who already has a victim\'s PIN calls them with an urgent story and asks them to read out the code just sent to their phone. This attack targets:',
-        options: ['The password layer', 'The 2FA one-time code', 'The biometric liveness check', 'The encryption key'],
+        question: 'A bank requires a large transfer to be raised by one officer and approved by a second before it completes. What is this control called?',
+        options: ['Dual control, or the four-eyes principle', 'Three-factor authentication (3FA)', 'Two-factor authentication with an OTP', 'Time- and volume-constrained access'],
+        correctIndex: 0,
+        explanation: 'This is dual control, also called the four-eyes principle: no single person or device can both request and approve. It is not a third authentication factor — the second officer may well have authenticated with exactly the same factors as the first.',
+      },
+      {
+        question: 'A criminal who already has a victim’s PIN calls them with an urgent story and asks them to read out the code just sent to their phone. This attack targets:',
+        options: ['The password layer', 'The 2FA one-time code', 'The device liveness check', 'The encryption key'],
         correctIndex: 1,
-        explanation: 'This is the classic social-engineering attack on 2FA — the attacker needs the victim to hand over the OTP to complete the second factor. A legitimate institution never asks a customer to read back an OTP.',
+        explanation: 'This is the classic social-engineering attack on 2FA — the attacker already holds the first factor and needs the victim to hand over the OTP to complete the second. A legitimate institution never asks a customer to read back an OTP.',
       },
       {
         question: 'Why should a system limit how long a session runs or how much data it can retrieve?',
-        options: ['To reduce server hosting costs', 'Because large-scale data theft takes time, and idle authenticated sessions can be hijacked', 'Because encryption slows down long sessions', 'To comply with browser cookie limits'],
+        options: ['Encryption slows down the longer a single session runs', 'Bulk copying takes time, and idle sessions can be hijacked', 'Browsers cap how long a session cookie may stay valid', 'Audit logs are only retained for a fixed period of time'],
         correctIndex: 1,
-        explanation: 'Copying a large dataset over a network takes time, so unusually long or high-volume sessions are a red flag; and a session left open is an opportunity for someone else to act on the user\'s behalf.',
+        explanation: 'Copying a large dataset over a network takes time, so an unusually long or high-volume session is a red flag; and a session left open is an opportunity for someone else to act on the user’s behalf.',
       },
       {
         question: 'Graceful degradation means designing a system so that:',
-        options: ['Performance slowly declines as more users log in', 'A compromised component is isolated or shut down while the rest of the system keeps running', 'Old data is deleted automatically after a set period', 'The system reverts to an earlier version after an attack'],
+        options: ['performance falls off slowly as more users log in', 'a compromised part is cut off while the rest runs on', 'the system reverts to an older version after an attack', 'the whole service goes offline until the fix is ready'],
         correctIndex: 1,
-        explanation: 'Graceful degradation contains a breach to the smallest possible part of the system, keeping the service available to legitimate users while the issue is resolved.',
+        explanation: 'Graceful degradation contains a breach to the smallest possible part of the system, keeping the service available to legitimate users while the issue is resolved — switching off a compromised reviews module and leaving browsing and checkout running. Taking the whole site down is the outcome it exists to avoid.',
       },
       {
         question: 'What is the purpose of liveness detection alongside biometric authentication?',
-        options: ['To speed up fingerprint matching', 'To confirm the biometric sample comes from a live person and not a photo, mask or other spoof', 'To store the biometric template securely', 'To allow login without an internet connection'],
+        options: ['To speed up matching a fingerprint against its template', 'To confirm the sample comes from a person, not a spoof', 'To keep the stored biometric template encrypted at rest', 'To let the user log in while the device is offline'],
         correctIndex: 1,
-        explanation: 'Liveness checks — such as prompting a blink or an open mouth — confirm a real person is present rather than a spoofed image.',
+        explanation: 'Liveness checks — such as prompting a blink or an open mouth — confirm a real person is present rather than a photograph, mask or other spoof. Protecting the stored template is a separate control.',
       },
       {
-        question: 'In input and request filtering, why does a device\'s IP address changing within about 60 seconds raise a flag?',
-        options: ['It always means the device is infected with malware', 'It may indicate VPN use or another anomaly, so the request can be restricted rather than granted outright', 'It proves the password has been stolen', 'It shows the encryption key has expired'],
+        question: 'In input and request filtering, why does a device’s IP address changing within about 60 seconds raise a flag?',
+        options: ['It proves the credentials have already been stolen', 'It may signal a VPN or another anomaly, so access is limited', 'It shows the session has passed its volume threshold', 'It means the browser has dropped its session cookie'],
         correctIndex: 1,
-        explanation: 'A request signature that shifts unexpectedly within a short window suggests a VPN or other anomaly — the same principle behind geo-gating and VPN detection.',
+        explanation: 'A request signature that shifts unexpectedly within a short window suggests a VPN or another anomaly — the same principle behind geo-gating and VPN detection. It is a signal to re-challenge, not proof of compromise: a traveller or a student on a VPN looks the same.',
       },
       {
         question: 'Which cryptographic category uses a mathematically linked key pair, so no single secret key has to be shared?',
-        options: ['Symmetric encryption', 'Asymmetric encryption', 'Hash functions', 'Steganography'],
+        options: ['Symmetric encryption, as with AES', 'Asymmetric encryption, as in RSA', 'Hash functions, as in SHA-256', 'Steganography in an image file'],
         correctIndex: 1,
-        explanation: 'Asymmetric encryption uses a public/private key pair — the public key encrypts data that only the private key can decrypt.',
+        explanation: 'Asymmetric encryption uses a public/private key pair — the public key encrypts data that only the private key can decrypt. Symmetric encryption is the case where the one key must itself be shared securely.',
       },
       {
         question: 'What are hash functions used for?',
-        options: ['Concealing data so it can later be recovered', 'Producing a fixed-length, one-way fingerprint used to verify integrity', 'Sharing a secret key between two parties', 'Hiding a message inside an image'],
+        options: ['Concealing data so the holder can recover it later', 'Producing a one-way fingerprint that proves integrity', 'Sharing one secret key safely between two parties', 'Hiding a message inside an ordinary-looking file'],
         correctIndex: 1,
-        explanation: 'A hash is one-way and cannot practically be reversed — it verifies that data has not been altered, rather than concealing and later recovering it.',
+        explanation: 'A hash is one-way and cannot practically be reversed — it verifies that data has not been altered, rather than concealing and later recovering it. Concealing recoverable data is encryption; hiding it inside another file is steganography.',
       },
       {
         question: 'How does steganography differ from encryption?',
-        options: ['It is faster than encryption', 'It hides the existence of the message rather than making it unreadable', 'It uses a longer key than encryption', 'It only works on text files'],
+        options: ['It scrambles the message with a shorter and faster key', 'It conceals the message’s existence, not its content', 'It can be reversed without holding any key at all', 'It protects data at rest but never data in transit'],
         correctIndex: 1,
-        explanation: 'Encryption signals that a message is protected; steganography conceals the very existence of the message by hiding it inside an ordinary-looking file such as an image.',
+        explanation: 'Encryption signals that a message is protected; steganography conceals the very existence of the message by hiding it inside an ordinary-looking file such as an image. The two solve different problems and can be combined.',
       },
       {
         question: 'Authentication controls and behavioural controls differ in that:',
-        options: ['Authentication controls address who is let in, while behavioural controls address what happens after access is granted', 'Behavioural controls apply only to mobile apps', 'Authentication controls run on the server and behavioural controls run in the browser', 'They are two names for the same thing'],
+        options: ['authentication governs entry; behaviour governs what follows', 'authentication governs conduct; behaviour governs entry', 'authentication runs on the server; behaviour runs in the browser', 'authentication applies to staff; behaviour applies to customers'],
         correctIndex: 0,
-        explanation: 'Password, 2FA, 3FA and multi-party authentication govern entry; time/volume limits and input filtering govern conduct once inside.',
+        explanation: 'Password, 2FA, 3FA and multi-party authentication govern who is let in; time and volume limits and input filtering govern what happens once access is granted.',
       },
     ],
+    // This course is examined on paper, not by CBT, so the written bank is the
+    // one that matches the exam — the MCQs above stay as low-stakes recall
+    // practice. See src/data/lectureNotes/cyb222ExamPrep.js for why the two
+    // banks are kept separate.
+    examPrep: cyb222ExamPrep,
   },
 
   // ═══════════════════════════════════════════════════════════════

@@ -41,7 +41,7 @@ export default function ProgressDashboard() {
         </div>
 
         {showGuestNudge && (
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-moss/8 border border-moss/20 rounded-xl px-4 py-3.5">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-moss/10 border border-moss/20 rounded-xl px-4 py-3.5">
             <CloudUpload size={20} className="text-moss shrink-0" />
             <p className="text-sm text-coffee-800 flex-1 leading-snug">
               You&rsquo;ve completed{' '}

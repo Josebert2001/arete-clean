@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
+import FeedbackTab from './components/FeedbackTab';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -20,6 +21,7 @@ const AITutor = lazy(() => import('./pages/AITutor'));
 const CodeExplainer = lazy(() => import('./pages/CodeExplainer'));
 const Cheatsheet = lazy(() => import('./pages/Cheatsheet'));
 const Planner = lazy(() => import('./pages/Planner'));
+const Review = lazy(() => import('./pages/Review'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SetupProfile = lazy(() => import('./pages/SetupProfile'));
 const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
@@ -53,7 +55,7 @@ class ErrorBoundary extends Component {
           <p className="text-sm text-coffee-600 mb-6">Try reloading the page. If the problem persists, contact support.</p>
           <button
             onClick={() => window.location.reload()}
-            className="text-sm font-semibold text-ember-600 hover:underline"
+            className="text-sm font-semibold text-ember-500 hover:underline"
           >
             Reload page
           </button>
@@ -212,6 +214,7 @@ export default function App() {
             <Route path="/explainer" element={<RequireAuth><CodeExplainer /></RequireAuth>} />
             <Route path="/cheatsheet" element={<RequireAuth><Cheatsheet /></RequireAuth>} />
             <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
+            <Route path="/review" element={<RequireAuth><Review /></RequireAuth>} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
             <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />
@@ -225,6 +228,7 @@ export default function App() {
       </main>
       {!isChatPage && <Footer />}
       {!isChatPage && <FloatingHelp />}
+      {!isChatPage && <FeedbackTab />}
       <PWAUpdatePrompt />
     </div>
     </StudyDaysProvider>

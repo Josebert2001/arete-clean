@@ -8,7 +8,19 @@
 // ============================================================================
 
 import crypto from 'crypto';
-import { google } from 'googleapis';
+// google-auth-library directly, NOT the `googleapis` barrel: the barrel pulls
+// every Google API surface (~200 MB on disk) and measured ~4.5s to import,
+// against ~240ms for this package. googleAuth.js is imported by all five
+// api/google/* endpoints — including status.js, which the Planner hits on
+// every mount — so the barrel was charging that to a cold start each time.
+//
+// This is the same package googleapis resolves for its own auth (10.9.0, one
+// copy on disk), though `google.auth.OAuth2 !== OAuth2Client` because the two
+// arrive via the ESM and CJS builds respectively. That's fine for the client
+// handed to google.calendar() in calendar-sync.js: googleapis-common's
+// apirequest.js duck-types the auth object on `getRequestHeaders` and never
+// uses instanceof.
+import { OAuth2Client } from 'google-auth-library';
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
@@ -30,7 +42,7 @@ export function googleConfigured() {
 
 export function createOAuth2Client() {
   if (!googleConfigured()) return null;
-  return new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
+  return new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 }
 
 // Lazily created — most requests (status checks, disconnect) never need it.

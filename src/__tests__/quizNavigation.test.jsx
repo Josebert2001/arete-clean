@@ -57,7 +57,8 @@ describe('Quiz navigation', () => {
     pick('Cross-site scripting');
     fireEvent.click(screen.getByRole('button', { name: /see results/i }));
 
-    expect(onComplete).toHaveBeenCalledWith(2, 2);
+    // Third argument is the review-outcome list, empty without an itemIdFor prop.
+    expect(onComplete).toHaveBeenCalledWith(2, 2, []);
     expect(screen.getByText('2 / 2')).toBeInTheDocument();
   });
 
@@ -73,6 +74,6 @@ describe('Quiz navigation', () => {
     pick('Cross-site scripting');
     fireEvent.click(screen.getByRole('button', { name: /see results/i }));
 
-    expect(onComplete).toHaveBeenCalledWith(1, 2);
+    expect(onComplete).toHaveBeenCalledWith(1, 2, []);
   });
 });
