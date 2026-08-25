@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
+import FeedbackTab from './components/FeedbackTab';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -227,6 +228,7 @@ export default function App() {
       </main>
       {!isChatPage && <Footer />}
       {!isChatPage && <FloatingHelp />}
+      {!isChatPage && <FeedbackTab />}
       <PWAUpdatePrompt />
     </div>
     </StudyDaysProvider>
