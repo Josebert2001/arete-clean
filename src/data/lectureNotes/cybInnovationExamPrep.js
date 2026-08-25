@@ -12,7 +12,10 @@
 // it among four options. So every question here takes the form a written
 // paper actually uses — "define", "list and explain", "differentiate
 // between" — with a model answer plus a per-point mark scheme the student
-// ticks off against what they actually wrote.
+// ticks off against what they actually wrote. A handful per group are
+// scenario questions — "Scenario: ..." — that put the student in a situation
+// drawn from (or modelled on) the group's own case studies and ask them to
+// apply the concepts, not just recite them.
 //
 // Question types:
 //   longform — question + marks + modelAnswer + markScheme[]
@@ -25,10 +28,7 @@
 // asserts both. Every question carries a `source` naming the group/topic it
 // came from.
 //
-// Coverage: groups 0–6, 8, 10 and 11 (the topics that carry lecture-note
-// content). Groups 7 (Automated Vulnerability Research) and 9 (Deepfake
-// Detection) are still placeholder titles with no notes and are not
-// examinable yet — add questions here once those groups are written up.
+// Coverage: all twelve groups (0-11).
 
 export const cybInnovationExamPrep = [
 
@@ -77,6 +77,60 @@ export const cybInnovationExamPrep = [
     ],
   },
 
+  {
+    type: 'recall',
+    marks: 8,
+    source: 'Group 0 — AI & Machine Learning in Threat Detection',
+    question: 'List the eight use cases where AI and ML are applied in threat detection.',
+    items: [
+      { name: 'Intrusion Detection Systems (IDS)', aliases: ['IDS'], explain: 'Anomaly-based detection of unseen attacks.' },
+      { name: 'Malware detection', aliases: [], explain: 'Analyses behaviour, not just stored signatures.' },
+      { name: 'Phishing detection', aliases: [], explain: 'NLP on email content, URLs, and sender behaviour.' },
+      { name: 'Fraud detection', aliases: [], explain: 'Flags unusual transactions and login locations.' },
+      { name: 'Threat intelligence & behavioural analysis', aliases: ['threat intelligence'], explain: 'Links attacks, surfaces emerging threats.' },
+      { name: 'IoT security', aliases: [], explain: 'Monitors device behaviour for compromise.' },
+      { name: 'Automated incident response', aliases: [], explain: 'Prioritises alerts, isolates compromised systems.' },
+      { name: 'Predictive threat detection', aliases: [], explain: 'Forecasts attacks from historical and live data.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 4,
+    source: 'Group 0 — AI & Machine Learning in Threat Detection',
+    question: 'What is UEBA, and what role does it play in AI-based threat detection?',
+    modelAnswer: 'UEBA (User & Entity Behaviour Analytics) baselines what normal login patterns, file access, network activity and typing patterns look like for a user or device, then flags deviations from that baseline as potential threats. It is one of the key tools — alongside EDR and SIEM — behind behavioural monitoring in AI-based detection.',
+    markScheme: [
+      'UEBA expanded and defined — baselines normal behaviour and flags deviations (3)',
+      'Named alongside EDR/SIEM as part of the behavioural-monitoring toolkit (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 0 — AI & Machine Learning in Threat Detection',
+    question: 'State and briefly explain three challenges or limitations of AI-based threat detection.',
+    modelAnswer: "False positives and false negatives arise from poor or incomplete training data. Adversarial attacks use crafted inputs deliberately designed to mislead the model, an ongoing 'arms race' between attackers and defenders. High computational cost is also a real constraint, since deep learning models need GPUs and large infrastructure to run.",
+    markScheme: [
+      'Challenge 1 named and explained (2)',
+      'Challenge 2 named and explained (2)',
+      'Challenge 3 named and explained (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 0 — AI & Machine Learning in Threat Detection',
+    question: "Scenario: A bank's AI fraud detection system flags a customer's transaction as suspicious because it deviates from their usual spending baseline — but the transaction is genuine, made while the customer is travelling abroad. What kind of error is this, and what does the notes' recommended approach to using AI say should happen next?",
+    modelAnswer: "This is a false positive — the system deviating from a learned baseline and flagging legitimate activity as a threat, one of the known limitations of AI-based detection. The recommended approach is human–AI collaboration: AI assists analysts and flags the anomaly for review, but does not replace human judgement or act alone, so a human can quickly confirm the travel-related transaction is genuine rather than the account being blocked outright.",
+    markScheme: [
+      'Identifies this as a false positive (2)',
+      'Explains human–AI collaboration — AI assists, does not replace, human review resolves it (4)',
+    ],
+  },
+
   // ══════════════════════════════════════════════════════════════════
   //  Group 1 — Zero Trust Architecture
   // ══════════════════════════════════════════════════════════════════
@@ -119,6 +173,59 @@ export const cybInnovationExamPrep = [
       'Network boundary — defined perimeter (firewall/VPN) vs no perimeter, identity-based boundary (2)',
       'Authentication — login once with a persisting session vs continuous, contextual re-authentication (2)',
       'Lateral movement — unrestricted once inside vs blocked by micro-segmentation (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 6,
+    source: 'Group 1 — Zero Trust Architecture',
+    question: 'List the six architectural components and technologies Zero Trust is assembled from.',
+    items: [
+      { name: 'Identity & Access Management (IAM)', aliases: ['IAM'], explain: 'Identity — not network location — is the primary security boundary; SSO, RBAC, ABAC, risk-based auth.' },
+      { name: 'Multi-Factor Authentication (MFA)', aliases: ['MFA'], explain: 'Two or more factors (know / have / are); mandatory for sensitive access; adaptive to risk.' },
+      { name: 'Zero Trust Network Access (ZTNA)', aliases: ['ZTNA'], explain: 'Replaces VPNs — grants access to specific resources, not the whole network.' },
+      { name: 'Device Trust & EDR', aliases: ['EDR'], explain: 'Verifies device health and compliance before access; EDR/MDM monitor and can quarantine endpoints.' },
+      { name: 'Data Security & Encryption', aliases: [], explain: 'Classify data; encrypt in transit (TLS/SSL) and at rest; DLP and attribute-based access control.' },
+      { name: 'SIEM & UEBA', aliases: ['SIEM'], explain: 'Aggregate and correlate logs; ML baselines behaviour and flags anomalies — the monitoring backbone.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 1 — Zero Trust Architecture',
+    question: 'Outline the three-phase NIST/CISA roadmap for implementing Zero Trust Architecture.',
+    modelAnswer: 'Phase 1, Visualise, catalogues every user, device, app and data store and maps transaction flows. Phase 2, Mitigate, deploys MFA and SSO, begins micro-segmentation, replaces the VPN with ZTNA, and enables logging. Phase 3, Optimise, expands segmentation, automates with SOAR, adds data-centric security and threat intelligence, and red-teams the result.',
+    markScheme: [
+      'Phase 1 — Visualise: catalogue assets and map transaction flows (2)',
+      'Phase 2 — Mitigate: MFA/SSO, micro-segmentation, ZTNA replacing VPN, logging (2)',
+      'Phase 3 — Optimise: expand segmentation, SOAR automation, threat intel, red-team (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 1 — Zero Trust Architecture',
+    question: 'State and briefly explain three challenges or limitations of Zero Trust Architecture.',
+    modelAnswer: 'Complexity and cost — integrating IAM, MFA, EDR and SIEM, and segmenting legacy systems, is expensive. Cultural resistance and "authentication fatigue" build up from more frequent verification prompts. "Zero Trust washing" — superficial or partial implementations — creates false confidence without delivering the real protection.',
+    markScheme: [
+      'Challenge 1 named and explained (2)',
+      'Challenge 2 named and explained (2)',
+      'Challenge 3 named and explained (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 1 — Zero Trust Architecture',
+    question: "Scenario: A company rolls out Zero Trust Network Access (ZTNA) for its remote workforce, but the whole IT team still shares one admin password that has not been changed in two years. Explain why this undermines the Zero Trust model despite the ZTNA deployment, referencing at least two core principles.",
+    modelAnswer: 'A shared, unchanging admin password breaks least-privilege access, since it is not scoped, time-limited or contextual to any one person — anyone who ever learned it retains full access indefinitely. It also breaks "never trust, always verify," which requires every request to be authenticated and continuously, contextually re-verified rather than accepted on a static shared credential nobody individually owns. A single ZTNA deployment cannot compensate for an identity layer that is not actually Zero Trust underneath it.',
+    markScheme: [
+      'Explains the violation of least-privilege access (3)',
+      'Explains the violation of never trust, always verify (3)',
     ],
   },
 
@@ -177,6 +284,60 @@ export const cybInnovationExamPrep = [
     ],
   },
 
+  {
+    type: 'recall',
+    marks: 5,
+    source: 'Group 2 — Post-Quantum Cryptography & Migration Frameworks',
+    question: 'List the five mathematical families of Post-Quantum Cryptography.',
+    items: [
+      { name: 'Lattice', aliases: ['lattice-based'], explain: 'LWE / Shortest Vector Problem — the primary standard (ML-KEM, ML-DSA).' },
+      { name: 'Code', aliases: ['code-based'], explain: 'Syndrome decoding of linear codes — HQC backup KEM.' },
+      { name: 'Hash', aliases: ['hash-based'], explain: 'Collision / pre-image resistance — SLH-DSA signatures.' },
+      { name: 'Multivariate', aliases: ['multivar'], explain: 'Non-linear multivariate quadratics — short signatures (research).' },
+      { name: 'Isogeny', aliases: ['isogeny-based'], explain: 'Maps between elliptic curves — SIKE was broken in 2022.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 2 — Post-Quantum Cryptography & Migration Frameworks',
+    question: 'Explain the "Harvest Now, Decrypt Later" (HNDL) attack and its three phases.',
+    modelAnswer: "HNDL means adversaries intercept and archive encrypted traffic today, intending to decrypt it retroactively once a quantum computer exists — so long-lived data is already at risk even though nothing can crack it yet. Phase 1, Harvest, has adversaries intercept and archive encrypted traffic at scale today. Phase 2, Wait, holds that encrypted archive while quantum capability matures. Phase 3, Decrypt, has all data under RSA or ECC decrypted retroactively from Q-Day onward, exposing records with 20-30-year sensitivity lifetimes.",
+    markScheme: [
+      'HNDL defined — intercept and archive encrypted data now to decrypt once a CRQC exists (2)',
+      'Phase 1 — Harvest: intercept and archive encrypted traffic today (1)',
+      'Phase 2 — Wait: hold the archive while quantum capability matures (1)',
+      'Phase 3 — Decrypt: retroactive decryption from Q-Day onward, exposing long-lived data (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 5,
+    source: 'Group 2 — Post-Quantum Cryptography & Migration Frameworks',
+    question: 'Explain hybrid cryptography as a migration strategy, and give a real-world example of an organisation already using it.',
+    modelAnswer: 'A dual-mode hybrid runs a classical algorithm and a PQC algorithm together, for example X25519 + ML-KEM-768, so the session secret combines both and an attacker must defeat both to break it. If a quantum computer later breaks the classical lock, the PQC lock still holds; if a flaw is later found in the new lattice scheme, the classical lock still holds. Google Chrome already deploys this X25519 + ML-KEM-768 hybrid by default in TLS 1.3.',
+    markScheme: [
+      'Hybrid defined — runs classical + PQC together so an attacker must break both (3)',
+      'Real-world example given — e.g. Google Chrome’s X25519 + ML-KEM-768 default (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 2 — Post-Quantum Cryptography & Migration Frameworks',
+    question: "Scenario: UNIUYO estimates its post-quantum migration will take 7 years, and some of its records (e.g. medical and exam records) must stay confidential for 20 years. Q-Day is estimated to be about 8 years away. Apply Mosca's Theorem to determine whether UNIUYO is already at risk, and explain what this means for when migration should begin.",
+    modelAnswer: "Mosca's Theorem states that an organisation is already at risk if (Migration Time) + (Data Secrecy Lifetime) exceeds (Years until Q-Day). Here, 7 years of migration plus 20 years of required confidentiality is 27 years of protection needed, against only an 8-year window before Q-Day. Since 27 exceeds 8, UNIUYO is already at risk. This means migration planning must begin now, not once Q-Day is confirmed to have arrived — waiting for that confirmation is already too late for any data with a long confidentiality requirement.",
+    markScheme: [
+      'States Mosca’s Theorem correctly (2)',
+      'Applies the numbers — 7 + 20 = 27 years needed vs 8 years available (3)',
+      'Concludes UNIUYO is already at risk since 27 > 8 (1)',
+      'Explains migration must start now, not on confirmation of Q-Day (2)',
+    ],
+  },
+
   // ══════════════════════════════════════════════════════════════════
   //  Group 3 — Behavioral Biometrics & Continuous Authentication
   // ══════════════════════════════════════════════════════════════════
@@ -220,6 +381,56 @@ export const cybInnovationExamPrep = [
       'Processing — cleans noise, extracts features (velocity, acceleration, jerk), normalises across devices (2)',
       'Analysis — the baseline is modelled with LSTM/autoencoder networks and compared to live data via cosine similarity (2)',
       'Response — maps the anomaly score to allow, challenge or block, in under 0.5 seconds (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 3,
+    source: 'Group 3 — Behavioral Biometrics & Continuous Authentication',
+    question: 'List the three things that defeat static MFA, covered in the notes.',
+    items: [
+      { name: 'Adversary-in-the-Middle (AitM) proxy phishing', aliases: ['AitM', 'adversary-in-the-middle'], explain: 'Tools like Evilginx intercept the live MFA token/session cookie and replay it, bypassing MFA entirely.' },
+      { name: 'MFA fatigue', aliases: ['prompt bombing'], explain: 'Repeated push notifications until a tired user finally taps "approve".' },
+      { name: 'Session hijacking / token theft', aliases: ['token theft', 'session hijacking'], explain: 'Infostealers scrape active session tokens from browser memory and replay them from another device.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 3 — Behavioral Biometrics & Continuous Authentication',
+    question: 'Explain probabilistic anomaly scoring, and describe the three response bands it maps to.',
+    modelAnswer: 'Rather than a binary match/mismatch, the analysis engine outputs a continuous anomaly score between 0.0 and 1.0, measuring how far live behaviour deviates from the enrolled baseline, using cosine similarity between the live and historical vectors. Below 0.3 the system allows the session with a continuous silent pass and no prompts. Between 0.3 and 0.7 it challenges with step-up authentication, and if verified the baseline is safely updated. At 0.7 or above it blocks: terminating the session, clearing storage, isolating the device and alerting the SOC.',
+    markScheme: [
+      'Explains the score is continuous (0.0-1.0), not binary, using cosine similarity (2)',
+      '< 0.3 — allow, silent pass (1)',
+      '0.3-0.7 — challenge, step-up authentication (1)',
+      '≥ 0.7 — block, terminate session and alert the SOC (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 4,
+    source: 'Group 3 — Behavioral Biometrics & Continuous Authentication',
+    question: 'State two privacy safeguards behavioral biometric systems use to remain GDPR/CCPA compliant.',
+    modelAnswer: 'Data minimisation — the system stores abstract timing deltas (e.g. a dwell time of 42ms) rather than raw keystrokes, so it never captures the actual characters typed. It also uses irreversible, encrypted vectorisation, converting behavioural signals into a form that cannot be reconstructed back into the original input.',
+    markScheme: [
+      'Data minimisation — stores timing deltas, not raw keystrokes (2)',
+      'Irreversible/encrypted vectorisation — cannot be reconstructed back into raw input (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 3 — Behavioral Biometrics & Continuous Authentication',
+    question: "Scenario: Someone who has stolen a bank customer's login credentials logs in successfully and begins a large transfer, but their mouse movements are unnaturally jerky and hesitant compared to the account owner's usual smooth cursor paths. Explain how a behavioral biometrics system would likely respond, and why this differs from what a static MFA system would do.",
+    modelAnswer: 'The unfamiliar, hesitant mouse pattern would drive the live behaviour vector away from the enrolled baseline, raising the anomaly score into the challenge or block band — triggering a step-up authentication prompt or terminating the session outright, potentially holding the transfer before funds leave, as described for Authorized Push Payment fraud. A static MFA system would do nothing at all at this point: it only verifies identity once at login, and the attacker already passed that check with the stolen credentials, so nothing challenges them again during the fraudulent session itself.',
+    markScheme: [
+      'Explains the anomaly score would rise, triggering a challenge or block response (3)',
+      'Explains static MFA only verifies at login and would not catch this post-login behaviour (3)',
     ],
   },
 
@@ -278,6 +489,58 @@ export const cybInnovationExamPrep = [
     ],
   },
 
+  {
+    type: 'recall',
+    marks: 5,
+    source: 'Group 4 — Blockchain Technology',
+    question: 'List the five parts of a block\'s structure.',
+    items: [
+      { name: 'Block header', aliases: [], explain: 'Metadata about the block, including a timestamp and a reference to the previous block.' },
+      { name: 'Previous block hash', aliases: [], explain: 'A cryptographic fingerprint of the prior block that physically chains the blocks together.' },
+      { name: 'Merkle root', aliases: [], explain: 'A single hash summarising all transactions in the block via a Merkle tree, allowing efficient verification without downloading the entire block.' },
+      { name: 'Transaction data', aliases: [], explain: 'The actual records being stored — financial transactions, smart contract calls, or other data.' },
+      { name: 'Nonce', aliases: [], explain: 'A number used in proof-of-work systems that miners adjust repeatedly to find a valid block hash.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 4 — Blockchain Technology',
+    question: 'Explain the three properties of cryptographic hash functions that protect blockchain integrity.',
+    modelAnswer: 'Determinism means the same input always produces the same hash, so any node can independently verify a block. The avalanche effect means changing even a single character of the input produces a completely different hash, making tampering immediately obvious. The one-way property means it is computationally infeasible to reverse a hash back into its original input, so the chain cannot be forged from the hash alone.',
+    markScheme: [
+      'Determinism — same input always produces the same hash (2)',
+      'Avalanche effect — a single-character change produces a completely different hash (2)',
+      'One-way function — infeasible to reverse a hash back into its input (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 4 — Blockchain Technology',
+    question: 'Describe two attack surfaces on blockchain systems that sit outside the core protocol itself.',
+    modelAnswer: 'Wallet and private-key theft is a leading cause of loss — phishing, malware and social engineering target the keys users hold, since the underlying cryptography is rarely the weak point compared to a user\'s own key management. Cross-chain bridge attacks are also a frequent target, since bridges connecting different blockchains hold large amounts of locked value while often relying on more centralised or experimental security models than the chains they connect.',
+    markScheme: [
+      'Attack surface 1 named and explained (3)',
+      'Attack surface 2 named and explained (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 4 — Blockchain Technology',
+    question: "Scenario: An attacker gains temporary control of 60% of a small blockchain network's mining power. Explain what kind of attack this enables, why it is described as extremely costly on a large network like Bitcoin, and one factor that makes smaller blockchains more vulnerable to it.",
+    modelAnswer: "This is a 51% attack: controlling a majority of the network's mining power lets the attacker rewrite recent transaction history. On a large network like Bitcoin, mounting this attack is extremely costly because it requires acquiring more computing power than the entire rest of the network combined, which demands enormous capital and energy expenditure. Smaller blockchains are more vulnerable because they have less distributed mining or staking power overall, so a much smaller absolute amount of resources is enough to reach a majority.",
+    markScheme: [
+      'Identifies a 51% attack, rewriting transaction history (2)',
+      'Explains why it is costly on large networks — must outweigh the combined rest of the network (2)',
+      'Explains smaller networks are more vulnerable due to less distributed mining/staking power (2)',
+    ],
+  },
+
   // ══════════════════════════════════════════════════════════════════
   //  Group 5 — Cloud Native Security
   // ══════════════════════════════════════════════════════════════════
@@ -320,6 +583,59 @@ export const cybInnovationExamPrep = [
     markScheme: [
       'Zero Trust — discards perimeter trust; every request authenticated, authorised and encrypted regardless of origin, often via service meshes with mutual TLS (3)',
       'Shift-Left — moves security checks earlier into CI/CD pipelines to catch issues before they reach production (3)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 4,
+    source: 'Group 5 — Cloud Native Security',
+    question: 'List the four key security challenges of cloud native environments.',
+    items: [
+      { name: 'Expanded attack surface', aliases: [], explain: 'Every container, microservice, and API endpoint is a potential entry point; one weak link enables lateral movement.' },
+      { name: 'Ephemeral & dynamic infrastructure', aliases: ['ephemeral infrastructure'], explain: 'Containers spin up and down in minutes, breaking conventional asset inventory and monitoring approaches.' },
+      { name: 'Misconfiguration', aliases: [], explain: 'Misconfigured images, overly permissive RBAC, and exposed dashboards cause more breaches than novel exploits.' },
+      { name: 'Supply chain risk', aliases: [], explain: 'Third-party base images, open-source libraries, and CI/CD dependencies create a chain a single compromise can propagate through.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 5 — Cloud Native Security',
+    question: 'Explain why misconfiguration, rather than novel exploits, causes more breaches in cloud native environments, and name two best practices that reduce this risk.',
+    modelAnswer: 'Misconfigured container images, overly permissive RBAC roles and exposed dashboards leave doors open that require no clever exploit to walk through — an attacker only needs to find the gap, not defeat any defence. Two best practices that reduce this: least-privilege access, restricting RBAC roles and service permissions to the minimum required per workload, and image scanning, checking container images for known vulnerabilities before they are pushed to a registry.',
+    markScheme: [
+      'Explains why misconfiguration is a bigger cause of breaches than novel exploits (2)',
+      'Best practice 1 named and explained (2)',
+      'Best practice 2 named and explained (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 4,
+    source: 'Group 5 — Cloud Native Security',
+    question: 'Name four tools from the cloud native security tooling landscape covered in the notes.',
+    items: [
+      { name: 'Docker', aliases: ['container runtime'], explain: 'Builds and runs containerized applications; image configuration is a key security control point.' },
+      { name: 'Kubernetes', aliases: [], explain: 'Manages container deployment and scaling; RBAC and network policies are central to securing it.' },
+      { name: 'Falco', aliases: ['runtime threat detection'], explain: 'Monitors system calls in real time to detect anomalous or malicious container behavior.' },
+      { name: 'Prisma Cloud', aliases: ['Aqua Security', 'CNAPP'], explain: 'A CNAPP providing unified visibility across posture management, vulnerability scanning and compliance (Aqua Security covers similar ground: image scanning, runtime protection, supply chain security).' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 5 — Cloud Native Security',
+    question: 'Scenario: A development team deploys a new microservice with an overly permissive RBAC role — it can read every other service\'s secrets — and skips image scanning to save time before a demo. A week later, an attacker compromises the container and uses its RBAC role to access secrets belonging to unrelated services. Using the 4C model and the least-privilege principle, explain what went wrong and what should have been done differently.',
+    modelAnswer: 'The failure spans the Container layer (an unscanned image was deployed with an unknown vulnerability) and the Cluster layer (the RBAC role granted at the cluster level was far broader than the microservice needed). Because the 4C model nests each layer, this weakness at Container/Cluster undermined the security of every other service whose secrets became reachable. This also directly violates least-privilege access, which requires permissions to be scoped to the minimum a workload actually needs — a compromised container should never be able to reach secrets outside its own service. The image should have been scanned before deployment, and the RBAC role restricted to only the secrets that specific microservice requires.',
+    markScheme: [
+      'Identifies the Container layer failure — unscanned image deployed (2)',
+      'Identifies the Cluster layer failure — overly broad RBAC role (2)',
+      'Explains the least-privilege violation (2)',
+      'States what should have been done — scan the image and restrict RBAC to the minimum needed (2)',
     ],
   },
 
@@ -379,6 +695,174 @@ export const cybInnovationExamPrep = [
     ],
   },
 
+  {
+    type: 'longform',
+    marks: 5,
+    source: 'Group 6 — Privacy Enhancing Technologies (PET)',
+    question: 'Explain Homomorphic Encryption, using the hospital/cloud AI example from the notes.',
+    modelAnswer: 'Homomorphic Encryption allows computation on encrypted data without decrypting it first — the result, once decrypted, matches what the same operations would have produced on the plaintext. In the notes\' example, a hospital sends encrypted patient data to a cloud AI model and receives a diagnosis back; the cloud never sees the raw patient data at any point, only ciphertext, yet still performs a useful computation on it.',
+    markScheme: [
+      'HE defined — computation on encrypted data, result matches plaintext computation once decrypted (3)',
+      'Hospital/cloud AI example correctly applied — cloud never sees raw patient data (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 3,
+    source: 'Group 6 — Privacy Enhancing Technologies (PET)',
+    question: 'List the three types of Differential Privacy.',
+    items: [
+      { name: 'Global DP', aliases: [], explain: 'Noise added at the aggregator/server — users trust the server to apply noise faithfully before publishing results.' },
+      { name: 'Local DP', aliases: [], explain: 'Noise added on-device before data leaves the user\'s device — Apple\'s approach since 2016; eliminates the need to trust a central aggregator.' },
+      { name: 'Shuffle DP', aliases: [], explain: 'Local DP combined with shuffling to reduce the noise requirement while maintaining strong privacy guarantees.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 5,
+    source: 'Group 6 — Privacy Enhancing Technologies (PET)',
+    question: 'Explain a Zero-Knowledge Proof using the "proving you are over 18" example, and name one real-world application.',
+    modelAnswer: 'A Zero-Knowledge Proof lets a prover convince a verifier that a statement is true without revealing any information beyond the fact of its truth. Proving you are over 18 to a website is the classic example: the verifier gets mathematically confirmed proof of that one fact without learning your exact date of birth or seeing your ID card. Zcash applies this in the real world, using zk-SNARKs to hide the amount, sender and receiver in shielded cryptocurrency transactions.',
+    markScheme: [
+      'ZKP defined — proves a statement is true without revealing anything beyond its truth (3)',
+      'Real-world application named (e.g. Zcash zk-SNARKs, zkSync, W3C DID) (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 6 — Privacy Enhancing Technologies (PET)',
+    question: 'Scenario: A Nigerian fintech wants several partner banks to jointly train a fraud-detection model on their combined transaction histories, but no bank is willing to share its raw customer data with the others. Which Hard PET would let them do this, and briefly explain how it works.',
+    modelAnswer: 'Federated Learning fits this directly: the server sends an initial model to each participating bank, each bank trains it exclusively on its own local transaction data, and only the resulting model updates (gradients) — never the raw customer records — are sent back to the server, which aggregates them into an improved shared fraud-detection model. Secure Multi-Party Computation is a valid alternative, letting the banks jointly compute a function such as a fraud score over their combined inputs without any bank learning the others\' individual records.',
+    markScheme: [
+      'Names Federated Learning and/or SMPC as the fitting Hard PET (2)',
+      'Explains the mechanism — local training/joint computation, only updates or results shared, never raw data (4)',
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  //  Group 7 — Automated Vulnerability Research
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type: 'longform',
+    marks: 7,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'Define Automated Vulnerability Research (AVR) and state its four objectives.',
+    modelAnswer: 'Automated Vulnerability Research (AVR) is the use of automated systems, software tools, and intelligent technologies to identify, analyse, and validate — and sometimes exploit — vulnerabilities in computer systems, networks, websites, and applications. Its four objectives are: to detect weaknesses before an attacker finds them; to reduce the manual workload on security teams; to improve defences by feeding findings back into remediation; and to test reliability, confirming a system holds up under adversarial conditions.',
+    markScheme: [
+      'AVR defined — automated systems, tools and intelligent technologies used to identify, analyse and validate vulnerabilities (3)',
+      'Objective — detect weaknesses early (1)',
+      'Objective — reduce workload (1)',
+      'Objective — improve defences (1)',
+      'Objective — test reliability (1)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 6,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'List the six components of AVR.',
+    items: [
+      { name: 'Static analysis', aliases: ['static'], explain: 'Checks the code for hidden flaws without ever running the program.' },
+      { name: 'Dynamic analysis', aliases: ['dynamic'], explain: 'Monitors how the software behaves and looks for crashes while it is actively running.' },
+      { name: 'Fuzz testing', aliases: ['fuzzing'], explain: 'Throws massive amounts of random, messy data at an app to see if it breaks.' },
+      { name: 'Symbolic execution', aliases: [], explain: 'Uses maths and placeholders instead of real data to uncover hidden paths in the code.' },
+      { name: 'Binary analysis', aliases: [], explain: 'Reverse-engineers compiled programs to understand how they work without the original source code.' },
+      { name: 'Artificial intelligence and machine learning', aliases: ['AI/ML', 'AI and ML'], explain: 'Uses past data to train computers to automatically predict and spot new security risks.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'Differentiate between static analysis and dynamic analysis as components of AVR, giving one tool example for each.',
+    modelAnswer: "Static analysis checks source code for hidden flaws without ever running the program, using tools such as SonarQube or CodeQL. Dynamic analysis instead monitors how the software behaves and looks for crashes while it is actively running, using tools such as Valgrind or Burp Suite. The key difference is timing: static analysis examines the code at rest, before execution, while dynamic analysis observes the program's real behaviour while it runs.",
+    markScheme: [
+      'Static analysis defined — examines code without running it (2)',
+      'Static analysis tool example (SonarQube/CodeQL) (1)',
+      'Dynamic analysis defined — monitors behaviour and crashes while running (2)',
+      'Dynamic analysis tool example (Valgrind/Burp Suite/OWASP ZAP/Dynatrace) (1)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 8,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'List the eight stages of the AVR architecture framework, in order.',
+    items: [
+      { name: 'Target systems', aliases: [], explain: 'Apps, APIs, IoT, networks, cloud, binaries and infrastructure — everything AVR is pointed at.' },
+      { name: 'Asset discovery & enumeration', aliases: ['asset discovery'], explain: 'Subdomains, hosts, open ports & services, technologies & versions, APIs & endpoints, attack-surface mapping.' },
+      { name: 'Data collection', aliases: [], explain: 'Scanning, web crawling, API requests, traffic monitoring, configuration dumping, banner grabbing.' },
+      { name: 'Vulnerability detection engine', aliases: ['detection engine'], explain: 'Signature/rule-based matching, AI/ML models, fuzzing & dynamic analysis, static analysis, pattern matching, known-vulnerability databases.' },
+      { name: 'Validation engine', aliases: [], explain: 'Confirms vulnerabilities, removes false positives, verifies exploitability, builds a proof of concept.' },
+      { name: 'Risk assessment', aliases: [], explain: 'Severity (CVSS), exploitability, impact analysis, asset criticality, business context, risk scoring.' },
+      { name: 'Report generation & recommendations', aliases: ['report generation'], explain: 'Vulnerability details, affected assets, severity & CVSS, evidence & PoC, remediation steps, references.' },
+      { name: 'Continuous monitoring & learning', aliases: ['continuous monitoring'], explain: 'Continuous scanning, change & drift detection, threat-intelligence feed, rule & model updates, feedback loop.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'Scenario: A university student portal suffers a SQL injection vulnerability on its login form, exposing student data. Using the notes, describe how AVR was used to detect and fix it.',
+    modelAnswer: 'Security teams deployed Burp Suite, Nessus and fuzzing together to detect the SQL injection. Once confirmed, the vulnerability was patched with parameterised queries, which prevent user input from being interpreted as SQL code. The fix was then kept under continuous monitoring so any regression or new flaw would be caught early. The result was that the vulnerability was removed and student data was protected.',
+    markScheme: [
+      'Vulnerability identified — SQL injection on the login form (2)',
+      'Detection tools named — Burp Suite, Nessus and fuzzing (2)',
+      'Remediation — parameterised queries (2)',
+      'Continuous monitoring after the fix (1)',
+      'Result stated — vulnerability removed, data protected (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: "Scenario: An organisation's AI-based vulnerability scanner reports zero critical issues on its public-facing web application for six months. It is then breached through a flaw disclosed only two weeks earlier as a zero-day, which the scanner never flagged. Explain why the scanner missed this vulnerability and recommend one change to the organisation's process that would reduce this risk in future.",
+    modelAnswer: "AVR tools are dependent on known-vulnerability databases: they detect and prioritise issues that have already been catalogued as CVEs or match a known signature. A zero-day, by definition, has no such record until it is disclosed, so a scanner checking against those databases has nothing to match it against and reports a clean result. This is exactly the 'dependent on vulnerability databases — misses zero-days' limitation covered in the notes. To reduce this risk, the organisation should pair automated scanning with periodic human-led penetration testing and a live threat-intelligence feed, since human testers and fresh intelligence can surface novel logic flaws and freshly disclosed issues that a database-driven scanner cannot yet know about.",
+    markScheme: [
+      'Explains the scanner is limited to known-vulnerability databases/signatures (3)',
+      'Explains a zero-day has no record until disclosed, so it is invisible to that kind of scan (2)',
+      'Recommendation given — e.g. periodic human penetration testing and/or a live threat-intelligence feed (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'State and briefly explain two benefits and two limitations of AVR.',
+    modelAnswer: 'Benefits: Speed — AVR scans far faster than a human review team could manage. Scalability — it handles large networks that would be impractical to assess by hand. Limitations: False positives and negatives — automated tools can flag issues that are not real, or miss ones that are. Dependence on vulnerability databases — because AVR checks against known-vulnerability databases, it can miss zero-day flaws that have not yet been catalogued.',
+    markScheme: [
+      'Benefit 1 named and explained (2)',
+      'Benefit 2 named and explained (2)',
+      'Limitation 1 named and explained (2)',
+      'Limitation 2 named and explained (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 7 — Automated Vulnerability Research',
+    question: 'Explain the significance of the 2016 DARPA Cyber Grand Challenge and the Mayhem system to the field of AVR.',
+    modelAnswer: 'The 2016 DARPA Cyber Grand Challenge (CGC) was a competition in which teams built completely autonomous supercomputers that had to defend their own networks while attacking others, with no human touching a keyboard during the contest itself. Mayhem, developed by ForAllSecure, is remembered as the most famous public demonstration of advanced AVR — proof that a fully automated system could discover, validate and even exploit vulnerabilities in real time, at machine speed, without a human in the loop.',
+    markScheme: [
+      'DARPA CGC (2016) described — autonomous systems defending and attacking without human intervention (3)',
+      'Mayhem named and attributed to ForAllSecure (2)',
+      'Significance — proof that automated systems can find/validate vulnerabilities at machine speed unaided (1)',
+    ],
+  },
+
   // ══════════════════════════════════════════════════════════════════
   //  Group 8 — Agentic AI
   // ══════════════════════════════════════════════════════════════════
@@ -425,6 +909,261 @@ export const cybInnovationExamPrep = [
     ],
   },
 
+  {
+    type: 'recall',
+    marks: 5,
+    source: 'Group 8 — Agentic AI',
+    question: 'List the five characteristics of Agentic AI.',
+    items: [
+      { name: 'Autonomy', aliases: [], explain: 'Performs tasks and makes decisions with minimal human intervention.' },
+      { name: 'Goal-oriented', aliases: [], explain: 'Focuses on achieving specific objectives by planning and executing actions.' },
+      { name: 'Adaptability', aliases: [], explain: 'Adjusts its behaviour based on changes in its environment or new information.' },
+      { name: 'Reasoning', aliases: [], explain: 'Analyses situations and selects the most appropriate course of action.' },
+      { name: 'Learning ability', aliases: [], explain: 'Improves its performance over time through experience and feedback.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 4,
+    source: 'Group 8 — Agentic AI',
+    question: 'Explain the "calculator vs accountant" analogy used to describe the difference between traditional AI and Agentic AI.',
+    modelAnswer: 'You hand a calculator two numbers and an operation, and it returns one answer — it does exactly and only what you typed, which is traditional AI responding to a specific input. You hand an accountant a goal such as "file this year\'s returns", and they go and find the receipts, decide what still needs checking, do the work in whatever order makes sense, and come back if something does not add up — which is Agentic AI, given a goal rather than a command, that plans and acts on its own toward it.',
+    markScheme: [
+      'Calculator side explained — responds only to exact input, traditional AI (2)',
+      'Accountant side explained — given a goal, plans and acts autonomously, Agentic AI (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 8 — Agentic AI',
+    question: 'State and briefly explain three challenges of Agentic AI.',
+    modelAnswer: 'Security risks — if compromised by attackers, an autonomous AI system could make harmful decisions or be manipulated into performing malicious actions. Lack of transparency — some agentic systems operate as "black boxes", making it difficult to understand how they reached a particular decision. Human oversight — despite its autonomy, Agentic AI still requires human supervision to ensure its actions remain safe, ethical and aligned with organisational objectives.',
+    markScheme: [
+      'Challenge 1 named and explained (2)',
+      'Challenge 2 named and explained (2)',
+      'Challenge 3 named and explained (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 8 — Agentic AI',
+    question: 'Scenario: A company deploys an Agentic AI system to autonomously investigate and respond to security incidents. One night, the system misclassifies a legitimate software update as an attack and automatically revokes access for the entire IT department, locking them out during a critical outage. Using the challenges covered in this topic, explain what went wrong and why human oversight remains necessary despite the system\'s autonomy.',
+    modelAnswer: 'This exposes both the lack-of-transparency and security-risk challenges: the system reached a harmful decision through reasoning nobody could inspect or override in time, and its very autonomy — the ability to act on its own — let one misclassification cascade into locking out an entire department. Human oversight remains necessary precisely because Agentic AI, despite planning and acting independently, still needs a person able to verify its actions stay safe, ethical and aligned with the organisation\'s actual objectives before consequences like this become irreversible.',
+    markScheme: [
+      'Identifies the lack-of-transparency / black-box failure (3)',
+      'Explains why human oversight remains necessary despite the system\'s autonomy (3)',
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  //  Group 9 — Deepfake Detection
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type: 'longform',
+    marks: 5,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Define a deepfake, and explain what distinguishes it from traditional photo or audio editing.',
+    modelAnswer: 'A deepfake is synthetic media — an image, video, or audio recording — generated or altered with artificial intelligence so that it depicts a person saying or doing something that never actually happened. Unlike traditional photo editing or dubbed audio, the manipulation is produced by a trained model rather than manual editing, which allows the output to be generated at scale and with a level of realism traditional tools could not achieve.',
+    markScheme: [
+      'Deepfake defined — AI-generated/altered synthetic media depicting something that never happened (3)',
+      'Distinction — produced by a trained model, generated at scale, with realism manual editing could not achieve (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 4,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'List the four ways to build a deepfake, and what each abbreviation stands for.',
+    items: [
+      { name: 'GAN', aliases: ['generative adversarial network', 'generative adversarial networks'], explain: "A generator and a discriminator compete, improving round after round until the output is hard to distinguish from real data." },
+      { name: 'AE', aliases: ['autoencoder', 'autoencoders'], explain: "Compresses a face into a shared internal code, then decodes it through a different identity's decoder — the core face-swap mechanism." },
+      { name: 'DM', aliases: ['diffusion model', 'diffusion models'], explain: 'Learns to reverse a noise process, gradually rebuilding a coherent image step by step.' },
+      { name: 'VC', aliases: ['voice cloning'], explain: "Learns a target's vocal characteristics from sample audio, then generates new speech in that voice." },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 9 — Deepfake Detection',
+    question: "Describe how \"audio-jacking\" works, as demonstrated by IBM Security's X-Force team in 2024.",
+    modelAnswer: "Audio-jacking is a live-call attack in which a hidden third party silently intercepts and alters a genuine phone call between two real speakers in real time, with no recording and no rehearsed script. The intercepted pipeline runs speech-to-text, into a large language model watching for a keyword trigger, into a voice clone, out through text-to-speech. In IBM's proof of concept, the system listened for the phrase \"bank account\"; whenever either speaker said it, the LLM silently replaced the real number with an attacker-controlled one and regenerated it in a cloned voice matching the speaker, mid-sentence, without either party noticing anything had changed.",
+    markScheme: [
+      'Defined — live-call interception and real-time alteration by a hidden third party (2)',
+      'Pipeline — speech-to-text (1)',
+      'Pipeline — LLM keyword trigger (1)',
+      'Pipeline — voice clone (1)',
+      'Pipeline — text-to-speech (1)',
+      'Worked example — "bank account" trigger replacing the number mid-sentence in a cloned voice (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Compare the Arup Hong Kong fraud and the Slovak election deepfake, including how each was ultimately caught.',
+    modelAnswer: "In January 2024, a finance employee at engineering firm Arup's Hong Kong office authorised 15 fraudulent wire transfers, totalling $25.6M, after joining a video call where every other participant — including a person who appeared to be the company's CFO — was an AI-generated deepfake built from public footage of real executives. It was caught only by a phone call to headquarters, not by detection software. In September 2023, two days before Slovakia's parliamentary election, a fabricated audio clip of party leader Michal Šimečka discussing plans to rig the vote spread widely, circulated during a legally mandated media-silence window that blocked timely fact-checking. It was addressed only by public denial from those involved, after polls had already opened. In both cases, the deepfake was caught by human verification after the fact, not by automated detection.",
+    markScheme: [
+      'Arup case — amount and date ($25.6M, January 2024) (2)',
+      'Arup case — deepfake CFO on a video call, 15 fraudulent transfers (1)',
+      'Arup case — caught by a phone call to headquarters, not detection software (1)',
+      'Slovak case — Šimečka audio clip, September 2023, two days before the election (2)',
+      'Slovak case — spread during the legally mandated media-silence window (1)',
+      'Slovak case — caught by public denial after polls opened (1)',
+      'Shared lesson — neither case was caught by automated detection software (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 9 — Deepfake Detection',
+    question: "Scenario: You are a finance manager. You receive a video call from someone who looks and sounds exactly like your company's CFO, instructing you to urgently wire $500,000 to a new supplier account before close of business, citing a confidential pending acquisition. Describe three actions you should take before authorising the transfer, and name the real-world case this scenario resembles.",
+    modelAnswer: "This scenario resembles the Arup Hong Kong fraud, where a deepfake CFO on a video call convinced a finance employee to authorise 15 fraudulent wire transfers. Before authorising the transfer, three actions should be taken: treat the request with healthy scepticism precisely because it combines urgency and money, the classic pressure combination; verify the instruction out-of-band, by calling the CFO back on a number already saved rather than one provided in the call itself, or by phoning company headquarters directly, as ultimately caught the Arup fraud; and use a pre-agreed personal code word or a second, separate confirmation channel before moving any funds, refusing to act on the video call alone no matter how convincing it looks or sounds.",
+    markScheme: [
+      'Identifies the resemblance to the Arup Hong Kong deepfake CFO fraud (2)',
+      'Action — healthy scepticism given the urgency + money combination (2)',
+      'Action — out-of-band verification (e.g. call back on a saved number, or call headquarters directly) (2)',
+      'Action — a further distinct safeguard (e.g. personal code word, refusing to act on the call alone) (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 9 — Deepfake Detection',
+    question: "Scenario: While discussing an unrelated issue on a call to your bank's customer service line, you mention your account number twice. Minutes later, someone attempts a large transfer from your account using a voice that sounds exactly like yours. Explain which deepfake technique most likely enabled this, how it works, and one behavioural change that would reduce this specific risk.",
+    modelAnswer: "This is most likely audio-jacking: a hidden party intercepting the live call in real time and running the intercepted audio through a pipeline of speech-to-text, into an LLM watching for a keyword trigger — here, the spoken account number — into a voice clone, then out through text-to-speech, letting the attacker reproduce the victim's voice on demand. The behavioural change that most directly reduces this risk is to paraphrase sensitive details instead of reading them back verbatim — for example describing the account rather than stating the digits aloud — which disrupts the keyword trigger the interception pipeline depends on.",
+    markScheme: [
+      'Identifies audio-jacking (2)',
+      'Describes the pipeline — speech-to-text, LLM keyword trigger, voice clone, text-to-speech (2)',
+      'Explains the mechanism — triggered by the spoken account number and cloned in real time (2)',
+      'Behavioural change — paraphrase sensitive details instead of repeating them verbatim (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 6,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'List the six categories of malicious use of deepfakes.',
+    items: [
+      { name: 'Financial fraud', aliases: [], explain: 'Grandparent scams and corporate impersonation, e.g. the $35M UAE voice-cloning heist and $25.6M Hong Kong video-call fraud.' },
+      { name: 'Political disinformation', aliases: [], explain: 'Fabricated audio/video of public figures, e.g. the 2024 New Hampshire robocall.' },
+      { name: 'Non-consensual content', aliases: [], explain: 'The most prevalent form by volume, overwhelmingly targeting women without consent.' },
+      { name: 'Identity theft & impersonation', aliases: ['identity theft'], explain: 'Combined with stolen documents to defeat facial-recognition checks in fraudulent applications.' },
+      { name: 'Extortion', aliases: [], explain: 'Fabricated compromising media or a cloned voice used to pressure victims into urgent payment.' },
+      { name: 'False positives & judicial doubt', aliases: ['judicial doubt'], explain: 'The mere existence of deepfakes lets genuine evidence be dismissed as fake, or fake evidence trusted as real.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Distinguish between the two broad tracks in deepfake detection research, with one example technique from each.',
+    modelAnswer: 'Track one, handcrafted features, has a researcher define the detection pattern in advance — for example, frequency-domain analysis, where a Fourier transform reveals grid-like GAN signatures. Track two, deep learning, has a model learn the difference directly from large volumes of labelled real and fake examples without an engineer specifying the exact artefact — for example, a CNN-based classifier such as XceptionNet or EfficientNet.',
+    markScheme: [
+      'Handcrafted features defined — researcher defines the pattern in advance (2)',
+      'Handcrafted example given (e.g. frequency-domain/Fourier analysis, blur/blending-boundary, landmark inconsistency) (1)',
+      'Deep learning defined — model learns the difference directly from labelled data (2)',
+      'Deep learning example given (e.g. CNN/XceptionNet/EfficientNet, RNN/LSTM, ViT, capsule networks) (1)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 4,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'List four deep learning detection architectures covered in the notes.',
+    items: [
+      { name: 'CNN-based (XceptionNet, EfficientNet)', aliases: ['CNN'], explain: 'The standard baseline; a 5-model EfficientNet ensemble won the 2020 DFDC challenge.' },
+      { name: 'RNN / LSTM temporal models', aliases: ['RNN', 'LSTM'], explain: 'Track how a face moves and changes across a sequence of frames, not just one image.' },
+      { name: 'Vision Transformer (ViT)', aliases: ['ViT'], explain: 'Self-attention relates distant regions, e.g. a swapped face vs. the real neck.' },
+      { name: 'Capsule networks', aliases: [], explain: 'Preserve part-to-whole facial relationships with far fewer parameters than a CNN.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Explain how remote photoplethysmography (rPPG) detects deepfakes, and why it remains a durable defence.',
+    modelAnswer: "rPPG measures tiny blood-flow-driven skin colour shifts that a generative model does not replicate, since those signals come from a real, living circulatory system rather than a learned visual pattern. Intel's FakeCatcher reports 96% accuracy internally using this approach, and DeepFakesON-Phys similarly uses heart-rate-derived features. Because generative models are not designed to reproduce this biological signal, rPPG-based detection is expected to stay durable even as generation methods otherwise improve.",
+    markScheme: [
+      'rPPG defined — measures blood-flow-driven skin colour shifts (2)',
+      'Example tool named (Intel FakeCatcher or DeepFakesON-Phys) (1)',
+      'Accuracy figure cited (96% internal, FakeCatcher) (1)',
+      'Reason for durability — generative models are not designed to replicate biological signals (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 5,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'What does the 17-point accuracy gap of the 2020 DFDC-winning model (82% on its own test set vs 65% on unfamiliar clips) demonstrate about deepfake detection?',
+    modelAnswer: "The 2020 DFDC-winning model scored 82% on the competition's own controlled test set but only 65% on entirely new, unfamiliar clips — a 17-point drop. This demonstrates that generalisation, not raw accuracy, is the harder problem in deepfake detection: a model can perform well on data resembling its training set while still failing badly against manipulation techniques it has not seen before. It is the central reason no detector generalises perfectly in the real world.",
+    markScheme: [
+      'Figures cited — 82% own test set, 65% unfamiliar clips (2)',
+      'Conclusion — generalisation, not raw accuracy, is the harder problem (2)',
+      'Implication — no detector generalises perfectly (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 9,
+    source: 'Group 9 — Deepfake Detection',
+    question: "Outline Nigeria's current legal and institutional challenges in responding to deepfakes, and state two of the study's recommendations.",
+    modelAnswer: "Nigeria has no dedicated deepfake law, relying instead on the Cybercrimes Act 2015. Enforcement capacity is limited — NITDA, the EFCC and the Police have limited capacity to handle AI-generated evidence — and a 2020 ECOWAS Court ruling went against a key section of the Cybercrimes Act. Public digital literacy is also low, leaving citizens poorly equipped to recognise fabricated media. Among the study's recommendations: amend the Cybercrimes Act to explicitly address AI-generated and manipulated media, and extend NITDA's platform accountability rules to require AI-content labelling.",
+    markScheme: [
+      'No dedicated deepfake law — reliant on the Cybercrimes Act 2015 (2)',
+      'Limited NITDA/EFCC/Police capacity for AI-generated evidence (2)',
+      '2020 ECOWAS Court ruling against a key section of the Cybercrimes Act (2)',
+      'Low public digital literacy (1)',
+      'Two recommendations named (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 9,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'List the nine primary defenses against deepfake attacks recommended in the study.',
+    items: [
+      { name: 'Education & sensitisation', aliases: [], explain: 'Regularly train yourself, your family and your organisation to recognise deepfake red flags.' },
+      { name: 'Healthy scepticism', aliases: [], explain: 'Treat urgent voice or video requests involving money with default suspicion; verify before acting.' },
+      { name: 'Out-of-band verification', aliases: [], explain: 'Confirm sensitive requests through a separate, already-trusted channel.' },
+      { name: 'Personal code words', aliases: [], explain: 'Agree a private code word with close family/colleagues that only they would know.' },
+      { name: "Paraphrase, don't repeat", aliases: ['paraphrase'], explain: 'Rephrase sensitive details instead of reading them back verbatim, disrupting keyword-triggered interception.' },
+      { name: 'Keep software patched', aliases: [], explain: 'Apply security updates promptly, since many attacks piggyback on separately-exploited vulnerabilities.' },
+      { name: "Don't click unknown links", aliases: [], explain: 'Avoid opening links or emails from unverified senders — phishing is the most common entry point.' },
+      { name: 'Verify app sources', aliases: [], explain: 'Only install apps from official, verified stores.' },
+      { name: 'Use MFA & passkeys', aliases: ['multi-factor authentication'], explain: "Enable multi-factor authentication or passkeys everywhere, so a cloned voice or face alone can't pass a second factor." },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 4,
+    source: 'Group 9 — Deepfake Detection',
+    question: 'Explain the "liar\'s dividend" and its social cost.',
+    modelAnswer: 'The "liar\'s dividend" is the effect by which the mere existence of deepfakes gives bad actors a plausible excuse to dismiss genuine, incriminating evidence as fabricated. Its social cost is a broader erosion of shared trust in recorded media generally — once any video or audio can plausibly be denied as fake, the evidentiary value of real recordings is undermined too.',
+    markScheme: [
+      "Liar's dividend defined — existence of deepfakes lets real evidence be dismissed as fake (2)",
+      'Social cost — broader erosion of trust in recorded media (2)',
+    ],
+  },
+
   // ══════════════════════════════════════════════════════════════════
   //  Group 10 — Secure Access Service Edge (SASE)
   // ══════════════════════════════════════════════════════════════════
@@ -465,6 +1204,59 @@ export const cybInnovationExamPrep = [
     markScheme: [
       "Single-vendor — one vendor delivers networking and security through a unified console; simpler integration but greater dependency on one vendor's roadmap (3)",
       'Multi-vendor/managed — best-of-breed or MSP-delivered components; greater flexibility, avoids lock-in, but adds integration complexity (3)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 5,
+    source: 'Group 10 — Secure Access Service Edge (SASE)',
+    question: 'List the five SASE principles.',
+    items: [
+      { name: 'Identity-Centric', aliases: [], explain: 'Access decisions follow the verified user or device — not network location.' },
+      { name: 'Cloud-Native', aliases: [], explain: 'Delivered from distributed points of presence, not on-prem appliances.' },
+      { name: 'Context-Aware', aliases: [], explain: 'Policy factors device posture, geolocation, time, and real-time risk.' },
+      { name: 'Zero Trust Default', aliases: [], explain: 'No implicit trust — continuous authentication and authorization.' },
+      { name: 'Consolidated', aliases: [], explain: 'Replaces siloed point products with one unified platform.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 10 — Secure Access Service Edge (SASE)',
+    question: 'Explain the "backhaul problem" in traditional network security and how SASE\'s Point of Presence (PoP) model solves it.',
+    modelAnswer: 'Under the legacy model, even traffic bound for the cloud is routed back through a central data centre for inspection before reaching its actual destination, causing higher latency, degraded user experience, increased operational cost, and inconsistent, location-based security enforcement. SASE solves this by having users connect instead to the nearest cloud Point of Presence, where identity verification and security inspection happen in-line, before traffic is routed directly to its destination — no unnecessary backhaul, with security enforced close to the source rather than wherever the network happens to route it.',
+    markScheme: [
+      'Backhaul problem explained — cloud traffic routed to a central data centre first, adding latency/cost/inconsistency (3)',
+      'PoP model explained — inspection happens at the nearest cloud PoP, traffic goes direct after (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 5,
+    source: 'Group 10 — Secure Access Service Edge (SASE)',
+    question: 'What does SSE stand for, and which four SASE components together make it up?',
+    modelAnswer: 'SSE stands for Security Service Edge — the security half of SASE, often adopted first. It is made up of four components: SWG (Secure Web Gateway), CASB (Cloud Access Security Broker), FWaaS (Firewall as a Service), and ZTNA (Zero Trust Network Access).',
+    markScheme: [
+      'SSE expanded — Security Service Edge (1)',
+      'SWG named (1)',
+      'CASB named (1)',
+      'FWaaS named (1)',
+      'ZTNA named (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 10 — Secure Access Service Edge (SASE)',
+    question: "Scenario: A multinational company routes all of its remote employees' traffic back to a single data centre in London for security inspection before it reaches cloud applications, causing noticeable lag for users in Asia and Africa. Which SASE component or model would resolve this, and how?",
+    modelAnswer: "This is exactly the backhaul problem SASE's Point of Presence (PoP) model is built to solve. Instead of backhauling every user's traffic to London, each employee would connect to their nearest cloud PoP, where identity verification and security inspection happen in-line before traffic is routed directly to its destination — cutting the round-trip to a distant data centre and enforcing security close to where the user actually is, removing the lag for users in Asia and Africa.",
+    markScheme: [
+      'Identifies the PoP model as the solution (3)',
+      'Explains inspection happens locally near the user instead of backhauling to one central location (3)',
     ],
   },
 
@@ -521,6 +1313,46 @@ export const cybInnovationExamPrep = [
     markScheme: [
       'Cost — can be expensive to implement and maintain (2)',
       'Integration complexity — connecting XDR to existing security tools can be technically difficult (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 6,
+    source: 'Group 11 — Extended Detection and Response (XDR)',
+    question: 'List the six stages of security-tool evolution leading up to XDR, with the decade each arrived.',
+    items: [
+      { name: '1980s — Antivirus', aliases: ['antivirus'], explain: 'First defence against computer viruses; scanned files for known malware.' },
+      { name: '1990s — Firewall', aliases: ['firewall'], explain: 'Controlled incoming and outgoing traffic; blocked unauthorized connections.' },
+      { name: '2000s — Intrusion Detection System (IDS)', aliases: ['IDS'], explain: 'Monitored network traffic for suspicious patterns; detected attacks in progress.' },
+      { name: '2010s — SIEM', aliases: [], explain: 'Collected logs from multiple tools and correlated events; manual investigation was still needed.' },
+      { name: '2015+ — EDR', aliases: [], explain: 'Protected individual devices and used AI to spot suspicious behaviour; could respond automatically.' },
+      { name: '2020+ — XDR', aliases: [], explain: 'Extends EDR across the whole environment, correlating data from all security tools for a unified response.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Group 11 — Extended Detection and Response (XDR)',
+    question: 'Using the phishing-attack example from the notes, explain how XDR turns a several-hour, four-alert incident into a response contained in minutes.',
+    modelAnswer: 'Without XDR, the timeline runs as four disconnected alerts with no clear link: the email system flags a phishing email in hour 1 (after 5 users already clicked), a device is flagged as infected in hour 2, stolen credentials are used from an unusual location in hour 3, and unusual file transfers signal data exfiltration in hour 4. With XDR, all four signals are correlated by the AI engine into one attack chain, the device is isolated, the suspicious IP is blocked, and the stolen credentials are revoked automatically — containing the incident in minutes rather than the hours it would otherwise take to notice and manually connect the same four alerts.',
+    markScheme: [
+      'Describes the four disconnected alerts and their timeline without XDR (3)',
+      'Explains XDR correlates them into one attack chain and responds automatically (isolate/block/revoke) in minutes (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Group 11 — Extended Detection and Response (XDR)',
+    question: "Scenario: A hospital's email security tool flags a phishing email as suspicious, but its endpoint protection, identity system and network monitor each operate independently and never share this alert with each other. Three hours later, stolen credentials from a device infected by that same email are used to exfiltrate patient data, and no single tool connects the dots until a manual audit the next day. Explain how deploying XDR would change this outcome.",
+    modelAnswer: "The core problem is that each tool sees only its own domain and none of them share context, so the phishing flag, the device infection, and the credential misuse are never recognised as one attack. XDR would gather telemetry from all of these domains — email, endpoint, identity and network — and its AI correlation engine would link the phishing email, the infected device and the subsequent credential misuse into a single attack chain in real time, rather than requiring a manual audit the next day. Once confirmed as a threat, XDR's automated response would isolate the infected device, block the suspicious access, and revoke the stolen credentials immediately, containing the exfiltration in minutes instead of allowing it to run undetected overnight.",
+    markScheme: [
+      'Identifies the core problem — disconnected tools with no shared context (2)',
+      'Explains XDR would correlate the phishing email, infected device and credential misuse as one attack chain (3)',
+      'Explains automated response would isolate/block/revoke far faster than the manual audit (3)',
     ],
   },
 
