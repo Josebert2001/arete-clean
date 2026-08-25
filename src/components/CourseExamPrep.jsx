@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   PenLine, Play, ArrowLeft, ArrowRight, Eye, CheckCircle2, Circle, XCircle,
-  Award, RotateCcw, Lightbulb, BookOpen, Terminal,
+  Award, RotateCcw, Lightbulb, BookOpen, Terminal, ListFilter,
 } from 'lucide-react';
 import MathText from './MathText';
 import CodeBlock from './CodeBlock';
@@ -415,7 +415,7 @@ function RecallQuestion({ q, awarded, onAward }) {
 }
 
 export default function CourseExamPrep({ course }) {
-  const bank = course.examPrep || [];
+  const bank = useMemo(() => course.examPrep || [], [course.examPrep]);
   const { progress, setQuizScore } = useProgress(STORAGE_KEY);
   // Review scheduling keeps its own record — see REVIEW_STORAGE_KEY.
   const { recordReviews } = useProgress(REVIEW_STORAGE_KEY);
@@ -433,6 +433,27 @@ export default function CourseExamPrep({ course }) {
   const [current, setCurrent] = useState(0);
   const [awards, setAwards] = useState({});
   const [finished, setFinished] = useState(false);
+  const [selectedTopics, setSelectedTopics] = useState([]);
+
+  // One entry per distinct `source` — for a bank like CYB 222's, where every
+  // question already carries the topic it was written from ("Group 7 —
+  // Automated Vulnerability Research"), that string *is* the revision unit a
+  // student thinks in. Order follows first appearance in the bank, which
+  // follows topic order since the bank is authored topic by topic.
+  const topics = useMemo(() => {
+    const bySource = new Map();
+    for (const q of bank) {
+      if (!bySource.has(q.source)) bySource.set(q.source, []);
+      bySource.get(q.source).push(q);
+    }
+    return [...bySource.entries()];
+  }, [bank]);
+
+  const toggleTopic = (source) => {
+    setSelectedTopics((prev) => (
+      prev.includes(source) ? prev.filter((s) => s !== source) : [...prev, source]
+    ));
+  };
 
   const start = (list) => {
     setQuestions(list);
@@ -659,6 +680,48 @@ export default function CourseExamPrep({ course }) {
           <Play size={13} /> Everything · all {bank.length}
         </button>
       </div>
+
+      {topics.length > 1 && (
+        <div className="mt-7">
+          <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-3 flex items-center gap-2">
+            <ListFilter size={14} /> Or pick by topic
+          </p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {topics.map(([source, qs]) => {
+              const on = selectedTopics.includes(source);
+              return (
+                <button
+                  key={source}
+                  onClick={() => toggleTopic(source)}
+                  aria-pressed={on}
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 transition-all text-sm text-left ${
+                    on ? 'border-rust bg-rust/10 text-ink' : 'border-coffee-200 hover:border-coffee-500 text-coffee-700'
+                  }`}
+                >
+                  {on
+                    ? <CheckCircle2 size={14} className="text-rust shrink-0" />
+                    : <Circle size={14} className="text-coffee-300 shrink-0" />}
+                  {source}
+                  <span className="text-xs text-coffee-500">({qs.length})</span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => {
+              const picked = bank.filter((q) => selectedTopics.includes(q.source));
+              start(shuffled(picked, picked.length));
+            }}
+            disabled={selectedTopics.length === 0}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-coffee-200 hover:border-rust hover:bg-rust/5 transition-all text-sm font-medium text-ink disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-coffee-200 disabled:hover:bg-transparent"
+          >
+            <Play size={13} className="text-rust" />
+            {selectedTopics.length === 0
+              ? 'Select one or more topics above'
+              : `Start · ${bank.filter((q) => selectedTopics.includes(q.source)).length} question${bank.filter((q) => selectedTopics.includes(q.source)).length === 1 ? '' : 's'} from ${selectedTopics.length} topic${selectedTopics.length === 1 ? '' : 's'}`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
