@@ -4764,6 +4764,15 @@ export const courses = [
     // Notes 4-22 are transcribed from the lecturer's scanned handout, printed
     // pages 3-71, and follow its wording and headings.
     //
+    // Notes 23-26 are neither transcribed nor from a class session: they are
+    // authored from the course outline above and the two set texts, to cover
+    // outline items 2, 4, 5 and 6 (big data technology and adoption; the system
+    // and management view; the systems-design process and lifecycle security
+    // management; policies and methodologies). None of that was ever handed
+    // out, and the exam draws on it. Each of the four says so in a leading
+    // `note` block, and the noteMap places them where they belong in the
+    // reading order rather than at the end where they are printed.
+    //
     // Notes 1-3 come from the class sessions instead, and are labelled as such
     // on the page. They are not in the workbook: the 5Vs, operational-vs-
     // analytical and big-data-skills material appears nowhere in any of the
@@ -7389,6 +7398,472 @@ print(summary_df.to_string(index=False))`,
           },
         ],
       },
+      {
+        number: '23',
+        title: 'Security Management and Its Objectives',
+        sections: [
+          {
+            type: 'note',
+            text: 'Notes 23-26 are not from the printed workbook and not from a class session. The workbook covers the machine-learning half of this course; items 2, 4, 5 and 6 of the course outline — big data technology and adoption, the system and management view of security, the systems-design process and lifecycle security management, and basic policies and methodologies — were never handed out as notes. These four topics are written from that outline and from the two set texts and standard practice (ISO/IEC 27001, NIST SP 800-37 and the NIST Cybersecurity Framework), so that the outline is covered end to end. Where the lecturer later supplies wording of their own, it takes precedence over these four.',
+          },
+          {
+            type: 'definition',
+            heading: '23.1 Definition',
+            text: 'Security management is the continuous process of planning, organising, directing and controlling the people, processes and technology that protect an organisation’s information assets. It is a management discipline before it is a technical one: it decides what is worth protecting, how much protection is justified, who is accountable for it, and how the organisation proves the protection is working.',
+          },
+          {
+            type: 'text',
+            text: 'The distinction that matters in this course is between security as a set of mechanisms — firewalls, encryption, access control — and security as something that has to be managed. A mechanism protects one thing at one moment. Management is what keeps a thousand mechanisms aligned with the organisation’s risk appetite as the data, the threats and the staff all change.',
+          },
+          {
+            type: 'termlist',
+            heading: '23.2 Objectives of Security Management — the Security Properties',
+            items: [
+              { term: 'Confidentiality', def: 'Information is disclosed only to parties authorised to see it. Protected by encryption at rest and in transit, access control and data classification.' },
+              { term: 'Integrity', def: 'Information is accurate and complete, and is changed only by authorised parties in authorised ways. Protected by hashing, digital signatures, checksums and change control.' },
+              { term: 'Availability', def: 'Information and the systems holding it are accessible to authorised users when needed. Protected by redundancy, backups, capacity planning and denial-of-service defences.' },
+              { term: 'Authenticity', def: 'The data is genuine and its claimed source is the real source. Protected by authentication, certificates and message authentication codes.' },
+              { term: 'Accountability', def: 'Every significant action can be traced back to the identity that performed it. Protected by unique user accounts, logging and audit trails — the reason shared administrator accounts are a management failure, not a convenience.' },
+              { term: 'Non-repudiation', def: 'A party cannot credibly deny having performed an action they did perform. Protected by digital signatures and tamper-evident logs.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Confidentiality, Integrity and Availability are the CIA triad, and are the three most likely to be asked for by name. The other three extend the triad and are worth adding when a question asks for "the objectives of security management" rather than "the CIA triad".',
+          },
+          {
+            type: 'termlist',
+            heading: '23.3 Objectives of Security Management — the Management Goals',
+            items: [
+              { term: 'Protect the organisation’s information assets', def: 'Identify what data, systems and people the organisation depends on, and give each a level of protection proportionate to its value.' },
+              { term: 'Reduce risk to an acceptable level', def: 'Not to eliminate risk, which is impossible and unaffordable, but to bring it within the level management has agreed to accept.' },
+              { term: 'Support the business objectives', def: 'Security exists to let the organisation operate, not to prevent it. A control that blocks legitimate work will be worked around, and an unenforceable control provides no protection.' },
+              { term: 'Ensure legal and regulatory compliance', def: 'Meet the obligations imposed by data-protection law and sector regulation — in Nigeria, the Nigeria Data Protection Act; for organisations handling EU residents’ data, the GDPR.' },
+              { term: 'Ensure business continuity', def: 'Keep critical operations running through an incident and restore them afterwards, through backup, redundancy and tested recovery plans.' },
+              { term: 'Preserve trust and reputation', def: 'A breach costs more in lost customer confidence and regulatory penalty than in remediation. Protecting reputation is a management objective, not a public-relations afterthought.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '23.4 The System View and the Management View',
+            headers: ['Aspect', 'System view', 'Management view'],
+            rows: [
+              ['Question asked', 'How is this system protected?', 'Is the organisation acceptably secure?'],
+              ['Scope', 'One host, network or application', 'The whole organisation and its suppliers'],
+              ['Concerned with', 'Mechanisms — encryption, firewalls, patching, access control', 'Risk, policy, budget, accountability, compliance'],
+              ['Measured by', 'Technical tests: scans, penetration tests, configuration audits', 'Risk registers, audit findings, incident and compliance metrics'],
+              ['Owned by', 'System administrators and security engineers', 'Executive management, the CISO and data owners'],
+              ['Failure looks like', 'An unpatched server, a weak cipher', 'No owner for a dataset, no policy, an unfunded control'],
+            ],
+          },
+          {
+            type: 'text',
+            text: 'Both views are needed. A system view without a management view produces well-hardened systems protecting data nobody has classified, with no one accountable when it leaks. A management view without a system view produces policy documents that describe a security posture the organisation does not actually have.',
+          },
+          {
+            type: 'termlist',
+            heading: '23.5 The Six Areas a Security Programme Manages',
+            items: [
+              { term: 'Planning', def: 'Strategic, tactical and operational planning for security, aligned to the organisation’s own plans.' },
+              { term: 'Policy', def: 'The written rules that state what is required, permitted and forbidden — see note 25.' },
+              { term: 'Programs', def: 'The ongoing security activities that are not projects: awareness training, risk management, business continuity.' },
+              { term: 'Protection', def: 'The controls themselves — technical, administrative and physical — selected through risk management.' },
+              { term: 'People', def: 'Staffing the security function, and managing everyone else: screening, training, separation of duties, and revoking access on exit.' },
+              { term: 'Projects', def: 'Discrete pieces of security work with a start and an end, managed with normal project discipline.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '23.6 Why Big Data Changes the Management Problem',
+            items: [
+              { term: 'Aggregation raises sensitivity', def: 'Datasets that are individually harmless become identifying when joined. Classification must be applied to the combination, not just to each source.' },
+              { term: 'Copies multiply', def: 'A big data platform ingests, replicates and caches. One dataset exists in a dozen places at different sensitivities, and access control has to follow it into all of them.' },
+              { term: 'The perimeter is gone', def: 'Data is distributed across clusters and often across a cloud provider’s infrastructure, so protection has to attach to the data rather than to a boundary around it.' },
+              { term: 'Volume defeats manual oversight', def: 'No team can review the logs a big data platform produces. Monitoring must itself be automated — which is why the machine-learning half of this course exists.' },
+              { term: 'Retention becomes a liability', def: 'Big data culture keeps everything in case it is useful later. Data-protection law requires the opposite: keep it only as long as the stated purpose needs it.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Note 4 gives the technical answer to the same problem — the four pillars of big data security. Read this topic for what management is trying to achieve, and note 4 for the controls that achieve it.',
+          },
+        ],
+      },
+      {
+        number: '24',
+        title: 'The Security Design Process and the Security Management Life Cycle',
+        sections: [
+          {
+            type: 'note',
+            text: 'Written from course outline item 5 — "requirements for information and big data security; systems-design process and lifecycle security management" — not from the printed workbook. See the note at the head of topic 23.',
+          },
+          {
+            type: 'definition',
+            heading: '24.1 Definition',
+            text: 'The security design process is the sequence of stages by which security requirements are identified, turned into a design, built into a system, verified, and then maintained for as long as the system runs. Its central principle is that security is designed in from the start rather than added afterwards: a control retrofitted to a finished system costs more, fits worse and covers less than the same control designed into it.',
+          },
+          {
+            type: 'termlist',
+            heading: '24.2 Major Stages of the Security Design Process',
+            items: [
+              { term: '1. Requirements definition', def: 'Establish what has to be protected and to what standard. Identify the assets, their owners and their classification, and capture the legal, regulatory and contractual obligations that apply. The output is a set of stated security requirements, not a list of products.' },
+              { term: '2. Risk assessment', def: 'Identify the threats to those assets and the vulnerabilities they could exploit, then estimate the likelihood and impact of each. This produces the ranked risk register that justifies everything spent in the later stages.' },
+              { term: '3. Security architecture and design', def: 'Decide the structure of the protection: trust boundaries, where data is encrypted, how identity flows, where the monitoring points sit. This is where the design principles of note 25 — least privilege, defence in depth, fail-safe defaults — are applied.' },
+              { term: '4. Control selection', def: 'Choose the specific technical, administrative and physical countermeasures that meet each requirement, and decide for each remaining risk whether it is mitigated, transferred, avoided or accepted.' },
+              { term: '5. Implementation', def: 'Build and configure the controls, following secure development and secure configuration standards. Controls are documented here so that the people who operate them later know what they are for.' },
+              { term: '6. Verification and validation', def: 'Test that the controls work and that they meet the stated requirements — code review, configuration audit, vulnerability scanning and penetration testing. Verification asks "was it built right"; validation asks "was the right thing built".' },
+              { term: '7. Deployment and authorisation', def: 'Release the system into production, with management formally accepting the residual risk. This step is what makes the risk decision explicit and accountable rather than implicit.' },
+              { term: '8. Operation, monitoring and maintenance', def: 'Run the controls, monitor them, patch, review access, and respond to incidents. The longest stage by far, and the one where most designs decay.' },
+              { term: '9. Disposal', def: 'Retire the system and destroy or securely archive its data. A decommissioned server with readable disks undoes every stage before it.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '24.3 The Security Systems Development Life Cycle (SecSDLC)',
+            headers: ['Phase', 'What happens', 'Key output'],
+            rows: [
+              ['Investigation', 'Management defines the problem, scope, objectives and constraints, and authorises the work', 'Programme charter, feasibility'],
+              ['Analysis', 'Existing policies are reviewed and a risk assessment of current assets and threats is performed', 'Risk register, legal requirements'],
+              ['Logical design', 'The security blueprint is drawn — what controls are needed, independent of product', 'Blueprint, incident and continuity plans'],
+              ['Physical design', 'Specific technologies are evaluated and selected against the blueprint', 'Chosen controls, acceptance criteria'],
+              ['Implementation', 'Controls are bought or built, configured, tested and staff are trained', 'Working, tested controls'],
+              ['Maintenance and change', 'The system is monitored, tested and updated as threats and the business change', 'Continuous assurance'],
+            ],
+          },
+          {
+            type: 'text',
+            text: 'The SecSDLC mirrors the ordinary systems development life cycle stage for stage. That is the point: security is not a separate project running alongside development, it is the same life cycle with security requirements carried through every phase of it.',
+          },
+          {
+            type: 'termlist',
+            heading: '24.4 Phases of the Security Management Life Cycle (Plan-Do-Check-Act)',
+            items: [
+              { term: 'Plan', def: 'Establish the information security management system. Define its scope and the security policy, identify and assess risks, select control objectives and controls, and obtain management approval for the residual risk.' },
+              { term: 'Do', def: 'Implement and operate the ISMS. Deploy the selected controls, allocate resources and responsibilities, train staff, and run the day-to-day security operations and incident handling.' },
+              { term: 'Check', def: 'Monitor and review. Measure control effectiveness, review logs and incidents, run internal audits and management reviews, and re-assess risk in the light of what the measurements show.' },
+              { term: 'Act', def: 'Maintain and improve. Apply corrective and preventive action to the weaknesses found in Check, update the policy, controls and risk assessment, and re-enter Plan. The cycle never terminates.' },
+            ],
+          },
+          {
+            type: 'text',
+            text: 'This is the life cycle of ISO/IEC 27001. Its significance is that security is treated as a continuous management cycle rather than a one-off implementation: a control that was adequate when it was deployed becomes inadequate as the threat changes, and only the Check and Act phases detect that.',
+          },
+          {
+            type: 'termlist',
+            heading: '24.5 The Operational Life Cycle (NIST Cybersecurity Framework)',
+            items: [
+              { term: 'Identify', def: 'Know the assets, data, people, suppliers and risks — you cannot protect what you have not catalogued.' },
+              { term: 'Protect', def: 'Apply the safeguards: access control, awareness training, data security, maintenance, protective technology.' },
+              { term: 'Detect', def: 'Discover events in a timely way through continuous monitoring, anomaly detection and detection processes.' },
+              { term: 'Respond', def: 'Contain and mitigate a detected incident: response planning, communications, analysis, mitigation, improvement.' },
+              { term: 'Recover', def: 'Restore capabilities and services, and feed the lessons back into planning.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '24.6 The Three Compared',
+            headers: ['Model', 'Applies to', 'Phases', 'Answers'],
+            rows: [
+              ['Security design process / SecSDLC', 'One system being built', 'Investigation → Analysis → Logical design → Physical design → Implementation → Maintenance', 'How is security built into this system?'],
+              ['Security management life cycle (PDCA)', 'The organisation’s whole security programme', 'Plan → Do → Check → Act', 'Is the programme still effective?'],
+              ['Operational life cycle (NIST CSF)', 'Day-to-day security operations', 'Identify → Protect → Detect → Respond → Recover', 'What do we do about threats as they arrive?'],
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '24.7 Lifecycle Security Management for Big Data',
+            items: [
+              { term: 'Create / collect', def: 'Classify the data at the point of capture and record its lawful basis and retention period. Everything downstream depends on this label existing.' },
+              { term: 'Store', def: 'Encrypt at rest, replicate for availability, and apply access control at the storage layer rather than trusting each application to enforce it.' },
+              { term: 'Use / process', def: 'Enforce least privilege on the processing cluster, mask or tokenise sensitive fields for analysts who do not need the real values, and log every access.' },
+              { term: 'Share / transmit', def: 'Encrypt in transit, authenticate both ends, and control onward disclosure — including to the analytics tools and third parties the platform feeds.' },
+              { term: 'Archive', def: 'Move cold data to cheaper storage without dropping its classification, and keep the keys needed to read it later.' },
+              { term: 'Destroy', def: 'Delete securely when the retention period expires, across every replica and backup. Data destroyed in the warehouse but left in three caches has not been destroyed.' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The phrase "lifecycle security management" in the course outline means exactly this: security applied at every stage through which data passes, rather than at one boundary. It is the management-side statement of the same idea note 4 states technically — that big data must be protected at all stages because it is constantly in motion.',
+          },
+        ],
+      },
+      {
+        number: '25',
+        title: 'Information Security Policy, Principles and Methodologies',
+        sections: [
+          {
+            type: 'note',
+            text: 'Written from course outline item 6 — "basic policies on information security and methodologies; security risk management" — not from the printed workbook. See the note at the head of topic 23.',
+          },
+          {
+            type: 'definition',
+            heading: '25.1 Definition',
+            text: 'An information security policy is a formal, management-approved statement of the rules governing how an organisation’s information and information systems are to be protected. It states what must be achieved and who is responsible for achieving it, and it derives its force from management authority rather than from technical enforcement.',
+          },
+          {
+            type: 'text',
+            text: 'Policy is the foundation of a security programme because every other element refers back to it. A control with no policy behind it cannot be justified when it is inconvenient; a breach of a rule that was never written down cannot be enforced against the person who breached it.',
+          },
+          {
+            type: 'termlist',
+            heading: '25.2 Policy, Standard, Procedure, Guideline',
+            items: [
+              { term: 'Policy', def: 'Mandatory. States what must be done and why. High level and technology-independent, so it survives the systems it governs. Example: "All confidential data must be encrypted at rest and in transit."' },
+              { term: 'Standard', def: 'Mandatory. States the specific requirement that satisfies the policy. Example: "AES-256 is the approved algorithm for data at rest."' },
+              { term: 'Procedure', def: 'Mandatory. The step-by-step instructions for carrying out the standard. Example: the numbered steps for enabling encryption on a new HDFS cluster.' },
+              { term: 'Guideline', def: 'Advisory. Recommended practice where judgement is allowed. Example: "Prefer managed key services over self-hosted key stores where available."' },
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The distinction is examinable and easy to lose marks on. Policy says what and why; standard says to what specification; procedure says how, step by step; guideline says what is advisable. Only the first three are mandatory.',
+          },
+          {
+            type: 'termlist',
+            heading: '25.3 The Three Types of Information Security Policy',
+            items: [
+              { term: 'Enterprise Information Security Policy (EISP)', def: 'The organisation-wide policy, issued by executive management. Sets the strategic direction, scope, tone and allocation of responsibility for security across the whole organisation. There is one of these.' },
+              { term: 'Issue-Specific Security Policy (ISSP)', def: 'Governs one particular technology or activity — acceptable use of email and the internet, remote working, use of personal devices, use of the analytics platform. There are many of these and they are updated often.' },
+              { term: 'System-Specific Security Policy (SysSP)', def: 'The rules and configurations for one system: access control lists, firewall rulesets, database privileges. Often expressed directly as configuration rather than as prose.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '25.4 Components of an Information Security Policy',
+            items: [
+              { term: 'Purpose / objective', def: 'Why the policy exists and what it is intended to achieve. Without it, the rules read as arbitrary.' },
+              { term: 'Scope', def: 'Who and what the policy applies to — which staff, contractors, systems, data and locations. Ambiguous scope is the most common reason a policy cannot be enforced.' },
+              { term: 'Policy statements', def: 'The rules themselves, written as clear mandatory requirements using "must" and "must not" rather than "should where possible".' },
+              { term: 'Roles and responsibilities', def: 'Who owns the policy, who owns each data set, who approves exceptions, and what is expected of every user. Named roles, not named individuals, so the policy survives staff changes.' },
+              { term: 'Compliance and enforcement', def: 'How compliance is measured, and the consequences of breach — which must be stated for the policy to have any force in a disciplinary process.' },
+              { term: 'Exceptions', def: 'The route by which a legitimate exception is requested, who may approve it, and for how long. Without a documented route, users create undocumented ones.' },
+              { term: 'Review and revision', def: 'How often the policy is reviewed and who approves changes. A policy with no review date silently becomes obsolete.' },
+              { term: 'Definitions and references', def: 'The terms used, and the laws, standards and other policies this one depends on.' },
+              { term: 'Approval and effective date', def: 'The management sign-off and the date from which the policy applies. This is what converts a document into an instruction.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '25.5 Principles of Information Security and How They Protect Organisational Information',
+            headers: ['Principle', 'What it requires', 'How it protects the organisation'],
+            rows: [
+              ['Least privilege', 'Every user and process gets the minimum access needed for its task, and no more', 'Caps the damage of any single compromised account — a stolen analyst login cannot delete the warehouse'],
+              ['Need to know', 'Access is granted to specific data on demonstrated business need, not by seniority', 'Stops sensitive datasets spreading to staff who have no reason to hold them'],
+              ['Separation of duties', 'No single person controls a whole sensitive transaction end to end', 'Makes fraud and unilateral abuse require collusion, which is far harder and easier to detect'],
+              ['Defence in depth', 'Multiple independent layers of control, so no single failure is fatal', 'A bypassed firewall still leaves encryption, access control and monitoring in the attacker’s way'],
+              ['Fail-safe defaults', 'Access is denied unless explicitly granted; on failure the system fails closed', 'A misconfiguration or crash leaves data inaccessible rather than exposed'],
+              ['Complete mediation', 'Every access is checked against authority, every time — never cached and trusted', 'Prevents privilege that was revoked from continuing to work through a stale session'],
+              ['Economy of mechanism', 'Keep security mechanisms as simple as possible', 'Simple controls can be reviewed and verified; complex ones hide flaws'],
+              ['Open design', 'Security rests on the secrecy of keys, not on the secrecy of the design', 'Survives disclosure of the design, and allows the mechanism to be independently reviewed'],
+              ['Psychological acceptability', 'Controls must be usable enough that staff do not route around them', 'An unusable control provides no protection, because it will not be used'],
+              ['Accountability', 'Every action is attributable to a unique identity and logged', 'Enables detection, investigation and discipline — and deters insiders who know they are traceable'],
+            ],
+          },
+          {
+            type: 'definition',
+            heading: '25.6 Information Security Methodologies',
+            text: 'An information security methodology is a structured, repeatable framework for establishing, operating and assessing security, so that the result depends on the method rather than on the judgement of whoever happened to do the work.',
+          },
+          {
+            type: 'termlist',
+            items: [
+              { term: 'ISO/IEC 27001 and 27002', def: '27001 specifies the requirements for an information security management system, run on the Plan-Do-Check-Act cycle of note 24, and is the standard organisations are certified against. 27002 is the companion code of practice giving the control objectives and controls themselves.' },
+              { term: 'NIST Cybersecurity Framework', def: 'Organises security around the five functions Identify, Protect, Detect, Respond and Recover, with implementation tiers describing how mature the practice is. Widely used as a common language between technical and executive staff.' },
+              { term: 'NIST SP 800-53 and SP 800-37', def: '800-53 is a catalogue of security and privacy controls; 800-37 is the Risk Management Framework that selects, implements, assesses, authorises and monitors them across a system’s life.' },
+              { term: 'COBIT', def: 'An IT governance framework. Broader than security alone, it aligns IT objectives, including security, with business objectives and is the usual vehicle when the audit function drives the programme.' },
+              { term: 'OCTAVE', def: 'An asset- and operationally-focused risk assessment methodology, driven by the business units that own the assets rather than by the IT department, which makes the risk decisions the owners’ rather than IT’s.' },
+              { term: 'ISO/IEC 27005', def: 'The information security risk management methodology used alongside 27001: context, identification, analysis, evaluation, treatment, acceptance, communication and monitoring.' },
+              { term: 'Defence in depth', def: 'A design methodology rather than a governance one: layer independent controls so that penetrating one leaves the attacker facing the next.' },
+              { term: 'Zero trust', def: 'Assume no implicit trust from network location. Authenticate and authorise every request, verify device posture, and segment aggressively. The natural fit for big data platforms, which have no meaningful perimeter.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '25.7 Security Risk Management',
+            items: [
+              { term: 'Risk identification', def: 'Inventory the assets, classify them, and identify the threats and vulnerabilities that apply to each.' },
+              { term: 'Risk analysis', def: 'Estimate the likelihood of each threat and the impact if it materialises — qualitatively on a scale, or quantitatively as expected loss.' },
+              { term: 'Risk evaluation', def: 'Rank the risks and compare them against the organisation’s stated risk appetite to decide which need treatment.' },
+              { term: 'Risk treatment', def: 'Choose one of four responses: mitigate by applying controls, transfer by insurance or contract, avoid by not doing the activity, or accept the risk with documented management approval.' },
+              { term: 'Residual risk', def: 'What remains after treatment. It must be explicitly accepted by management, not silently ignored — this is the step that makes the risk decision accountable.' },
+              { term: 'Monitoring and review', def: 'Re-assess as assets, threats and controls change. A risk register that is a year old describes an organisation that no longer exists.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: '25.8 Why Policies Fail',
+            items: [
+              'They are written but never distributed, so staff cannot comply with rules they have not read.',
+              'They are not read or acknowledged, so breach cannot be enforced in a disciplinary process.',
+              'They are unenforceable in practice, so they are ignored and the whole document loses authority.',
+              'They conflict with how the work actually has to be done, so staff build undocumented workarounds.',
+              'They are never reviewed, so they govern systems the organisation retired years ago.',
+              'They have no named owner, so nobody updates them when the environment changes.',
+            ],
+          },
+          {
+            type: 'note',
+            text: 'For a written question on "how the principles contribute to protecting organisational information", the marks are in the third column of the table in 25.5 — not in naming the principle. State the principle, say what it requires, then say what attack or failure it defeats.',
+          },
+        ],
+      },
+      {
+        number: '26',
+        title: 'Big Data Stages, Technologies and Adoption',
+        sections: [
+          {
+            type: 'note',
+            text: 'Written from course outline item 2 — "big data technology, platforms, components, and governance; using the cloud for big data" — not from the printed workbook. See the note at the head of topic 23.',
+          },
+          {
+            type: 'definition',
+            heading: '26.1 The Big Data Life Cycle',
+            text: 'The big data life cycle is the sequence of stages through which data passes from the moment it is generated to the moment it is destroyed. Each stage transforms the data, and each stage has its own security exposure — which is why note 4 insists data must be protected at all stages rather than at a single boundary.',
+          },
+          {
+            type: 'termlist',
+            heading: '26.2 Stages of the Big Data Life Cycle',
+            items: [
+              { term: '1. Data generation', def: 'Data is produced at its sources — M2M sensors and IoT devices, people interacting with systems, and organisational transaction systems. The organisation usually does not control this stage, only what it accepts from it.' },
+              { term: '2. Data acquisition / ingestion', def: 'Data is collected from those sources and moved into the platform, either in batches or as a continuous stream. This is where authentication of the source and validation of the payload belong.' },
+              { term: '3. Data storage', def: 'Data is landed in a distributed file system, data lake or NoSQL store, replicated for durability. The store must handle structured, semi-structured and unstructured data together.' },
+              { term: '4. Data cleaning and pre-processing', def: 'Missing values are handled, duplicates removed, formats normalised, and features scaled or encoded. Poor work here propagates into every result afterwards.' },
+              { term: '5. Data processing and analysis', def: 'Batch or stream processing, statistical analysis and machine-learning modelling — the stage that produces the insight the platform exists for.' },
+              { term: '6. Visualisation and interpretation', def: 'Results are turned into dashboards, charts and reports that a decision maker can act on. An insight nobody can read has produced no value.' },
+              { term: '7. Archival and disposal', def: 'Cold data is moved to cheaper storage and, when its retention period expires, securely destroyed across every replica and backup.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '26.3 Security at Each Stage',
+            headers: ['Stage', 'Principal exposure', 'Control that belongs there'],
+            rows: [
+              ['Generation', 'Spoofed or compromised source devices', 'Device authentication, signed telemetry'],
+              ['Ingestion', 'Interception in transit; poisoned input', 'TLS, mutual authentication, schema and range validation'],
+              ['Storage', 'Bulk theft of the data at rest', 'Encryption at rest, storage-layer access control, replication'],
+              ['Cleaning', 'Analysts handling raw identifiers they do not need', 'Masking, tokenisation, pseudonymisation'],
+              ['Processing / analysis', 'Over-privileged jobs and users; model poisoning', 'Least privilege on the cluster, job isolation, training-data integrity'],
+              ['Visualisation', 'Over-disclosure through a dashboard', 'Row- and column-level access control, aggregation thresholds'],
+              ['Archival / disposal', 'Forgotten copies and readable retired media', 'Retention schedule, key destruction, secure media disposal'],
+            ],
+          },
+          {
+            type: 'table',
+            heading: '26.4 Big Data Technologies by Layer',
+            headers: ['Layer', 'Purpose', 'Representative technologies'],
+            rows: [
+              ['Ingestion', 'Move data from sources into the platform', 'Apache Kafka, Flume, Sqoop, NiFi'],
+              ['Storage', 'Hold large volumes durably and cheaply', 'HDFS, Amazon S3, HBase, Cassandra, MongoDB'],
+              ['Batch processing', 'Process large accumulated datasets', 'MapReduce, Apache Hive, Apache Pig'],
+              ['Stream processing', 'Process data as it arrives, in real time', 'Apache Storm, Apache Flink, Spark Streaming'],
+              ['Resource management', 'Schedule work across the cluster', 'YARN, Apache Mesos, Kubernetes'],
+              ['Analytics and ML', 'Model, predict and classify', 'Apache Spark and MLlib, scikit-learn, TensorFlow'],
+              ['Visualisation', 'Present results to decision makers', 'Tableau, Power BI, Matplotlib, Seaborn'],
+              ['Governance and security', 'Control, audit and catalogue access', 'Apache Ranger, Apache Sentry, Knox Gateway, Kerberos, Apache Atlas'],
+            ],
+          },
+          {
+            type: 'note',
+            text: 'Note 2 gives the same technologies split a different way — Kafka, Storm and Flink as operational big data, Spark and BI tools as analytical. That split is by what the data is for; this one is by where the tool sits in the stack. Both can be asked.',
+          },
+          {
+            type: 'termlist',
+            heading: '26.5 Components of a Big Data Platform',
+            items: [
+              { term: 'Data sources', def: 'The systems, devices and people producing the data.' },
+              { term: 'Ingestion layer', def: 'The pipelines that collect it and deliver it into the platform.' },
+              { term: 'Storage layer', def: 'The distributed file system, data lake or NoSQL stores that hold it.' },
+              { term: 'Processing layer', def: 'The batch and stream engines that transform and compute over it.' },
+              { term: 'Analytics layer', def: 'The statistical, query and machine-learning tools that extract insight.' },
+              { term: 'Visualisation layer', def: 'The dashboards and reports through which insight reaches decision makers.' },
+              { term: 'Governance and security layer', def: 'Authentication, authorisation, encryption, auditing, lineage and data quality — cutting across every layer above rather than sitting between two of them.' },
+            ],
+          },
+          {
+            type: 'definition',
+            heading: '26.6 Big Data Adoption',
+            text: 'Big data adoption is the process by which an organisation moves from not using big data at all to running it as a routine part of how decisions are made. It is an organisational change as much as a technical one: the technology can be bought in a week, and the skills, data culture and governance take years.',
+          },
+          {
+            type: 'termlist',
+            heading: 'Drivers of Adoption',
+            items: [
+              { term: 'Competitive pressure', def: 'Rivals making faster and better-evidenced decisions force the organisation to match them.' },
+              { term: 'Falling cost of storage and computing', def: 'Commodity hardware and cloud pricing brought analysis within reach of organisations that could never have afforded it.' },
+              { term: 'Data availability', def: 'Mobile, social, IoT and transaction systems now generate far more data than the organisation was designed to use.' },
+              { term: 'Customer expectation', def: 'Personalisation, real-time service and instant fraud alerts are expected, and all of them are analytics products.' },
+              { term: 'Regulatory and risk demands', def: 'Anti-fraud, anti-money-laundering and reporting obligations increasingly require analysis at a scale only these platforms provide.' },
+              { term: 'Maturity of the tools', def: 'Managed cloud services removed the need to build and operate a cluster before any analysis could start.' },
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '26.7 Stages of Big Data Adoption',
+            items: [
+              { term: '1. Awareness / educate', def: 'The organisation is learning what big data is and what it might be worth. No investment yet, and no data initiative.' },
+              { term: '2. Exploration / explore', def: 'A business case is developed, requirements and gaps are assessed, and a strategy is drafted.' },
+              { term: '3. Engagement / pilot', def: 'A limited proof of concept is run on a real problem with a real dataset, to test value and feasibility at small scale.' },
+              { term: '4. Execution / adoption', def: 'One or two big data initiatives are deployed into production, delivering value to a specific business function.' },
+              { term: '5. Transformation / optimisation', def: 'Big data is embedded across the organisation: it is how decisions are routinely made, governance is mature, and the platform is continuously extended.' },
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: '26.8 Barriers to Adoption',
+            items: [
+              'Shortage of skills — the categories in note 3 are scarce and expensive, especially in combination.',
+              'Cost of infrastructure and of the specialists to run it.',
+              'Poor data quality, and data locked in departmental silos that will not join.',
+              'Privacy, security and regulatory concerns, particularly where personal data crosses borders.',
+              'Absence of a clear business case, so projects cannot show a return and lose funding.',
+              'Cultural resistance — decision makers who trust experience over evidence.',
+              'Weak data governance: no ownership, no classification, no lineage, so nobody can vouch for a result.',
+              'Integration with legacy systems that were never designed to export their data.',
+            ],
+          },
+          {
+            type: 'bullets',
+            heading: '26.9 Critical Success Factors',
+            items: [
+              'Visible executive sponsorship, and a business problem worth solving as the starting point rather than the technology.',
+              'Start with a narrow pilot that can demonstrate value quickly, then extend.',
+              'Data governance from the beginning — ownership, classification and quality — not retrofitted after the platform is full.',
+              'Security and privacy designed in at each life-cycle stage, per topic 24.',
+              'Investment in skills, both by hiring and by training the analysts already in the organisation.',
+              'Results delivered in a form decision makers actually use, which is a communication problem as much as a technical one.',
+            ],
+          },
+          {
+            type: 'termlist',
+            heading: '26.10 Using the Cloud for Big Data',
+            items: [
+              { term: 'Elasticity', def: 'Capacity is added for a large job and released afterwards, so the organisation stops paying for a cluster sized for its busiest hour.' },
+              { term: 'No capital outlay', def: 'Storage and computing are rented, which removes the up-front investment that blocks most first big data projects.' },
+              { term: 'Managed services', def: 'The provider operates the cluster, so a small team can run a platform that would otherwise need specialist staff.' },
+              { term: 'Global reach', def: 'Data can be processed near where it is generated — which is also where data-residency law becomes a constraint.' },
+              { term: 'The trade-off', def: 'Data leaves the organisation’s own infrastructure. Multi-tenancy, provider access, jurisdiction and vendor lock-in all become security and compliance questions that an on-premises cluster never raised.' },
+            ],
+          },
+          {
+            type: 'table',
+            heading: '26.11 The Shared Responsibility Model',
+            headers: ['Responsibility', 'Cloud provider', 'Customer'],
+            rows: [
+              ['Physical data centre and hardware', 'Yes', 'No'],
+              ['Hypervisor, host OS, network infrastructure', 'Yes', 'No'],
+              ['Guest OS patching (IaaS)', 'No', 'Yes'],
+              ['Application and platform configuration', 'No', 'Yes'],
+              ['Identity and access management', 'Provides the service', 'Configures who may access what'],
+              ['Encryption of customer data and key management', 'Provides the service', 'Decides what is encrypted and controls the keys'],
+              ['Classification of the data', 'No', 'Yes'],
+            ],
+          },
+          {
+            type: 'note',
+            text: 'The rule the model reduces to: the provider is responsible for security *of* the cloud, and the customer for security *in* the cloud. Almost every publicised cloud data breach has been a customer-side misconfiguration — an open storage bucket, an over-permissive access policy — not a failure of the provider’s infrastructure.',
+          },
+        ],
+      },
     ],
     quiz: [
       // Note 1 — Introduction to Big Data Security
@@ -7625,9 +8100,9 @@ print(summary_df.to_string(index=False))`,
     // aid of a diagram", "state the steps" — so the course needs both forms.
     // See src/data/lectureNotes/cyb224ExamPrep.js.
     examPrep: cyb224ExamPrep,
-    // How the 22 topics relate to each other. The notes are transcribed from
-    // two sources and no algorithm is taught in one place, so each topic needs
-    // to say what completes it. See src/data/lectureNotes/cyb224Map.js.
+    // How the 26 topics relate to each other. The notes come from three sources
+    // and no algorithm is taught in one place, so each topic needs to say what
+    // completes it. See src/data/lectureNotes/cyb224Map.js.
     noteMap: cyb224Map,
   },
   {

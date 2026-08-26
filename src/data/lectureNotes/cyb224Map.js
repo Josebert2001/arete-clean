@@ -1,10 +1,15 @@
 // CYB 224 — the links between the topics.
 //
-// The 22 notes are transcribed faithfully from two sources (class sessions for
+// Notes 1-22 are transcribed faithfully from two sources (class sessions for
 // 1-3, the printed workbook for 4-22), and neither source was written to be
 // read as one course. The result is that no algorithm is taught in one place,
 // anomaly detection is introduced five separate times, and k-NN's practical
 // (note 17) sits three topics *before* the theory that explains it (note 20).
+//
+// Notes 23-26 are different again: they are authored from the course outline
+// and the set texts to cover outline items 2, 4, 5 and 6, which neither source
+// ever handed out. They sit at the end of the list but belong near the front of
+// the reading order, which is exactly the kind of thing this file exists to say.
 //
 // Nothing here changes a word of the transcription. This file is a separate
 // layer that says how the existing topics relate: which part of the course a
@@ -31,14 +36,14 @@ export const cyb224Map = {
     {
       id: 'A',
       title: 'What big data is',
-      topics: ['1', '2', '3'],
-      blurb: 'The vocabulary. Characteristics, where the data comes from, and the skills the rest of the course assumes.',
+      topics: ['1', '2', '3', '26'],
+      blurb: 'The vocabulary. Characteristics, where the data comes from, the stages it passes through, the technology stack, and the skills the rest of the course assumes.',
     },
     {
       id: 'B',
-      title: 'Securing it',
-      topics: ['4'],
-      blurb: 'The one topic that is classical information security: why perimeter thinking fails at scale, and the four pillars that replace it.',
+      title: 'Securing and managing it',
+      topics: ['4', '23', '24', '25'],
+      blurb: 'The classical information security half of the course: why perimeter thinking fails at scale and the four pillars that replace it (4), then the management side — objectives, the design process and life cycles, policy, principles and methodologies (23-25).',
     },
     {
       id: 'C',
@@ -160,6 +165,16 @@ export const cyb224Map = {
       note: 'The stop-sign attack (5), attacker economics (6), and the same question asked as an activity in both 7 and 11.',
     },
     {
+      name: 'Protecting data at every stage',
+      notes: ['4', '24', '26'],
+      note: 'Note 4 says data must be protected at all stages because it is constantly in motion; note 26 lists what those stages actually are; note 24 attaches a control to each of them and calls the result lifecycle security management. Three statements of one idea.',
+    },
+    {
+      name: 'Life cycles',
+      notes: ['24', '26'],
+      note: 'Four different life cycles are named across these two notes and are easy to confuse: the security design process / SecSDLC (building one system), Plan-Do-Check-Act (running the security programme), Identify-Protect-Detect-Respond-Recover (day-to-day operations), and the big data life cycle (what happens to the data). The table in 24.6 separates the first three; note 26 owns the fourth.',
+    },
+    {
       name: 'The Vs',
       notes: ['1', '4'],
       note: 'Five Vs as characteristics of big data (1); three of the same Vs as reasons traditional security fails (4). Different purposes, not a contradiction.',
@@ -170,12 +185,16 @@ export const cyb224Map = {
   topics: {
     '1': {
       part: 'A',
-      continuesIn: [{ n: '4', why: 'the workbook’s own security definition, and three of these same Vs' }],
+      continuesIn: [
+        { n: '26', why: 'the stages this data passes through, and the technology stack that moves it' },
+        { n: '4', why: 'the workbook’s own security definition, and three of these same Vs' },
+      ],
       alsoSee: [{ n: '4', why: 'the 3Vs there are these Vs used for a different purpose' }],
     },
     '2': {
       part: 'A',
       buildsOn: [{ n: '1', why: 'what big data is' }],
+      alsoSee: [{ n: '26', why: 'the same technologies split by layer instead of by purpose' }],
     },
     '3': {
       part: 'A',
@@ -184,14 +203,21 @@ export const cyb224Map = {
         { n: '13', why: 'the analytical skills listed here, actually performed' },
         { n: '15', why: 'the programming and framework skills, as real libraries' },
       ],
+      alsoSee: [{ n: '26', why: 'the adoption barriers these skills are the answer to' }],
     },
     '4': {
       part: 'B',
       buildsOn: [{ n: '1', why: 'the characteristics of big data' }],
-      continuesIn: [{ n: '5', why: 'the threats these pillars defend against' }],
+      continuesIn: [
+        { n: '5', why: 'the threats these pillars defend against' },
+        { n: '23', why: 'the management half — what these controls are meant to achieve, and who is accountable' },
+      ],
       alsoSee: [
         { n: '1', why: 'five Vs there, three here — read them together' },
         { n: '7', why: 'the UEBA mentioned here is anomaly detection, covered properly there' },
+        { n: '24', why: '"protect at all stages" restated as lifecycle security management, with a control per stage' },
+        { n: '25', why: 'the policy and principles a big data security programme is written from' },
+        { n: '26', why: 'the governance and security layer, in its place in the platform stack' },
       ],
     },
     '5': {
@@ -392,6 +418,45 @@ export const cyb224Map = {
         { n: '16', why: 'the same EDA moves, on a different dataset' },
         { n: '20', why: 'the k-NN theory behind one of the four models' },
       ],
+    },
+    '23': {
+      part: 'B',
+      buildsOn: [{ n: '4', why: 'the technical controls this topic decides how to manage' }],
+      continuesIn: [
+        { n: '24', why: 'the process and life cycles that deliver these objectives' },
+        { n: '25', why: 'the policy and principles that put them in writing' },
+      ],
+      alsoSee: [{ n: '26', why: 'the life cycle and adoption picture the management problem sits inside' }],
+      warning: 'Printed last, but belongs immediately after note 4. It is the management half of the same subject.',
+    },
+    '24': {
+      part: 'B',
+      buildsOn: [{ n: '23', why: 'the objectives the process exists to deliver' }],
+      continuesIn: [{ n: '25', why: 'the policy and design principles applied in the design stage' }],
+      alsoSee: [
+        { n: '4', why: 'the same "protect at all stages" idea, stated technically' },
+        { n: '26', why: 'the big data life cycle these controls attach to' },
+      ],
+    },
+    '25': {
+      part: 'B',
+      buildsOn: [{ n: '23', why: 'the objectives policy is written to achieve' }],
+      alsoSee: [
+        { n: '24', why: 'where in the design process these principles are applied' },
+        { n: '4', why: 'the pillars a big data security policy has to mandate' },
+      ],
+    },
+    '26': {
+      part: 'A',
+      buildsOn: [{ n: '1', why: 'what big data is and where it comes from' }],
+      continuesIn: [{ n: '24', why: 'securing each of these stages, as lifecycle security management' }],
+      alsoSee: [
+        { n: '2', why: 'the same technologies split by purpose rather than by layer' },
+        { n: '3', why: 'the skills each stage of the life cycle demands' },
+        { n: '4', why: 'the governance and security layer, in detail' },
+        { n: '23', why: 'why this scale and these copies make security management harder' },
+      ],
+      warning: 'Printed last, but belongs with notes 1-3.',
     },
   },
 };
