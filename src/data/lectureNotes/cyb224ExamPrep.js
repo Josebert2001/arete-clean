@@ -63,6 +63,19 @@ export const cyb224ExamPrep = [
 
   {
     type: 'longform',
+    marks: 6,
+    source: 'Topic 1 · Characteristics of Big Data — The 5Vs',
+    question: 'The class notes for Big Data Security use 5Vs, while the concepts topic later uses only 3Vs. Explain what each set of Vs is used for, and name the two Vs that are dropped.',
+    modelAnswer: 'Both sets describe characteristics of big data, but they are used for different purposes. The 5Vs — Volume, Velocity, Variety, Veracity and Value — describe big data itself: how much of it there is, how fast it arrives, how many forms it takes, how trustworthy it is, and what insight can be extracted from it. The 3Vs used later, when discussing why traditional security fails at big-data scale, are Volume, Velocity and Variety only — the three that directly explain why a perimeter firewall around a static database cannot cope: too much data to scan, arriving too fast to inspect in time, in too many formats for one policy to cover. Veracity and Value are dropped from that second use because they describe the quality and usefulness of the data rather than the reason security controls at that scale need to be different.',
+    markScheme: [
+      '5Vs correctly stated to describe big data itself (2)',
+      '3Vs correctly stated to explain why traditional security fails at scale (2)',
+      'Veracity and Value named as the two dropped from the security-challenge use (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
     marks: 10,
     source: 'Topic 2 · Operational Big Data; Analytical Big Data; Comparison',
     question: 'Differentiate between operational and analytical big data. In your answer, give TWO examples and TWO technologies for each.',
@@ -75,6 +88,33 @@ export const cyb224ExamPrep = [
       'Two analytical examples given (1)',
       'Two analytical technologies named from Spark, BI tools, ML platforms (1)',
       'Any two further points of difference stated — nature, purpose, data freshness or focus (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 7,
+    source: 'Topic 2 · Operational Big Data — Advantages & Disadvantages',
+    question: 'State FOUR advantages and THREE disadvantages of operational big data.',
+    modelAnswer: 'Operational big data allows real-time decision making, since data is processed as it is generated; it enables a faster response to customer needs, because the system reacts within the same session rather than after the fact; it improves operational efficiency, by feeding daily transactional processes directly; and it enhances customer experience, since services built on it, such as fraud alerts or live order tracking, respond immediately. Against this, operational big data carries a high infrastructure cost, because sustaining real-time processing at scale needs continuously running clusters rather than periodic batch jobs; it raises data security concerns, since sensitive transactional data is in motion constantly rather than sitting still to be secured once; and it is complex to manage, requiring specialised skills to keep streaming systems such as Kafka, Storm and Flink running reliably.',
+    markScheme: [
+      'Any four advantages named from real-time decision making, faster response to customer needs, improved operational efficiency, enhanced customer experience (4)',
+      'Any three disadvantages named from high infrastructure cost, data security concerns, complex management (3)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 6,
+    source: 'Topic 2 · Operational Big Data — Sources',
+    question: 'Name the SIX sources of operational big data given in the notes.',
+    items: [
+      { name: 'Social media activities', aliases: ['social media'], explain: 'Posts, likes and interactions generated continuously by users.' },
+      { name: 'Online transactions', aliases: [], explain: 'Purchases and transfers processed as they happen.' },
+      { name: 'ATM transactions', aliases: ['atm'], explain: 'Cash withdrawals and balance checks logged in real time.' },
+      { name: 'Sensor and IoT devices', aliases: ['iot', 'sensors'], explain: 'Connected devices reporting readings continuously.' },
+      { name: 'Mobile applications', aliases: ['mobile apps'], explain: 'App usage and interaction data generated on the go.' },
+      { name: 'GPS tracking systems', aliases: ['gps'], explain: 'Location data streamed from vehicles or devices in motion.' },
     ],
   },
 
@@ -103,6 +143,34 @@ export const cyb224ExamPrep = [
       'Second category named and explained (2)',
       'Third category named and explained (2)',
       'Fourth category named and explained (2)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 5,
+    source: 'Topic 3 · Problem Solving — Steps',
+    question: 'State the FIVE steps of the data-driven problem-solving process, in order.',
+    items: [
+      { name: 'Identify the problem', aliases: [], explain: 'Step 1 — state what is actually being solved before collecting anything.' },
+      { name: 'Collect relevant data', aliases: [], explain: 'Step 2 — gather the data that bears on the identified problem.' },
+      { name: 'Analyse the data', aliases: [], explain: 'Step 3 — examine the collected data for patterns and answers.' },
+      { name: 'Generate insights', aliases: [], explain: 'Step 4 — turn the analysis into a finding that means something.' },
+      { name: 'Recommend solutions', aliases: [], explain: 'Step 5 — propose an action based on the insight.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    source: 'Topic 3 · Case Study — Improving Student Performance with Big Data Analytics',
+    question: 'The University of Uyo wants to improve student performance using big data analytics. Identify TWO possible data sources, state the type of analytics that should be applied, and give ONE benefit and ONE challenge of the project.',
+    modelAnswer: 'Two data sources already held by the university are semester results and GPA history per course, and student-portal login and activity logs; lecture attendance registers and library borrowing records would serve equally well. All four types of analytics apply, in order: descriptive analytics answers what happened, for example pass rates by course and level; diagnostic analytics asks why, identifying which factors track with failure; predictive analytics identifies which students are likely to carry over a course while there is still time to intervene; and prescriptive analytics recommends which intervention to offer whom. One benefit is that at-risk students can be identified before they carry over a course, so support reaches them while it can still help. One challenge is that student records are scattered across departments with no single student identifier linking them, which has to be resolved before any of the analytics above can run.',
+    markScheme: [
+      'Two plausible data sources identified from the university\'s own records (3)',
+      'All four analytics types named in order — descriptive, diagnostic, predictive, prescriptive (4)',
+      'One benefit stated (1.5)',
+      'One challenge stated (1.5)',
     ],
   },
 
@@ -283,6 +351,44 @@ export const cyb224ExamPrep = [
     ],
   },
 
+  {
+    type: 'longform',
+    marks: 9,
+    source: 'Topic 6 · Activity 1: Economic Motivation Analysis',
+    question: 'State and explain why cyber-attacks have shifted from reputation-based to monetary motivations, why attackers might avoid large financial institutions despite the high potential reward, and how weaker organizations become attractive targets in the attacker economy.',
+    modelAnswer: 'The shift to monetary motivation came with the rise of e-commerce, cryptocurrency and organised cybercrime markets, which made data and access directly convertible to cash, turning attacks into a business rather than a hobby. Attackers often avoid large financial institutions despite the high potential reward because those institutions invest heavily in security — SOC teams for detection, encryption, and regulatory compliance — which makes attacking them costly and risky to execute. Weaker organizations become attractive targets instead, because small businesses typically have limited security budgets, no dedicated IT or security staff, and outdated systems, so the same effort yields a far higher chance of success.',
+    markScheme: [
+      'Shift to monetary motivation explained — e-commerce, cryptocurrency and crime markets making data convertible to cash (3)',
+      'Avoidance of large institutions explained — heavy investment in SOC, encryption and compliance raises cost and risk (3)',
+      'Weaker organizations explained as targets — limited budgets, no dedicated staff, outdated systems (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Topic 6 · Activity 2: Attack Supply Chain Mapping',
+    question: 'A case scenario asks: what economic incentive might motivate the attacker, and which machine learning approach would you recommend — supervised, anomaly detection, or hybrid? Explain your choice.',
+    modelAnswer: 'The economic incentive is either the stored payment data the target holds, which converts directly to cash, or the ransom potential from disrupting a business that cannot afford downtime. The recommended approach is a hybrid: supervised learning catches known attack patterns effectively, because it has been trained on labeled examples of exactly those patterns, while anomaly detection catches unknown attacks that do not match any existing signature — the combination covers both what has been seen before and what has not.',
+    markScheme: [
+      'Economic incentive identified — stored payment data or ransom potential (3)',
+      'Hybrid approach recommended, with both halves justified — supervised for known patterns, anomaly detection for unknown attacks (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 9,
+    source: "Topic 6 · Activity — Attacker Economics, Adversarial ML, Underground Marketplace",
+    question: 'Explain how understanding attacker economics improves defensive strategy design, why cybersecurity is considered an adversarial machine learning problem, and how the underground marketplace accelerates threat evolution.',
+    modelAnswer: 'Understanding attacker economics improves defensive design because knowing what makes a target profitable — weak security, valuable data — helps a defender prioritise protecting the most attractive assets first, rather than spreading effort evenly. Cybersecurity is considered an adversarial machine learning problem because, unlike a static dataset, the data is generated by an intelligent opponent who actively adapts to evade detection, so a model that works today can be defeated by a change in attacker behaviour tomorrow. The underground marketplace accelerates threat evolution because attackers buy, sell and share tools and techniques instantly, so improvements to an attack spread across the criminal community far faster than defenders can respond to any single instance of it.',
+    markScheme: [
+      'Attacker economics improving defensive design — prioritising the most attractive assets (3)',
+      'Adversarial ML explained — data generated by an adapting opponent, not a static dataset (3)',
+      'Underground marketplace explained — instant sharing spreads improvements faster than defenders can respond (3)',
+    ],
+  },
+
   // ══════════════════════════════════════════════════════════════════
   //  TOPIC 7 — MACHINE LEARNING FOR DATA SECURITY
   // ══════════════════════════════════════════════════════════════════
@@ -329,6 +435,32 @@ export const cyb224ExamPrep = [
       'Three ways ML enhances access control — learns typical patterns, identifies abnormal behaviour, provides adaptive responses (3)',
       'Hospital example — nurses access individual records, doctors query multiple records (2)',
       'Detects abnormal patterns without blocking legitimate rare events (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 9,
+    source: 'Topic 7 · Activity: Machine Learning Application',
+    question: 'State which threats are best suited to supervised learning detection models and why, which threats may require anomaly detection instead and why, and what makes cybersecurity data different from standard ML datasets.',
+    modelAnswer: 'Threats best suited to supervised learning are well-labeled ones such as phishing, malware and spam, because there is plenty of historical labeled data to train a model on. Threats requiring anomaly detection instead are zero-day attacks, insider threats and unusual network behaviour, where no prior labeled examples exist for a model to learn from. What makes cybersecurity data different from standard ML datasets is that attacks are rare compared with normal traffic, patterns constantly evolve, adversaries actively try to evade detection, and labeled attack data is scarce and sensitive to collect.',
+    markScheme: [
+      'Supervised-learning-suited threats named with reason — well-labeled, plenty of historical data (3)',
+      'Anomaly-detection-requiring threats named with reason — no prior labeled examples (3)',
+      'Cybersecurity data distinguished from standard datasets — rare, evolving, adversarial, scarce labels (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 9,
+    source: 'Topic 7 · Activity — Attacker Motivations, Adversarial ML, Zero-Day Signatures',
+    question: 'Explain why it is important to understand attacker motivations before designing detection systems, how the adversarial nature of cybersecurity affects machine learning model design, and why zero-day vulnerabilities are difficult to detect using signature-based systems.',
+    modelAnswer: 'Understanding attacker motivations first matters because motivation predicts behaviour — a financially driven attacker goes after payment data and credentials, while an espionage actor goes after long, quiet access — and knowing which you face tells you which assets to instrument, what normal looks like around them, and which detections are worth the false positives they generate. The adversarial nature of cybersecurity changes model design because the data is produced by an opponent who watches your defences and adapts, so models must be retrained continuously, be robust to deliberately crafted inputs, and avoid relying on features an attacker can cheaply change. Signature-based systems miss zero-days because a signature can only match something already seen and catalogued, and a zero-day is by definition unseen, so no signature exists for it — which is why behavioural and anomaly-based detection is needed alongside signatures.',
+    markScheme: [
+      'Attacker motivations explained as predicting behaviour and shaping what to instrument (3)',
+      'Adversarial nature explained — continuous retraining, robustness to crafted inputs, avoiding cheaply-changed features (3)',
+      'Signature-based detection explained to fail on zero-days because no prior match exists (3)',
     ],
   },
 
@@ -509,6 +641,31 @@ export const cyb224ExamPrep = [
     ],
   },
 
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Topic 9 · Discussion — Overfitting Across Algorithms',
+    question: 'State how overfitting can arise when a Decision Tree, SVM or Neural Network is trained to detect network attacks, and state THREE techniques that could reduce it.',
+    modelAnswer: 'The model learns the capture instead of the attack. Identifier-like features are the worst offenders: a model that splits on a specific source IP address or port scores perfectly on the capture and detects nothing once the attacker moves host, and because benign traffic heavily outnumbers attacks, the model can report high accuracy while missing every intrusion in the set. Techniques to reduce this include dropping or generalising identifier-like features — bucketing ports into ranges instead of splitting on one number, and preferring behavioural features such as packet rate, byte entropy and SYN-to-ACK ratio that an attacker cannot change for free; constraining model complexity, such as maximum depth and minimum samples per leaf for a tree, or a smaller C for an SVM; and validating on traffic captured on a different day, or cross-validating and rebalancing the classes, rather than trusting one split.',
+    markScheme: [
+      'Overfitting explained — model learns identifier-like features (IP, port) rather than the attack pattern (3)',
+      'Class imbalance noted — high accuracy possible while missing every intrusion (1)',
+      'Any three reduction techniques stated — generalising features, constraining model complexity, validating on different data (4)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Topic 9 · Which Model Is Suitable For',
+    question: 'State which machine learning model suits a small labeled dataset from a university network, and which suits a massive real-time traffic dataset, giving a reason for each.',
+    modelAnswer: 'A Support Vector Machine suits a small labelled dataset from a university network, because SVMs generalise well from relatively small labelled datasets, and since the margin is fixed by only a handful of support vectors, a few hundred labelled flows can still place a usable boundary. A Neural Network suits a massive real-time traffic dataset, because it delivers its best performance on large and complex datasets and, once trained, predicts cheaply, which is what real-time operation depends on.',
+    markScheme: [
+      'SVM given for the small labelled dataset, with the support-vector reason (3)',
+      'Neural network given for the massive real-time dataset, with the cheap-prediction reason (3)',
+    ],
+  },
+
   // ══════════════════════════════════════════════════════════════════
   //  TOPICS 10-11 — OTHER PARADIGMS, DETECTION AND MITIGATION
   // ══════════════════════════════════════════════════════════════════
@@ -540,6 +697,20 @@ export const cyb224ExamPrep = [
       'CNN security application — traffic as images, or malware detection from binary code (2)',
       'RNNs explained — designed for sequential data, suited to time-series analysis (2)',
       'RNN security application — anomalies over time, ongoing attacks or data exfiltration (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Topic 10 · Anomaly Detection; Markov Decision Processes (MDP)',
+    question: 'Name the TWO techniques commonly used for anomaly detection within unsupervised learning, and explain the role of a Markov Decision Process in reinforcement learning for network security, with an example.',
+    modelAnswer: 'The two techniques commonly used for anomaly detection are Gaussian Mixture Models and Principal Component Analysis, both used to identify data points that deviate significantly from the majority of the data — in network security this surfaces unusual traffic patterns that may indicate a security breach. A Markov Decision Process provides the mathematical framework for modeling decision-making in situations where outcomes are partly random and partly under the control of the decision-maker, which is what a reinforcement learning agent needs in order to learn a policy rather than a single fixed rule. In network security, reinforcement learning built on this framework can be used to develop adaptive security policies that respond to evolving threats — for example, a reinforcement learning model could be trained to dynamically adjust firewall rules based on detected threats, optimizing the balance between security and network performance.',
+    markScheme: [
+      'GMM and PCA named as the two anomaly-detection techniques (2)',
+      'What they detect stated — data points deviating significantly from the majority (2)',
+      'MDP explained — outcomes partly random, partly under the decision-maker\'s control (2)',
+      'Firewall-rule adjustment example given (2)',
     ],
   },
 
@@ -584,6 +755,46 @@ export const cyb224ExamPrep = [
       'Behavioral analysis explained, with zero-day attacks and APTs as what it catches (3)',
       'Predictive modeling explained, with DDoS forecasting from traffic-volume trends (3)',
       'Risk assessment explained — impact and likelihood, prioritising high-value assets (3)',
+    ],
+  },
+
+  {
+    type: 'recall',
+    marks: 4,
+    source: 'Topic 11 · Activity 2: Supervised vs Unsupervised',
+    question: 'Classify each of the FOUR scenarios below as supervised or unsupervised learning, stating why: spam detection; unknown network traffic patterns; malware family classification; insider behavior anomaly detection.',
+    items: [
+      { name: 'Spam detection — Supervised', aliases: ['spam detection'], explain: 'Labeled examples of spam and non-spam are available.' },
+      { name: 'Unknown network traffic patterns — Unsupervised', aliases: ['unknown network traffic patterns'], explain: 'No prior labels exist for new or evolving attack patterns.' },
+      { name: 'Malware family classification — Supervised', aliases: ['malware family classification'], explain: 'Historical data exists for the different malware families.' },
+      { name: 'Insider behavior anomaly detection — Unsupervised', aliases: ['insider behavior anomaly detection', 'insider threat detection'], explain: 'Insider threats are rare and often lack predefined labels.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 9,
+    source: 'Topic 11 · Activity 3: Adversarial Thinking',
+    question: 'How might attackers use machine learning to bypass security systems? Why must machine learning systems in cybersecurity consider adversarial threats? What is adversarial machine learning?',
+    modelAnswer: 'Attackers can use machine learning to generate evasive malware, craft sophisticated phishing campaigns, or learn to mimic normal user behaviour so as to avoid detection. Machine learning systems in cybersecurity must consider adversarial threats because attackers actively adapt to evade detection, so models must be robust against adversarial examples and continuously updated to counter new evasion techniques — a model trained once and left alone degrades as the attacker learns its blind spots. Adversarial machine learning is the field that studies the vulnerability of ML models to malicious inputs, or adversarial examples, and develops techniques to make those models more robust against them.',
+    markScheme: [
+      'Attacker use of ML explained — evasive malware, phishing, mimicking normal behaviour (3)',
+      'Why adversarial threats must be considered — robustness and continuous updating against active adaptation (3)',
+      'Adversarial machine learning defined (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 10,
+    source: 'Topic 11 · Activity 5: Case Study',
+    question: 'A company observes that one employee suddenly accesses 50 times more files than usual, at 2:00 AM, from a new geographic location. State whether this is a pattern-recognition or anomaly-detection problem, name THREE features you would extract to analyze it, and state the risk of a false positive and the risk of a false negative.',
+    modelAnswer: 'This is an anomaly-detection problem, because the scenario describes a significant deviation from the employee\'s usual behaviour in time, volume and location, rather than a match to a known malicious signature. Features to extract include the login time, the login location such as IP address or geo-coordinates, the number of files accessed, the type of files accessed, and the employee\'s own historical access pattern compared with typical access patterns for users in similar roles. The risk of a false positive is that flagging legitimate activity as malicious causes unnecessary investigations, user inconvenience, and erosion of trust in the security system. The risk of a false negative is that missing genuine malicious activity can result in a data breach, financial loss, reputational damage, and compromise of the entire system.',
+    markScheme: [
+      'Anomaly detection identified, with the reason — deviation in time, volume and location (2)',
+      'Any three features named (3)',
+      'False positive risk stated — unnecessary investigation, inconvenience, eroded trust (2.5)',
+      'False negative risk stated — breach, financial loss, reputational damage, compromise (2.5)',
     ],
   },
 
@@ -649,6 +860,22 @@ export const cyb224ExamPrep = [
   },
 
   {
+    type: 'recall',
+    marks: 7,
+    source: 'Topic 13 · Functions of EDA',
+    question: 'Name the FOUR functions of Exploratory Data Analysis, and the THREE libraries typically used to perform it.',
+    items: [
+      { name: 'Discover patterns', aliases: [], explain: 'A function of EDA — surfacing regularities in the data.' },
+      { name: 'Detect errors or missing values', aliases: [], explain: 'A function of EDA — catching bad data before modeling.' },
+      { name: 'Identify relationships between variables', aliases: [], explain: 'A function of EDA — seeing how variables move together.' },
+      { name: 'Check assumptions for modeling', aliases: [], explain: 'A function of EDA — confirming the data fits what a model expects.' },
+      { name: 'Pandas', aliases: ['pd'], explain: 'Used for data handling.' },
+      { name: 'Matplotlib', aliases: ['pyplot', 'plt'], explain: 'Used for basic plots.' },
+      { name: 'Seaborn', aliases: ['sns'], explain: 'Used for advanced visuals.' },
+    ],
+  },
+
+  {
     type: 'longform',
     marks: 12,
     source: 'Topic 14 · Model Evaluation',
@@ -676,6 +903,18 @@ export const cyb224ExamPrep = [
   },
 
   {
+    type: 'longform',
+    marks: 6,
+    source: 'Topic 14 · Precision; Recall (Sensitivity)',
+    question: 'Distinguish between precision and recall, giving the equation for each and explaining what a high value of each indicates for an intrusion detection system.',
+    modelAnswer: 'Precision is TP / (TP + FP), the proportion of positive predictions that are actually correct; a high precision value means the model produces fewer false alarms, so an analyst is rarely called to investigate traffic that turns out to be benign. Recall is TP / (TP + FN), the proportion of actual positive cases the model correctly identifies; a high recall value means the model misses fewer real intrusions. The two pull in different directions — a model tuned purely for precision lets more real attacks slip through as it becomes pickier about what it flags, while a model tuned purely for recall raises more false alarms as it flags more aggressively — which is why an IDS is rarely judged on either alone.',
+    markScheme: [
+      'Precision defined with its equation, and what a high value means — fewer false alarms (3)',
+      'Recall defined with its equation, and what a high value means — fewer missed intrusions (3)',
+    ],
+  },
+
+  {
     type: 'recall',
     marks: 4,
     source: 'Topic 15 · Different Libraries for Big Data Manipulation',
@@ -685,6 +924,51 @@ export const cyb224ExamPrep = [
       { name: 'NumPy', aliases: ['np'], explain: 'Numerical computations and array operations — handles large numerical data, supports mathematical operations, works with multi-dimensional arrays.' },
       { name: 'Matplotlib', aliases: ['pyplot', 'plt'], explain: 'Basic data visualization — line charts, bar charts and histograms. Drawing graphs from scratch.' },
       { name: 'Seaborn', aliases: ['sns'], explain: 'Advanced and attractive statistical visualizations — builds on Matplotlib and handles complex visuals easily.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    language: 'python',
+    source: 'Topic 15 · Pandas',
+    question: 'Write a Python script using Pandas that loads a dataset from "data.csv", then views its first rows, prints summary statistics and checks for missing values.',
+    modelAnswer: 'Pandas is imported as pd. pd.read_csv loads the file into a DataFrame. df.head() previews the first rows so you can see the columns and a sample of the values. df.describe() computes summary statistics — count, mean, standard deviation and quartiles — for the numeric columns. df.isnull().sum() counts missing values per column, which is the check that decides whether preprocessing is needed before anything else runs.',
+    modelCode: String.raw`import pandas as pd
+
+df = pd.read_csv("data.csv")   # Load dataset
+df.head()                      # View first rows
+df.describe()                  # Summary statistics
+df.isnull().sum()              # Check missing values`,
+    markScheme: [
+      'import pandas as pd, and pd.read_csv used to load the file (2)',
+      'df.head() used to view the first rows (1)',
+      'df.describe() used for summary statistics (1.5)',
+      'df.isnull().sum() used to check missing values (1.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    language: 'python',
+    source: 'Topic 15 · Seaborn',
+    question: "The Seaborn snippet below is missing an import line and will crash on df.corr() if df carries any non-numeric columns. Identify both faults and give the corrected script.",
+    code: String.raw`# df is the DataFrame loaded in the Pandas example above
+sns.countplot(x='label', data=df)
+sns.heatmap(df.corr())
+sns.boxplot(x='label', y='value', data=df)`,
+    modelAnswer: "The snippet never imports seaborn, so running it exactly as printed raises a NameError on sns the moment the first line runs. Even once seaborn is imported, df.corr() crashes if df carries any non-numeric columns, because corr() cannot compute a correlation over text — traffic data such as UNSW-NB15 mixes numeric byte counts with categorical columns such as protocol and service, so this is not a hypothetical case. Two fixes are needed: add import seaborn as sns at the top, and call df.corr(numeric_only=True) so the text columns are skipped.",
+    modelCode: String.raw`import seaborn as sns
+
+# df is the DataFrame loaded in the Pandas example above
+sns.countplot(x='label', data=df)             # Bar chart
+sns.heatmap(df.corr(numeric_only=True))       # Correlation heatmap
+sns.boxplot(x='label', y='value', data=df)    # Boxplot`,
+    markScheme: [
+      'Missing import identified — sns is used but never imported (2)',
+      'df.corr() crash explained — cannot handle non-numeric columns, and traffic data carries them (2)',
+      'Corrected script adds the import and numeric_only=True (2)',
     ],
   },
 
@@ -706,6 +990,56 @@ export const cyb224ExamPrep = [
       'Matplotlib role — visualizes clusters so outliers can be identified (1.5)',
       'All five workflow steps stated in order (3)',
       'Practical example given — normal small downloads against a 10 GB transfer at 3:00 AM (1)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 19 · Python Implementation',
+    question: 'Write Python code using NumPy, scikit-learn\'s KMeans and Matplotlib that clusters network-activity data given as [Data Volume, Session Duration] pairs into TWO clusters, plots the points coloured by cluster label, and marks the cluster centres.',
+    modelCode: String.raw`import numpy as np
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Format: [Data Volume, Session Duration]
+data = np.array([[1, 2],
+                 [1, 1],
+                 [2, 1.5],
+                 [10, 10]])   # potential threat (anomaly)
+
+kmeans = KMeans(n_clusters=2, random_state=42)
+kmeans.fit(data)
+
+plt.scatter(data[:, 0], data[:, 1], c=kmeans.labels_)
+plt.scatter(kmeans.cluster_centers_[:, 0],
+            kmeans.cluster_centers_[:, 1],
+            marker='X', s=200)
+plt.xlabel("Data Volume")
+plt.ylabel("Session Duration")
+plt.title("Anomaly Detection Using K-Means")
+plt.show()`,
+    modelAnswer: 'The data is organised as a NumPy array of [Data Volume, Session Duration] pairs. KMeans(n_clusters=2) creates the clusterer, and kmeans.fit(data) finds two cluster centroids and assigns every point a cluster label, stored in kmeans.labels_. The scatter plot colours each point by its label using c=kmeans.labels_, so the two clusters are visually distinct, and a second scatter call plots kmeans.cluster_centers_ as large X markers on top, so the centroids are visible against the points that were clustered around them. The row [10, 10] sits far from the other three points, so it should end up in its own cluster, or far from its cluster centre — the visual signature of an anomaly.',
+    markScheme: [
+      'Data organised as a NumPy array in the stated format (1.5)',
+      'KMeans(n_clusters=2) created and fit on the data (2)',
+      'Scatter of points coloured by kmeans.labels_ (2)',
+      'Cluster centres plotted distinctly using kmeans.cluster_centers_ (2)',
+      'Axis labels named — Data Volume and Session Duration (0.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Topic 19 · Printed Heading',
+    question: 'Printed page 55 of the workbook heads this section "THREAT ANALYSIS USING SUPPORT VECTOR MACHINE," but every technique under it is K-Means clustering. Explain why this is a workbook error rather than a deliberate use of both algorithms, and state what algorithm the section actually demonstrates.',
+    modelAnswer: 'The heading names Support Vector Machine, but nothing under it trains an SVM, calls SVC or LinearSVC, or reasons about a hyperplane or margin — every code listing imports KMeans from sklearn.cluster, fits it with n_clusters=2, and reasons about distance to cluster centroids, which is K-Means language, not SVM language. The heading is left over from the previous practical, which was genuinely about SVM, and was not updated when this section was written. The section actually demonstrates K-Means clustering used for anomaly detection: points far from a cluster centroid are flagged as anomalous.',
+    markScheme: [
+      'Heading identified as mismatched with the content beneath it (2)',
+      'Evidence given — KMeans imported and fitted, not SVC/LinearSVC, no hyperplane or margin language (2)',
+      'Correct algorithm named — K-Means clustering (2)',
     ],
   },
 
@@ -739,6 +1073,20 @@ export const cyb224ExamPrep = [
       'Feature scaling — Euclidean distance dominated by the widest range, so scaling is required (2)',
     ],
   },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Topic 20 · Activity',
+    question: 'Explain why k-NN is considered memory inefficient, state the purpose of a k-d tree in k-NN, and compare k-NN with Random Forest in terms of training time and prediction time.',
+    modelAnswer: 'k-NN is memory inefficient because the training set is the model: every stored vector has to be kept for the lifetime of the classifier, and all of it is consulted on each prediction, so memory grows with the size of the dataset rather than with the complexity of the boundary. A k-d tree indexes the stored points spatially so the search for nearest neighbours can discard whole regions instead of comparing against every sample — it attacks the slow classification phase, not the memory cost. Against Random Forest, the costs are inverted: k-NN trains in almost no time and pays at prediction, because each prediction searches the whole training set, while Random Forest pays up front to build its trees and then predicts quickly by dropping a sample through them. For an intrusion detection system that has to keep up with live traffic, prediction time is the binding constraint, which favours Random Forest.',
+    markScheme: [
+      'Memory inefficiency explained — the training set is the model, kept and consulted in full (3)',
+      'k-d tree purpose explained — speeds the search, not the memory cost (2)',
+      'k-NN vs Random Forest compared — training-time cost against prediction-time cost, and which suits live traffic (3)',
+    ],
+  },
+
   // ══════════════════════════════════════════════════════════════════
   //  TOPICS 16-18, 21 — THE CODED PRACTICALS
   // ══════════════════════════════════════════════════════════════════
@@ -775,6 +1123,104 @@ export const cyb224ExamPrep = [
 
   {
     type: 'longform',
+    marks: 6,
+    source: 'Topic 16 · Practice Exercise of Exploratory Data Analysis for IDS Data Set',
+    question: 'The EDA script for the IDS dataset is written as three separate code blocks. Why must they be run in order within the same notebook session, and what error results if the third block is run on its own?',
+    modelAnswer: 'The three blocks are one continuous script split only for readability, not three independent programs. The second block reuses df, the DataFrame loaded in the first block, and adds num_cols, the list of numeric columns, both of which the first block creates. The third block reuses both df and num_cols again. None of the later blocks re-creates these names, so running the third block on its own, without first running the first and second in the same session, raises a NameError: the name df, or num_cols, is not defined, because Python has never bound that name in the current session.',
+    markScheme: [
+      'Blocks explained as one continuous script, not independent programs (2)',
+      'df and num_cols identified as the objects carried forward from earlier blocks (2)',
+      'NameError given as the specific failure when run out of order (2)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 16 · Import Libraries; Basic Exploration',
+    question: 'Write the Python code to import pandas, numpy, matplotlib.pyplot and seaborn, load a UNSW-NB15-style CSV into a DataFrame, and print its first five rows, info, shape and column names.',
+    modelCode: String.raw`import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+file_path = "UNSW_NB15_dataset.csv"
+df = pd.read_csv(file_path)
+
+print("First 5 rows:")
+print(df.head())
+
+print("\nDataset Info:")
+print(df.info())
+print("\nDataset Shape:")
+print(df.shape)
+print("\nColumn Names:")
+print(df.columns)`,
+    modelAnswer: 'All four libraries are imported with their standard aliases — pandas as pd, numpy as np, matplotlib.pyplot as plt and seaborn as sns — because the rest of the practical depends on all four being available. pd.read_csv loads the dataset into a DataFrame. df.head() previews the first five rows, df.info() reports the column types and non-null counts, df.shape gives the row and column counts, and df.columns lists the column names — together these are the basic exploration that tells you what you are working with before any plot is drawn or any model is trained.',
+    markScheme: [
+      'All four libraries imported with their standard aliases (2)',
+      'pd.read_csv used to load the dataset into df (1.5)',
+      'df.head(), df.info(), df.shape and df.columns all used to inspect the data (3)',
+      'Purpose stated — knowing structure and size before analysis (1.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Topic 17 · Practice Exercise Using SVM for Threat Detection',
+    question: "In the SVM practical, why are 'id' and 'attack_cat' dropped from X before training, and why must feature scaling fit only on the training set rather than on the whole dataset?",
+    modelAnswer: "'id' is a row number carrying no signal, so keeping it would let the model key off a meaningless index rather than a real feature. 'attack_cat' names the attack family, and since the binary label is derived from it, leaving attack_cat in would leak the answer directly to the model — it could read off which category maps to which label instead of learning a decision boundary from the traffic features. Feature scaling must fit only on the training set, then transform the test set with the parameters learned there, because fitting the scaler on the combined data lets statistics from the test set — its mean and variance — influence the transformation applied to the training data. That is a form of data leakage: it makes test performance look better than the model will actually achieve on genuinely unseen traffic, which is why the code calls scaler.fit_transform(X_train) but only scaler.transform(X_test).",
+    markScheme: [
+      "'id' dropped — a row number, not a signal (1.5)",
+      "'attack_cat' dropped — leaking the label the model is meant to predict (2)",
+      'Scaler fit only on training data explained as avoiding leakage from the test set (3)',
+      'fit_transform vs transform distinguished — one learns parameters, the other only applies them (1.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 6,
+    source: 'Topic 17 · ALTERNATIVE CODES; Intrusion Detection Using KNN',
+    question: 'Why does the alternative SVM listing use LinearSVC instead of SVC, and why does the KNN practical mark feature scaling as mandatory?',
+    modelAnswer: 'The kernel SVM, SVC, scales roughly with the square of the number of samples, so on the full UNSW-NB15 file it can take hours to train; LinearSVC is optimised for datasets this size and is used in the alternative listing for exactly that reason. Feature scaling is mandatory for KNN because its distance calculation, Euclidean distance by default, is dominated by whichever feature has the widest numeric range — an unscaled byte count in the millions would swamp a SYN flag of 0 or 1, so without StandardScaler the model would effectively measure one feature and ignore the rest.',
+    markScheme: [
+      'LinearSVC explained — SVC scales with the square of the sample count, LinearSVC built for this size (3)',
+      'KNN scaling explained — Euclidean distance dominated by the widest-range feature without it (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 9,
+    source: 'Topic 18 · Intrusion Detection Using Decision Tree (DT)',
+    question: 'Explain why feature scaling is described as optional for the Decision Tree in this practical, unlike the SVM and KNN practicals, and why it is kept anyway. Also explain what stratify=y in the train-test split achieves, and what the K-fold cross-validation at the end reports.',
+    modelAnswer: "Feature scaling is optional for a decision tree because its splits are threshold-based — a tree asks whether a feature is above or below a cut point, and that comparison gives the same answer whether the feature is measured in its raw units or a scaled version, since scaling only stretches or shrinks the number line without reordering the values either side of any threshold. It is kept in this listing anyway so the same preprocessing pipeline can serve other models, such as the SVM and KNN practicals, where scaling is not optional. stratify=y in the train-test split ensures the proportion of each class, malicious and benign, is preserved in both the training and test sets, which matters because attack traffic is the minority class and a random split could otherwise leave the test set with too few attack examples to evaluate recall meaningfully. The K-fold cross-validation at the end trains and evaluates the model five separate times, each time holding out a different fifth of the data as the test fold, and reports the mean accuracy across all five runs — a single train-test split can be lucky or unlucky, and five folds show whether the reported accuracy is stable or an artefact of one particular split.",
+    markScheme: [
+      'Scaling explained as optional for DT — threshold-based splits unaffected by scale (2.5)',
+      'Reason scaling is kept anyway — shared preprocessing pipeline for other models (1.5)',
+      'stratify=y explained — preserves class proportions across the split (2.5)',
+      'K-fold cross-validation explained — five folds, mean accuracy, checks stability of the result (2.5)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 9,
+    source: 'Topic 18 · Evaluate and Cross-Validate',
+    question: 'The K-fold cross-validation call is cross_val_score(dt_model, X, y, cv=5, scoring="accuracy") — using X and y, not X_train, X_test or the already-scaled arrays, and dt_model was already fit earlier in the script. Explain what this call actually does, and why it is not simply reusing the accuracy already computed in the evaluation step above it.',
+    modelAnswer: "cross_val_score does not evaluate the fitted dt_model object as it stands — passing an already-fitted estimator is misleading, because cross_val_score clones the estimator's settings and re-fits a fresh copy of the tree on each of the five folds it creates from X and y, discarding whatever the original fit learned. So this call trains five new decision trees, each on four-fifths of the full dataset and tested on the remaining fifth, and returns five separate accuracy scores. This is not the same figure as the accuracy computed earlier, which came from one model trained on a single 80% split and tested once on the other 20%: the cross-validation mean is an average over five different splits, and it is what tells you whether that single-split accuracy was a fair estimate or a lucky one.",
+    markScheme: [
+      "cross_val_score explained as fitting five fresh trees, not reusing dt_model's earlier fit (3)",
+      'Five-fold process explained — four-fifths train, one-fifth test, repeated five times (3)',
+      "Distinguished from the earlier single-split figure — one split versus an averaged estimate over five (3)",
+    ],
+  },
+
+  {
+    type: 'longform',
     marks: 8,
     source: 'Topic 21 · Main Functions of Pandas; Main Functions of Scikit-Learn',
     question: 'State the function of the Pandas and Scikit-Learn libraries, and explain any THREE main functions of each.',
@@ -788,6 +1234,36 @@ export const cyb224ExamPrep = [
   },
 
   {
+    type: 'longform',
+    marks: 8,
+    language: 'python',
+    source: 'Topic 21 · Isolation Forest',
+    question: "Write Python code that uses scikit-learn's IsolationForest to flag anomalies in the traffic array [[10,100],[12,120],[11,110],[200,1000],[9,95]], set to expect 20% of the data to be anomalous, and explain what the returned labels mean.",
+    modelCode: String.raw`import numpy as np
+from sklearn.ensemble import IsolationForest
+
+traffic = np.array([[10, 100],
+                    [12, 120],
+                    [11, 110],
+                    [200, 1000],
+                    [9, 95]])
+
+model = IsolationForest(contamination=0.2)
+model.fit(traffic)
+
+anomalies = model.predict(traffic)
+print("Anomaly Labels:", anomalies)
+# -1 = anomaly, 1 = normal`,
+    modelAnswer: 'IsolationForest is imported from sklearn.ensemble and created with contamination=0.2, which tells the model to expect roughly 20% of the data to be anomalous. model.fit(traffic) fits it on the array, and model.predict(traffic) returns one label per row: -1 marks a row the model considers anomalous, and 1 marks a row it considers normal. Unlike K-Means, which measures distance to a cluster centroid, Isolation Forest isolates points by randomly partitioning the feature space and measuring how few splits it takes to isolate a point — an outlier such as [200, 1000] separates from the rest in very few splits, which is what marks it anomalous.',
+    markScheme: [
+      'IsolationForest imported and fitted correctly (2)',
+      'contamination=0.2 explained — expected proportion of anomalies (2)',
+      'predict() output explained — -1 for anomaly, 1 for normal (2)',
+      'How Isolation Forest differs from K-Means — isolates by partitioning rather than distance to a centroid (2)',
+    ],
+  },
+
+  {
     type: 'recall',
     marks: 4,
     source: 'Topics 17-18, 22 · the coded practicals',
@@ -797,6 +1273,32 @@ export const cyb224ExamPrep = [
       { name: 'KNeighborsClassifier', aliases: ['knn', 'kneighborsclassifier', 'k-nn'], explain: 'k-Nearest Neighbors intrusion detection with n_neighbors=5. Feature scaling is mandatory before fitting it.' },
       { name: 'DecisionTreeClassifier', aliases: ['decision tree', 'decisiontreeclassifier'], explain: 'Decision Tree intrusion detection with criterion=gini, evaluated with 5-fold cross-validation.' },
       { name: 'RandomForestClassifier', aliases: ['random forest', 'randomforestclassifier'], explain: 'Random Forest in the credit-card fraud model comparison, with n_estimators=100.' },
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Topic 22 · MODEL COMPARISON',
+    question: 'The credit-card fraud model-comparison script takes only a 10% stratified sample of the dataset before splitting into train and test. Explain why stratify=y_sample is used at both the sampling and splitting stages, and why scaling of Amount and Time happens after the split rather than before.',
+    modelAnswer: "The sample and both splits use stratify to preserve the proportion of fraud to genuine transactions, because fraud is a tiny minority of the dataset — an unstratified split could easily leave the test set, or even the 10% sample itself, with too few fraud cases to evaluate recall meaningfully, or in the worst case none at all. Amount and Time are scaled after the split, fitting the scaler only on the training rows and then applying it to the test rows, because scaling the whole frame first would let the test set's mean and standard deviation influence the values used for training, which flatters every score reported afterwards — the same data-leakage concern that applies to feature scaling in every other practical in this course.",
+    markScheme: [
+      'Stratification explained — preserves the rare fraud proportion at both the sampling and split stages (3)',
+      'Consequence of not stratifying stated — too few or zero fraud cases in a split (2)',
+      'Scaling-after-split explained — fit only on training rows to avoid leaking test statistics (3)',
+    ],
+  },
+
+  {
+    type: 'longform',
+    marks: 8,
+    source: 'Topic 22 · Check Class Imbalance; MODEL COMPARISON',
+    question: "The EDA script computes fraud_pct = (df['Class'].value_counts()[1] / len(df)) * 100. Explain why this class-imbalance figure matters for how the model-comparison script evaluates the four classifiers, and why it reports precision, recall and F1 for the fraud class specifically rather than overall accuracy.",
+    modelAnswer: "Credit-card fraud is a heavily imbalanced dataset — fraud_pct reports the tiny percentage of transactions that are actually fraudulent, and a classifier that predicted every transaction as genuine would still score a very high overall accuracy while catching not a single fraud case. This is why the model-comparison script pulls precision, recall and F1 specifically for the fraud class, report['1']['precision'] and so on, rather than reporting a single overall accuracy figure: those class-specific metrics are the only ones that say anything about how well each of the four models — SVM, KNN, Decision Tree and Random Forest — actually detects the minority class the whole exercise cares about.",
+    markScheme: [
+      'Class imbalance explained via fraud_pct — fraud is a tiny minority (2.5)',
+      'Consequence explained — a model predicting all-genuine can score high accuracy while catching nothing (2.5)',
+      "Class-specific metrics explained as the reason precision/recall/F1 for class 1 are reported instead of accuracy (3)",
     ],
   },
 ];

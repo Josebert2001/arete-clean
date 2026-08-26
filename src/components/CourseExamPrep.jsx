@@ -435,23 +435,35 @@ export default function CourseExamPrep({ course }) {
   const [finished, setFinished] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState([]);
 
-  // One entry per distinct `source` — for a bank like CYB 222's, where every
-  // question already carries the topic it was written from ("Group 7 —
-  // Automated Vulnerability Research"), that string *is* the revision unit a
-  // student thinks in. Order follows first appearance in the bank, which
-  // follows topic order since the bank is authored topic by topic.
+  // One entry per revision unit. For a bank like CYB 222's, every question
+  // already carries the topic it was written from as the whole `source`
+  // string ("Group 7 — Automated Vulnerability Research"), so that string
+  // *is* the unit. But banks like CYB 224 and CYB 221 append the specific
+  // heading after the topic ("Topic 8 · Decision Trees (DT)", "Topic 8 ·
+  // Support Vector Machines (SVM)"), so grouping on the full string put one
+  // question in almost every pill. Group on the leading "Topic N" instead
+  // when present; sources with no such prefix (§N, Group N — already one
+  // shared string per topic) group as before. Order follows first
+  // appearance in the bank, which follows topic order since the bank is
+  // authored topic by topic.
+  const topicKeyOf = (source) => {
+    const m = /^(Topic \d+)\s*(?:·|-|—)/.exec(source);
+    return m ? m[1] : source;
+  };
+
   const topics = useMemo(() => {
-    const bySource = new Map();
+    const byTopic = new Map();
     for (const q of bank) {
-      if (!bySource.has(q.source)) bySource.set(q.source, []);
-      bySource.get(q.source).push(q);
+      const key = topicKeyOf(q.source);
+      if (!byTopic.has(key)) byTopic.set(key, []);
+      byTopic.get(key).push(q);
     }
-    return [...bySource.entries()];
+    return [...byTopic.entries()];
   }, [bank]);
 
-  const toggleTopic = (source) => {
+  const toggleTopic = (key) => {
     setSelectedTopics((prev) => (
-      prev.includes(source) ? prev.filter((s) => s !== source) : [...prev, source]
+      prev.includes(key) ? prev.filter((s) => s !== key) : [...prev, key]
     ));
   };
 
@@ -709,7 +721,7 @@ export default function CourseExamPrep({ course }) {
           </div>
           <button
             onClick={() => {
-              const picked = bank.filter((q) => selectedTopics.includes(q.source));
+              const picked = bank.filter((q) => selectedTopics.includes(topicKeyOf(q.source)));
               start(shuffled(picked, picked.length));
             }}
             disabled={selectedTopics.length === 0}
@@ -718,7 +730,7 @@ export default function CourseExamPrep({ course }) {
             <Play size={13} className="text-rust" />
             {selectedTopics.length === 0
               ? 'Select one or more topics above'
-              : `Start · ${bank.filter((q) => selectedTopics.includes(q.source)).length} question${bank.filter((q) => selectedTopics.includes(q.source)).length === 1 ? '' : 's'} from ${selectedTopics.length} topic${selectedTopics.length === 1 ? '' : 's'}`}
+              : `Start · ${bank.filter((q) => selectedTopics.includes(topicKeyOf(q.source))).length} question${bank.filter((q) => selectedTopics.includes(topicKeyOf(q.source))).length === 1 ? '' : 's'} from ${selectedTopics.length} topic${selectedTopics.length === 1 ? '' : 's'}`}
           </button>
         </div>
       )}
