@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useId } from 'react';
 import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, Circle, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink, ListChecks } from 'lucide-react';
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
@@ -551,9 +551,12 @@ function KeyPoints({ topic, plain, context }) {
   );
 }
 
-function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplifiedMap, explainReady, explanations, summarizeReady, context, tracksReading, isRead, onSetRead, mapEntry, mapPart, onJumpToTopic }) {
+function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplifiedMap, explainReady, explanations, summarizeReady, context, tracksReading, isRead, onSetRead, mapEntry, mapPart, onJumpToTopic, headingLevel = 3 }) {
   const panelId = `lecture-panel-${index}`;
   const buttonId = `lecture-header-${index}`;
+  // Drops to h4 when the topics are nested inside a part section, so the
+  // document outline matches what is on screen instead of running h3 under h3.
+  const Heading = headingLevel === 4 ? 'h4' : 'h3';
 
   // Serialised once per topic and reused for both the Key points call and the
   // auto-mark dwell, so a long topic asks for proportionally more reading time.
@@ -646,7 +649,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
   return (
     <div className="border border-coffee-200 rounded-xl bg-paper overflow-hidden">
       {/* Header — heading wraps a real button (WAI-ARIA accordion pattern) */}
-      <h3 className="m-0">
+      <Heading className="m-0">
         <button
           id={buttonId}
           type="button"
@@ -679,7 +682,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
             className={`text-coffee-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
           />
         </button>
-      </h3>
+      </Heading>
 
       {/* Panel */}
       {isOpen && (
@@ -841,6 +844,93 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
  *   (if currently unused) mode, not a fallback — a caller that does not track
  *   reading gets no progress bar rather than a bar that silently does nothing.
  */
+// One part of a course's reading map: a named, collapsible group of topics.
+//
+// A course with twenty-odd topics rendered as one flat list is a wall — the
+// student has to read every title to find out what the course even contains,
+// and the length alone is discouraging. Six named parts, five of them closed,
+// is a page they can decide something from: "I am revising the machine
+// learning half" picks one box, not fourteen rows.
+//
+// The parts come from the course's own `noteMap`, so this is not a layout the
+// component invents — it is the reading order the map already declares, made
+// visible. Courses with no map keep the flat list.
+function PartSection({ part, isOpen, onToggle, readCount, tracksReading, children }) {
+  const uid = useId();
+  const buttonId = `part-header-${uid}`;
+  const panelId = `part-panel-${uid}`;
+  const total = part.indices.length;
+  const allRead = tracksReading && readCount === total;
+
+  return (
+    <section className="border border-coffee-200 rounded-2xl bg-paper overflow-hidden">
+      <h3 className="m-0">
+        <button
+          id={buttonId}
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={panelId}
+          onClick={onToggle}
+          className={`w-full px-4 sm:px-5 py-4 text-left transition-colors ${
+            isOpen ? 'bg-coffee-50' : 'hover:bg-coffee-50'
+          }`}
+        >
+          {/* Spans, not divs — this is all inside a <button>. */}
+          <span className="flex items-center gap-3 sm:gap-4">
+            {part.id && (
+              <span className="bg-ink text-cream font-mono text-xs font-bold px-2.5 py-1.5 rounded-lg shrink-0">
+                Part {part.id}
+              </span>
+            )}
+            <span className="display-heading text-lg sm:text-xl text-ink leading-snug flex-1">
+              {part.title}
+            </span>
+            <span className="hidden sm:block text-xs font-mono text-coffee-500 shrink-0">
+              {total} {total === 1 ? 'topic' : 'topics'}
+            </span>
+            <ChevronDown
+              size={18}
+              className={`text-coffee-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+            />
+          </span>
+
+          {part.blurb && (
+            <span className="block text-sm text-coffee-600 leading-snug mt-2">{part.blurb}</span>
+          )}
+
+          {tracksReading && (
+            <span className="flex items-center gap-3 mt-3">
+              {/* aria-hidden: the count beside it already says this in words,
+                  and role="progressbar" is not valid inside a button. */}
+              <span aria-hidden="true" className="h-1.5 flex-1 overflow-hidden rounded-full bg-coffee-100">
+                <span
+                  className="block h-full rounded-full bg-moss transition-all duration-500"
+                  style={{ width: `${total ? (readCount / total) * 100 : 0}%` }}
+                />
+              </span>
+              <span className={`inline-flex items-center gap-1.5 text-xs font-mono shrink-0 ${allRead ? 'font-bold text-moss' : 'text-coffee-500'}`}>
+                {allRead && <CheckCircle2 size={12} />}
+                {allRead ? `All ${total} read` : `${readCount} of ${total} read`}
+              </span>
+            </span>
+          )}
+        </button>
+      </h3>
+
+      {isOpen && (
+        <div
+          id={panelId}
+          role="region"
+          aria-labelledby={buttonId}
+          className="border-t border-coffee-100 px-3 sm:px-4 pt-3 pb-4 space-y-3"
+        >
+          {children}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function LectureNotes({ topics, context, reading, notesKey, map }) {
   // Split so the availability probes in the inner component only fire on
   // courses that actually have lecture notes.
@@ -890,8 +980,69 @@ function LectureNotesInner({ topics, context, reading, notesKey, map }) {
       return next;
     });
 
-  const toggleAll = () =>
-    setOpenSet(allOpen ? new Set() : new Set(topics.map((_, i) => i)));
+  // The course re-grouped into the parts its map declares, as arrays of indices
+  // into `topics` — indices, not copies, so every `openSet` entry, panel id and
+  // read mark keeps pointing at the same topic it always did.
+  //
+  // Topics appear inside their part rather than in printed order. For a course
+  // assembled from several sources those differ: CYB 224 prints the big data
+  // life cycle last and the whole management half after twenty-two practicals,
+  // while its map puts the first with topics 1-3 and the second with topic 4.
+  // Nothing is renumbered — the badge still reads "Topic 26", it just sits
+  // beside Topic 3, where it is meant to be read.
+  const groups = useMemo(() => {
+    if (!map?.parts?.length) return [{ id: null, indices: topics.map((_, i) => i) }];
+
+    const byNumber = new Map(topics.map((t, i) => [String(t.number), i]));
+    const claimed = new Set();
+    const out = map.parts
+      .map((p) => {
+        const indices = (p.topics || [])
+          .map((n) => byNumber.get(String(n)))
+          .filter((i) => i !== undefined);
+        indices.forEach((i) => claimed.add(i));
+        return { id: p.id, title: p.title, blurb: p.blurb, indices };
+      })
+      // A part whose topics are all still untranscribed would otherwise render
+      // as an empty box the student can open and find nothing in.
+      .filter((g) => g.indices.length > 0);
+
+    // Transcribed after the map was last updated. Shown in a trailing group
+    // rather than silently dropped off the page.
+    const unplaced = topics.map((_, i) => i).filter((i) => !claimed.has(i));
+    if (unplaced.length) {
+      out.push({
+        id: null,
+        title: 'Also in this course',
+        blurb: 'Topics added since this course’s reading map was last updated.',
+        indices: unplaced,
+      });
+    }
+    return out;
+  }, [topics, map]);
+
+  const grouped = groups.length > 1 || Boolean(groups[0].id);
+
+  // First part open, the rest closed — the point of grouping is that the page
+  // does not open as every topic at once, but an all-closed page reads as
+  // broken rather than as tidy.
+  const [openParts, setOpenParts] = useState(() => new Set([0]));
+
+  const togglePart = (gi) =>
+    setOpenParts((prev) => {
+      const next = new Set(prev);
+      if (next.has(gi)) next.delete(gi);
+      else next.add(gi);
+      return next;
+    });
+
+  const toggleAll = () => {
+    const opening = !allOpen;
+    setOpenSet(opening ? new Set(topics.map((_, i) => i)) : new Set());
+    // Expanding every topic inside a collapsed part would expand nothing the
+    // student can see, so the parts move with them.
+    setOpenParts(opening ? new Set(groups.map((_, gi) => gi)) : new Set());
+  };
 
   // Following a link from one topic to another: open the target and scroll to
   // it. Same idiom as jumpToSection above. A link to a note that is not on the
@@ -901,13 +1052,25 @@ function LectureNotesInner({ topics, context, reading, notesKey, map }) {
     const ti = topics.findIndex((t) => String(t.number) === String(noteNumber));
     if (ti === -1) return;
     setOpenSet((prev) => new Set(prev).add(ti));
+    // The target usually lives in a different part, and following a link into
+    // a collapsed one would scroll to a header that is not on the page.
+    const gi = groups.findIndex((g) => g.indices.includes(ti));
+    const partWasClosed = gi !== -1 && !openParts.has(gi);
+    if (gi !== -1) setOpenParts((prev) => new Set(prev).add(gi));
     // Two frames, not zero: opening the target panel changes the height of
     // everything below it, so measuring before React has re-rendered scrolls to
     // where the header *used* to be and lands mid-topic. The first frame lets
     // the re-render commit, the second lets layout settle after the expansion.
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      document.getElementById(`lecture-header-${ti}`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById(`lecture-header-${ti}`)?.scrollIntoView({
+        // Instant when a whole part had to be expanded on the way. That inserts
+        // a screenful of topics above the target, and a smooth scroll animating
+        // towards an offset measured a frame earlier gets overtaken by the
+        // reflow and stops short — observed landing on the link you clicked
+        // rather than on the topic you asked for. Nothing can overtake a jump.
+        behavior: partWasClosed ? 'auto' : 'smooth',
+        block: 'start',
+      });
     }));
   };
 
@@ -918,6 +1081,34 @@ function LectureNotesInner({ topics, context, reading, notesKey, map }) {
     (map?.parts || []).forEach((p) => p.topics.forEach((n) => m.set(String(n), p)));
     return m;
   }, [map]);
+
+  const renderTopic = (ti, headingLevel) => {
+    const topic = topics[ti];
+    return (
+      <TopicAccordion
+        key={ti}
+        topic={topic}
+        index={ti}
+        headingLevel={headingLevel}
+        isOpen={openSet.has(ti)}
+        onToggle={() => toggle(ti)}
+        simplifyReady={simplifyStatus === 'ready'}
+        simplifiedMap={simplifiedMap}
+        explainReady={explainStatus === 'ready'}
+        explanations={explanations}
+        summarizeReady={summarizeStatus === 'ready'}
+        context={context}
+        tracksReading={tracksReading}
+        isRead={isRead(topic)}
+        onSetRead={(read) => setRead(topic, read)}
+        mapEntry={map?.topics?.[String(topic.number)]}
+        // Only when the list is flat. Once the topics sit under a part header
+        // that names the part, repeating it inside every panel is noise.
+        mapPart={grouped ? undefined : partOf.get(String(topic.number))}
+        onJumpToTopic={jumpToTopic}
+      />
+    );
+  };
 
   return (
     <div>
@@ -957,29 +1148,24 @@ function LectureNotesInner({ topics, context, reading, notesKey, map }) {
         )}
       </div>
 
-      <div className="space-y-3">
-        {topics.map((topic, ti) => (
-          <TopicAccordion
-            key={ti}
-            topic={topic}
-            index={ti}
-            isOpen={openSet.has(ti)}
-            onToggle={() => toggle(ti)}
-            simplifyReady={simplifyStatus === 'ready'}
-            simplifiedMap={simplifiedMap}
-            explainReady={explainStatus === 'ready'}
-            explanations={explanations}
-            summarizeReady={summarizeStatus === 'ready'}
-            context={context}
-            tracksReading={tracksReading}
-            isRead={isRead(topic)}
-            onSetRead={(read) => setRead(topic, read)}
-            mapEntry={map?.topics?.[String(topic.number)]}
-            mapPart={partOf.get(String(topic.number))}
-            onJumpToTopic={jumpToTopic}
-          />
-        ))}
-      </div>
+      {grouped ? (
+        <div className="space-y-4">
+          {groups.map((g, gi) => (
+            <PartSection
+              key={g.id ?? `unplaced-${gi}`}
+              part={g}
+              isOpen={openParts.has(gi)}
+              onToggle={() => togglePart(gi)}
+              readCount={g.indices.filter((ti) => isRead(topics[ti])).length}
+              tracksReading={tracksReading}
+            >
+              {g.indices.map((ti) => renderTopic(ti, 4))}
+            </PartSection>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">{groups[0].indices.map((ti) => renderTopic(ti, 3))}</div>
+      )}
 
       <div className="flex items-center gap-2 text-xs text-coffee-500 font-mono pt-5 mt-2">
         <BookOpen size={11} />
