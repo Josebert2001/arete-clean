@@ -5,6 +5,7 @@ import { cyb123Quiz } from './lectureNotes/cyb123Quiz.js';
 import { cyb122ExamPrep } from './lectureNotes/cyb122ExamPrep.js';
 import { cyb221ExamPrep } from './lectureNotes/cyb221ExamPrep.js';
 import { cyb224ExamPrep } from './lectureNotes/cyb224ExamPrep.js';
+import { cyb224Map } from './lectureNotes/cyb224Map.js';
 import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
 import { cyb222ExamPrep } from './lectureNotes/cyb222ExamPrep.js';
 import { cybInnovationExamPrep } from './lectureNotes/cybInnovationExamPrep.js';
@@ -7624,6 +7625,10 @@ print(summary_df.to_string(index=False))`,
     // aid of a diagram", "state the steps" — so the course needs both forms.
     // See src/data/lectureNotes/cyb224ExamPrep.js.
     examPrep: cyb224ExamPrep,
+    // How the 22 topics relate to each other. The notes are transcribed from
+    // two sources and no algorithm is taught in one place, so each topic needs
+    // to say what completes it. See src/data/lectureNotes/cyb224Map.js.
+    noteMap: cyb224Map,
   },
   {
     code: 'CYB 222',
