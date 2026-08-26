@@ -319,6 +319,7 @@ export default function CourseDetail() {
                 context={{ courseCode: course.code, courseTitle: course.title }}
                 reading={reading}
                 notesKey={explainedKeyFor(course)}
+                map={course.noteMap}
               />
             </ExplainSelection>
           )}

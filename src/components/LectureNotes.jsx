@@ -3,6 +3,7 @@ import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, Circle, XCircle, Chev
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
 import ExplainCode from './ExplainCode';
+import TopicLinks from './TopicLinks';
 import { useExplanations } from './useExplanations';
 import { loadSimplified } from '../data/lectureNotes/simplified';
 import RichText from './RichText';
@@ -550,7 +551,7 @@ function KeyPoints({ topic, plain, context }) {
   );
 }
 
-function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplifiedMap, explainReady, explanations, summarizeReady, context, tracksReading, isRead, onSetRead }) {
+function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplifiedMap, explainReady, explanations, summarizeReady, context, tracksReading, isRead, onSetRead, mapEntry, mapPart, onJumpToTopic }) {
   const panelId = `lecture-panel-${index}`;
   const buttonId = `lecture-header-${index}`;
 
@@ -692,6 +693,10 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
           {topic.date && (
             <span className="sm:hidden text-xs font-mono text-coffee-500 mb-4 block">Lecture date: {topic.date}</span>
           )}
+
+          {/* Where this topic sits, and which others complete it. Data-driven —
+              renders nothing for a course that declares no map. */}
+          <TopicLinks entry={mapEntry} part={mapPart} onJumpTo={onJumpToTopic} />
 
           {hasBundledContent && (
             <div className="flex justify-end mb-3">
@@ -836,14 +841,14 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
  *   (if currently unused) mode, not a fallback — a caller that does not track
  *   reading gets no progress bar rather than a bar that silently does nothing.
  */
-export default function LectureNotes({ topics, context, reading, notesKey }) {
+export default function LectureNotes({ topics, context, reading, notesKey, map }) {
   // Split so the availability probes in the inner component only fire on
   // courses that actually have lecture notes.
   if (!topics?.length) return null;
-  return <LectureNotesInner topics={topics} context={context} reading={reading} notesKey={notesKey} />;
+  return <LectureNotesInner topics={topics} context={context} reading={reading} notesKey={notesKey} map={map} />;
 }
 
-function LectureNotesInner({ topics, context, reading, notesKey }) {
+function LectureNotesInner({ topics, context, reading, notesKey, map }) {
   // First topic open by default; rest collapsed.
   const [openSet, setOpenSet] = useState(() => new Set([0]));
   const simplifyStatus = useApiAvailability('/api/simplify');
@@ -887,6 +892,32 @@ function LectureNotesInner({ topics, context, reading, notesKey }) {
 
   const toggleAll = () =>
     setOpenSet(allOpen ? new Set() : new Set(topics.map((_, i) => i)));
+
+  // Following a link from one topic to another: open the target and scroll to
+  // it. Same idiom as jumpToSection above. A link to a note that is not on the
+  // page (a course whose map runs ahead of its transcription) is ignored rather
+  // than scrolling to nothing.
+  const jumpToTopic = (noteNumber) => {
+    const ti = topics.findIndex((t) => String(t.number) === String(noteNumber));
+    if (ti === -1) return;
+    setOpenSet((prev) => new Set(prev).add(ti));
+    // Two frames, not zero: opening the target panel changes the height of
+    // everything below it, so measuring before React has re-rendered scrolls to
+    // where the header *used* to be and lands mid-topic. The first frame lets
+    // the re-render commit, the second lets layout settle after the expansion.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.getElementById(`lecture-header-${ti}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+  };
+
+  // Note number -> the part it belongs to, so each topic can name its part
+  // without every accordion re-scanning the map.
+  const partOf = useMemo(() => {
+    const m = new Map();
+    (map?.parts || []).forEach((p) => p.topics.forEach((n) => m.set(String(n), p)));
+    return m;
+  }, [map]);
 
   return (
     <div>
@@ -943,6 +974,9 @@ function LectureNotesInner({ topics, context, reading, notesKey }) {
             tracksReading={tracksReading}
             isRead={isRead(topic)}
             onSetRead={(read) => setRead(topic, read)}
+            mapEntry={map?.topics?.[String(topic.number)]}
+            mapPart={partOf.get(String(topic.number))}
+            onJumpToTopic={jumpToTopic}
           />
         ))}
       </div>
