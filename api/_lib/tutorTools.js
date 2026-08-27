@@ -73,17 +73,45 @@ const TRACK_BY_STORAGE_KEY = Object.fromEntries(
   Object.values(trackMeta).map(t => [t.storageKey, t])
 );
 
+// `progress` is a client-written JSONB blob. The browser sanitises it on read
+// (sanitizeProgress in src/components/useProgress.js), but this path never goes
+// through the browser — a student can write the column directly with their own
+// token, and whatever lands here is serialised into the model prompt. So
+// nothing below may throw or emit junk: a malformed entry is dropped.
+//
+// The old `new Date(s.date).toISOString()` was the sharp edge — a non-numeric
+// or out-of-range date yields an Invalid Date and toISOString THROWS, which
+// would have taken out the tool call mid-answer.
 function summarizeTrackProgress(track, progress) {
   const titleById = Object.fromEntries(
     track.moduleIndex.map(m => [m.id, `Module ${String(m.number).padStart(2, '0')}: ${m.title}`])
   );
-  const completed = (progress.completedModules || []).map(id => titleById[id] || id);
-  const quizAttempts = Object.entries(progress.quizScores || {}).map(([id, s]) => ({
-    module: titleById[id] || id,
-    score: `${s.score}/${s.total}`,
-    percent: s.total ? Math.round((s.score / s.total) * 100) : null,
-    date: s.date ? new Date(s.date).toISOString().slice(0, 10) : null,
-  }));
+
+  const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+  // Falls back to the raw id for a module that isn't in the index (a renamed or
+  // retired one), but only when that id is a usable string to begin with.
+  const label = (id) => (typeof id === 'string' && id ? (titleById[id] || id) : null);
+
+  const completed = (Array.isArray(progress?.completedModules) ? progress.completedModules : [])
+    .map(label)
+    .filter(Boolean);
+
+  const scores = progress?.quizScores;
+  const entries = scores && typeof scores === 'object' && !Array.isArray(scores)
+    ? Object.entries(scores)
+    : [];
+
+  const quizAttempts = entries.flatMap(([id, s]) => {
+    const module = label(id);
+    if (!module || !s || typeof s !== 'object' || !isNum(s.score) || !isNum(s.total)) return [];
+    const when = isNum(s.date) && s.date > 0 ? new Date(s.date) : null;
+    return [{
+      module,
+      score: `${s.score}/${s.total}`,
+      percent: s.total ? Math.round((s.score / s.total) * 100) : null,
+      date: when && !Number.isNaN(when.getTime()) ? when.toISOString().slice(0, 10) : null,
+    }];
+  });
 
   return {
     track: track.fullName,

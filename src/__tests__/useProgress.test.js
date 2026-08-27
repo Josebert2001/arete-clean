@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mergeProgress, readProgress } from '../components/useProgress';
+import { mergeProgress, readProgress, sanitizeProgress } from '../components/useProgress';
+import { MAX_BOX } from '../utils/reviewSchedule';
 
 // ─── mergeProgress ────────────────────────────────────────────────────────────
 
@@ -156,16 +157,141 @@ describe('readProgress', () => {
     expect(result).toEqual({ completedModules: [], quizScores: {} });
   });
 
+  // Fixture uses string ids because that is what the app actually stores —
+  // module ids come from the data files ('foundations', 'sec-intro'), reading
+  // ids are `${slug}#${hash}`. It previously used numbers, which readProgress
+  // now drops as junk (see sanitizeProgress).
   it('returns parsed data from localStorage', () => {
-    const stored = { completedModules: [1, 2], quizScores: { 1: { score: 5, total: 7, date: 100 } } };
+    const stored = {
+      completedModules: ['foundations', 'arrays'],
+      quizScores: { foundations: { score: 5, total: 7, date: 100 } },
+    };
     localStorage.setItem('test-key', JSON.stringify(stored));
     const result = readProgress('test-key');
     expect(result).toEqual(stored);
+  });
+
+  it('drops malformed entries from stored progress without losing the good ones', () => {
+    localStorage.setItem('test-key', JSON.stringify({
+      completedModules: ['foundations', 42, null, { nope: true }, 'arrays'],
+      quizScores: {
+        foundations: { score: 5, total: 7, date: 100 },
+        broken: { score: 'lots', total: 7 },
+      },
+    }));
+    const result = readProgress('test-key');
+    expect(result.completedModules).toEqual(['foundations', 'arrays']);
+    expect(Object.keys(result.quizScores)).toEqual(['foundations']);
   });
 
   it('returns empty progress when localStorage contains invalid JSON', () => {
     localStorage.setItem('bad-key', '{not valid json}}}');
     const result = readProgress('bad-key');
     expect(result).toEqual({ completedModules: [], quizScores: {} });
+  });
+});
+
+// ─── sanitizeProgress ─────────────────────────────────────────────────────────
+// Guards the two places a progress blob re-enters the app: localStorage (which
+// anything on the origin can edit) and user_progress.progress (written straight
+// from the client). The governing rule is that a bad ENTRY is dropped and the
+// rest of the blob survives — silently wiping a student's real progress would
+// be worse than the corruption being defended against.
+
+describe('sanitizeProgress', () => {
+  it('returns empty progress for anything that is not an object', () => {
+    const empty = { completedModules: [], quizScores: {} };
+    expect(sanitizeProgress(null)).toEqual(empty);
+    expect(sanitizeProgress(undefined)).toEqual(empty);
+    expect(sanitizeProgress('nope')).toEqual(empty);
+    expect(sanitizeProgress(42)).toEqual(empty);
+    // An array is an object, but never a valid blob.
+    expect(sanitizeProgress(['foundations'])).toEqual(empty);
+  });
+
+  it('passes a well-formed blob through untouched', () => {
+    const good = {
+      completedModules: ['foundations', 'arrays'],
+      quizScores: { foundations: { score: 8, total: 10, date: 1700000000000 } },
+    };
+    expect(sanitizeProgress(good)).toEqual(good);
+  });
+
+  it('keeps valid modules while dropping non-string ids', () => {
+    const result = sanitizeProgress({
+      completedModules: ['foundations', 7, null, undefined, {}, [], 'arrays'],
+    });
+    expect(result.completedModules).toEqual(['foundations', 'arrays']);
+  });
+
+  it('dedupes repeated module ids', () => {
+    const result = sanitizeProgress({ completedModules: ['a', 'a', 'b', 'a'] });
+    expect(result.completedModules).toEqual(['a', 'b']);
+  });
+
+  it('rejects quiz scores whose score or total is not a real number', () => {
+    const result = sanitizeProgress({
+      quizScores: {
+        ok: { score: 3, total: 5, date: 10 },
+        stringScore: { score: '3', total: 5 },
+        nanTotal: { score: 3, total: NaN },
+        infinite: { score: Infinity, total: 5 },
+        notAnObject: 'nope',
+        nullEntry: null,
+      },
+    });
+    expect(Object.keys(result.quizScores)).toEqual(['ok']);
+  });
+
+  it('defaults a missing or malformed quiz date to 0 rather than dropping the score', () => {
+    const result = sanitizeProgress({
+      quizScores: { a: { score: 1, total: 2 }, b: { score: 1, total: 2, date: 'yesterday' } },
+    });
+    expect(result.quizScores.a.date).toBe(0);
+    expect(result.quizScores.b.date).toBe(0);
+  });
+
+  it('omits the items key entirely when the blob has none', () => {
+    // mergeProgress relies on this — a track record must not grow an empty map.
+    expect('items' in sanitizeProgress({ completedModules: ['a'] })).toBe(false);
+  });
+
+  it('keeps well-formed review items and drops ones missing box or due day', () => {
+    const result = sanitizeProgress({
+      items: {
+        good: { b: 3, d: 120, n: 4, l: 1, t: 1700000000000 },
+        noBox: { d: 120 },
+        noDue: { b: 3 },
+        junk: 'nope',
+      },
+    });
+    expect(Object.keys(result.items)).toEqual(['good']);
+    expect(result.items.good).toEqual({ b: 3, d: 120, n: 4, l: 1, t: 1700000000000 });
+  });
+
+  it('clamps a forged box number into the real ladder', () => {
+    const result = sanitizeProgress({
+      items: {
+        tooHigh: { b: 9999, d: 1 },
+        tooLow: { b: -5, d: 1 },
+      },
+    });
+    expect(result.items.tooHigh.b).toBe(MAX_BOX);
+    expect(result.items.tooLow.b).toBe(1);
+  });
+
+  it('defaults missing review counters instead of emitting undefined', () => {
+    const { items } = sanitizeProgress({ items: { a: { b: 2, d: 30 } } });
+    expect(items.a).toEqual({ b: 2, d: 30, n: 0, l: 0, t: 0 });
+  });
+
+  it('caps how many entries a single blob can carry', () => {
+    const completedModules = Array.from({ length: 6000 }, (_, i) => `m-${i}`);
+    expect(sanitizeProgress({ completedModules }).completedModules).toHaveLength(5000);
+  });
+
+  it('drops absurdly long ids', () => {
+    const result = sanitizeProgress({ completedModules: ['ok', 'x'.repeat(500)] });
+    expect(result.completedModules).toEqual(['ok']);
   });
 });
