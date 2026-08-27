@@ -84,7 +84,7 @@ Browser → React SPA (Vite)
 | `api/research.js` | Explain-this — `groq/compound-mini` web search over a highlighted passage; signed-in only, returns explanation + sources |
 | `src/components/ExplainSelection.jsx` | Wraps readable content; shows "Explain this" on text selection, renders inline explanation card |
 | `api/run.js` | JDoodle proxy — runs Java/C/C++/Python code |
-| `api/extract.js` | Extracts text from freshly uploaded course materials (.txt/.docx/.pdf via mammoth + pdf-parse) so the tutor can reference lecture notes; signed-in only |
+| `api/extract.js` | **Registers** a freshly uploaded course material: downloads the object the browser just stored, extracts its text (.txt/.docx/.pdf via mammoth + pdf-parse) and writes the `course_materials` row itself on the service-role client. The browser cannot insert that row any more — `authenticated` has no INSERT grant (migration `20260827010000`). Every security-relevant field is derived here, never taken from the body: `uploaded_by` from the verified token, `course_code`/`department` from the catalogue via `findCourseBySlug()` and the uploader's own profile, `extracted_text` from the real bytes. This is why it matters: that text is injected into every student's tutor context for that course, and the lookup takes the two most *recent* rows, so a forged row displaced the genuine notes. Signed-in only; answers 503 when `SUPABASE_SERVICE_ROLE_KEY` is unset |
 | `api/simplify.js` | "Simplify this" — Groq rewrite of a dense lecture-note section in plain English; client caches results in localStorage |
 | `api/summarize.js` \| `src/utils/summarizeTopic.js` | "Key points" — exam-ready recap of a **whole topic**, for a student who has already read it. Deliberately separate from Simplify (one *section*, for a student who is stuck): different scope, prompt, cap (32k vs 4k chars) and rate bucket. Skips topics whose title is already a hand-written summary (`/exam focus\|key takeaways/i`) |
 | `src/components/LectureNotes.jsx` | Renders lecture-note sections (definition/bullets/termlist/table/mosca/…); termlists double as flashcards; hosts the Simplify and Key points buttons and the per-topic read markers. Takes `reading` from the *page* — see below |
@@ -94,7 +94,9 @@ Browser → React SPA (Vite)
 | `src/components/CourseExamPrep.jsx` | Written-exam practice off `course.examPrep`, for courses examined on paper rather than by CBT. Generic over any course carrying a bank; see "Adding a question bank" below for why it is a sibling field and not more question types on `quiz` |
 | `src/data/lectureNotes/ent221Quiz.js` \| `cyb122ExamPrep.js` | The two banks that exist today — an MCQ bank shared by both catalogues' ENT 221 entries, and CYB 122's written-exam bank |
 | `api/_lib/supabase.js` | Server-side Supabase client using Bearer token from request |
-| `api/_lib/googleAuth.js` | Google OAuth2 client, signed `state` (CSRF), service-role client — the only file allowed to use `SUPABASE_SERVICE_ROLE_KEY` |
+| `api/_lib/serviceRole.js` | **The only file allowed to read `SUPABASE_SERVICE_ROLE_KEY`.** That key bypasses RLS entirely, so every use of it is a place where the database's protections do not apply and the calling code alone is responsible for scoping — keeping the read in one module keeps that list greppable (`serviceRoleClient(`). Two callers today: `googleAuth.js` and `extract.js`. Any new one must scope by an already-verified user id, and should prefer the caller's own `student.db` unless the server must write something the user must not be able to forge |
+| `api/_lib/googleAuth.js` | Google OAuth2 client, signed `state` (CSRF), refresh-token storage via `serviceRole.js` |
+| `api/_lib/request-policy.js` | CORS/cache headers, and the two-layer rate limit. `enforceRateLimit` is per-IP and in-memory (per-lambda-instance, wiped by cold starts) — a cheap guard on the *pre-auth* path only. `enforceUserRateLimit`/`denyIfUserRateLimited` are the budget that actually binds: per-student, via the `consume_rate_limit()` Postgres function (migration `20260827000000`), so the count is shared across every instance. It **fails open** by design — migrations here are applied by hand, so deployed code can legitimately meet a database without the function yet. A hard *spend* cap is deliberately not implemented in app code; set it at the provider (Google Cloud quotas, Groq limits) where the app cannot reach it |
 | `api/_lib/googleEvents.js` | PlanEvent → Google Calendar event resource (duplicates `src/utils/ics.js`'s date/RRULE math for the Node context — keep both in sync by hand) |
 | `api/google/connect.js` \| `callback.js` \| `status.js` \| `disconnect.js` | "Connect Google" OAuth flow (Calendar + Drive scopes), independent of Supabase's own Google sign-in |
 | `api/google/calendar-sync.js` | Pushes a generated study plan into a dedicated secondary Google Calendar (idempotent re-sync) |
@@ -120,7 +122,7 @@ SENTRY_DSN                # Sentry error monitoring — /api/* serverless (optio
 GOOGLE_CLIENT_ID          # Google OAuth (Calendar sync + Drive import) — api/google/*
 GOOGLE_CLIENT_SECRET      # Google OAuth — also keys the signed `state` HMAC, never expose to the browser
 GOOGLE_REDIRECT_URI       # Must exactly match a redirect URI registered on the Google OAuth client
-SUPABASE_SERVICE_ROLE_KEY # Now also a live runtime secret for api/_lib/googleAuth.js (was previously local-shell-only, for setup-supabase.mjs)
+SUPABASE_SERVICE_ROLE_KEY # Live runtime secret, read only by api/_lib/serviceRole.js (Google token storage + course-material inserts). Uploads answer 503 without it
 ```
 For Vercel deployment, set all of the above in the Vercel dashboard — not in code.
 For Supabase setup script only: also need `SUPABASE_PAT`.

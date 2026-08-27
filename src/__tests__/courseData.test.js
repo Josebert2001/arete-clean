@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { findCourseEntry, findModule, COURSE_INDEX, getCourseIndexForDepartment } from '../../api/_lib/courseData.js';
+import { findCourseEntry, findCourseBySlug, findModule, COURSE_INDEX, getCourseIndexForDepartment } from '../../api/_lib/courseData.js';
 
 // Backs the AI Tutor's getCourseOutline / getModuleDetail tools. The recent
 // hardening guarantees: a loosely-formatted code resolves to the CANONICAL
@@ -202,5 +202,48 @@ describe('findCourseEntry — materials pool resolution', () => {
 
   it('falls back to the default department when no slug is given', async () => {
     expect((await findCourseEntry('CYB 222')).materialsDepartment).toBe('cybersecurity');
+  });
+});
+
+// Backs api/extract.js. Since the browser no longer inserts course_materials
+// rows, this is what decides which course an upload is filed under and which
+// materials pool it lands in — both derived from the slug, never taken from the
+// request body. A slug that doesn't resolve is a rejected upload.
+describe('findCourseBySlug — upload target resolution', () => {
+  it('resolves a slug to its canonical course code', () => {
+    const course = findCourseBySlug('cyb-222', 'cybersecurity');
+    expect(course).not.toBeNull();
+    expect(course.code).toBe('CYB 222');
+    expect(course.slug).toBe('cyb-222');
+  });
+
+  it('pools a cross-departmental course into the shared materials pool', () => {
+    // GST 111 carries crossDepartmental, so its notes must reach every
+    // programme rather than being filed under the uploader's department.
+    expect(findCourseBySlug('gst-111', 'cybersecurity').materialsDepartment).toBe('general');
+    expect(findCourseBySlug('gst-111', 'dataScience').materialsDepartment).toBe('general');
+  });
+
+  it("keeps a department's own course in that department's pool", () => {
+    expect(findCourseBySlug('cyb-222', 'cybersecurity').materialsDepartment).toBe('cybersecurity');
+  });
+
+  it('rejects a slug that is not in the uploader\'s catalogue', () => {
+    // A Data Science student cannot file a note against a Cybersecurity-only
+    // course, even by editing the request body.
+    expect(findCourseBySlug('cyb-222', 'dataScience')).toBeNull();
+  });
+
+  it('rejects a missing, empty or non-string slug rather than guessing', () => {
+    expect(findCourseBySlug('', 'cybersecurity')).toBeNull();
+    expect(findCourseBySlug('   ', 'cybersecurity')).toBeNull();
+    expect(findCourseBySlug(null, 'cybersecurity')).toBeNull();
+    expect(findCourseBySlug(undefined, 'cybersecurity')).toBeNull();
+    expect(findCourseBySlug('not-a-real-course', 'cybersecurity')).toBeNull();
+  });
+
+  it('does not match on a partial or differently-cased slug', () => {
+    expect(findCourseBySlug('CYB-222', 'cybersecurity')).toBeNull();
+    expect(findCourseBySlug('cyb-22', 'cybersecurity')).toBeNull();
   });
 });

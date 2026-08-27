@@ -7,20 +7,8 @@
 
 import { tool } from 'ai';
 import { z } from 'zod';
-import { createClient } from '@supabase/supabase-js';
 import { findCourseEntry, findModule } from './courseData.js';
 import { trackMeta } from '../../src/data/trackMeta.js';
-
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
-
-// Anonymous read-only client — course_materials has a public read policy.
-function getAnonDb() {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
 
 // Truncate each note to keep the AI prompt within safe limits. These are sized
 // for Groq's free tier (8K tokens/request): a fat getCourseOutline result gets
@@ -166,7 +154,12 @@ export function buildTutorTools(student, departmentSlug) {
         }
         const { code: canonicalCode, outline, materialsDepartment } = entry;
 
-        const db = getAnonDb();
+        // The student's own RLS-scoped client, not an anonymous one: since
+        // 20260827010000_materials_server_insert.sql, course_materials is
+        // readable by `authenticated` only — an anon client now reads back zero
+        // rows and the notes would vanish from the tutor with no error. The
+        // tutor requires sign-in (api/tutor.js), so this is always present.
+        const db = student?.db;
         // Without a canonical code there's no reliable key to match uploads on
         // (notes-only match) — return the outline as-is.
         if (!db || !canonicalCode) return outline;

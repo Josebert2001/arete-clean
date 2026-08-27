@@ -14,7 +14,7 @@
 
 import { createGroq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { captureApiError } from './_lib/sentry.js';
 
@@ -81,8 +81,15 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Availability probe — lets the UI hide the "Explain this" button when the
-  // feature isn't configured. Skips auth + rate limiting, like the siblings.
+  // feature isn't configured. Skips auth; rate-limited on its own generous bucket.
   if (req.body?.probe) {
+    // Cheap, but not free — see PROBE_RATE_LIMIT.
+    const probeLimit = enforceRateLimit(req, PROBE_RATE_LIMIT);
+    setRateLimitHeaders(res, probeLimit);
+    if (!probeLimit.allowed) {
+      res.setHeader('Retry-After', String(probeLimit.retryAfterSeconds));
+      return res.status(429).json({ error: 'Too many requests.' });
+    }
     return res.status(200).json({ configured: Boolean(process.env.GROQ_API_KEY) });
   }
 

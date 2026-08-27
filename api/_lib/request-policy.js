@@ -29,6 +29,19 @@ function cleanupExpiredEntries(store, now) {
   }
 }
 
+// Availability probes ({ probe: true }) answer a boolean and make no model call,
+// so they deliberately skip auth and the per-endpoint budget — the UI fires them
+// on page load to decide whether to render a button at all, before the student
+// has done anything. They were skipping rate limiting ENTIRELY though, which
+// left an uncounted endpoint anyone could hammer. They now share one generous
+// bucket across every endpoint: high enough that a student opening several pages
+// never notices, low enough that it is not free traffic.
+export const PROBE_RATE_LIMIT = {
+  namespace: 'probe',
+  limit: 60,
+  windowMs: 10 * 60 * 1000,
+};
+
 export function applyApiHeaders(res) {
   res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Upload, FileText, Image as ImageIcon, Download,
-  X, CheckCircle2, AlertCircle, Loader2, Paperclip,
+  X, CheckCircle2, AlertCircle, Loader2, Paperclip, Trash2,
 } from 'lucide-react';
 import { supabase, isConfigured, getAccessToken } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -64,6 +64,11 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  // Two-step delete: the first click arms the confirmation inline, the second
+  // performs it. An inline arm rather than window.confirm — a native modal
+  // blocks the whole page and looks nothing like the rest of the app.
+  const [confirmId, setConfirmId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const fileRef = useRef();
 
   useEffect(() => {
@@ -76,9 +81,13 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
   // believes it re-uploads a file that is already there.
   async function load() {
     setLoadError('');
+    // uploaded_by is not selectable — the column grant was revoked in
+    // 20260827010000_materials_server_insert.sql so an upload can't be
+    // correlated to a student. "Is this mine?" is answered by uploaded_by_me,
+    // a boolean the view computes against auth.uid() without exposing the id.
     const { data, error: fetchError } = await supabase
-      .from('course_materials')
-      .select('id, display_name, file_path, file_size, file_type, description, uploaded_at')
+      .from('course_materials_visible')
+      .select('id, display_name, file_path, file_size, file_type, description, uploaded_at, uploaded_by_me')
       .eq('course_slug', courseSlug)
       .eq('department', department)
       .order('uploaded_at', { ascending: false });
@@ -121,43 +130,34 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
         .upload(path, file, { contentType: file.type });
       if (storageErr) throw storageErr;
 
-      // Extract text so the AI Tutor can reference this material as lecture notes.
-      // Failure is non-fatal — the upload completes even if extraction fails.
-      let extracted_text = null;
-      if (['txt', 'docx', 'pdf'].includes(fileExt)) {
-        try {
-          // /api/extract requires a signed-in caller — forward the access token.
-          const token = await getAccessToken();
-          const exRes = await fetch('/api/extract', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ filePath: path, fileType: fileExt }),
-          });
-          if (exRes.ok) {
-            const exData = await exRes.json();
-            extracted_text = exData.text ?? null;
-          }
-        } catch {
-          // extraction failure is silent — material still uploads
-        }
-      }
-
-      const { error: dbErr } = await supabase.from('course_materials').insert({
-        course_code: courseCode,
-        course_slug: courseSlug,
-        department,
-        display_name: file.name,
-        file_path: path,
-        file_size: file.size,
-        file_type: fileExt,
-        description: desc.trim() || null,
-        uploaded_by: user.id,
-        extracted_text,
+      // The server writes the course_materials row — the browser no longer can,
+      // and must not: it would otherwise be choosing `extracted_text`, which is
+      // fed to every student's AI tutor for this course. /api/extract downloads
+      // the object we just stored, extracts the text from the real bytes, and
+      // derives course_code, the materials pool and uploaded_by itself. Unlike
+      // the old extraction step this is NOT optional — if it fails there is no
+      // row, so the error has to surface.
+      const token = await getAccessToken();
+      const res = await fetch('/api/extract', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          filePath: path,
+          fileType: fileExt,
+          courseSlug,
+          displayName: file.name,
+          description: desc.trim() || null,
+          fileSize: file.size,
+        }),
       });
-      if (dbErr) throw dbErr;
+
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(payload.error || 'Could not save the material. Please try again.');
+      }
 
       setDone(true);
       setFile(null);
@@ -169,6 +169,33 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
       setError(err?.message ?? 'Upload failed. Please try again.');
     } finally {
       setUploading(false);
+    }
+  }
+
+  // Removes a material the signed-in student uploaded: the row first (RLS
+  // restricts this to their own, see the DELETE policy), then the object. Order
+  // matters — an orphaned row would render a dead download link, whereas an
+  // orphaned object is invisible and gets swept separately. A storage failure
+  // is therefore not surfaced as an error: the material is already gone from
+  // every listing, which is what the student asked for.
+  async function handleDelete(material) {
+    setDeletingId(material.id);
+    setError('');
+    try {
+      const { error: rowErr } = await supabase
+        .from('course_materials')
+        .delete()
+        .eq('id', material.id);
+      if (rowErr) throw rowErr;
+
+      await supabase.storage.from(BUCKET).remove([material.file_path]);
+
+      setConfirmId(null);
+      setMaterials(prev => prev.filter(m => m.id !== material.id));
+    } catch (err) {
+      setError(err?.message ?? 'Could not remove that material. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -396,42 +423,89 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {materials.map(m => (
-            <a
+            // A div, not an anchor: the Remove control below has to be a sibling
+            // of the link rather than nested inside it — a button inside an <a>
+            // is invalid markup and swallows the click on some browsers.
+            <div
               key={m.id}
-              href={materialUrl(m.file_path)}
-              target="_blank"
-              rel="noopener noreferrer"
               className="group flex h-full flex-col rounded-xl border border-coffee-200 bg-paper p-4 transition-all hover:border-ink hover:shadow-sm"
             >
-              {/* Top row — icon + type badge */}
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-coffee-100 transition-colors group-hover:bg-ink/5">
-                  <FileIcon type={m.file_type} className="h-4 w-4 text-coffee-600 group-hover:text-ink" />
+              <a
+                href={materialUrl(m.file_path)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-1 flex-col"
+              >
+                {/* Top row — icon + type badge */}
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-coffee-100 transition-colors group-hover:bg-ink/5">
+                    <FileIcon type={m.file_type} className="h-4 w-4 text-coffee-600 group-hover:text-ink" />
+                  </div>
+                  <span className="rounded-full bg-coffee-100 px-2 py-0.5 font-mono text-[10px] font-medium uppercase text-coffee-600">
+                    {m.file_type}
+                  </span>
                 </div>
-                <span className="rounded-full bg-coffee-100 px-2 py-0.5 font-mono text-[10px] font-medium uppercase text-coffee-600">
-                  {m.file_type}
-                </span>
-              </div>
 
-              {/* Name + description */}
-              <p className="text-sm font-semibold leading-snug text-ink line-clamp-2">{m.display_name}</p>
-              {m.description && (
-                <p className="mt-1 text-xs leading-relaxed text-coffee-600 line-clamp-2">
-                  {m.description}
-                </p>
+                {/* Name + description */}
+                <p className="text-sm font-semibold leading-snug text-ink line-clamp-2">{m.display_name}</p>
+                {m.description && (
+                  <p className="mt-1 text-xs leading-relaxed text-coffee-600 line-clamp-2">
+                    {m.description}
+                  </p>
+                )}
+
+                {/* Footer — meta + open affordance, pinned to bottom */}
+                <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+                  <span className="font-mono text-[11px] text-coffee-500">
+                    {m.file_size ? `${fmtSize(m.file_size)} · ` : ''}{timeAgo(m.uploaded_at)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-coffee-600 transition-colors group-hover:text-ink">
+                    <Download size={11} />
+                    Open
+                  </span>
+                </div>
+              </a>
+
+              {/* Only on the student's own uploads — uploaded_by_me is computed
+                  in the database so the uploader's id never reaches the client. */}
+              {m.uploaded_by_me && (
+                <div className="mt-3 border-t border-coffee-100 pt-2.5">
+                  {confirmId === m.id ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-coffee-600">Remove this file?</span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmId(null)}
+                          disabled={deletingId === m.id}
+                          className="rounded px-2 py-1 text-[11px] font-medium text-coffee-600 transition-colors hover:text-ink disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(m)}
+                          disabled={deletingId === m.id}
+                          className="inline-flex items-center gap-1 rounded bg-rust px-2 py-1 text-[11px] font-semibold text-cream transition-opacity hover:opacity-90 disabled:opacity-50"
+                        >
+                          {deletingId === m.id && <Loader2 size={10} className="animate-spin" />}
+                          {deletingId === m.id ? 'Removing…' : 'Remove'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmId(m.id)}
+                      className="inline-flex items-center gap-1 text-[11px] font-medium text-coffee-500 transition-colors hover:text-rust"
+                    >
+                      <Trash2 size={11} />
+                      Remove
+                    </button>
+                  )}
+                </div>
               )}
-
-              {/* Footer — meta + open affordance, pinned to bottom */}
-              <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-                <span className="font-mono text-[11px] text-coffee-500">
-                  {m.file_size ? `${fmtSize(m.file_size)} · ` : ''}{timeAgo(m.uploaded_at)}
-                </span>
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-coffee-600 transition-colors group-hover:text-ink">
-                  <Download size={11} />
-                  Open
-                </span>
-              </div>
-            </a>
+            </div>
           ))}
         </div>
       )}
