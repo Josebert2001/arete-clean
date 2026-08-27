@@ -19,3 +19,13 @@ export async function getAccessToken() {
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
 }
+
+// Spread into the headers of an /api/* fetch. Returns {} when signed out rather
+// than throwing: the endpoints that require sign-in answer 401 with a message
+// the caller already surfaces, and the availability probes are deliberately
+// anonymous. Every AI/code-run endpoint requires this header — see the auth
+// gates in api/tutor.js and its siblings.
+export async function authHeaders() {
+  const token = await getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}

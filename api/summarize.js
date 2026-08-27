@@ -16,6 +16,7 @@
 
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
+import { getStudentFromRequest } from './_lib/supabase.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 const SYSTEM_PROMPT = `You are Areté's lecture-note summariser for University of Uyo students in Nigeria. You will be given the full text of one lecture-note topic. The student has already read it — produce the revision recap they would want the night before the exam.
@@ -67,6 +68,20 @@ export default async function handler(req, res) {
     return res.status(429).json({
       error: 'Too many summaries requested from this device. Please wait a few minutes and try again.',
       kind: 'rate_limited',
+    });
+  }
+
+  // Signed-in only — this endpoint spends real model quota, so it must not be
+  // callable anonymously by anything that finds the URL. It is the widest of the
+  // set (32,000 chars of arbitrary text into the strong model), so it was also
+  // the cheapest to abuse. Checked AFTER the rate limiter for the same reason as
+  // research.js: an invalid token must not force an uncounted Supabase auth call.
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'summarize', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to use Key points.',
+      kind: 'unauthorized',
     });
   }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Play, Loader2, Terminal, RotateCcw, Check, X, AlertTriangle } from 'lucide-react';
+import { authHeaders } from '../lib/supabase';
 import { fetchJsonWithFallback } from '../utils/apiClient';
 
 /*
@@ -56,7 +57,8 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
         '/api/run',
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          // The endpoint is signed-in only — without this it answers 401.
+          headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
           body: JSON.stringify({ source_code: code, language, stdin }),
         },
         'The code runner needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.'

@@ -40,6 +40,21 @@ const RATE_LIMIT = {
   windowMs: 10 * 60 * 1000,
 };
 
+// Every source here is rendered as a clickable `href` (ExplainSelection.jsx), and
+// the list is model-supplied — so the scheme is allowlisted at the source rather
+// than trusted at the render site. A `javascript:` or `data:` URL parses happily
+// as a URL and would otherwise become a one-click payload. Anything that isn't
+// plain http(s) — including a string that doesn't parse as a URL at all, which
+// could never be a safe link anyway — is dropped.
+function isHttpUrl(url) {
+  try {
+    const { protocol } = new URL(url);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 // Pulls the URL sources the compound system cited, deduped and capped. The AI
 // SDK exposes web results as `result.sources` (sourceType 'url'); we degrade to
 // an empty list if the shape isn't present rather than failing the response.
@@ -49,10 +64,10 @@ export function extractSources(result) {
   const out = [];
   for (const s of raw) {
     const url = s?.url;
-    if (!url || seen.has(url)) continue;
+    if (!url || seen.has(url) || !isHttpUrl(url)) continue;
     seen.add(url);
-    let host = url;
-    try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { /* keep raw url */ }
+    // Safe to construct unconditionally — isHttpUrl already parsed it.
+    const host = new URL(url).hostname.replace(/^www\./, '');
     out.push({ title: s.title || host, url });
     if (out.length >= MAX_SOURCES) break;
   }

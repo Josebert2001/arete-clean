@@ -8,6 +8,7 @@
 // section for a student who is stuck, this works on a whole topic for a student
 // who has finished it. They share the serialiser and the hash, nothing else.
 
+import { authHeaders } from '../lib/supabase';
 import { fetchJsonWithFallback } from './apiClient';
 import { hashText, sectionsToPlainText } from './simplifySection';
 
@@ -69,7 +70,8 @@ export async function requestSummary({ text, context, signal }) {
       '/api/summarize',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // The endpoint is signed-in only — without this it answers 401.
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
         body: JSON.stringify({ text, context }),
         signal,
       },

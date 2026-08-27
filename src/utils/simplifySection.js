@@ -50,12 +50,19 @@ export function setCachedSimplification(text, simplified) {
 
 // Calls the API. Resolves to { simplified } | { error } | { aborted: true }.
 export async function requestSimplification({ text, context, signal }) {
+  // Lazy for the same reason as requestCodeExplanation in explainCode.js: that
+  // module imports hashText from here, and it runs under plain Node in
+  // scripts/pregenerate-explanations.mjs, where src/lib/supabase.js cannot be
+  // evaluated (it reads `import.meta.env`). Nothing in the script calls this.
+  const { authHeaders } = await import('../lib/supabase.js');
+
   try {
     const data = await fetchJsonWithFallback(
       '/api/simplify',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // The endpoint is signed-in only — without this it answers 401.
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
         body: JSON.stringify({ text, context }),
         signal,
       },

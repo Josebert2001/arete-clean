@@ -10,6 +10,7 @@
 
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
+import { getStudentFromRequest } from './_lib/supabase.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 // Shared by both modes. The students these listings are set for were handed a
@@ -110,6 +111,20 @@ export default async function handler(req, res) {
     return res.status(429).json({
       error: 'Too many explainer requests from this device. Please wait a few minutes and try again.',
       kind: 'rate_limited',
+    });
+  }
+
+  // Signed-in only — this endpoint spends real model quota, so it must not be
+  // callable anonymously by anything that finds the URL. Every caller in the app
+  // already sits behind a RequireAuth route, so this costs no student anything.
+  // Checked AFTER the rate limiter for the same reason as research.js: an
+  // invalid token must not be able to force an uncounted Supabase auth call.
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'explainer', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to use the code explainer.',
+      kind: 'unauthorized',
     });
   }
 

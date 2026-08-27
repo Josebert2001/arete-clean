@@ -36,6 +36,7 @@ const LANGUAGES = {
 
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
+import { getStudentFromRequest } from './_lib/supabase.js';
 
 const RATE_LIMIT = {
   namespace: 'run',
@@ -60,6 +61,22 @@ export default async function handler(req, res) {
       error: 'Too many code-run requests from this device. Please wait a few minutes and try again.',
       kind: 'limit',
       status: 'Rate limit reached',
+    });
+  }
+
+  // Signed-in only. JDoodle's free plan is 20 executions per DAY across every
+  // user, so an anonymous caller could burn the whole department's playground
+  // in a couple of minutes. Every caller in the app already sits behind a
+  // RequireAuth route, so requiring the token costs no student anything.
+  // Checked AFTER the rate limiter for the same reason as research.js: an
+  // invalid token must not be able to force an uncounted Supabase auth call.
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'run', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to run code.',
+      kind: 'unauthorized',
+      status: 'Sign in required',
     });
   }
 

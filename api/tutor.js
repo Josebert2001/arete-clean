@@ -265,6 +265,21 @@ export default async function handler(req, res) {
     });
   }
 
+  // Signed-in only. This is the most expensive endpoint in the app — an agentic
+  // loop of up to 4 steps on the strong model — so it must not be callable
+  // anonymously by anything that finds the URL. Both callers (/tutor and the
+  // course chat) already sit behind RequireAuth routes, so no student loses
+  // access. Checked AFTER the rate limiter for the same reason as research.js:
+  // an invalid token must not be able to force an uncounted Supabase auth call.
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'tutor', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to use the AI Tutor.',
+      kind: 'unauthorized',
+    });
+  }
+
   if (!hasAnyProvider()) {
     return res.status(200).json({
       notConfigured: true,
@@ -300,15 +315,10 @@ export default async function handler(req, res) {
   const chain = buildModelChain(tier);
 
   try {
-    const student = await getStudentFromRequest(req);
-    // Anonymous students get the default (Cybersecurity) catalogue — we have
-    // no profile to scope by, so this matches the frontend's own fallback.
-    let studentContext, departmentSlug = 'cybersecurity', departmentLabel = 'the B.Sc. Cybersecurity programme';
-    if (student) {
-      ({ text: studentContext, departmentSlug, departmentLabel } = await buildStudentContext(student));
-    } else {
-      studentContext = '\n\nSTUDENT CONTEXT: The student is browsing anonymously, so no saved progress is available. If they ask about tracking or saving progress, mention that signing in keeps it synced across devices.';
-    }
+    // `student` is guaranteed by the auth gate above. A profile lookup failure
+    // inside buildStudentContext is still non-fatal — it falls back to email
+    // only and the default (Cybersecurity) catalogue.
+    const { text: studentContext, departmentSlug, departmentLabel } = await buildStudentContext(student);
 
     // Stream plain text so the frontend renders chunks as they arrive. The
     // fallback helper tries each provider in turn (Gemini → Groq → OpenRouter),
