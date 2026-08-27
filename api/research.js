@@ -14,7 +14,7 @@
 
 import { createGroq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { captureApiError } from './_lib/sentry.js';
 
@@ -109,6 +109,13 @@ export default async function handler(req, res) {
       kind: 'unauthorized',
     });
   }
+
+  // The budget that actually binds: per-student, in Postgres, shared across
+  // instances. The per-IP check above is only a cheap pre-auth guard.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'research',
+    message: 'You have used your Explain-this lookups for now. Please wait a few minutes and try again.',
+  })) return;
 
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_API_KEY) {

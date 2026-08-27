@@ -14,7 +14,7 @@
 //  _lib/model.js) so a provider that rejects the request is retried on the next.
 // ============================================================================
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
@@ -84,6 +84,13 @@ export default async function handler(req, res) {
       kind: 'unauthorized',
     });
   }
+
+  // The budget that actually binds: per-student, in Postgres, shared across
+  // instances. The per-IP check above is only a cheap pre-auth guard.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'summarize',
+    message: 'You have used your Key points allowance for now. Please wait a few minutes and try again.',
+  })) return;
 
   // Strong tier, unlike simplify's light one: the input is several times larger
   // and the job is to decide what matters, which is where a light model starts

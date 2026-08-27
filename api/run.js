@@ -34,7 +34,7 @@ const LANGUAGES = {
   python: { language: 'python3', versionIndex: '6' },
 };
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 
@@ -79,6 +79,15 @@ export default async function handler(req, res) {
       status: 'Sign in required',
     });
   }
+
+  // The budget that actually binds: per-student, in Postgres, shared across
+  // instances. Matters more here than anywhere else — JDoodle's ceiling is a
+  // hard 20 runs per DAY for the whole app, so one student on a fast loop
+  // could still deny everyone else even while signed in.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'run',
+    message: 'You have used your code-run allowance for now. Please wait a few minutes and try again.',
+  })) return;
 
   const CLIENT_ID = process.env.JDOODLE_CLIENT_ID;
   const CLIENT_SECRET = process.env.JDOODLE_CLIENT_SECRET;
