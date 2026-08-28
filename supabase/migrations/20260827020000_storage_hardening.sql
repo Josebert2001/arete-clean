@@ -1,6 +1,14 @@
 -- Tighten the course-materials storage bucket. Run manually in the Supabase SQL
 -- editor. Idempotent.
 --
+-- ─── ORDERING: safe either side of the deploy ───────────────────────────────
+-- Both the old and the new frontend upload to the same key shape
+-- ("<courseSlug>/<timestamp>-<rand>.<ext>") and let Supabase stamp `owner` from
+-- the JWT, so the tightened INSERT policy below accepts both. Run it with the
+-- other pre-deploy migrations. Verified against the real catalogue: all 112
+-- course slugs across both departments match the folder pattern (longest is
+-- `cyb-313-report-writing`, 22 chars) — so no course loses uploads to it.
+--
 -- ─── WHY ────────────────────────────────────────────────────────────────────
 -- The upload policy was `WITH CHECK (bucket_id = 'course-materials')` and
 -- nothing more. Any signed-in student could therefore write ANY key in the
