@@ -14,8 +14,9 @@
 //  _lib/model.js) so a provider that rejects the request is retried on the next.
 // ============================================================================
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
+import { getStudentFromRequest } from './_lib/supabase.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 const SYSTEM_PROMPT = `You are Areté's lecture-note summariser for University of Uyo students in Nigeria. You will be given the full text of one lecture-note topic. The student has already read it — produce the revision recap they would want the night before the exam.
@@ -54,8 +55,15 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Availability probe — lets the UI hide the Key points buttons on page load
-  // when no provider is configured. Skips rate limiting.
+  // when no provider is configured. Rate-limited on its own generous bucket.
   if (req.body?.probe) {
+    // Cheap, but not free — see PROBE_RATE_LIMIT.
+    const probeLimit = enforceRateLimit(req, PROBE_RATE_LIMIT);
+    setRateLimitHeaders(res, probeLimit);
+    if (!probeLimit.allowed) {
+      res.setHeader('Retry-After', String(probeLimit.retryAfterSeconds));
+      return res.status(429).json({ error: 'Too many requests.' });
+    }
     return res.status(200).json({ configured: hasAnyProvider() });
   }
 
@@ -69,6 +77,27 @@ export default async function handler(req, res) {
       kind: 'rate_limited',
     });
   }
+
+  // Signed-in only — this endpoint spends real model quota, so it must not be
+  // callable anonymously by anything that finds the URL. It is the widest of the
+  // set (32,000 chars of arbitrary text into the strong model), so it was also
+  // the cheapest to abuse. Checked AFTER the rate limiter for the same reason as
+  // research.js: an invalid token must not force an uncounted Supabase auth call.
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'summarize', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to use Key points.',
+      kind: 'unauthorized',
+    });
+  }
+
+  // The budget that actually binds: per-student, in Postgres, shared across
+  // instances. The per-IP check above is only a cheap pre-auth guard.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'summarize',
+    message: 'You have used your Key points allowance for now. Please wait a few minutes and try again.',
+  })) return;
 
   // Strong tier, unlike simplify's light one: the input is several times larger
   // and the job is to decide what matters, which is where a light model starts

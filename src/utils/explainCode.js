@@ -129,12 +129,20 @@ export function listingsInExamPrep(bank) {
 
 // Calls the API. Resolves to { explanation } | { error } | { aborted: true }.
 export async function requestCodeExplanation({ code, language, mode, signal }) {
+  // Imported lazily rather than at module scope because this file is ALSO loaded
+  // by scripts/pregenerate-explanations.mjs under plain Node, where
+  // src/lib/supabase.js cannot be evaluated at all — it reads `import.meta.env`,
+  // which Vite defines and Node leaves undefined. The script only uses the pure
+  // listing helpers above and never reaches this function.
+  const { authHeaders } = await import('../lib/supabase.js');
+
   try {
     const data = await fetchJsonWithFallback(
       '/api/explainer',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // The endpoint is signed-in only — without this it answers 401.
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
         body: JSON.stringify({ code, language, mode }),
         signal,
       },

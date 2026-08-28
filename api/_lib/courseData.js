@@ -792,6 +792,28 @@ async function lectureNotesText(course) {
 // as stored in courses.js / course_materials.course_code (e.g. "CYB 222"),
 // so callers can do an exact-match DB lookup that agrees with this resolver's
 // fuzzy matching. `code` is null when only lecture notes matched (no catalogue
+// Resolves a course from the SLUG a material upload claims to be for, scoped to
+// the uploader's own department catalogue. Exists so api/extract.js can derive
+// `course_code` and the materials pool itself rather than trusting either from
+// the request body — before this, a client could file a note under any course,
+// in any pool, by editing the JSON it posted.
+//
+// Returns null when that department's catalogue has no such slug, which the
+// caller treats as "reject the upload" rather than "fall back to something".
+export function findCourseBySlug(courseSlug, departmentSlug) {
+  if (typeof courseSlug !== 'string' || !courseSlug.trim()) return null;
+
+  const department = departmentFor(departmentSlug);
+  const course = (department.courses || []).find(c => c.slug === courseSlug);
+  if (!course) return null;
+
+  return {
+    slug: course.slug,
+    code: course.code,
+    materialsDepartment: resolveMaterialsDepartment(course, departmentSlug),
+  };
+}
+
 // block to take a canonical code from). Returns null when nothing matches.
 //
 // departmentSlug scopes the result to that department's catalogue (see

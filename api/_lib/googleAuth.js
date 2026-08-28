@@ -3,8 +3,10 @@
 //  Shared plumbing for the "Connect Google" flow: builds the OAuth2 client,
 //  signs/verifies the redirect-flow `state` param (CSRF protection), and
 //  reads/writes the student's stored refresh token via the Supabase
-//  service-role client — the only file in the codebase allowed to touch
-//  SUPABASE_SERVICE_ROLE_KEY.
+//  service-role client from _lib/serviceRole.js — which is now the single file
+//  that reads SUPABASE_SERVICE_ROLE_KEY (api/extract.js is the second caller).
+//  Every query below is scoped by an already-verified user id, never by
+//  anything taken from a request body; RLS does not apply to this client.
 // ============================================================================
 
 import crypto from 'crypto';
@@ -21,10 +23,7 @@ import crypto from 'crypto';
 // apirequest.js duck-types the auth object on `getRequestHeaders` and never
 // uses instanceof.
 import { OAuth2Client } from 'google-auth-library';
-import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { serviceRoleClient } from './serviceRole.js';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -43,18 +42,6 @@ export function googleConfigured() {
 export function createOAuth2Client() {
   if (!googleConfigured()) return null;
   return new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
-}
-
-// Lazily created — most requests (status checks, disconnect) never need it.
-let _serviceClient = null;
-export function serviceRoleClient() {
-  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return null;
-  if (!_serviceClient) {
-    _serviceClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-  }
-  return _serviceClient;
 }
 
 const STATE_TTL_MS = 10 * 60 * 1000;

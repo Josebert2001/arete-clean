@@ -1,9 +1,90 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { applyReviews } from '../utils/reviewSchedule';
+import { applyReviews, MAX_BOX } from '../utils/reviewSchedule';
 
 const EMPTY_PROGRESS = { completedModules: [], quizScores: {} };
+
+// ─── Shape validation ────────────────────────────────────────────────────────
+// A progress blob crosses two trust boundaries before anything reads it back:
+// the browser's own localStorage, and the `user_progress.progress` JSONB column
+// — which is written straight from the client, so it holds whatever that
+// student's browser (or a hand-written PostgREST call with their own token) put
+// there. Nothing downstream re-checks it: the dashboards index into it, and the
+// tutor's getStudentProgress tool serialises it into the model prompt.
+//
+// RLS keeps each blob to its own author, so today the blast radius is a student
+// garbling their own session. This exists so that stays true if progress ever
+// becomes visible ACROSS users — a leaderboard, a class view — where one
+// student's blob would land on another student's screen.
+//
+// Deliberately lenient: a bad ENTRY is dropped, never the whole blob. Wiping a
+// student's real progress because one quiz score went malformed would be a
+// worse bug than the one this prevents.
+
+// Generous enough that no real student reaches them; low enough that a crafted
+// blob can't be used to make every dashboard render tens of thousands of nodes.
+const MAX_ENTRIES = 5000;
+const MAX_ID_LENGTH = 200;
+
+// Ids are strings everywhere they are produced — module ids from the data files
+// ('foundations', 'sec-intro'), reading ids as `${slug}#${hash}`, review ids as
+// `q:${course}:${hash}`. A non-string id could never match any of them, so it
+// is junk regardless of where it came from.
+function validId(id) {
+  return typeof id === 'string' && id.length > 0 && id.length <= MAX_ID_LENGTH;
+}
+
+function finite(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+export function sanitizeProgress(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ...EMPTY_PROGRESS };
+
+  const completedModules = Array.isArray(raw.completedModules)
+    ? [...new Set(raw.completedModules.filter(validId))].slice(0, MAX_ENTRIES)
+    : [];
+
+  const quizScores = {};
+  if (raw.quizScores && typeof raw.quizScores === 'object' && !Array.isArray(raw.quizScores)) {
+    for (const [id, s] of Object.entries(raw.quizScores)) {
+      if (Object.keys(quizScores).length >= MAX_ENTRIES) break;
+      if (!validId(id) || !s || typeof s !== 'object') continue;
+      // score/total drive the percentage maths on every dashboard; a missing
+      // date only costs a merge tie-break, so it defaults instead of rejecting.
+      if (!finite(s.score) || !finite(s.total)) continue;
+      quizScores[id] = { score: s.score, total: s.total, date: finite(s.date) ? s.date : 0 };
+    }
+  }
+
+  const clean = { completedModules, quizScores };
+
+  // `items` only exists on the review-queue record. Left absent otherwise so a
+  // track record doesn't grow an empty key — mergeProgress relies on that.
+  if (raw.items && typeof raw.items === 'object' && !Array.isArray(raw.items)) {
+    const items = {};
+    for (const [id, state] of Object.entries(raw.items)) {
+      if (Object.keys(items).length >= MAX_ENTRIES) break;
+      if (!validId(id) || !state || typeof state !== 'object') continue;
+      // b and d drive the scheduling maths (isDue, pruneItems); without them
+      // the item is unusable. n/l/t are counters that default cleanly.
+      if (!finite(state.b) || !finite(state.d)) continue;
+      items[id] = {
+        // Clamped to the range schedule() itself produces, so a forged box
+        // number can't park an item outside the ladder forever.
+        b: Math.min(Math.max(Math.round(state.b), 1), MAX_BOX),
+        d: Math.round(state.d),
+        n: finite(state.n) ? Math.max(0, Math.round(state.n)) : 0,
+        l: finite(state.l) ? Math.max(0, Math.round(state.l)) : 0,
+        t: finite(state.t) ? state.t : 0,
+      };
+    }
+    clean.items = items;
+  }
+
+  return clean;
+}
 
 // Union of completed modules; for quiz scores, the most recent attempt wins.
 //
@@ -45,7 +126,9 @@ export function readProgress(storageKey) {
 
   try {
     const raw = localStorage.getItem(storageKey);
-    return raw ? JSON.parse(raw) : { ...EMPTY_PROGRESS };
+    // Sanitised on the way in: localStorage is editable by anything running on
+    // the origin, including the student themselves via devtools.
+    return raw ? sanitizeProgress(JSON.parse(raw)) : { ...EMPTY_PROGRESS };
   } catch {
     return { ...EMPTY_PROGRESS };
   }
@@ -71,7 +154,9 @@ export function useProgress(storageKey = 'cos222-progress-v1') {
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled) return;
-        if (data?.progress) setProgress(local => mergeProgress(local, data.progress));
+        // The column is client-written, so treat what comes back as untrusted
+        // even though RLS guarantees it is this student's own row.
+        if (data?.progress) setProgress(local => mergeProgress(local, sanitizeProgress(data.progress)));
         setPulledKey(syncKey);
       });
     return () => { cancelled = true; };

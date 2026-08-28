@@ -14,7 +14,7 @@
 
 import { createGroq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { captureApiError } from './_lib/sentry.js';
 
@@ -40,6 +40,21 @@ const RATE_LIMIT = {
   windowMs: 10 * 60 * 1000,
 };
 
+// Every source here is rendered as a clickable `href` (ExplainSelection.jsx), and
+// the list is model-supplied — so the scheme is allowlisted at the source rather
+// than trusted at the render site. A `javascript:` or `data:` URL parses happily
+// as a URL and would otherwise become a one-click payload. Anything that isn't
+// plain http(s) — including a string that doesn't parse as a URL at all, which
+// could never be a safe link anyway — is dropped.
+function isHttpUrl(url) {
+  try {
+    const { protocol } = new URL(url);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 // Pulls the URL sources the compound system cited, deduped and capped. The AI
 // SDK exposes web results as `result.sources` (sourceType 'url'); we degrade to
 // an empty list if the shape isn't present rather than failing the response.
@@ -49,10 +64,10 @@ export function extractSources(result) {
   const out = [];
   for (const s of raw) {
     const url = s?.url;
-    if (!url || seen.has(url)) continue;
+    if (!url || seen.has(url) || !isHttpUrl(url)) continue;
     seen.add(url);
-    let host = url;
-    try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { /* keep raw url */ }
+    // Safe to construct unconditionally — isHttpUrl already parsed it.
+    const host = new URL(url).hostname.replace(/^www\./, '');
     out.push({ title: s.title || host, url });
     if (out.length >= MAX_SOURCES) break;
   }
@@ -66,8 +81,15 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Availability probe — lets the UI hide the "Explain this" button when the
-  // feature isn't configured. Skips auth + rate limiting, like the siblings.
+  // feature isn't configured. Skips auth; rate-limited on its own generous bucket.
   if (req.body?.probe) {
+    // Cheap, but not free — see PROBE_RATE_LIMIT.
+    const probeLimit = enforceRateLimit(req, PROBE_RATE_LIMIT);
+    setRateLimitHeaders(res, probeLimit);
+    if (!probeLimit.allowed) {
+      res.setHeader('Retry-After', String(probeLimit.retryAfterSeconds));
+      return res.status(429).json({ error: 'Too many requests.' });
+    }
     return res.status(200).json({ configured: Boolean(process.env.GROQ_API_KEY) });
   }
 
@@ -94,6 +116,13 @@ export default async function handler(req, res) {
       kind: 'unauthorized',
     });
   }
+
+  // The budget that actually binds: per-student, in Postgres, shared across
+  // instances. The per-IP check above is only a cheap pre-auth guard.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'research',
+    message: 'You have used your Explain-this lookups for now. Please wait a few minutes and try again.',
+  })) return;
 
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_API_KEY) {

@@ -16,7 +16,7 @@
 // ============================================================================
 
 import { stepCountIs } from 'ai';
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { getCourseIndexForDepartment, MODULE_INDEX } from './_lib/courseData.js';
@@ -249,8 +249,15 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Availability probe — lets the UI show the unconfigured state on page load
-  // instead of after the student has typed a question. Skips rate limiting.
+  // instead of after the student has typed a question. Rate-limited on its own generous bucket.
   if (req.body?.probe) {
+    // Cheap, but not free — see PROBE_RATE_LIMIT.
+    const probeLimit = enforceRateLimit(req, PROBE_RATE_LIMIT);
+    setRateLimitHeaders(res, probeLimit);
+    if (!probeLimit.allowed) {
+      res.setHeader('Retry-After', String(probeLimit.retryAfterSeconds));
+      return res.status(429).json({ error: 'Too many requests.' });
+    }
     return res.status(200).json({ configured: hasAnyProvider() });
   }
 
@@ -264,6 +271,28 @@ export default async function handler(req, res) {
       kind: 'rate_limited',
     });
   }
+
+  // Signed-in only. This is the most expensive endpoint in the app — an agentic
+  // loop of up to 4 steps on the strong model — so it must not be callable
+  // anonymously by anything that finds the URL. Both callers (/tutor and the
+  // course chat) already sit behind RequireAuth routes, so no student loses
+  // access. Checked AFTER the rate limiter for the same reason as research.js:
+  // an invalid token must not be able to force an uncounted Supabase auth call.
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'tutor', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to use the AI Tutor.',
+      kind: 'unauthorized',
+    });
+  }
+
+  // The budget that actually binds: per-student, in Postgres, shared across
+  // instances. The per-IP check above is only a cheap pre-auth guard.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'tutor',
+    message: 'You have used your tutor allowance for now. Please wait a few minutes and try again.',
+  })) return;
 
   if (!hasAnyProvider()) {
     return res.status(200).json({
@@ -300,15 +329,10 @@ export default async function handler(req, res) {
   const chain = buildModelChain(tier);
 
   try {
-    const student = await getStudentFromRequest(req);
-    // Anonymous students get the default (Cybersecurity) catalogue — we have
-    // no profile to scope by, so this matches the frontend's own fallback.
-    let studentContext, departmentSlug = 'cybersecurity', departmentLabel = 'the B.Sc. Cybersecurity programme';
-    if (student) {
-      ({ text: studentContext, departmentSlug, departmentLabel } = await buildStudentContext(student));
-    } else {
-      studentContext = '\n\nSTUDENT CONTEXT: The student is browsing anonymously, so no saved progress is available. If they ask about tracking or saving progress, mention that signing in keeps it synced across devices.';
-    }
+    // `student` is guaranteed by the auth gate above. A profile lookup failure
+    // inside buildStudentContext is still non-fatal — it falls back to email
+    // only and the default (Cybersecurity) catalogue.
+    const { text: studentContext, departmentSlug, departmentLabel } = await buildStudentContext(student);
 
     // Stream plain text so the frontend renders chunks as they arrive. The
     // fallback helper tries each provider in turn (Gemini → Groq → OpenRouter),

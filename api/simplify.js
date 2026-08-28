@@ -10,8 +10,9 @@
 //  413/429) is transparently retried on the next one.
 // ============================================================================
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
+import { getStudentFromRequest } from './_lib/supabase.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 // Exported so scripts/pregenerate-simplify.mjs rewrites with the exact prompt
@@ -55,8 +56,15 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Availability probe — lets the UI hide the Simplify buttons on page load
-  // when no provider is configured. Skips rate limiting.
+  // when no provider is configured. Rate-limited on its own generous bucket.
   if (req.body?.probe) {
+    // Cheap, but not free — see PROBE_RATE_LIMIT.
+    const probeLimit = enforceRateLimit(req, PROBE_RATE_LIMIT);
+    setRateLimitHeaders(res, probeLimit);
+    if (!probeLimit.allowed) {
+      res.setHeader('Retry-After', String(probeLimit.retryAfterSeconds));
+      return res.status(429).json({ error: 'Too many requests.' });
+    }
     return res.status(200).json({ configured: hasAnyProvider() });
   }
 
@@ -70,6 +78,27 @@ export default async function handler(req, res) {
       kind: 'rate_limited',
     });
   }
+
+  // Signed-in only — this endpoint spends real model quota, so it must not be
+  // callable anonymously by anything that finds the URL. Every caller in the app
+  // already sits behind a RequireAuth route, so this costs no student anything.
+  // Checked AFTER the rate limiter for the same reason as research.js: an
+  // invalid token must not be able to force an uncounted Supabase auth call.
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'simplify', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to use Simplify.',
+      kind: 'unauthorized',
+    });
+  }
+
+  // The budget that actually binds: per-student, in Postgres, shared across
+  // instances. The per-IP check above is only a cheap pre-auth guard.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'simplify',
+    message: 'You have used your Simplify allowance for now. Please wait a few minutes and try again.',
+  })) return;
 
   // Light tier (flash-lite) — cheaper and faster. This endpoint briefly moved
   // to the strong model because gemini-3.1-flash-lite dropped points from the

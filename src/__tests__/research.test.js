@@ -41,4 +41,29 @@ describe('extractSources', () => {
     const sources = Array.from({ length: 8 }, (_, i) => ({ url: `https://s${i}.com`, title: `S${i}` }));
     expect(extractSources({ sources })).toHaveLength(5);
   });
+
+  // Each source is rendered as a clickable href in ExplainSelection.jsx, and the
+  // list comes from the model — so a non-http(s) scheme must never reach it.
+  it('drops sources whose scheme is not http or https', () => {
+    const sources = [
+      { url: 'javascript:alert(document.cookie)', title: 'Click me' },
+      { url: 'data:text/html,<script>alert(1)</script>', title: 'Docs' },
+      { url: 'vbscript:msgbox(1)', title: 'Reference' },
+      { url: 'file:///etc/passwd', title: 'Local' },
+      { url: 'https://owasp.org/xss', title: 'XSS — OWASP' },
+    ];
+    expect(extractSources({ sources })).toEqual([
+      { title: 'XSS — OWASP', url: 'https://owasp.org/xss' },
+    ]);
+  });
+
+  it('keeps plain http as well as https', () => {
+    const sources = [{ url: 'http://example.org/a', title: 'A' }];
+    expect(extractSources({ sources })).toEqual([{ title: 'A', url: 'http://example.org/a' }]);
+  });
+
+  it('drops values that do not parse as a URL at all', () => {
+    const sources = [{ url: 'not a url', title: 'Nope' }, { url: 'https://ok.com', title: 'OK' }];
+    expect(extractSources({ sources })).toEqual([{ title: 'OK', url: 'https://ok.com' }]);
+  });
 });

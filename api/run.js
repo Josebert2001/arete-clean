@@ -34,8 +34,9 @@ const LANGUAGES = {
   python: { language: 'python3', versionIndex: '6' },
 };
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from './_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
+import { getStudentFromRequest } from './_lib/supabase.js';
 
 const RATE_LIMIT = {
   namespace: 'run',
@@ -62,6 +63,31 @@ export default async function handler(req, res) {
       status: 'Rate limit reached',
     });
   }
+
+  // Signed-in only. JDoodle's free plan is 20 executions per DAY across every
+  // user, so an anonymous caller could burn the whole department's playground
+  // in a couple of minutes. Every caller in the app already sits behind a
+  // RequireAuth route, so requiring the token costs no student anything.
+  // Checked AFTER the rate limiter for the same reason as research.js: an
+  // invalid token must not be able to force an uncounted Supabase auth call.
+  const student = await getStudentFromRequest(req);
+  if (!student) {
+    logRequest(req, 'run', { denied: 'unauthorized' });
+    return res.status(401).json({
+      error: 'Please sign in to run code.',
+      kind: 'unauthorized',
+      status: 'Sign in required',
+    });
+  }
+
+  // The budget that actually binds: per-student, in Postgres, shared across
+  // instances. Matters more here than anywhere else — JDoodle's ceiling is a
+  // hard 20 runs per DAY for the whole app, so one student on a fast loop
+  // could still deny everyone else even while signed in.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'run',
+    message: 'You have used your code-run allowance for now. Please wait a few minutes and try again.',
+  })) return;
 
   const CLIENT_ID = process.env.JDOODLE_CLIENT_ID;
   const CLIENT_SECRET = process.env.JDOODLE_CLIENT_SECRET;
