@@ -40,6 +40,42 @@
     <meta name="twitter:title" content="Areté — Excellence, Engineered." />
     <meta name="twitter:description" content="Courses, interactive programming tracks, and an AI tutor for University of Uyo students." />
     <meta name="twitter:image" content="https://www.aretecyb.tech/og-image.png" />
+
+    <!-- Site-level structured data. scripts/prerender.mjs appends a per-course
+         Course + BreadcrumbList block to each prerendered file; this pair is
+         what every page carries.
+
+         An application/ld+json block is a data block, not executable script:
+         the HTML spec's "prepare the script element" algorithm returns before
+         the CSP check for any type that is neither classic nor module, so this
+         needs no 'unsafe-inline' and no hash in vercel.json's script-src. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "Areté",
+      "alternateName": "Arete UniUyo",
+      "url": "https://www.aretecyb.tech/",
+      "logo": "https://www.aretecyb.tech/icon-512.png",
+      "description": "Academic companion for University of Uyo students — course outlines, transcribed lecture notes, past-paper practice, interactive Java, Python and C tracks, and an AI tutor that knows the curriculum.",
+      "areaServed": { "@type": "Place", "name": "Uyo, Akwa Ibom, Nigeria" },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "student",
+        "audienceType": "University of Uyo undergraduates"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Areté",
+      "url": "https://www.aretecyb.tech/",
+      "inLanguage": "en",
+      "publisher": { "@type": "Organization", "name": "JRsolvy" }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
