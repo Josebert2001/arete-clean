@@ -1,8 +1,21 @@
 User-agent: *
 Allow: /
+
+# Auth and API surfaces have nothing to index. /signin in particular must stay
+# disallowed: every gated route resolves to it, so allowing it would let a
+# crawler index one sign-in page under a hundred different course URLs.
 Disallow: /api/
 Disallow: /signin
 Disallow: /setup-profile
 Disallow: /welcome
+Disallow: /profile
+
+# Gated study tools. A crawler that follows these gets redirected to /signin,
+# which is disallowed above — so they are dead ends, not content.
+Disallow: /tutor
+Disallow: /explainer
+Disallow: /planner
+Disallow: /review
+Disallow: /lab
 
 Sitemap: https://www.aretecyb.tech/sitemap.xml

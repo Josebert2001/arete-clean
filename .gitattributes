@@ -1,0 +1,7 @@
+# scripts/prerender.mjs rewrites public/sitemap.xml on every build, with LF
+# endings. On a machine with core.autocrlf=true git checks the file out as
+# CRLF, so the freshly generated file never matches what git expects and
+# `git status` reports it modified after every single build — even though
+# `git diff` is empty, because the normalized content is identical. Pin the
+# working-tree endings to what the generator actually writes.
+public/sitemap.xml text eol=lf
