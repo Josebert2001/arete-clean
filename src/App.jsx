@@ -13,6 +13,7 @@ import { recordLocation, readLastLocation } from './utils/lastLocation';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
+const CoursePublic = lazy(() => import('./pages/CoursePublic'));
 const CodeLab = lazy(() => import('./pages/CodeLab'));
 const TrackModules = lazy(() => import('./pages/TrackModules'));
 const TrackModuleDetail = lazy(() => import('./pages/TrackModuleDetail'));
@@ -142,6 +143,25 @@ function RequireAuth({ children }) {
   return children;
 }
 
+// The two course routes are the only study pages a signed-out visitor may
+// open, and they show a different page rather than the real one: the outline,
+// the set texts and the study tips (CoursePreview), with the lecture notes,
+// question banks, tutor and progress tracking still behind the gate.
+//
+// They are open because they are the whole of Areté's search presence. Every
+// other route redirects a crawler to /signin, which robots.txt disallows, so
+// without these the site has exactly one indexable page — and students look
+// for their courses by code ("cyb 224 uniuyo"), not by the name of a study
+// app they have never heard of. scripts/prerender.mjs bakes each of these
+// into static HTML so the text is in the served bytes, not just after
+// hydration.
+function PublicOrGated({ children }) {
+  const { user, authLoading, authEnabled } = useAuth();
+  if (authLoading) return <RouteLoading />;
+  if (!authEnabled || user) return children;
+  return <CoursePublic />;
+}
+
 function NotFound() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-24 text-center">
@@ -201,8 +221,8 @@ export default function App() {
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/courses" element={<RequireAuth><Courses /></RequireAuth>} />
-            <Route path="/courses/:slug" element={<RequireAuth><CourseDetail /></RequireAuth>} />
+            <Route path="/courses" element={<PublicOrGated><Courses /></PublicOrGated>} />
+            <Route path="/courses/:slug" element={<PublicOrGated><CourseDetail /></PublicOrGated>} />
             <Route path="/lab" element={<RequireAuth><CodeLab /></RequireAuth>} />
             <Route path="/tracks" element={<Navigate to="/lab" replace />} />
             <Route path="/tracks/:lang" element={<RequireAuth><TrackModules /></RequireAuth>} />
