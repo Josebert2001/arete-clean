@@ -29,9 +29,26 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 // coding; LIGHT (flash-lite) is fast/cheap for simple turns AND doubles as the
 // proven fallback if the strong model id is ever unavailable. The task router
 // (api/_lib/taskRouter.js) picks the tier per tutor turn.
-// gemini-3.5-flash is GA/stable and Google's most capable Flash model — strong
-// at the tutor's agentic tool loop and coding, while staying fast/affordable.
-const GEMINI_STRONG_MODEL = process.env.GEMINI_MODEL_STRONG || 'gemini-3.5-flash';
+// gemini-3.7-flash is Google's most capable Flash model, built for exactly what
+// the tutor does — agentic tool loops and reliable multi-step execution — and it
+// is CHEAPER than the 3.5-flash it replaces: $0.75/$3.75 per 1M in/out against
+// $1.50/$9.00. That promotional rate runs to 31 Dec 2026; re-check the pricing
+// page before assuming it still holds after that.
+//
+// NOTE, if answers ever start cutting off mid-sentence: 3.7 supports thinking
+// levels low/medium/high and defaults to medium — it has NO "minimal", so unlike
+// 3.5 it may ignore the `thinkingBudget: 0` that tutor.js/explainer.js/
+// simplify.js pass. Hidden thinking then spends from the same maxOutputTokens
+// budget as the visible reply, which is the exact failure those call sites were
+// written to prevent. The endpoints most exposed are the ones with tight caps:
+// summarize (1400) and tutor (1200); explainer has 6000 and plenty of room.
+// Fastest fix is no deploy at all — set GEMINI_MODEL_STRONG=gemini-3.5-flash in
+// Vercel and the chain reverts on the next request.
+//
+// The light tier stays on 3.5-flash-lite: there is no 3.7 Flash-Lite, and
+// flash-lite is both the cheapest tier ($0.30/$2.50) and the fallback step for
+// BOTH tiers below, so it has to remain a model that exists.
+const GEMINI_STRONG_MODEL = process.env.GEMINI_MODEL_STRONG || 'gemini-3.7-flash';
 const GEMINI_LIGHT_MODEL = process.env.GEMINI_MODEL_LIGHT || 'gemini-3.5-flash-lite';
 
 /**
