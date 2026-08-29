@@ -44,6 +44,78 @@ export function createOAuth2Client() {
   return new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 }
 
+// ─── Refresh-token encryption at rest ────────────────────────────────────────
+// A Google refresh token is a long-lived credential: whoever holds one can mint
+// access tokens and write to that student's Calendar until it is revoked.
+// Column-level GRANTs already keep it away from `authenticated` (see
+// supabase/migrations/20260719000000_google_connections.sql), but that only
+// governs who may SELECT it — a leaked service-role key or a database dump
+// handed over every token in plaintext.
+//
+// The key is DERIVED from GOOGLE_CLIENT_SECRET rather than being a new env var,
+// which is what makes this work with zero configuration: the secret already
+// lives in Vercel's environment and never in the database, so a dump on its own
+// is now useless. It is the same trust boundary signState() already relies on.
+// HKDF with a distinct `info` string keeps this key independent of the one used
+// for state signing, so neither can be used to attack the other.
+//
+// ROTATION: re-issuing GOOGLE_CLIENT_SECRET makes existing ciphertexts
+// undecryptable. That is acceptable — rotating it invalidates the OAuth client
+// anyway, so every student has to reconnect regardless, and clientForUser()
+// returns null for a token it cannot read rather than throwing.
+const ENC_PREFIX = 'v1';
+
+function encryptionKey() {
+  if (!GOOGLE_CLIENT_SECRET) return null;
+  return Buffer.from(
+    crypto.hkdfSync('sha256', GOOGLE_CLIENT_SECRET, 'arete-google-token-salt', 'arete-google-refresh-token', 32)
+  );
+}
+
+// Returns `v1.<iv>.<tag>.<ciphertext>`, or the plaintext unchanged when no key
+// is available — the feature degrades rather than storing nothing.
+export function encryptRefreshToken(plain) {
+  const key = encryptionKey();
+  if (!key || typeof plain !== 'string' || !plain) return plain;
+
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const ct = Buffer.concat([cipher.update(plain, 'utf-8'), cipher.final()]);
+  return [
+    ENC_PREFIX,
+    iv.toString('base64url'),
+    cipher.getAuthTag().toString('base64url'),
+    ct.toString('base64url'),
+  ].join('.');
+}
+
+// Accepts either a `v1.…` ciphertext or a legacy plaintext token, so rows
+// written before this existed keep working. Returns null when a ciphertext
+// cannot be authenticated — a tampered or undecryptable token must not be
+// silently treated as a usable credential.
+export function decryptRefreshToken(stored) {
+  if (typeof stored !== 'string' || !stored) return null;
+  if (!stored.startsWith(`${ENC_PREFIX}.`)) return stored; // legacy plaintext
+
+  const key = encryptionKey();
+  if (!key) return null;
+
+  try {
+    const [, ivB64, tagB64, ctB64] = stored.split('.');
+    if (!ivB64 || !tagB64 || !ctB64) return null;
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(ivB64, 'base64url'));
+    decipher.setAuthTag(Buffer.from(tagB64, 'base64url'));
+    return Buffer.concat([decipher.update(Buffer.from(ctB64, 'base64url')), decipher.final()]).toString('utf-8');
+  } catch {
+    return null;
+  }
+}
+
+// True for a value still stored in the clear, so callers can migrate it.
+export function isLegacyPlaintextToken(stored) {
+  return typeof stored === 'string' && stored.length > 0 && !stored.startsWith(`${ENC_PREFIX}.`);
+}
+
 const STATE_TTL_MS = 10 * 60 * 1000;
 
 // Signs { uid, returnTo } into a compact, tamper-evident token used as the
@@ -89,7 +161,26 @@ export async function getRefreshTokenForUser(userId) {
     .select('refresh_token')
     .eq('user_id', userId)
     .maybeSingle();
-  return data?.refresh_token ?? null;
+
+  const stored = data?.refresh_token ?? null;
+  if (!stored) return null;
+
+  const plain = decryptRefreshToken(stored);
+
+  // Lazily migrate a row written before encryption existed: re-store it
+  // encrypted the first time it is used, so no separate backfill is needed and
+  // nobody has to reconnect. Best-effort — a failed rewrite must not stop the
+  // caller getting the token it just decrypted successfully.
+  if (plain && isLegacyPlaintextToken(stored) && encryptionKey()) {
+    db.from('google_connections')
+      .update({ refresh_token: encryptRefreshToken(plain) })
+      .eq('user_id', userId)
+      .then(({ error }) => {
+        if (error) console.error('google token re-encryption failed:', error.message);
+      }, () => {});
+  }
+
+  return plain;
 }
 
 // Upserts the connection row after a successful token exchange. Only
@@ -103,7 +194,8 @@ export async function saveGoogleConnection(userId, tokens) {
   if (tokens.refresh_token) {
     const { error } = await db.from('google_connections').upsert({
       user_id: userId,
-      refresh_token: tokens.refresh_token,
+      // Encrypted at rest — see encryptRefreshToken. Never store the raw token.
+      refresh_token: encryptRefreshToken(tokens.refresh_token),
       scope: tokens.scope || GOOGLE_SCOPES.join(' '),
       updated_at: new Date().toISOString(),
     });
