@@ -29,26 +29,36 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 // coding; LIGHT (flash-lite) is fast/cheap for simple turns AND doubles as the
 // proven fallback if the strong model id is ever unavailable. The task router
 // (api/_lib/taskRouter.js) picks the tier per tutor turn.
-// gemini-3.7-flash is Google's most capable Flash model, built for exactly what
-// the tutor does — agentic tool loops and reliable multi-step execution — and it
-// is CHEAPER than the 3.5-flash it replaces: $0.75/$3.75 per 1M in/out against
-// $1.50/$9.00. That promotional rate runs to 31 Dec 2026; re-check the pricing
-// page before assuming it still holds after that.
+// gemini-3.5-flash is GA/stable — strong at the tutor's agentic tool loop and
+// coding, while staying fast and affordable.
 //
-// NOTE, if answers ever start cutting off mid-sentence: 3.7 supports thinking
-// levels low/medium/high and defaults to medium — it has NO "minimal", so unlike
-// 3.5 it may ignore the `thinkingBudget: 0` that tutor.js/explainer.js/
-// simplify.js pass. Hidden thinking then spends from the same maxOutputTokens
-// budget as the visible reply, which is the exact failure those call sites were
-// written to prevent. The endpoints most exposed are the ones with tight caps:
-// summarize (1400) and tutor (1200); explainer has 6000 and plenty of room.
-// Fastest fix is no deploy at all — set GEMINI_MODEL_STRONG=gemini-3.5-flash in
-// Vercel and the chain reverts on the next request.
+// ─── DO NOT MOVE THIS TO gemini-3.7-flash WITHOUT READING THIS ──────────────
+// It was tried on 2026-08-29 and reverted the same day, because it BREAKS the
+// output of every strong-tier endpoint with a tight budget.
 //
-// The light tier stays on 3.5-flash-lite: there is no 3.7 Flash-Lite, and
-// flash-lite is both the cheapest tier ($0.30/$2.50) and the fallback step for
-// BOTH tiers below, so it has to remain a model that exists.
-const GEMINI_STRONG_MODEL = process.env.GEMINI_MODEL_STRONG || 'gemini-3.7-flash';
+// 3.7 supports thinking levels low/medium/high and defaults to medium. It has
+// no "minimal", and it IGNORES the `thinkingBudget: 0` that tutor.js,
+// explainer.js and simplify.js pass — so hidden thinking spends from the same
+// maxOutputTokens budget as the visible reply. Measured against /api/summarize
+// (1400-token cap) on production: the recap came back 331 characters long and
+// cut off mid-sentence at "* **Collection** requires", with the required
+// "Terms to know:" line never emitted. 3.5-flash answers the same prompt in
+// full. This is precisely the failure those `thinkingBudget: 0` options were
+// added to prevent, so 3.7 undoes a fix rather than being a clean upgrade.
+//
+// 3.7 IS cheaper ($0.75/$3.75 per 1M in/out vs $1.50/$9.00) and is genuinely
+// better at agentic work, so it is worth revisiting — but only together with
+// one of: raising maxOutputTokens on summarize/tutor far enough to cover an
+// uncapped thinking pass, or setting an explicit low thinking level through
+// whatever option @ai-sdk/google exposes for it. Verify by asking /api/summarize
+// for a recap and checking the "Terms to know:" line is present; that line is
+// the last thing the prompt asks for, so its absence is the truncation tell.
+//
+// Note also that a Google console banner announcing 3.5 Flash "will be taken
+// down soon" was checked against the official deprecation page, which lists
+// gemini-3.5-flash with "No shutdown date announced". There is no deadline
+// forcing this migration.
+const GEMINI_STRONG_MODEL = process.env.GEMINI_MODEL_STRONG || 'gemini-3.5-flash';
 const GEMINI_LIGHT_MODEL = process.env.GEMINI_MODEL_LIGHT || 'gemini-3.5-flash-lite';
 
 /**
