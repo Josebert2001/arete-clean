@@ -130,7 +130,7 @@ Copy `.env.example` to `.env.local` for local dev (never commit `.env.local`).
 # --- AI providers (at least one; chain tries them in this order) ---
 GEMINI_API_KEY=              # Google AI Studio — free tier, leads the chain (tools support)
 # or GOOGLE_GENERATIVE_AI_API_KEY as an alias
-GEMINI_MODEL_STRONG=         # optional override, default gemini-3.5-flash
+GEMINI_MODEL_STRONG=         # optional override, default gemini-3.7-flash
 GEMINI_MODEL_LIGHT=          # optional override, default gemini-3.5-flash-lite
 GROQ_API_KEY=                 # console.groq.com — fast fallback, powers Explain This (compound-mini)
 OPENROUTER_API_KEY=           # optional — best-effort last resort via openrouter/free
