@@ -56,9 +56,17 @@
     "vitest": "^4.1.9"
   },
   "overridesReason": {
-    "gaxios": "googleapis-common pins gaxios to exactly 7.1.3, which drags in rimraf -> glob -> minimatch -> brace-expansion@2.x. brace-expansion 2.x has no patch for GHSA-3jxr-9vmj-r5cp / GHSA-mh99-v99m-4gvg (the 1.x line was patched at 1.1.16, the 2.x line never was). gaxios 7.3.0 dropped the rimraf dependency outright, so this bump removes the vulnerable chain instead of patching it. google-auth-library@10.9.0 already resolves gaxios 7.3.0 in this same tree."
+    "gaxios": "googleapis-common pins gaxios to exactly 7.1.3, which drags in rimraf -> glob -> minimatch -> brace-expansion@2.x. brace-expansion 2.x has no patch for GHSA-3jxr-9vmj-r5cp / GHSA-mh99-v99m-4gvg (the 1.x line was patched at 1.1.16, the 2.x line never was). gaxios 7.3.0 dropped the rimraf dependency outright, so this bump removes the vulnerable chain instead of patching it. google-auth-library@10.9.0 already resolves gaxios 7.3.0 in this same tree.",
+    "fast-uri@3.1.6": "Workbox-build's vendored ajv@8.20.0 pulls fast-uri ^3.0.1. 3.1.5 and below have four advisories (GHSA-5jgf-p345-68v8, GHSA-f65p-4m7j-42xc, GHSA-fph4-wmhf-6fwf, GHSA-jqff-g426-hqxp) — SSRF via host confusion / malformed IPv6 / percent-decoding / percent-encoded scheme on URL parsing. 3.1.6 fixes them. This is a dev-only chain (vite-plugin-pwa -> workbox-build), never shipped to the browser or the /api functions.",
+    "@xmldom/xmldom@0.8.15": "mammoth (used by api/extract.js for .docx) pulls @xmldom/xmldom ^0.8.6. 0.8.14 and below have GHSA-6gmq-8vp8-gcm6 (XML fragment injection via invalid EntityReference.nodeName during requireWellFormed serialization). 0.8.15 fixes it.",
+    "postcss-selector-parser@6.1.3": "tailwindcss / autoprefixer pull postcss-selector-parser ^6.1.x. 6.1.0-6.1.2 have GHSA-w9m9-85wc-3x92 (uncontrolled AST recursion DoS). 6.1.3 fixes it. Dev-only.",
+    "qs@6.16.0": "googleapis-common pulls qs ^6.7.0. 6.15.3 and below have GHSA-x5fp-wj9c-mxmx (array-limit bypass via bracket-key comma parsing) and GHSA-4mjr-xmp4-gh2g (DoS via Attacker Controlled isBuffer). 6.16.0 fixes both."
   },
   "overrides": {
-    "gaxios": "^7.3.0"
+    "gaxios": "^7.3.0",
+    "fast-uri": "^3.1.6",
+    "@xmldom/xmldom": "^0.8.15",
+    "postcss-selector-parser": "^6.1.3",
+    "qs": "^6.16.0"
   }
 }

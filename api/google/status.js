@@ -6,7 +6,7 @@
 //  (never refresh_token — see the SQL in the Google-integration setup notes).
 // ============================================================================
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from '../_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
 import { googleConfigured } from '../_lib/googleAuth.js';
 
@@ -33,6 +33,13 @@ export default async function handler(req, res) {
   if (!student) {
     return res.status(401).json({ error: 'Please sign in.' });
   }
+
+  // Per-student budget shared across instances, matching the other endpoints.
+  // Read-only, so the bucket is generous but still cross-instance.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'google-status',
+    message: 'Too many requests. Please wait a few minutes and try again.',
+  })) return;
 
   if (!googleConfigured()) {
     return res.status(200).json({ configured: false, connected: false });

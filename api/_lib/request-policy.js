@@ -1,4 +1,24 @@
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+// CORS origin wall. NEVER default to "*" — a wildcard would let any site send
+// authenticated requests to every /api/* endpoint (the browser would attach the
+// victim's Authorization header and this app has no CSRF tokens on its JSON
+// POST handlers; the bearer token is the only credential). Instead:
+//   * if ALLOWED_ORIGIN is set, only that exact origin may call across origins
+//   * in production with it unset, we serve NO ACAO header, so browsers refuse
+//     every cross-origin call — which is safe because the real frontend uses
+//     relative /api/* URLs (same-origin) and never needs the header at all
+//   * in dev/preview (or locally), default to the local Vite origin so `vercel
+//     dev` + `vite` on different ports keep talking
+const isProduction = process.env.VERCEL_ENV === 'production';
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN
+  || (isProduction ? null : 'http://localhost:5173');
+
+if (isProduction && !process.env.ALLOWED_ORIGIN) {
+  // Discoverability only — same-origin calls keep working, but this must be
+  // surfaced or a future cross-origin consumer will fail confusingly.
+  console.error(
+    'request-policy: ALLOWED_ORIGIN is not set in production; cross-origin /api/* calls are being refused. Set it to your frontend origin if you serve the API from a separate domain.'
+  );
+}
 
 const RATE_LIMIT_STORE_KEY = Symbol.for('arete.rateLimitStore');
 
@@ -43,7 +63,12 @@ export const PROBE_RATE_LIMIT = {
 };
 
 export function applyApiHeaders(res) {
-  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  // ALLOWED_ORIGIN is null only in production with the env var unset — emit no
+  // ACAO header then, so the browser blocks every cross-origin call (same-origin
+  // /api/* requests from the frontend need no header).
+  if (ALLOWED_ORIGIN) {
+    res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Cache-Control', 'no-store');
