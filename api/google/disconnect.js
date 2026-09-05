@@ -5,7 +5,7 @@
 //  caller's own row — no service-role client needed for the delete itself).
 // ============================================================================
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from '../_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
 import { getRefreshTokenForUser } from '../_lib/googleAuth.js';
 
@@ -32,6 +32,12 @@ export default async function handler(req, res) {
   if (!student) {
     return res.status(401).json({ error: 'Please sign in.' });
   }
+
+  // Per-student budget shared across instances, matching the other endpoints.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'google-disconnect',
+    message: 'You have disconnected Google a lot just now. Please wait a few minutes and try again.',
+  })) return;
 
   const refreshToken = await getRefreshTokenForUser(student.user.id);
   if (refreshToken) {

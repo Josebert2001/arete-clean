@@ -4,7 +4,7 @@
 //  redirects their browser to it, and lands back on api/google/callback.js.
 // ============================================================================
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from '../_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
 import { createOAuth2Client, googleConfigured, signState, GOOGLE_SCOPES } from '../_lib/googleAuth.js';
 
@@ -36,6 +36,14 @@ export default async function handler(req, res) {
     logRequest(req, 'google-connect', { denied: 'unauthorized' });
     return res.status(401).json({ error: 'Please sign in to connect Google.' });
   }
+
+  // Per-student budget, shared across instances (the per-IP check above is only
+  // a cheap pre-auth guard and is wiped by lambda cold starts). Bounds how often
+  // one account can re-issue OAuth consent requests.
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'google-connect',
+    message: 'You have started the Google connection flow a lot just now. Please wait a few minutes and try again.',
+  })) return;
 
   if (!googleConfigured()) {
     return res.status(200).json({ notConfigured: true, error: 'Google isn’t connected yet on this deployment.' });

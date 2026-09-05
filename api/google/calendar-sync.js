@@ -6,7 +6,7 @@
 // ============================================================================
 
 import { google } from 'googleapis';
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest } from '../_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
 import { captureApiError } from '../_lib/sentry.js';
 import { clientForUser, deleteGoogleConnection } from '../_lib/googleAuth.js';
@@ -48,6 +48,13 @@ export default async function handler(req, res) {
   if (!student) {
     return res.status(401).json({ error: 'Please sign in.' });
   }
+
+  // Per-student budget shared across instances — bounds how often one account
+  // can create/delete Google calendars (expensive, irreversible side effects).
+  if (await denyIfUserRateLimited(req, res, student, RATE_LIMIT, {
+    route: 'google-calendar-sync',
+    message: 'You have synced your study plan a lot just now. Please wait a few minutes and try again.',
+  })) return;
 
   const { events, calendarName } = req.body || {};
   if (!Array.isArray(events) || events.length === 0) {
