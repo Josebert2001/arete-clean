@@ -127,8 +127,12 @@ export default async function handler(req, res) {
     const outcome = await generateTextWithFallback({
       chain,
       system: SYSTEM_PROMPT,
-      // Reasoning tokens share this budget. Roomier than simplify's 900 because
-      // the recap itself is longer and the input takes more reasoning to sift.
+      // Reasoning tokens share this budget; the caps that stop them eating it
+      // live on the chain entries in model.js (thinkingBudget for Gemini,
+      // reasoningEffort for Groq). Same 1400 as simplify against an input up to
+      // 8x larger, so it is the first endpoint to truncate if a cap goes
+      // missing — which is exactly what happened here in Aug 2026, back when
+      // each caller carried its own copy and this one didn't.
       maxOutputTokens: 1400,
       prompt: `${setting ? `Course context: ${setting}\n\n` : ''}Lecture-note topic:\n\n${text}`,
       // Low temperature keeps the recap faithful ("condense, don't expand");

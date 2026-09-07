@@ -173,18 +173,14 @@ export default async function handler(req, res) {
       chain,
       system: study ? STUDY_SYSTEM_PROMPT : SYSTEM_PROMPT,
       prompt: buildExplainPrompt(code, language, mode),
-      // Reasoning tokens share this budget on Groq (capped via reasoningEffort
-      // in model.js) and Gemini 3.5 Flash, which is NOT capped by default and
-      // was measured spending up to ~900 of this budget on hidden thinking for
-      // one listing — leaving too little for the visible answer and producing
-      // walkthroughs that cut off mid-sentence, sometimes with reasoning-style
-      // phrasing bleeding into the last line. thinkingBudget: 0 below (Gemini
-      // only) fixes that; explaining a listing needs no multi-step reasoning.
+      // Reasoning tokens share this budget. Both caps that keep them from eating
+      // it live on the chain entries in model.js — reasoningEffort for Groq,
+      // thinkingBudget: 0 for Gemini, the latter measured spending up to ~900 of
+      // this budget on one listing and cutting walkthroughs off mid-sentence.
       maxOutputTokens: 6000,
       // Lower temperature for accurate, deterministic explanations; applied to
       // Groq/OpenRouter only, never to Gemini (see model.js).
       temperature: 0.5,
-      providerOptions: { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
     });
 
     if (outcome.text) {

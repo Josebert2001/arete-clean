@@ -2,19 +2,30 @@
 //  Arete — multi-provider model chain with automatic fallback
 //  Shared by the AI endpoints so provider selection lives in ONE place.
 //
-//  Order (for the agentic tutor, which needs tool calling):
-//    1. Gemini 3.1 Flash-Lite — a GA model that's on Google's free tier (15 RPM,
-//       1,500 req/day), supports tools, defaults to `minimal` thinking (fast +
-//       cheap), and is the cheapest Gemini if you ever exceed the free tier.
-//       Its generous limits mean the requests that 413 Groq's 8K/req cap fit here.
-//    2. Groq gpt-oss-120b — fast fallback.
-//    3. OpenRouter's free router — best-effort last resort (no SLA; free models
+//  Order (strong tier, which the agentic tutor needs for tool calling; the
+//  light tier is the same list minus step 1 — see buildModelChain):
+//    1. Gemini strong (GEMINI_STRONG_MODEL) — leads only when tier is 'strong'.
+//    2. Gemini flash-lite (GEMINI_LIGHT_MODEL) — leads the light tier and is the
+//       second Gemini step of BOTH tiers. On Google's free tier (15 RPM,
+//       1,500 req/day), supports tools, and is the cheapest Gemini if you ever
+//       exceed the free tier. Its generous limits mean the requests that 413
+//       Groq's 8K/req cap fit here.
+//    3. Groq gpt-oss-120b — fast fallback.
+//    4. OpenRouter's free router — best-effort last resort (no SLA; free models
 //       can be slow/removed). `openrouter/free` auto-selects a free model that
 //       supports the requested features, including tool calling.
 //
 //  NOTE: Gemini 3.x is a reasoning model tuned for its defaults — Google
 //  recommends NOT sending temperature/top_p/top_k. So temperature is set
 //  per-provider (Groq/OpenRouter) via `options`, and omitted for Gemini.
+//
+//  Gemini 3.x is NOT thinking-capped by default: hidden reasoning spends from
+//  the same maxOutputTokens as the visible reply, which truncates answers on
+//  endpoints with a tight budget. That cap therefore lives on the Gemini chain
+//  entries below (`thinkingBudget: 0`), NOT at each call site. It used to be
+//  copied into every caller, which is exactly how /api/summarize ended up
+//  without it and made a model swap look broken (see the block above the model
+//  ids). Callers pass only provider-agnostic options.
 //
 //  Each provider is included only when its key is set, so the app degrades
 //  gracefully and you can run locally with just one key.
@@ -32,34 +43,62 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 // gemini-3.5-flash is GA/stable — strong at the tutor's agentic tool loop and
 // coding, while staying fast and affordable.
 //
-// ─── DO NOT MOVE THIS TO gemini-3.7-flash WITHOUT READING THIS ──────────────
-// It was tried on 2026-08-29 and reverted the same day, because it BREAKS the
-// output of every strong-tier endpoint with a tight budget.
+// ─── BEFORE MOVING THIS TO gemini-3.7-flash, READ THIS ──────────────────────
+// 3.7 was tried on 2026-08-29 and reverted the same day: /api/summarize came
+// back 331 characters long, cut off mid-sentence at "* **Collection** requires",
+// with the "Terms to know:" line that the prompt ends by asking for never
+// emitted. 3.5-flash answered the same prompt in full.
 //
-// 3.7 supports thinking levels low/medium/high and defaults to medium. It has
-// no "minimal", and it IGNORES the `thinkingBudget: 0` that tutor.js,
-// explainer.js and simplify.js pass — so hidden thinking spends from the same
-// maxOutputTokens budget as the visible reply. Measured against /api/summarize
-// (1400-token cap) on production: the recap came back 331 characters long and
-// cut off mid-sentence at "* **Collection** requires", with the required
-// "Terms to know:" line never emitted. 3.5-flash answers the same prompt in
-// full. This is precisely the failure those `thinkingBudget: 0` options were
-// added to prevent, so 3.7 undoes a fix rather than being a clean upgrade.
+// That test was INVALID, and the note it first produced here claimed 3.7
+// ignores `thinkingBudget: 0`. Nothing measured supports that: back when each
+// call site carried its own copy of the option, summarize.js was the one
+// strong-tier caller that never sent it. The truncation is fully explained by
+// an uncapped thinking pass against a 1400-token budget — 3.7 defaults to
+// medium thinking and, unlike 3.5, has no "minimal" level. The cap now lives on
+// the chain entries below, where a caller cannot skip it.
 //
-// 3.7 IS cheaper ($0.75/$3.75 per 1M in/out vs $1.50/$9.00) and is genuinely
-// better at agentic work, so it is worth revisiting — but only together with
-// one of: raising maxOutputTokens on summarize/tutor far enough to cover an
-// uncapped thinking pass, or setting an explicit low thinking level through
-// whatever option @ai-sdk/google exposes for it. Verify by asking /api/summarize
-// for a recap and checking the "Terms to know:" line is present; that line is
-// the last thing the prompt asks for, so its absence is the truncation tell.
+// So whether 3.7 honours thinkingBudget: 0 is UNKNOWN, not disproved. It is
+// cheaper ($0.75/$3.75 per 1M in/out vs $1.50/$9.00) and better at agentic
+// work, so it is worth retrying now the cap is applied everywhere. If a retry
+// still truncates, do NOT compensate by raising maxOutputTokens: tutor.js caps
+// at 1200 to hold Groq's request under its free-tier 8K limit, and
+// `stopWhen: stepCountIs(4)` spends that budget per step, so the headroom an
+// uncapped thinking pass needs is ~4x — which makes the Groq fallback 413, the
+// exact failure this chain exists to absorb. Set an explicit low thinking level
+// through whatever option @ai-sdk/google exposes for it instead.
+//
+// To verify a retry: /api/summarize is a valid probe again (it now gets the cap
+// from the chain like every other caller) and is still the most sensitive one,
+// with the largest input against the tightest budget. Ask it for a recap and
+// check the "Terms to know:" line is present — it is the last thing the prompt
+// asks for, so its absence is the truncation tell.
 //
 // Note also that a Google console banner announcing 3.5 Flash "will be taken
 // down soon" was checked against the official deprecation page, which lists
 // gemini-3.5-flash with "No shutdown date announced". There is no deadline
 // forcing this migration.
+// ────────────────────────────────────────────────────────────────────────────
+//
+// Both are env-overridable, and the env var WINS — a GEMINI_MODEL_STRONG set in
+// the Vercel dashboard shadows this default silently, and whoever sets it there
+// never sees the block above. Check it before concluding which model is live.
 const GEMINI_STRONG_MODEL = process.env.GEMINI_MODEL_STRONG || 'gemini-3.5-flash';
+// flash-lite is both the cheapest tier and the second Gemini step of BOTH
+// tiers, so this has to stay a model id that actually exists: point it at a
+// wrong or unreleased id and Gemini drops out of the strong chain as well as
+// the light one, sending every request to Groq's 8K-capped free tier.
 const GEMINI_LIGHT_MODEL = process.env.GEMINI_MODEL_LIGHT || 'gemini-3.5-flash-lite';
+
+// Hidden reasoning otherwise spends from the same maxOutputTokens as the
+// visible reply — measured at ~900 tokens on a single code listing — which
+// truncates answers mid-sentence and occasionally leaks reasoning-style
+// phrasing into the last line. Nothing this app asks Gemini for (explain a
+// listing, rewrite a paragraph, recap a topic, answer from a tool lookup) needs
+// a multi-step reasoning pass. It rides on the chain entries rather than being
+// passed by each caller because the copy-per-caller version was forgotten at
+// /api/summarize and cost a wrongly-diagnosed model revert; a new endpoint now
+// gets it by construction.
+const GEMINI_THINKING_OFF = { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } };
 
 /**
  * Build the ordered provider chain from whatever keys are configured.
@@ -77,9 +116,9 @@ export function buildModelChain(tier = 'strong') {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
     // No temperature/top_p/top_k — Gemini 3.x is optimized for its defaults.
     if (tier === 'strong') {
-      chain.push({ name: 'gemini-strong', model: google(GEMINI_STRONG_MODEL) });
+      chain.push({ name: 'gemini-strong', model: google(GEMINI_STRONG_MODEL), providerOptions: GEMINI_THINKING_OFF });
     }
-    chain.push({ name: 'gemini-lite', model: google(GEMINI_LIGHT_MODEL) });
+    chain.push({ name: 'gemini-lite', model: google(GEMINI_LIGHT_MODEL), providerOptions: GEMINI_THINKING_OFF });
   }
 
   if (process.env.GROQ_API_KEY) {
@@ -182,8 +221,9 @@ export async function streamTextWithFallback({ chain, ...options }, onText, onTo
  * that were previously hardwired to Groq and had no recovery from its free-tier
  * 413 / 429s. Tries each provider in chain order until one returns text.
  *
- * reasoningEffort comes from the per-provider entries in buildModelChain(), so
- * callers pass only provider-agnostic options (system, prompt, maxOutputTokens).
+ * The reasoning caps — reasoningEffort for Groq, thinkingBudget for Gemini —
+ * come from the per-provider entries in buildModelChain(), so callers pass only
+ * provider-agnostic options (system, prompt, maxOutputTokens).
  * The `result` is returned too, so a caller that needs provider extras (e.g.
  * `.sources`) can reach them — though web-search endpoints stay Groq-only
  * (compound-mini).
