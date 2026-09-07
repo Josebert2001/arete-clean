@@ -330,6 +330,18 @@ body {
   50% { opacity: 0.7; transform: translateY(-6px) scaleX(1.1); }
 }
 
+/* Gentle vertical bob used by the floating campus map launcher */
+@keyframes float-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.float-bob {
+  animation: float-bob 3s ease-in-out infinite;
+}
+.float-bob:hover {
+  animation-play-state: paused;
+}
+
 /* Respect users who prefer less motion */
 @media (prefers-reduced-motion: reduce) {
   html {
