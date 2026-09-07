@@ -19,10 +19,34 @@ export const CATEGORIES = {
   entrance: { label: 'Entrance', color: 'ink' },
 };
 
-// Resolves a palette key (e.g. 'moss', 'coffee-700') to a CSS color that
-// follows the active light/dark theme.
+// Resolves a palette key (e.g. 'moss', 'coffee-700') to a concrete color for
+// the theme that is active right now.
+//
+// It returns `rgb(31 41 55)`, not `rgb(var(--moss))`, and that matters: these
+// values are handed to Leaflet, which writes vector colors as SVG *presentation
+// attributes* (`path.setAttribute('stroke', ...)`) and as canvas `strokeStyle`.
+// Neither substitutes `var()` the way a real CSS property does, so a token
+// string risks being dropped and falling back to Leaflet's defaults — black
+// fills and an invisible route line. Resolving here is correct for the CSS
+// call sites too (the legend swatches use it as an inline `backgroundColor`),
+// so both paths stay in agreement.
+//
+// Because the value is a snapshot, anything drawn with it must be restyled when
+// the theme changes — see restyleForTheme() in CampusMap.jsx.
 export function categoryColor(key) {
-  return key ? `rgb(var(--${key}))` : 'rgb(var(--ember))';
+  return cssPalette(key || 'ember');
+}
+
+// Reads one of the space-separated RGB channel triples defined in index.css
+// (`--moss: 92 107 63`) off the document root and wraps it as a usable color.
+// Falls back to the raw token form when there is no document (SSR/prerender),
+// where nothing is painted anyway.
+export function cssPalette(key, fallback = 'rgb(107 114 128)') {
+  if (typeof document === 'undefined') return `rgb(var(--${key}))`;
+  const channels = getComputedStyle(document.documentElement)
+    .getPropertyValue(`--${key}`)
+    .trim();
+  return channels ? `rgb(${channels})` : fallback;
 }
 
 // pins: destinations (searchable) + waypoints (route shape)

@@ -38,11 +38,36 @@ describe('bearings and directions', () => {
     expect(compassDir(360)).toBe('N');
   });
 
-  it('bearing between two north-aligned points is 0 or 360', () => {
-    const a = { lat: 5.65, lng: 7.93 };
-    const b = { lat: 5.66, lng: 7.93 };
-    const brg = bearingDeg(a, b);
-    expect(brg).toBeLessThan(1);
+  // A bearing function that always returns 0 passes a north-only assertion, and
+  // that is exactly how a broken formula (degrees subtracted from radians)
+  // shipped: every route read "head north / continue straight". All four
+  // cardinals are checked here, plus a diagonal, so a constant cannot pass.
+  it('returns the true bearing for each cardinal direction', () => {
+    const origin = { lat: 5.65, lng: 7.93 };
+    expect(bearingDeg(origin, { lat: 5.66, lng: 7.93 })).toBeCloseTo(0, 1);
+    expect(bearingDeg(origin, { lat: 5.65, lng: 7.94 })).toBeCloseTo(90, 1);
+    expect(bearingDeg(origin, { lat: 5.64, lng: 7.93 })).toBeCloseTo(180, 1);
+    expect(bearingDeg(origin, { lat: 5.65, lng: 7.92 })).toBeCloseTo(270, 1);
+  });
+
+  it('returns ~45 degrees for a northeast step and maps it to a compass point', () => {
+    const origin = { lat: 5.65, lng: 7.93 };
+    // At 5.65 deg latitude one degree of longitude is cos(lat) times shorter
+    // than one of latitude, so an equal-distance NE step needs the longitude
+    // delta scaled by that factor.
+    const dLat = 0.01;
+    const dLng = dLat / Math.cos((5.65 * Math.PI) / 180);
+    const brg = bearingDeg(origin, { lat: 5.65 + dLat, lng: 7.93 + dLng });
+    expect(brg).toBeGreaterThan(44);
+    expect(brg).toBeLessThan(46);
+    expect(compassDir(brg)).toBe('NE');
+  });
+
+  it('is antisymmetric: reversing the pair flips the bearing by 180', () => {
+    const a = { lat: 5.6465, lng: 7.929 };
+    const b = { lat: 5.652, lng: 7.931 };
+    const diff = Math.abs(normalizeDeg(bearingDeg(a, b) - bearingDeg(b, a)));
+    expect(diff).toBeCloseTo(180, 1);
   });
 
   it('normalizeDeg wraps into [-180, 180]', () => {
@@ -163,5 +188,59 @@ describe('routeProgress', () => {
     const route = buildRoute('main-gate', 'library', pins, edges);
     expect(routeProgress(null, route, pinById)).toBeNull();
     expect(routeProgress({ lat: 5.65, lng: 7.93 }, null, pinById)).toBeNull();
+  });
+
+  // Arrival used to be derived from cumulative graph distance alone, so anyone
+  // whose nearest node was the destination scored remaining = 0 and was told
+  // they had arrived — even standing well short of it, and inside the 70 m
+  // off-route threshold so nothing contradicted the claim.
+  it('does not claim arrival while the walker is still short of the destination', () => {
+    const route = buildRoute('main-gate', 'library', pins, edges);
+    const library = pinById('library');
+    // ~55 m north of the library: nearest path node is still the library.
+    const shortOfIt = { lat: library.lat + 0.0005, lng: library.lng };
+
+    const progress = routeProgress(shortOfIt, route, pinById);
+    expect(progress.nearestIdx).toBe(route.path.length - 1);
+    expect(progress.distanceToDestination).toBeGreaterThan(40);
+    expect(progress.offRoute).toBe(false);
+    expect(progress.arrived).toBe(false);
+  });
+
+  // steps[i] is what you do as you leave path[i], so standing at node i the
+  // instruction still owed is steps[i]. Handing back steps[i + 1] walked the
+  // student past the turn they were standing on.
+  it('offers the instruction owed at the current node, not the one after it', () => {
+    const route = buildRoute('main-gate', 'library', pins, edges);
+    const midIdx = Math.floor(route.path.length / 2);
+    const atMidNode = pinById(route.path[midIdx]);
+
+    const progress = routeProgress({ lat: atMidNode.lat, lng: atMidNode.lng }, route, pinById);
+    expect(progress.nearestIdx).toBe(midIdx);
+    expect(progress.nextStep).toBe(route.steps[midIdx]);
+  });
+});
+
+// The bearing bug was invisible at this level too: every step came back
+// "straight", which still satisfied "every step has non-empty text".
+describe('directions over the real campus graph', () => {
+  it('produces varied headings and at least one genuine turn', () => {
+    const route = buildRoute('main-gate', 'sports-complex', pins, edges);
+    expect(route).not.toBeNull();
+
+    const kinds = new Set(route.steps.map((s) => s.type));
+    expect(kinds.has('start')).toBe(true);
+    expect(kinds.has('arrive')).toBe(true);
+    // A route across the whole campus cannot legitimately be one straight line.
+    const turns = route.steps.filter((s) => s.type === 'left' || s.type === 'right'
+      || s.type === 'sharp-left' || s.type === 'sharp-right');
+    expect(turns.length).toBeGreaterThan(0);
+  });
+
+  it('names a real compass heading in the start step', () => {
+    const route = buildRoute('main-gate', 'library', pins, edges);
+    // The library is north-east of the main gate, so the opening instruction
+    // must not say "south" or "west".
+    expect(route.steps[0].text).toMatch(/^Head (north|northeast|east|north-northeast|east-northeast)/);
   });
 });

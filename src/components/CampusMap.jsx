@@ -19,29 +19,79 @@ import {
   Search,
   Footprints,
 } from 'lucide-react';
-import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CATEGORIES, categoryColor } from '../data/campusMap';
+import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
 import { buildRoute, routeProgress } from '../utils/campusRoute';
-import { escapeHtml, safeGeoPoint } from '../utils/locationSafety';
+import { escapeHtml, safeGeoPoint, isWithinBounds } from '../utils/locationSafety';
 
 const WALK_SPEED = 80; // meters per minute
+
+// How far outside MAP_BOUNDS a GPS fix may sit and still be treated as "on
+// campus" (degrees — roughly 550 m here). Generous enough to cover a poor fix
+// at the perimeter, tight enough that a reading from another town is rejected.
+const OFF_CAMPUS_MARGIN = 0.005;
 
 const CARTO_KEY = import.meta.env.VITE_CARTO_API_KEY?.trim();
 
 // CARTO's raster basemaps watermark every request without a key. With a key we
 // get the pretty Voyager / Dark Matter tiles; without one we fall back to the
 // plain default OSM tiles so the map is never covered in "API key required".
-const TILE_URLS = CARTO_KEY
+//
+// The two providers do NOT take the same options, and mixing them up shows as
+// missing tiles rather than an error:
+//   * subdomains — CARTO serves a-d, OSM serves only a-c. Asking OSM for
+//     d.tile.openstreetmap.org silently loses a quarter of every screen.
+//   * maxZoom — CARTO goes to 20, OSM stops at 19. Past that the server 404s
+//     and the viewport goes blank, which the sidebar's "fly to a building"
+//     button (setView at zoom 19) walks straight into on a retina screen,
+//     since detectRetina requests one level deeper than it displays.
+//   * {r} — the @2x retina suffix. CARTO honours it; OSM has no @2x tiles, so
+//     detectRetina must stay off there.
+const TILE_CONFIG = CARTO_KEY
   ? {
-      light: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CARTO_KEY}`,
-      dark: `https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_KEY}`,
+      light: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(CARTO_KEY)}`,
+      dark: `https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(CARTO_KEY)}`,
+      subdomains: 'abcd',
+      maxZoom: 20,
+      detectRetina: true,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     }
   : {
       light: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       dark: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      subdomains: 'abc',
+      maxZoom: 19,
+      detectRetina: false,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     };
-const TILE_ATTRIBUTION = CARTO_KEY
-  ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-  : '&copy; OpenStreetMap contributors';
+
+// Highest zoom the map itself will go to. Capped by the tile source so the user
+// can never zoom into a level that returns nothing.
+const MAX_ZOOM = TILE_CONFIG.maxZoom;
+
+// Vector styles are resolved against the palette at call time (categoryColor /
+// cssPalette hand back concrete rgb() values, not `var()` tokens — see the note
+// in src/data/campusMap.js). That makes them a snapshot of the current theme,
+// so every layer built from them has to be restyled when the theme flips.
+const edgeLineStyle = () => ({ color: cssPalette('coffee-400') });
+const waypointStyle = () => ({
+  color: cssPalette('paper'),
+  fillColor: cssPalette('coffee-500'),
+});
+const destinationStyle = (cat) => ({
+  color: cssPalette('paper'),
+  fillColor: categoryColor(cat.color),
+});
+const routeCasingStyle = () => ({ color: cssPalette('paper') });
+const routeLineStyle = () => ({ color: cssPalette('ember') });
+
+function createTileLayer(theme) {
+  return L.tileLayer(TILE_CONFIG[theme] || TILE_CONFIG.light, {
+    attribution: TILE_CONFIG.attribution,
+    maxZoom: TILE_CONFIG.maxZoom,
+    subdomains: TILE_CONFIG.subdomains,
+    detectRetina: TILE_CONFIG.detectRetina,
+  });
+}
 
 function formatDistance(meters) {
   if (meters < 1000) return `${Math.round(meters)} m`;
@@ -99,6 +149,7 @@ export default function CampusMap() {
   const [follow, setFollow] = useState(true);
   const [userPos, setUserPos] = useState(null);
   const [geoError, setGeoError] = useState('');
+  const [routeError, setRouteError] = useState('');
 
   const pinById = (id) => rawPins.find((p) => p.id === id);
 
@@ -118,10 +169,17 @@ export default function CampusMap() {
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
+    // Any layer left over from a previous run of this effect (React StrictMode
+    // mounts, tears down and remounts in development) belongs to a map that no
+    // longer exists. Drop them, or the sidebar's marker lookup below finds a
+    // dead one and its popup silently refuses to open.
+    markersRef.current = [];
+    edgeLinesRef.current = [];
+
     const map = L.map(mapRef.current, {
       center: CAMPUS_CENTER,
       zoom: CAMPUS_ZOOM,
-      maxZoom: 20,
+      maxZoom: MAX_ZOOM,
       minZoom: 15,
       maxBounds: [
         [MAP_BOUNDS.south - 0.002, MAP_BOUNDS.west - 0.002],
@@ -133,12 +191,7 @@ export default function CampusMap() {
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    const tileLayer = L.tileLayer(TILE_URLS[themeRef.current], {
-      attribution: TILE_ATTRIBUTION,
-      maxZoom: 20,
-      subdomains: 'abcd',
-      detectRetina: true,
-    }).addTo(map);
+    const tileLayer = createTileLayer(themeRef.current).addTo(map);
     tileLayerRef.current = tileLayer;
     tileThemeRef.current = themeRef.current;
 
@@ -152,7 +205,7 @@ export default function CampusMap() {
             [pa.lat, pa.lng],
             [pb.lat, pb.lng],
           ],
-          { color: 'rgb(var(--coffee-400))', weight: 1.5, dashArray: '3 6', opacity: 0.45 }
+          { ...edgeLineStyle(), weight: 1.5, dashArray: '3 6', opacity: 0.45 }
         ).addTo(map);
         edgeLinesRef.current.push(line);
       }
@@ -163,28 +216,26 @@ export default function CampusMap() {
       if (pin.type === 'waypoint') {
         const marker = L.circleMarker([pin.lat, pin.lng], {
           radius: 3.5,
-          color: 'rgb(var(--paper))',
-          fillColor: 'rgb(var(--coffee-500))',
+          ...waypointStyle(),
           fillOpacity: 0.8,
           weight: 1.5,
         }).addTo(map);
-        markersRef.current.push({ id: pin.id, marker });
+        markersRef.current.push({ id: pin.id, marker, pin });
       } else {
         const cat = CATEGORIES[pin.category] || CATEGORIES.building;
         const marker = L.circleMarker([pin.lat, pin.lng], {
           radius: 8,
-          color: 'rgb(var(--paper))',
-          fillColor: categoryColor(cat.color),
+          ...destinationStyle(cat),
           fillOpacity: 0.95,
           weight: 3,
         }).addTo(map);
         marker.bindPopup(
           `<div style="font-family:Inter,sans-serif">
             <strong style="font-size:14px">${escapeHtml(pin.name)}</strong>
-            <br/><span style="font-size:11px;color:rgb(var(--coffee-500))">${escapeHtml(cat.label)}</span>
+            <br/><span style="font-size:11px;color:${cssPalette('coffee-500')}">${escapeHtml(cat.label)}</span>
           </div>`
         );
-        markersRef.current.push({ id: pin.id, marker });
+        markersRef.current.push({ id: pin.id, marker, pin });
       }
     });
 
@@ -192,41 +243,52 @@ export default function CampusMap() {
 
     // The map may mount inside a container whose size isn't settled yet
     // (lazy chunk, SSR) — force Leaflet to re-measure after first paint.
-    setTimeout(() => map.invalidateSize(), 0);
+    const sizeTimer = setTimeout(() => map.invalidateSize(), 0);
 
     return () => {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
       }
-      if (userDotRef.current && mapInstance.current) {
-        mapInstance.current.removeLayer(userDotRef.current);
-        userDotRef.current = null;
-      }
-      if (userAccuracyRef.current && mapInstance.current) {
-        mapInstance.current.removeLayer(userAccuracyRef.current);
-        userAccuracyRef.current = null;
-      }
+      // map.remove() takes every layer with it, so the user dot and halo only
+      // need their refs dropped — otherwise a remount would try to reuse
+      // markers belonging to a destroyed map.
+      userDotRef.current = null;
+      userAccuracyRef.current = null;
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
       }
+      clearTimeout(sizeTimer);
     };
   }, []);
 
-  // Swap the tile layer when the site theme changes (the init effect above only
-  // pins the initial theme, so one tile set does not bleed into preview).
+  // Follow the site theme: swap the tile layer, and restyle every vector drawn
+  // from the palette. The colors were resolved to concrete rgb() values when the
+  // layers were created, so without this second half the pins and route keep
+  // their light-theme colors over dark tiles.
   useEffect(() => {
     themeRef.current = theme;
     const map = mapInstance.current;
-    if (!map || !tileLayerRef.current || tileThemeRef.current === theme) return;
-    map.removeLayer(tileLayerRef.current);
-    tileLayerRef.current = L.tileLayer(TILE_URLS[theme], {
-      attribution: TILE_ATTRIBUTION,
-      maxZoom: 20,
-      subdomains: 'abcd',
-      detectRetina: true,
-    }).addTo(map);
+    if (!map || tileThemeRef.current === theme) return;
+
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = createTileLayer(theme).addTo(map);
+    }
+
+    edgeLinesRef.current.forEach((line) => line.setStyle(edgeLineStyle()));
+    markersRef.current.forEach(({ marker, pin }) => {
+      if (!pin) return;
+      marker.setStyle(
+        pin.type === 'waypoint'
+          ? waypointStyle()
+          : destinationStyle(CATEGORIES[pin.category] || CATEGORIES.building)
+      );
+    });
+    routeCasingRef.current?.setStyle(routeCasingStyle());
+    routeLineRef.current?.setStyle(routeLineStyle());
+
     tileThemeRef.current = theme;
   }, [theme]);
 
@@ -252,11 +314,26 @@ export default function CampusMap() {
     if (!mapInstance.current) return;
     clearRouteLayers();
     setRoute(null);
+    setRouteError('');
 
-    if (!startId || !endId || startId === endId) return;
+    // Not an error — the student has only filled in one end of the trip yet.
+    if (!startId || !endId) return;
+
+    if (startId === endId) {
+      setRouteError('Pick two different places — that start and destination are the same.');
+      return;
+    }
 
     const result = buildRoute(startId, endId, rawPins, rawEdges);
-    if (!result) return;
+    if (!result) {
+      // Every destination is reachable in the shipped graph, so this means the
+      // data has drifted (a pin added without edges). Say so rather than
+      // clearing the route and leaving the student wondering what they did.
+      setRouteError(
+        `No walking route is mapped between ${getPinName(startId)} and ${getPinName(endId)} yet.`
+      );
+      return;
+    }
 
     const coords = result.path.map((id) => {
       const p = pinById(id);
@@ -265,13 +342,13 @@ export default function CampusMap() {
 
     // White "casing" under the route so it stays visible over any tile.
     const casing = L.polyline(coords, {
-      color: 'rgb(var(--paper))',
+      ...routeCasingStyle(),
       weight: 9,
       opacity: 0.9,
     }).addTo(mapInstance.current);
 
     const line = L.polyline(coords, {
-      color: 'rgb(var(--ember))',
+      ...routeLineStyle(),
       weight: 5,
       opacity: 0.95,
     }).addTo(mapInstance.current);
@@ -286,6 +363,7 @@ export default function CampusMap() {
     setFromId('');
     setToId('');
     setSearchQuery('');
+    setRouteError('');
     clearRouteLayers();
     setRoute(null);
   };
@@ -304,9 +382,24 @@ export default function CampusMap() {
     drawRoute(nextFrom, nextTo);
   };
 
+  // Removes the "you are here" dot and its accuracy halo. Shared by stopTracking,
+  // the off-campus branch of trackPosition and the unmount cleanup, which each
+  // used to carry their own copy of this.
+  const clearUserLayer = () => {
+    const map = mapInstance.current;
+    if (userDotRef.current && map) map.removeLayer(userDotRef.current);
+    if (userAccuracyRef.current && map) map.removeLayer(userAccuracyRef.current);
+    userDotRef.current = null;
+    userAccuracyRef.current = null;
+  };
+
   const updateUserLayer = (pos) => {
     const map = mapInstance.current;
-    if (!map || !window.L) return;
+    // `L` is imported at the top of this module; the old `!window.L` half of
+    // this guard only happened to hold because Leaflet's UMD build assigns the
+    // global as a side effect, and would have silently disabled the whole
+    // location layer the day that stopped being true.
+    if (!map) return;
 
     if (!userDotRef.current) {
       userDotRef.current = L.circleMarker([pos.lat, pos.lng], {
@@ -337,6 +430,19 @@ export default function CampusMap() {
   const trackPosition = (coords) => {
     const pos = safeGeoPoint(coords);
     if (!pos) return;
+
+    // safeGeoPoint only proves the fix is numeric. A fix from outside campus is
+    // well-formed and still useless here: the dot lands off the map, panTo
+    // fights maxBounds, and routeProgress measures against a graph the walker
+    // is nowhere near. Keep tracking on, but say why nothing is being drawn.
+    if (!isWithinBounds(pos.lat, pos.lng, MAP_BOUNDS, OFF_CAMPUS_MARGIN)) {
+      setGeoError('You appear to be off campus, so your position is not being shown on the map.');
+      setUserPos(null);
+      clearUserLayer();
+      return;
+    }
+
+    setGeoError('');
     const accuracy = pos.accuracy ?? 30;
     setUserPos({ lat: pos.lat, lng: pos.lng, accuracy });
     updateUserLayer({ lat: pos.lat, lng: pos.lng, accuracy });
@@ -347,6 +453,15 @@ export default function CampusMap() {
       setGeoError('Geolocation is not available in this browser.');
       return;
     }
+    // Never start a second watch over the top of a live one. The error callback
+    // below deliberately leaves the watch running (a GPS timeout is transient
+    // and the browser keeps retrying), so `tracking` being false does not mean
+    // there is no watch — and overwriting the id would strand the old watcher
+    // permanently, burning battery for the life of the tab.
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
     setGeoError('');
     setTracking(true);
     setFollow(true);
@@ -355,8 +470,14 @@ export default function CampusMap() {
       (pos) => trackPosition(pos.coords),
       (err) => {
         setGeoError(err.message);
-        setTracking(false);
         setUserPos(null);
+        // PERMISSION_DENIED (1) is final — no later fix can arrive, so release
+        // the watch and drop out of tracking mode. A timeout or a temporarily
+        // unavailable position is not: leave the watch in place so the browser
+        // can recover on its own once a fix lands.
+        if (err.code === err.PERMISSION_DENIED) {
+          stopTracking();
+        }
       },
       { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
     );
@@ -369,14 +490,7 @@ export default function CampusMap() {
     }
     setTracking(false);
     setUserPos(null);
-    if (userDotRef.current && mapInstance.current) {
-      mapInstance.current.removeLayer(userDotRef.current);
-      userDotRef.current = null;
-    }
-    if (userAccuracyRef.current && mapInstance.current) {
-      mapInstance.current.removeLayer(userAccuracyRef.current);
-      userAccuracyRef.current = null;
-    }
+    clearUserLayer();
   };
 
   const toggleTracking = () => {
@@ -438,7 +552,12 @@ export default function CampusMap() {
                     />
                   </div>
                   <div className="max-h-48 overflow-y-auto">
-                    {filteredDestinations.map((d) => (
+                    {/* Exclude whatever is already the destination, mirroring the
+                        To list below — otherwise picking it here builds a
+                        start === end route that can only be refused. */}
+                    {filteredDestinations
+                      .filter((d) => d.id !== toId)
+                      .map((d) => (
                       <button
                         key={d.id}
                         onClick={() => selectDestination(d.id, 'from')}
@@ -451,7 +570,7 @@ export default function CampusMap() {
                         {d.name}
                       </button>
                     ))}
-                    {filteredDestinations.length === 0 && (
+                    {filteredDestinations.filter((d) => d.id !== toId).length === 0 && (
                       <p className="px-3 py-2 text-sm text-coffee-400 italic">No matches</p>
                     )}
                   </div>
@@ -533,6 +652,21 @@ export default function CampusMap() {
                 Clear
               </button>
             </div>
+
+            {routeError && (
+              <p role="alert" className="mt-3 rounded-lg bg-rust/10 px-3 py-2 text-xs text-rust">
+                {routeError}
+              </p>
+            )}
+
+            {/* Lives here, not inside the route panel: a location failure is
+                worth reporting whether or not a route happens to be active,
+                and it used to be invisible until one was. */}
+            {geoError && (
+              <p role="alert" className="mt-3 rounded-lg bg-rust/10 px-3 py-2 text-xs text-rust">
+                {geoError}
+              </p>
+            )}
           </div>
 
           {/* Route summary + steps */}
@@ -574,9 +708,6 @@ export default function CampusMap() {
                     </div>
                   ) : (
                     <p className="text-coffee-500">Walking route along marked paths</p>
-                  )}
-                  {geoError && (
-                    <p className="text-rust mt-1">Tracking stopped: {geoError}</p>
                   )}
                 </div>
               </div>

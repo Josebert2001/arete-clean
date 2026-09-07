@@ -14,13 +14,25 @@ export function haversine(a, b) {
 }
 
 // Initial bearing (degrees, 0-360) between two lat/lng points.
+//
+// Every term must be in radians. Getting that wrong does not produce a slightly
+// off bearing, it produces a constant one: an earlier version wrote
+// `Math.cos(toRad(b.lng) - a.lng)`, subtracting degrees from radians, which at
+// campus longitudes (~7.93) evaluates to cos(-7.79) ~ 0.06 instead of ~1.0. That
+// left `x` pinned near 0.092 while `y` stayed around 1e-5, so atan2 returned ~0
+// for every pair of pins on the map — every instruction read "head north" and
+// every turn classified as "straight". The same version also dropped the sin()
+// around the longitude delta in `y`.
 export function bearingDeg(a, b) {
   const toRad = (d) => (d * Math.PI) / 180;
   const toDeg = (d) => (d * 180) / Math.PI;
-  const y = toRad(b.lng - a.lng) * Math.cos(toRad(b.lat));
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const y = Math.sin(dLng) * Math.cos(lat2);
   const x =
-    Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) -
-    Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(toRad(b.lng) - a.lng);
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
   const deg = toDeg(Math.atan2(y, x));
   return (deg + 360) % 360;
 }
@@ -114,13 +126,18 @@ const TURN_TEXT = {
   'u-turn': 'Make a U-turn',
 };
 
+// Used at waypoints instead of TURN_TEXT. A waypoint is an invisible shape
+// point, so "Turn left" there is an instruction the walker cannot locate —
+// describe the path bending instead, and save the imperative for the named
+// buildings they can actually see. These are whole sentences, not fragments to
+// staple onto TURN_TEXT: doing that produced "Turn left, bending left".
 const PASS_TEXT = {
-  straight: 'keeping you on the path',
-  right: 'bending right',
-  left: 'bending left',
-  'sharp-right': 'veering sharply right',
-  'sharp-left': 'veering sharply left',
-  'u-turn': 'coming back on yourself',
+  straight: 'Continue straight',
+  right: 'Follow the path as it bends right',
+  left: 'Follow the path as it bends left',
+  'sharp-right': 'Follow the path as it veers sharply right',
+  'sharp-left': 'Follow the path as it veers sharply left',
+  'u-turn': 'Follow the path back on itself',
 };
 
 const HEADING_TEXT = {
@@ -153,8 +170,9 @@ export function buildRouteSteps(path, pinById) {
     const kind = turnKind(prevBearing, nextBearing);
     const node = pinById(path[i]);
     const seg = haversine(coords[i], coords[i + 1]);
-    let text = `${TURN_TEXT[kind]}${PASS_TEXT[kind] ? `, ${PASS_TEXT[kind]}` : ''}`;
-    if (node.type === 'destination') text += ` at ${node.name}`;
+    const text = node.type === 'destination'
+      ? `${TURN_TEXT[kind]} at ${node.name}`
+      : PASS_TEXT[kind];
     steps.push({ type: kind, text, distance: seg });
   }
 
@@ -211,15 +229,34 @@ export function routeProgress(userPos, route, pinById) {
     }
   });
 
-  const remaining = route.distance - route.cumulative[nearestIdx];
-  const nextIdx = Math.min(nearestIdx + 1, route.steps.length - 1);
-  const arrived = remaining <= 25;
+  // Distance still to walk, measured from the nearest node onward, plus however
+  // far the walker currently stands off that node.
+  const alongRoute = route.distance - route.cumulative[nearestIdx];
+  const remaining = Math.max(0, alongRoute);
+
+  // Arrival is about where the walker actually is, not about running out of
+  // graph. Keying it off `remaining` alone meant anyone whose nearest node
+  // happened to be the destination was told they had arrived — including
+  // someone standing 60 m away across open ground, which is inside the 70 m
+  // off-route threshold and so went unchallenged. Require real proximity to the
+  // destination itself.
+  const destination = pinById(route.path[route.path.length - 1]);
+  const distanceToDestination = destination ? haversine(userPos, destination) : Infinity;
+  const arrived = distanceToDestination <= 25;
+
   const offRoute = nearestDist > 70;
+
+  // steps[i] is the instruction you follow as you LEAVE path[i], so the walker
+  // standing at (or nearest to) node i still has steps[i] ahead of them. Using
+  // i + 1 handed them the turn at the *next* junction and marched them straight
+  // past the one they were standing on.
+  const nextIdx = Math.min(nearestIdx, route.steps.length - 1);
 
   return {
     nearestIdx,
     nearestDist,
-    remaining: Math.max(0, remaining),
+    remaining,
+    distanceToDestination,
     arrived,
     offRoute,
     nextStep: route.steps[nextIdx],

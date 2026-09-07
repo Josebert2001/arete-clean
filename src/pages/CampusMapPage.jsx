@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { usePageTitle } from '../utils/usePageTitle';
-import { MapPin } from 'lucide-react';
+import { MapPin, AlertTriangle } from 'lucide-react';
 
 const CampusMap = lazy(() => import('../components/CampusMap'));
 
@@ -21,6 +21,22 @@ export default function CampusMapPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* The pins are placeholders sketched around 5.65N 7.93E, not surveyed
+          positions — see campus-map-prototype.md. Until someone walks the campus
+          and records real coordinates, a student must not be able to mistake
+          this for directions they can follow. Delete this banner in the same
+          commit that lands the real data. */}
+      <div className="px-4 sm:px-6 py-2 bg-rust/10 border-b border-rust/25 flex-shrink-0">
+        <p className="max-w-6xl mx-auto flex items-start gap-2 text-xs text-rust">
+          <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
+          <span>
+            <strong className="font-semibold">Preview — do not navigate by this yet.</strong>{' '}
+            The building positions are approximate placeholders while the real campus
+            locations are being surveyed, so routes and walking times are illustrative only.
+          </span>
+        </p>
       </div>
       <Suspense
         fallback={
