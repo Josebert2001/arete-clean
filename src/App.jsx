@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import FeedbackTab from './components/FeedbackTab';
+import CampusMapFloatingButton from './components/CampusMapFloatingButton';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -23,6 +24,7 @@ const CodeExplainer = lazy(() => import('./pages/CodeExplainer'));
 const Cheatsheet = lazy(() => import('./pages/Cheatsheet'));
 const Planner = lazy(() => import('./pages/Planner'));
 const Review = lazy(() => import('./pages/Review'));
+const CampusMapPage = lazy(() => import('./pages/CampusMapPage'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SetupProfile = lazy(() => import('./pages/SetupProfile'));
 const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
@@ -235,6 +237,7 @@ export default function App() {
             <Route path="/cheatsheet" element={<RequireAuth><Cheatsheet /></RequireAuth>} />
             <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
             <Route path="/review" element={<RequireAuth><Review /></RequireAuth>} />
+            <Route path="/campus-map" element={<CampusMapPage />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
             <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />
@@ -249,6 +252,7 @@ export default function App() {
       {!isChatPage && <Footer />}
       {!isChatPage && <FloatingHelp />}
       {!isChatPage && <FeedbackTab />}
+      {!isChatPage && <CampusMapFloatingButton />}
       <PWAUpdatePrompt />
     </div>
     </StudyDaysProvider>

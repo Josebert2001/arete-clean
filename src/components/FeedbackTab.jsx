@@ -67,7 +67,7 @@ export default function FeedbackTab() {
   };
 
   return (
-    <div ref={panelRef} className="fixed bottom-3 left-3 z-50 print:hidden sm:bottom-5 sm:left-5">
+    <div ref={panelRef} className="fixed bottom-24 left-4 z-50 print:hidden sm:bottom-28 sm:left-6">
       {open && (
         <div className="mb-3 w-[min(20rem,calc(100vw-1.5rem))] bg-paper border border-coffee-200 rounded-xl shadow-xl overflow-hidden">
           <div className="flex items-start justify-between px-4 py-3 border-b border-coffee-200 bg-cream/60">
