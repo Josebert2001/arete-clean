@@ -22,11 +22,12 @@ const LEVELS = [
 const INSIDE = [
   {
     icon: GraduationCap,
-    title: 'Every course, all four years',
+    title: 'Every course, all four years, every department',
     body:
       'Topic outlines, recommended textbooks and exam tips for every course from 100 Level to ' +
       'Final Year, plus transcribed lecture notes, flashcards and plain-English rewrites for a ' +
-      'growing set of courses.',
+      'growing set of them. The foundation courses taken across University of Uyo programmes are ' +
+      'covered for every student, whatever their department.',
   },
   {
     icon: Code2,
@@ -65,15 +66,23 @@ export default function HomePreview() {
             the first factual sentence it finds; this is that sentence. */}
         <p className="text-coffee-800 leading-relaxed max-w-2xl mb-4">
           Areté is a free academic companion for University of Uyo undergraduates in Akwa Ibom
-          State, Nigeria. It carries the outline, the recommended textbooks and the study tips for
-          every course from 100 Level to Final Year, transcribed lecture notes and past-paper
-          practice for a growing set of courses, interactive Java, Python and C tracks, and an AI
-          tutor that has read the curriculum.
+          State, Nigeria — for students in every department, not one. It carries the outline, the
+          recommended textbooks and the study tips for every course from 100 Level to Final Year,
+          transcribed lecture notes and past-paper practice for a growing set of courses,
+          interactive Java, Python and C tracks, and an AI tutor that has read the curriculum.
         </p>
-        <p className="text-sm text-coffee-700">
-          Cybersecurity and Data Science have fully authored catalogues. Students in every other
-          department get the shared GST, MTH, PHY, STA, COS, CSC, ENT and INS courses, plus all
-          four tracks.
+        {/* Said plainly, high on the page. The site is at aretecyb.tech and its
+            first authored catalogue was Cybersecurity, so a student from any
+            other department arrives assuming it is not for them. */}
+        <p className="text-sm text-coffee-700 max-w-2xl">
+          <b className="text-ink">Whatever you study here, the foundation courses are yours.</b>{' '}
+          The GST, MTH, PHY, STA, COS, CSC, ENT and INS courses that every undergraduate programme
+          in the university passes through — Communication in English, Elementary Mathematics,
+          General Physics, Descriptive Statistics, Entrepreneurship and the rest — are on Areté for
+          every student, with the same outlines, textbooks, lecture notes and practice as anyone
+          else. Cybersecurity and Data Science have their full departmental catalogues authored on
+          top of that; other departments are written next, in the order students actually sign up
+          from them.
         </p>
         <div className="flex flex-wrap gap-3 mt-6">
           <a href="/courses" className="btn-primary text-sm">Browse all course outlines</a>

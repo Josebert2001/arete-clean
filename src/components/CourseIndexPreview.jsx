@@ -26,9 +26,10 @@ export default function CourseIndexPreview({ groups = [] }) {
         </h1>
         <p className="text-coffee-800 leading-relaxed max-w-2xl">
           Every one of the {total} courses on Areté, from 100 Level to Final Year — the outline,
-          the recommended textbooks and the study tips for each. Cybersecurity and Data Science
-          are fully authored; students in other departments get the shared GST, MTH, PHY, STA and
-          COS courses.
+          the recommended textbooks and the study tips for each. The GST, MTH, PHY, STA, COS, CSC,
+          ENT and INS foundation courses are taken across the university&rsquo;s programmes and are
+          here for every student, whatever their department. Cybersecurity and Data Science have
+          their full departmental catalogues authored on top of that.
         </p>
         <a href="/signin" className="btn-primary text-sm mt-6 inline-block">
           Sign in to study

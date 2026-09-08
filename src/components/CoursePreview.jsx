@@ -1,5 +1,5 @@
 import { BookOpen, GraduationCap, HelpCircle, Lightbulb, ListChecks, Lock } from 'lucide-react';
-import { courseFaqs, courseOfferings, courseSummary } from '../data/publicCatalogue';
+import { courseAudience, courseFaqs, courseOfferings, courseSummary } from '../data/publicCatalogue';
 
 // The public face of a course: everything a prospective student — or a search
 // crawler — should be able to read without an account. The syllabus, the set
@@ -66,9 +66,11 @@ export default function CoursePreview({ course, department, siblings = [] }) {
           {SEMESTERS[course.semester] && <Pill>{SEMESTERS[course.semester]}</Pill>}
         </div>
         <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-3">{course.title}</h1>
-        <p className="text-sm text-coffee-600 mb-4">
-          {department?.degree ? `${department.degree}, ` : ''}University of Uyo
-        </p>
+        {/* Not "B.Sc. Cybersecurity" on GST 111. Areté serves the whole
+            university, and 22 of these pages are courses every programme
+            takes — naming one department there tells every other student the
+            page is not for them. */}
+        <p className="text-sm text-coffee-600 mb-4">{courseAudience(course, department)}</p>
         {/* Definitional lead. The page used to open with prose written for a
             student who already knows what the course is; an answer engine
             extracts the first factual sentence, so this states the facts —

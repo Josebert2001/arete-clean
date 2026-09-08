@@ -401,6 +401,32 @@ P0, P1 and every §7 finding are **implemented** on branch `feat/aeo-p0-p1`. P2 
 | §7.7 freshness signals | ✅ | `<lastmod>` on every sitemap URL + `dateModified` on Course JSON-LD, both from one `buildDate`. |
 | P2 freemium excerpt | ⏸ Deferred | Product decision. Note §7.6 still applies: only 10 note files cover ~10 of 95 courses. |
 
+### The biggest finding this audit missed: whole-school framing
+
+Every document above frames Areté as "Academic Companion for **B.Sc. Cybersecurity** & Science Programmes". The app is not that — it serves the whole University of Uyo, and the framing error was in the shipped pages too.
+
+`CoursePreview` printed `{department.degree}, University of Uyo`, and `loadPublicCourses()` dedupes shared slugs keeping the **Cybersecurity** entry. So **29 of the 95 public pages** — the foundation courses taken across programmes (GST 111, MTH 111/121, PHY 111/117/121/128, STA 111, COS 111/121/211/221/411, CSC 111/112/223/319, ENT 221/321, INS 224/411, GST 211/212/311/312, MTH 211/212/223) — each announced itself as **"B.Sc. Cybersecurity, University of Uyo"**, with `"about": "B.Sc. Cybersecurity"` in the Course JSON-LD to match.
+
+Those are the *highest-volume* searches on the site ("gst 111 uniuyo", "sta 111 uniuyo") and the widest door into it. A Microbiology student who searched for GST 111 landed on a page whose first line told them it was not for them — and every answer engine was being taught the same thing about a course the whole university takes.
+
+Fixed by `courseAudience()` / `courseAudienceType()` in `publicCatalogue.js`:
+
+| Surface | Before | After |
+| :--- | :--- | :--- |
+| Visible line on 29 pages | `B.Sc. Cybersecurity, University of Uyo` | `Foundation course — taken across University of Uyo programmes, not one department` |
+| Course JSON-LD `about` | `"B.Sc. Cybersecurity"` | omitted on shared courses |
+| Course JSON-LD `audience` | absent | `University of Uyo undergraduates, all programmes` |
+| `courseSummary()` | no mention | adds "a foundation course taken by undergraduates across the university's programmes" |
+| FAQ | none | a `Which programmes take GST 111?` pair, placed second |
+| `llms.txt` | none | scope line naming all 29, and a per-course `Foundation course: taken across programmes.` marker |
+| Home / hub / `SITE_FAQS` | Cybersecurity-first | leads whole-school; adds an explicit `Is Areté only for Cybersecurity students?` |
+
+A departmental course (CYB 224, DTS 111) still names its degree — that is accurate there.
+
+**Wording rule, enforced by `aeo.test.js`:** say *"taken across programmes"*, never *"every programme takes it"*. The `crossDepartmental` flag covers alternatives as well as universals — Cybersecurity takes GST 212/312 where Data Science takes GST 211/311 — so the stronger claim is checkable and false on some of these pages. A falsifiable claim in an FAQ answer is worse than a vaguer true one.
+
+Note the domain itself (`aretecyb.tech`) reads as Cybersecurity-only. Nothing in the code can fix that; the copy now compensates, but it is worth weighing separately.
+
 ### Correction to §5: the `robots.txt` snippet in this document is unsafe
 
 The drafted per-bot groups grant more than they appear to. **robots.txt has no inheritance**: the moment a named `User-agent: GPTBot` group matches, the `User-agent: *` group stops applying to that bot entirely. The §5 draft repeats only `Disallow: /api/` and `Disallow: /signin` under each bot, so it would have handed `GPTBot`, `PerplexityBot` and `ClaudeBot` the whole gated surface — `/tutor`, `/profile`, `/planner`, `/review`, `/lab`, `/setup-profile`, `/welcome`.

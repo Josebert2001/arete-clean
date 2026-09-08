@@ -4,6 +4,7 @@ import path from 'node:path';
 import {
   loadPublicCourses,
   courseSummary,
+  courseAudience,
   courseFaqs,
   courseFaqJsonLd,
   siteFaqJsonLd,
@@ -41,6 +42,84 @@ describe('the definitional lead', () => {
       expect(summary, course.code).toContain(`${course.level} Level`);
       expect(summary, course.code).toContain('University of Uyo');
     }
+  });
+});
+
+describe('whole-university framing', () => {
+  // Areté serves every University of Uyo department. 29 of the 95 public pages
+  // are foundation courses taken across programmes, and they were labelled with
+  // whichever degree won the slug dedupe — so GST 111, Communication in
+  // English, announced itself as a B.Sc. Cybersecurity page. Those are also the
+  // highest-volume searches, i.e. the widest door into the site, and the
+  // mislabel closed it on everyone outside two departments.
+  //
+  // The wording is "across programmes", never "every programme takes it": the
+  // flag covers alternatives too (Cybersecurity takes GST 212/312 where Data
+  // Science takes GST 211/311), so the stronger claim would be false on some
+  // of these pages.
+  const foundation = () => entries.filter((e) => e.course.crossDepartmental);
+
+  it('has foundation courses to talk about', () => {
+    expect(foundation().length).toBeGreaterThanOrEqual(20);
+  });
+
+  it('never names one degree on a course taken across programmes', () => {
+    for (const { course, department } of foundation()) {
+      const audience = courseAudience(course, department);
+      expect(audience, course.code).not.toMatch(/B\.Sc\./);
+      expect(audience, course.code).toMatch(/across University of Uyo programmes, not one department/);
+    }
+  });
+
+  it('still names the degree on a course that really belongs to one', () => {
+    const owned = entries.find(
+      (e) => !e.course.crossDepartmental && !e.course.sharedMaterials && e.department?.degree
+    );
+    expect(courseAudience(owned.course, owned.department)).toContain(owned.department.degree);
+  });
+
+  it('drops the degree from JSON-LD `about` on a foundation course', () => {
+    for (const { course, department } of foundation()) {
+      const ld = courseJsonLd(course, department);
+      expect(ld.about, course.code).toBeUndefined();
+      expect(ld.audience.audienceType, course.code).toMatch(/all programmes/);
+    }
+  });
+
+  it('says so in the extractable summary sentence, not only in a badge', () => {
+    for (const { course } of foundation()) {
+      expect(courseSummary(course), course.code).toMatch(/foundation course/i);
+    }
+  });
+
+  it('never overclaims that literally every programme takes it', () => {
+    // GST 211 and GST 212 are alternatives. "Every programme takes GST 211" is
+    // checkable and wrong, and a falsifiable claim in an FAQ answer is worse
+    // than a vaguer true one.
+    for (const { course, department } of foundation()) {
+      const text = [
+        courseAudience(course, department),
+        courseSummary(course),
+        ...courseFaqs(course).map((f) => f.a),
+      ].join(' ');
+      expect(text, course.code).not.toMatch(/every (undergraduate )?programme (at|in) the/i);
+      expect(text, course.code).not.toMatch(/every programme takes/i);
+    }
+  });
+
+  it('answers "which programmes take this" on every foundation course', () => {
+    for (const { course } of foundation()) {
+      const q = courseFaqs(course).find((f) => /which programmes/i.test(f.q));
+      expect(q, course.code).toBeTruthy();
+      expect(q.a, course.code).toMatch(/across University of Uyo programmes/);
+    }
+  });
+
+  it('tells a student from any other department the site is for them too', () => {
+    const answers = SITE_FAQS.map((f) => f.a).join(' ');
+    expect(answers).toMatch(/every department|all of them|whatever their department/i);
+    // The one question a student who found aretecyb.tech actually asks.
+    expect(SITE_FAQS.some((f) => /only for cybersecurity/i.test(f.q))).toBe(true);
   });
 });
 

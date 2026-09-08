@@ -142,6 +142,11 @@ export async function collectLlmsTxt({ buildDate } = {}) {
   const stamp = (buildDate || new Date().toISOString()).slice(0, 10);
   const units = (n) => `${n} ${n === 1 ? 'unit' : 'units'}`;
   const semester = (n) => `${n === 1 ? 'First' : 'Second'} Semester`;
+  // The courses every programme in the university takes. Called out because
+  // they are the reason Areté is a whole-school resource rather than a
+  // Cybersecurity one, and an engine cannot infer it from a course code.
+  const foundation = entries.map((e) => e.course).filter((c) => c.crossDepartmental);
+  const scope = (c) => (c.crossDepartmental ? ' Foundation course: taken across programmes.' : '');
 
   // One physical line per paragraph. A hard-wrapped blockquote leaves trailing
   // spaces at every break, which in markdown is a line-break directive — the
@@ -158,8 +163,16 @@ export async function collectLlmsTxt({ buildDate } = {}) {
     `- Site: ${SITE_URL}`,
     `- Institution: ${INSTITUTION} (https://www.uniuyo.edu.ng/, https://www.wikidata.org/wiki/Q7896523)`,
     '- Audience: 100 Level – 400 Level undergraduates',
-    '- Departments with a fully authored catalogue: Cybersecurity, Data Science. Every other ' +
-      'department gets the shared GST, MTH, PHY, STA, COS, CSC, ENT and INS courses.',
+    `- Scope: the whole university, not one department. ${foundation.length} of the ` +
+      `${entries.length} courses below are foundation courses taken across ${INSTITUTION} ` +
+      'programmes rather than owned by any one department (a programme takes either GST 211/311 ' +
+      'or GST 212/312, for instance, but every programme takes some of these): ' +
+      `${foundation.map((c) => c.code).join(', ')}. They are marked "foundation course" in the ` +
+      'listing.',
+    '- Departments with a fully authored catalogue: Cybersecurity, Data Science. A student in ' +
+      'any other department signs up in foundation mode and gets those shared courses plus all ' +
+      'four programming tracks; more catalogues are authored as students from those departments ' +
+      'sign up.',
     '- Access: course outlines, textbooks and study tips are public. Lecture notes, question ' +
       'banks, the AI tutor and progress tracking need a free account (email code, no password).',
     `- Last generated: ${stamp}`,
@@ -178,7 +191,7 @@ export async function collectLlmsTxt({ buildDate } = {}) {
       ...group.courses.map(
         (c) =>
           `- [${c.code} — ${c.title}](${SITE_URL}/courses/${c.slug}): ` +
-          `${units(c.units)}, ${semester(c.semester)}.` +
+          `${units(c.units)}, ${semester(c.semester)}.${scope(c)}` +
           (c.description ? ` ${c.description.replace(/\s+/g, ' ').trim()}` : ''),
       ),
       '',
@@ -211,6 +224,7 @@ export async function collectLlmsTxt({ buildDate } = {}) {
           '',
           `- URL: ${SITE_URL}/courses/${c.slug}`,
           `- ${units(c.units)} · ${c.level} Level · ${semester(c.semester)}`,
+          `- Taken by: ${c.crossDepartmental ? `undergraduates across ${INSTITUTION} programmes (foundation course, not departmental)` : c.sharedMaterials ? `more than one ${INSTITUTION} programme` : 'the departments whose catalogue lists it'}`,
           '',
         ];
         if (c.description) lines.push(c.description.replace(/\s+/g, ' ').trim(), '');

@@ -112,6 +112,41 @@ export function courseTitle(course) {
   return `${course.code} — ${course.title} · ${INSTITUTION}`;
 }
 
+// Who actually takes this course.
+//
+// 22 of the 95 public pages are foundation courses that EVERY University of Uyo
+// programme takes — GST 111, MTH 111, COS 111, STA 111, ENT 221 — and they are
+// also the highest-volume searches ("gst 111 uniuyo"). They were labelled with
+// the degree of whichever catalogue happened to win the slug dedupe, which told
+// a Microbiology student, and every answer engine, that a page about
+// Communication in English was for Cybersecurity students. Areté is for the
+// whole university; these pages are the widest door into it and must not close
+// it on the reader in their first line.
+// "across programmes", not "by every programme": the flag covers alternatives
+// as well as universals — Cybersecurity takes GST 212/312 where Data Science
+// takes GST 211/311 — so a blanket "every programme takes this" would be a
+// falsifiable claim on some of these pages. The point stands either way: the
+// course belongs to the university, not to one department.
+export function courseAudience(course, department) {
+  if (course?.crossDepartmental) {
+    return `Foundation course — taken across ${INSTITUTION} programmes, not one department`;
+  }
+  if (course?.sharedMaterials) {
+    return `Shared across ${INSTITUTION} programmes`;
+  }
+  return department?.degree ? `${department.degree}, ${INSTITUTION}` : INSTITUTION;
+}
+
+// The same fact, phrased for schema.org's `audience`.
+function courseAudienceType(course, department) {
+  if (course?.crossDepartmental || course?.sharedMaterials) {
+    return `${INSTITUTION} undergraduates, all programmes`;
+  }
+  return department?.degree
+    ? `${department.degree} undergraduates at the ${INSTITUTION}`
+    : `${INSTITUTION} undergraduates`;
+}
+
 // The one-sentence factual answer to "what is this course", assembled from the
 // fields rather than prose. Answer engines extract a definition and cite the
 // page it came from; a page that opens with a sign-in pitch gives them nothing
@@ -124,7 +159,14 @@ export function courseSummary(course) {
     semester ? `taught in the ${semester}` : null,
     `at the ${INSTITUTION}, Akwa Ibom State, Nigeria.`,
   ].filter(Boolean);
-  return parts.join(' ');
+  const base = parts.join(' ');
+  // Said in the extractable sentence, not only in a badge further down: this
+  // is the fact that decides whether a student from another department reads
+  // on, and it is the one an engine quotes.
+  if (course?.crossDepartmental) {
+    return `${base} It is a foundation course taken by undergraduates across the university's programmes, not one department's course.`;
+  }
+  return base;
 }
 
 export function courseDescription(course) {
@@ -152,8 +194,10 @@ export function indexTitle() {
 
 export function indexDescription(count) {
   return (
-    `Outlines, recommended textbooks and study tips for all ${count} ${INSTITUTION} courses ` +
-    `on ${SITE_NAME} — Cybersecurity, Data Science and the shared GST, MTH, PHY, STA and COS courses.`
+    `Outlines, recommended textbooks and study tips for all ${count} ${INSTITUTION} courses on ` +
+    `${SITE_NAME} — including the GST, MTH, PHY, STA, COS, CSC, ENT and INS foundation courses ` +
+    `taken across every undergraduate programme, plus the full Cybersecurity and Data Science ` +
+    `catalogues.`
   );
 }
 
@@ -202,6 +246,25 @@ export function courseFaqs(course) {
       a: course.description ? `${courseSummary(course)} ${course.description}` : courseSummary(course),
     },
   ];
+
+  // Second, because for a foundation course it is the question that decides
+  // whether the reader is in the right place at all.
+  if (course.crossDepartmental) {
+    items.push({
+      q: `Which programmes take ${course.code}?`,
+      a:
+        `${course.code} is a foundation course taken by undergraduates across ${INSTITUTION} ` +
+        `programmes — it belongs to the university, not to one department. Whatever your ` +
+        `department, Areté covers it with the same outline, textbooks and study tips.`,
+    });
+  } else if (course.sharedMaterials) {
+    items.push({
+      q: `Which programmes take ${course.code}?`,
+      a:
+        `${course.code} is taken by more than one ${INSTITUTION} programme, and the notes ` +
+        `uploaded for it are shared between them.`,
+    });
+  }
 
   if (course.topics?.length) {
     items.push({
@@ -256,19 +319,34 @@ export const SITE_FAQS = [
   {
     q: 'What is Areté?',
     a:
-      `Areté is a free web app for ${INSTITUTION} undergraduates in Akwa Ibom State, Nigeria. ` +
-      `It carries the outline, recommended textbooks and study tips for every course from ` +
-      `100 Level to Final Year, transcribed lecture notes and past-paper practice for a growing ` +
-      `set of courses, interactive Java, Python and C tracks, a hands-on capture-the-flag ` +
-      `security track, and an AI tutor that has read the curriculum.`,
+      `Areté is a free web app for ${INSTITUTION} undergraduates in Akwa Ibom State, Nigeria — ` +
+      `for students in every department, not one. It carries the outline, recommended textbooks ` +
+      `and study tips for every course from 100 Level to Final Year, transcribed lecture notes ` +
+      `and past-paper practice for a growing set of courses, interactive Java, Python and C ` +
+      `tracks, a hands-on capture-the-flag security track, and an AI tutor that has read the ` +
+      `curriculum.`,
   },
   {
     q: `Which ${INSTITUTION} departments does Areté cover?`,
     a:
-      `Cybersecurity and Data Science have fully authored catalogues. Students in any other ` +
-      `department sign up in foundation mode and get the shared GST, MTH, PHY, STA, COS, CSC, ` +
-      `ENT and INS courses every programme takes, plus all four programming tracks. Departments ` +
-      `are added based on which ones students actually sign up from.`,
+      `All of them, at the foundation level. The GST, MTH, PHY, STA, COS, CSC, ENT and INS ` +
+      `courses that every undergraduate programme in the university passes through are on Areté ` +
+      `for every student, whatever their department — with the same outlines, textbooks, ` +
+      `lecture notes and practice as anyone else. On top of that, ` +
+      `Cybersecurity and Data Science have their full departmental catalogues authored. If your ` +
+      `department is not one of those two, you sign up in foundation mode, keep all four ` +
+      `programming tracks, and tell Areté your department — that is the signal used to decide ` +
+      `which catalogue is written next, and your progress carries over when it is.`,
+  },
+  {
+    q: `Is Areté only for Cybersecurity students?`,
+    a:
+      `No. Areté is built for the whole ${INSTITUTION}. Its two fully authored catalogues are ` +
+      `Cybersecurity and Data Science, but the foundation courses taken across programmes — ` +
+      `Communication in English (GST 111), Elementary Mathematics (MTH 111/121), General ` +
+      `Physics (PHY 111/121), Descriptive Statistics (STA 111), Entrepreneurship (ENT 221) and ` +
+      `the rest — are covered for students in every department, and the Java, Python, C and ` +
+      `security tracks are open to everyone.`,
   },
   {
     q: 'Is Areté free?',
@@ -340,7 +418,16 @@ export function courseJsonLd(course, department, { dateModified } = {}) {
       name: SITE_NAME,
       url: SITE_URL,
     },
-    about: department?.degree || undefined,
+    // Only a course that really belongs to one degree names it. A foundation
+    // course claiming `about: "B.Sc. Cybersecurity"` is the machine-readable
+    // form of the same mislabel — see courseAudience().
+    about:
+      course.crossDepartmental || course.sharedMaterials ? undefined : department?.degree || undefined,
+    audience: {
+      '@type': 'EducationalAudience',
+      educationalRole: 'student',
+      audienceType: courseAudienceType(course, department),
+    },
     hasCourseInstance: {
       '@type': 'CourseInstance',
       courseMode: 'online',

@@ -5,7 +5,8 @@
 - Site: https://www.aretecyb.tech
 - Institution: University of Uyo (https://www.uniuyo.edu.ng/, https://www.wikidata.org/wiki/Q7896523)
 - Audience: 100 Level – 400 Level undergraduates
-- Departments with a fully authored catalogue: Cybersecurity, Data Science. Every other department gets the shared GST, MTH, PHY, STA, COS, CSC, ENT and INS courses.
+- Scope: the whole university, not one department. 29 of the 95 courses below are foundation courses taken across University of Uyo programmes rather than owned by any one department (a programme takes either GST 211/311 or GST 212/312, for instance, but every programme takes some of these): GST 111, MTH 111, PHY 111, PHY 117, COS 111, STA 111, UUY-CSC 111, UUY-CSC 112, GST 121, COS 121, MTH 121, PHY 121, PHY 128, GST 212, COS 211, ENT 221, COS 221, INS 224, GST 312, CSC 319, COS 411, ENT 321, GST 211, MTH 211, MTH 212, MTH 223, CSC 223, GST 311, INS 411. They are marked "foundation course" in the listing.
+- Departments with a fully authored catalogue: Cybersecurity, Data Science. A student in any other department signs up in foundation mode and gets those shared courses plus all four programming tracks; more catalogues are authored as students from those departments sign up.
 - Access: course outlines, textbooks and study tips are public. Lecture notes, question banks, the AI tutor and progress tracking need a free account (email code, no password).
 - Last generated: 2026-09-08
 
@@ -16,6 +17,7 @@
 
 - URL: https://www.aretecyb.tech/courses/cos-111
 - 3 units · 100 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 A broad survey of the computing field: hardware, software, human-ware, information processing, and the many specializations within computing. Lays the conceptual vocabulary and hands-on device familiarity for everything that follows in your degree.
 
@@ -47,6 +49,7 @@ A broad survey of the computing field: hardware, software, human-ware, informati
 
 - URL: https://www.aretecyb.tech/courses/gst-111
 - 2 units · 100 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Develops the English language skills required for academic and professional success: sound patterns, word classes, sentence construction, logical/critical reasoning, and writing craft. A foundation course that improves every other course you will take.
 
@@ -78,6 +81,7 @@ Develops the English language skills required for academic and professional succ
 
 - URL: https://www.aretecyb.tech/courses/mth-111
 - 2 units · 100 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Algebra and trigonometry for university-level computation: set theory, real and complex numbers, sequences and series, quadratic equations, and circular measure. Bridges secondary-school maths with the rigour needed for the programme.
 
@@ -108,6 +112,7 @@ Algebra and trigonometry for university-level computation: set theory, real and 
 
 - URL: https://www.aretecyb.tech/courses/phy-111
 - 2 units · 100 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Classical mechanics: vectors, kinematics, Newtonian dynamics, conservation principles, rotational motion, and gravitation. Builds the physical intuition that underpins electronics, networking signals, and the hardware concepts met in later computing courses.
 
@@ -138,6 +143,7 @@ Classical mechanics: vectors, kinematics, Newtonian dynamics, conservation princ
 
 - URL: https://www.aretecyb.tech/courses/phy-117
 - 1 unit · 100 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Laboratory practicals that accompany PHY 111. Quantitative measurement, treatment of measurement errors, and graphical analysis across mechanical, electrical, light, heat, and viscosity experiments. Develops precision, scientific method, and report-writing discipline.
 
@@ -168,6 +174,7 @@ Laboratory practicals that accompany PHY 111. Quantitative measurement, treatmen
 
 - URL: https://www.aretecyb.tech/courses/sta-111
 - 3 units · 100 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 The language of data: types, sources, and methods of data collection; presentation, errors and approximations; and the core measures used to summarise a dataset. A foundation for every analysis task in research and data-driven decision-making.
 
@@ -198,6 +205,7 @@ The language of data: types, sources, and methods of data collection; presentati
 
 - URL: https://www.aretecyb.tech/courses/uuy-csc-111
 - 2 units · 100 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Practical computer skills: laboratory safety, hardware components, operating system navigation, productivity software, internet operations, and an introduction to statistical computing with SPSS. The hands-on companion to COS 111.
 
@@ -228,6 +236,7 @@ Practical computer skills: laboratory safety, hardware components, operating sys
 
 - URL: https://www.aretecyb.tech/courses/uuy-csc-112
 - 2 units · 100 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Diagnosing and resolving common hardware and software problems across PCs, laptops, tablets, and mobile phones. Covers network connectivity/security troubleshooting, backup and restore, and virus/anti-virus procedures — practical skills every computing professional needs.
 
@@ -258,6 +267,7 @@ Diagnosing and resolving common hardware and software problems across PCs, lapto
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-111
 - 3 units · 100 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Your orientation to the discipline: what data science actually is, what a data scientist does day to day, and the end-to-end lifecycle of a data project from question to deployed insight. Heavily practical — you will handle real datasets in your first semester.
 
@@ -290,6 +300,7 @@ Your orientation to the discipline: what data science actually is, what a data s
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-112
 - 2 units · 100 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 How data is stored, structured and retrieved at scale. Relational modelling, normalisation, and SQL — the single most reusable practical skill in the degree, and the one most often tested in data-science job interviews.
 
@@ -321,6 +332,7 @@ How data is stored, structured and retrieved at scale. Relational modelling, nor
 
 - URL: https://www.aretecyb.tech/courses/cos-121
 - 3 units · 100 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Algorithmic thinking and systematic problem solving using Python and C. Covers problem identification, solution techniques, pseudocode/flowcharts, and programming fundamentals — the first real programming course in the degree. Strong performance here builds confidence for all future programming courses.
 
@@ -351,6 +363,7 @@ Algorithmic thinking and systematic problem solving using Python and C. Covers p
 
 - URL: https://www.aretecyb.tech/courses/gst-121
 - 2 units · 100 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 An introduction to Nigeria's ethnic diversity, cultural heritage, colonial and political history, and nation-building challenges. Provides context for the social and policy dimensions of technology in Nigeria.
 
@@ -381,6 +394,7 @@ An introduction to Nigeria's ethnic diversity, cultural heritage, colonial and p
 
 - URL: https://www.aretecyb.tech/courses/mth-121
 - 2 units · 100 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Single-variable calculus: limits, continuity, differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and the signal theory used across science and engineering.
 
@@ -411,6 +425,7 @@ Single-variable calculus: limits, continuity, differentiation, integration, and 
 
 - URL: https://www.aretecyb.tech/courses/phy-121
 - 2 units · 100 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Electrostatics, DC circuits, magnetism, and electromagnetic induction. The electromagnetic foundations of this course directly underpin networking, wireless communications, and electronics studied in later years.
 
@@ -441,6 +456,7 @@ Electrostatics, DC circuits, magnetism, and electromagnetic induction. The elect
 
 - URL: https://www.aretecyb.tech/courses/phy-128
 - 1 unit · 100 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Laboratory practicals continuing from PHY 117, covering the theoretical concepts of PHY 121 through quantitative measurement, treatment of measurement errors, and graphical analysis.
 
@@ -470,6 +486,7 @@ Laboratory practicals continuing from PHY 117, covering the theoretical concepts
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-121
 - 2 units · 100 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Foundational networking: how data travels across local and wide area networks, the OSI/TCP-IP models, IP addressing and subnetting, routing protocols, and simulation with Packet Tracer. Critical groundwork for network security courses in later years.
 
@@ -500,6 +517,7 @@ Foundational networking: how data travels across local and wide area networks, t
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-122
 - 2 units · 100 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 An introduction to the core principles of information security: operating system protection mechanisms, intrusion detection, formal security models, cryptography and steganography, and the policy/regulatory dimension of protecting information and value across networks.
 
@@ -536,6 +554,7 @@ An introduction to the core principles of information security: operating system
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-123
 - 2 units · 100 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Building web pages from scratch: web architecture and the client-server model, HTML structure, CSS styling, JavaScript interactivity, and XML documents. An entry point into web security topics and the front-end layer targeted by many cybersecurity attacks.
 
@@ -565,6 +584,7 @@ Building web pages from scratch: web architecture and the client-server model, H
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-121
 - 3 units · 100 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 How the web works and how to get data out of it. HTML, CSS and JavaScript fundamentals, HTTP and APIs, and the beginnings of web scraping — because a great deal of the data you will ever analyse lives behind a URL.
 
@@ -597,6 +617,7 @@ How the web works and how to get data out of it. HTML, CSS and JavaScript fundam
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-122
 - 3 units · 100 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 How organisations create, move, store and govern information, and how ICT infrastructure supports that. The organisational context in which data work actually happens — systems, stakeholders, policy and communication.
 
@@ -630,6 +651,7 @@ How organisations create, move, store and govern information, and how ICT infras
 
 - URL: https://www.aretecyb.tech/courses/cos-211
 - 3 units · 200 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Object-oriented programming in Java: from variables and control flow through full OOP, collections, exception handling, file I/O, and GUI development with Swing. The primary programming course of the degree and the subject most likely to determine your programming competence throughout your career.
 
@@ -664,6 +686,7 @@ Object-oriented programming in Java: from variables and control flow through ful
 
 - URL: https://www.aretecyb.tech/courses/cyb-211
 - 2 units · 200 Level · First Semester
+- Taken by: more than one University of Uyo programme
 
 A strategic overview of the cybersecurity landscape: basic concepts (confidentiality, integrity, availability, authentication, non-repudiation), security policy and incident response, risk management, and the national/organisational strategies that guide security decision-making at scale.
 
@@ -695,6 +718,7 @@ A strategic overview of the cybersecurity landscape: basic concepts (confidentia
 
 - URL: https://www.aretecyb.tech/courses/cyb-213
 - 2 units · 200 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The legal and regulatory landscape of cybercrime: Nigerian cybercrime law, international frameworks, types of cybercrime, investigative procedures, and technical countermeasures. Essential context for any cybersecurity professional.
 
@@ -726,6 +750,7 @@ The legal and regulatory landscape of cybercrime: Nigerian cybercrime law, inter
 
 - URL: https://www.aretecyb.tech/courses/dts-211
 - 2 units · 200 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 R from the ground up: the language, its data structures, and the tidyverse workflow for importing, tidying, transforming, visualising and modelling data. R is the statistician's language, and it is the fastest route from a dataset to a publication-quality figure.
 
@@ -757,6 +782,7 @@ R from the ground up: the language, its data structures, and the tidyverse workf
 
 - URL: https://www.aretecyb.tech/courses/dts-212
 - 2 units · 200 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The formal treatment of the data science process, building on UUY-DTS 111: problem formulation, data acquisition, feature construction, model families, evaluation, and the ethics and limits of inference from data.
 
@@ -788,6 +814,7 @@ The formal treatment of the data science process, building on UUY-DTS 111: probl
 
 - URL: https://www.aretecyb.tech/courses/gst-211
 - 2 units · 200 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Philosophical method, formal logic, and the perennial questions about knowledge, value and human existence. The logic half is directly technical — it is the same propositional calculus you will formalise in MTH 212 and implement in code.
 
@@ -819,6 +846,7 @@ Philosophical method, formal logic, and the perennial questions about knowledge,
 
 - URL: https://www.aretecyb.tech/courses/gst-212
 - 2 units · 200 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 An examination of philosophical reasoning, formal logic, and the human condition. The logic component — syllogism, symbolic logic, and rules of inference — directly supports discrete mathematics and the formal reasoning used in security proofs and algorithm design.
 
@@ -849,6 +877,7 @@ An examination of philosophical reasoning, formal logic, and the human condition
 
 - URL: https://www.aretecyb.tech/courses/mth-211
 - 2 units · 200 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 The analytical toolkit for scientific computing: sequences and series, partial differentiation, vector calculus and an introduction to differential equations. These are the methods that underpin optimisation, gradient-based learning and statistical modelling.
 
@@ -880,6 +909,7 @@ The analytical toolkit for scientific computing: sequences and series, partial d
 
 - URL: https://www.aretecyb.tech/courses/mth-212
 - 2 units · 200 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Rigorous foundations: set theory, formal logic, relations and functions, and an introduction to abstract algebraic structures. This is where mathematical proof is taught properly, and where the language of the rest of your theoretical courses is set.
 
@@ -911,6 +941,7 @@ Rigorous foundations: set theory, formal logic, relations and functions, and an 
 
 - URL: https://www.aretecyb.tech/courses/sen-211
 - 2 units · 200 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The principles and practices of building software systematically: software development lifecycle models, requirements engineering, system design, testing, and project management. Context for how secure software is planned and built.
 
@@ -942,6 +973,7 @@ The principles and practices of building software systematically: software devel
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-212
 - 2 units · 200 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 An introduction to offensive security thinking: information security fundamentals, the hacking cycle, and countermeasures across passwords, social engineering, networks, web/mobile/IoT applications, wireless, and the cloud. Covers the legal/ethical framework under which penetration testing operates.
 
@@ -973,6 +1005,7 @@ An introduction to offensive security thinking: information security fundamental
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-214
 - 2 units · 200 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The architecture, protocols, market segments, and security challenges of the Internet of Things. Covers sensing/actuation, cloud data collection and analysis, smart-city and industrial use cases, and the unique vulnerabilities of IoT devices — a rapidly growing attack surface.
 
@@ -1003,6 +1036,7 @@ The architecture, protocols, market segments, and security challenges of the Int
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-211
 - 2 units · 200 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Analytics as a business discipline: the four analytics types (descriptive, diagnostic, predictive, prescriptive), KPI design, dashboarding, and turning an analysis into a decision. Practical and tool-focused.
 
@@ -1034,6 +1068,7 @@ Analytics as a business discipline: the four analytics types (descriptive, diagn
 
 - URL: https://www.aretecyb.tech/courses/cos-221
 - 3 units · 200 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Advanced programming building on COS 211: deeper object-oriented programming (polymorphism, abstract classes, interfaces), the Collections API, searching/sorting/recursion, event-driven and GUI programming. Bridges programming skills and the algorithmic thinking required for security tool development.
 
@@ -1064,6 +1099,7 @@ Advanced programming building on COS 211: deeper object-oriented programming (po
 
 - URL: https://www.aretecyb.tech/courses/csc-223
 - 2 units · 200 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 The mathematics of discrete objects — counting, graphs, trees, recurrence relations and Boolean algebra. Graph theory in particular is the direct foundation for network analysis, recommendation systems and the web-data work in UUY-DTS 311.
 
@@ -1095,6 +1131,7 @@ The mathematics of discrete objects — counting, graphs, trees, recurrence rela
 
 - URL: https://www.aretecyb.tech/courses/cyb-222
 - 2 units · 200 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Emerging technologies and their cybersecurity implications: AI in security, blockchain, quantum computing threats to cryptography, zero-trust architecture, and the innovation lifecycle in the security industry.
 
@@ -1125,6 +1162,7 @@ Emerging technologies and their cybersecurity implications: AI in security, bloc
 
 - URL: https://www.aretecyb.tech/courses/cyb-224
 - 2 units · 200 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Big data fundamentals — characteristics, sources, platforms, and analytics — paired with the security side: information and big data security requirements, lifecycle security management, risk management, and cloud-based big data security.
 
@@ -1155,6 +1193,7 @@ Big data fundamentals — characteristics, sources, platforms, and analytics —
 
 - URL: https://www.aretecyb.tech/courses/dts-224
 - 3 units · 200 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Reasoning from a sample to a population: estimation, confidence intervals, hypothesis testing, and the linear model. The core statistical machinery of the degree — and the part most often misused in practice.
 
@@ -1187,6 +1226,7 @@ Reasoning from a sample to a population: estimation, confidence intervals, hypot
 
 - URL: https://www.aretecyb.tech/courses/dts-226
 - 3 units · 200 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 The mathematics of uncertainty: probability axioms, random variables, distributions, expectation, and the limit theorems. Probability is the language machine learning is written in — every model output is ultimately a probability statement.
 
@@ -1218,6 +1258,7 @@ The mathematics of uncertainty: probability axioms, random variables, distributi
 
 - URL: https://www.aretecyb.tech/courses/ent-221
 - 2 units · 200 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Business thinking for technical students: entrepreneurship and intrapreneurship theory, entrepreneurial characteristics and thinking, innovation, enterprise formation, and e-commerce principles. Directly applicable to consulting, startup, and freelance careers in technology.
 
@@ -1249,6 +1290,7 @@ Business thinking for technical students: entrepreneurship and intrapreneurship 
 
 - URL: https://www.aretecyb.tech/courses/ins-224
 - 3 units · 200 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 A structured approach to analysing information system needs and designing solutions: the software development lifecycle, top-down and bottom-up design, dataflow diagramming, entity-relationship modelling, and file/database and user-interface design.
 
@@ -1280,6 +1322,7 @@ A structured approach to analysing information system needs and designing soluti
 
 - URL: https://www.aretecyb.tech/courses/mth-223
 - 2 units · 200 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 How to compute answers to mathematical problems that have no closed-form solution, and how to know when the computed answer is wrong. Error, convergence and stability — the reason floating-point arithmetic sometimes betrays you.
 
@@ -1311,6 +1354,7 @@ How to compute answers to mathematical problems that have no closed-form solutio
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-221
 - 2 units · 200 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Practical network security: identification/authentication/authorization, threat classification, firewalls, administrative/physical/technical controls, virtualization and cloud, wireless/mobile/IoT security, and cryptography/PKI. Builds directly on the networking foundation from UUY-CYB 121.
 
@@ -1341,6 +1385,7 @@ Practical network security: identification/authentication/authorization, threat 
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-222
 - 2 units · 200 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Attacking and defending web and mobile applications. Covers the OWASP Top 10 in depth, secure coding practices for Java/Python/Kotlin/Swift, audit and QA testing, and mobile-specific threats on iOS and Android platforms.
 
@@ -1372,6 +1417,7 @@ Attacking and defending web and mobile applications. Covers the OWASP Top 10 in 
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-224
 - 2 units · 200 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 The working Python data stack: NumPy, pandas, Matplotlib and scikit-learn. Where the mathematics of the other 200 Level courses becomes code you can run on a real dataset.
 
@@ -1405,6 +1451,7 @@ The working Python data stack: NumPy, pandas, Matplotlib and scikit-learn. Where
 
 - URL: https://www.aretecyb.tech/courses/csc-319
 - 2 units · 300 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Foundations of AI: intelligent agents, search algorithms, knowledge representation, semantic networks, natural language processing, and expert systems. Directly relevant to AI-powered anomaly detection, prediction, and automated analysis across computing.
 
@@ -1436,6 +1483,7 @@ Foundations of AI: intelligent agents, search algorithms, knowledge representati
 
 - URL: https://www.aretecyb.tech/courses/cyb-311
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The mathematical and algorithmic foundations of modern cryptography: symmetric and asymmetric cryptosystems, key management, hash functions, digital signatures, PKI, and protocol security. The theoretical backbone of all secure communications.
 
@@ -1467,6 +1515,7 @@ The mathematical and algorithmic foundations of modern cryptography: symmetric a
 
 - URL: https://www.aretecyb.tech/courses/cyb-312
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Biometric authentication systems: digital image/signal processing, matching algorithms, error metrics, and data security. Covers implementation in national identity systems and access control.
 
@@ -1498,6 +1547,7 @@ Biometric authentication systems: digital image/signal processing, matching algo
 
 - URL: https://www.aretecyb.tech/courses/cyb-313
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Systematic methods for identifying, analysing, and treating cybersecurity risks. Covers applied information security management, risk mitigation in the cloud, governance and security policy, the ISO 27000 series, and the economic/geopolitical factors behind Africa's cyber risk exposure.
 
@@ -1530,6 +1580,7 @@ Systematic methods for identifying, analysing, and treating cybersecurity risks.
 
 - URL: https://www.aretecyb.tech/courses/dts-312
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 What changes when the data no longer fits on one machine. Distributed storage and computation, the MapReduce model, Hadoop and Spark, and the architectural patterns of modern data platforms.
 
@@ -1562,6 +1613,7 @@ What changes when the data no longer fits on one machine. Distributed storage an
 
 - URL: https://www.aretecyb.tech/courses/dts-314
 - 3 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Database systems for the data professional, going well beyond UUY-DTS 112: advanced SQL, indexing and query performance, transactions and concurrency, and the design of data models that survive real workloads.
 
@@ -1593,6 +1645,7 @@ Database systems for the data professional, going well beyond UUY-DTS 112: advan
 
 - URL: https://www.aretecyb.tech/courses/dts-318
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The obligations that come with holding and modelling data about people: privacy law, consent, algorithmic fairness, transparency and accountability. The course that determines whether your technical skill does good or harm.
 
@@ -1625,6 +1678,7 @@ The obligations that come with holding and modelling data about people: privacy 
 
 - URL: https://www.aretecyb.tech/courses/gst-311
 - 2 units · 300 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 The nature of conflict, the conditions for peace, and the practical machinery of resolution — negotiation, mediation and arbitration. Applied to the Nigerian and West African context.
 
@@ -1656,6 +1710,7 @@ The nature of conflict, the conditions for peace, and the practical machinery of
 
 - URL: https://www.aretecyb.tech/courses/gst-312
 - 2 units · 300 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 The causes, dynamics, and resolution of conflict in a multi-ethnic nation: types and theories of conflict, root causes of conflict and violence in Africa, peacebuilding strategies, and the roles of international organisations, media, and traditional institutions.
 
@@ -1687,6 +1742,7 @@ The causes, dynamics, and resolution of conflict in a multi-ethnic nation: types
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-314
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The formal models that underpin access control and multi-level security: Bell-LaPadula, Biba, Clark-Wilson, Brewer-Nash, and the access-control mechanisms (MAC, RBAC, ACLs, lattice-based control) that implement them in real systems.
 
@@ -1718,6 +1774,7 @@ The formal models that underpin access control and multi-level security: Bell-La
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-315
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Hands-on laboratory course in offensive/defensive security: operating system file structures, formal security models, intrusion detection, vulnerability testing, and countermeasures for denial-of-service, worm, and virus attacks.
 
@@ -1749,6 +1806,7 @@ Hands-on laboratory course in offensive/defensive security: operating system fil
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-316
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Securing database systems from the ground up: installing and configuring a database product, security architecture and operating-system security principles, user/privilege/role administration, and database auditing models and practice.
 
@@ -1779,6 +1837,7 @@ Securing database systems from the ground up: installing and configuring a datab
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-311
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Measuring and analysing behaviour on the web: clickstream and log data, web analytics platforms, funnels and attribution, plus text and network analysis of web content. Builds directly on UUY-DTS 121.
 
@@ -1811,6 +1870,7 @@ Measuring and analysing behaviour on the web: clickstream and log data, web anal
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-313
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The core machine learning course: supervised and unsupervised algorithms, how they are trained, how they are evaluated, and how they fail. The technical centrepiece of the degree.
 
@@ -1843,6 +1903,7 @@ The core machine learning course: supervised and unsupervised algorithms, how th
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-317
 - 2 units · 300 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Operating system fundamentals with a practical Linux emphasis: processes, memory, file systems, the shell, and containers. The environment every data pipeline actually runs in.
 
@@ -1874,6 +1935,7 @@ Operating system fundamentals with a practical Linux emphasis: processes, memory
 
 - URL: https://www.aretecyb.tech/courses/cyb-311-siwes-1
 - 3 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 The first industrial training placement: three months attached to a private or public organisation during the second-year long break, gaining practical cybersecurity experience under supervision, with a defended report at the end.
 
@@ -1904,6 +1966,7 @@ The first industrial training placement: three months attached to a private or p
 
 - URL: https://www.aretecyb.tech/courses/cyb-312-siwes-2
 - 3 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 The second, more advanced industrial placement: three months attached to a private or public organisation during the third-year long break, building on SIWES I with additional practical cybersecurity experience and a defended report.
 
@@ -1934,6 +1997,7 @@ The second, more advanced industrial placement: three months attached to a priva
 
 - URL: https://www.aretecyb.tech/courses/cyb-313-report-writing
 - 3 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 The craft of professional and technical report writing, focused on documenting the SIWES I and II placements: structuring findings, presenting technical work clearly, and defending a written report before a panel.
 
@@ -1964,6 +2028,7 @@ The craft of professional and technical report writing, focused on documenting t
 
 - URL: https://www.aretecyb.tech/courses/mini-project-300l
 - 3 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 A supervised mini research or development project that demonstrates integration of skills acquired across the first six semesters. Serves as a preparation and rehearsal for the 400L Final Year Project.
 
@@ -1994,6 +2059,7 @@ A supervised mini research or development project that demonstrates integration 
 
 - URL: https://www.aretecyb.tech/courses/seminar-300l
 - 3 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 A series of student-led presentations on advanced topics in cybersecurity. Develops research, critical analysis, and public speaking skills in a professional academic setting.
 
@@ -2024,6 +2090,7 @@ A series of student-led presentations on advanced topics in cybersecurity. Devel
 
 - URL: https://www.aretecyb.tech/courses/dts-399
 - 6 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Students Industrial Work Experience Scheme — a full-semester supervised industrial placement. Six units and 270 practical hours, the largest single course in the programme, assessed on your logbook, technical report and defence.
 
@@ -2054,6 +2121,7 @@ Students Industrial Work Experience Scheme — a full-semester supervised indust
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-321
 - 3 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 A wholly practical course consolidating the professional toolchain: version control, environments, testing, documentation and deployment. The skills that make you employable rather than merely knowledgeable.
 
@@ -2085,6 +2153,7 @@ A wholly practical course consolidating the professional toolchain: version cont
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-322
 - 3 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 A practical, industry-facing innovation project: identify a real problem in an organisation or sector, design a data-driven solution, and demonstrate it. Runs alongside SIWES and feeds directly into your final-year work.
 
@@ -2116,6 +2185,7 @@ A practical, industry-facing innovation project: identify a real problem in an o
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-323
 - 3 units · 300 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Research and presentation skills: select a current topic in data science, review the literature, and present and defend it before staff and peers. Preparation for the literature review and defence of DTS 417/428.
 
@@ -2149,6 +2219,7 @@ Research and presentation skills: select a current topic in data science, review
 
 - URL: https://www.aretecyb.tech/courses/cos-411
 - 3 units · 400 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 The rigorous methods for conducting and communicating academic and technical research: research types and approaches, scientific investigation and problem formulation, data collection instruments, and the structure of technical reports. Essential preparation for the Final Year Project.
 
@@ -2180,6 +2251,7 @@ The rigorous methods for conducting and communicating academic and technical res
 
 - URL: https://www.aretecyb.tech/courses/cyb-411
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Advanced vulnerability assessment methodology: systematic identification, testing, and mitigation of risks to a company's infrastructure. Covers penetration testing methodologies, information gathering, password cracking, social engineering, and reporting at a professional level.
 
@@ -2211,6 +2283,7 @@ Advanced vulnerability assessment methodology: systematic identification, testin
 
 - URL: https://www.aretecyb.tech/courses/cyb-412
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The art and science of concealing information: history of secret writing, steganography vs encryption, text/image/audio/video steganography techniques, information hiding and steganalysis, and steganography detection.
 
@@ -2241,6 +2314,7 @@ The art and science of concealing information: history of secret writing, stegan
 
 - URL: https://www.aretecyb.tech/courses/cyb-413
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Techniques for detecting, responding to, and defeating organised cybercrime and cyberwar activities. Covers cyber threat intelligence (tactical, operational, and strategic), the kill chain, indicator lifecycle, and the evolution of counterterrorism and cyber conflict.
 
@@ -2271,6 +2345,7 @@ Techniques for detecting, responding to, and defeating organised cybercrime and 
 
 - URL: https://www.aretecyb.tech/courses/cyb-414
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Securing cloud environments: cloud service and deployment models, data-centre and virtualisation security, the cloud cube model, threat mitigation, and the standards (NIST, Cloud Security Alliance) that govern effective cloud management.
 
@@ -2302,6 +2377,7 @@ Securing cloud environments: cloud service and deployment models, data-centre an
 
 - URL: https://www.aretecyb.tech/courses/cyb-497
 - 3 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The first phase of the capstone Final Year Project: an independent or group investigation of a cybersecurity-related problem, culminating in a written proposal covering the problem statement, objectives, scope, research gap, and proposed methodology. Supervised closely by an academic supervisor.
 
@@ -2333,6 +2409,7 @@ The first phase of the capstone Final Year Project: an independent or group inve
 
 - URL: https://www.aretecyb.tech/courses/dts-413
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The theory and craft of visual communication: perception, encoding, chart selection, dashboard design and narrative. How an analysis becomes a decision.
 
@@ -2365,6 +2442,7 @@ The theory and craft of visual communication: perception, encoding, chart select
 
 - URL: https://www.aretecyb.tech/courses/dts-417
 - 3 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 The first half of the capstone: choose a problem, review the literature, design the methodology, secure the data, and defend a proposal. What you do this semester determines whether DTS 428 is manageable or miserable.
 
@@ -2396,6 +2474,7 @@ The first half of the capstone: choose a problem, review the literature, design 
 
 - URL: https://www.aretecyb.tech/courses/ins-411
 - 2 units · 400 Level · First Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 Planning, executing and controlling projects: scope, schedule, cost, risk and stakeholders, across both traditional and agile approaches. Directly applicable to running your final-year project on time.
 
@@ -2427,6 +2506,7 @@ Planning, executing and controlling projects: scope, schedule, cost, risk and st
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-411
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Data analytics and business intelligence tools in the context of small and medium enterprises: BI applications in Excel and R, reporting tools, data warehousing and dimensional modelling, ETL, and how BI connects to big data and cloud computing.
 
@@ -2457,6 +2537,7 @@ Data analytics and business intelligence tools in the context of small and mediu
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-410
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 A rotating course on current developments in the field — the content varies year to year with staff expertise and what is moving in the discipline. Recent themes include deep learning, large language models, MLOps and causal inference.
 
@@ -2488,6 +2569,7 @@ A rotating course on current developments in the field — the content varies ye
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-411
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Data science applied to biological and health data: genomics, clinical records, epidemiological modelling and public-health surveillance, with the specific statistical and ethical challenges those domains bring.
 
@@ -2519,6 +2601,7 @@ Data science applied to biological and health data: genomics, clinical records, 
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-412
 - 2 units · 400 Level · First Semester
+- Taken by: the departments whose catalogue lists it
 
 Enterprise-scale data management, continuing DTS 314: data architecture, pipelines and orchestration, master data and quality management, governance, and the modern data stack.
 
@@ -2551,6 +2634,7 @@ Enterprise-scale data management, continuing DTS 314: data architecture, pipelin
 
 - URL: https://www.aretecyb.tech/courses/cyb-421
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Advanced offensive security: perimeter defences, privilege escalation, malware and social engineering, system and network hacking, web/wireless/mobile attacks, and reverse engineering of code and network exploits as a method for developing countermeasures.
 
@@ -2582,6 +2666,7 @@ Advanced offensive security: perimeter defences, privilege escalation, malware a
 
 - URL: https://www.aretecyb.tech/courses/cyb-422
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 The architecture, technologies, and security landscape of the dark web. Covers Tor network internals, cryptocurrency and crypto-trading, safe and anonymous access techniques, and the risks and monitoring of dark/deep web activity.
 
@@ -2612,6 +2697,7 @@ The architecture, technologies, and security landscape of the dark web. Covers T
 
 - URL: https://www.aretecyb.tech/courses/cyb-423
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 The science and practice of digital forensics: securing, processing, acquiring, examining, and reporting digital evidence; the cyber trail; and the role of computers in crime, technology, and law. Covers portable and stationary device forensics.
 
@@ -2642,6 +2728,7 @@ The science and practice of digital forensics: securing, processing, acquiring, 
 
 - URL: https://www.aretecyb.tech/courses/cyb-498
 - 3 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 A continuation of CYB 497: completing the research methodology, statistical data analysis, prototype/simulation development, and the formal written report (chapters four and five), submitted for final grading with an oral defence before the external examiner.
 
@@ -2672,6 +2759,7 @@ A continuation of CYB 497: completing the research methodology, statistical data
 
 - URL: https://www.aretecyb.tech/courses/dts-426
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Entrepreneurship specific to data: what makes a data product commercially viable, how data businesses are structured, and how to price, protect and scale an offering built on data and models.
 
@@ -2703,6 +2791,7 @@ Entrepreneurship specific to data: what makes a data product commercially viable
 
 - URL: https://www.aretecyb.tech/courses/dts-428
 - 3 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 The capstone completed: implement the methodology designed in DTS 417, evaluate the results, write the full report and defend it. The single largest determinant of your final-year classification.
 
@@ -2734,6 +2823,7 @@ The capstone completed: implement the methodology designed in DTS 417, evaluate 
 
 - URL: https://www.aretecyb.tech/courses/ent-321
 - 2 units · 400 Level · Second Semester
+- Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
 The practical mechanics of launching a business: opportunity identification, business planning, entrepreneurial finance, marketing and e-commerce, and applying emerging technologies to new ventures. Prepares graduates who want to start consultancies or technology ventures.
 
@@ -2764,6 +2854,7 @@ The practical mechanics of launching a business: opportunity identification, bus
 
 - URL: https://www.aretecyb.tech/courses/uniuyo-cyb-425-voip
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Securing voice-over-IP and multimedia traffic: VoIP network architecture and call-control protocols (H.323, SIP, MGCP), NAT/firewall traversal, and the encryption and best practices that mitigate VoIP-specific risks.
 
@@ -2794,6 +2885,7 @@ Securing voice-over-IP and multimedia traffic: VoIP network architecture and cal
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-424
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Security governance at the enterprise level: information security principles, governance and risk management, security architecture and design, and end-to-end security of e-business and cyber environments — from data-centre security to backup and disaster recovery.
 
@@ -2824,6 +2916,7 @@ Security governance at the enterprise level: information security principles, go
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-421
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 What goes wrong with data and models, and how to manage it: model risk, data risk, operational failure, and the governance structures that catch problems before they reach production.
 
@@ -2856,6 +2949,7 @@ What goes wrong with data and models, and how to manage it: model risk, data ris
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-422
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Building and deploying applications on cloud infrastructure: service models, core compute and storage services, containers and serverless, and the deployment of data and ML workloads to the cloud.
 
@@ -2887,6 +2981,7 @@ Building and deploying applications on cloud infrastructure: service models, cor
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-423
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Designing the analytical database: dimensional modelling, star and snowflake schemas, slowly changing dimensions, OLAP operations, and the ETL that populates it all.
 
@@ -2918,6 +3013,7 @@ Designing the analytical database: dimensional modelling, star and snowflake sch
 
 - URL: https://www.aretecyb.tech/courses/uuy-dts-424
 - 2 units · 400 Level · Second Semester
+- Taken by: the departments whose catalogue lists it
 
 Data science applied to cities: sensor and IoT data, mobility and transport analytics, geospatial analysis, and the smart-city systems that use them — with the Nigerian urban context front and centre.
 
