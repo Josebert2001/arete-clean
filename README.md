@@ -144,7 +144,7 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 
 # --- CORS ---
-ALLOWED_ORIGIN=https://www.aretecyb.tech   # restricts browser callers of /api/*
+ALLOWED_ORIGIN=https://www.aretecyb.tech   # the one origin allowed to read /api/* cross-origin; unset = none (fail closed)
 
 # --- Error monitoring (optional) ---
 VITE_SENTRY_DSN=               # frontend

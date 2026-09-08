@@ -1,22 +1,37 @@
-// CORS origin wall. NEVER default to "*" — a wildcard would let any site send
-// authenticated requests to every /api/* endpoint (the browser would attach the
-// victim's Authorization header and this app has no CSRF tokens on its JSON
-// POST handlers; the bearer token is the only credential). Instead:
-//   * if ALLOWED_ORIGIN is set, only that exact origin may call across origins
-//   * in production with it unset, we serve NO ACAO header, so browsers refuse
-//     every cross-origin call — which is safe because the real frontend uses
-//     relative /api/* URLs (same-origin) and never needs the header at all
-//   * in dev/preview (or locally), default to the local Vite origin so `vercel
-//     dev` + `vite` on different ports keep talking
-const isProduction = process.env.VERCEL_ENV === 'production';
+// CORS origin wall. NEVER default to "*", and never fall back to a permissive
+// value when the environment is merely unrecognised.
+//
+// What this header does and does not buy: ACAO governs whether a *browser* lets
+// one origin read another origin's response. It is not a CSRF defence — a
+// cross-origin page cannot obtain this app's bearer token in the first place
+// (it lives in the app origin's storage, and browsers never attach an
+// Authorization header on their own), and it is no defence at all against a
+// non-browser client, which ignores CORS entirely. It is a read-gate, nothing
+// more. The real frontend calls /api/* with relative URLs, so it is same-origin
+// and needs no ACAO header at all; anything that *does* need one is a
+// deliberate second consumer and must be named explicitly.
+//
+// Hence the rule: an origin is allowed only when someone set it.
+//   * ALLOWED_ORIGIN set          -> exactly that origin may read across origins
+//   * ALLOWED_ORIGIN unset        -> NO ACAO header; browsers refuse every
+//                                    cross-origin read. Same-origin is unaffected.
+//   * local dev needs localhost   -> opt in explicitly with ARETE_ALLOW_LOCAL_CORS=1
+//
+// Deriving this from VERCEL_ENV was the earlier approach and it failed open: any
+// context where that variable is absent (self-hosting, a plain `node` run, a
+// Vercel project with system env vars disabled, a CI harness) was treated as
+// "not production" and advertised http://localhost:5173 to the world. Absence of
+// a signal must never widen the wall.
+const LOCAL_DEV_ORIGIN = 'http://localhost:5173';
+const allowLocalCors = process.env.ARETE_ALLOW_LOCAL_CORS === '1';
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN
-  || (isProduction ? null : 'http://localhost:5173');
+  || (allowLocalCors ? LOCAL_DEV_ORIGIN : null);
 
-if (isProduction && !process.env.ALLOWED_ORIGIN) {
+if (!ALLOWED_ORIGIN) {
   // Discoverability only — same-origin calls keep working, but this must be
   // surfaced or a future cross-origin consumer will fail confusingly.
   console.error(
-    'request-policy: ALLOWED_ORIGIN is not set in production; cross-origin /api/* calls are being refused. Set it to your frontend origin if you serve the API from a separate domain.'
+    'request-policy: ALLOWED_ORIGIN is not set; cross-origin /api/* calls are being refused. Same-origin calls are unaffected. Set ALLOWED_ORIGIN to your frontend origin if you serve the API from a separate domain, or ARETE_ALLOW_LOCAL_CORS=1 for local development.'
   );
 }
 
@@ -63,9 +78,9 @@ export const PROBE_RATE_LIMIT = {
 };
 
 export function applyApiHeaders(res) {
-  // ALLOWED_ORIGIN is null only in production with the env var unset — emit no
-  // ACAO header then, so the browser blocks every cross-origin call (same-origin
-  // /api/* requests from the frontend need no header).
+  // ALLOWED_ORIGIN is null whenever nobody named an origin — emit no ACAO header
+  // then, so the browser blocks every cross-origin read (same-origin /api/*
+  // requests from the frontend need no header).
   if (ALLOWED_ORIGIN) {
     res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   }

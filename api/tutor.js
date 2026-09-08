@@ -360,14 +360,12 @@ export default async function handler(req, res) {
         // request under its free-tier 8K limit; Gemini has far more headroom.
         maxOutputTokens: 1200,
         // temperature is set per-provider in model.js — Gemini 3.x is tuned for
-        // its defaults and shouldn't receive temperature/top_p/top_k.
-        // Gemini 3.x is NOT capped by default and spends hidden thinking out of
-        // this same per-step budget — on the final answer step that leaves too
-        // little for the visible reply and produces answers that cut off short,
-        // same failure mode fixed in explainer.js/simplify.js. The tutor's tool
-        // calls already do the "look at the whole course" work on demand; this
-        // budget only needs to cover writing the answer, not more reasoning.
-        providerOptions: { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
+        // its defaults and shouldn't receive temperature/top_p/top_k. Gemini's
+        // thinking cap lives there too, on the chain entries: uncapped hidden
+        // reasoning would spend this same per-step budget and leave too little
+        // for the visible reply. The tutor's tool calls already do the "look at
+        // the whole course" work on demand, so this budget only needs to cover
+        // writing the answer, not more reasoning.
       },
       (chunk) => res.write(chunk),
       // Emit a status marker each time the model reaches for a tool, so the UI
