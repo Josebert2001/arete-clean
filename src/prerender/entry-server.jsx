@@ -4,6 +4,7 @@ import CourseIndexPreview from '../components/CourseIndexPreview';
 import HomePreview from '../components/HomePreview';
 import InstallPreview from '../components/InstallPreview';
 import { tracks, installHowToJsonLd } from '../data/installGuides';
+import { loadPublicNotes, glossaryJsonLd } from '../data/publicNotes';
 import {
   loadPublicCourses,
   groupByLevel,
@@ -103,6 +104,11 @@ export async function collectPages({ buildDate } = {}) {
     const siblings = entries
       .filter((e) => e.course.level === course.level)
       .map((e) => e.course);
+    // null for the 81 courses with no notes. This pulls the note chunks at
+    // build time — ~1.4 MB across 14 courses, loaded once each, and none of it
+    // reaches the browser bundle.
+    const notes = await loadPublicNotes(course);
+    const glossary = glossaryJsonLd(course, notes, `${SITE_URL}/courses/${course.slug}`);
     pages.push({
       path: `/courses/${course.slug}`,
       title: courseTitle(course),
@@ -118,9 +124,15 @@ export async function collectPages({ buildDate } = {}) {
         courseJsonLd(course, department, { dateModified: buildDate }),
         courseBreadcrumbJsonLd(course),
         courseFaqJsonLd(course),
-      ],
+        glossary,
+      ].filter(Boolean),
       html: renderToStaticMarkup(
-        <CoursePreview course={course} department={department} siblings={siblings} />
+        <CoursePreview
+          course={course}
+          department={department}
+          siblings={siblings}
+          notes={notes}
+        />
       ),
     });
   }
@@ -215,10 +227,11 @@ export async function collectLlmsTxt({ buildDate } = {}) {
   // have to crawl 95 HTML files to find out.
   const full = [
     header,
-    ...groups.flatMap((group) => [
+    ...(await Promise.all(groups.map(async (group) => [
       `## ${group.level} Level`,
       '',
-      ...group.courses.flatMap((c) => {
+      ...(await Promise.all(group.courses.map(async (c) => {
+        const notes = await loadPublicNotes(c);
         const lines = [
           `### ${c.code} — ${c.title}`,
           '',
@@ -242,9 +255,29 @@ export async function collectLlmsTxt({ buildDate } = {}) {
         if (c.studyTips?.length) {
           lines.push('**How to pass**', '', ...c.studyTips.map((t) => `- ${t}`), '');
         }
+        // The public note slice. The lecture-note topic titles and the glossary
+        // are the only place the transcribed material surfaces in machine-
+        // readable form, and a definition is what an engine is most likely to
+        // want and least likely to be able to misuse.
+        if (notes?.outline?.length) {
+          lines.push(
+            `**Lecture notes** (${notes.topicCount} transcribed topics; full text needs a free account)`,
+            '',
+            ...notes.outline.map((t, i) => `${i + 1}. ${t}`),
+            '',
+          );
+        }
+        if (notes?.glossary?.length) {
+          lines.push(
+            '**Key concepts**',
+            '',
+            ...notes.glossary.map((g) => `- **${g.term}** — ${g.definition}`),
+            '',
+          );
+        }
         return lines;
-      }),
-    ]),
+      }))).flat(),
+    ]))).flat(),
   ].join('\n');
 
   return {

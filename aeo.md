@@ -399,7 +399,32 @@ P0, P1 and every §7 finding are **implemented** on branch `feat/aeo-p0-p1`. P2 
 | §7.3 mid-word truncation | ✅ | `clip()` in `publicCatalogue.js` — prefers a sentence end, falls back to a word boundary. |
 | §7.4 `og:type` inheritance | ✅ | `page.ogType` in `prerender.mjs`; course pages and `/install` are `article`. |
 | §7.7 freshness signals | ✅ | `<lastmod>` on every sitemap URL + `dateModified` on Course JSON-LD, both from one `buildDate`. |
-| P2 freemium excerpt | ⏸ Deferred | Product decision. Note §7.6 still applies: only 10 note files cover ~10 of 95 courses. |
+| P2 freemium excerpt | ✅ | `src/data/publicNotes.js` — outline + glossary + capped first-topic preview on 14 courses. See below. |
+
+### P2 as built, and where it departs from §5
+
+**14 courses carry notes, not the ~10 §7.6 estimated** — four hold them inline (INS 224: 27 topics, CYB 224: 26, UUY-CYB 222: 13, CYB 222: 12) rather than through `notesKey`. Five of the 14 are foundation courses (GST 121, COS 121, MTH 121, PHY 128, ENT 221), which is the whole-school point again: the freemium slice reaches students in every department, not two.
+
+`loadPublicNotes(course)` returns three things, in ascending order of what they give away:
+
+| Piece | What it is | Why it is safe to publish |
+| :--- | :--- | :--- |
+| `outline` | Every topic **title** | A table of contents, not the content — and the single thing a student weighing an account most wants: does this match what my lecturer taught? |
+| `glossary` | ≤ 28 term/definition pairs from the notes' own `definition` and `termlist` sections | The part answer engines actually cite. A definition is inherently a fragment; quoting it does not replace reading the notes. |
+| `preview` | Prose of topic 1, ≤ 2,400 chars | Enough to show the notes are real and written for these students. Not enough to be the notes. |
+
+Everything else — the other topics, figures, worked code, question banks, flashcards, tutor — stays gated. Page weight went 28 kB → 50–59 kB on the 14, and their crawlable text roughly tripled (4.8k → 13–16k chars).
+
+**§5 said "Topic 1 public". Four things it did not anticipate:**
+
+1. **A cap is mandatory.** ENT 221's definitions and term lists are ~378 kB of JSON. Inlined, the page advertising the notes would be slower than the notes. Hence `GLOSSARY_MAX = 28`.
+2. **The extractor cannot tell a definition from a table cell.** COS 221 yielded `Simple — "Java is easy to learn."`; COS 121 yielded operator rows like `Addition (+)` with 5-character bodies. Published as `DefinedTerm`s and attributed to Areté by an engine, those are worse than nothing. `MIN_DEF_CHARS = 40` drops them.
+3. **Note headings double as section numbers.** MTH 121 produced terms like `2.1 Introduction` and `2.2.1 Differentiability`. Numbering is stripped and purely structural headings (`Introduction`, `Overview`, `Summary`, …) are dropped.
+4. **Maths cannot be published at all here.** Inline `$…$` renders through `MathText`, which uses hooks and lazy-loads KaTeX — neither available to `renderToStaticMarkup`. Publishing the raw source would put `$f(x)$` on the page *and into an engine's quote of it*. Maths-bearing entries are dropped, which costs MTH 121 its entire glossary (0 terms) and leaves PHY 128 with 4. That is the correct outcome: no glossary beats a broken one. MTH 121 keeps its outline and preview.
+
+**One correctness bug worth recording:** the preview caption first read *"That is topic 1 of 12"* whenever every **prose** section fitted — but images, tables and code had been stripped, so the reader had not seen topic 1. `truncated` now compares against `topic.sections.length`, and the caption reads *"That is the opening of topic 1 of 12"*. A student uses that line to decide whether an account gives them anything more, so it must not overstate what they already have.
+
+`llms-full.txt` grew 158 kB → 228 kB carrying the outlines and glossaries; `DefinedTermSet` JSON-LD ships on the 13 courses with a glossary.
 
 ### The biggest finding this audit missed: whole-school framing
 

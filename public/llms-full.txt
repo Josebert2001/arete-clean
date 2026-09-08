@@ -359,6 +359,49 @@ Algorithmic thinking and systematic problem solving using Python and C. Covers p
 - Solve at least one coding problem daily, even if small; consistency beats cramming
 - Harvard CS50P (Introduction to Programming with Python) is free and excellent
 
+**Lecture notes** (9 transcribed topics; full text needs a free account)
+
+1. Concept of Computing
+2. Problem and Problem Solving
+3. Python Programming
+4. Control Structures
+5. Arrays and Lists
+6. Functions and Classes
+7. Writing Mathematical Formulas in Python
+8. Input, Output, and Type-Casting
+9. GUI with Tkinter
+
+**Key concepts**
+
+- **Routine problem** — They are common and occur frequently in similar conditions. These problems often have pre-defined solutions and can be solved using standard procedures and algorithms. Solutions are standard and do not require creativity.
+- **Non-routine problem** — They are complex and do not have straightforward solutions. They require creative thinking, experimentation, and new strategies to solve the problem.
+- **Algorithm** — A structured approach to problem solving. A step-by-step procedure or set of rules used to solve a specific problem. Features: There must be inputs. There must be outputs. It must be definite. It is finite, correct, and efficient.
+- **Heuristic** — An approximate approach. It finds a satisfactory solution in a place where an optimal solution is impracticable. It doesn't guarantee a perfect solution but is aimed at finding a good enough solution quickly. It is applied when you can't get an optimal solution.
+- **Abstraction** — Focuses on relevant details and not irrelevant details. Abstraction can be applied in software development, artificial intelligence, and cybersecurity.
+- **Analogy** — Using past experience to solve a problem. Features: Uses past experience; encourages pattern recognition commonly used in machine learning.
+- **Brainstorming** — A group or individual problem-solving technique where multiple ideas are generated. Features: Encourages creative thinking; mostly used in business, software development, and research.
+- **Trial & Error** — Trying different solutions with the intention of taking the best.
+- **Hypothesis Testing** — This involves simulating an assumption and testing it through experiment or observation.
+- **Reduction** — Simplifies a complex problem by breaking it down into simpler equivalent problems that are easier to solve. Mostly used in mathematics and computing.
+- **Literal Thinking** — Involves applying a logical and direct approach to a problem solution without assumption or abstract interpretation. Features: Avoids assumption and abstract interpretation.
+- **Means-end Analysis** — It involves comparing the current state of a problem with a desired goal and determining the best way to close the gap.
+- **Proof** — The process of logically verifying the correctness of a solution using mathematical or formal proving.
+- **Divide and Conquer** — This is where a complex problem is divided into smaller tasks, solved individually, and the solutions are combined.
+- **Definition** — Python Programming is a script of sequence information and commands evaluated and resolved by an interpreter called a shell. It consists of primitive constructs, syntax, and static semantics.
+- **Numeric** — Scalar objects assigned to variables used for mathematical operations.
+- **Sequence Type** — Used to store ordered, changeable collections.
+- **String (str)** — Represented by data in a single quote or double quote in the memory.
+- **Set** — Ordered and mutable collection used for storage of unique elements and can't be accessed by using indexing.
+- **The while Loop** — Repeatedly executes a code block as long as its condition remains true.
+- **Functions** — A function is a subprogram or module and a unit of a program. In some programming languages, it is called a procedure. It performs a specific task and is reusable. You can call a function as many times as required.
+- **Local variable** — A variable that exists within a function.
+- **Global variable** — A variable that exists outside functions.
+- ***args** — Defines undefined positional values in a variable.
+- ****kwargs** — Defines undefined keyword values in a variable.
+- **Object-Oriented Programming (OOP)** — OOP is a programming paradigm that organizes software around objects. An object means instances that bundle together data attributes.
+- **Encapsulation** — Bundling data and methods; private attributes accessed via getter/setter methods.
+- **Inheritance** — A child class inherits properties from a parent class.
+
 ### GST 121 — Nigerian Peoples and Culture
 
 - URL: https://www.aretecyb.tech/courses/gst-121
@@ -390,6 +433,42 @@ An introduction to Nigeria's ethnic diversity, cultural heritage, colonial and p
 - Cybercrime and digital-policy topics connect directly to computing degrees — pay extra attention there
 - Past questions drive most of the exam content for GST courses — collect and study them
 
+**Lecture notes** (2 transcribed topics; full text needs a free account)
+
+1. The 3Rs Policy and Reorientation Strategies in Nigeria: 1970–1975
+2. Apprenticeship System in Nigeria: Challenges and Future Prospects
+
+**Key concepts**
+
+- **The 3Rs: Rehabilitation, Reconstruction and Reconciliation** — The 3Rs policy was enunciated immediately after the end of the civil war in 1970 to readmit Biafra (the Eastern Region) into Nigeria after its exit in 1967. It was a clearly thought-out policy carrying the ingredients for healing the wounds and scars created by the war, and a strategy for resolving the age-old…
+- **Rehabilitation** — Restoring to good working condition what the war had damaged — people, roads, bridges, public services and private companies that were destroyed during the war.
+- **Reconstruction** — Rebuilding destroyed public infrastructure: hospitals, schools and markets were reconstructed.
+- **Reconciliation** — Assuaging feelings of animosity among Nigerians — amnesty was granted to exiled Igbos, and those who had been in the civil or public service were completely reabsorbed into the mainstream of the public service.
+- **The Indigenization Policy** — The indigenization policy is defined as "the roping off of certain types of business activities and the reserving of these for exclusive ownership and control of Nigerians." Its objective, according to Chibuzo Ogbuagu, was to set the stage for greater participation by Nigerian nationals in the ownership, management…
+- **The National Youth Service Corps (NYSC)** — The National Youth Service Corps is a one-year mandatory national service programme for all graduates of Nigerian citizenship from Nigerian universities and from foreign universities recognised by the National Universities Commission (NUC). It was established under Decree No. 24 by the military government of Gen.
+- **What Is Apprenticeship?** — Apprenticeship is a structured form of vocational training in which an apprentice acquires practical skills and knowledge from an experienced mentor or master craftsman within a specific trade or profession, through a combination of on-the-job learning and formal instruction.
+- **Structured learning experience** — A learning programme designed to impart the skills and competencies of a particular craft or profession, tailored to industry needs and combining theory with practice.
+- **Mentorship and guidance** — The relationship between apprentice and master craftsman, who acts as role model, instructor and source of personalised feedback throughout training.
+- **Hands-on training** — Learning by doing — apprentices engage directly in the tasks of the trade under supervision, developing proficiency through repeated practice and real-world exposure.
+- **Progression and skill development** — Apprentices gain proficiency gradually, taking on more complex tasks and responsibilities as they demonstrate competence.
+- **Cultural and socio-economic context** — Apprenticeship is embedded in the traditions, values and community practices of a region or ethnic group, and plays a role in preserving cultural heritage.
+- **Skill acquisition and employability** — Equips apprentices with practical skills that prepare them for entry-level employment or self-employment.
+- **Promotion of craftsmanship and artisanship** — Preserves and promotes traditional craftsmanship by passing down specialised knowledge and techniques.
+- **Career development and professionalism** — Gives apprentices a structured pathway from novice to skilled practitioner, fostering commitment to quality standards.
+- **Economic growth and industry development** — Addresses skills shortages, and skilled apprentices contribute to productivity, entrepreneurship and competitiveness.
+- **Social inclusion and community engagement** — Gives marginalised groups, including youth, access to training and employment, often supported by strong community networks.
+- **Business involvement** — Employers are the foundation of every apprenticeship programme; the skills their workforce needs sit at its core, and businesses must be active partners at every stage of designing it.
+- **On-the-job training** — Structured, hands-on training from an experienced mentor at the job site, typically for at least a year, built by mapping the skills and knowledge the apprentice must master to become fully proficient.
+- **Related instruction** — Technical, workforce and academic instruction that complements on-the-job learning, delivered by a community college, technical school, apprenticeship training school, or the business itself, with education partners and employers jointly developing the curriculum and funding it.
+- **Rewards for skill gains** — Apprentices receive progressive pay increases as they hit skill benchmarks, from an entry wage to an ending wage, rewarding and motivating advancement through training.
+- **Agriculture** — A diverse sector needing skilled labour — veterinary nursing, horticulture, animal care, game and wildlife management, and environmental conservation, spanning both outdoor and office-based roles.
+- **Arts and media** — Skills for the media and publishing sector — journalism, live events and promotion, creative and digital media, broadcast production, costume and wardrobe, and business and administration.
+- **Business and administration** — Typical office roles with fixed hours, requiring strong organisational and communication skills — human resource management, business innovation and growth, social media and digital marketing, project management, telemarketing and sales.
+- **Construction** — Designing, building and maintaining roads, buildings, airports and other projects — plumbing and heating, civil engineering, construction management, electrical and electronic servicing, and education and training.
+- **Education and training** — Working with people of all ages and needs to develop and pass on knowledge in a particular area — work-based learning practitioner development, learning and development, learning support, and supporting teaching and learning in schools or in physical education.
+- **Perceived prestige of formal education** — Nigerian society tends to see formal education as more prestigious and a better guarantee of career prospects than vocational apprenticeship, discouraging young people from pursuing it and contributing to a decline in skilled artisans.
+- **Lack of standardization and regulation** — Apprenticeship programmes often lack standardised curricula, assessment procedures and certification, undermining the quality and recognition of the training.
+
 ### MTH 121 — General Mathematics II (Calculus)
 
 - URL: https://www.aretecyb.tech/courses/mth-121
@@ -420,6 +499,15 @@ Single-variable calculus: limits, continuity, differentiation, integration, and 
 - Calculus rewards consistent daily practice more than any last-minute cramming
 - Understand the concept of a derivative as 'rate of change' before memorising rules
 - Khan Academy calculus is free, self-paced, and covers this entire course
+
+**Lecture notes** (6 transcribed topics; full text needs a free account)
+
+1. Unit One — Introduction: Functions, Limits and Continuity
+2. Unit Two — Differentiation
+3. Unit Three — Extrema
+4. Unit Four — Integration
+5. Unit Five — Application of Integration to Areas and Volumes
+6. Tutorial Questions — whole-course revision
 
 ### PHY 121 — General Physics II (Electricity & Magnetism)
 
@@ -482,6 +570,20 @@ Laboratory practicals continuing from PHY 117, covering the theoretical concepts
 - Always quote uncertainties with your measurements — it demonstrates scientific rigour
 - Submit lab reports on time; late submissions lose marks even when the content is perfect
 
+**Lecture notes** (4 transcribed topics; full text needs a free account)
+
+1. Chapter One — General Introduction & Useful Hints to Students
+2. Chapter Two — Geometrical Optics (Theoretical Background)
+3. Chapter Three — Sound Waves (Theoretical Background)
+4. Chapter Four — Electricity and Magnetism (Theoretical Background)
+
+**Key concepts**
+
+- **Ammeter** — Measures electric current, and is always placed in series in the circuit. Its resistance is always very small, so that when placed in a circuit it does not diminish the current it is intended to measure.
+- **Voltmeter** — Measures the p.d. between two points in a circuit, and is always placed in parallel with the resistance whose p.d. is wanted. Its resistance is always very high, so that it does not divert an appreciable current from the circuit.
+- **Cells** — Different types are used in the laboratory — the Daniell cell (e.m.f. 1.1 V, internal resistance a few ohms) and the Leclanché cell (e.m.f. 1.45 V, internal resistance several ohms) supply current for short periods and are emptied after use.
+- **Battery** — A group of similar cells arranged in series or in parallel.
+
 ### UUY-CYB 121 — Introduction to Computer Networks
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-121
@@ -512,6 +614,47 @@ Foundational networking: how data travels across local and wide area networks, t
 - Practice subnetting until it is instinctive: it reappears in Network Defense and Security courses
 - Professor Messer's free Network+ course on YouTube is one of the best networking courses available
 - Use Cisco Packet Tracer (free) to simulate and visualise network configurations hands-on
+
+**Lecture notes** (7 transcribed topics; full text needs a free account)
+
+1. Fundamentals of Computer Networking
+2. Organizational Computational Models
+3. Network Models: Peer-to-Peer vs Server-Based
+4. Network Services
+5. Protocol Layering and Transmission Media
+6. Internetworking Devices
+7. Connection Types and Physical Topologies
+
+**Key concepts**
+
+- **What is Computer Networking?** — Computer networking is the process of connecting two or more autonomous computing devices to enable resource sharing — information, printers, files, data and servers. For communication to succeed, a network must possess a common physical or logical connecting link, and the communicating devices must adhere to mutually…
+- **Protocol** — A formal set of rules and conventions that govern how data is transmitted and received between computers across a network.
+- **MAC (Media Access Control) address** — A unique hardware identifier assigned to a network interface controller (NIC), used as the device’s address within a network segment.
+- **IP (Internet Protocol) address** — A numerical label assigned to each device connected to a computer network that uses the Internet Protocol for communication.
+- **Centralized Computing** — In a centralized computing model, all processing power and data storage reside at a single central location — typically a mainframe, UNIX host or powerful server. Connected client terminals (historically dumb terminals) act merely as input/output interfaces.
+- **Distributed Computing** — Distributed computing replaces dumb terminals with autonomous personal computers. Each workstation can operate independently for local tasks while still interacting with network servers to retrieve shared files or resources. The application logic is executed on the client workstation rather than on the server.
+- **Collaborative (Cooperative) Computing** — Collaborative computing enables multiple computers to share both resources and processing tasks. In a client-server database architecture such as Microsoft SQL Server, a client submits a query, the database server performs the heavy backend processing — filtering and sorting records — and returns only the processed…
+- **Peer-to-Peer (P2P) Networking Model** — In a peer-to-peer network, every connected machine functions simultaneously as both a client and a server. No dedicated server is required.
+- **Server-Based (Client-Server) Networking Model** — Server-based networks require dedicated servers — such as Windows NT Server or NetWare — to manage network resources and enforce user-level security. Permissions and access rights are tied to authenticated user accounts maintained centrally by the server.
+- **File servers** — Provide a centralised repository for storing files, letting multiple users access common data securely and making centralised backup possible.
+- **Print servers** — Manage and coordinate access to one or more shared network printers on behalf of multiple clients.
+- **Application servers** — Host and execute software applications on behalf of clients, processing data on the server side and delivering the results across the network.
+- **Protocol Layering and Architecture** — To manage design complexity, networks are structured as a hierarchy of layers or levels, where each layer builds upon the services of the layer directly beneath it.
+- **Interface** — The boundary between two adjacent layers on the same machine. It defines the primitive operations the lower layer offers to the one above it.
+- **Protocol stack** — The complete ordered list of protocols in use by a system — one protocol per layer.
+- **Data encapsulation and flow** — Data flows downward through the sender’s layers to the physical medium, crosses the physical channel, and ascends upward through the receiver’s layers.
+- **CAT 5 Cable** — A standardised twisted-pair cable containing four pairs of colour-coded wires, designed for laboratory and enterprise networking.
+- **Trimmer / stripper** — Strips the cable’s outer jacket safely without damaging the conductors inside. Do not substitute a knife or scissors.
+- **Crimper** — A plier-like tool that attaches RJ-45 connectors securely to the cable ends.
+- **RJ-45 connector** — A transparent modular connector carrying 8 gold-plated contact pins.
+- **LAN tester** — An electronic testing device that verifies electrical continuity across all 8 pins after crimping.
+- **Hub (Physical Layer)** — A multiport repeater that broadcasts an incoming electrical signal across all of its active ports.
+- **Passive hub** — Purely connects cable segments together, without regenerating the signal.
+- **Active hub** — Regenerates and amplifies the signal before repeating it.
+- **Intelligent hub** — An active hub that additionally incorporates network management protocols such as SNMP.
+- **Multiplexer** — Combines multiple distinct signals onto a single transmission medium.
+- **Bridge (Data Link Layer)** — Connects two separate network segments into one logical whole by examining MAC addresses.
+- **Switch (Data Link Layer)** — Often described as a high-performance multiport bridge, supporting dozens or hundreds of ports, with each port providing exclusive dedicated bandwidth — for example 10 or 100 Mbps per port.
 
 ### UUY-CYB 122 — Principles and Practice of Information Security
 
@@ -550,6 +693,52 @@ An introduction to the core principles of information security: operating system
 - On a four-from-six paper in two hours, budget about 30 minutes per question: 5 planning the points, 20 writing, 5 checking. Read all six and pick your four before you write a single word
 - Where a list is long (the fifteen threat categories, for instance) the question will ask for "any five" — so learn five you can explain properly rather than fifteen you can only name
 
+**Lecture notes** (12 transcribed topics; full text needs a free account)
+
+1. Foundations of Information Security
+2. Legal, Ethical and Professional Frameworks
+3. Access Control Architectures
+4. Perimeter Defense and Firewalls
+5. Intrusion Detection and Prevention Systems (IDPS)
+6. Physical Security
+7. History of Information Security and the CNSS Model
+8. Implementing Information Security: Approach, the SDLC and Professional Roles
+9. Threats to Information Security
+10. Network Attack Methods and Secure Programming
+11. Legal, Ethical and Regulatory Landscape
+12. Risk Management
+
+**Key concepts**
+
+- **The Expanded Attributes of Information Security** — Security is usually taught as the CIA triad — Confidentiality, Integrity, Availability — but a fuller list of attributes is needed to reason about end-to-end protection of an organisation’s digital assets.
+- **Primary motives for hackers** — Financial gain, political objectives, fame and reputation, revenge, and intellectual curiosity.
+- **Attacker targets** — Data repositories, network communication channels, hardware and computer systems, and human personnel (social engineering vectors).
+- **Threat agents** — External hackers, malicious or careless insiders, competing entities, organized cybercriminals, and nation-state actors.
+- **Ethics** — Moral principles and rules of conduct guiding individual and collective behavior.
+- **Professional standards** — Expectations governing conduct within specialized fields.
+- **Laws** — Enforceable rules established by governing authorities.
+- **Policies** — Internal rules mandated by organizations.
+- **Computer Fraud and Abuse Act (CFAA)** — Criminalizes unauthorized access to protected computer systems.
+- **Electronic Communications Privacy Act (ECPA)** — Safeguards wire, oral and electronic communications against unauthorized interception.
+- **HIPAA & GLBA** — Mandate stringent privacy and security controls for healthcare and financial institutions respectively.
+- **Sarbanes-Oxley Act (SOX)** — Requires public corporations to maintain accurate financial records and internal controls.
+- **Mandatory Access Control (MAC)** — Uses rigorous data classification schemes where users and objects are assigned sensitivity and clearance levels. Lattice-based access control provides a mathematical formalization of these security levels.
+- **Non-Discretionary Access Control (NAC)** — Centrally managed and strictly enforced access control governed by organizational authorities — for example Role-Based Access Control (RBAC) or Task-Based Access Control.
+- **Discretionary Access Control (DAC)** — Implemented at the discretion of data owners, common in peer-to-peer and decentralized environments.
+- **The Four Pillars of Access Control** — Every access control mechanism, regardless of model, is built from the same four steps in the same order.
+- **Identification** — A supplicant presents a unique identifier (ID) within the security domain.
+- **Authentication** — Validating the supplicant’s identity using one or more of three factors: something you know (passwords, PINs, passphrases), something you have (smart cards, ATM cards, hardware tokens), or something you are (biometrics — fingerprints, hand geometry, retinal scans, voice recognition).
+- **Authorization** — Matching authenticated entities against authorized resource access lists and group memberships.
+- **Accountability (auditability)** — Maintaining comprehensive system audit logs to attribute all user actions to verifiable identities, facilitating intrusion detection and forensic analysis.
+- **Firewalls** — Protective network layers that inspect and restrict unauthorized data transfer between an untrusted external network (such as the Internet) and a trusted internal network. Firewalls can operate as dedicated hardware appliances, software modules running on routers or servers, or distributed network perimeters.
+- **IDS (Intrusion Detection System)** — Detects violations and generates passive alarms (audible or visual) — it observes and reports but does not act.
+- **IPS (Intrusion Prevention System)** — Actively intercepts and blocks malicious traffic in real time.
+- **True attack stimulus** — An actual attack or authorized test drill triggering a correct IDPS response.
+- **False positive** — An alarm triggered in the absence of an actual attack.
+- **False negative** — The failure of an IDPS to detect an actual attack — the most grievous security failure, since the organization has no idea it happened.
+- **Noise** — Accurate but low-threat alerts generated by unsuccessful attacks or normal operational anomalies.
+- **General management** — Exterior facility security, building access control, and fire protection systems.
+
 ### UUY-CYB 123 — Web Authoring and Development
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-123
@@ -579,6 +768,60 @@ Building web pages from scratch: web architecture and the client-server model, H
 - Build at least one real web page per week — the only way to learn web development is to build
 - Inspect real websites using browser DevTools (F12) to see how professional sites are structured
 - Learn the web security concepts early — XSS and CSRF from this course appear in later security courses
+
+**Lecture notes** (20 transcribed topics; full text needs a free account)
+
+1. Web Programming, the Internet and the World Wide Web
+2. Internet Services and Communication Protocols
+3. Web Architecture and the Network Model
+4. The Web Development Life Cycle
+5. HTML Tags and Attributes
+6. Structure of an HTML Page
+7. HTML Lists and Tables
+8. HTML Forms, Graphics and Links
+9. Basics of Cascading Style Sheets
+10. Adding Style to HTML, Inheritance and the Cascade
+11. CSS Text, Font and Colours; Validating Documents
+12. CSS Borders, Margin and Padding
+13. Basics of JavaScript
+14. Arithmetic Operators and Functions
+15. Control Statements in JavaScript
+16. Event Handlers in JavaScript
+17. XML Basics
+18. Formatting and Manipulating XML Documents
+19. Viewing and Modifying XML Documents
+20. Processing and Validating XML Documents
+
+**Key concepts**
+
+- **What is Web Programming?** — Web programming is the process of writing code that will eventually create a website. Text and multimedia content can be manipulated by a web designer to produce an elegant page that is seen in a web browser. Web programming is therefore the creation of web pages that run over the Internet.
+- **Global reach** — The Internet and the web allow businesses to reach a worldwide audience with their products and services.
+- **Cost-effectiveness** — Web development lets businesses reduce costs by automating processes, improving efficiency, and reducing the need for physical infrastructure.
+- **Improved communication** — Websites facilitate communication and collaboration across organisations and geographies, enabling better knowledge sharing and decision-making.
+- **Enhanced customer experience** — Web applications allow businesses to provide a more personalised, interactive and engaging customer experience.
+- **Access to data** — Web applications provide vast amounts of data that can be used for analysis, insights and informed decision-making.
+- **Mobile access** — Web applications enable businesses to reach customers through mobile devices, which have become increasingly important in our lives.
+- **Innovation** — Web applications drive innovation by providing a platform for new products, services and business models.
+- **Social impact** — Web technology can improve social and economic outcomes by providing access to education, healthcare and other essential services.
+- **In-demand skills** — Web development skills are in high demand, with many companies seeking professionals who can design, develop and maintain web-based applications.
+- **Career opportunities** — Learning web programming opens up careers in web development, web design, e-commerce and digital marketing.
+- **Flexibility** — Web programming can be used to build various applications and services, providing flexibility in the type of work that can be undertaken.
+- **Entrepreneurship** — Web programming provides a platform for entrepreneurship, enabling individuals to create and launch their own web-based businesses.
+- **Creativity** — Web programming allows creative expression through web design and development, providing opportunities to create visually appealing and engaging user interfaces.
+- **Continuous learning** — Web programming constantly evolves, providing continuous learning and skill development opportunities.
+- **Remote work** — Web programming skills are highly transferable and can be applied remotely, providing remote work and freelancing opportunities.
+- **Competitive advantage** — Knowledge of web programming provides a competitive advantage in the job market and in business, enabling individuals and companies to stay ahead of the curve.
+- **What is the Internet?** — The Internet is a global communication system consisting of hardware and software infrastructure that provides connectivity between remote computers.
+- **What is the Web?** — The Web is a collection of interconnected documents and other resources, linked by hyperlinks and uniform resource locators (URLs). The World Wide Web is a hypermedia system — hypermedia being the addition of multimedia to hypertext.
+- **Protocol** — Defines the manner for interpreting computer information. Many web pages use HTTP. Other protocols used on the Internet include File Transfer Protocol (FTP) for file transfer, and Simple Mail Transfer Protocol (SMTP) and Post Office Protocol 3 (POP3) for electronic mail.
+- **Server** — Identifies the computer system that stores the information you seek, and is always preceded by two slashes. A server is a computer that holds information and sends it to the client when a request is made.
+- **Path** — Defines the location within the server where the requested item will be found — here, faculty of computing / software engineering. Most web pages have .htm or .html as their extension.
+- **Wireless broadband (Wi-Fi)** — Go to your network settings, turn on Wi-Fi, and select your network name.
+- **Ethernet cable** — Use an Ethernet cable to connect your computer to your router or modem.
+- **Dial-up** — Plug your modem into the phone jack, then connect the modem to your computer.
+- **Internet Protocols** — The Internet is a large interconnection of computers across the globe, linked together through telecommunication networks. Communication on the Internet is guided by protocols. A network protocol is a standard way of regulating data transfer between computers: just as diplomats adhere to protocols — rules of behaviour…
+- **Application layer** — Combines the functionality of the topmost three OSI layers (session, presentation and application). Protocols at this layer include Telnet, e-mail, directory services (NFS) and network management services.
+- **Host-to-host layer** — Equivalent to the transport layer of the OSI model. The protocols here are the Transmission Control Protocol (TCP) and the User Datagram Protocol (UDP). TCP offers reliable services and full-duplex functions; UDP provides unreliable services that improve throughput when error correction is not required.
 
 ### UUY-DTS 121 — Foundation of Web Technologies for Data Science
 
@@ -1095,6 +1338,52 @@ Advanced programming building on COS 211: deeper object-oriented programming (po
 - Trace sorting algorithms step by step on a 5-element array by hand before every exam
 - Areté Java modules cover the programming foundation; use them for the Java component of this course
 
+**Lecture notes** (12 transcribed topics; full text needs a free account)
+
+1. Fundamentals in Java Programming
+2. Flow Control Structures
+3. Array
+4. Methods (Functions)
+5. OOP I: Concept of Object-Oriented Programming
+6. OOP II: Inheritance, Interface, Polymorphism, and Abstract
+7. Exception Handling
+8. Threads
+9. Text File Handling
+10. Java Database Connectivity (JDBC)
+11. Graphical User Interfaces (GUI)
+12. Java String API
+
+**Key concepts**
+
+- **Secure** — Java has advanced authentication and access-control features that help make web applications secure.
+- **Portable** — Java code runs on all major platforms unmodified — once a source file compiles into bytecode, that bytecode runs on any platform with a Java JDK, unlike languages that must be recompiled into machine code separately for each platform.
+- **Robust** — Java has strong memory management and exception-handling features that catch errors during execution and manage incorrect input.
+- **Object-Oriented** — A model of programming built around real-world entities — inheritance, data hiding, polymorphism. OOP's aim is to bind a portion of data and the functions that act on it together, so no other part of the code can access them directly.
+- **Multithreaded** — Java supports multithreaded programming, so a Java program can perform several tasks at the same time.
+- **Architecture-Neutral** — Compiling Java code produces bytecode that runs on many platforms with the help of the Java Runtime Environment (JRE) and Java Virtual Machine (JVM).
+- **Interpreted** — Java creates an intermediate representation called bytecode, which is what lets it run on any platform via the JDK.
+- **High-Performance** — Java uses a Just-In-Time (JIT) compiler, which converts bytecode instructions to enable faster execution.
+- **Distributed** — Java programs can access files on any machine on the internet using RMI and EJB, enabling distributed applications.
+- **Dynamic** — Java can compile and load a class dynamically, on demand — only the specifically required portion of code, rather than the whole program.
+- **Variables in Java** — A variable in Java is a human-readable name used to store data in computer memory — it lets a program store, read, and change data held in memory. A variable is also called an identifier, because it identifies values within a program.
+- **Primitive** — Uses a small, fixed amount of memory to represent a single item of data. Java has exactly eight: `byte`, `short`, `int`, `long`, `float`, `double`, `char`, and `boolean` — a Java program cannot define any others. Primitives are used so often that making them full objects would noticeably hurt performance.
+- **Object (Non-Primitive)** — A larger chunk of memory that can hold a great deal of data along with the methods used to process it. Every data member and local variable must be declared as either a primitive or an object (class) type.
+- **char** — A 16-bit character using the Unicode encoding scheme.
+- **abs()** — Returns the absolute value of a number — the number without its negative sign, so the result is always positive. Works on `int`, `long`, `float`, or `double` values.
+- **sqrt()** — Returns the square root of a positive number. Takes an `int` or `double` as input and always returns a `double`.
+- **pow(x, y)** — Computes x raised to the power y. Takes two `double` arguments (base, then power) and returns a `double` — integer or float arguments are implicitly converted to `double` first.
+- **Conditional execution** — The most common use of the "if-else" statement is to conditionally execute a block of code based on the result of a Boolean expression. For example, you might want to execute a block of code that performs a calculation only if a certain variable has a specific value.
+- **Decision making** — The "if-else" statement can also be used to make decisions in your code based on different conditions. For example, you might use an "if-else" statement to determine which of two different actions to take based on the value of a variable.
+- **Error checking** — The "if-else" statement can also be used to check for errors or invalid inputs in your code. For example, you might use an "if-else" statement to validate user input and display an error message if the input is not valid.
+- **Multiple branches** — The "if-else" statement can also be used to handle multiple branches of execution based on different conditions. For example, you might use multiple "if-else" statements to handle different cases in a switch statement.
+- **Initialization expression** — In the above example, int i = 1; is our initialization expression. In this expression we initialize the loop variable to some value so that the loop will start from the initialized value. In the above example the loop will start from 1 and continue to execute until it crosses the value 5.
+- **Test expression** — In the above example, i <= 5; is our test expression. The compiler will test the condition written in the test expression. If the condition evaluates to true, then the body of the loop will execute.
+- **Step or increment** — This part updates the expression. In the above example, i = i + 1 is our update expression. After executing the body of the loop, the update expression increments the loop variable i by 1 and then moves to test the condition written in the test expression.
+- **Built-in Methods** — These methods are predefined, and we can use them any time we want in our Java program. For example pow(), sqrt(), min(), etc.
+- **User Defined Methods** — These methods are defined or created by the programmer for performing a specific task in a program.
+- **inputdetails()** — for storing information in the instance variables.
+- **calculate()** — for calculating and storing the total and percentage obtained.
+
 ### CSC 223 — Discrete Structures
 
 - URL: https://www.aretecyb.tech/courses/csc-223
@@ -1158,6 +1447,52 @@ Emerging technologies and their cybersecurity implications: AI in security, bloc
 - Quantum threats to RSA and AES connect directly to your Cryptography course in 300L
 - For exam essays, structure answers around: what the technology is, its security benefit, and its risk
 
+**Lecture notes** (12 transcribed topics; full text needs a free account)
+
+1. AI & Machine Learning in Threat Detection
+2. Zero Trust Architecture
+3. Post-Quantum Cryptography & Migration Frameworks
+4. Behavioral Biometrics & Continuous Authentication
+5. Blockchain Technology
+6. Cloud Native Security
+7. Privacy Enhancing Technologies (PET)
+8. Automated Vulnerability Research
+9. Agentic AI
+10. Deepfake Detection
+11. Secure Access Service Edge (SASE)
+12. Extended Detection and Response (XDR)
+
+**Key concepts**
+
+- **Abstract** — Traditional security relied on signature-based detection, matching known attack patterns against incoming data — an approach that fails against the rapid evolution of cyberattacks. AI and ML fundamentally change threat detection by letting systems learn from data, recognise behavioural anomalies, and adapt to emerging…
+- **Supervised Learning** — Trained on labelled normal/malicious data — spam filtering, malware classification, IDS, fraud. Algorithms: Decision Trees, Random Forest, SVM, Logistic Regression, Naive Bayes.
+- **Unsupervised Learning** — Finds hidden patterns in unlabelled data for anomaly detection and user-behaviour analytics. Techniques: K-Means, PCA, Autoencoders, density-based clustering.
+- **Deep Learning** — Neural networks for large, complex datasets — malware detection, traffic classification, advanced IDS. Models: CNN, RNN, LSTM, Transformers.
+- **— Marsh** — Stephen Paul Marsh formalises trust as a computational concept.
+- **— Jericho Forum** — Forms to address "de-perimeterisation" of the enterprise network.
+- **— Kindervag** — Coins "Zero Trust" at Forrester: trust itself is a vulnerability.
+- **/ 2014 — Google BeyondCorp** — Implements then publishes Zero Trust after Operation Aurora; becomes the enterprise blueprint.
+- **— NIST SP 800-207** — First comprehensive government-endorsed ZTA framework.
+- **— Executive Order 14028** — Mandates Zero Trust for all US federal agencies.
+- **— CISA ZTMM v2.0** — Zero Trust Maturity Model across five pillars.
+- **Never Trust, Always Verify** — Every request is authenticated and continuously, contextually re-verified — not a one-time login.
+- **Least Privilege Access** — Access is scoped, time-limited, and contextual, shrinking the blast radius of any compromise.
+- **Assume Breach** — Design as if attackers are already inside: encrypt everything, segment, monitor, and plan recovery.
+- **Micro-Segmentation** — Divide the network into isolated segments — down to individual workloads — to contain lateral movement.
+- **Identity & Access Management (IAM)** — Identity — not network location — is the primary security boundary; SSO, RBAC, ABAC, risk-based auth.
+- **Multi-Factor Authentication (MFA)** — Two or more factors (know / have / are); mandatory for sensitive access; adaptive to risk.
+- **Zero Trust Network Access (ZTNA)** — Replaces VPNs — grants access to specific resources, not the whole network.
+- **Device Trust & EDR** — Verifies device health and compliance before access; EDR/MDM monitor and can quarantine endpoints.
+- **Data Security & Encryption** — Classify data; encrypt in transit (TLS/SSL) and at rest; DLP and attribute-based access control.
+- **SIEM & UEBA** — Aggregate and correlate logs; ML baselines behaviour and flags anomalies — the monitoring backbone.
+- **What Is a Quantum Computer?** — A quantum computer is a different computational paradigm, exploiting superposition, entanglement and interference. Where a classical bit is 0 or 1, a qubit can be both at once, so n qubits represent 2ⁿ states simultaneously.
+- **Analogy — The Maze** — A classical computer searches a maze one path at a time: hit a dead end, backtrack, try again. A quantum computer, through superposition, effectively evaluates many paths at once and converges exponentially faster.
+- **Mosca's Theorem — Quantifying the Urgency** — If (Migration Time) + (Data Secrecy Lifetime) > (Years until Q-Day), the organisation is already at risk. Applied to UNIUYO: a 7-year migration plus a 20-year record-confidentiality requirement = 27 years of protection needed against an ~8-year window.
+- **ML-KEM (FIPS 203)** — Primary KEM replacing RSA/Diffie-Hellman; from CRYSTALS-Kyber; ML-KEM-768 recommended; ~17× faster than ECDH on a Cortex-M0+ with 94% less energy; live by default in Google Chrome TLS 1.3
+- **ML-DSA (FIPS 204)** — Primary signature replacing ECDSA/RSA; from CRYSTALS-Dilithium; signatures 2,420–4,627 bytes (38–72× larger than ECDSA); rejection sampling causes variable signing latency
+- **SLH-DSA (FIPS 205)** — Stateless hash-based signature from SPHINCS+; the suite's insurance policy; very large signatures (7,856–49,856 bytes); for low-frequency, high-security signing
+- **Falcon (FIPS 206)** — Compact lattice (NTRU) signature ~666 bytes — best for DNS; hard to implement (constant-time floating-point) and the highest side-channel risk
+
 ### CYB 224 — Information and Big Data Security
 
 - URL: https://www.aretecyb.tech/courses/cyb-224
@@ -1188,6 +1523,66 @@ Big data fundamentals — characteristics, sources, platforms, and analytics —
 - SQL injection from this course connects directly to web security in UUY-CYB 222 — study them together
 - The cloud shared responsibility model is exam-critical: know clearly what the provider vs customer secures
 - Use OWASP resources on SQL injection and data security — they are free and authoritative
+
+**Lecture notes** (26 transcribed topics; full text needs a free account)
+
+1. Introduction to Big Data Security
+2. Operational and Analytical Big Data
+3. Big Data Skills
+4. Concepts of Big Data Security
+5. Artificial Intelligence and Big Data Security
+6. The Cyber Attacker's Economy
+7. Machine Learning for Data Security
+8. Supervised Learning for Data Security
+9. Practical Activities
+10. Unsupervised, Reinforcement and Deep Learning
+11. Detection and Mitigation of Threats in Big Data
+12. Machine Learning for Threat Detection in Big Data
+13. Exploratory Data Analysis (EDA) for Network Security
+14. Model Evaluation
+15. Different Libraries for Big Data Manipulation
+16. Practice Exercise of Exploratory Data Analysis for IDS Data Set
+17. Practical — SVM and KNN for Intrusion Detection
+18. Intrusion Detection Using Decision Tree (DT)
+19. Network Anomaly Detection (K-Means Clustering)
+20. The k-Nearest Neighbors (k-NN) Algorithm
+21. Anomaly Detection Using Pandas and Scikit-Learn Libraries
+22. Practical Illustration of Anomaly Detection in Customer Credit Card
+23. Security Management and Its Objectives
+24. The Security Design Process and the Security Management Life Cycle
+25. Information Security Policy, Principles and Methodologies
+26. Big Data Stages, Technologies and Adoption
+
+**Key concepts**
+
+- **Definition** — Big Data Security refers to the tools, policies, and measures used to protect large volumes of data from unauthorized access, breaches, and misuse throughout its lifecycle — from collection to processing and storage.
+- **M2M (Machine to Machine)** — data exchanged between connected devices
+- **People to Machine** — data generated through human interactions with technology
+- **Organisational Data** — data produced by businesses and institutions
+- **Operational Big Data** — Operational Big Data refers to real or nearly real-time data used to support daily business operations and decision making. It processes data immediately as it is generated, supports transactional systems, and requires fast processing.
+- **Analytical Big Data** — Analytical Big Data refers to historical and accumulated data used for analysis, forecasting, reporting, and strategic decision making. It focuses on past and current data, supports business intelligence, and is often stored in data warehouses.
+- **Technical Skills** — programming, database management, big data frameworks
+- **Analytical Skills** — data analysis, pattern recognition, statistical analysis
+- **Business Skills** — translating insights into actionable business strategies
+- **Communication Skills** — presenting findings clearly to non-technical audiences
+- **Problem Solving Skills** — using data-driven approaches to solve complex problems
+- **Programming** — ability to write code to manipulate and process data
+- **Database Skills** — MySQL, Oracle — querying and managing structured data
+- **Big Data Frameworks** — Hadoop, Spark, Kafka — large-scale data processing tools
+- **Data sources** — Records the university already holds: semester results and GPA history per course, lecture attendance registers, student-portal login and activity logs, library borrowing and e-resource access, JAMB and O-level entry scores, departmental and level enrolment figures, fee-payment timing, and student feedback or…
+- **Collection and storage** — Most of this starts on paper or in departmental spreadsheets, so the first tasks are digitising it and agreeing one student identifier that works across departments. Structured records go into a central data warehouse; feedback text and portal logs suit a data lake.
+- **Type of analytics** — All four, in order. Descriptive answers what happened — pass rates by course and level. Diagnostic asks why — which factors track with failure. Predictive identifies which students are likely to carry over a course while there is still time to act. Prescriptive recommends which intervention to offer whom
+- **Tools and technology** — Python with pandas for the analysis, PostgreSQL or MySQL for the warehouse, and Power BI or Excel for dashboards that deans will actually open. Hadoop and Spark are the fashionable answer and the wrong one here: a single university produces gigabytes, not petabytes, and one relational database server handles that…
+- **Benefits and challenges** — Benefits: at-risk students identified before they carry over a course, better lecturer and timetable allocation, and evidence to support accreditation. Challenges: incomplete and inconsistent records, no single student identifier across departments, staff with no analytics training, unreliable power and connectivity…
+- **Volume** — Protecting petabytes or exabytes of data requires security tools that can scale dynamically without creating processing bottlenecks.
+- **Velocity** — Data streams into systems in real-time (e.g., IoT sensors, network logs). Security mechanisms like encryption and threat detection must happen on the fly without causing latency.
+- **Variety** — Big Data includes structured SQL databases, semi-structured JSON files, and unstructured data like video, audio, and text. A one-size-fits-all security policy does not work here.
+- **Encryption in Transit** — Protecting data as it moves between nodes, clusters, or users (typically using TLS/SSL).
+- **Encryption at Rest** — Safeguarding data stored on disks using strong encryption standards (like AES-256).
+- **Data Masking & Tokenization** — Replacing sensitive data (like credit card numbers or PII) with realistic but fake data or tokens before it enters the analytics pipeline so data scientists can work with it safely.
+- **Role-Based Access Control (RBAC)** — Assigning permissions based on organizational roles.
+- **Attribute-Based Access Control (ABAC)** — A finer-grained approach where access is determined by contextual attributes (e.g., "Allow access only if the user is a Data Analyst AND the request comes from an internal IP during working hours").
+- **Node Authentication** — Ensuring that only authorized servers/nodes can join the computing cluster (often managed via Kerberos).
 
 ### DTS 224 — Statistical Inference and Modelling
 
@@ -1286,6 +1681,58 @@ Business thinking for technical students: entrepreneurship and intrapreneurship 
 - Nigeria's NITDA and other agencies offer technology grants — research them as part of your learning
 - This course matters for your career: many technology professionals eventually consult or freelance
 
+**Lecture notes** (18 transcribed topics; full text needs a free account)
+
+1. The Concept of Entrepreneurship
+2. Classification and Biographical Study of Entrepreneur
+3. Barriers and Critical Success Factors in Entrepreneurship
+4. Theories of Entrepreneurship
+5. Entrepreneurial Thinking and Creativity
+6. Innovations and Change Management
+7. Enterprise Formation, Partnership and Networking
+8. Forms of Business Ownership
+9. Business Plan and Feasibility Study
+10. Entrepreneurship Development in Nigeria
+11. Women Entrepreneurship
+12. Youth Entrepreneurship
+13. Entrepreneurship Support Institutions: Governmental
+14. Entrepreneurship Support Institutions: Non-Governmental
+15. E-Commerce and Entrepreneurship
+16. Entrepreneurship Regulations and Related Laws in Nigeria
+17. Technopreneurship
+18. Contemporary Issues in Entrepreneurship
+
+**Key concepts**
+
+- **Who is an “Entrepreneur?”** — An entrepreneur is an individual who identifies an opportunity and organizes the necessary resources to exploit it. This definition highlights two key aspects of entrepreneurship: opportunity recognition and resource mobilization.
+- **Creativity and Innovation** — The ability to think outside the box and develop new solutions to problems.
+- **Resilience and Perseverance** — The capacity to bounce back from failure and keep going in the face of obstacles.
+- **Self-Confidence** — A strong belief in one's abilities and the value of one's ideas.
+- **Vision** — The ability to see the big picture and anticipate future trends.
+- **Need for Achievement** — A strong drive to succeed and reach one's goals.
+- **The Concept and Meaning of Entrepreneurship** — Entrepreneurship is a multifaceted concept that can be understood from various perspectives. At its core, it is the process of creating value by bringing together a unique package of resources to exploit an opportunity.
+- **The Concept of Intrapreneurship** — Intrapreneurship, also known as corporate entrepreneurship, refers to the practice of fostering an entrepreneurial mindset and behaviors within an established organization. It involves encouraging employees to think and act like entrepreneurs, identifying and pursuing new opportunities that can drive growth and…
+- **Corporate Entrepreneurship Defined** — Corporate entrepreneurship is a broad term that encompasses a variety of activities aimed at fostering innovation and growth within an established firm. It can be defined as the process by which teams within an established company conceive, foster, launch and manage a new business that is distinct from the parent…
+- **Corporate Venturing** — This involves the creation of new businesses by an established firm. This can be done through internal corporate venturing, where the new business is developed within the company, or external corporate venturing, where the company invests in or partners with outside startups.
+- **Strategic Entrepreneurship** — This refers to a firm's efforts to achieve creativity and innovation in its strategic areas, such as its business model, product services, or served markets. It involves using entrepreneurial thinking to gain a competitive advantage and drive long-term growth.
+- **Entrepreneurial Mindset and Behaviours** — It is not a big idea alone that paves the path to ultimate entrepreneurial success; the mindset and behaviour of the "would-be" entrepreneur plays a crucial role. Entrepreneurs are often seen as innovators, risk-takers, and visionaries who create value and solve problems in the world, but what makes them different…
+- **Challenges in Developing an Entrepreneurial Mindset** — The mind is often regarded as the most powerful attribute and weapon every human has. Whatever we become is always attributed to the state of our mind. Thus, developing an enterprise is chiefly a function of the state of our mind and that is where the battle for life and success began.
+- **Overcoming the Fear of Failure** — One of the primary hurdles to fostering an entrepreneurial mindset is surmounting the fear of failure. Many individuals shy away from taking risks and initiating their ventures due to concerns about potential negative consequences.
+- **Cultivating Self-Confidence** — Entrepreneurs must possess unwavering self-confidence in their abilities to navigate the uncertainties of the business world. A lack of self-confidence can impede decision-making processes and create obstacles to pursuing new opportunities.
+- **Embracing Change** — Entrepreneurship is synonymous with change, innovation, and continuous learning. Those resistant to change may find it challenging to adapt to new situations and acquire the necessary skills for success.
+- **Managing Uncertainty** — The inherent uncertainty of entrepreneurship makes decision-making challenging without knowing the outcome. Developing a tolerance for uncertainty is crucial, requiring the ability to make informed decisions despite limited information.
+- **Financial Stability Concerns** — Commencing a new venture often involves financial risks, and the apprehension of financial instability can hinder the development of an entrepreneurial mindset. Mitigating these concerns involves careful financial planning, risk assessment, and a strategic approach to resource allocation.
+- **Building a Supportive Ecosystem** — Entrepreneurs thrive in supportive environments with access to resources like funding, mentorship, and networking opportunities. The absence of such support can hinder the development of necessary skills and knowledge for success.
+- **Balancing Work and Life** — Entrepreneurs often grapple with long working hours and challenges in maintaining a healthy work-life balance. Managing personal well-being and relationships while pursuing a new venture requires intentional efforts to prioritize self-care, set boundaries, and cultivate resilience amidst the demands of…
+- **Resilience to Criticism and Rejection** — Entrepreneurs frequently encounter criticism, rejection, and skepticism from others. Developing resilience and the ability to persevere despite criticism is crucial for success. Fortifying mental strength involves reframing criticism as constructive feedback, learning from setbacks, and maintaining a steadfast focus…
+- **Sustaining Motivation and Perseverance** — The entrepreneurial journey is a protracted and challenging endeavor. Sustaining motivation, focus, and perseverance is vital, especially during setbacks and obstacles. Entrepreneurs must cultivate a resilient mindset, set achievable milestones, and celebrate small victories to stay motivated on the path to long-term…
+- **Fostering Creative and Innovative Thinking** — Entrepreneurship demands creative problem-solving and innovative thinking. Developing these skills can be challenging, particularly for individuals with traditional educational or professional backgrounds.
+- **Rationale and Relevance of Entrepreneurship** — Entrepreneurship as we see has to do with the persistent of opportunity to create wealth through innovative creation of product or service that meets a need of customers, using scarce resources in any way that result in enterprise development and growth which satisfies the expectation of stakeholders whose roles…
+- **Creation of Employment** — It has been pointed out at various times and with varying degrees of emphasis that entrepreneurship creates employment for the teaming population of any nation. In Nigeria, for instance, it is documented that small and medium scale business, the catalyst of entrepreneurship employs about 30% of the entire labour force…
+- **Transformation of Traditional Industry** — Entrepreneurial activities help to transform the traditional sector thereby helping in the economic development of a nation. In one respect, it helps in modernizing the people's perception of life, and in another, it modernizes the traditional handicraft prevalent in the rural economies, by introducing the use of…
+- **Utilization of Resources** — Entrepreneurship helps to mobilize resources that would otherwise remain idle in the lands of people and employ them productively. By so doing, capital formation which is a vital engine of economic growth is encouraged.
+- **Better Standard of Living** — As a result of their numerous economic activities, entrepreneurship activities make large quantities of goods and services available to people. With increased supply of goods and services individual's demands increase as well. This increase in demand, in turn, results in a better standard of living for the people.
+
 ### INS 224 — Systems Analysis and Design
 
 - URL: https://www.aretecyb.tech/courses/ins-224
@@ -1317,6 +1764,67 @@ A structured approach to analysing information system needs and designing soluti
 - Use DRAW.IO (free, online) to practise system diagrams until speed and accuracy improve
 - Normalisation (1NF, 2NF, 3NF) has a logical pattern — understand it conceptually before memorising rules
 - Relate everything to a real system you interact with (a bank app, university portal) to aid understanding
+
+**Lecture notes** (27 transcribed topics; full text needs a free account)
+
+1. Introduction to Systems Analysis and Design
+2. Feasibility Study in Systems Analysis and Design
+3. The Software Development Life Cycle (SDLC)
+4. Software Development Life Cycle Models — Overview
+5. The Waterfall Model
+6. The V-Model
+7. Iterative Models
+8. The Incremental Model
+9. Evolutionary Process Models
+10. The Spiral Model
+11. The Prototyping Model
+12. The Agile Model
+13. Comparison of SDLC Models
+14. Requirement Analysis
+15. System Modeling Overview & Structured Analysis
+16. Data Flow Diagrams (DFD)
+17. Business Process Modeling Notation (BPMN)
+18. Entity Relationship Diagrams (ERD)
+19. Decision Tables and Decision Trees
+20. Introduction to UML
+21. Use Case Diagrams
+22. Class Diagrams
+23. Sequence Diagrams
+24. Activity Diagrams
+25. State Chart Diagrams
+26. Component Diagrams
+27. Deployment Diagrams
+
+**Key concepts**
+
+- **Business to Consumer (B2C)** — a computerized system that facilitates the exchange of products, services, and information directly between businesses and individual consumers through the internet.
+- **Business to Business (B2B)** — a computerized information system that supports the exchange of information, products, services, and transactions between business organizations through the internet to improve operational efficiency and collaboration.
+- **Break-Even Analysis** — Determines when cumulative benefits equal cumulative costs.
+- **Return on Investment (ROI)** — Measures the financial return relative to the cost of investment.
+- **Net Present Value (NPV)** — Accounts for the time value of money when comparing future benefits against current costs.
+- **Payback Period** — Estimates how long before the investment is recovered.
+- **User acceptance** — The degree to which users willingly adopt and correctly use the system.
+- **Management support** — Projects without visible leadership endorsement often fail at the implementation stage.
+- **Training requirements** — Complex systems require substantial training investment.
+- **Impact on jobs** — Systems that threaten job security or significantly change job roles may face strong resistance.
+- **Data protection and privacy laws** — Systems that store or process personal data must comply with relevant legislation (e.g., Nigeria Data Protection Act 2023, GDPR for European-facing systems).
+- **Intellectual property** — Software components, databases, or algorithms used in the system must be properly licensed.
+- **Industry-specific regulations** — Financial systems must comply with banking regulations; healthcare systems must meet patient confidentiality standards.
+- **Contract obligations** — Existing vendor contracts may restrict the ability to switch platforms or integrate third-party tools.
+- **Employment law** — Systems that monitor employee activity (e.g., keystroke logging) may face legal scrutiny.
+- **Gantt Charts** — Bar charts that map tasks against a timeline, showing start and end dates and task dependencies.
+- **PERT (Programme Evaluation and Review Technique)** — Analyses task durations probabilistically to estimate overall project duration.
+- **Critical Path Method (CPM)** — Identifies the longest sequence of dependent tasks that determines the minimum project duration.
+- **Technical feasibility** — Does the required technology exist? Does the team have the skills?
+- **Economic feasibility** — Will the benefits justify the costs? What is the expected return on investment (ROI)?
+- **Operational feasibility** — Will the intended users accept and use the system?
+- **Legal/ethical feasibility** — Are there regulatory or ethical constraints?
+- **Functional Requirements** — This is what the system does, its behaviours, features, and functions. For example, "The system shall allow users to reset their password via email."
+- **Non-Functional Requirements** — Non-functional requirements encompass performance, security, reliability, scalability, usability, and maintainability, among others. This tells how well the system performs, using quality attributes. For example, "The system shall respond to any user request within 2 seconds under normal load."
+- **Interviews** — One-on-one discussions with users, managers, or domain experts.
+- **Surveys and questionnaires** — Useful when stakeholders are numerous or geographically dispersed.
+- **Observation (ethnographic study)** — Watching users perform their current tasks to understand workflows and pain points.
+- **Workshops and focus groups** — Bringing multiple stakeholders together to collaboratively define needs.
 
 ### MTH 223 — Introduction to Numerical Analysis
 
@@ -1381,6 +1889,61 @@ Practical network security: identification/authentication/authorization, threat 
 - Know the difference between IDS (detect only) and IPS (detect + block) — exam-critical
 - Relate every defence mechanism to a specific attack from UUY-CYB 212 — show the attack/defence pairing
 
+**Lecture notes** (21 transcribed topics; full text needs a free account)
+
+1. Threats, Vulnerabilities and the CIA Triad
+2. Malware, Hardware Attacks and Threat Categories
+3. Firewalls
+4. Network Foundations: OSI, TCP/IP and Connection Setup
+5. Classical Network Attacks
+6. Encryption Controls and Virtual Private Networks
+7. Secure Protocols: SSH and TLS
+8. IP Security (IPSec)
+9. Kerberos Authentication and Mobile Device Security
+10. Practical 1: Strings, Files and Basic Network Communication
+11. Practical 2: Basic Encryption and Decryption Algorithms
+12. Practical 3: Cryptography Challenge — Hybrid Security
+13. Practical 4: Detecting File Tampering and Credential Integrity
+14. Practical 5: Client-Server Application and Socket Programming
+15. Practical 6: Live Packet Analysis
+16. Practical 7: Creating a Web Scraper to Gather Data from Websites
+17. Practical 8: Simple Penetration Testing Tasks
+18. Practical 9: Scripts for Basic Static Malware Analysis
+19. Practical 10: Intrusion Detection and Traffic Monitoring
+20. Practical 11: Threat Detection
+21. Practical 12: Firewall Screening of Incoming and Outgoing Packets
+
+**Key concepts**
+
+- **Classification of Threats** — A cyber-attack is an exploitation of computer systems and networks. It uses malicious code to alter computer code, logic or data and lead to cybercrimes, such as information and identity theft.
+- **Injection attacks** — It is the attack in which some data will be injected into a web application to manipulate the application and fetch the required information. Example- SQL Injection, code Injection, log Injection, XML Injection etc.
+- **DNS Spoofing** — DNS Spoofing is a type of computer security hacking. Whereby a data is introduced into a DNS resolver’s cache causing the name server to return an incorrect IP address, diverting traffic to the attacker’s computer or any other computer.
+- **Session Hijacking** — It is a security attack on a user session over a protected network. Web applications create cookies to store the state and user sessions. By stealing the cookies, an attacker can have access to all of the user data.
+- **Phishing** — Phishing is a type of attack which attempts to steal sensitive information like user login credentials and credit card number. It occurs when an attacker is masquerading as a trustworthy entity in electronic communication.
+- **Brute force** — It is a type of attack which uses a trial-and-error method. This attack generates a large number of guesses and validates them to obtain actual data like user password and personal identification number.
+- **Denial of Service** — It is an attack which meant to make a server or network resource unavailable to the users. It accomplishes this by flooding the target with traffic or sending it information that triggers a crash. It uses the single system and single internet connection to attack a server. It can be classified into the following-
+- **Dictionary attacks** — This type of attack stored the list of a commonly used password and validated them to get original password.
+- **URL Interpretation** — It is a type of attack where we can change the certain parts of a URL, and one can make a web server to deliver web pages for which he is not authorized to browse.
+- **File Inclusion attacks** — It is a type of attack that allows an attacker to access unauthorized or essential files which is available on the web server or to execute malicious files on the web server by making use of the include functionality.
+- **Man in the middle attacks** — It is a type of attack that allows an attacker to intercepts the connection between client and server and acts as a bridge between them. Due to this, an attacker will be able to read, insert and modify the data in the intercepted connection.
+- **Virus** — It is a type of malicious software program that spread throughout the computer files without the knowledge of a user. It is a self-replicating malicious computer program that replicates by inserting copies of itself into other computer programs when executed.
+- **Worm** — It is a type of malware whose primary function is to replicate itself to spread to uninfected computers. It works same as the computer virus. Worms often originate from email attachments that appear to be from trusted senders.
+- **Trojan horse** — It is a malicious program that occurs unexpected changes to computer setting and unusual activity, even when the computer should be idle. It misleads the user of its true intent. It appears to be a normal application but when opened/executed some malicious code will run in the background.
+- **Backdoors** — It is a method that bypasses the normal authentication process. A developer may create a backdoor so that an application or operating system can be accessed for troubleshooting or other purposes.
+- **Bots** — A bot (short for "robot") is an automated process that interacts with other network services. Some bots program run automatically, while others only execute commands when they receive specific input. Common examples of bots program are the crawler, chatroom bots, and malicious bots.
+- **The 7 Layers of Cyber Security** — The 7 layers of cyber security should Centre on the mission critical assets you are seeking to protect.
+- **Vulnerability, Threat, Harmful Acts** — As the recent epidemic of data breaches illustrates, no system is immune to attacks. Any company that manages, transmits, stores, or otherwise handles data has to institute and enforce mechanisms to monitor their cyber environment, identify vulnerabilities, and close up security holes as quickly as possible.
+- **CIA Triad** — The CIA Triad is actually a security model that has been developed to help people think about various parts of IT security.
+- **Assets and Threat** — What is an Asset: An asset is any data, device or other component of an organization’s systems that is valuable – often because it contains sensitive data or can be used to access such information.
+- **Types of Cyber-Attacker Actions** — Active attacks: An active attack is a network exploit in which a hacker attempts to make changes to data on the target or data en route to the target.
+- **Masquerade** — in this attack, the intruder pretends to be a particular user of a system to gain access or to gain greater privileges than they are authorized for. A masquerade may be attempted through the use of stolen login IDs and passwords, through finding security gaps in programs or through bypassing the authentication…
+- **Session replay** — In this type of attack, a hacker steals an authorized user’s log in information by stealing the session ID. The intruder gains access and the ability to do anything the authorized user can do on the website.
+- **Message modification** — In this attack, an intruder alters packet header addresses to direct a message to a different destination or modify the data on a target machine.
+- **Denial of service (DoS)** — In a denial of service (DoS) attack, users are deprived of access to a network or web resource. This is generally accomplished by overwhelming the target with more traffic than it can handle.
+- **Distributed denial-of-service (DDoS)** — In a distributed denial-of-service (DDoS) exploit, large numbers of compromised systems (sometimes called a botnet or zombie army) attack a single target.
+- **Eavesdropping (tapping)** — the attacker simply listens to messages exchanged by two entities. For the attack to be useful, the traffic must not be encrypted. Any unencrypted information, such as a password sent in response to an HTTP request, may be retrieved by the attacker.
+- **Traffic analysis** — the attacker looks at the metadata transmitted in traffic in order to deduce information relating to the exchange and the participating entities, e.g. the form of the exchanged traffic (rate, duration, etc.).
+
 ### UUY-CYB 222 — Web and Mobile Applications Security
 
 - URL: https://www.aretecyb.tech/courses/uuy-cyb-222
@@ -1412,6 +1975,53 @@ Attacking and defending web and mobile applications. Covers the OWASP Top 10 in 
 - DVWA (Damn Vulnerable Web Application) is a free practice target you can run locally
 - For every vulnerability, know: how it works, how to exploit it, and how to fix it
 - Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies
+
+**Lecture notes** (13 transcribed topics; full text needs a free account)
+
+1. Foundations: Web & Mobile Applications
+2. Impact of the Internet & Web Applications on Business
+3. Principles & Strategies for Secure Design
+4. Mobile Threats & Secure Development Practices
+5. Mobile Platform Security Models — iOS vs Android
+6. Mobile Bearer Layers — WAP, Bluetooth, SMS/MMS & Location
+7. Risks & Threats
+8. Website Attacks
+9. Strengths, Weaknesses & Best Practice
+10. Audit, Compliance & Quality Assurance
+11. Web Application Security & the Security Lifecycle
+12. The OWASP Top 10 — Ranking Web Application Risk
+13. Exam Focus — The Lecturer’s Guaranteed Questions
+
+**Key concepts**
+
+- **Web Application** — A web application is software controlled by a centralized server and accessed through browsers with an internet connection. Web apps use a combination of server-side (e.g. PHP, ASP.NET) and client-side (HTML, CSS) scripts to process and present data to the user.
+- **Mobile Application** — A mobile application is software installed directly on a user’s device (iOS or Android), designed to run on a mobile device or tablet. Some mobile apps can also be accessed via an internet connection and a web browser.
+- **E-commerce** — E-commerce refers to markets enabled by the internet — the buying and selling of goods and services online.
+- **Teleconferencing & Remote Collaboration** — Teleconferencing is the use of digital technology to communicate between businesses or individuals located in different geographical areas.
+- **Audio Conferencing** — communication by voice only, with no video — e.g. a conference phone call
+- **Video Conferencing** — participants see and hear each other in real time — e.g. Zoom or Google Meet
+- **Web Conferencing** — online meetings that add shared screens, slides and documents to the call
+- **Hybrid Conferencing** — combines in-person and remote participants in the same meeting
+- **Marketing, Advertising & Customer Engagement** — The internet lets businesses reach and engage customers directly, and much of it is powered by tracking. When a cookie is dropped on a platform, it records that a person searched for a particular item — which lets the business show that person targeted adverts later.
+- **Supply Chain & Logistics** — Logistics and supply chain management benefit significantly from internet connectivity and web applications, which coordinate the flow of goods, information and resources.
+- **Recreational / “for fun”** — curiosity or a technical challenge, without intent to cause damage
+- **Fame** — the desire for recognition within a hacking community
+- **Activism (“hacktivism”)** — pursuing a political, social, or ideological cause
+- **Financial gain** — the most common driver of serious cybercrime — fraud, extortion, data resale
+- **Coercion** — an individual is forced or blackmailed into compromising a system
+- **Destruction** — intent to disrupt, delete, or disable systems and data
+- **Espionage** — gathering confidential information for competitive, corporate, or state advantage
+- **Hobbyists** — informal, curiosity-driven individuals, often with limited resources
+- **Government & law-enforcement agencies** — acting under legal authority, though their tools and techniques mirror those of attackers
+- **Activists** — acting in pursuit of a cause rather than personal gain
+- **Cyberterrorists** — seeking to cause fear, disruption, or harm at scale
+- **Criminal actors** — organized groups pursuing financial gain
+- **Insiders** — employees or contractors who already hold legitimate access, making them uniquely positioned to cause damage
+- **AI-augmented hackers** — an emerging category using automated and AI-assisted tools to scale reconnaissance and attacks
+- **Authentication vs Authorization** — Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information.
+- **Password Security & Creation** — Password policy is the most basic layer of access control, and it should be enforced at the point a user or account is created, not applied after the fact.
+- **Two-Factor Authentication (2FA)** — 2FA adds a second, independently generated credential on top of the known password. During registration the system collects an alternative contact point — typically a phone number or email address — and at login it sends a one-time code (commonly 4–8 digits) to that channel.
+- **Three-Factor Authentication (3FA)** — 3FA requires evidence from three independent categories of proof, not merely three steps or three devices. The three factors are: something you know — a password, PIN or passphrase; something you have — a phone, hardware token or smart card; and something you are — a fingerprint, face or iris.
 
 ### UUY-DTS 224 — Programming in Data Science
 

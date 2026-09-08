@@ -17,6 +17,7 @@
 import { departments, DEFAULT_DEPARTMENT, YEAR_LEVELS } from './departments';
 import { noteTopicCount } from './lectureNotes/index.js';
 import { SITE_URL, SITE_NAME, INSTITUTION, homeTitle, homeDescription } from './siteMeta';
+import { clip } from '../utils/text.js';
 
 // Re-exported so every existing caller keeps importing them from here. They are
 // defined in siteMeta.js, a leaf module, so usePageTitle can read the home
@@ -90,20 +91,6 @@ export function courseOfferings(course) {
 }
 
 const SEMESTERS = { 1: 'First Semester', 2: 'Second Semester' };
-
-// Truncate on a boundary a reader would choose. A bare .slice() cuts mid-word,
-// and a description that ends "...access control mecha" is quoted back verbatim
-// by an answer engine — the one place the text is guaranteed to be read aloud
-// is the place it must not be broken. Prefers the last sentence end in the back
-// two-fifths of the budget, falls back to the last word plus an ellipsis.
-function clip(text, max) {
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max);
-  const sentence = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '));
-  if (sentence > max * 0.6) return cut.slice(0, sentence + 1);
-  const space = cut.lastIndexOf(' ');
-  return `${cut.slice(0, space > 0 ? space : max).replace(/[\s,;:—-]+$/, '')}…`;
-}
 
 // `<title>` for a course page. Front-loaded with the course code because that
 // is what students actually type into Google ("cyb 224 uniuyo"), and kept near
