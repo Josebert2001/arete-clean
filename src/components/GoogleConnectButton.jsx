@@ -5,9 +5,13 @@ import { useGoogleConnection } from './useGoogleConnection';
 // Small reusable "Connect Google" / "Google connected" control, shared by the
 // Planner (Calendar sync) and Course Materials (Drive import) entry points.
 export default function GoogleConnectButton({ returnTo, className = '' }) {
-  const { connected, configured, loading, connect, disconnect } = useGoogleConnection();
+  const { connected, configured, loading, statusError, connect, disconnect } = useGoogleConnection();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
+  // An action's own failure is the more urgent message; otherwise explain why
+  // the connection state on screen may be stale (see useGoogleConnection).
+  const error = localError || statusError;
+  const setError = setLocalError;
 
   if (!configured) return null;
   if (loading) {

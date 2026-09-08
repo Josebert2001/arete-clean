@@ -4,7 +4,7 @@
 //  redirects their browser to it, and lands back on api/google/callback.js.
 // ============================================================================
 
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from '../_lib/request-policy.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
 import { createOAuth2Client, googleConfigured, signState, GOOGLE_SCOPES } from '../_lib/googleAuth.js';
 
@@ -19,7 +19,20 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // Availability probe — lets the UI show the unconfigured state on page load,
+  // before the student has done anything, so it deliberately skips auth and the
+  // per-endpoint budget. Cheap, but not free: it shares the generous cross-
+  // endpoint bucket rather than being an uncounted endpoint anyone can hammer.
+  // See PROBE_RATE_LIMIT, and the same guard in explainer.js / research.js /
+  // simplify.js — this handler was the one probe path still missing it.
   if (req.body?.probe) {
+    const probeLimit = enforceRateLimit(req, PROBE_RATE_LIMIT);
+    setRateLimitHeaders(res, probeLimit);
+    if (!probeLimit.allowed) {
+      logRequest(req, 'google-connect', { denied: 'probe_rate_limit' });
+      res.setHeader('Retry-After', String(probeLimit.retryAfterSeconds));
+      return res.status(429).json({ error: 'Too many requests.' });
+    }
     return res.status(200).json({ configured: googleConfigured() });
   }
 

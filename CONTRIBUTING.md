@@ -94,7 +94,7 @@ with what to look at:
 
 | File | Look for |
 |------|----------|
-| `api/_lib/request-policy.js` | IP rate limiting + CORS. Store is in-memory per cold start (resets on redeploy/scale). `getClientIp` trusts `x-forwarded-for` — is that spoofable behind Vercel? Is `ALLOWED_ORIGIN` actually enforced, or just echoed? |
+| `api/_lib/request-policy.js` | IP rate limiting + CORS. The per-IP store is in-memory per cold start (resets on redeploy/scale) — the binding budget is the per-user Postgres one. `getClientIp` prefers Vercel's own `x-vercel-forwarded-for` over the client-suppliable `x-forwarded-for`. `ALLOWED_ORIGIN` is **echoed, not enforced**: it is an ACAO read-gate for browsers, never a CSRF or non-browser defence — treat every endpoint as directly reachable and rely on the bearer-token check. Unset means no ACAO header at all (fail closed). |
 | `api/_lib/supabase.js` | Bearer-token → user resolution. Confirm RLS actually applies and no path uses the service-role key. |
 | `api/run.js` | JDoodle proxy. Input validation (size caps exist), but: can a payload reach JDoodle that shouldn't? Any way to leak credit/usage info? |
 | `api/tutor.js` | Groq streaming tutor with tools (`getStudentProgress`, `getCourseOutline`, `getModuleDetail`). **Prompt injection** — user input flows into the model; can a student make the tutor leak another student's progress or call tools out of scope? |
