@@ -94,11 +94,10 @@ async function simplify(chain, text, setting) {
     chain,
     system: SYSTEM_PROMPT,
     prompt: `${setting ? `Course context: ${setting}\n\n` : ''}Lecture-note excerpt:\n\n${text}`,
+    // Keep in step with api/simplify.js; the Gemini thinking cap now comes from
+    // the chain entries in model.js, so it cannot drift from the endpoint.
     maxOutputTokens: 1400,
     temperature: 0.4,
-    // Keep in step with api/simplify.js — Gemini 3.5 Flash otherwise spends
-    // hidden thinking out of this same budget and truncates the rewrite.
-    providerOptions: { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
   });
   if (outcome.text) return outcome.text;
   throw outcome.error ?? new Error('no text returned');

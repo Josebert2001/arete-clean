@@ -139,12 +139,6 @@ export default async function handler(req, res) {
       // Low temperature keeps the rewrite faithful ("simplify, don't expand");
       // applied to Groq/OpenRouter only, never to Gemini (see model.js).
       temperature: 0.4,
-      // Gemini 3.x is NOT capped by default and spends hidden thinking out of
-      // this same budget — with only 1400 tokens to work with, that leaves too
-      // little for the visible rewrite and produces answers that cut off
-      // mid-bullet. Same fix as explainer.js: this is a plain-English rewrite,
-      // not multi-step reasoning.
-      providerOptions: { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
     });
 
     if (outcome.text) {
