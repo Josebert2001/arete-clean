@@ -51,6 +51,7 @@ export default function Navbar() {
     { to: '/courses', label: 'Courses' },
     { to: '/lab', label: 'Code Lab', also: ['/tracks', '/install', '/explainer', '/cheatsheet'] },
     { to: '/tutor', label: 'AI Tutor' },
+    { to: '/campus-map', label: 'Campus Map' },
   ];
 
   const isLinkActive = (link, isActive) =>
