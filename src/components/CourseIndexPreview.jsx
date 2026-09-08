@@ -35,8 +35,12 @@ export default function CourseIndexPreview({ groups = [] }) {
         </a>
       </header>
 
+      {/* id, not a ?level= query: the level breadcrumb on every course page
+          points here, and a fragment resolves inside the bytes that were
+          actually sent — a query string promises a filtered page the static
+          file cannot produce. */}
       {groups.map((group) => (
-        <section key={group.level} className="mb-10">
+        <section key={group.level} id={`level-${group.level}`} className="mb-10">
           <div className="flex items-center gap-2.5 mb-4">
             <GraduationCap size={16} className="text-ember-500" />
             <h2 className="display-heading text-xl text-ink">

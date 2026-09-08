@@ -16,10 +16,12 @@
 
 import { departments, DEFAULT_DEPARTMENT, YEAR_LEVELS } from './departments';
 import { noteTopicCount } from './lectureNotes/index.js';
+import { SITE_URL, SITE_NAME, INSTITUTION, homeTitle, homeDescription } from './siteMeta';
 
-export const SITE_URL = 'https://www.aretecyb.tech';
-export const SITE_NAME = 'Areté';
-export const INSTITUTION = 'University of Uyo';
+// Re-exported so every existing caller keeps importing them from here. They are
+// defined in siteMeta.js, a leaf module, so usePageTitle can read the home
+// title without pulling this file's registries in — see the note there.
+export { SITE_URL, SITE_NAME, INSTITUTION, homeTitle, homeDescription };
 
 // Order matters: the first department carrying a slug owns its public page.
 // The shared foundation courses (GST/MTH/PHY/…) appear in both authored
@@ -89,11 +91,40 @@ export function courseOfferings(course) {
 
 const SEMESTERS = { 1: 'First Semester', 2: 'Second Semester' };
 
+// Truncate on a boundary a reader would choose. A bare .slice() cuts mid-word,
+// and a description that ends "...access control mecha" is quoted back verbatim
+// by an answer engine — the one place the text is guaranteed to be read aloud
+// is the place it must not be broken. Prefers the last sentence end in the back
+// two-fifths of the budget, falls back to the last word plus an ellipsis.
+function clip(text, max) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const sentence = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '));
+  if (sentence > max * 0.6) return cut.slice(0, sentence + 1);
+  const space = cut.lastIndexOf(' ');
+  return `${cut.slice(0, space > 0 ? space : max).replace(/[\s,;:—-]+$/, '')}…`;
+}
+
 // `<title>` for a course page. Front-loaded with the course code because that
 // is what students actually type into Google ("cyb 224 uniuyo"), and kept near
 // 60 characters so it survives the search-result truncation.
 export function courseTitle(course) {
   return `${course.code} — ${course.title} · ${INSTITUTION}`;
+}
+
+// The one-sentence factual answer to "what is this course", assembled from the
+// fields rather than prose. Answer engines extract a definition and cite the
+// page it came from; a page that opens with a sign-in pitch gives them nothing
+// to lift, so this sentence leads both the visible page and the first FAQ.
+export function courseSummary(course) {
+  const semester = SEMESTERS[course.semester];
+  const parts = [
+    `${course.code} (${course.title}) is a ${course.units}-unit,`,
+    `${course.level} Level course`,
+    semester ? `taught in the ${semester}` : null,
+    `at the ${INSTITUTION}, Akwa Ibom State, Nigeria.`,
+  ].filter(Boolean);
+  return parts.join(' ');
 }
 
 export function courseDescription(course) {
@@ -103,7 +134,7 @@ export function courseDescription(course) {
     ? ` Course outline, ${offerings.slice(0, 3).join(', ')}.`
     : ` Full course outline, recommended textbooks and study tips.`;
   const body = course.description ? ` ${course.description}` : '';
-  return `${lead}${detail}${body}`.replace(/\s+/g, ' ').trim().slice(0, 300);
+  return clip(`${lead}${detail}${body}`.replace(/\s+/g, ' ').trim(), 300);
 }
 
 export function courseUrl(slug) {
@@ -126,24 +157,183 @@ export function indexDescription(count) {
   );
 }
 
+// ─── Head text for the two other prerendered pages ──────────────────────────
+// Same reason these live here as the course versions: scripts/prerender.mjs
+// writes them into the bytes and the page re-applies them after a client-side
+// navigation. Two copies of the string is how they drift.
+
+export function installTitle() {
+  return `Install Java, Python & C — setup guides · ${SITE_NAME}`;
+}
+
+export function installDescription() {
+  return (
+    `Step-by-step setup guides for ${INSTITUTION} students: JDK 17 and Apache NetBeans for the ` +
+    `COS 211/221 Java labs, Anaconda and JupyterLab for Python, and GCC via MSYS2 for C — with ` +
+    `verification steps and the errors that actually come up.`
+  );
+}
+
+// ─── FAQ ────────────────────────────────────────────────────────────────────
+// Answer engines build a reply out of Question/Answer pairs before they build
+// one out of prose, and Google requires an FAQPage block's content to be
+// visible on the page — so these are rendered by CoursePreview/HomePreview and
+// serialised into JSON-LD from the same array. One source, never two.
+
+export function faqJsonLd(items) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  };
+}
+
+// Every answer here is derived from catalogue fields, so a newly authored note
+// file or textbook list shows up with no extra writing — and nothing can claim
+// something the course data does not actually say.
+export function courseFaqs(course) {
+  const items = [
+    {
+      q: `What is ${course.code} at the ${INSTITUTION}?`,
+      a: course.description ? `${courseSummary(course)} ${course.description}` : courseSummary(course),
+    },
+  ];
+
+  if (course.topics?.length) {
+    items.push({
+      q: `What topics are covered in ${course.code}?`,
+      a:
+        `The ${course.code} outline covers ${course.topics.length} topics: ` +
+        `${course.topics.join('; ')}.`,
+    });
+  }
+
+  if (course.textbooks?.length) {
+    items.push({
+      q: `What textbooks are recommended for ${course.code}?`,
+      a:
+        `Recommended reading for ${course.code}: ` +
+        course.textbooks
+          .map((b) => (b.authors ? `${b.title} by ${b.authors}` : b.title))
+          .join('; ') +
+        '.',
+    });
+  }
+
+  if (course.studyTips?.length) {
+    items.push({
+      q: `How do I pass ${course.code}?`,
+      a: course.studyTips.join(' '),
+    });
+  }
+
+  const offerings = courseOfferings(course);
+  if (offerings.length) {
+    items.push({
+      q: `Where can I find ${course.code} lecture notes and past questions?`,
+      a:
+        `Areté (${courseUrl(course.slug)}) carries ${offerings.join(', ')} for ${course.code}, ` +
+        `plus an AI tutor that has read the outline. It is free for ${INSTITUTION} students — ` +
+        `sign in with your email, no password.`,
+    });
+  }
+
+  return items;
+}
+
+export function courseFaqJsonLd(course) {
+  return faqJsonLd(courseFaqs(course));
+}
+
+// The site-level questions, for the home page. Deliberately the questions a
+// student actually asks a chatbot — "is there a site with UniUyo course notes",
+// "is it free" — rather than the ones a brochure answers.
+export const SITE_FAQS = [
+  {
+    q: 'What is Areté?',
+    a:
+      `Areté is a free web app for ${INSTITUTION} undergraduates in Akwa Ibom State, Nigeria. ` +
+      `It carries the outline, recommended textbooks and study tips for every course from ` +
+      `100 Level to Final Year, transcribed lecture notes and past-paper practice for a growing ` +
+      `set of courses, interactive Java, Python and C tracks, a hands-on capture-the-flag ` +
+      `security track, and an AI tutor that has read the curriculum.`,
+  },
+  {
+    q: `Which ${INSTITUTION} departments does Areté cover?`,
+    a:
+      `Cybersecurity and Data Science have fully authored catalogues. Students in any other ` +
+      `department sign up in foundation mode and get the shared GST, MTH, PHY, STA, COS, CSC, ` +
+      `ENT and INS courses every programme takes, plus all four programming tracks. Departments ` +
+      `are added based on which ones students actually sign up from.`,
+  },
+  {
+    q: 'Is Areté free?',
+    a:
+      `Yes. Areté is free for ${INSTITUTION} students. Sign in with your university or personal ` +
+      `email — a one-time code is sent to you, there is no password and no payment.`,
+  },
+  {
+    q: 'Do I need an account to read a course outline?',
+    a:
+      `No. Every course outline, its recommended textbooks and its study tips are public at ` +
+      `${SITE_URL}/courses. An account is only needed for the lecture notes, the question banks, ` +
+      `the AI tutor and progress tracking.`,
+  },
+  {
+    q: 'What programming languages does Areté teach?',
+    a:
+      `Java (13 modules, matching the COS 211 and COS 221 NetBeans labs), Python (12 modules), ` +
+      `and C (12 modules) — each with theory, annotated code, an in-browser playground, quizzes ` +
+      `and a mini project. A twelve-room security track teaches capture-the-flag skills: the CIA ` +
+      `triad, cryptography, SQL injection, the Linux command line, digital forensics and network ` +
+      `defence.`,
+  },
+];
+
+export function siteFaqJsonLd() {
+  return faqJsonLd(SITE_FAQS);
+}
+
+// ─── Structured data ────────────────────────────────────────────────────────
+
 // schema.org Course. `hasCourseInstance` is not decoration — Google's Course
 // rich result requires it, and drops the whole block without it.
-export function courseJsonLd(course, department) {
+//
+// `dateModified` is passed in rather than read from a clock: it is the build
+// stamp, supplied by scripts/prerender.mjs so that every page in one deploy
+// agrees with that deploy's sitemap `lastmod`. Omitted on the client, where
+// there is no build to date.
+export function courseJsonLd(course, department, { dateModified } = {}) {
   const weeklyHours = Math.round(((course.lh || 0) + (course.ph || 0)) / 15) || 1;
   return {
     '@context': 'https://schema.org',
     '@type': 'Course',
     name: `${course.code} — ${course.title}`,
     description: course.description || courseDescription(course),
+    abstract: courseSummary(course),
     courseCode: course.code,
     url: courseUrl(course.slug),
     inLanguage: 'en',
     educationalLevel: `${course.level} Level`,
     teaches: course.topics || undefined,
+    numberOfCredits: course.units || undefined,
+    dateModified: dateModified || undefined,
+    isAccessibleForFree: true,
     provider: {
       '@type': 'CollegeOrUniversity',
       name: INSTITUTION,
-      sameAs: 'https://www.uniuyo.edu.ng/',
+      // Q7896523 is the university itself — checked against the Wikidata search
+      // API, not inferred. A sameAs pointing at the wrong entity does not fail
+      // validation; it just teaches every engine the wrong fact.
+      sameAs: [
+        'https://www.uniuyo.edu.ng/',
+        'https://en.wikipedia.org/wiki/University_of_Uyo',
+        'https://www.wikidata.org/wiki/Q7896523',
+      ],
     },
     publisher: {
       '@type': 'Organization',
@@ -160,11 +350,15 @@ export function courseJsonLd(course, department) {
   };
 }
 
+// The level crumb points at an anchor on /courses, not at /courses?level=200.
+// The query form promises a filtered view, and the no-JS fetch an answer engine
+// makes returns the unfiltered hub — the crumb described bytes that were never
+// sent. CourseIndexPreview gives each level section a matching id.
 export function courseBreadcrumbJsonLd(course) {
   const crumbs = [
     { name: 'Areté', item: `${SITE_URL}/` },
     { name: 'Courses', item: `${SITE_URL}/courses` },
-    { name: `${course.level} Level`, item: `${SITE_URL}/courses?level=${course.level}` },
+    { name: `${course.level} Level`, item: `${SITE_URL}/courses#level-${course.level}` },
     { name: course.code, item: courseUrl(course.slug) },
   ];
   return {

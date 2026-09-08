@@ -53,27 +53,87 @@
     {
       "@context": "https://schema.org",
       "@type": "EducationalOrganization",
+      "@id": "https://www.aretecyb.tech/#organization",
       "name": "Areté",
-      "alternateName": "Arete UniUyo",
+      "alternateName": ["Arete", "Arete UniUyo", "Areté UniUyo"],
       "url": "https://www.aretecyb.tech/",
       "logo": "https://www.aretecyb.tech/icon-512.png",
+      "image": "https://www.aretecyb.tech/og-image.png",
       "description": "Academic companion for University of Uyo students — course outlines, transcribed lecture notes, past-paper practice, interactive Java, Python and C tracks, and an AI tutor that knows the curriculum.",
-      "areaServed": { "@type": "Place", "name": "Uyo, Akwa Ibom, Nigeria" },
+      "knowsLanguage": "en",
+      "knowsAbout": [
+        "Cybersecurity",
+        "Data Science",
+        "Java programming",
+        "Python programming",
+        "C programming",
+        "Capture the flag",
+        "University of Uyo curriculum"
+      ],
+      "areaServed": { "@type": "AdministrativeArea", "name": "Akwa Ibom State, Nigeria" },
       "audience": {
         "@type": "EducationalAudience",
         "educationalRole": "student",
         "audienceType": "University of Uyo undergraduates"
-      }
+      },
+      "founder": { "@id": "https://www.aretecyb.tech/#author" },
+      "publisher": { "@id": "https://www.aretecyb.tech/#author" }
+    }
+    </script>
+    <!-- The institution as its own node rather than a nested blob, so the
+         sameAs links resolve Areté's subject to a real entity an engine already
+         knows. Q7896523 is the University of Uyo — verified against Wikidata,
+         not inferred from a name match. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollegeOrUniversity",
+      "@id": "https://www.uniuyo.edu.ng/#organization",
+      "name": "University of Uyo",
+      "alternateName": ["UniUyo", "Uniuyo"],
+      "url": "https://www.uniuyo.edu.ng/",
+      "sameAs": [
+        "https://en.wikipedia.org/wiki/University_of_Uyo",
+        "https://www.wikidata.org/wiki/Q7896523"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Uyo",
+        "addressRegion": "Akwa Ibom State",
+        "addressCountry": "NG"
+      },
+      "subOrganization": { "@id": "https://www.aretecyb.tech/#organization" }
+    }
+    </script>
+    <!-- E-E-A-T: who made this and on what authority. "JRsolvy" appeared only
+         in a meta tag, which is a string; this is an entity engines can attach
+         experience to. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": "https://www.aretecyb.tech/#author",
+      "name": "JRsolvy",
+      "url": "https://www.aretecyb.tech/",
+      "jobTitle": "Founder and author, Areté",
+      "description": "Builds and writes Areté — the course outlines, transcribed lecture notes and practice banks are authored from the University of Uyo curriculum and lecturers' own workbooks.",
+      "affiliation": { "@id": "https://www.uniuyo.edu.ng/#organization" },
+      "knowsAbout": ["Cybersecurity", "Data Science", "Java", "Python", "C", "University of Uyo curriculum"]
     }
     </script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
+      "@id": "https://www.aretecyb.tech/#website",
       "name": "Areté",
+      "alternateName": "Areté — University of Uyo academic companion",
       "url": "https://www.aretecyb.tech/",
       "inLanguage": "en",
-      "publisher": { "@type": "Organization", "name": "JRsolvy" }
+      "isAccessibleForFree": true,
+      "about": { "@id": "https://www.uniuyo.edu.ng/#organization" },
+      "publisher": { "@id": "https://www.aretecyb.tech/#organization" },
+      "author": { "@id": "https://www.aretecyb.tech/#author" }
     }
     </script>
   </head>

@@ -1,0 +1,2946 @@
+# Areté — academic companion for the University of Uyo
+
+> ἀρετή (ar-eh-TAY). A free study companion for University of Uyo undergraduates in Akwa Ibom State, Nigeria: the outline, recommended textbooks and study tips for all 95 courses from 100 Level to Final Year, transcribed lecture notes and past-paper practice for a growing set of them, interactive Java, Python and C tracks, a capture-the-flag security track, and an AI tutor that has read the curriculum.
+
+- Site: https://www.aretecyb.tech
+- Institution: University of Uyo (https://www.uniuyo.edu.ng/, https://www.wikidata.org/wiki/Q7896523)
+- Audience: 100 Level – 400 Level undergraduates
+- Departments with a fully authored catalogue: Cybersecurity, Data Science. Every other department gets the shared GST, MTH, PHY, STA, COS, CSC, ENT and INS courses.
+- Access: course outlines, textbooks and study tips are public. Lecture notes, question banks, the AI tutor and progress tracking need a free account (email code, no password).
+- Last generated: 2026-09-08
+
+
+## 100 Level
+
+### COS 111 — Introduction to Computing Sciences
+
+- URL: https://www.aretecyb.tech/courses/cos-111
+- 3 units · 100 Level · First Semester
+
+A broad survey of the computing field: hardware, software, human-ware, information processing, and the many specializations within computing. Lays the conceptual vocabulary and hands-on device familiarity for everything that follows in your degree.
+
+**Outline**
+
+1. Brief history of computing
+2. Basic components of a computer/computing device; input/output devices and peripherals
+3. Hardware, software and human-ware
+4. Diverse and growing computer/digital applications
+5. Information processing and its role in society
+6. The Internet: applications and impact on the world today
+7. Areas and specializations within the computing discipline; job specializations for computing professionals
+8. The future of computing
+9. Lab work: OS across desktops/laptops/tablets/phones, common applications, browsers, search engines, online resources
+
+**Recommended textbooks**
+
+- Introduction to Computers and Information Technology — Gary B. Shelly & Misty E. Vermaat
+- Computer Science: An Overview — J. Glenn Brookshear & Dennis Brylow
+
+**How to pass**
+
+- This is the course that sets the tone — learn number conversions until they are automatic
+- CrashCourse Computer Science on YouTube (free) covers most of this course in engaging 10-minute episodes
+- Harvard CS50 (free on edX) is the gold standard introduction to computing — bookmark it
+- Link every abstract concept to something physical: binary → two states of a switch/transistor
+
+### GST 111 — Communication in English
+
+- URL: https://www.aretecyb.tech/courses/gst-111
+- 2 units · 100 Level · First Semester
+
+Develops the English language skills required for academic and professional success: sound patterns, word classes, sentence construction, logical/critical reasoning, and writing craft. A foundation course that improves every other course you will take.
+
+**Outline**
+
+1. Sound patterns in English: vowels, consonants, phonetics and phonology
+2. Word classes: lexical and grammatical words, forms and usage
+3. Sentence types: structural, functional, simple and complex
+4. Grammar and usage: tense, mood, modality, and concord
+5. Logical and critical thinking: syllogism, inductive and deductive reasoning, analogy
+6. Ethical considerations, copyright rules and infringements
+7. Writing process: pre-writing, drafting, editing and proofreading; essays, CVs, reports
+8. Comprehension strategies and reading types
+9. ICT in modern language learning; public speaking and listening
+
+**Recommended textbooks**
+
+- Communicating in English — Aremo, Adetayo & Farinde
+- English Grammar in Use — Raymond Murphy
+
+**How to pass**
+
+- Do not treat GST courses as unimportant — writing skills affect your grades in every other course
+- Practice essay writing by timing yourself: 45 minutes per essay, as you will in the exam
+- Build vocabulary by reading one news article daily and noting unfamiliar words
+- Keep a small notebook of common grammar errors you make and review it weekly
+
+### MTH 111 — Elementary Mathematics I (Algebra and Trigonometry)
+
+- URL: https://www.aretecyb.tech/courses/mth-111
+- 2 units · 100 Level · First Semester
+
+Algebra and trigonometry for university-level computation: set theory, real and complex numbers, sequences and series, quadratic equations, and circular measure. Bridges secondary-school maths with the rigour needed for the programme.
+
+**Outline**
+
+1. Elementary set theory: subsets, union, intersection, complements, Venn diagrams
+2. Real numbers: integers, rational and irrational numbers, mathematical induction
+3. Real sequences and series
+4. Theory of quadratic equations and the binomial theorem
+5. Complex numbers: algebra of complex numbers, the Argand diagram
+6. De Moivre's theorem and nth roots of unity
+7. Circular measure and trigonometric functions of angles of any magnitude
+8. Addition and factor formulae
+
+**Recommended textbooks**
+
+- Engineering Mathematics — K.A. Stroud
+- Further Mathematics — Tuttuh-Adegun, Sivasubramaniam & Adegoke
+
+**How to pass**
+
+- Work at least 10 practice problems per topic — mathematics is only learnt by doing
+- Keep a formula sheet and update it every week; review before each lecture
+- Khan Academy is free and covers every topic in this course at the right level
+- Form a study group: explaining a solution to a classmate reveals whether you truly understand it
+
+### PHY 111 — General Physics I (Mechanics)
+
+- URL: https://www.aretecyb.tech/courses/phy-111
+- 2 units · 100 Level · First Semester
+
+Classical mechanics: vectors, kinematics, Newtonian dynamics, conservation principles, rotational motion, and gravitation. Builds the physical intuition that underpins electronics, networking signals, and the hardware concepts met in later computing courses.
+
+**Outline**
+
+1. Space, time, units and dimensions; vectors and scalars
+2. Differentiation of vectors: displacement, velocity, acceleration; kinematics
+3. Newton's laws of motion: inertial frames, impulse, momentum conservation
+4. Equations of motion and application of Newtonian mechanics
+5. Conservation principles: conservative forces, kinetic and potential energy
+6. System of particles, centre of mass, rotational motion and torque
+7. Angular momentum, polar coordinates, circular motion, moments of inertia
+8. Gravitation: Newton's Law of Gravitation, Kepler's Laws, escape velocity, satellite orbits
+
+**Recommended textbooks**
+
+- University Physics with Modern Physics — Young & Freedman
+- Fundamentals of Physics — Halliday, Resnick & Walker
+
+**How to pass**
+
+- Always draw a free-body diagram before attempting any mechanics problem
+- Learn units and dimensions first — dimensional analysis catches most errors
+- Connect physics concepts to real technology: waves → WiFi signals, thermodynamics → CPU cooling
+- Khan Academy Physics covers this entire course for free — use it alongside lectures
+
+### PHY 117 — General Practical Physics I
+
+- URL: https://www.aretecyb.tech/courses/phy-117
+- 1 unit · 100 Level · First Semester
+
+Laboratory practicals that accompany PHY 111. Quantitative measurement, treatment of measurement errors, and graphical analysis across mechanical, electrical, light, heat, and viscosity experiments. Develops precision, scientific method, and report-writing discipline.
+
+**Outline**
+
+1. Laboratory safety and quantitative measurement techniques
+2. Treatment of measurement errors
+3. Studies of meters and the oscilloscope
+4. Mechanical systems experiments
+5. Electrical and mechanical resonant systems
+6. Light, heat, and viscosity experiments
+7. Graphical analysis of experimental data
+8. Scientific report writing
+
+**Recommended textbooks**
+
+- Practical Physics — G.L. Squires
+- Experimental Physics — R.A. Dunlap
+
+**How to pass**
+
+- Take measurements three times and average them — always follow good experimental practice
+- Write up your lab report on the same day as the experiment while it is fresh in your memory
+- Show all calculations clearly — marks in practicals are awarded for method, not just the answer
+- Understand the theory behind each experiment before you arrive at the lab
+
+### STA 111 — Descriptive Statistics
+
+- URL: https://www.aretecyb.tech/courses/sta-111
+- 3 units · 100 Level · First Semester
+
+The language of data: types, sources, and methods of data collection; presentation, errors and approximations; and the core measures used to summarise a dataset. A foundation for every analysis task in research and data-driven decision-making.
+
+**Outline**
+
+1. Statistical data: types, sources and methods of collection
+2. Presentation of data: tables, charts and graphs
+3. Errors and approximations
+4. Frequency and cumulative distributions
+5. Measures of location: mean, median, mode
+6. Measures of partition and dispersion: range, variance, standard deviation
+7. Skewness and kurtosis
+8. Rates, ratios and index numbers
+
+**Recommended textbooks**
+
+- Statistics for Management and Economics — Gerald Keller
+- Introductory Statistics — Neil A. Weiss
+
+**How to pass**
+
+- StatQuest with Josh Starmer on YouTube makes every stats concept intuitive — start there
+- Always choose the right measure of central tendency: mean for symmetric data, median for skewed data
+- Practice calculating variance and standard deviation by hand at least 5 times before the exam
+- Draw histograms and box plots manually — you see patterns that summary numbers hide
+
+### UUY-CSC 111 — Computer Operations
+
+- URL: https://www.aretecyb.tech/courses/uuy-csc-111
+- 2 units · 100 Level · First Semester
+
+Practical computer skills: laboratory safety, hardware components, operating system navigation, productivity software, internet operations, and an introduction to statistical computing with SPSS. The hands-on companion to COS 111.
+
+**Outline**
+
+1. Laboratory ethics and safety precautions; basic components of a computer system
+2. Booting a PC; Windows, Unix, Linux and Macintosh operating systems
+3. File systems: directories, subdirectories and file paths
+4. Application packages: Word, Excel, Access, PowerPoint, CorelDraw
+5. Internet operations: web browsers, e-mail, search engines
+6. Document creation, editing, formatting and printing
+7. Modern statistical computing and data management; verifying and transferring data
+8. Introduction to SPSS: summarising data, hypothesis testing, correlation, regression, and probability distributions
+
+**Recommended textbooks**
+
+- Microsoft Office 365: In Practice — Randy Nordell
+- Computer Literacy for IC3 — Connie Morrison & Faithe Wempen
+
+**How to pass**
+
+- Practise every application feature you learn immediately on your own computer
+- Learn Excel functions early — VLOOKUP, SUMIF, and pivot tables appear in research projects later
+- Touch-type practice daily (use keybr.com free) — speed matters more than you expect
+- Save all your university work to Google Drive or OneDrive so nothing is ever lost
+
+### UUY-CSC 112 — Computer Troubleshooting
+
+- URL: https://www.aretecyb.tech/courses/uuy-csc-112
+- 2 units · 100 Level · First Semester
+
+Diagnosing and resolving common hardware and software problems across PCs, laptops, tablets, and mobile phones. Covers network connectivity/security troubleshooting, backup and restore, and virus/anti-virus procedures — practical skills every computing professional needs.
+
+**Outline**
+
+1. Fundamentals of hardware
+2. Handling, testing and troubleshooting personal computer problems
+3. Diagnosis and repair of laptops, tablets and mobile phones
+4. Internet connections, network services, and network security troubleshooting
+5. Maintenance of computer networks and peripherals
+6. System backup and restore operations
+7. Viruses and anti-virus procedures
+8. Inbuilt and external diagnostic tools; installing, configuring, optimizing and upgrading systems
+
+**Recommended textbooks**
+
+- CompTIA A+ Core 1 (220-1101) and Core 2 (220-1102) — Mike Meyers
+- PC Maintenance and Repair — Jean Andrews
+
+**How to pass**
+
+- Professor Messer on YouTube has a free, comprehensive CompTIA A+ course that covers this entire course
+- When troubleshooting, always follow a systematic approach: most common cause → less common
+- Build a habit of documenting every problem and its solution — this is how senior technicians work
+- If you can access a spare PC to disassemble and reassemble, do it until it is routine
+
+### UUY-DTS 111 — Fundamentals of Data Science
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-111
+- 3 units · 100 Level · First Semester
+
+Your orientation to the discipline: what data science actually is, what a data scientist does day to day, and the end-to-end lifecycle of a data project from question to deployed insight. Heavily practical — you will handle real datasets in your first semester.
+
+**Outline**
+
+1. What data science is: the intersection of statistics, computing and domain knowledge
+2. Roles in the field: data analyst, data scientist, data engineer, ML engineer
+3. The data science lifecycle: problem framing, collection, cleaning, exploration, modelling, communication, deployment
+4. Types of data: structured, semi-structured and unstructured; quantitative vs qualitative
+5. Data sources: surveys, sensors, transactions, logs, web scraping, open data portals
+6. Data quality: missing values, duplicates, outliers, inconsistent coding
+7. Exploratory data analysis and basic visualisation
+8. Tools of the trade: spreadsheets, Python/R notebooks, SQL, version control
+9. Case studies of data science in health, agriculture, finance and government in Nigeria
+
+**Recommended textbooks**
+
+- Data Science from Scratch — Joel Grus
+- R for Data Science — Hadley Wickham & Garrett Grolemund
+- Doing Data Science — Cathy O'Neil & Rachel Schutt
+
+**How to pass**
+
+- Pick one real dataset in your first month (Nigeria open data, NBS, or a Kaggle set) and carry it through every stage of the lifecycle as you learn each stage
+- Cleaning is 70–80% of real data work and is barely 10% of the syllabus — over-invest in it anyway
+- Start a public GitHub repository now; by 400 Level it is the portfolio that gets you hired
+- Learn to state the business question before touching the data — an elegant model answering the wrong question scores zero
+
+### UUY-DTS 112 — Introduction to Database Technology
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-112
+- 2 units · 100 Level · First Semester
+
+How data is stored, structured and retrieved at scale. Relational modelling, normalisation, and SQL — the single most reusable practical skill in the degree, and the one most often tested in data-science job interviews.
+
+**Outline**
+
+1. File systems vs database systems; why databases exist
+2. Database system architecture: the three-schema architecture and data independence
+3. Data models: hierarchical, network, relational, object and document models
+4. Entity-relationship modelling: entities, attributes, relationships, cardinality, ER diagrams
+5. The relational model: relations, tuples, keys (primary, candidate, foreign), integrity constraints
+6. Normalisation: functional dependency, 1NF, 2NF, 3NF and BCNF
+7. SQL data definition: CREATE, ALTER, DROP, constraints
+8. SQL data manipulation: SELECT, WHERE, ORDER BY, GROUP BY, HAVING, JOIN, subqueries, aggregate functions
+9. Transactions and the ACID properties; introduction to NoSQL alternatives
+
+**Recommended textbooks**
+
+- Database System Concepts — Silberschatz, Korth & Sudarshan
+- Learning SQL — Alan Beaulieu
+
+**How to pass**
+
+- Install PostgreSQL or SQLite locally in week one and write real queries — SQL cannot be learnt by reading
+- Normalisation questions are guaranteed in the exam: practise taking an unnormalised table to 3NF and stating the functional dependency that forced each step
+- Master JOINs properly (INNER, LEFT, RIGHT, FULL) — they are the number one SQL interview topic and reappear in DTS 314
+- SQLBolt and pgexercises.com are free, interactive, and better practice than any past question paper
+
+### COS 121 — Problem Solving
+
+- URL: https://www.aretecyb.tech/courses/cos-121
+- 3 units · 100 Level · Second Semester
+
+Algorithmic thinking and systematic problem solving using Python and C. Covers problem identification, solution techniques, pseudocode/flowcharts, and programming fundamentals — the first real programming course in the degree. Strong performance here builds confidence for all future programming courses.
+
+**Outline**
+
+1. Problems and problem-solving: routine vs non-routine problems
+2. Methods of solving computing problems: algorithms and heuristics
+3. Solvable and unsolvable problems
+4. Solution techniques: abstraction, brainstorming, trial and error, divide and conquer, root cause analysis
+5. General problem-solving process
+6. Solution formulation and design: flowchart, pseudocode, decision table, decision tree
+7. Implementation, evaluation and refinement
+8. Programming in C and Python
+
+**Recommended textbooks**
+
+- Python Crash Course — Eric Matthes
+- Think Python: How to Think Like a Computer Scientist — Allen Downey
+
+**How to pass**
+
+- Areté has 12 full interactive Python modules for this course — use them from day one
+- Never copy-paste code examples — type every line yourself so your fingers learn the syntax
+- Solve at least one coding problem daily, even if small; consistency beats cramming
+- Harvard CS50P (Introduction to Programming with Python) is free and excellent
+
+### GST 121 — Nigerian Peoples and Culture
+
+- URL: https://www.aretecyb.tech/courses/gst-121
+- 2 units · 100 Level · Second Semester
+
+An introduction to Nigeria's ethnic diversity, cultural heritage, colonial and political history, and nation-building challenges. Provides context for the social and policy dimensions of technology in Nigeria.
+
+**Outline**
+
+1. Nigerian history, culture and art up to 1800 (Yoruba, Hausa, Igbo, and minority groups)
+2. Nigeria under colonial rule and colonial administration
+3. Evolution of Nigeria as a political unit: amalgamation, nationalist movement, independence
+4. Challenges of nation-building: military intervention, the Nigerian Civil War
+5. Trade and economics of self-reliance: indigenous trade, apprenticeship, skill acquisition
+6. Social justice, national development, and the judiciary
+7. Individual norms and values; citizenship acquisition and civic responsibilities
+8. Re-orientation and national values: the 3Rs and national orientation strategies
+
+**Recommended textbooks**
+
+- Nigerian Peoples and Culture — Emmanuel N. Emeka
+- The History of Nigeria — Toyin Falola
+
+**How to pass**
+
+- Link course topics to current events — Nigerian news puts everything in context
+- For the culture component, draw on your own background and community knowledge
+- Cybercrime and digital-policy topics connect directly to computing degrees — pay extra attention there
+- Past questions drive most of the exam content for GST courses — collect and study them
+
+### MTH 121 — General Mathematics II (Calculus)
+
+- URL: https://www.aretecyb.tech/courses/mth-121
+- 2 units · 100 Level · Second Semester
+
+Single-variable calculus: limits, continuity, differentiation, integration, and their applications. Builds the analytical foundation for probability, statistics, and the signal theory used across science and engineering.
+
+**Outline**
+
+1. Functions of a real variable: domain, range, composition
+2. Limits, continuity, and the derivative
+3. Rules of differentiation: product, quotient, chain
+4. Implicit, parametric, exponential and logarithmic differentiation
+5. Applications of derivatives: tangents, rates, max/min
+6. Definite and indefinite integrals
+7. Techniques of integration: substitution, by parts, partial fractions
+8. Applications of integration: area, volume
+
+**Recommended textbooks**
+
+- Engineering Mathematics — K.A. Stroud
+- Calculus: Early Transcendentals — James Stewart
+
+**How to pass**
+
+- 3Blue1Brown "Essence of Calculus" on YouTube builds genuine geometric intuition — watch it
+- Calculus rewards consistent daily practice more than any last-minute cramming
+- Understand the concept of a derivative as 'rate of change' before memorising rules
+- Khan Academy calculus is free, self-paced, and covers this entire course
+
+### PHY 121 — General Physics II (Electricity & Magnetism)
+
+- URL: https://www.aretecyb.tech/courses/phy-121
+- 2 units · 100 Level · Second Semester
+
+Electrostatics, DC circuits, magnetism, and electromagnetic induction. The electromagnetic foundations of this course directly underpin networking, wireless communications, and electronics studied in later years.
+
+**Outline**
+
+1. Electrostatics: electric charge, Coulomb's law and superposition
+2. Electric field and potential; Gauss's law; capacitance; electric dipoles
+3. Conductors, insulators, and energy in electric fields
+4. DC circuits: current, voltage, resistance, Ohm's law, resistor combinations
+5. Magnetic fields: Lorentz force, Biot-Savart and Ampère's laws, magnetic dipoles
+6. Electromagnetic induction: Faraday and Lenz's laws, self and mutual inductance
+7. Transformers and Maxwell's equations
+8. Electromagnetic oscillations and waves; AC voltages and currents in inductors, capacitors, and resistors
+
+**Recommended textbooks**
+
+- University Physics with Modern Physics — Young & Freedman
+- Fundamentals of Physics — Halliday, Resnick & Walker
+
+**How to pass**
+
+- Connect electricity topics to real circuits: every concept has a practical application
+- Draw circuit diagrams before applying Kirchhoff's laws — never solve blind
+- AC circuit analysis uses complex numbers from MTH — revise those in parallel
+- MIT OCW 8.02 Electricity and Magnetism lectures are free and excellent
+
+### PHY 128 — General Practical Physics II
+
+- URL: https://www.aretecyb.tech/courses/phy-128
+- 1 unit · 100 Level · Second Semester
+
+Laboratory practicals continuing from PHY 117, covering the theoretical concepts of PHY 121 through quantitative measurement, treatment of measurement errors, and graphical analysis.
+
+**Outline**
+
+1. Continuation of quantitative measurement techniques from PHY 117
+2. Treatment of measurement errors
+3. Graphical analysis of experimental data
+4. Electricity and magnetism experiments
+5. Data collection and tabulation of observations
+6. Numerical and graphical analysis, drawing conclusions from data
+7. Preparation and presentation of practical reports
+
+**Recommended textbooks**
+
+- Practical Physics — G.L. Squires
+- Physics Laboratory Manual — Loyd
+
+**How to pass**
+
+- Arrive at every practical knowing the theory — lab demonstrators mark understanding, not just results
+- Record ALL raw readings in your lab notebook before doing any calculations
+- Always quote uncertainties with your measurements — it demonstrates scientific rigour
+- Submit lab reports on time; late submissions lose marks even when the content is perfect
+
+### UUY-CYB 121 — Introduction to Computer Networks
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-121
+- 2 units · 100 Level · Second Semester
+
+Foundational networking: how data travels across local and wide area networks, the OSI/TCP-IP models, IP addressing and subnetting, routing protocols, and simulation with Packet Tracer. Critical groundwork for network security courses in later years.
+
+**Outline**
+
+1. Fundamentals of computer networks: LAN/MAN/WAN, Internet, Intranet, Extranet
+2. Network topology, devices, and modes of data transmission
+3. Network architecture: peer-to-peer, client-server, WLAN and IEEE standards
+4. OSI reference model and TCP/IP protocol suite; physical and link layer functionalities
+5. LAN technologies: Ethernet, Token Ring, multiple access schemes (CSMA/CD, CSMA/CA), MAC addressing
+6. Network layer: IP, ARP, ICMP; IPv4 addressing and subnetting; routing protocols (RIP, OSPF, BGP)
+7. Transport layer: UDP and TCP, ports and sockets, connection establishment, flow/congestion control
+8. Application layer protocols (HTTP, FTP, DNS, SMTP, TELNET) and IPv6 transition
+
+**Recommended textbooks**
+
+- Computer Networks — Andrew S. Tanenbaum & David J. Wetherall
+- CompTIA Network+ Study Guide — Todd Lammle
+
+**How to pass**
+
+- Memorise the 7 OSI layers and what happens at each — this appears in every networking exam
+- Practice subnetting until it is instinctive: it reappears in Network Defense and Security courses
+- Professor Messer's free Network+ course on YouTube is one of the best networking courses available
+- Use Cisco Packet Tracer (free) to simulate and visualise network configurations hands-on
+
+### UUY-CYB 122 — Principles and Practice of Information Security
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-122
+- 2 units · 100 Level · Second Semester
+
+An introduction to the core principles of information security: operating system protection mechanisms, intrusion detection, formal security models, cryptography and steganography, and the policy/regulatory dimension of protecting information and value across networks.
+
+**Outline**
+
+1. Operating system protection mechanisms
+2. Intrusion detection systems
+3. Formal models of security
+4. Cryptography and steganography
+5. Network and distributed system security
+6. Transfer of funds/value across networks; electronic voting security
+7. Secure application design
+8. Homeland cybersecurity policy and government regulation of information technology
+
+**Recommended textbooks**
+
+- Principles of Information Security — Michael E. Whitman & Herbert J. Mattord
+- CompTIA Security+ Study Guide — Mike Chapple & David Seidl
+
+**How to pass**
+
+- The CIA triad (Confidentiality, Integrity, Availability) is the lens through which every security concept is understood — internalise it
+- Read real breach case studies (Troy Hunt's blog, Krebs on Security) — they make abstract threats concrete
+- Professor Messer's free Security+ course covers most of this curriculum and is excellent
+- Social engineering is the most common attack vector — understand human psychology, not just technical controls
+- Scope triage: the examinable core is what was actually lectured — Lectures 1–4, which are sections 7–12 of the lecture notes (Whitman & Mattord chapters 1–4). Cryptography/steganography and funds transfer/e-voting sit in the course outline but were never taught, so revise them last if at all
+- Written paper, not CBT: a 10-mark question wants roughly five distinct points, each named and then explained in a sentence or two. One long unbroken paragraph scores badly even when everything in it is correct — the marker is counting points
+- Structure every long answer the same way: define the term, explain the mechanism, give an example or a diagram, then link it to a neighbouring concept. A repeatable skeleton stops you freezing on a question you half-know
+- Practise reproducing the diagrams from memory with their labels — the McCumber Cube, the TCP three-way handshake, the SDLC waterfall, top-down vs bottom-up. "With the aid of a diagram" is a standard question stem and the labels are where the marks are
+- On a four-from-six paper in two hours, budget about 30 minutes per question: 5 planning the points, 20 writing, 5 checking. Read all six and pick your four before you write a single word
+- Where a list is long (the fifteen threat categories, for instance) the question will ask for "any five" — so learn five you can explain properly rather than fifteen you can only name
+
+### UUY-CYB 123 — Web Authoring and Development
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-123
+- 2 units · 100 Level · Second Semester
+
+Building web pages from scratch: web architecture and the client-server model, HTML structure, CSS styling, JavaScript interactivity, and XML documents. An entry point into web security topics and the front-end layer targeted by many cybersecurity attacks.
+
+**Outline**
+
+1. Web programming basics: the Internet, WWW, and internet services/protocols
+2. Web application architecture, the network model, and the web development life cycle
+3. HTML: tags and attributes, page structure, lists, tables, and forms
+4. CSS: basics, adding style to HTML, text/font/colour, borders, margin and padding
+5. JavaScript: basics, arithmetic operators, control statements, event handlers
+6. Extensible Markup Language (XML): basics, formatting, viewing, and validating documents
+7. Introduction to web security: XSS, CSRF concepts
+
+**Recommended textbooks**
+
+- HTML and CSS: Design and Build Websites — Jon Duckett
+- JavaScript: The Good Parts — Douglas Crockford
+
+**How to pass**
+
+- freeCodeCamp Responsive Web Design certification is free and covers exactly this curriculum
+- Build at least one real web page per week — the only way to learn web development is to build
+- Inspect real websites using browser DevTools (F12) to see how professional sites are structured
+- Learn the web security concepts early — XSS and CSRF from this course appear in later security courses
+
+### UUY-DTS 121 — Foundation of Web Technologies for Data Science
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-121
+- 3 units · 100 Level · Second Semester
+
+How the web works and how to get data out of it. HTML, CSS and JavaScript fundamentals, HTTP and APIs, and the beginnings of web scraping — because a great deal of the data you will ever analyse lives behind a URL.
+
+**Outline**
+
+1. Internet and web fundamentals: clients, servers, DNS, URLs and the request/response cycle
+2. HTTP: methods, status codes, headers, cookies and sessions
+3. HTML: document structure, semantic elements, lists, tables and forms
+4. CSS: selectors, the box model, layout with flexbox and grid, responsive design
+5. JavaScript basics: variables, control flow, functions, DOM manipulation and events
+6. The Document Object Model as a data structure you can query
+7. Web APIs and JSON: consuming a REST endpoint, parsing responses
+8. Introduction to web scraping: HTML parsing, selectors, pagination, and the ethics and legality of scraping
+9. Serving a simple data dashboard on the web
+
+**Recommended textbooks**
+
+- HTML and CSS: Design and Build Websites — Jon Duckett
+- Eloquent JavaScript — Marijn Haverbeke
+- Web Scraping with Python — Ryan Mitchell
+
+**How to pass**
+
+- Open dev tools (F12) on every site you visit and read the Network tab — you learn HTTP faster by watching it than by reading about it
+- Focus your effort on the DOM and on APIs/JSON; those are the parts a data scientist uses weekly, unlike CSS layout
+- Always check a site's robots.txt and terms before scraping, and rate-limit your requests — the ethics questions are examined and the habit matters professionally
+- Build one small thing that fetches a public API and charts the result; it is the best possible revision for this course
+
+### UUY-DTS 122 — Introduction to Information and Communication Management
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-122
+- 3 units · 100 Level · Second Semester
+
+How organisations create, move, store and govern information, and how ICT infrastructure supports that. The organisational context in which data work actually happens — systems, stakeholders, policy and communication.
+
+**Outline**
+
+1. Information concepts: data, information, knowledge and wisdom; the DIKW hierarchy
+2. Information systems in organisations: TPS, MIS, DSS and executive information systems
+3. The information lifecycle: creation, storage, retrieval, distribution, archiving and disposal
+4. Communication models, channels and barriers in an organisational setting
+5. ICT infrastructure: networks, servers, cloud services and collaboration platforms
+6. Records and document management; metadata and classification
+7. Information governance: quality, ownership, stewardship and retention policy
+8. Data privacy and protection: NDPR, GDPR principles, and confidentiality obligations
+9. Presenting information to non-technical stakeholders
+
+**Recommended textbooks**
+
+- Management Information Systems: Managing the Digital Firm — Laudon & Laudon
+- Information Systems Today — Valacich & Schneider
+
+**How to pass**
+
+- Learn the NDPR basics properly — Nigerian data protection law is directly examinable here and again in DTS 318
+- For every system type (TPS/MIS/DSS), memorise one concrete Nigerian example; scenario questions ask you to classify a system
+- The communication half of this course is not filler: explaining a result to a non-technical manager is a graded skill in DTS 413 and a career-defining one after
+- Draw the DIKW pyramid and the information lifecycle from memory — both are near-certain exam diagrams
+
+## 200 Level
+
+### COS 211 — Computer Programming I
+
+- URL: https://www.aretecyb.tech/courses/cos-211
+- 3 units · 200 Level · First Semester
+
+Object-oriented programming in Java: from variables and control flow through full OOP, collections, exception handling, file I/O, and GUI development with Swing. The primary programming course of the degree and the subject most likely to determine your programming competence throughout your career.
+
+**Outline**
+
+1. Programming paradigms: functional, declarative, logic, and object-oriented
+2. Java syntax: variables, data types, expressions, operators
+3. Control flow: if/else, switch, loops; arrays (1D and 2D)
+4. Methods: parameters, return types, overloading
+5. Classes and objects; abstraction, constructors and encapsulation
+6. Inheritance, polymorphism, and abstract classes; interfaces
+7. Exception handling: try, catch, finally, custom exceptions
+8. Collections API: ArrayList, HashMap, HashSet, Stack, Queue, iterators/enumerators
+9. Strings and string processing; searching, sorting, and recursive algorithms
+10. Event-driven programming: event-handling methods and event propagation
+11. File I/O: reading and writing text files; GUI programming with Java Swing
+12. Basic JDBC: connecting Java to a database
+
+**Recommended textbooks**
+
+- Introduction to Java Programming and Data Structures — Y. Daniel Liang
+- Head First Java — Kathy Sierra & Bert Bates
+
+**How to pass**
+
+- Areté has 13 full interactive modules for this course with live playgrounds and quizzes — use them every day
+- Type every code example yourself; copying and pasting prevents your brain from building muscle memory
+- Java OOP is the most exam-critical section — understand inheritance diagrams and method overriding
+- The AI Tutor on this app can explain any Java concept or debug your code any time
+
+### CYB 211 — Introduction to Cybersecurity and Strategy
+
+- URL: https://www.aretecyb.tech/courses/cyb-211
+- 2 units · 200 Level · First Semester
+
+A strategic overview of the cybersecurity landscape: basic concepts (confidentiality, integrity, availability, authentication, non-repudiation), security policy and incident response, risk management, and the national/organisational strategies that guide security decision-making at scale.
+
+**Outline**
+
+1. Basic concepts: cyber, security, CIA, authentication, access control, non-repudiation
+2. Security policies, best current practices, testing, and incident response
+3. Risk management, disaster recovery, and access control
+4. Basic cryptography and software application vulnerabilities; evolution of cyber-attacks
+5. Operating system protection, IDS, formal security models, steganography, DoS/worms/viruses
+6. Transfer of funds/value across networks and electronic voting security
+7. Cybersecurity policy, guidelines, and government regulation of information technology
+8. Main actors of cyberspace; impact on civil/military institutions, privacy, business, government
+9. Ethical obligations of security professionals; standards and frameworks
+
+**Recommended textbooks**
+
+- Cybersecurity Essentials — Charles J. Brooks et al.
+- The Art of Intrusion — Kevin Mitnick
+
+**How to pass**
+
+- Follow cybersecurity news (Krebs on Security, The Hacker News) — exam questions often reference current events
+- Understand the cyber kill chain model deeply — it frames every attack and defence strategy in the field
+- Nigeria's National Cybersecurity Policy is public and freely available — read the executive summary
+- Link strategic concepts back to technical mechanisms from UUY-CYB 122 to build integrated understanding
+
+### CYB 213 — Cybercrime, Law and Countermeasures
+
+- URL: https://www.aretecyb.tech/courses/cyb-213
+- 2 units · 200 Level · First Semester
+
+The legal and regulatory landscape of cybercrime: Nigerian cybercrime law, international frameworks, types of cybercrime, investigative procedures, and technical countermeasures. Essential context for any cybersecurity professional.
+
+**Outline**
+
+1. Definition, types and categories of cybercrime; threats to national critical infrastructure
+2. Investigation process and procedure for cybercrime; strategies of perpetrators and prevention
+3. Technical aspects of cybercrime investigations; attacks and defences used by terrorists and criminals
+4. Use of online social networks in cybercrime investigation
+5. Computer and network forensics: concepts, trends, and methods
+6. Digital evidence collection and evaluation
+7. Legal issues, international jurisdiction, and privacy issues
+8. Cyber law application internationally: Europe, North/South America, Asia
+9. The cyber law framework in Nigeria (Cybercrime Act 2015, EFCC); challenges and opportunities for enforcement
+
+**Recommended textbooks**
+
+- Cybercrime and the Law — Susan W. Brenner
+- Cybercrime: An Introduction to an Emerging Phenomenon — Joseph F. Donnermeyer
+
+**How to pass**
+
+- Download and read the actual Nigeria Cybercrime Act 2015 — it is short and publicly available
+- Case studies of Nigerian cybercrime prosecution are in EFCC press releases — use them in exam answers
+- Distinguish clearly between cybercrime as a tool, as a target, and as an environment
+- Link every legal concept to a technical mechanism: knowing both sides earns the best marks
+
+### DTS 211 — Introduction to R Programming
+
+- URL: https://www.aretecyb.tech/courses/dts-211
+- 2 units · 200 Level · First Semester
+
+R from the ground up: the language, its data structures, and the tidyverse workflow for importing, tidying, transforming, visualising and modelling data. R is the statistician's language, and it is the fastest route from a dataset to a publication-quality figure.
+
+**Outline**
+
+1. The R environment and RStudio; scripts, projects and the console
+2. Atomic vectors, coercion and vectorised operations
+3. Data structures: vectors, matrices, lists, factors and data frames
+4. Control flow, functions and the apply family
+5. Reading and writing data: CSV, Excel, delimited files and databases
+6. The tidyverse: dplyr verbs (filter, select, mutate, arrange, summarise, group_by)
+7. Tidy data principles and reshaping with tidyr
+8. Visualisation with ggplot2: the grammar of graphics, aesthetics, geoms, facets and themes
+9. Reproducible reporting with R Markdown / Quarto
+
+**Recommended textbooks**
+
+- R for Data Science — Hadley Wickham, Mine Çetinkaya-Rundel & Garrett Grolemund
+- The Art of R Programming — Norman Matloff
+
+**How to pass**
+
+- Install R and RStudio in week one and never read R code without running it
+- Learn the six dplyr verbs cold — filter, select, mutate, arrange, group_by, summarise. Together they solve most real data-wrangling tasks
+- ggplot2 feels strange until the grammar of graphics clicks: data → aesthetic mapping → geometry. Once it clicks it is faster than anything else
+- Do everything in an R Markdown / Quarto document from the start so your work is reproducible — you will need exactly this for DTS 417
+
+### DTS 212 — Introduction to Data Science
+
+- URL: https://www.aretecyb.tech/courses/dts-212
+- 2 units · 200 Level · First Semester
+
+The formal treatment of the data science process, building on UUY-DTS 111: problem formulation, data acquisition, feature construction, model families, evaluation, and the ethics and limits of inference from data.
+
+**Outline**
+
+1. Framing a data science problem: from a vague question to a measurable target
+2. Data acquisition strategies and sampling; sampling bias and its consequences
+3. Data cleaning and preparation: missing data mechanisms, imputation, outlier treatment
+4. Feature engineering, encoding categorical variables, scaling and normalisation
+5. Exploratory data analysis: distributions, relationships, and the grammar of graphics
+6. Supervised vs unsupervised learning; regression vs classification
+7. Model evaluation: train/test split, cross-validation, and the bias–variance trade-off
+8. Overfitting, underfitting and regularisation as concepts
+9. Communicating results; reproducibility and the ethics of data-driven claims
+
+**Recommended textbooks**
+
+- An Introduction to Statistical Learning — James, Witten, Hastie & Tibshirani
+- Python Data Science Handbook — Jake VanderPlas
+
+**How to pass**
+
+- The bias–variance trade-off is the conceptual centre of this course and of the whole degree — be able to explain it with a picture, in words, and with a formula
+- Never evaluate a model on data it was trained on. Internalise this now and it will save your final-year project
+- Watch the free ISLR video lectures from the authors; they follow the book chapter by chapter
+- For every technique, learn the assumption it makes and what breaks when the assumption fails — that is what distinguishes a data scientist from a button-pusher
+
+### GST 211 — Philosophy, Logic and Human Existence
+
+- URL: https://www.aretecyb.tech/courses/gst-211
+- 2 units · 200 Level · First Semester
+
+Philosophical method, formal logic, and the perennial questions about knowledge, value and human existence. The logic half is directly technical — it is the same propositional calculus you will formalise in MTH 212 and implement in code.
+
+**Outline**
+
+1. The meaning, scope and branches of philosophy
+2. Philosophy and logic: the nature of argument, premises and conclusions
+3. Deductive and inductive reasoning; validity, soundness and cogency
+4. Symbolic logic: propositions, connectives, truth tables and truth-functional analysis
+5. Rules of inference and methods of proof
+6. Informal fallacies: ad hominem, straw man, false cause, hasty generalisation, appeal to authority
+7. Epistemology: sources and limits of knowledge; scepticism
+8. Ethics: consequentialism, deontology and virtue ethics
+9. Human existence, freedom, determinism and the meaning of life
+
+**Recommended textbooks**
+
+- Philosophy and Logic: An Introduction — Various UniUyo GST course team
+- A Concise Introduction to Logic — Patrick J. Hurley
+
+**How to pass**
+
+- Truth tables are free marks — practise until you can build one for any compound proposition without hesitating
+- The fallacies section is the most examined: learn each one with a one-line example you invented yourself, not the textbook's
+- Statistical reasoning is inductive; understanding why induction can never give certainty makes DTS 224 hypothesis testing click
+- For essay questions, define your terms in the first paragraph — examiners reward it explicitly
+
+### GST 212 — Philosophy, Logic and Human Existence
+
+- URL: https://www.aretecyb.tech/courses/gst-212
+- 2 units · 200 Level · First Semester
+
+An examination of philosophical reasoning, formal logic, and the human condition. The logic component — syllogism, symbolic logic, and rules of inference — directly supports discrete mathematics and the formal reasoning used in security proofs and algorithm design.
+
+**Outline**
+
+1. Scope, notions, meanings, branches and problems of philosophy
+2. Logic as an indispensable tool of philosophy
+3. Elements of syllogism and symbolic logic; the first nine rules of inference
+4. Informal fallacies, laws of thought, and the nature of arguments
+5. Valid and invalid arguments; logic of form vs logic of content
+6. Deduction, induction, and inference; creative and critical thinking
+7. Impact of philosophy on human existence and conduct
+8. Philosophy and politics, religion, human values, and character moulding
+
+**Recommended textbooks**
+
+- Introduction to Logic — Irving M. Copi & Carl Cohen
+- Philosophy: The Basics — Nigel Warburton
+
+**How to pass**
+
+- The logic component matters most for your degree — practise truth tables until they are automatic
+- Logical validity and logical truth are different concepts — do not confuse them in exams
+- Ethical technology topics (privacy, AI, cybercrime) connect directly to your computing courses
+- Argument mapping: writing out premises and conclusions explicitly prevents exam errors
+
+### MTH 211 — Mathematical Methods I
+
+- URL: https://www.aretecyb.tech/courses/mth-211
+- 2 units · 200 Level · First Semester
+
+The analytical toolkit for scientific computing: sequences and series, partial differentiation, vector calculus and an introduction to differential equations. These are the methods that underpin optimisation, gradient-based learning and statistical modelling.
+
+**Outline**
+
+1. Sequences and infinite series; tests of convergence
+2. Power series, Taylor and Maclaurin expansions
+3. Functions of several variables; limits and continuity in several variables
+4. Partial derivatives; the chain rule for multivariable functions
+5. Total differential, gradient, directional derivative, divergence and curl
+6. Maxima and minima of functions of several variables; Lagrange multipliers
+7. Multiple integrals: double and triple integrals and their applications
+8. First-order ordinary differential equations: separable, homogeneous, exact and linear
+9. Second-order linear differential equations with constant coefficients
+
+**Recommended textbooks**
+
+- Advanced Engineering Mathematics — Erwin Kreyszig
+- Engineering Mathematics — K.A. Stroud
+
+**How to pass**
+
+- The gradient is THE central object of machine learning — every training algorithm you meet in UUY-DTS 313 is gradient descent on a loss surface. Learn it here properly and that course becomes much easier
+- Lagrange multipliers are constrained optimisation, which is exactly what a support vector machine solves — the connection is not decorative
+- Taylor series is how numerical methods approximate everything; MTH 223 next semester assumes you have it cold
+- Practise partial differentiation until you stop confusing it with total differentiation — that specific mistake costs marks every year
+
+### MTH 212 — Sets, Logic and Algebra
+
+- URL: https://www.aretecyb.tech/courses/mth-212
+- 2 units · 200 Level · First Semester
+
+Rigorous foundations: set theory, formal logic, relations and functions, and an introduction to abstract algebraic structures. This is where mathematical proof is taught properly, and where the language of the rest of your theoretical courses is set.
+
+**Outline**
+
+1. Set theory: operations, laws, power sets, Cartesian products, indexed families
+2. Propositional logic: connectives, truth tables, tautologies, logical equivalence
+3. Predicate logic: quantifiers, bound and free variables, negation of quantified statements
+4. Methods of proof: direct proof, contraposition, contradiction, mathematical induction
+5. Relations: reflexive, symmetric, transitive; equivalence relations and partitions
+6. Partial orders, Hasse diagrams and lattices
+7. Functions: injective, surjective, bijective; composition and inverse functions; cardinality
+8. Binary operations and algebraic structures: groups, subgroups, cyclic groups
+9. Rings and fields: definitions, examples and elementary properties
+
+**Recommended textbooks**
+
+- Discrete Mathematics and Its Applications — Kenneth H. Rosen
+- Book of Proof — Richard Hammack
+
+**How to pass**
+
+- Proof is a skill, not knowledge — you must write proofs yourself, badly at first, to learn it. Reading proofs feels productive and is not
+- Equivalence relations and partitions are the mathematical basis of clustering: a clustering is literally a partition of your dataset
+- Learn to negate a quantified statement mechanically (¬∀x P(x) ≡ ∃x ¬P(x)) — it is examined and it is how you state a null hypothesis correctly
+- Hammack's Book of Proof is free and will teach you more in three chapters than a term of passive lectures
+
+### SEN 211 — Introduction to Software Engineering
+
+- URL: https://www.aretecyb.tech/courses/sen-211
+- 2 units · 200 Level · First Semester
+
+The principles and practices of building software systematically: software development lifecycle models, requirements engineering, system design, testing, and project management. Context for how secure software is planned and built.
+
+**Outline**
+
+1. Software engineering concepts, principles, and its place as a computing discipline
+2. Software processes: lifecycle and process models, process assessment and metrics
+3. Software requirements, specifications, design, and architecture
+4. Software quality, testing, and validation
+5. Software evolution: maintenance, re-engineering, legacy systems, and software reuse
+6. Software project management: team management, scheduling, estimation, risk analysis
+7. Software quality assurance and configuration management
+8. Version control with Git and GitHub
+9. Software engineering and law; secure software development lifecycle
+
+**Recommended textbooks**
+
+- Software Engineering — Ian Sommerville
+- Clean Code — Robert C. Martin
+
+**How to pass**
+
+- Learn Git now — it is used for every programming project in years 3 and 4
+- UML diagrams appear heavily in exams: practise class and sequence diagrams until they are fast to draw
+- Relate SDLC models to the projects you build in COS 211 — theory becomes concrete immediately
+- The Secure SDLC section links directly to your cybersecurity courses — connect them explicitly
+
+### UUY-CYB 212 — Ethical Hacking Fundamentals
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-212
+- 2 units · 200 Level · First Semester
+
+An introduction to offensive security thinking: information security fundamentals, the hacking cycle, and countermeasures across passwords, social engineering, networks, web/mobile/IoT applications, wireless, and the cloud. Covers the legal/ethical framework under which penetration testing operates.
+
+**Outline**
+
+1. Information security fundamentals; threats and vulnerabilities
+2. Stages of the hacking cycle
+3. Password cracking techniques and countermeasures
+4. Social engineering techniques and countermeasures
+5. Network-level attacks and countermeasures
+6. Web application attacks and countermeasures (OWASP Top 10)
+7. Wireless, mobile, and IoT attacks and countermeasures
+8. Cloud computing threats and countermeasures
+9. Penetration testing fundamentals
+
+**Recommended textbooks**
+
+- The Web Application Hacker's Handbook — Stuttard & Pinto
+- Penetration Testing — Georgia Weidman
+
+**How to pass**
+
+- TryHackMe.com has free beginner "learning paths" that cover exactly this curriculum hands-on
+- Every technique must be practised only on systems you own or have explicit written permission to test
+- Understand OWASP Top 10 deeply — it is the foundation of web application security in later courses
+- A good pen test report is as important as the test itself: practise clear, structured writing
+
+### UUY-CYB 214 — Fundamentals of IoT
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-214
+- 2 units · 200 Level · First Semester
+
+The architecture, protocols, market segments, and security challenges of the Internet of Things. Covers sensing/actuation, cloud data collection and analysis, smart-city and industrial use cases, and the unique vulnerabilities of IoT devices — a rapidly growing attack surface.
+
+**Outline**
+
+1. Internet of Things (IoT): market segments, examples, and the IoT value stack
+2. IoT data collection: sensing and actuation
+3. IoT data collection, aggregation, analysis, and visualization in the cloud
+4. Smart products and high-resolution data
+5. Technology and protocols for IoT communication and networking; machine-to-machine communication
+6. Driving technologies for smart cities, smart transportation, Industry 4.0, and digital health
+7. Opportunities, possibilities, challenges, security, and privacy of IoT
+8. IoT specializations: industrial, medical/healthcare, automotive, energy/utilities, and blockchain-based IoT
+
+**Recommended textbooks**
+
+- Internet of Things: A Hands-On Approach — Arshdeep Bahga & Vijay Madisetti
+- Practical Internet of Things Security — Brian Russell & Drew Van Duren
+
+**How to pass**
+
+- OWASP IoT Top 10 is a free, authoritative list of IoT vulnerabilities — read it fully
+- If you can access an Arduino or Raspberry Pi, build a simple sensor project to make concepts tangible
+- IoT security connects to network security, cryptography, and embedded systems — build cross-course links
+- Real-world IoT breaches (Mirai botnet, industrial ICS attacks) make the best exam examples
+
+### UUY-DTS 211 — Introduction to Data Analytics
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-211
+- 2 units · 200 Level · First Semester
+
+Analytics as a business discipline: the four analytics types (descriptive, diagnostic, predictive, prescriptive), KPI design, dashboarding, and turning an analysis into a decision. Practical and tool-focused.
+
+**Outline**
+
+1. The analytics maturity ladder: descriptive, diagnostic, predictive and prescriptive analytics
+2. Defining metrics and KPIs; leading vs lagging indicators
+3. Data preparation for analysis: joins, aggregation, pivoting and derived measures
+4. Cohort analysis, funnel analysis and time-series trends
+5. Spreadsheet analytics: pivot tables, lookup functions and what-if analysis
+6. Business intelligence tools: Power BI / Tableau / Looker Studio fundamentals
+7. Dashboard design: audience, hierarchy of information, and avoiding chart junk
+8. A/B testing basics and the interpretation of experimental results
+9. From insight to recommendation: writing the analytics brief
+
+**Recommended textbooks**
+
+- Storytelling with Data — Cole Nussbaumer Knaflic
+- Data Science for Business — Foster Provost & Tom Fawcett
+
+**How to pass**
+
+- Build one real dashboard on a dataset you care about — a portfolio dashboard is worth more at interview than a grade
+- The four analytics types are a guaranteed exam question; be ready with a Nigerian example of each
+- Practise writing a three-sentence "so what" for every chart you make. If you cannot, the chart is not finished
+- Learn pivot tables properly — an enormous amount of professional analytics still happens in a spreadsheet
+
+### COS 221 — Computer Programming II
+
+- URL: https://www.aretecyb.tech/courses/cos-221
+- 3 units · 200 Level · Second Semester
+
+Advanced programming building on COS 211: deeper object-oriented programming (polymorphism, abstract classes, interfaces), the Collections API, searching/sorting/recursion, event-driven and GUI programming. Bridges programming skills and the algorithmic thinking required for security tool development.
+
+**Outline**
+
+1. Advanced OOP review: polymorphism, abstract classes, and interfaces
+2. Class hierarchies and programme organization using packages/namespaces
+3. Collections API: iterators/enumerators, List, Stack, Queue
+4. Searching and sorting algorithms
+5. Recursive algorithms
+6. Event-driven programming: event-handling methods and event propagation
+7. Exception handling
+8. Graphical User Interface (GUI) programming
+
+**Recommended textbooks**
+
+- Data Structures and Algorithms in Java — Robert Lafore
+- Introduction to Algorithms (CLRS) — Cormen, Leiserson, Rivest, Stein
+
+**How to pass**
+
+- VisuAlgo (visualgo.net) provides free visual animations for every data structure — use it constantly
+- Implement every data structure from scratch at least once — never just read about it
+- Trace sorting algorithms step by step on a 5-element array by hand before every exam
+- Areté Java modules cover the programming foundation; use them for the Java component of this course
+
+### CSC 223 — Discrete Structures
+
+- URL: https://www.aretecyb.tech/courses/csc-223
+- 2 units · 200 Level · Second Semester
+
+The mathematics of discrete objects — counting, graphs, trees, recurrence relations and Boolean algebra. Graph theory in particular is the direct foundation for network analysis, recommendation systems and the web-data work in UUY-DTS 311.
+
+**Outline**
+
+1. Review of sets, relations and functions in a computing context
+2. Propositional and predicate logic; logical equivalence and inference
+3. Proof techniques: induction and strong induction; recursive definitions
+4. Counting: the product and sum rules, permutations, combinations, the pigeonhole principle
+5. Binomial coefficients and combinatorial identities; inclusion–exclusion
+6. Recurrence relations and their solution; the Master theorem informally
+7. Graph theory: graphs, digraphs, degree, paths, cycles, connectivity
+8. Graph representations (adjacency matrix and list), traversal, shortest paths, spanning trees
+9. Trees: rooted trees, binary trees, traversal; Boolean algebra and logic circuit minimisation
+
+**Recommended textbooks**
+
+- Discrete Mathematics and Its Applications — Kenneth H. Rosen
+- Discrete Mathematics with Applications — Susanna S. Epp
+
+**How to pass**
+
+- Counting problems are deceptively hard — do many, and always ask "does order matter?" and "is repetition allowed?" before choosing a formula
+- Graph theory is the highest-value topic for a data scientist here: social networks, web link structures and recommendation graphs are all this
+- Recurrence relations explain the running time of recursive algorithms from COS 221 — study the two courses together
+- Rosen's exercises are the best preparation for the exam; work them rather than re-reading notes
+
+### CYB 222 — Cybersecurity Innovation and New Technologies
+
+- URL: https://www.aretecyb.tech/courses/cyb-222
+- 2 units · 200 Level · Second Semester
+
+Emerging technologies and their cybersecurity implications: AI in security, blockchain, quantum computing threats to cryptography, zero-trust architecture, and the innovation lifecycle in the security industry.
+
+**Outline**
+
+1. AI and machine learning in threat detection
+2. Blockchain technology and its security properties
+3. Quantum computing and the threat to current cryptography
+4. Zero-trust architecture: principles and implementation
+5. Security automation: SOAR platforms overview
+6. Emerging threat vectors: deepfakes, AI-generated attacks
+7. Security innovation lifecycle and technology adoption
+8. Open-source intelligence (OSINT) modern tools
+
+**Recommended textbooks**
+
+- AI and Machine Learning for Coders — Laurence Moroney
+- Blockchain Basics — Daniel Drescher
+
+**How to pass**
+
+- Stay current — this course changes rapidly; subscribe to a cybersecurity newsletter (SANS, Dark Reading)
+- Zero trust ("never trust, always verify") is a major industry direction — understand it thoroughly
+- Quantum threats to RSA and AES connect directly to your Cryptography course in 300L
+- For exam essays, structure answers around: what the technology is, its security benefit, and its risk
+
+### CYB 224 — Information and Big Data Security
+
+- URL: https://www.aretecyb.tech/courses/cyb-224
+- 2 units · 200 Level · Second Semester
+
+Big data fundamentals — characteristics, sources, platforms, and analytics — paired with the security side: information and big data security requirements, lifecycle security management, risk management, and cloud-based big data security.
+
+**Outline**
+
+1. Big data fundamentals: small vs big data, characteristics (3Vs/6Vs), sources and formats
+2. Big data technology, platforms, components, and governance; using the cloud for big data
+3. Operational and analytical big data; business intelligence vs big data vs data mining
+4. System and management view of information and big data security
+5. Requirements for information and big data security; systems-design process and lifecycle security management
+6. Basic policies on information security and methodologies; security risk management
+7. Laws related to information security and management of operational systems
+8. Applying machine learning and analytical tools to big data; cloud-based big data analysis
+
+**Recommended textbooks**
+
+- Big Data Security — Bhavani Thuraisingham
+- Database Security and Auditing — Hassan Afyouni
+
+**How to pass**
+
+- Read the Nigeria Data Protection Act — it is publicly available and short; exam questions reference it
+- SQL injection from this course connects directly to web security in UUY-CYB 222 — study them together
+- The cloud shared responsibility model is exam-critical: know clearly what the provider vs customer secures
+- Use OWASP resources on SQL injection and data security — they are free and authoritative
+
+### DTS 224 — Statistical Inference and Modelling
+
+- URL: https://www.aretecyb.tech/courses/dts-224
+- 3 units · 200 Level · Second Semester
+
+Reasoning from a sample to a population: estimation, confidence intervals, hypothesis testing, and the linear model. The core statistical machinery of the degree — and the part most often misused in practice.
+
+**Outline**
+
+1. Populations, samples, parameters and statistics; sampling distributions
+2. The Central Limit Theorem and its practical consequences
+3. Point estimation: unbiasedness, efficiency, consistency; method of moments and maximum likelihood
+4. Interval estimation: confidence intervals for means, proportions and variances
+5. Hypothesis testing: null and alternative hypotheses, test statistics, p-values, Type I and Type II errors, power
+6. One- and two-sample tests: z, t, chi-square and F tests
+7. Analysis of variance (ANOVA): one-way and two-way
+8. Simple and multiple linear regression: estimation, interpretation, inference on coefficients
+9. Model diagnostics: residual analysis, multicollinearity, and the assumptions of the linear model
+
+**Recommended textbooks**
+
+- Mathematical Statistics with Applications — Wackerly, Mendenhall & Scheaffer
+- Statistical Inference — George Casella & Roger L. Berger
+- OpenIntro Statistics — Diez, Çetinkaya-Rundel & Barr
+
+**How to pass**
+
+- Learn what a p-value actually is and — more importantly — what it is not. Almost everyone gets this wrong, and examiners specifically test the misinterpretations
+- A confidence interval is a statement about the procedure, not about the parameter. Say it correctly once and it stays right forever
+- Simulate the Central Limit Theorem yourself in R (DTS 211): draw 1000 samples, plot the means, watch it become normal. Nothing else makes it as concrete
+- For every test, memorise the assumptions alongside the formula — "which test do I use here?" is the exam's favourite question
+
+### DTS 226 — Probability for Data Science
+
+- URL: https://www.aretecyb.tech/courses/dts-226
+- 3 units · 200 Level · Second Semester
+
+The mathematics of uncertainty: probability axioms, random variables, distributions, expectation, and the limit theorems. Probability is the language machine learning is written in — every model output is ultimately a probability statement.
+
+**Outline**
+
+1. Sample spaces, events and the axioms of probability
+2. Conditional probability, independence, the law of total probability and Bayes' theorem
+3. Discrete random variables: probability mass functions, expectation and variance
+4. Discrete distributions: Bernoulli, binomial, geometric, hypergeometric, Poisson
+5. Continuous random variables: density and distribution functions
+6. Continuous distributions: uniform, exponential, gamma, normal
+7. Joint, marginal and conditional distributions; covariance and correlation
+8. Transformations of random variables; moment generating functions
+9. Laws of large numbers and the Central Limit Theorem; introduction to Markov chains
+
+**Recommended textbooks**
+
+- A First Course in Probability — Sheldon Ross
+- Introduction to Probability — Blitzstein & Hwang
+
+**How to pass**
+
+- Bayes' theorem is the most important single formula in the course — it is the entire basis of Naive Bayes classifiers and of Bayesian inference
+- Watch Joe Blitzstein's Stat 110 lectures (free on YouTube); they are the best probability teaching available anywhere
+- For each distribution, learn the story that generates it ("number of successes in n trials", "waiting time until first event") — then you never have to guess which one applies
+- Draw the sample space for small problems. Most probability mistakes are modelling mistakes, not arithmetic mistakes
+
+### ENT 221 — Entrepreneurship and Innovation
+
+- URL: https://www.aretecyb.tech/courses/ent-221
+- 2 units · 200 Level · Second Semester
+
+Business thinking for technical students: entrepreneurship and intrapreneurship theory, entrepreneurial characteristics and thinking, innovation, enterprise formation, and e-commerce principles. Directly applicable to consulting, startup, and freelance careers in technology.
+
+**Outline**
+
+1. Concept of entrepreneurship and intrapreneurship/corporate entrepreneurship
+2. Theories, rationale and relevance: Schumpeterian perspective, risk-taking, creative destruction
+3. Characteristics of entrepreneurs: opportunity seeker, risk taker, innovator
+4. Entrepreneurial thinking: critical, reflective, and creative thinking
+5. Innovation: concept, dimensions, and its relationship to knowledge and change
+6. Enterprise formation, partnership and networking: business plans, ownership forms, registration
+7. Contemporary entrepreneurship issues: intellectual property, virtual office, networking
+8. Entrepreneurship in Nigeria: youth/women entrepreneurship, support institutions, barriers
+9. Basic principles of e-commerce
+
+**Recommended textbooks**
+
+- Entrepreneurship: Successfully Launching New Ventures — Barringer & Ireland
+- The Lean Startup — Eric Ries
+
+**How to pass**
+
+- Apply every concept to a technology business idea from your own field — it makes abstract topics concrete and exam-ready
+- The Business Model Canvas is the most exam-critical framework — practise filling it in for different scenarios
+- Nigeria's NITDA and other agencies offer technology grants — research them as part of your learning
+- This course matters for your career: many technology professionals eventually consult or freelance
+
+### INS 224 — Systems Analysis and Design
+
+- URL: https://www.aretecyb.tech/courses/ins-224
+- 3 units · 200 Level · Second Semester
+
+A structured approach to analysing information system needs and designing solutions: the software development lifecycle, top-down and bottom-up design, dataflow diagramming, entity-relationship modelling, and file/database and user-interface design.
+
+**Outline**
+
+1. Structured approach to analysis and design of information systems for businesses
+2. Software development lifecycle (SDLC)
+3. Structured top-down and bottom-up design
+4. Dataflow diagramming and entity-relationship modelling
+5. Computer-aided software engineering (CASE)
+6. Input/output, prototyping design and validation
+7. File and database design
+8. Design of user interfaces
+9. Comparison of structured and object-oriented design
+
+**Recommended textbooks**
+
+- Systems Analysis and Design — Kenneth Kendall & Julie Kendall
+- Modern Systems Analysis and Design — Hoffer, George & Valacich
+
+**How to pass**
+
+- DFDs and ER diagrams are the most commonly examined topics — practise drawing them from scratch
+- Use DRAW.IO (free, online) to practise system diagrams until speed and accuracy improve
+- Normalisation (1NF, 2NF, 3NF) has a logical pattern — understand it conceptually before memorising rules
+- Relate everything to a real system you interact with (a bank app, university portal) to aid understanding
+
+### MTH 223 — Introduction to Numerical Analysis
+
+- URL: https://www.aretecyb.tech/courses/mth-223
+- 2 units · 200 Level · Second Semester
+
+How to compute answers to mathematical problems that have no closed-form solution, and how to know when the computed answer is wrong. Error, convergence and stability — the reason floating-point arithmetic sometimes betrays you.
+
+**Outline**
+
+1. Sources of error: round-off, truncation, and floating-point representation
+2. Absolute, relative and percentage error; error propagation and conditioning
+3. Solution of nonlinear equations: bisection, false position, Newton–Raphson, secant method
+4. Convergence criteria and rates of convergence
+5. Solution of linear systems: Gaussian elimination, LU decomposition, pivoting
+6. Iterative methods: Jacobi and Gauss–Seidel
+7. Interpolation: Lagrange and Newton divided-difference polynomials; spline interpolation
+8. Numerical differentiation and integration: trapezoidal rule, Simpson's rules
+9. Numerical solution of ordinary differential equations: Euler and Runge–Kutta methods
+
+**Recommended textbooks**
+
+- Numerical Analysis — Richard L. Burden & J. Douglas Faires
+- Numerical Methods in Engineering with Python 3 — Jaan Kiusalaas
+
+**How to pass**
+
+- Implement every method in Python as you learn it — a method you have coded is a method you understand
+- Newton–Raphson is the same algorithm family as gradient descent; recognising that makes UUY-DTS 313 far less mysterious
+- Learn WHY floating-point comparison with == is unsafe; this single fact prevents a whole class of real bugs in data pipelines
+- Exam questions usually ask for two or three iterations by hand — practise tabulating iterations neatly and carrying enough decimal places
+
+### UUY-CYB 221 — Network Defense Fundamentals
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-221
+- 2 units · 200 Level · Second Semester
+
+Practical network security: identification/authentication/authorization, threat classification, firewalls, administrative/physical/technical controls, virtualization and cloud, wireless/mobile/IoT security, and cryptography/PKI. Builds directly on the networking foundation from UUY-CYB 121.
+
+**Outline**
+
+1. Network security fundamentals; identification, authentication and authorization
+2. Classification of threats: malware, intrusions, denial of service
+3. Fundamentals of firewalls and implementation approaches
+4. Network security controls: administrative, physical, and technical
+5. Virtualization and cloud computing security
+6. Wireless network security, mobile device security, and IoT device security
+7. Data security: cryptography and public key infrastructure (PKI)
+8. Network traffic monitoring; basic network utilities (ipconfig, ping, tracert, netstat)
+
+**Recommended textbooks**
+
+- Network Security Essentials — William Stallings
+- CompTIA CySA+ Study Guide — Mike Chapple & David Seidl
+
+**How to pass**
+
+- Install Wireshark (free) and capture your own network traffic — hands-on analysis builds intuition fast
+- Use Cisco Packet Tracer (free) to build and defend virtual networks before exams
+- Know the difference between IDS (detect only) and IPS (detect + block) — exam-critical
+- Relate every defence mechanism to a specific attack from UUY-CYB 212 — show the attack/defence pairing
+
+### UUY-CYB 222 — Web and Mobile Applications Security
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-222
+- 2 units · 200 Level · Second Semester
+
+Attacking and defending web and mobile applications. Covers the OWASP Top 10 in depth, secure coding practices for Java/Python/Kotlin/Swift, audit and QA testing, and mobile-specific threats on iOS and Android platforms.
+
+**Outline**
+
+1. The impact of the internet and web applications on the business world
+2. Principles and strategies for the design and implementation of secure applications — writing software that makes it difficult for intruders to exploit security loopholes in applications/code
+3. Secure program development for mobile (Android, iOS) and web
+4. Delineation of web-based risks, common website attacks, weaknesses, and security best practices
+5. Value and importance of vulnerability and security assessment for web and mobile applications
+6. Attributes and qualities of secure coding practices
+7. Role and importance of audit compliance and quality assurance testing for web/mobile applications
+8. Next-generation challenges in securing web/mobile applications and data
+9. Lifecycle approach to web/mobile application security
+
+**Recommended textbooks**
+
+- The Web Application Hacker's Handbook — Stuttard & Pinto
+- Real-World Bug Hunting — Peter Yaworski
+
+**How to pass**
+
+- PortSwigger Web Security Academy is free and has labs for every OWASP Top 10 vulnerability — essential
+- DVWA (Damn Vulnerable Web Application) is a free practice target you can run locally
+- For every vulnerability, know: how it works, how to exploit it, and how to fix it
+- Bug bounty write-ups on HackerOne and Bugcrowd are the best real-world case studies
+
+### UUY-DTS 224 — Programming in Data Science
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-224
+- 2 units · 200 Level · Second Semester
+
+The working Python data stack: NumPy, pandas, Matplotlib and scikit-learn. Where the mathematics of the other 200 Level courses becomes code you can run on a real dataset.
+
+**Outline**
+
+1. The scientific Python ecosystem; notebooks, environments and package management
+2. NumPy: ndarrays, dtypes, vectorisation, broadcasting, slicing and linear algebra routines
+3. pandas: Series and DataFrame, indexing, selection and filtering
+4. Data cleaning in pandas: missing values, type conversion, duplicates, string operations
+5. Reshaping and combining data: groupby, pivot, melt, merge and concat
+6. Time-series handling: datetime indexes, resampling and rolling windows
+7. Visualisation with Matplotlib and Seaborn
+8. An introduction to scikit-learn: the estimator API, fit/predict, pipelines
+9. Writing reusable code: functions, modules, virtual environments and version control with Git
+
+**Recommended textbooks**
+
+- Python for Data Analysis — Wes McKinney
+- Python Data Science Handbook — Jake VanderPlas
+
+**How to pass**
+
+- Learn groupby properly — the split-apply-combine pattern solves an astonishing share of real analysis tasks
+- Write vectorised NumPy/pandas code rather than Python loops; on a large dataset the difference is minutes versus hours
+- Keep every notebook in Git from day one. Reproducibility is a graded expectation by DTS 417
+- Recreate a chart you have seen in a news article using Matplotlib; matching a real design teaches more than following a tutorial
+
+## 300 Level
+
+### CSC 319 — Artificial Intelligence
+
+- URL: https://www.aretecyb.tech/courses/csc-319
+- 2 units · 300 Level · First Semester
+
+Foundations of AI: intelligent agents, search algorithms, knowledge representation, semantic networks, natural language processing, and expert systems. Directly relevant to AI-powered anomaly detection, prediction, and automated analysis across computing.
+
+**Outline**
+
+1. Overview, history, goals, types, branches and applications of AI
+2. Intelligent agents: performance, faculties, rationality, environment, architectures
+3. Search: general classes of AI search problems, techniques and strategies
+4. Knowledge representation: predicate logic, non-monotonic logic, probabilistic reasoning
+5. Semantic networks and frames
+6. Natural language processing: syntactic and semantic structures
+7. Expert systems: characteristics, components, types, development
+8. Programming languages for AI; introduction to computer image recognition
+9. Lab: Turing test, facial recognition, chatbots, spam detection, sentiment analysis, machine translation
+
+**Recommended textbooks**
+
+- Artificial Intelligence: A Modern Approach — Stuart Russell & Peter Norvig
+- Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow — Aurélien Géron
+
+**How to pass**
+
+- Understand A* search intuitively by tracing it on a grid before studying the formal algorithm
+- Connect AI to a concrete application in your own field in every exam answer — applied answers score higher
+- Google's free Machine Learning Crash Course covers supervised/unsupervised ML at the right level
+- AI ethics questions (bias, fairness) appear frequently — develop considered, referenced arguments
+
+### CYB 311 — Cryptography Techniques, Algorithms and Applications
+
+- URL: https://www.aretecyb.tech/courses/cyb-311
+- 2 units · 300 Level · First Semester
+
+The mathematical and algorithmic foundations of modern cryptography: symmetric and asymmetric cryptosystems, key management, hash functions, digital signatures, PKI, and protocol security. The theoretical backbone of all secure communications.
+
+**Outline**
+
+1. Introduction to cryptography: symmetric and asymmetric cryptosystems, key management
+2. Cryptanalysis; stream ciphers, block ciphers, and Feistel ciphers
+3. Hash functions; data integrity, authentication, and perfect secrecy
+4. Public-key cryptography and discrete algorithms: ElGamal, algorithmic number theory, primality testing
+5. Security of ElGamal and RSA encryption; RSA key generation; discrete logarithm schemes
+6. Selected cryptosystems: DES, RSA, and the AES symmetric block cipher
+7. PKI, SSL, and VPN
+8. Digital signatures, pseudo-random number generation, and cryptographic protocols
+9. Certificate authorities; policies and procedures for the proper use of cryptography
+
+**Recommended textbooks**
+
+- Cryptography and Network Security — William Stallings
+- Introduction to Modern Cryptography — Katz & Lindell
+
+**How to pass**
+
+- Work through RSA key generation by hand at least twice — the maths is not complex once you step through it
+- Know the difference between confidentiality (encryption), integrity (MAC/hash), and authentication (signature)
+- Computerphile on YouTube has outstanding, accessible videos on every topic in this course — free
+- Quantum threats from this course directly link to CYB 222 (Innovation) and CYB 411 (Vulnerability Assessment)
+
+### CYB 312 — Biometrics Security
+
+- URL: https://www.aretecyb.tech/courses/cyb-312
+- 2 units · 300 Level · First Semester
+
+Biometric authentication systems: digital image/signal processing, matching algorithms, error metrics, and data security. Covers implementation in national identity systems and access control.
+
+**Outline**
+
+1. Introduction to biometrics and digital image processing
+2. Biometric algorithms and systems: face, fingerprint, iris, voice
+3. Automated biometric identification and multimodal biometrics
+4. Biometric data: raw data, template data, and data methods
+5. Matching basics: enrolment, match threshold, matching performance
+6. Calculating error rates and graphs (FAR, FRR, EER)
+7. Storage of biometric data: transactions, quality upgrades, data security and integrity
+8. Privacy issues; security strength and recognition rates
+9. Applications of biometrics and future trends; alternatives to passwords and smart cards
+
+**Recommended textbooks**
+
+- Introduction to Biometrics — Anil K. Jain, Arun A. Ross & Karthik Nandakumar
+- Biometric System and Data Analysis — Ted Dunstone & Neil Yager
+
+**How to pass**
+
+- FAR vs FRR trade-off is the most examined concept — understand the EER graphically
+- Nigeria's NIN (National Identity Number) system is a real-world case study for national biometrics
+- Biometric privacy connects to the Nigeria Data Protection Act from CYB 224 — link them
+- Presentation attack / spoofing scenarios make excellent exam answers for "practical examples"
+
+### CYB 313 — Cybersecurity Risks Analysis, Challenges and Mitigation
+
+- URL: https://www.aretecyb.tech/courses/cyb-313
+- 2 units · 300 Level · First Semester
+
+Systematic methods for identifying, analysing, and treating cybersecurity risks. Covers applied information security management, risk mitigation in the cloud, governance and security policy, the ISO 27000 series, and the economic/geopolitical factors behind Africa's cyber risk exposure.
+
+**Outline**
+
+1. Principles of applied information security management
+2. Cybersecurity risks, challenges, and the path forward; recognizing risks
+3. Decision and risk analysis techniques; mitigating risks and vulnerabilities
+4. Effective use of assessments for cybersecurity risk mitigation, including in the cloud
+5. Economic and geopolitical factors behind Africa's vulnerability to cyber-attacks
+6. Governance and security policy; threat and vulnerability management
+7. Incident management, risk assessment and risk management frameworks
+8. Information leakage, crisis management, and business continuity
+9. ISO 27000 series and the Plan-Do-Check-Act model
+10. Incident response, forensics, and investigations; legal and regulatory drivers
+
+**Recommended textbooks**
+
+- Risk Analysis and the Security Survey — James F. Broder & Gene Tucker
+- CompTIA Security+ Study Guide — Mike Chapple & David Seidl
+
+**How to pass**
+
+- Practise ALE/SLE/ARO calculations until they are automatic — they appear in nearly every exam
+- STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation) — memorise and apply it to any system
+- Risk registers are a practical exam task — practise building one for a sample organisation
+- BCP and DR are distinct: BCP keeps the business running, DR recovers IT systems — know the difference
+
+### DTS 312 — Big Data Computing
+
+- URL: https://www.aretecyb.tech/courses/dts-312
+- 2 units · 300 Level · First Semester
+
+What changes when the data no longer fits on one machine. Distributed storage and computation, the MapReduce model, Hadoop and Spark, and the architectural patterns of modern data platforms.
+
+**Outline**
+
+1. Characterising big data: volume, velocity, variety, veracity and value
+2. Why scale-up fails and scale-out wins; commodity clusters and fault tolerance
+3. Distributed file systems: HDFS architecture, blocks, replication, NameNode and DataNodes
+4. The MapReduce programming model: map, shuffle, reduce; worked word-count and join examples
+5. The Hadoop ecosystem: YARN, Hive, HBase, Sqoop, Flume
+6. Apache Spark: RDDs, DataFrames, lazy evaluation, transformations vs actions, in-memory computation
+7. Spark SQL and PySpark for data processing
+8. Stream processing concepts: Kafka, windowing, and batch vs streaming architectures
+9. NoSQL stores and the CAP theorem; cloud big-data services
+
+**Recommended textbooks**
+
+- Hadoop: The Definitive Guide — Tom White
+- Learning Spark — Damji, Wenig, Das & Lee
+- Designing Data-Intensive Applications — Martin Kleppmann
+
+**How to pass**
+
+- Be able to trace a word-count through map → shuffle → reduce by hand; it is the classic exam question and it teaches the model properly
+- Install Spark locally (or use a free Databricks Community workspace) and run PySpark on a few million rows — the concepts stay abstract until you see a job execute
+- Understand WHY Spark is faster than MapReduce (in-memory, DAG scheduling, lazy evaluation) rather than just asserting it
+- The CAP theorem is examined nearly every year: know what each letter means and why you can only have two
+
+### DTS 314 — Data Management I
+
+- URL: https://www.aretecyb.tech/courses/dts-314
+- 3 units · 300 Level · First Semester
+
+Database systems for the data professional, going well beyond UUY-DTS 112: advanced SQL, indexing and query performance, transactions and concurrency, and the design of data models that survive real workloads.
+
+**Outline**
+
+1. Review of the relational model and relational algebra
+2. Advanced SQL: window functions, common table expressions, recursive queries, set operations
+3. Views, stored procedures, triggers and user-defined functions
+4. Physical design: storage structures, indexing (B-tree, hash), and when an index hurts
+5. Query processing and optimisation; reading an execution plan
+6. Transactions: ACID properties, concurrency control, locking, isolation levels and deadlock
+7. Recovery, backup strategies and write-ahead logging
+8. Database security: privileges, roles, injection prevention and encryption at rest
+9. Distributed databases and NoSQL families: key-value, document, column-family and graph stores
+
+**Recommended textbooks**
+
+- Database System Concepts — Silberschatz, Korth & Sudarshan
+- SQL Performance Explained — Markus Winand
+
+**How to pass**
+
+- Window functions are the highest-leverage SQL skill you can learn at this level — running totals, rankings and period-over-period comparisons all become one query
+- Run EXPLAIN on your slow queries and read the plan. Knowing why a query is slow is a rarer skill than writing SQL at all
+- Learn the isolation levels with the anomaly each one permits (dirty read, non-repeatable read, phantom) — that table is a standing exam question
+- Practise on a database with at least a million rows; performance concepts are invisible on toy data
+
+### DTS 318 — Ethics and Legal Issues in Data Science
+
+- URL: https://www.aretecyb.tech/courses/dts-318
+- 2 units · 300 Level · First Semester
+
+The obligations that come with holding and modelling data about people: privacy law, consent, algorithmic fairness, transparency and accountability. The course that determines whether your technical skill does good or harm.
+
+**Outline**
+
+1. Ethical frameworks applied to data: consequentialist, deontological and virtue perspectives
+2. Privacy: informational self-determination, consent, purpose limitation and data minimisation
+3. Anonymisation, pseudonymisation and re-identification risk; k-anonymity and differential privacy in outline
+4. Data protection law: the Nigeria Data Protection Act, the NDPR, and the GDPR as a comparator
+5. Rights of data subjects: access, rectification, erasure, portability and objection
+6. Algorithmic bias and fairness: sources of bias, fairness metrics, and their trade-offs
+7. Transparency, explainability and the right to an explanation; black-box models in high-stakes decisions
+8. Accountability, auditing, and the governance of automated decision-making
+9. Professional codes of conduct and case studies of data science failures
+
+**Recommended textbooks**
+
+- Weapons of Math Destruction — Cathy O'Neil
+- Ethics and Data Science — Loukides, Mason & Patil
+- Fairness and Machine Learning — Barocas, Hardt & Narayanan
+
+**How to pass**
+
+- Know the Nigeria Data Protection Act and the NDPR specifically — Nigerian law is what you are examined on and what will actually govern your work
+- Learn why the different fairness metrics are mathematically incompatible; "just make it fair" is not an available option and examiners want you to know that
+- Prepare three real case studies (e.g. COMPAS, a credit-scoring case, a facial-recognition case) in enough detail to analyse rather than merely name
+- This is the course whose content you will most often actually need after graduation — treat it as professional training, not a compliance box
+
+### GST 311 — Peace and Conflict Resolution
+
+- URL: https://www.aretecyb.tech/courses/gst-311
+- 2 units · 300 Level · First Semester
+
+The nature of conflict, the conditions for peace, and the practical machinery of resolution — negotiation, mediation and arbitration. Applied to the Nigerian and West African context.
+
+**Outline**
+
+1. Basic concepts: peace, conflict, violence, security and human security
+2. Types and causes of conflict: economic, political, ethnic, religious and resource conflict
+3. Theories of conflict and conflict dynamics; conflict escalation and de-escalation
+4. Peace as a process: peacekeeping, peacemaking, peacebuilding and peace enforcement
+5. Conflict resolution mechanisms: negotiation, mediation, conciliation, arbitration and adjudication
+6. Alternative dispute resolution (ADR) and traditional African conflict-resolution systems
+7. The role of government, civil society, NGOs and international bodies (UN, AU, ECOWAS)
+8. Case studies of conflict and resolution in Nigeria and West Africa
+9. Developing a culture of peace; the role of the media and of data in early warning
+
+**Recommended textbooks**
+
+- Peace and Conflict Studies — David P. Barash & Charles P. Webel
+- Introduction to Peace and Conflict Resolution — UniUyo GST course team
+
+**How to pass**
+
+- Learn the resolution mechanisms as a ladder from least to most binding (negotiation → mediation → arbitration → adjudication); scenario questions ask you to pick the right rung
+- Have two Nigerian case studies fully prepared — specificity is what separates an A from a C in the essay
+- Conflict early-warning systems are increasingly data-driven; mentioning that connection is a genuine differentiator in your answers
+- This is another GST course of easy marks; do the past questions rather than over-reading
+
+### GST 312 — Peace and Conflict Resolution
+
+- URL: https://www.aretecyb.tech/courses/gst-312
+- 2 units · 300 Level · First Semester
+
+The causes, dynamics, and resolution of conflict in a multi-ethnic nation: types and theories of conflict, root causes of conflict and violence in Africa, peacebuilding strategies, and the roles of international organisations, media, and traditional institutions.
+
+**Outline**
+
+1. Concepts of peace, conflict, and security in a multi-ethnic nation
+2. Types and theories of conflict: ethnic, religious, economic, geo-political
+3. Root causes of conflict and violence in Africa; selected conflict case studies
+4. Peacebuilding, management of conflicts and security
+5. Insurgency and terrorism; peace mediation and peacekeeping
+6. Alternative Dispute Resolution: dialogue, arbitration, negotiation, collaboration
+7. Roles of international organisations: UN, African Union, ECOWAS
+8. Media and traditional institutions in peacebuilding
+9. Managing post-conflict situations: refugees, IDPs, and the role of NGOs
+
+**Recommended textbooks**
+
+- The Handbook of Conflict Resolution — Morton Deutsch, Peter T. Coleman & Eric C. Marcus
+- Peace and Conflict Studies — David P. Barash & Charles P. Webel
+
+**How to pass**
+
+- Tie cyber-conflict topics back to your own security or computing courses for cross-course reinforcement
+- Current events in Nigeria provide excellent case studies for conflict analysis questions
+- Understand the UN Charter and its limitations regarding cyber operations — examined often
+- Mediator vs arbitrator vs conciliator: know the distinctions precisely
+
+### UUY-CYB 314 — Information Security Models
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-314
+- 2 units · 300 Level · First Semester
+
+The formal models that underpin access control and multi-level security: Bell-LaPadula, Biba, Clark-Wilson, Brewer-Nash, and the access-control mechanisms (MAC, RBAC, ACLs, lattice-based control) that implement them in real systems.
+
+**Outline**
+
+1. Basic concepts of formal security models; Access Control Lists (ACL)
+2. Bell-LaPadula model (confidentiality) and the Biba model (integrity)
+3. Brewer and Nash model (Chinese Wall) and the Clark-Wilson model
+4. Capability-based security and the Object-Capability Model
+5. Context-Based Access Control (CBAC) and Graham-Denning model
+6. Harrison-Ruzzo-Ullman (HRU) and the Take-Grant protection model
+7. Lattice-Based Access Control (LBAC), Mandatory Access Control (MAC), and Multi-Level Security (MLS)
+8. Non-interference security; Role-Based Access Control (RBAC)
+9. Protection rings and the High-Water Mark security model
+
+**Recommended textbooks**
+
+- Computer Security: Principles and Practice — William Stallings & Lawrie Brown
+- Security Engineering — Ross Anderson
+
+**How to pass**
+
+- Contrast Bell-LaPadula (confidentiality: "no read up, no write down") with Biba (integrity: the reverse) — this pairing is exam-critical
+- Draw the lattice for MLS/LBAC by hand — visualising the ordering makes the model click
+- Link RBAC and MAC back to UUY-CYB 122 and UUY-CYB 221, where these controls are applied practically
+- Memorise which model addresses which property (confidentiality, integrity, or conflict of interest) — a common exam table
+
+### UUY-CYB 315 — Lab for Cyber Attacks and Vulnerability Testing
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-315
+- 2 units · 300 Level · First Semester
+
+Hands-on laboratory course in offensive/defensive security: operating system file structures, formal security models, intrusion detection, vulnerability testing, and countermeasures for denial-of-service, worm, and virus attacks.
+
+**Outline**
+
+1. Operating system file structure and protection mechanisms
+2. Formal models of security
+3. Cryptography and steganography
+4. Network and distributed system security
+5. Vulnerability testing on networked infrastructure
+6. Intrusion detection tasks on networked computer systems
+7. Denial-of-service attack strategies and prevention
+8. Worms and viruses: attack strategies and countermeasures
+9. Transfer of funds/value across networks; electronic voting security
+
+**Recommended textbooks**
+
+- The Hacker Playbook 3 — Peter Kim
+- Kali Linux Revealed — Raphaël Hertzog & Jim O'Gorman
+
+**How to pass**
+
+- Set up a local lab with VirtualBox + Kali Linux + Metasploitable before the first lab session
+- TryHackMe and HackTheBox both have beginner paths that map directly to this lab content — free tiers available
+- Document everything in your lab notebook: tools used, commands run, findings, screenshots
+- Practise on legal targets ONLY: Metasploitable, DVWA, HackTheBox, TryHackMe — never on live systems
+
+### UUY-CYB 316 — Database Management and Control Systems
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-316
+- 2 units · 300 Level · First Semester
+
+Securing database systems from the ground up: installing and configuring a database product, security architecture and operating-system security principles, user/privilege/role administration, and database auditing models and practice.
+
+**Outline**
+
+1. Enterprise security issues in database systems
+2. Installing a typical database product
+3. Security architecture and operating system security principles
+4. Administration of users, profiles, and password policies
+5. Privileges and roles
+6. Database application security models
+7. Database auditing models and application data auditing
+8. Practices of database auditing
+
+**Recommended textbooks**
+
+- Database System Concepts — Silberschatz, Korth & Sudarshan
+- Database Security and Auditing — Hassan Afyouni
+
+**How to pass**
+
+- Use MySQL Workbench or pgAdmin (both free) to practise installing and securing a database hands-on
+- Database roles and privileges follow the same access-control logic as UUY-CYB 314 (Information Security Models) — connect them
+- Practise setting up a users/privileges/password-policy scheme for a sample organisation — a common practical exam task
+- SQL injection prevention from CYB 224 directly applies here — connect both courses in exam answers
+
+### UUY-DTS 311 — Analytics of Web Data
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-311
+- 2 units · 300 Level · First Semester
+
+Measuring and analysing behaviour on the web: clickstream and log data, web analytics platforms, funnels and attribution, plus text and network analysis of web content. Builds directly on UUY-DTS 121.
+
+**Outline**
+
+1. Sources of web data: server logs, clickstream, tags, cookies and event tracking
+2. Web analytics platforms: metrics, dimensions, sessions, users and events (GA4 model)
+3. Traffic analysis: acquisition channels, bounce and engagement, retention and cohorts
+4. Conversion funnels, goals and attribution models
+5. Segmentation of web audiences; behavioural clustering
+6. A/B testing and experimentation on the web: design, sample size and interpretation
+7. Web content mining: scraping at scale, parsing, deduplication and storage
+8. Text analytics on web content: tokenisation, TF-IDF, sentiment analysis, topic modelling
+9. Web structure mining: link graphs, PageRank, and social network analysis measures
+
+**Recommended textbooks**
+
+- Web Analytics 2.0 — Avinash Kaushik
+- Mining the Social Web — Matthew A. Russell & Mikhail Klassen
+- Mining of Massive Datasets — Leskovec, Rajaraman & Ullman
+
+**How to pass**
+
+- Set up analytics on any small site (even a personal page) and watch real traffic — the vocabulary only sticks when attached to real numbers
+- PageRank is an eigenvector computation, which connects straight back to your linear algebra; understanding it that way is what earns the top marks
+- A/B testing is applied DTS 224 — the sample-size and p-value questions are the same statistics in a commercial costume
+- Be careful with the ethics of scraping here; the legal boundaries you learned in DTS 318 are examinable in this context too
+
+### UUY-DTS 313 — Machine Learning and Applications
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-313
+- 2 units · 300 Level · First Semester
+
+The core machine learning course: supervised and unsupervised algorithms, how they are trained, how they are evaluated, and how they fail. The technical centrepiece of the degree.
+
+**Outline**
+
+1. The learning problem: supervised, unsupervised, semi-supervised and reinforcement learning
+2. Linear and logistic regression; loss functions and gradient descent
+3. Regularisation: ridge, lasso, and the bias–variance trade-off revisited
+4. k-nearest neighbours, Naive Bayes and support vector machines
+5. Decision trees, and ensembles: bagging, random forests and gradient boosting
+6. Unsupervised learning: k-means, hierarchical clustering, DBSCAN
+7. Dimensionality reduction: principal component analysis and t-SNE
+8. Model evaluation: confusion matrix, precision, recall, F1, ROC/AUC, cross-validation, hyperparameter tuning
+9. Introduction to neural networks: perceptrons, backpropagation, and where deep learning applies
+
+**Recommended textbooks**
+
+- An Introduction to Statistical Learning — James, Witten, Hastie & Tibshirani
+- Hands-On Machine Learning with Scikit-Learn, Keras and TensorFlow — Aurélien Géron
+- The Elements of Statistical Learning — Hastie, Tibshirani & Friedman
+
+**How to pass**
+
+- Accuracy is a misleading metric on imbalanced data — learn precision, recall and the ROC curve properly, and be able to argue which matters for a given problem
+- Implement linear regression and k-means from scratch in NumPy once. After that, using scikit-learn is informed rather than magical
+- For every algorithm, learn its inductive bias — what it assumes about the data. That is what tells you when to reach for it
+- Compete in one beginner Kaggle competition; the feedback loop teaches evaluation discipline faster than any lecture
+
+### UUY-DTS 317 — Basic Operating Systems for Data Science
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-317
+- 2 units · 300 Level · First Semester
+
+Operating system fundamentals with a practical Linux emphasis: processes, memory, file systems, the shell, and containers. The environment every data pipeline actually runs in.
+
+**Outline**
+
+1. Operating system functions, structure and system calls
+2. Processes and threads: states, scheduling, context switching and inter-process communication
+3. Concurrency: race conditions, mutual exclusion, semaphores and deadlock
+4. Memory management: paging, segmentation, virtual memory and thrashing
+5. File systems: structure, permissions, links, mounting and I/O
+6. The Linux shell: navigation, pipes and redirection, grep/awk/sed, process control
+7. Shell scripting and job scheduling with cron
+8. Package management, environments and dependency isolation
+9. Virtualisation and containers: Docker images, containers and volumes for reproducible analysis
+
+**Recommended textbooks**
+
+- Operating System Concepts — Silberschatz, Galvin & Gagne
+- The Linux Command Line — William Shotts
+
+**How to pass**
+
+- Use Linux (or WSL on Windows) as your daily environment for one semester — nothing else builds shell fluency
+- Learn grep, awk, sed and pipes properly: on a 10 GB log file the command line beats pandas, and it beats it by a lot
+- Docker is the answer to "it works on my machine" — containerise one of your own projects and the concept lands permanently
+- Deadlock conditions (mutual exclusion, hold-and-wait, no preemption, circular wait) are a guaranteed exam question — memorise all four
+
+### CYB 311 — SIWES I (Student Industrial Work Experience Scheme)
+
+- URL: https://www.aretecyb.tech/courses/cyb-311-siwes-1
+- 3 units · 300 Level · Second Semester
+
+The first industrial training placement: three months attached to a private or public organisation during the second-year long break, gaining practical cybersecurity experience under supervision, with a defended report at the end.
+
+**Outline**
+
+1. IT department integration and workplace orientation
+2. Practical network administration and monitoring
+3. Security operations: log review, alert triage, incident handling
+4. Help desk and technical support operations
+5. Observing penetration testing or vulnerability management
+6. Documenting processes and writing technical reports
+7. Professional communication and teamwork in IT environments
+8. Identifying and reporting your learning outcomes
+
+**Recommended textbooks**
+
+- SIWES Student Handbook — ITF (Industrial Training Fund)
+- The IT Professional's Guide to Career Development — Various
+
+**How to pass**
+
+- Start searching for a placement organisation at the end of 200L second semester — do not wait
+- Security operations centres (SOCs), banks, telecoms companies, and NITDA are good placement targets
+- Keep a daily log of what you do — your SIWES report grade depends on evidence of engagement
+- Ask your supervisor for tasks beyond basic support — every real challenge is a learning opportunity
+
+### CYB 312 — SIWES II (Student Industrial Work Experience Scheme)
+
+- URL: https://www.aretecyb.tech/courses/cyb-312-siwes-2
+- 3 units · 300 Level · Second Semester
+
+The second, more advanced industrial placement: three months attached to a private or public organisation during the third-year long break, building on SIWES I with additional practical cybersecurity experience and a defended report.
+
+**Outline**
+
+1. Advanced security monitoring and SIEM usage in production
+2. Participation in or observation of incident response
+3. Vulnerability assessment contribution
+4. Security awareness training participation
+5. Independent security research or mini-investigation
+6. Cross-functional collaboration with non-IT departments
+7. Professional certification preparation (optional but valuable)
+8. SIWES II technical report and supervisor evaluation
+
+**Recommended textbooks**
+
+- SIWES Student Handbook — ITF (Industrial Training Fund)
+- CompTIA Security+ or CEH Study Guide — Various
+
+**How to pass**
+
+- Use SIWES to begin working towards a professional certification: Security+, CEH, or OSCP
+- Build your LinkedIn profile during SIWES — document your work and achievements professionally
+- Network actively: every senior professional you meet is a potential reference or employer
+- Your SIWES report is a professional document — write it to the standard you would send to a client
+
+### CYB 313 — Report Writing
+
+- URL: https://www.aretecyb.tech/courses/cyb-313-report-writing
+- 3 units · 300 Level · Second Semester
+
+The craft of professional and technical report writing, focused on documenting the SIWES I and II placements: structuring findings, presenting technical work clearly, and defending a written report before a panel.
+
+**Outline**
+
+1. Structure of a professional technical report
+2. Documenting workplace experience and technical assignments
+3. Clarity, precision, and objectivity in technical writing
+4. Figures, tables, and appendices in a technical report
+5. Referencing and academic/professional integrity
+6. Editing and proofreading technical documents
+7. Preparing to defend a written report before a panel
+8. Common pitfalls in student technical reports
+
+**Recommended textbooks**
+
+- Technical Report Writing Today — Daniel G. Riordan
+- The Elements of Technical Writing — Gary Blake & Robert W. Bly
+
+**How to pass**
+
+- Draft this report alongside your SIWES I/II placements rather than after — memory of details fades fast
+- Use the ITF SIWES logbook as your raw source material, then structure it into a formal report
+- Have a peer or supervisor read a draft before submission — clarity gaps are hard to see in your own writing
+- Practise a short verbal summary of your report; panels often ask you to explain it in your own words
+
+### CYB 314 — Mini Project
+
+- URL: https://www.aretecyb.tech/courses/mini-project-300l
+- 3 units · 300 Level · Second Semester
+
+A supervised mini research or development project that demonstrates integration of skills acquired across the first six semesters. Serves as a preparation and rehearsal for the 400L Final Year Project.
+
+**Outline**
+
+1. Topic selection: scope, feasibility, and originality
+2. Literature review methodology
+3. Research/development methodology selection
+4. Designing and building a cybersecurity solution or tool
+5. Data collection, analysis, or system implementation
+6. Academic writing: introduction, methodology, results, conclusion
+7. Referencing and academic integrity
+8. Oral presentation and project defence
+
+**Recommended textbooks**
+
+- Research Methods for Computer Science — Stuart Shapiro
+- Writing for Computer Science — Justin Zobel
+
+**How to pass**
+
+- Choose a project topic that excites you — you will work on it for a full semester
+- Select a topic that connects to your SIWES experience — it gives you real-world data and context
+- Start your literature review early: academic papers take time to find and read
+- The mini project is a rehearsal for FYP — treat it seriously and document everything
+
+### CYB 399 — Seminar
+
+- URL: https://www.aretecyb.tech/courses/seminar-300l
+- 3 units · 300 Level · Second Semester
+
+A series of student-led presentations on advanced topics in cybersecurity. Develops research, critical analysis, and public speaking skills in a professional academic setting.
+
+**Outline**
+
+1. Selecting a cutting-edge cybersecurity topic
+2. Academic literature search and evaluation
+3. Structuring a 20-minute technical presentation
+4. Slide design for technical audiences
+5. Handling questions from examiners and peers
+6. Peer review and constructive feedback
+7. Current trends: AI security, quantum threat, ransomware economics
+8. Writing a seminar paper to accompany the presentation
+
+**Recommended textbooks**
+
+- The Craft of Research — Booth, Colomb & Williams
+- Presentation Zen — Garr Reynolds
+
+**How to pass**
+
+- Choose a seminar topic from an area where you have genuine curiosity — passion shows in delivery
+- Rehearse your presentation at least three full times before the seminar day
+- Anticipate questions: list five things an examiner might ask and prepare short, confident answers
+- Clear slides with minimal text and good diagrams outperform bullet-point-heavy decks every time
+
+### DTS 399 — SIWES
+
+- URL: https://www.aretecyb.tech/courses/dts-399
+- 6 units · 300 Level · Second Semester
+
+Students Industrial Work Experience Scheme — a full-semester supervised industrial placement. Six units and 270 practical hours, the largest single course in the programme, assessed on your logbook, technical report and defence.
+
+**Outline**
+
+1. Securing a placement relevant to data science: analytics teams, banks, telcos, research institutes, government agencies, tech companies
+2. Workplace conduct, confidentiality and professional ethics
+3. Applying the data lifecycle in an organisational setting
+4. Maintaining the SIWES logbook: daily entries, tasks, tools and skills acquired
+5. Industrial supervisor and institution-based supervisor assessment
+6. Writing the SIWES technical report: structure, evidence and reflection
+7. Oral defence of the placement experience
+8. Identifying a real-world problem that could become your final-year project
+
+**Recommended textbooks**
+
+- ITF SIWES Guidelines — Industrial Training Fund
+- Departmental SIWES Handbook — Department of Data Science, UniUyo
+
+**How to pass**
+
+- Start looking for a placement a full semester early — the good data-related placements go first and generic clerical placements waste your six units
+- Fill the logbook the same day, every day. Reconstructing five months of entries the week before submission is obvious to any examiner and costs marks
+- Ask to be given at least one end-to-end task you own; a placement where you only observed is very hard to write six units of report about
+- Treat SIWES as final-year project reconnaissance — the best projects come from a real problem you saw at your placement
+
+### UUY-DTS 321 — Computing Skills
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-321
+- 3 units · 300 Level · Second Semester
+
+A wholly practical course consolidating the professional toolchain: version control, environments, testing, documentation and deployment. The skills that make you employable rather than merely knowledgeable.
+
+**Outline**
+
+1. Version control with Git: commits, branches, merging, rebasing, pull requests and collaboration
+2. Project structure and dependency management for reproducible analysis
+3. Writing clean, documented, reusable code; style guides and code review
+4. Testing: unit tests for data code, assertions and data validation
+5. Command-line productivity and automation
+6. Notebooks vs scripts vs packages: choosing the right artefact
+7. Documentation: READMEs, docstrings and technical writing for code
+8. Deployment basics: APIs for models, containerisation and cloud hosting
+9. Building and presenting a professional portfolio
+
+**Recommended textbooks**
+
+- Pro Git — Scott Chacon & Ben Straub
+- The Pragmatic Programmer — David Thomas & Andrew Hunt
+
+**How to pass**
+
+- Make small, frequent commits with real messages. "update" and "final v2 final" are habits that will embarrass you professionally
+- Every project you have ever done should end up in a public GitHub repo with a README that explains the problem, the data and the result
+- Learn branching and pull requests properly — this is how every team you will ever join actually works
+- Testing data code feels unnecessary until a silent schema change corrupts a month of results. Write the assertions
+
+### UUY-DTS 322 — Industry-based Innovation
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-322
+- 3 units · 300 Level · Second Semester
+
+A practical, industry-facing innovation project: identify a real problem in an organisation or sector, design a data-driven solution, and demonstrate it. Runs alongside SIWES and feeds directly into your final-year work.
+
+**Outline**
+
+1. Identifying an innovation opportunity within an industry context
+2. Stakeholder engagement and requirements gathering
+3. Design thinking: empathise, define, ideate, prototype, test
+4. Assessing data availability, quality and access constraints for a proposed solution
+5. Rapid prototyping of a data product
+6. Feasibility: technical, operational, economic and legal
+7. Measuring impact: defining success metrics before building
+8. Pitching a solution to a non-technical audience
+9. Documentation and handover of an innovation project
+
+**Recommended textbooks**
+
+- The Lean Startup — Eric Ries
+- Data Science for Business — Foster Provost & Tom Fawcett
+
+**How to pass**
+
+- Choose a problem you have personally observed — a real irritation you witnessed at your SIWES placement beats an impressive-sounding invented one
+- Check data availability before you commit to an idea; the most common failure here is a great plan with no obtainable data
+- Define your success metric in week one and hold yourself to it — this is exactly what UUY-DTS 211 taught you
+- Prototype ugly and early. A working rough demo persuades far more than a polished slide deck
+
+### UUY-DTS 323 — Seminar
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-323
+- 3 units · 300 Level · Second Semester
+
+Research and presentation skills: select a current topic in data science, review the literature, and present and defend it before staff and peers. Preparation for the literature review and defence of DTS 417/428.
+
+**Outline**
+
+1. Selecting and scoping a seminar topic in data science
+2. Literature search: Google Scholar, arXiv, IEEE Xplore, ACM Digital Library, open-access sources
+3. Evaluating sources: peer review, preprints, predatory journals and credibility
+4. Reading a research paper efficiently: the three-pass method
+5. Synthesising a literature review rather than summarising papers one by one
+6. Citation and referencing styles; reference managers (Zotero, Mendeley)
+7. Academic integrity and plagiarism avoidance
+8. Designing effective slides and speaking to a technical audience
+9. Handling questions and defending your position
+
+**Recommended textbooks**
+
+- Writing for Computer Science — Justin Zobel
+- How to Read a Paper — S. Keshav
+
+**How to pass**
+
+- Pick a topic narrow enough to cover properly — "AI in healthcare" is a book; "deep learning for malaria diagnosis from blood smear images" is a seminar
+- Read 15–20 papers but present the synthesis, not the list. A literature review that goes "Paper A said…, Paper B said…" scores poorly
+- Use a reference manager from your first paper; reformatting 30 citations by hand is a self-inflicted wound
+- Rehearse out loud with a timer at least three times. The questions afterwards are where marks are won and lost — prepare for the obvious ones
+
+## 400 Level
+
+### COS 411 — Research Methodology and Technical Report Writing
+
+- URL: https://www.aretecyb.tech/courses/cos-411
+- 3 units · 400 Level · First Semester
+
+The rigorous methods for conducting and communicating academic and technical research: research types and approaches, scientific investigation and problem formulation, data collection instruments, and the structure of technical reports. Essential preparation for the Final Year Project.
+
+**Outline**
+
+1. Foundations, types, and approaches of research; significance of research
+2. Research methods versus methodology; the research process; criteria for good research
+3. Scientific investigation, problem formulation, and definition of the research problem
+4. Data collection: primary and secondary data; questionnaires and interview guidelines
+5. Research proposals, research plans, and hypothesis formulation and testing
+6. Literature review procedure and referencing cited works
+7. Sampling design: types and steps in sampling
+8. Methods of analysis: processing, interpretation, and presentation of results
+9. Types of reports; technical report writing, layout, and documentation standards
+
+**Recommended textbooks**
+
+- Research Methods for Computer Science — Stuart Shapiro
+- Writing for Computer Science — Justin Zobel
+
+**How to pass**
+
+- This course is CYB 497 (FYP) preparation — every lecture directly applies to your final year project
+- Use Zotero (free reference management software) to organise your literature from the start
+- Plagiarism software is used on all final year projects: understand what constitutes academic misconduct
+- Begin identifying your FYP topic in this course — approach your supervisor before the semester ends
+
+### CYB 411 — Systems Vulnerability Assessment and Testing
+
+- URL: https://www.aretecyb.tech/courses/cyb-411
+- 2 units · 400 Level · First Semester
+
+Advanced vulnerability assessment methodology: systematic identification, testing, and mitigation of risks to a company's infrastructure. Covers penetration testing methodologies, information gathering, password cracking, social engineering, and reporting at a professional level.
+
+**Outline**
+
+1. Definition of systems vulnerability; assessment and testing methods
+2. Mitigation of risks and enhancing infrastructure security
+3. Penetration testing methodologies, test planning and scheduling
+4. Information gathering and password cracking
+5. Social engineering, internal and external penetration testing
+6. Router penetration testing, security analysis, reporting and documentation
+7. Operating systems fingerprinting and remote network mapping
+8. Software and operational vulnerabilities and how to overcome them
+9. Attack surface analysis, fuzz testing, patch management, and security auditing
+
+**Recommended textbooks**
+
+- The Hacker Playbook 3 — Peter Kim
+- Penetration Testing — Georgia Weidman
+
+**How to pass**
+
+- CVE/CVSS is the universal language of vulnerabilities — understand Base, Temporal, and Environmental scoring
+- Practice building a full assessment report from scanner output — this is the deliverable clients pay for
+- Connect each discovered vulnerability to the cryptography or network concepts from earlier courses
+- OWASP WSTG (Web Security Testing Guide) is the free, comprehensive standard for web assessments
+
+### CYB 412 — Steganography: Access Methods and Data Hiding
+
+- URL: https://www.aretecyb.tech/courses/cyb-412
+- 2 units · 400 Level · First Semester
+
+The art and science of concealing information: history of secret writing, steganography vs encryption, text/image/audio/video steganography techniques, information hiding and steganalysis, and steganography detection.
+
+**Outline**
+
+1. History of secret writing; overview of steganography
+2. Why steganography is important; steganography vs encryption
+3. Steganography types and methods: text, image, video and audio steganography
+4. Survey of steganography techniques for encrypting data
+5. Information hiding: steganography and steganalysis
+6. Data hiding methods, techniques, and access methods
+7. Steganographic algorithms and their security
+8. Steganography detection: finding images and verifying hidden content
+
+**Recommended textbooks**
+
+- Hiding in Plain Sight: Steganography and the Art of Covert Communication — Eric Cole
+- Digital Steganography and Watermarking — Fátima Terroso-Saenz et al.
+
+**How to pass**
+
+- Implement a simple LSB steganography tool in Python — it takes one hour and permanently fixes the concept
+- Understand why steganography matters for forensics: hidden data in images is a real-world challenge
+- Tools like Steghide, OpenStego, and SilentEye are free — use them to both hide and detect
+- Connect steganography to CYB 423 (Digital Forensics) — detection is a key forensic skill
+
+### CYB 413 — Cyber Threat Intelligence and Cyber Conflict
+
+- URL: https://www.aretecyb.tech/courses/cyb-413
+- 2 units · 400 Level · First Semester
+
+Techniques for detecting, responding to, and defeating organised cybercrime and cyberwar activities. Covers cyber threat intelligence (tactical, operational, and strategic), the kill chain, indicator lifecycle, and the evolution of counterterrorism and cyber conflict.
+
+**Outline**
+
+1. Detecting, responding to, and defeating organised cybercrimes and cyberwar activities
+2. Analysing successful and unsuccessful APT and malware campaigns
+3. National and international policies for combating cyber terrorism
+4. Cyber threat intelligence: defining threats, indicators of compromise
+5. Tactical threat intelligence: the kill chain and intrusion analysis; indicator lifecycle
+6. Operational threat intelligence: information sharing, campaigns and threat actors
+7. Strategic threat intelligence: threat modelling, organisational security posturing
+8. Event recording and incident sharing; evolution of counterterrorism and cyber conflict
+
+**Recommended textbooks**
+
+- The Threat Intelligence Handbook — CrowdStrike
+- Cyber War: The Next Threat to National Security — Richard A. Clarke & Robert K. Knake
+
+**How to pass**
+
+- MITRE ATT&CK (attack.mitre.org) is free and should be explored thoroughly — it is the industry standard
+- Use MISP or OpenCTI in a lab environment to understand how threat intel is operationalised
+- APT case studies (APT28/Fancy Bear, APT41, Lazarus Group) provide excellent exam material
+- Cyber conflict geopolitics from CYB 211 provides the strategic context — connect them explicitly
+
+### CYB 414 — Cloud Computing Security
+
+- URL: https://www.aretecyb.tech/courses/cyb-414
+- 2 units · 400 Level · First Semester
+
+Securing cloud environments: cloud service and deployment models, data-centre and virtualisation security, the cloud cube model, threat mitigation, and the standards (NIST, Cloud Security Alliance) that govern effective cloud management.
+
+**Outline**
+
+1. Cloud computing, vendors, threats, and the cloud reference model
+2. Cloud-enabling technologies, services, and service-oriented architectures
+3. Cloud service models (IaaS, PaaS, SaaS) and deployment models (Public, Private, Hybrid, Community)
+4. Data centres: servers, storage, networking and virtualisation
+5. The cloud cube model and security for cloud computing
+6. Cloud threats, threat mitigation, and security risks
+7. Cloud Security Alliance, NIST Information Assurance Framework, cloud audit
+8. Cloud business continuity planning and architectural best practices for designing for the cloud
+9. Economics of the cloud; cloud strategy and standards
+
+**Recommended textbooks**
+
+- Cloud Security and Privacy — Tim Mather, Subra Kumaraswamy & Shahed Latif
+- AWS Certified Security Specialty Study Guide — Chad Smith
+
+**How to pass**
+
+- AWS, Azure, and Google Cloud all offer free tiers — create an account and explore IAM hands-on
+- Cloud certifications (AWS Security Specialty, Azure SC-900) can be pursued during 400L
+- Shared responsibility is the most exam-critical concept: draw the model from memory
+- OWASP Cloud Top 10 is a free, authoritative reference for cloud-specific attack vectors
+
+### CYB 497 — Final Year Project I
+
+- URL: https://www.aretecyb.tech/courses/cyb-497
+- 3 units · 400 Level · First Semester
+
+The first phase of the capstone Final Year Project: an independent or group investigation of a cybersecurity-related problem, culminating in a written proposal covering the problem statement, objectives, scope, research gap, and proposed methodology. Supervised closely by an academic supervisor.
+
+**Outline**
+
+1. Identifying a researchable cybersecurity project topic under supervisor guidance
+2. Literature review to establish the research gap
+3. Referencing and acknowledging sources of information
+4. Conceptualising and designing a research methodology
+5. Determining tools for analysing data based on research objectives
+6. Writing a coherent project proposal: problem, aim, objectives, scope, significance
+7. Estimated schedule of completion and resources needed
+8. Oral presentation of the written project proposal
+9. Emerging-trend topics: AI, steganography, quantum computing, big data, cloud security, ethical hacking, digital forensics, blockchain, IoT, 5G security
+
+**Recommended textbooks**
+
+- Writing for Computer Science — Justin Zobel
+- The Craft of Research — Booth, Colomb & Williams
+
+**How to pass**
+
+- Meet your supervisor regularly — at minimum twice a month; consistent updates prevent last-minute crises
+- Choose a topic that either solves a real local cybersecurity problem or contributes something novel
+- Begin writing from day one: a rough chapter is easier to improve than a blank page
+- Document all design decisions and their justifications — examiners ask "why this approach?"
+
+### DTS 413 — Data Visualization for Data-driven Decision Making
+
+- URL: https://www.aretecyb.tech/courses/dts-413
+- 2 units · 400 Level · First Semester
+
+The theory and craft of visual communication: perception, encoding, chart selection, dashboard design and narrative. How an analysis becomes a decision.
+
+**Outline**
+
+1. Why visualisation works: visual perception, pre-attentive attributes and cognitive load
+2. The grammar of graphics: data, aesthetic mappings, geometries, scales, facets
+3. Choosing an encoding: position, length, angle, area, colour, shape — and their accuracy ranking
+4. Chart selection for comparison, distribution, composition, relationship and trend
+5. Colour: sequential, diverging and categorical palettes; colour-blind-safe design
+6. Common distortions: truncated axes, dual axes, misleading area, cherry-picked ranges
+7. Dashboard design: layout, hierarchy, interactivity and the audience's question
+8. Interactive and web visualisation: Plotly, Dash/Streamlit, D3 concepts
+9. Data storytelling: narrative structure, annotation and the single message per chart
+
+**Recommended textbooks**
+
+- The Visual Display of Quantitative Information — Edward R. Tufte
+- Fundamentals of Data Visualization — Claus O. Wilke
+- Storytelling with Data — Cole Nussbaumer Knaflic
+
+**How to pass**
+
+- Learn the accuracy ranking of visual encodings (position beats length beats angle beats area beats colour) — it answers most "which chart?" questions on its own
+- Never use a pie chart with more than three slices, and be ready to justify that rule in the exam
+- Collect bad charts from newspapers and rebuild them properly; critique-and-redesign is the fastest way to develop judgement
+- Every chart should have one message. If you cannot state it in a sentence, split the chart in two
+
+### DTS 417 — Final Year Project I
+
+- URL: https://www.aretecyb.tech/courses/dts-417
+- 3 units · 400 Level · First Semester
+
+The first half of the capstone: choose a problem, review the literature, design the methodology, secure the data, and defend a proposal. What you do this semester determines whether DTS 428 is manageable or miserable.
+
+**Outline**
+
+1. Selecting a feasible project topic with a genuine data source
+2. Defining the problem statement, aims, objectives and research questions
+3. Conducting and writing the literature review; establishing the research gap
+4. Designing the methodology: data, methods, evaluation criteria and tools
+5. Data acquisition, ethical clearance and data-use agreements where required
+6. Preliminary exploratory analysis and feasibility demonstration
+7. Project planning: milestones, deliverables and risk register
+8. Writing chapters one to three of the project report
+9. The proposal defence: presenting and defending your design
+
+**Recommended textbooks**
+
+- Research Methodology: Methods and Techniques — C.R. Kothari & Gaurav Garg
+- Departmental Project Handbook — Department of Data Science, UniUyo
+
+**How to pass**
+
+- Confirm you can actually obtain the data before you commit to the topic. No-data is the number one cause of a stalled project
+- Choose a supervisor whose interests match your topic and agree a fixed meeting rhythm in week one
+- Do the entire pipeline on a tiny sample early — an end-to-end rough version in month one beats a perfect chapter one and no code
+- Write as you go. Chapters one to three written in the last two weeks are visibly written in the last two weeks
+
+### INS 411 — Project Management
+
+- URL: https://www.aretecyb.tech/courses/ins-411
+- 2 units · 400 Level · First Semester
+
+Planning, executing and controlling projects: scope, schedule, cost, risk and stakeholders, across both traditional and agile approaches. Directly applicable to running your final-year project on time.
+
+**Outline**
+
+1. Project characteristics, the project lifecycle and the role of the project manager
+2. Project initiation: charter, stakeholders and scope definition
+3. Work breakdown structure and activity definition
+4. Scheduling: Gantt charts, network diagrams, CPM and PERT; critical path and float
+5. Resource allocation, levelling and cost estimation; budgeting
+6. Risk management: identification, qualitative and quantitative analysis, response planning
+7. Quality management and change control
+8. Agile approaches: Scrum roles, sprints, backlogs and ceremonies; Kanban
+9. Monitoring and control: earned value analysis; project closure and lessons learned
+
+**Recommended textbooks**
+
+- A Guide to the Project Management Body of Knowledge (PMBOK Guide) — Project Management Institute
+- Project Management: A Systems Approach — Harold Kerzner
+
+**How to pass**
+
+- CPM/PERT network problems are guaranteed and are pure method marks — practise drawing the network, computing earliest/latest times and identifying the critical path until it is mechanical
+- Know the difference between agile and waterfall well enough to argue which suits a data science project (usually agile — requirements shift as you learn what the data supports)
+- Actually build a Gantt chart for your DTS 417 project; students who plan their project finish it
+- Learn the earned value formulas (CV, SV, CPI, SPI) — they are compact, examinable and frequently forgotten
+
+### UUY-CYB 411 — Business Intelligence in Small and Medium-Scale Enterprises (BISME)
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-411
+- 2 units · 400 Level · First Semester
+
+Data analytics and business intelligence tools in the context of small and medium enterprises: BI applications in Excel and R, reporting tools, data warehousing and dimensional modelling, ETL, and how BI connects to big data and cloud computing.
+
+**Outline**
+
+1. Overview of BI concepts and applications using Excel and R
+2. SQL Server Reporting Services, Power BI, and Tableau
+3. BI architecture: data warehouse and BI architecture framework
+4. BI development approaches: Kimball's bus architecture vs Inmon's Corporate Information Factory
+5. Data governance and the TDWI BI maturity model
+6. Data models: entity-relationship (E/R) and dimensional modelling; OLAP
+7. Data integration: extract, transform, load (ETL)
+8. Big data and cloud computing in relation to BI and business analytics
+
+**Recommended textbooks**
+
+- Business Intelligence: A Managerial Perspective on Analytics — Ramesh Sharda, Dursun Delen & Efraim Turban
+- Data Warehousing in the Age of Big Data — Krish Krishnan
+
+**How to pass**
+
+- Microsoft Power BI Desktop is free — build a real dashboard using any Nigerian public dataset
+- Star schema vs snowflake schema is exam-critical — understand the trade-offs with real examples
+- Connect BI security to CYB 224 (Data Security) — BI platforms are high-value data targets
+- Microsoft Learn (free) has a complete Power BI learning path with certifications
+
+### UUY-DTS 410 — Special Topics in Data Science
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-410
+- 2 units · 400 Level · First Semester
+
+A rotating course on current developments in the field — the content varies year to year with staff expertise and what is moving in the discipline. Recent themes include deep learning, large language models, MLOps and causal inference.
+
+**Outline**
+
+1. Current research directions in data science and machine learning
+2. Deep learning architectures: CNNs for images, RNNs/Transformers for sequences
+3. Large language models: pretraining, fine-tuning, prompting and retrieval-augmented generation
+4. Natural language processing pipelines and embeddings
+5. MLOps: experiment tracking, model registries, monitoring and drift detection
+6. Causal inference: correlation vs causation, randomised experiments, difference-in-differences
+7. Responsible and explainable AI: SHAP, LIME and model interpretability
+8. Edge cases and emerging areas: federated learning, synthetic data, AutoML
+9. Reading and critiquing a current research paper
+
+**Recommended textbooks**
+
+- Deep Learning — Goodfellow, Bengio & Courville
+- Designing Machine Learning Systems — Chip Huyen
+
+**How to pass**
+
+- Confirm this year's actual syllabus with the lecturer in week one — the content genuinely rotates, so last year's notes may not apply
+- Whatever the theme, the assessment usually involves reading current papers; practise the three-pass method from UUY-DTS 323
+- This is the course closest to what employers are hiring for right now — treat it as career investment, not a filler 2 units
+- Reproduce one result from a paper on a small dataset; "I reimplemented it" is a strong thing to say in an interview
+
+### UUY-DTS 411 — Bio-Analytics Systems and Applications
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-411
+- 2 units · 400 Level · First Semester
+
+Data science applied to biological and health data: genomics, clinical records, epidemiological modelling and public-health surveillance, with the specific statistical and ethical challenges those domains bring.
+
+**Outline**
+
+1. Introduction to biological data: genomic, transcriptomic, proteomic and clinical data types
+2. Biological databases and formats: GenBank, FASTA/FASTQ, VCF, UniProt
+3. Sequence analysis: alignment, BLAST, and motif finding
+4. Gene expression analysis and the high-dimension/low-sample-size problem
+5. Multiple testing and false discovery rate correction
+6. Electronic health records: structure, coding systems (ICD, SNOMED) and data quality
+7. Survival analysis: Kaplan–Meier curves, hazard functions, Cox regression
+8. Epidemiological modelling: incidence, prevalence, SIR/SEIR compartment models
+9. Health data privacy, consent and the ethics of biomedical data
+
+**Recommended textbooks**
+
+- Bioinformatics and Functional Genomics — Jonathan Pevsner
+- Biostatistics: A Foundation for Analysis in the Health Sciences — Daniel & Cross
+
+**How to pass**
+
+- The multiple-testing problem is the defining statistical issue in genomics: with 20,000 genes tested at p < 0.05 you get 1,000 false positives by chance. Understand Bonferroni and Benjamini–Hochberg
+- Survival analysis is the one technique here that transfers everywhere — customer churn and equipment failure are the same mathematics
+- Use real public data (NCBI, WHO, NCDC) for practicals; health data science is unusually well served by open datasets
+- The ethics content is not decorative — health data carries the strictest consent and privacy obligations of any domain you will work in
+
+### UUY-DTS 412 — Data Management II
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-412
+- 2 units · 400 Level · First Semester
+
+Enterprise-scale data management, continuing DTS 314: data architecture, pipelines and orchestration, master data and quality management, governance, and the modern data stack.
+
+**Outline**
+
+1. Enterprise data architecture: operational vs analytical systems
+2. Data integration: ETL vs ELT, batch vs streaming ingestion
+3. Pipeline orchestration and scheduling; DAGs and tools such as Airflow
+4. Data lakes, data warehouses and the lakehouse pattern; file formats (Parquet, Avro, ORC)
+5. Master data management and reference data
+6. Data quality: dimensions, profiling, validation rules and monitoring
+7. Metadata management, data catalogues and data lineage
+8. Data governance: ownership, stewardship, policy and regulatory compliance
+9. Data lifecycle management: retention, archiving and secure disposal
+
+**Recommended textbooks**
+
+- Fundamentals of Data Engineering — Joe Reis & Matt Housley
+- DAMA-DMBOK: Data Management Body of Knowledge — DAMA International
+- The Data Warehouse Toolkit — Ralph Kimball & Margy Ross
+
+**How to pass**
+
+- Build one real pipeline end to end (ingest → transform → store → schedule), even a small one. Data engineering is understood by doing
+- Know why Parquet beats CSV for analytics (columnar, compressed, typed) — a favourite short-answer question and a genuinely useful fact
+- Data quality dimensions (accuracy, completeness, consistency, timeliness, validity, uniqueness) are examinable as a list — memorise them
+- Governance sounds bureaucratic until you inherit an undocumented database. Frame your answers around that reality
+
+### CYB 421 — Ethical Hacking and Reverse Engineering
+
+- URL: https://www.aretecyb.tech/courses/cyb-421
+- 2 units · 400 Level · Second Semester
+
+Advanced offensive security: perimeter defences, privilege escalation, malware and social engineering, system and network hacking, web/wireless/mobile attacks, and reverse engineering of code and network exploits as a method for developing countermeasures.
+
+**Outline**
+
+1. Ethical hacking strategies; how perimeter defences work and how intruders escalate privileges
+2. Intrusion detection, policy creation, and social engineering
+3. Attack phases; footprinting, reconnaissance, and scanning networks
+4. Enumeration, system hacking, and malware threats; sniffing; physical security
+5. Password vulnerabilities and cracking passwords
+6. Denial of service, session hijacking; hacking web servers and web applications, SQL injection
+7. Hacking wireless networks and mobile platforms
+8. Evading IDS, firewalls, and honeypots
+9. Reverse engineering of code and network exploits for countermeasure development
+
+**Recommended textbooks**
+
+- Hacking: The Art of Exploitation — Jon Erickson
+- Practical Malware Analysis — Sikorski & Honig
+
+**How to pass**
+
+- Ghidra (from the NSA — free) is the primary tool for this course: practise weekly from 300L onward
+- Buffer overflows become clearer once you understand assembly and memory layout — invest the time
+- Malware.analysis.me and ANY.RUN provide safe malware samples and sandboxes for practice
+- OSCP certification aligns almost perfectly with this course — consider it post-graduation
+
+### CYB 422 — Deep and Dark Web Security
+
+- URL: https://www.aretecyb.tech/courses/cyb-422
+- 2 units · 400 Level · Second Semester
+
+The architecture, technologies, and security landscape of the dark web. Covers Tor network internals, cryptocurrency and crypto-trading, safe and anonymous access techniques, and the risks and monitoring of dark/deep web activity.
+
+**Outline**
+
+1. Dark web, deep web, and clear net; how to get on the dark web
+2. Tor, onion routing, hidden services, and Tor alternatives (I2P, Matrix, Orbot, FreeNet)
+3. Privacy and anonymity; accessing the deep/dark web via VPN + Tor safely
+4. Cryptocurrencies: crypto trading, cryptomining, anonymity and security
+5. Navigating the dark web: search engines, the Hidden Wiki, darknet email and messaging
+6. Dark web markets and takedown case studies (Silk Road and others)
+7. Cyber threats and dangers on the deep/dark web; safety practices
+8. Dark web and deep web monitoring
+
+**Recommended textbooks**
+
+- Dark Web Intelligence — Joseph M. Straw
+- Tor and the Dark Art of Anonymity — Lance Henderson
+
+**How to pass**
+
+- Use Tor Browser (legal) to understand the surface experience — but only on trusted, legal .onion sites
+- Dark web case studies (Silk Road, BTC-e, AlphaBay takedowns) are the best exam material
+- Distinguish carefully between anonymity and privacy — examiners look for precision
+- OSINT Forum and Intel Techniques (Michael Bazzell) provide excellent, legal dark web investigation training
+
+### CYB 423 — Digital Forensics and Investigation Methods
+
+- URL: https://www.aretecyb.tech/courses/cyb-423
+- 2 units · 400 Level · Second Semester
+
+The science and practice of digital forensics: securing, processing, acquiring, examining, and reporting digital evidence; the cyber trail; and the role of computers in crime, technology, and law. Covers portable and stationary device forensics.
+
+**Outline**
+
+1. Introduction to digital forensics and digital evidence
+2. Challenging aspects of digital evidence; best practices in securing and processing evidence
+3. The cyber trail and its challenges; cyber auditing
+4. Brief history of computer crime and cybercrime investigation; evolution of investigative tools
+5. Role of computers in crime, technology, and law: jurisdiction, privacy, copyright, digital IP theft
+6. The investigative process and investigative reconstruction with digital evidence
+7. Techniques and tools for computer forensics: acquisition, preservation, recovery, analysis
+8. Forensic examination of portable and stationary storage devices, PDAs, and cell phones
+
+**Recommended textbooks**
+
+- Digital Forensics with Open Source Tools — Cory Altheide & Harlan Carvey
+- The Art of Memory Forensics — Ligh, Case, Levy & Walters
+
+**How to pass**
+
+- Autopsy (free, open source) is the standard forensic tool for this course — install and practise immediately
+- DFIR.training has free forensic exercises and challenge images — the best way to build skill
+- Chain of custody documentation is as important as technical analysis in real cases — know it perfectly
+- Connect steganography detection (CYB 412) and network analysis (UUY-CYB 221) to forensics workflows
+
+### CYB 498 — Final Year Project II
+
+- URL: https://www.aretecyb.tech/courses/cyb-498
+- 3 units · 400 Level · Second Semester
+
+A continuation of CYB 497: completing the research methodology, statistical data analysis, prototype/simulation development, and the formal written report (chapters four and five), submitted for final grading with an oral defence before the external examiner.
+
+**Outline**
+
+1. Continuation of CYB 497: research methodology and data analysis using statistical tools
+2. Performance evaluation of the research/development work
+3. Standard documentation of the project and referencing style
+4. Programming of the prototype or simulation model, where required
+5. Plagiarism and grammar checks
+6. Chapters four and five of the formal written report, approved by the supervisor
+7. PowerPoint presentation skills
+8. Oral defence of the project in the final examination before the external examiner
+
+**Recommended textbooks**
+
+- Writing for Computer Science — Justin Zobel
+- How to Write a Better Thesis — Evans, Gruba & Zobel
+
+**How to pass**
+
+- Do not submit on the deadline — submit at least 48 hours early; technical problems are common
+- Have at least two people proofread your thesis before submission
+- For the viva, prepare a 10-minute verbal summary of your project and its contribution
+- Know your own work deeply enough to answer "why did you not use X approach?" for every major decision
+
+### DTS 426 — Data Science Innovation and Entrepreneurship
+
+- URL: https://www.aretecyb.tech/courses/dts-426
+- 2 units · 400 Level · Second Semester
+
+Entrepreneurship specific to data: what makes a data product commercially viable, how data businesses are structured, and how to price, protect and scale an offering built on data and models.
+
+**Outline**
+
+1. The data product landscape: analytics services, embedded models, data marketplaces, decision tools
+2. Identifying commercially viable data opportunities; the value of a prediction
+3. Data as an asset: acquisition, ownership, licensing and the data moat
+4. Business models for data products: subscription, usage-based, freemium, marketplace
+5. Costing a data product: infrastructure, compute, storage and human-in-the-loop costs
+6. Building an MVP for a data product; when a spreadsheet is the right first version
+7. Intellectual property for data and models; trade secrets vs patents
+8. Regulatory constraints on data businesses in Nigeria
+9. Scaling: from a one-off analysis to a repeatable, automated service
+
+**Recommended textbooks**
+
+- Data Science for Business — Foster Provost & Tom Fawcett
+- Prediction Machines — Agrawal, Gans & Goldfarb
+
+**How to pass**
+
+- The central question of this course is "who pays, and why?" — a technically excellent model with no buyer is a hobby
+- Prediction Machines' framing (AI reduces the cost of prediction; judgement becomes the scarce input) is a genuinely useful lens for essay answers
+- Cost out the infrastructure for your idea honestly; cloud compute has bankrupted more data startups than bad models have
+- Combine this with ENT 321 and DTS 428 — one coherent venture built on your project is worth far more than three disconnected submissions
+
+### DTS 428 — Final Year Project II
+
+- URL: https://www.aretecyb.tech/courses/dts-428
+- 3 units · 400 Level · Second Semester
+
+The capstone completed: implement the methodology designed in DTS 417, evaluate the results, write the full report and defend it. The single largest determinant of your final-year classification.
+
+**Outline**
+
+1. Implementing the methodology: data preparation, modelling and iteration
+2. Experimental rigour: baselines, controls, reproducible pipelines and version control
+3. Evaluation against the criteria set in the proposal; statistical validity of the comparison
+4. Interpreting results honestly, including negative and inconclusive findings
+5. Writing chapters four and five: results, discussion, conclusion and recommendations
+6. Producing publication-quality tables and figures
+7. Assembling the complete report to the departmental format
+8. Preparing the demonstration/artefact for assessment
+9. The final defence: presentation, demonstration and viva questions
+
+**Recommended textbooks**
+
+- Writing for Computer Science — Justin Zobel
+- Departmental Project Handbook — Department of Data Science, UniUyo
+
+**How to pass**
+
+- A negative result honestly analysed scores better than a suspiciously perfect one. Examiners have seen fabricated accuracy figures before
+- Always report a baseline. "My model got 87%" means nothing without "and the trivial baseline gets 85%"
+- Rehearse the defence with a friend playing hostile examiner. Prepare specifically for "why this method and not X?" and "what are the limitations?"
+- Freeze your code and results two weeks before submission and spend that time on the report. Late changes are what break projects
+
+### ENT 321 — Venture Creation
+
+- URL: https://www.aretecyb.tech/courses/ent-321
+- 2 units · 400 Level · Second Semester
+
+The practical mechanics of launching a business: opportunity identification, business planning, entrepreneurial finance, marketing and e-commerce, and applying emerging technologies to new ventures. Prepares graduates who want to start consultancies or technology ventures.
+
+**Outline**
+
+1. Opportunity identification: sources of business opportunities in Nigeria, market gaps
+2. New business development: business planning and market research
+3. Entrepreneurial finance: venture capital, microfinance, business plan competitions
+4. Entrepreneurial marketing and e-commerce: B2B, B2C, C2C models
+5. Small business/family business management: leadership, basic bookkeeping
+6. Negotiation and business communication
+7. Opportunity discovery: idea generation, pitching, brainstorming
+8. Technological solutions for new ventures: AI, VR/MR, IoT, Blockchain, Cloud Computing
+
+**Recommended textbooks**
+
+- Entrepreneurship: Successfully Launching New Ventures — Barringer & Ireland
+- Zero to One — Peter Thiel & Blake Masters
+
+**How to pass**
+
+- Actually complete the CAC registration process research — knowing the real steps sets exam answers apart
+- Frame your venture creation around a real service gap you identified during SIWES
+- A completed business plan is typically the coursework submission — start it week one
+- Connect this to ENT 221 — build on the feasibility study you conceptualised in 200L
+
+### UNIUYO-CYB 425 — VoIP and Multimedia Security
+
+- URL: https://www.aretecyb.tech/courses/uniuyo-cyb-425-voip
+- 2 units · 400 Level · Second Semester
+
+Securing voice-over-IP and multimedia traffic: VoIP network architecture and call-control protocols (H.323, SIP, MGCP), NAT/firewall traversal, and the encryption and best practices that mitigate VoIP-specific risks.
+
+**Outline**
+
+1. Multimedia elements, characteristics, and storage formats
+2. Techniques for streaming data traffic: VoIP and multimedia traffic
+3. VoIP network architecture and protocols; SIP-based VoIP security issues
+4. Call-control protocols: H.323, Session Initiation Protocol (SIP), MGCP — threats and security holes
+5. How NAT and firewalls impact call setup, media streams, and latency
+6. SIP NAT traversal: STUN, TURN, and ICE
+7. VoIP risks, threats, vulnerabilities, and cryptographic protocols for VoIP security
+8. VoIP management tools and best practices for risk mitigation
+
+**Recommended textbooks**
+
+- VoIP and PBX Security and Forensics — Iosif I. Androulidakis
+- Hacking VoIP — Himanshu Dwivedi
+
+**How to pass**
+
+- Draw the SIP call-setup flow from memory — most exam questions probe understanding of the signalling sequence
+- Understand why NAT breaks VoIP by default before learning STUN/TURN/ICE as the fix — the problem motivates the solution
+- Connect VoIP encryption (SRTP, TLS for SIP) back to the cryptography course (CYB 311)
+- Wireshark can capture and analyse real SIP/RTP traffic in a lab — practise identifying a call setup in a capture
+
+### UUY-CYB 424 — Enterprise Security and Information Assurance
+
+- URL: https://www.aretecyb.tech/courses/uuy-cyb-424
+- 2 units · 400 Level · Second Semester
+
+Security governance at the enterprise level: information security principles, governance and risk management, security architecture and design, and end-to-end security of e-business and cyber environments — from data-centre security to backup and disaster recovery.
+
+**Outline**
+
+1. Information security principles; governance and risk management
+2. Security architecture and design
+3. Security of e-business and cyber environments end-to-end, including data-centre and access security
+4. The information security phases: inspection, protection, detection, reaction, reflection
+5. Server and application security; virtual local area networks (VLANs)
+6. Secure access and financial transaction techniques
+7. Backup and disaster recovery techniques
+8. Software development security; law, investigations, and ethics
+
+**Recommended textbooks**
+
+- Official (ISC)² Guide to the CISSP CBK — Adam Gordon
+- Information Security Management Handbook — Harold F. Tipton & Kevin Henry
+
+**How to pass**
+
+- ISO 27001 is the global standard for information security management — understand Annex A controls
+- The five information security phases (inspection, protection, detection, reaction, reflection) are exam-critical — memorise the sequence
+- The CISSP certification is the gold standard for enterprise security leadership — this course is a foundation
+- Security policy writing is a practical exam task: practise writing an acceptable use policy from scratch
+
+### UUY-DTS 421 — Data Science Risk and Management
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-421
+- 2 units · 400 Level · Second Semester
+
+What goes wrong with data and models, and how to manage it: model risk, data risk, operational failure, and the governance structures that catch problems before they reach production.
+
+**Outline**
+
+1. Risk concepts: threat, vulnerability, likelihood, impact and the risk register
+2. Data risk: quality failures, silent schema change, leakage, and loss of provenance
+3. Model risk: overfitting, target leakage, spurious correlation, and inappropriate deployment
+4. Concept drift and data drift; monitoring models in production
+5. Bias, fairness and discrimination risk in deployed models
+6. Security risk for data systems: access control, adversarial inputs, model theft, privacy attacks
+7. Regulatory and compliance risk; auditability of automated decisions
+8. Model risk management frameworks, validation and independent review
+9. Business continuity, incident response and post-incident review for data systems
+
+**Recommended textbooks**
+
+- Designing Machine Learning Systems — Chip Huyen
+- Weapons of Math Destruction — Cathy O'Neil
+- ISO 31000 / NIST AI Risk Management Framework — ISO / NIST
+
+**How to pass**
+
+- Target leakage is the classic silent killer: a feature that would not exist at prediction time gives 99% accuracy in testing and fails completely in production. Learn to spot it
+- Be able to distinguish data drift (the inputs changed) from concept drift (the relationship changed) with an example of each
+- Build a risk register for your DTS 428 project — it is real practice and it genuinely protects the project
+- The NIST AI RMF is free, short and current; reading it is the highest-value hour you can spend on this course
+
+### UUY-DTS 422 — Cloud Application Development
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-422
+- 2 units · 400 Level · Second Semester
+
+Building and deploying applications on cloud infrastructure: service models, core compute and storage services, containers and serverless, and the deployment of data and ML workloads to the cloud.
+
+**Outline**
+
+1. Cloud computing concepts: IaaS, PaaS, SaaS; public, private and hybrid clouds
+2. Core cloud services: virtual machines, object storage, managed databases, networking basics
+3. Identity and access management; the principle of least privilege
+4. Containers in the cloud: images, registries and orchestration concepts
+5. Serverless computing: functions, event-driven architecture and their trade-offs
+6. Building and deploying a REST API for a model
+7. Managed data and ML services on cloud platforms
+8. Infrastructure as code and CI/CD pipelines
+9. Cost management, scaling, monitoring and cloud security fundamentals
+
+**Recommended textbooks**
+
+- Cloud Computing: Concepts, Technology and Architecture — Thomas Erl
+- Architecting the Cloud — Michael J. Kavis
+
+**How to pass**
+
+- Use a free tier (AWS, GCP or Azure) and deploy something real. Set a billing alert first — every student has a horror story
+- Deploy your DTS 428 model as an API; a live URL in your project defence is memorable and demonstrates the whole stack
+- IaaS/PaaS/SaaS classification questions are guaranteed — have a concrete example of each ready
+- Least privilege is the security rule that matters most here, and the one most often violated in student projects
+
+### UUY-DTS 423 — Data Warehousing and Multidimensional Modeling
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-423
+- 2 units · 400 Level · Second Semester
+
+Designing the analytical database: dimensional modelling, star and snowflake schemas, slowly changing dimensions, OLAP operations, and the ETL that populates it all.
+
+**Outline**
+
+1. Why analytical and operational databases differ: OLTP vs OLAP workloads
+2. Data warehouse architecture: staging, core warehouse, data marts; Inmon vs Kimball approaches
+3. Dimensional modelling: facts, dimensions, grain, and the four-step design process
+4. Star schema and snowflake schema; when to denormalise
+5. Fact table types: transaction, periodic snapshot and accumulating snapshot
+6. Dimension design: surrogate keys, hierarchies, conformed dimensions, degenerate dimensions
+7. Slowly changing dimensions: Types 0 through 3 and their trade-offs
+8. OLAP operations: roll-up, drill-down, slice, dice and pivot; cubes and MOLAP/ROLAP
+9. ETL design for the warehouse; incremental loading and change data capture
+
+**Recommended textbooks**
+
+- The Data Warehouse Toolkit — Ralph Kimball & Margy Ross
+- Building the Data Warehouse — W.H. Inmon
+
+**How to pass**
+
+- Kimball's four-step process (choose the business process, declare the grain, identify dimensions, identify facts) is the exam's favourite structured answer — memorise it and apply it to any scenario given
+- Declaring the grain is the step students skip and the step everything depends on. State it as a single sentence: "one row per…"
+- SCD Type 2 (add a new row with validity dates) is the most examined and the most used in practice — be able to draw the before/after table
+- Design a small warehouse for a scenario you know (university results, a shop's sales) — it makes every abstract term concrete
+
+### UUY-DTS 424 — Intelligent Computing and Analytics for Urban Centres
+
+- URL: https://www.aretecyb.tech/courses/uuy-dts-424
+- 2 units · 400 Level · Second Semester
+
+Data science applied to cities: sensor and IoT data, mobility and transport analytics, geospatial analysis, and the smart-city systems that use them — with the Nigerian urban context front and centre.
+
+**Outline**
+
+1. Smart city concepts, domains and architectures
+2. Urban data sources: IoT sensors, GPS traces, mobile network data, satellite imagery, open city data
+3. IoT fundamentals for urban sensing: devices, gateways, protocols (MQTT, LoRaWAN) and edge computing
+4. Geospatial data: coordinate systems, vector and raster data, GeoJSON and shapefiles
+5. Spatial analysis: geocoding, spatial joins, buffers, density and hotspot analysis
+6. Mobility and transport analytics: origin–destination matrices, traffic flow, route optimisation
+7. Urban applications: energy, waste, water, public safety, health and environmental monitoring
+8. Real-time dashboards and decision support for city administration
+9. Challenges in the Nigerian context: data scarcity, informal settlements, infrastructure and surveillance ethics
+
+**Recommended textbooks**
+
+- Urban Analytics — Alex Singleton, Seth Spielman & David Folch
+- Geographic Data Science with Python — Rey, Arribas-Bel & Wolf
+
+**How to pass**
+
+- Learn GeoPandas and QGIS practically — geospatial skills are rare among Nigerian graduates and immediately marketable
+- Coordinate reference systems cause more bugs than any other geospatial topic; understand why you cannot mix WGS84 and a projected CRS in one calculation
+- Use real local data (OpenStreetMap for Uyo, NASA/Copernicus satellite imagery) — a local case study is far stronger in assessment than a foreign one
+- The surveillance-ethics angle connects straight back to DTS 318; smart-city sensing is one of the sharpest privacy trade-offs in the field
