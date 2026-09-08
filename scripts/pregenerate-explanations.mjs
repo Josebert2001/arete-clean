@@ -114,14 +114,12 @@ async function explain(chain, listing) {
     chain,
     system: study ? STUDY_SYSTEM_PROMPT : SYSTEM_PROMPT,
     prompt: buildExplainPrompt(listing.code, listing.language, listing.mode),
+    // Must match api/explainer.js's call exactly — bundled text has to be the
+    // same answer the endpoint would give. The Gemini thinking cap and Groq's
+    // reasoningEffort both come from the chain entries in model.js, so this
+    // stays in step with the endpoint automatically.
     maxOutputTokens: 6000,
     temperature: 0.5,
-    // Must match api/explainer.js's call exactly — bundled text has to be the
-    // same answer the endpoint would give. Gemini 3.5 Flash spends hidden
-    // reasoning tokens out of maxOutputTokens by default (measured ~900 on one
-    // listing), which was cutting real answers short; this listing needs no
-    // multi-step reasoning to explain.
-    providerOptions: { google: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } },
   });
   if (outcome.text) return outcome.text;
   throw outcome.error ?? new Error('no text returned');
