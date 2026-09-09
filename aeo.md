@@ -452,6 +452,16 @@ A departmental course (CYB 224, DTS 111) still names its degree — that is accu
 
 Note the domain itself (`aretecyb.tech`) reads as Cybersecurity-only. Nothing in the code can fix that; the copy now compensates, but it is worth weighing separately.
 
+### What is NOT done
+
+Everything above is code, committed on `feat/aeo-p0-p1` and **not pushed**. Still open:
+
+1. **Nothing is deployed**, so every measurement in §6 is unrun: Rich Results Test, `curl -A "GPTBot/1.0"`, and the monthly synthetic-query tracking. Those need the branch merged and live.
+2. **No browser verification.** The Chrome extension was disconnected throughout. The build renders every preview component through `renderToStaticMarkup` (a real React render, 95×), and `Install.jsx` and `InstallPreview` have render tests — but no one has loaded a page.
+3. **109 of the 340 published glossary definitions are flagged** for review and unactioned. The dominant signal is definitions opening on a bare pronoun ("They are common and occur frequently…"), which reads correctly under its heading in the notes and badly once an engine quotes the `DefinedTerm` alone. This is a systematic transcription artifact, not typos; the cheap fix is a pronoun-opener filter in `glossaryFrom()`, trading coverage for quotability.
+4. **§7.5 shared-slug framing loss is accepted, not fixed.** ENT 221 and the other cross-catalogue slugs carry different `description`/`topics`/`studyTips` per department; `loadPublicCourses()` keeps the Cybersecurity wording and the Data Science version stays unindexed. One URL can only have one canonical page, so this is the correct trade — but the second wording exists and no one sees it.
+5. **P1 "backlinks from institutional domains"** (§4, P2 bullet 3) is outreach, not code. Untouched.
+
 ### Correction to §5: the `robots.txt` snippet in this document is unsafe
 
 The drafted per-bot groups grant more than they appear to. **robots.txt has no inheritance**: the moment a named `User-agent: GPTBot` group matches, the `User-agent: *` group stops applying to that bot entirely. The §5 draft repeats only `Disallow: /api/` and `Disallow: /signin` under each bot, so it would have handed `GPTBot`, `PerplexityBot` and `ClaudeBot` the whole gated surface — `/tutor`, `/profile`, `/planner`, `/review`, `/lab`, `/setup-profile`, `/welcome`.
