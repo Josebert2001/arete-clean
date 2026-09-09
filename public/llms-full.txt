@@ -8,7 +8,7 @@
 - Scope: the whole university, not one department. 29 of the 95 courses below are foundation courses taken across University of Uyo programmes rather than owned by any one department (a programme takes either GST 211/311 or GST 212/312, for instance, but every programme takes some of these): GST 111, MTH 111, PHY 111, PHY 117, COS 111, STA 111, UUY-CSC 111, UUY-CSC 112, GST 121, COS 121, MTH 121, PHY 121, PHY 128, GST 212, COS 211, ENT 221, COS 221, INS 224, GST 312, CSC 319, COS 411, ENT 321, GST 211, MTH 211, MTH 212, MTH 223, CSC 223, GST 311, INS 411. They are marked "foundation course" in the listing.
 - Departments with a fully authored catalogue: Cybersecurity, Data Science. A student in any other department signs up in foundation mode and gets those shared courses plus all four programming tracks; more catalogues are authored as students from those departments sign up.
 - Access: course outlines, textbooks and study tips are public. Lecture notes, question banks, the AI tutor and progress tracking need a free account (email code, no password).
-- Last generated: 2026-09-08
+- Last generated: 2026-09-09
 
 
 ## 100 Level
@@ -499,15 +499,6 @@ Single-variable calculus: limits, continuity, differentiation, integration, and 
 - Calculus rewards consistent daily practice more than any last-minute cramming
 - Understand the concept of a derivative as 'rate of change' before memorising rules
 - Khan Academy calculus is free, self-paced, and covers this entire course
-
-**Lecture notes** (6 transcribed topics; full text needs a free account)
-
-1. Unit One — Introduction: Functions, Limits and Continuity
-2. Unit Two — Differentiation
-3. Unit Three — Extrema
-4. Unit Four — Integration
-5. Unit Five — Application of Integration to Areas and Volumes
-6. Tutorial Questions — whole-course revision
 
 ### PHY 121 — General Physics II (Electricity & Magnetism)
 

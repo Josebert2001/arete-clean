@@ -66,6 +66,32 @@ function PreviewSection({ section }) {
       </div>
     );
   }
+  if (section.type === 'termlist') {
+    return (
+      <dl className="mb-4 space-y-2">
+        {(section.items || []).map(({ term, def }) => (
+          <div key={term}>
+            <dt className="text-sm font-semibold text-ink inline">{term} — </dt>
+            <dd className="text-sm text-coffee-800 leading-relaxed inline">{def}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+  if (section.type === 'note') {
+    return (
+      <div className="mb-4 rounded-lg bg-coffee-100 px-4 py-3">
+        {section.text && (
+          <p className="text-sm text-coffee-800 leading-relaxed">{section.text}</p>
+        )}
+        {section.items?.length > 0 && (
+          <ul className="list-disc pl-5 space-y-1 text-sm text-coffee-800 leading-relaxed mt-1.5">
+            {section.items.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        )}
+      </div>
+    );
+  }
   if (section.type === 'definition') {
     return (
       <div className="mb-4 rounded-lg border-l-2 border-ember-500 bg-paper pl-4 py-2.5">
@@ -76,7 +102,18 @@ function PreviewSection({ section }) {
       </div>
     );
   }
-  return <p className="mb-4 text-sm text-coffee-800 leading-relaxed">{section.text}</p>;
+  // `text` sections carry a heading too — 62 of the 139 in the note files do.
+  // Dropping it published a run of headless paragraphs: COS 221's topic 1
+  // became four consecutive definitions of `boolean`, `byte`, `char` and
+  // `short` with nothing saying which was which.
+  return (
+    <div className="mb-4">
+      {section.heading && (
+        <h4 className="text-sm font-semibold text-ink mb-1.5">{section.heading}</h4>
+      )}
+      <p className="text-sm text-coffee-800 leading-relaxed">{section.text}</p>
+    </div>
+  );
 }
 
 export default function CoursePreview({ course, department, siblings = [], notes = null }) {

@@ -40,11 +40,28 @@ export const PREVIEW_CHAR_BUDGET = 2400;
 export const GLOSSARY_MAX = 28;
 export const GLOSSARY_DEF_CHARS = 320;
 
-// Only the prose types. Images, code, math, tables and case studies need the
-// components LectureNotes.jsx owns — and CoursePreview is deliberately
-// hook-free and rendered through renderToStaticMarkup, so it cannot have them.
-// Skipping them here is what keeps the preview a paragraph renderer.
-const PREVIEW_TYPES = new Set(['text', 'definition', 'bullets']);
+// The self-contained prose types — the ones whose meaning survives with the
+// figures and listings around them removed. `note` (a callout) and `termlist`
+// (term/definition pairs) qualify as much as a paragraph does; excluding them
+// at first cost CYB 224 its whole preview, because its topic 1 opens on a
+// `note`, and cut COS 221's to a single paragraph.
+//
+// Images, code, maths, tables and case studies stay out: they need the
+// components LectureNotes.jsx owns, and CoursePreview is deliberately
+// hook-free and build-rendered.
+const PREVIEW_TYPES = new Set(['text', 'definition', 'bullets', 'note', 'termlist']);
+
+// What the reader actually sees from one section, for budgeting.
+function sectionBody(section) {
+  if (section.type === 'bullets') return (section.items || []).join(' ');
+  if (section.type === 'termlist') {
+    return (section.items || []).map((i) => `${i.term} ${i.def}`).join(' ');
+  }
+  if (section.type === 'note') {
+    return [section.text || '', ...(section.items || [])].join(' ');
+  }
+  return section.text || '';
+}
 
 // Inline maths is written as $...$ and rendered by MathText, which uses hooks
 // and lazy-loads KaTeX — neither available here. Publishing the raw source
@@ -80,21 +97,31 @@ function previewFrom(topic) {
   const kept = [];
   let used = 0;
 
+  // A CONTIGUOUS run from the start, stopping at the first section that cannot
+  // be rendered — never skipping over one to reach the next.
+  //
+  // Skipping published prose about things no longer on the page. COS 221's
+  // topic 1 has a code listing followed by "Here, `a` first stores the value
+  // `5`. Then `b` stores the text…", and with the listing gone that paragraph
+  // was commentary on nothing. Lecture notes are written as a sequence in which
+  // paragraphs lean on the figure or listing above them, so the only safe cut
+  // is a prefix.
   for (const section of topic.sections) {
-    if (!PREVIEW_TYPES.has(section.type)) continue;
-    // Measure what the reader actually sees, so a heading-heavy topic and a
-    // prose-heavy one get comparable amounts of real content.
-    const body =
-      section.type === 'bullets' ? (section.items || []).join(' ') : section.text || '';
-    if (!body) continue;
-    if (hasMath(body) || hasMath(section.heading)) continue;
+    if (!PREVIEW_TYPES.has(section.type)) break;
+    const body = sectionBody(section);
+    if (!body.trim()) break;
+    // Maths ends the run for the same reason it is dropped from the glossary:
+    // MathText loads KaTeX in an effect, effects never run under
+    // renderToStaticMarkup, and the fallback it renders is the raw "$f(x)$".
+    if (hasMath(body) || hasMath(section.heading)) break;
     if (used + body.length > PREVIEW_CHAR_BUDGET && kept.length) break;
 
-    if (section.type === 'bullets') {
-      kept.push({ type: 'bullets', heading: section.heading, items: section.items });
-    } else {
-      kept.push({ type: section.type, heading: section.heading, text: section.text });
-    }
+    kept.push({
+      type: section.type,
+      heading: section.heading,
+      text: section.text,
+      items: section.items,
+    });
     used += body.length;
     if (used >= PREVIEW_CHAR_BUDGET) break;
   }

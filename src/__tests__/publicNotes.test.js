@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { loadPublicCourses, courseUrl } from '../data/publicCatalogue';
+import { loadNotesFor } from '../data/lectureNotes/index.js';
 import {
   loadPublicNotes,
   glossaryJsonLd,
@@ -18,13 +19,17 @@ import {
 
 let entries;
 let noted;
+// The raw notes, to check the published slice against what it was cut from.
+const notesByCourse = new Map();
 
 beforeAll(async () => {
   entries = await loadPublicCourses();
   noted = [];
   for (const { course } of entries) {
     const notes = await loadPublicNotes(course);
-    if (notes) noted.push({ course, notes });
+    if (!notes) continue;
+    noted.push({ course, notes });
+    notesByCourse.set(course.slug, await loadNotesFor(course));
   }
 });
 
@@ -52,6 +57,19 @@ describe('what stays gated', () => {
       // The outline lists every title — that is a table of contents. The
       // preview body must come from topic 1 alone.
       expect(notes.preview.title, course.code).toBe(notes.outline[0]);
+    }
+  });
+
+  it('publishes a contiguous prefix of topic 1, never a skip-over', () => {
+    // The bug this pins: skipping unrenderable sections to reach the next
+    // prose one published COS 221's "Here, `a` first stores the value `5`…"
+    // with the code listing it describes removed — commentary on nothing.
+    // Lecture notes are a sequence; the only safe cut is a prefix.
+    for (const { course, notes } of noted) {
+      if (!notes.preview) continue;
+      const kept = notes.preview.sections.map((s) => s.type);
+      const source = notesByCourse.get(course.slug)[0].sections.map((s) => s.type);
+      expect(source.slice(0, kept.length), course.code).toEqual(kept);
     }
   });
 
@@ -115,12 +133,17 @@ describe('the glossary', () => {
     // maths-bearing entries are dropped instead. MTH 121 loses its whole
     // glossary to this, which is the correct outcome.
     for (const { course, notes } of noted) {
+      // termlist items are {term, def} objects, the rest are strings — flatten
+      // both, or the check silently skips the sections most likely to carry
+      // maths.
       const all = [
         ...notes.glossary.flatMap((g) => [g.term, g.definition]),
         ...(notes.preview?.sections || []).flatMap((s) => [
           s.heading || '',
           s.text || '',
-          ...(s.items || []),
+          ...(s.items || []).flatMap((i) =>
+            typeof i === 'string' ? [i] : [i.term || '', i.def || '']
+          ),
         ]),
       ];
       for (const text of all) {

@@ -452,6 +452,22 @@ A departmental course (CYB 224, DTS 111) still names its degree — that is accu
 
 Note the domain itself (`aretecyb.tech`) reads as Cybersecurity-only. Nothing in the code can fix that; the copy now compensates, but it is worth weighing separately.
 
+### Defects found by auditing the built output (2026-09-09)
+
+Three bugs in the P2 preview renderer, all found by reading `dist/` rather than the source. Fixed.
+
+1. **Orphaned commentary.** `previewFrom()` *skipped* unrenderable sections to reach the next prose one, so COS 221's public page carried *"Here, `a` first stores the value `5`. Then `b` stores the text…"* with the code listing it describes removed. Lecture notes are a sequence — paragraphs lean on the figure above them. The preview is now a **contiguous prefix**, asserted by a test.
+2. **Dropped headings.** `PreviewSection` rendered `text` sections without `section.heading`. 62 of the 139 topic-1 `text` sections carry one, so COS 221's preview became four consecutive paragraphs defining `boolean`, `byte`, `char` and `short` with nothing saying which was which.
+3. **Two safe section types excluded.** `note` and `termlist` are self-contained — no figure to lose — but were outside `PREVIEW_TYPES`. Combined with fix 1 that was severe: an excluded type no longer skips, it *ends* the preview. CYB 224 (topic 1 opens on a `note`) lost its preview entirely and COS 221 fell to 330 characters. Adding both restored coverage to 12 of 14 courses; COS 221 went 330 → 1,939 chars.
+
+Only PHY 128 now has no preview — its topic 1 opens on maths, which is a legitimate stop.
+
+**Not bugs, but worth knowing:**
+
+- **26 of 98 page titles exceed 70 characters** and will be truncated in a result. `courseTitle()` is `"{code} — {title} · University of Uyo"`, so MTH 111 renders 81 chars and loses *"University of Uyo"* — the exact phrase students search. Pre-existing, not introduced here, and the fix is a judgement call about what to drop.
+- **Inline backticks render literally** in the note prose (`` a `.class` file ``). `mathText.js` handles `$…$` but nothing handles `` ` ``, so **the signed-in app has this too** — it is a note-rendering gap app-wide, not a P2 regression. Fixing it only in the public preview would make the two diverge.
+- **`dist/index.html` is rewritten after VitePWA computes its precache manifest**, so the manifest's revision hash describes the pre-prerender shell. If a future deploy changes only `HomePreview` (an SSR-only module, absent from the client bundle), the shell stays byte-identical, the revision does not change, and returning PWA users keep the cached copy. Impact is near-nil — `createRoot` discards that markup and `usePageMeta` rewrites the tags, and crawlers do not run service workers — but the inconsistency is real.
+
 ### What is NOT done
 
 Everything above is code, committed on `feat/aeo-p0-p1` and **not pushed**. Still open:
