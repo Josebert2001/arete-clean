@@ -19,7 +19,7 @@ import {
   Search,
   Footprints,
 } from 'lucide-react';
-import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
+import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CORE_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
 import { buildRoute, routeProgress } from '../utils/campusRoute';
 import { escapeHtml, safeGeoPoint, isWithinBounds } from '../utils/locationSafety';
 
@@ -31,6 +31,13 @@ const WALK_SPEED = 80; // meters per minute
 const OFF_CAMPUS_MARGIN = 0.005;
 
 const CARTO_KEY = import.meta.env.VITE_CARTO_API_KEY?.trim();
+
+// ?graph=1 draws the raw routing graph — every waypoint node, not just the named
+// destinations. A surveying aid, not a user-facing feature: it is the only way to
+// see which node a building's connector attached to, or where an inferred bridge
+// crosses open ground.
+const showGraph =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('graph') === '1';
 
 // CARTO's raster basemaps watermark every request without a key. With a key we
 // get the pretty Voyager / Dark Matter tiles; without one we fall back to the
@@ -176,18 +183,39 @@ export default function CampusMap() {
     markersRef.current = [];
     edgeLinesRef.current = [];
 
+    // The permanent site is ~2.8 km x 1.8 km. A desktop viewport at zoom 16 spans
+    // more than 3 km, i.e. WIDER than the campus — and a maxBounds narrower than
+    // the viewport is the one configuration Leaflet cannot satisfy. With
+    // viscosity pinned at 1.0 it re-centres on every corrective pan, corrects
+    // again, and locks the main thread; the tab renders a skeleton and then stops
+    // responding to input entirely.
+    //
+    // Two defences, because either alone still breaks on some screen size:
+    //   · the pan clamp is padded well beyond the campus, so it can always
+    //     contain the viewport, and viscosity is elastic rather than absolute;
+    //   · the opening view comes from fitBounds(), not a hard-coded zoom, so it
+    //     frames the whole campus on a phone and a monitor alike.
+    const PAN_PAD = 0.02; // ~2.2 km of slack around the campus
     const map = L.map(mapRef.current, {
       center: CAMPUS_CENTER,
       zoom: CAMPUS_ZOOM,
       maxZoom: MAX_ZOOM,
-      minZoom: 15,
+      minZoom: 13,
       maxBounds: [
-        [MAP_BOUNDS.south - 0.002, MAP_BOUNDS.west - 0.002],
-        [MAP_BOUNDS.north + 0.002, MAP_BOUNDS.east + 0.002],
+        [MAP_BOUNDS.south - PAN_PAD, MAP_BOUNDS.west - PAN_PAD],
+        [MAP_BOUNDS.north + PAN_PAD, MAP_BOUNDS.east + PAN_PAD],
       ],
-      maxBoundsViscosity: 1.0,
+      maxBoundsViscosity: 0.7,
       zoomControl: false,
     });
+
+    map.fitBounds(
+      [
+        [CORE_BOUNDS.south, CORE_BOUNDS.west],
+        [CORE_BOUNDS.north, CORE_BOUNDS.east],
+      ],
+      { padding: [24, 24], animate: false },
+    );
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
@@ -195,55 +223,105 @@ export default function CampusMap() {
     tileLayerRef.current = tileLayer;
     tileThemeRef.current = themeRef.current;
 
-    // Render edge lines
+    // Resolve every colour ONCE, up front.
+    //
+    // cssPalette() calls getComputedStyle(), which forces a synchronous style
+    // recalculation. Calling it inside the layer loops meant one forced recalc
+    // per layer, interleaved with inserting that layer into a steadily growing
+    // SVG tree — textbook layout thrashing. On the prototype's invented 40-pin
+    // graph it was survivable. On the real OSM graph (264 pins, 271 edges → 535
+    // layers, ~1,000 getComputedStyle calls) it locked the main thread hard
+    // enough that the tab stopped responding to input and never painted the map.
+    const palette = {
+      edge: edgeLineStyle(),
+      waypoint: waypointStyle(),
+      muted: cssPalette('coffee-500'),
+      destination: Object.fromEntries(
+        Object.entries(CATEGORIES).map(([k, cat]) => [k, destinationStyle(cat)]),
+      ),
+    };
+
+    // O(1) endpoint lookup. The previous rawPins.find() per edge was O(E × P) —
+    // fine at 45 edges, 70k comparisons at 271.
+    const pinIndex = new Map(rawPins.map((p) => [p.id, p]));
+
+    // Build into layer groups and attach each in one go, so the map performs a
+    // single insertion rather than one per feature.
+    const edgeLayer = L.layerGroup();
+    const markerLayer = L.layerGroup();
+
     rawEdges.forEach((e) => {
-      const pa = rawPins.find((p) => p.id === e.a);
-      const pb = rawPins.find((p) => p.id === e.b);
-      if (pa && pb) {
-        const line = L.polyline(
-          [
-            [pa.lat, pa.lng],
-            [pb.lat, pb.lng],
-          ],
-          { ...edgeLineStyle(), weight: 1.5, dashArray: '3 6', opacity: 0.45 }
-        ).addTo(map);
-        edgeLinesRef.current.push(line);
-      }
+      const pa = pinIndex.get(e.a);
+      const pb = pinIndex.get(e.b);
+      if (!pa || !pb) return;
+      const line = L.polyline(
+        [
+          [pa.lat, pa.lng],
+          [pb.lat, pb.lng],
+        ],
+        { ...palette.edge, weight: 1.5, dashArray: '3 6', opacity: 0.45 },
+      );
+      edgeLayer.addLayer(line);
+      edgeLinesRef.current.push(line);
     });
 
-    // Render pins
     rawPins.forEach((pin) => {
       if (pin.type === 'waypoint') {
+        // Waypoints are route-shaping geometry, not places — they have no name
+        // and nothing to tell you. The prototype drew them because its invented
+        // graph had twenty; the real one derived from OSM has 229, and drawing
+        // them buried all 35 searchable destinations under a field of identical
+        // brown dots. The dashed edge lines already show where the paths run.
+        //
+        // Kept behind ?graph=1 because it is genuinely useful while surveying —
+        // it is the only way to see which node a connector attached to.
+        if (!showGraph) return;
         const marker = L.circleMarker([pin.lat, pin.lng], {
           radius: 3.5,
-          ...waypointStyle(),
+          ...palette.waypoint,
           fillOpacity: 0.8,
           weight: 1.5,
-        }).addTo(map);
+        });
+        markerLayer.addLayer(marker);
         markersRef.current.push({ id: pin.id, marker, pin });
       } else {
         const cat = CATEGORIES[pin.category] || CATEGORIES.building;
         const marker = L.circleMarker([pin.lat, pin.lng], {
           radius: 8,
-          ...destinationStyle(cat),
+          ...(palette.destination[pin.category] ?? palette.destination.building),
           fillOpacity: 0.95,
           weight: 3,
-        }).addTo(map);
+        });
         marker.bindPopup(
           `<div style="font-family:Inter,sans-serif">
             <strong style="font-size:14px">${escapeHtml(pin.name)}</strong>
-            <br/><span style="font-size:11px;color:${cssPalette('coffee-500')}">${escapeHtml(cat.label)}</span>
-          </div>`
+            <br/><span style="font-size:11px;color:${palette.muted}">${escapeHtml(cat.label)}</span>
+          </div>`,
         );
+        markerLayer.addLayer(marker);
         markersRef.current.push({ id: pin.id, marker, pin });
       }
     });
 
+    edgeLayer.addTo(map);
+    markerLayer.addTo(map);
+
     mapInstance.current = map;
 
     // The map may mount inside a container whose size isn't settled yet
-    // (lazy chunk, SSR) — force Leaflet to re-measure after first paint.
-    const sizeTimer = setTimeout(() => map.invalidateSize(), 0);
+    // (lazy chunk, SSR) — force Leaflet to re-measure after first paint, then
+    // re-frame, since the fitBounds above was computed against the pre-layout
+    // size and would otherwise leave the campus half off-screen.
+    const sizeTimer = setTimeout(() => {
+      map.invalidateSize();
+      map.fitBounds(
+        [
+          [CORE_BOUNDS.south, CORE_BOUNDS.west],
+          [CORE_BOUNDS.north, CORE_BOUNDS.east],
+        ],
+        { padding: [24, 24], animate: false },
+      );
+    }, 0);
 
     return () => {
       if (watchIdRef.current !== null) {
@@ -277,13 +355,20 @@ export default function CampusMap() {
       tileLayerRef.current = createTileLayer(theme).addTo(map);
     }
 
-    edgeLinesRef.current.forEach((line) => line.setStyle(edgeLineStyle()));
+    // Same one-shot resolution as the initial render, and for the same reason:
+    // a getComputedStyle() per layer here would make every theme toggle re-run
+    // the thrash across all 535 layers.
+    const edgeStyle = edgeLineStyle();
+    const wpStyle = waypointStyle();
+    const destStyles = Object.fromEntries(
+      Object.entries(CATEGORIES).map(([k, cat]) => [k, destinationStyle(cat)]),
+    );
+
+    edgeLinesRef.current.forEach((line) => line.setStyle(edgeStyle));
     markersRef.current.forEach(({ marker, pin }) => {
       if (!pin) return;
       marker.setStyle(
-        pin.type === 'waypoint'
-          ? waypointStyle()
-          : destinationStyle(CATEGORIES[pin.category] || CATEGORIES.building)
+        pin.type === 'waypoint' ? wpStyle : destStyles[pin.category] ?? destStyles.building,
       );
     });
     routeCasingRef.current?.setStyle(routeCasingStyle());
@@ -758,7 +843,13 @@ export default function CampusMap() {
                     key={d.id}
                     onClick={() => {
                       if (mapInstance.current) {
-                        mapInstance.current.setView([d.lat, d.lng], 19);
+                        // Clamped to the tile source's ceiling. Hard-coding 19
+                        // works only by luck on OSM and breaks the moment a layer
+                        // with a lower maximum is added — Esri's imagery over
+                        // UNIUYO stops at z18 and serves a grey "Map data not yet
+                        // available" tile above it, so this button would land the
+                        // student on a blank square.
+                        mapInstance.current.setView([d.lat, d.lng], Math.min(18, MAX_ZOOM));
                         const entry = markersRef.current.find((m) => m.id === d.id);
                         if (entry) entry.marker.openPopup();
                       }
