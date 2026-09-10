@@ -58,15 +58,8 @@ export const extraPins = [
   },
 ];
 
-// Categories a pin may carry. Colours resolve against the Tailwind palette in
-// src/data/campusMap.js — never hardcode hex here.
-export const CATEGORY_KEYS = [
-  'academic',
-  'building',
-  'office',
-  'facility',
-  'hostel',
-  'sports',
-  'entrance',
-  'transport',
-];
+// Categories a pin may carry are the keys of CATEGORIES in src/data/campusMap.js.
+// They are deliberately NOT restated here: a second copy of the list is a second
+// thing to keep in step, and nothing imported the copy that used to sit at the
+// bottom of this file. scripts/validate-modules.mjs already fails the build on a
+// pin whose category is missing from CATEGORIES, which is the check that matters.

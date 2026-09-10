@@ -392,3 +392,16 @@ body {
   outline: 2px solid rgb(var(--ink));
   outline-offset: 2px;
 }
+
+/* The OSM id on an unnamed pin — the key campusOverrides.js is written against,
+   so it has to be readable and selectable straight off the map. */
+.campus-popup__ref {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgb(var(--coffee-600));
+  background: rgb(var(--coffee-100));
+  border-radius: 4px;
+  padding: 1px 5px;
+  align-self: flex-start;
+  user-select: all;
+}

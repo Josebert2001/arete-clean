@@ -392,6 +392,18 @@ export default function CampusMap() {
         sub.textContent = pin.source ? cat.label : `${cat.label} · name not surveyed yet`;
         card.appendChild(sub);
 
+        // An unnamed building shows its OpenStreetMap id, because that is the
+        // key campusOverrides.js is written against. Without it, naming a
+        // building means finding its id somewhere else entirely — which is
+        // enough friction that the 33 unnamed ones stay unnamed.
+        if (!pin.source && pin.osmId) {
+          const ref = document.createElement('code');
+          ref.className = 'campus-popup__ref';
+          ref.textContent = `OSM ${pin.osmId}`;
+          ref.title = 'Use this id as the key in src/data/campusOverrides.js';
+          card.appendChild(ref);
+        }
+
         const go = document.createElement('button');
         go.type = 'button';
         go.className = 'campus-popup__go';

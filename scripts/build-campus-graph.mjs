@@ -89,6 +89,7 @@ const MAX_BRIDGE_M = 140;
 
 const args = new Set(process.argv.slice(2));
 const STATS_ONLY = args.has('--stats');
+const FETCH = args.has('--fetch');
 
 // ── Geometry ─────────────────────────────────────────────────────────────────
 
@@ -174,6 +175,132 @@ function ringCentroid(points) {
   area *= 0.5;
   return [cx / (6 * area), cy / (6 * area)];
 }
+
+// ── Refreshing the OSM extract (--fetch) ─────────────────────────────────────
+// The extract is committed so the build never depends on Overpass being up —
+// during this project it returned 504s and "server too busy" often enough that
+// a live dependency would have been a liability. --fetch is the deliberate
+// refresh path.
+
+// The campus polygon's own bounding box, padded. It has to be a literal: on a
+// cold refresh there is no extract yet, so the polygon that would define it is
+// exactly what we are fetching. Keep it in step with CAMPUS_WAY_ID.
+const OSM_BBOX = [5.0278, 7.972, 5.048, 7.9845]; // south, west, north, east
+
+// Public Overpass instances, tried in order. The main one rate-limits and sheds
+// load under pressure; having somewhere else to go is the difference between a
+// refresh that works and one that needs babysitting.
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.osm.jp/api/interpreter',
+];
+
+function overpassQuery() {
+  const bbox = OSM_BBOX.join(',');
+  return `[out:json][timeout:180];
+(
+  way(${CAMPUS_WAY_ID});
+  way["building"](${bbox});
+  way["highway"](${bbox});
+  way["amenity"](${bbox});
+  node["amenity"](${bbox});
+  way["leisure"](${bbox});
+  node["entrance"](${bbox});
+  way["barrier"](${bbox});
+);
+out geom;`;
+}
+
+// Deep key sort. Overpass does not guarantee key order, and an unordered dump
+// turns every refresh into a diff nobody can read — which is how a real change
+// to the campus gets waved through in a wall of noise.
+function sortKeys(value) {
+  if (Array.isArray(value)) return value.map(sortKeys);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((k) => [k, sortKeys(value[k])]),
+    );
+  }
+  return value;
+}
+
+async function refreshExtract() {
+  const body = overpassQuery();
+  let lastError = 'no endpoint attempted';
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      try {
+        // The Content-Type is not optional. Node's fetch defaults a string
+        // body to text/plain, and Overpass answers that with 406 Not
+        // Acceptable — while the same query through curl works, because curl's
+        // -d sends form-encoded. The User-Agent is Overpass etiquette: they ask
+        // that automated clients identify themselves so an abusive one can be
+        // told apart from a broken one.
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'Arete-campus-map/1.0 (+https://www.aretecyb.tech)',
+          },
+          body,
+        });
+        if (!res.ok) {
+          lastError = `${endpoint} → HTTP ${res.status}`;
+          continue;
+        }
+        const text = await res.text();
+        // Overpass answers overload with an HTML error page and a 200, so the
+        // status code alone proves nothing.
+        if (!text.trimStart().startsWith('{')) {
+          lastError = `${endpoint} → not JSON (probably "server too busy")`;
+          continue;
+        }
+        const data = JSON.parse(text);
+
+        // Validate BEFORE overwriting. A truncated or empty answer that replaced
+        // a good extract would take the campus out of the map, and the next
+        // person would be debugging a graph, not a download.
+        const elements = data.elements ?? [];
+        if (!elements.some((e) => e.id === CAMPUS_WAY_ID)) {
+          lastError = `${endpoint} → response is missing campus way ${CAMPUS_WAY_ID}`;
+          continue;
+        }
+        const highways = elements.filter((e) => e.tags?.highway).length;
+        const buildings = elements.filter((e) => e.tags?.building).length;
+        if (highways === 0 || buildings === 0) {
+          lastError = `${endpoint} → response has ${highways} highways and ${buildings} buildings`;
+          continue;
+        }
+
+        // Drop the generator banner and timestamp: they change on every call and
+        // would make each refresh look like a change even when nothing moved.
+        delete data.osm3s;
+        delete data.generator;
+        elements.sort((a, b) => (a.type === b.type ? a.id - b.id : a.type.localeCompare(b.type)));
+
+        writeFileSync(OSM_PATH, JSON.stringify(sortKeys(data)), 'utf8');
+        console.log(
+          `✓ extract refreshed from ${endpoint} — ${elements.length} elements ` +
+            `(${buildings} buildings, ${highways} highways)`,
+        );
+        return true;
+      } catch (err) {
+        lastError = `${endpoint} → ${err.message}`;
+      }
+    }
+    if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 4000));
+  }
+
+  console.error(`✗ could not refresh the OSM extract: ${lastError}`);
+  console.error('  The committed extract is untouched — rebuilding from it instead.');
+  return false;
+}
+
+if (FETCH) await refreshExtract();
 
 // ── Load ─────────────────────────────────────────────────────────────────────
 
