@@ -22,7 +22,7 @@ import {
 import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CORE_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
 import { buildRoute, routeProgress, routeFromPoint } from '../utils/campusRoute';
 import { searchDestinations } from '../utils/campusSearch';
-import { escapeHtml, safeGeoPoint, isWithinBounds } from '../utils/locationSafety';
+import { safeGeoPoint, isWithinBounds } from '../utils/locationSafety';
 
 const WALK_SPEED = 80; // meters per minute
 
@@ -158,6 +158,7 @@ export default function CampusMap() {
   const userAccuracyRef = useRef(null);
   const watchIdRef = useRef(null);
   const firstFixRef = useRef(null);
+  const directionsRef = useRef(null);
   const routeRef = useRef(null);
   const followRef = useRef(true);
 
@@ -175,6 +176,7 @@ export default function CampusMap() {
 
   const pinIndex = useMemo(() => new Map(rawPins.map((p) => [p.id, p])), []);
   const pinById = (id) => pinIndex.get(id);
+  const getPinName = (id) => (id === MY_LOCATION ? 'My location' : pinById(id)?.name || '');
 
   // Resolves ids for a route that may have been built from a live GPS fix. Such
   // a route contains two pins the shipped list does not — the walker, and the
@@ -322,12 +324,39 @@ export default function CampusMap() {
           fillOpacity: 0.95,
           weight: 3,
         });
-        marker.bindPopup(
-          `<div style="font-family:Inter,sans-serif">
-            <strong style="font-size:14px">${escapeHtml(pin.name)}</strong>
-            <br/><span style="font-size:11px;color:${palette.muted}">${escapeHtml(cat.label)}</span>
-          </div>`,
-        );
+
+        // Built as DOM rather than an HTML string, for two reasons.
+        //
+        // The popup needs a real button — tapping a pin and getting directions
+        // is the whole interaction, and it cannot be a link because the target
+        // is React state, not a URL. And building it as nodes means the name
+        // goes in through textContent, so a building called `<img onerror=...>`
+        // is inert by construction instead of relying on remembering to call
+        // escapeHtml at every interpolation.
+        const card = document.createElement('div');
+        card.className = 'campus-popup';
+
+        const title = document.createElement('strong');
+        title.textContent = pin.name;
+        card.appendChild(title);
+
+        const sub = document.createElement('span');
+        sub.textContent = pin.source ? cat.label : `${cat.label} · name not surveyed yet`;
+        card.appendChild(sub);
+
+        const go = document.createElement('button');
+        go.type = 'button';
+        go.className = 'campus-popup__go';
+        go.textContent = 'Directions';
+        // Through a ref, not a direct closure. Markers are created once, in the
+        // mount effect, so a handler captured here would hold the very first
+        // render's state forever — it would route from whatever `userPos` was
+        // when the map loaded, which is `null`. The ref is reassigned every
+        // render, so the button always reaches the current one.
+        go.addEventListener('click', () => directionsRef.current?.(pin.id));
+        card.appendChild(go);
+
+        marker.bindPopup(card);
         markerLayer.addLayer(marker);
         markersRef.current.push({ id: pin.id, marker, pin });
       }
@@ -408,10 +437,7 @@ export default function CampusMap() {
   }, [theme]);
 
   // Keep the latest route + follow flag readable from the geolocation callback.
-  useEffect(() => {
-    routeRef.current = route;
-    followRef.current = follow;
-  }, [route, follow]);
+
 
   const clearRouteLayers = () => {
     if (!mapInstance.current) return;
@@ -683,7 +709,40 @@ export default function CampusMap() {
     }
   };
 
-  const getPinName = (id) => (id === MY_LOCATION ? 'My location' : pinById(id)?.name || '');
+  // Tapping a pin and asking for directions — the core interaction of the map.
+  //
+  // A function declaration, not a const arrow: it is referenced by the effect
+  // above, and everything it calls (drawRoute, startTracking) is defined below.
+  // Hoisting is what lets the wiring read top-down without the handler having to
+  // be split away from the code it belongs next to.
+  function handleDirectionsTo(id) {
+    setToId(id);
+    mapInstance.current?.closePopup();
+    // Already tracking, or already have a start: go straight to a route. The
+    // live position is the better default when it is available, since the pin
+    // the student tapped is where they want to END up.
+    if (userPos) {
+      setFromId(MY_LOCATION);
+      drawRoute(MY_LOCATION, id, userPos);
+    } else if (fromId && fromId !== id) {
+      drawRoute(fromId, id);
+    } else {
+      setFromId(MY_LOCATION);
+      setRouteError('');
+      startTracking((firstFix) => drawRoute(MY_LOCATION, id, firstFix));
+    }
+  }
+
+  // Keeps the latest route, follow flag and popup handler reachable from
+  // callbacks that were registered once — the geolocation watcher and the
+  // marker popups, both created at mount. No dependency array on purpose: these
+  // must track every render, and assigning a ref during render is not allowed.
+  useEffect(() => {
+    routeRef.current = route;
+    followRef.current = follow;
+    directionsRef.current = handleDirectionsTo;
+  });
+
 
   return (
     <div className="flex flex-col lg:flex-row flex-1 min-h-0 relative">
