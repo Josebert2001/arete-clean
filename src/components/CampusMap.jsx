@@ -18,6 +18,7 @@ import {
   Flag,
   Search,
   Footprints,
+  Layers,
 } from 'lucide-react';
 import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CORE_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
 import { buildRoute, routeProgress, routeFromPoint } from '../utils/campusRoute';
@@ -89,6 +90,32 @@ const TILE_CONFIG = CARTO_KEY
 // can never zoom into a level that returns nothing.
 const MAX_ZOOM = TILE_CONFIG.maxZoom;
 
+// Esri World Imagery — free, no key, and the only satellite layer whose terms
+// explicitly grant the right to trace features from it, which is how the campus
+// footpaths will eventually get mapped.
+//
+// Note the {z}/{y}/{x} order. Esri addresses tiles row-then-column, the reverse
+// of Leaflet's default {z}/{x}/{y}; getting it wrong does not error, it silently
+// serves a different part of the planet.
+//
+// SATELLITE_MAX_ZOOM is 18 and that is not a style choice. Measured over the
+// campus core: z16-z18 return real imagery (8.7 kB, 7.3 kB, 5.8 kB) while z19
+// and z20 both return an identical 2,521-byte grey placeholder reading "Map data
+// not yet available". Without the cap the very first thing a student does after
+// switching to satellite — zoom in to find a door — lands them on a blank grey
+// square, and the sidebar's fly-to button used to go straight to z19.
+//
+// Deliberately NOT precached by the service worker: Esri's terms allow offline
+// export only through their own ArcGIS applications, which is also why the
+// offline basemap work went to self-hosted OpenStreetMap tiles instead.
+const SATELLITE_MAX_ZOOM = 18;
+const SATELLITE_TILES = {
+  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  maxZoom: SATELLITE_MAX_ZOOM,
+  attribution:
+    'Imagery &copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics',
+};
+
 // Vector styles are resolved against the palette at call time (categoryColor /
 // cssPalette hand back concrete rgb() values, not `var()` tokens — see the note
 // in src/data/campusMap.js). That makes them a snapshot of the current theme,
@@ -105,7 +132,17 @@ const destinationStyle = (cat) => ({
 const routeCasingStyle = () => ({ color: cssPalette('paper') });
 const routeLineStyle = () => ({ color: cssPalette('ember') });
 
-function createTileLayer(theme) {
+function createTileLayer(theme, basemap) {
+  if (basemap === 'satellite') {
+    return L.tileLayer(SATELLITE_TILES.url, {
+      attribution: SATELLITE_TILES.attribution,
+      maxZoom: SATELLITE_TILES.maxZoom,
+      // No {r}: Esri has no @2x tiles, and detectRetina would request one zoom
+      // deeper than it displays — straight past the imagery ceiling into the
+      // grey placeholder on exactly the high-DPI phones students carry.
+      detectRetina: false,
+    });
+  }
   return L.tileLayer(TILE_CONFIG[theme] || TILE_CONFIG.light, {
     attribution: TILE_CONFIG.attribution,
     maxZoom: TILE_CONFIG.maxZoom,
@@ -113,6 +150,13 @@ function createTileLayer(theme) {
     detectRetina: TILE_CONFIG.detectRetina,
   });
 }
+
+// Vector styling has to change over imagery. The graph is drawn in coffee and
+// cream, which read well on a pale street map and disappear against dark aerial
+// photography — and in dark theme the marker stroke is `paper`, i.e. black on
+// near-black. Over satellite everything gets a white stroke and more opacity.
+const satelliteEdgeStyle = () => ({ color: '#ffffff', opacity: 0.75 });
+const satelliteStrokeStyle = () => ({ color: '#ffffff' });
 
 function formatDistance(meters) {
   if (meters < 1000) return `${Math.round(meters)} m`;
@@ -149,6 +193,7 @@ export default function CampusMap() {
   const mapInstance = useRef(null);
   const tileLayerRef = useRef(null);
   const tileThemeRef = useRef(theme);
+  const basemapRef = useRef('map');
   const themeRef = useRef(theme);
   const markersRef = useRef([]);
   const edgeLinesRef = useRef([]);
@@ -173,6 +218,9 @@ export default function CampusMap() {
   const [userPos, setUserPos] = useState(null);
   const [geoError, setGeoError] = useState('');
   const [routeError, setRouteError] = useState('');
+  // 'map' | 'satellite'. Street map by default: it is the one that shows the
+  // campus graph clearly, and the one that works offline.
+  const [basemap, setBasemap] = useState('map');
 
   const pinIndex = useMemo(() => new Map(rawPins.map((p) => [p.id, p])), []);
   const pinById = (id) => pinIndex.get(id);
@@ -251,7 +299,7 @@ export default function CampusMap() {
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    const tileLayer = createTileLayer(themeRef.current).addTo(map);
+    const tileLayer = createTileLayer(themeRef.current, basemapRef.current).addTo(map);
     tileLayerRef.current = tileLayer;
     tileThemeRef.current = themeRef.current;
 
@@ -400,27 +448,43 @@ export default function CampusMap() {
     };
   }, []);
 
-  // Follow the site theme: swap the tile layer, and restyle every vector drawn
-  // from the palette. The colors were resolved to concrete rgb() values when the
-  // layers were created, so without this second half the pins and route keep
-  // their light-theme colors over dark tiles.
+  // Follow the site theme AND the chosen basemap: swap the tile layer, and
+  // restyle every vector drawn from the palette. The colours were resolved to
+  // concrete rgb() values when the layers were created, so without this second
+  // half the pins and route keep their light-theme colours over dark tiles — and
+  // their street-map colours over satellite imagery, where coffee-on-cream is
+  // close to invisible.
   useEffect(() => {
     themeRef.current = theme;
     const map = mapInstance.current;
-    if (!map || tileThemeRef.current === theme) return;
+    if (!map) return;
+    if (tileThemeRef.current === theme && basemapRef.current === basemap) return;
+
+    const satellite = basemap === 'satellite';
 
     if (tileLayerRef.current) {
       map.removeLayer(tileLayerRef.current);
-      tileLayerRef.current = createTileLayer(theme).addTo(map);
+      tileLayerRef.current = createTileLayer(theme, basemap).addTo(map);
     }
 
-    // Same one-shot resolution as the initial render, and for the same reason:
-    // a getComputedStyle() per layer here would make every theme toggle re-run
-    // the thrash across all 535 layers.
-    const edgeStyle = edgeLineStyle();
-    const wpStyle = waypointStyle();
+    // Clamp the map's own ceiling to whatever the active imagery actually has.
+    // setMaxZoom() also pulls the view back if it is currently deeper, so a
+    // student sitting at z19 on the street map does not land on Esri's grey
+    // "Map data not yet available" tile the instant they switch.
+    map.setMaxZoom(satellite ? SATELLITE_MAX_ZOOM : MAX_ZOOM);
+
+    // Same one-shot palette resolution as the initial render, and for the same
+    // reason: a getComputedStyle() per layer here would re-run the layout thrash
+    // across every layer on each toggle.
+    const edgeStyle = satellite ? satelliteEdgeStyle() : edgeLineStyle();
+    const wpStyle = satellite
+      ? { ...waypointStyle(), ...satelliteStrokeStyle() }
+      : waypointStyle();
     const destStyles = Object.fromEntries(
-      Object.entries(CATEGORIES).map(([k, cat]) => [k, destinationStyle(cat)]),
+      Object.entries(CATEGORIES).map(([k, cat]) => [
+        k,
+        satellite ? { ...destinationStyle(cat), ...satelliteStrokeStyle() } : destinationStyle(cat),
+      ]),
     );
 
     edgeLinesRef.current.forEach((line) => line.setStyle(edgeStyle));
@@ -430,11 +494,14 @@ export default function CampusMap() {
         pin.type === 'waypoint' ? wpStyle : destStyles[pin.category] ?? destStyles.building,
       );
     });
-    routeCasingRef.current?.setStyle(routeCasingStyle());
+    routeCasingRef.current?.setStyle(
+      satellite ? satelliteStrokeStyle() : routeCasingStyle(),
+    );
     routeLineRef.current?.setStyle(routeLineStyle());
 
     tileThemeRef.current = theme;
-  }, [theme]);
+    basemapRef.current = basemap;
+  }, [theme, basemap]);
 
   // Keep the latest route + follow flag readable from the geolocation callback.
 
@@ -1106,6 +1173,27 @@ export default function CampusMap() {
               <span className="hidden sm:inline">{follow ? 'Following' : 'Follow'}</span>
             </button>
           )}
+
+          {/* Satellite is genuinely useful here: the campus is criss-crossed with
+              worn dirt tracks that exist on the ground and in no map, and the
+              imagery is the only way to see them. It is also how the missing
+              footpaths get traced — Esri's terms explicitly permit tracing. */}
+          <button
+            onClick={() => setBasemap((b) => (b === 'satellite' ? 'map' : 'satellite'))}
+            aria-pressed={basemap === 'satellite'}
+            aria-label={basemap === 'satellite' ? 'Switch to street map' : 'Switch to satellite view'}
+            title={basemap === 'satellite' ? 'Street map' : 'Satellite'}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-2.5 text-xs font-semibold shadow-lg ring-1 transition-colors ${
+              basemap === 'satellite'
+                ? 'bg-ink text-cream ring-coffee-600'
+                : 'bg-cream text-ink ring-coffee-200 hover:bg-paper'
+            }`}
+          >
+            <Layers size={15} />
+            <span className="hidden sm:inline">
+              {basemap === 'satellite' ? 'Street map' : 'Satellite'}
+            </span>
+          </button>
         </div>
       </div>
 
