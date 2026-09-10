@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CORE_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
 import { buildRoute, routeProgress, routeFromPoint } from '../utils/campusRoute';
+import { searchDestinations } from '../utils/campusSearch';
 import { escapeHtml, safeGeoPoint, isWithinBounds } from '../utils/locationSafety';
 
 const WALK_SPEED = 80; // meters per minute
@@ -190,11 +191,13 @@ export default function CampusMap() {
     []
   );
 
-  const filteredDestinations = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return destinations;
-    return destinations.filter((d) => d.name.toLowerCase().includes(q));
-  }, [destinations, searchQuery]);
+  // Ranked, alias-aware search — see src/utils/campusSearch.js. The old filter
+  // matched a lowercased substring of the official name only, so the map could
+  // be searched only by people who already knew what each building was called.
+  const filteredDestinations = useMemo(
+    () => searchDestinations(searchQuery, destinations, CATEGORIES),
+    [destinations, searchQuery],
+  );
 
   // routeProgress walks route.path, which on a live route includes ids that are
   // not in the shipped pin list — resolve through the route's own pins.
