@@ -10,6 +10,8 @@ import {
   buildRouteSteps,
   buildRoute,
   routeProgress,
+  routeFromPoint,
+  YOU_ID,
 } from '../utils/campusRoute';
 
 const pinById = (id) => pins.find((p) => p.id === id);
@@ -221,8 +223,8 @@ describe('dijkstra', () => {
 describe('buildRouteSteps', () => {
   it('produces a start step, middle steps and an arrive step for a real route', () => {
     const { path } = dijkstra(GATE, FAR.d.id, pins, edges);
-    const steps = buildRouteSteps(path, pinById);
-    expect(steps.length).toBe(path.length);
+    const { steps } = buildRouteSteps(path, pinById);
+    expect(steps.length).toBeGreaterThan(1);
     expect(steps[0].type).toBe('start');
     expect(steps[steps.length - 1].type).toBe('arrive');
     expect(steps[steps.length - 1].text).toContain(FAR.d.name);
@@ -230,16 +232,98 @@ describe('buildRouteSteps', () => {
     expect(steps.every((s) => typeof s.text === 'string' && s.text.length > 0)).toBe(true);
   });
 
-  it('distance field matches the next segment length', () => {
+  // The OSM-derived graph keeps a vertex at every slight bend in the tarmac, so
+  // one unbroken walk up a road arrived as several identical "Continue straight"
+  // instructions. Merging them is the whole point of the step list being
+  // separate from the path.
+  it('never emits two consecutive plain "continue straight" steps', () => {
     const { path } = dijkstra(GATE, FAR.d.id, pins, edges);
-    const steps = buildRouteSteps(path, pinById);
-    for (let i = 0; i < steps.length - 1; i++) {
-      expect(steps[i].distance).toBeCloseTo(haversine(pinById(path[i]), pinById(path[i + 1])));
+    const { steps } = buildRouteSteps(path, pinById);
+    for (let i = 1; i < steps.length; i++) {
+      const bothPlainStraight =
+        steps[i].type === 'straight' &&
+        steps[i - 1].type === 'straight' &&
+        !steps[i].text.includes(' at ') &&
+        !steps[i - 1].text.includes(' at ');
+      expect(bothPlainStraight, `steps ${i - 1} and ${i} should have merged`).toBe(false);
+    }
+    expect(steps.length).toBeLessThan(path.length);
+  });
+
+  // Merging must move metres between steps, never lose them.
+  it('conserves total distance across the merge', () => {
+    const route = buildRoute(GATE, FAR.d.id, pins, edges);
+    const summed = route.steps.reduce((t, s) => t + s.distance, 0);
+    expect(summed).toBeCloseTo(route.distance, 6);
+  });
+
+  it('maps every path node to a step that exists', () => {
+    const route = buildRoute(GATE, FAR.d.id, pins, edges);
+    expect(route.stepForNode).toHaveLength(route.path.length);
+    for (const idx of route.stepForNode) {
+      expect(route.steps[idx]).toBeDefined();
     }
   });
 
-  it('returns [] for a path of fewer than two pins', () => {
-    expect(buildRouteSteps([GATE], pinById)).toEqual([]);
+  // A destination pin whose connector snapped onto an existing road node sits
+  // exactly on top of it, so the first segment out of the main gate has zero
+  // length. bearingDeg() on two identical points is atan2(0, 0) = 0, which reads
+  // as "north" — a fabricated direction stated with full confidence.
+  it('does not invent a heading when the route opens on a zero-length segment', () => {
+    const gate = pinById(GATE);
+    const stacked = [
+      { id: 'a', name: 'Stacked start', type: 'destination', category: 'entrance', lat: gate.lat, lng: gate.lng },
+      { id: 'b', type: 'waypoint', lat: gate.lat, lng: gate.lng },
+      // Due EAST of the start, so a fabricated "north" is unambiguously wrong.
+      { id: 'c', name: 'East end', type: 'destination', category: 'building', lat: gate.lat, lng: gate.lng + 0.004 },
+    ];
+    const byId = (id) => stacked.find((p) => p.id === id);
+    const { steps } = buildRouteSteps(['a', 'b', 'c'], byId);
+    expect(steps[0].text).toMatch(/east/);
+    expect(steps[0].text).not.toMatch(/north|south/);
+  });
+
+  it('returns empty for a path of fewer than two pins', () => {
+    expect(buildRouteSteps([GATE], pinById).steps).toEqual([]);
+  });
+});
+
+// Nobody standing in the sun on a 2.2 km campus picks their own starting pin off
+// a dropdown. The GPS fix is almost never on the graph, so it gets joined to it.
+describe('routeFromPoint', () => {
+  it('routes from an off-graph position by joining it to the nearest path', () => {
+    const anchor = pinById(FAR.route.path[2]);
+    // ~35 m off the route, i.e. nowhere near any node.
+    const standing = { lat: anchor.lat + 0.0003, lng: anchor.lng + 0.0002 };
+
+    const route = routeFromPoint(standing, FAR.d.id, pins, edges);
+    expect(route).not.toBeNull();
+    expect(route.fromLive).toBe(true);
+    expect(route.path[0]).toBe(YOU_ID);
+    expect(route.path[route.path.length - 1]).toBe(FAR.d.id);
+    expect(route.snapDistance).toBeLessThan(250);
+    expect(route.distance).toBeGreaterThan(0);
+  });
+
+  it('refuses rather than guessing when the walker is far from any mapped path', () => {
+    // Well off campus. Snapping this to the nearest road would report a route
+    // and a walking time that bear no relation to the walk actually required.
+    expect(routeFromPoint({ lat: 5.09, lng: 8.04 }, FAR.d.id, pins, edges)).toBeNull();
+  });
+
+  it('does not mutate the pins and edges it was given', () => {
+    const pinCount = pins.length;
+    const edgeCount = edges.length;
+    const anchor = pinById(FAR.route.path[2]);
+    routeFromPoint({ lat: anchor.lat + 0.0003, lng: anchor.lng }, FAR.d.id, pins, edges);
+    expect(pins).toHaveLength(pinCount);
+    expect(edges).toHaveLength(edgeCount);
+  });
+
+  it('returns null without a fix or a destination', () => {
+    expect(routeFromPoint(null, FAR.d.id, pins, edges)).toBeNull();
+    expect(routeFromPoint({ lat: 5.04, lng: 7.978 }, '', pins, edges)).toBeNull();
+    expect(routeFromPoint({ lat: 5.04, lng: 7.978 }, 'no-such-pin', pins, edges)).toBeNull();
   });
 });
 
@@ -249,7 +333,10 @@ describe('buildRoute', () => {
     expect(route).not.toBeNull();
     expect(route.from).toBe(pinById(GATE).name);
     expect(route.to).toBe(FAR.d.name);
-    expect(route.steps.length).toBe(route.path.length);
+    // Steps are deliberately no longer 1:1 with path nodes — consecutive plain
+    // straights are merged — so stepForNode is what carries the correspondence.
+    expect(route.steps.length).toBeLessThanOrEqual(route.path.length);
+    expect(route.stepForNode).toHaveLength(route.path.length);
     expect(route.cumulative[0]).toBe(0);
     expect(route.cumulative[route.cumulative.length - 1]).toBeCloseTo(route.distance);
   });
@@ -330,7 +417,7 @@ describe('routeProgress', () => {
 
     const progress = routeProgress({ lat: atMidNode.lat, lng: atMidNode.lng }, route, pinById);
     expect(progress.nearestIdx).toBe(midIdx);
-    expect(progress.nextStep).toBe(route.steps[midIdx]);
+    expect(progress.nextStep).toBe(route.steps[route.stepForNode[midIdx]]);
   });
 });
 

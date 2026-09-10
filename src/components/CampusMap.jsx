@@ -20,10 +20,23 @@ import {
   Footprints,
 } from 'lucide-react';
 import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CORE_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
-import { buildRoute, routeProgress } from '../utils/campusRoute';
+import { buildRoute, routeProgress, routeFromPoint } from '../utils/campusRoute';
 import { escapeHtml, safeGeoPoint, isWithinBounds } from '../utils/locationSafety';
 
 const WALK_SPEED = 80; // meters per minute
+
+// Sentinel used as a "From" value. Not a pin id — it means "wherever the GPS
+// says I am", which is resolved at route time rather than picked off a list.
+const MY_LOCATION = '__my-location';
+
+// When the mapped route is this much longer than the straight line, and the
+// straight line is more than trivially short, the map says so instead of
+// presenting the walking time as fact. Measured on the real graph: a 176 m
+// crossing routes as 1,655 m — 9.4x — because the only mapped connection is the
+// ring road. 2.5x is comfortably above the honest detours a real path network
+// produces and well below that.
+const DETOUR_WARN_RATIO = 2.5;
+const DETOUR_WARN_MIN_M = 60;
 
 // How far outside MAP_BOUNDS a GPS fix may sit and still be treated as "on
 // campus" (degrees — roughly 550 m here). Generous enough to cover a poor fix
@@ -143,6 +156,7 @@ export default function CampusMap() {
   const userDotRef = useRef(null);
   const userAccuracyRef = useRef(null);
   const watchIdRef = useRef(null);
+  const firstFixRef = useRef(null);
   const routeRef = useRef(null);
   const followRef = useRef(true);
 
@@ -158,7 +172,18 @@ export default function CampusMap() {
   const [geoError, setGeoError] = useState('');
   const [routeError, setRouteError] = useState('');
 
-  const pinById = (id) => rawPins.find((p) => p.id === id);
+  const pinIndex = useMemo(() => new Map(rawPins.map((p) => [p.id, p])), []);
+  const pinById = (id) => pinIndex.get(id);
+
+  // Resolves ids for a route that may have been built from a live GPS fix. Such
+  // a route contains two pins the shipped list does not — the walker, and the
+  // point where they join the path — so drawing or measuring it through the
+  // plain lookup returns undefined and throws on .lat.
+  const routePinById = (r) => {
+    if (!r?.pins) return pinById;
+    const live = new Map(r.pins.map((p) => [p.id, p]));
+    return (id) => live.get(id) ?? pinById(id);
+  };
 
   const destinations = useMemo(
     () => rawPins.filter((p) => p.type === 'destination'),
@@ -171,7 +196,9 @@ export default function CampusMap() {
     return destinations.filter((d) => d.name.toLowerCase().includes(q));
   }, [destinations, searchQuery]);
 
-  const progress = route && userPos ? routeProgress(userPos, route, pinById) : null;
+  // routeProgress walks route.path, which on a live route includes ids that are
+  // not in the shipped pin list — resolve through the route's own pins.
+  const progress = route && userPos ? routeProgress(userPos, route, routePinById(route)) : null;
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -395,7 +422,7 @@ export default function CampusMap() {
     }
   };
 
-  const drawRoute = (startId, endId) => {
+  const drawRoute = (startId, endId, posOverride) => {
     if (!mapInstance.current) return;
     clearRouteLayers();
     setRoute(null);
@@ -409,19 +436,49 @@ export default function CampusMap() {
       return;
     }
 
-    const result = buildRoute(startId, endId, rawPins, rawEdges);
-    if (!result) {
-      // Every destination is reachable in the shipped graph, so this means the
-      // data has drifted (a pin added without edges). Say so rather than
-      // clearing the route and leaving the student wondering what they did.
-      setRouteError(
-        `No walking route is mapped between ${getPinName(startId)} and ${getPinName(endId)} yet.`
-      );
-      return;
+    // Routing from the live GPS fix rather than a pin the student picked off a
+    // list. `posOverride` exists because this is called straight out of the
+    // click handler that turns tracking on, before the first fix has landed in
+    // React state.
+    const live = startId === MY_LOCATION;
+    const here = posOverride ?? userPos;
+    let result;
+
+    if (live) {
+      if (!here) {
+        setRouteError('Waiting for your location — allow location access, then try again.');
+        return;
+      }
+      result = routeFromPoint(here, endId, rawPins, rawEdges);
+      if (!result) {
+        // Deliberately not snapped to the nearest road anyway: a walker this far
+        // from anything mapped would be shown a route and a walking time bearing
+        // no relation to the walk they actually face.
+        setRouteError(
+          'You are too far from any mapped path for directions. Move towards a road or walkway and try again.',
+        );
+        return;
+      }
+    } else {
+      result = buildRoute(startId, endId, rawPins, rawEdges);
+      if (!result) {
+        // Every destination is reachable in the shipped graph and the prebuild
+        // validator enforces it, so this means the data has drifted (a pin added
+        // without edges). Say so rather than clearing the route and leaving the
+        // student wondering what they did wrong.
+        setRouteError(
+          `No walking route is mapped between ${getPinName(startId)} and ${getPinName(endId)} yet.`
+        );
+        return;
+      }
     }
 
+    // A live route references two ids the shipped pin list does not contain
+    // (the walker, and the point where they join the path), so it carries its
+    // own pins and everything downstream has to resolve through those.
+    const resolve = routePinById(result);
     const coords = result.path.map((id) => {
-      const p = pinById(id);
+      const p = resolve(id);
       return [p.lat, p.lng];
     });
 
@@ -451,6 +508,22 @@ export default function CampusMap() {
     setRouteError('');
     clearRouteLayers();
     setRoute(null);
+  };
+
+  // Picking "Use my location" as the start. Tracking is switched on if it is
+  // not already, and the route is drawn from the first fix that lands — the
+  // startTracking callback passes it straight through, because React state has
+  // not caught up by the time this returns.
+  const useMyLocationAsStart = () => {
+    setFromId(MY_LOCATION);
+    setShowFromList(false);
+    setSearchQuery('');
+    if (userPos) {
+      drawRoute(MY_LOCATION, toId, userPos);
+      return;
+    }
+    setRouteError('');
+    startTracking((firstFix) => drawRoute(MY_LOCATION, toId, firstFix));
   };
 
   const selectDestination = (id, field) => {
@@ -529,11 +602,25 @@ export default function CampusMap() {
 
     setGeoError('');
     const accuracy = pos.accuracy ?? 30;
-    setUserPos({ lat: pos.lat, lng: pos.lng, accuracy });
-    updateUserLayer({ lat: pos.lat, lng: pos.lng, accuracy });
+    const fix = { lat: pos.lat, lng: pos.lng, accuracy };
+    setUserPos(fix);
+    updateUserLayer(fix);
+
+    // Deliberately fired only for a fix that passed the on-campus check above:
+    // routing from a rejected reading would draw a route from another town.
+    if (firstFixRef.current) {
+      const fn = firstFixRef.current;
+      firstFixRef.current = null;
+      fn(fix);
+    }
   };
 
-  const startTracking = () => {
+  // `onFirstFix` fires once, on the next usable position. "Use my location"
+  // needs it because the fix arrives asynchronously and React state has not
+  // updated by the time the click handler returns — without it, the first tap
+  // reliably did nothing and the second one worked.
+  const startTracking = (onFirstFix) => {
+    if (typeof onFirstFix === 'function') firstFixRef.current = onFirstFix;
     if (!navigator.geolocation) {
       setGeoError('Geolocation is not available in this browser.');
       return;
@@ -573,6 +660,7 @@ export default function CampusMap() {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+    firstFixRef.current = null;
     setTracking(false);
     setUserPos(null);
     clearUserLayer();
@@ -592,7 +680,7 @@ export default function CampusMap() {
     }
   };
 
-  const getPinName = (id) => pinById(id)?.name || '';
+  const getPinName = (id) => (id === MY_LOCATION ? 'My location' : pinById(id)?.name || '');
 
   return (
     <div className="flex flex-col lg:flex-row flex-1 min-h-0 relative">
@@ -637,6 +725,21 @@ export default function CampusMap() {
                     />
                   </div>
                   <div className="max-h-48 overflow-y-auto">
+                    {/* First, and always offered: the campus is 2.2 km end to
+                        end, and asking someone standing in the sun to identify
+                        their own position on a list of 35 buildings — 33 of them
+                        still called "Unnamed building N" — is the worst thing
+                        this map used to do. Hidden while searching, since it is
+                        not a search result. */}
+                    {!searchQuery.trim() && (
+                      <button
+                        onClick={useMyLocationAsStart}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-paper transition-colors flex items-center gap-2 border-b border-coffee-200 font-medium text-ink"
+                      >
+                        <Crosshair size={13} className="text-ember-500 flex-shrink-0" />
+                        Use my location
+                      </button>
+                    )}
                     {/* Exclude whatever is already the destination, mirroring the
                         To list below — otherwise picking it here builds a
                         start === end route that can only be refused. */}
@@ -768,6 +871,22 @@ export default function CampusMap() {
                     <span className="font-medium text-ink">{formatDistance(route.distance)}</span>
                     {' '}&middot; {formatTime(route.distance)} &middot; arrive {etaAt(route.distance)}
                   </p>
+
+                  {/* The mapped walk is far longer than the direct line, which
+                      on this campus almost always means a real shortcut exists
+                      that nobody has surveyed yet — OSM has the roads here and
+                      not one footpath. Saying so is the difference between a map
+                      that is wrong and a map that knows what it does not know. */}
+                  {route.detour >= DETOUR_WARN_RATIO && route.direct >= DETOUR_WARN_MIN_M && (
+                    <p className="mt-1 rounded-lg bg-coffee-100 px-2.5 py-2 text-[11px] text-coffee-700 leading-relaxed">
+                      <span className="font-semibold text-ink">
+                        {route.to} is only {formatDistance(route.direct)} away in a straight line.
+                      </span>{' '}
+                      This route follows the paths we have mapped, which go the long way round.
+                      There is probably a shortcut that has not been surveyed yet — trust what you
+                      can see on the ground.
+                    </p>
+                  )}
 
                   {progress ? (
                     <div className={`mt-1 rounded-lg px-2.5 py-2 text-xs ${progress.arrived ? 'bg-moss/15 text-moss' : progress.offRoute ? 'bg-rust/15 text-rust' : 'bg-paper'}`}>
