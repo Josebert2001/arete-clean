@@ -25,11 +25,12 @@ export default function CourseIndexPreview({ groups = [] }) {
           University of Uyo course outlines
         </h1>
         <p className="text-coffee-800 leading-relaxed max-w-2xl">
-          Every one of the {total} courses on Areté, from 100 Level to Final Year — the outline,
-          the recommended textbooks and the study tips for each. The GST, MTH, PHY, STA, COS, CSC,
-          ENT and INS foundation courses are taken across the university&rsquo;s programmes and are
-          here for every student, whatever their department. Cybersecurity and Data Science have
-          their full departmental catalogues authored on top of that.
+          All {total} course outlines currently on Areté, from 100 Level to Final Year — the
+          outline, the recommended textbooks and the study tips for each. The GST, MTH, PHY, STA,
+          COS, CSC, ENT and INS foundation courses are taken across the university&rsquo;s
+          programmes and are here for every student, whatever their department. Cybersecurity and
+          Data Science have their full departmental catalogues authored on top of that; other
+          departments are written next, in the order students sign up from them.
         </p>
         <a href="/signin" className="btn-primary text-sm mt-6 inline-block">
           Sign in to study

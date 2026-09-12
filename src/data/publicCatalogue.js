@@ -16,13 +16,20 @@
 
 import { departments, DEFAULT_DEPARTMENT, YEAR_LEVELS } from './departments';
 import { noteTopicCount } from './lectureNotes/index.js';
-import { SITE_URL, SITE_NAME, INSTITUTION, homeTitle, homeDescription } from './siteMeta';
+import {
+  SITE_URL,
+  SITE_NAME,
+  INSTITUTION,
+  INSTITUTION_SHORT,
+  homeTitle,
+  homeDescription,
+} from './siteMeta';
 import { clip } from '../utils/text.js';
 
 // Re-exported so every existing caller keeps importing them from here. They are
 // defined in siteMeta.js, a leaf module, so usePageTitle can read the home
 // title without pulling this file's registries in — see the note there.
-export { SITE_URL, SITE_NAME, INSTITUTION, homeTitle, homeDescription };
+export { SITE_URL, SITE_NAME, INSTITUTION, INSTITUTION_SHORT, homeTitle, homeDescription };
 
 // Order matters: the first department carrying a slug owns its public page.
 // The shared foundation courses (GST/MTH/PHY/…) appear in both authored
@@ -92,11 +99,25 @@ export function courseOfferings(course) {
 
 const SEMESTERS = { 1: 'First Semester', 2: 'Second Semester' };
 
+// Google truncates a displayed title at roughly this many characters. Nothing
+// is lost for ranking past it — the whole tag is still read — but the suffix
+// stops being *shown*, and here the suffix is the institution, i.e. the word
+// that tells a student scanning results that this page is about their school.
+const TITLE_DISPLAY_CHARS = 65;
+
 // `<title>` for a course page. Front-loaded with the course code because that
-// is what students actually type into Google ("cyb 224 uniuyo"), and kept near
-// 60 characters so it survives the search-result truncation.
+// is what students actually type into Google ("cyb 224 uniuyo").
+//
+// 36 of the 95 course titles run past the display limit with the institution
+// spelled out. Swapping in the short form rescues 21 of them; the other 15 are
+// long because the course's own name is long ("Business Intelligence in Small
+// and Medium-Scale Enterprises"), and that is the course's name — it is not
+// ours to abbreviate. Truncating a real title to fit a pixel budget would
+// trade a fact for a cosmetic win.
 export function courseTitle(course) {
-  return `${course.code} — ${course.title} · ${INSTITUTION}`;
+  const full = `${course.code} — ${course.title} · ${INSTITUTION}`;
+  if (full.length <= TITLE_DISPLAY_CHARS) return full;
+  return `${course.code} — ${course.title} · ${INSTITUTION_SHORT}`;
 }
 
 // Who actually takes this course.
@@ -183,8 +204,8 @@ export function indexDescription(count) {
   return (
     `Outlines, recommended textbooks and study tips for all ${count} ${INSTITUTION} courses on ` +
     `${SITE_NAME} — including the GST, MTH, PHY, STA, COS, CSC, ENT and INS foundation courses ` +
-    `taken across every undergraduate programme, plus the full Cybersecurity and Data Science ` +
-    `catalogues.`
+    `taken across the university's undergraduate programmes, plus the full Cybersecurity and ` +
+    `Data Science catalogues.`
   );
 }
 
@@ -202,6 +223,18 @@ export function installDescription() {
     `Step-by-step setup guides for ${INSTITUTION} students: JDK 17 and Apache NetBeans for the ` +
     `COS 211/221 Java labs, Anaconda and JupyterLab for Python, and GCC via MSYS2 for C — with ` +
     `verification steps and the errors that actually come up.`
+  );
+}
+
+export function aboutTitle() {
+  return `About Areté — who builds it and where the material comes from`;
+}
+
+export function aboutDescription() {
+  return (
+    `Areté is an independent study companion for ${INSTITUTION} students, built by Josebert and ` +
+    `Barry of the Cybersecurity department. Not affiliated with the university. How the course ` +
+    `outlines, transcribed lecture notes and question banks are sourced, and what is free.`
   );
 }
 
@@ -308,16 +341,17 @@ export const SITE_FAQS = [
     a:
       `Areté is a free web app for ${INSTITUTION} undergraduates in Akwa Ibom State, Nigeria — ` +
       `for students in every department, not one. It carries the outline, recommended textbooks ` +
-      `and study tips for every course from 100 Level to Final Year, transcribed lecture notes ` +
-      `and past-paper practice for a growing set of courses, interactive Java, Python and C ` +
-      `tracks, a hands-on capture-the-flag security track, and an AI tutor that has read the ` +
-      `curriculum.`,
+      `and study tips for the foundation courses taken across the university's programmes and ` +
+      `for the full Cybersecurity and Data Science catalogues, 100 Level to Final Year, with ` +
+      `transcribed lecture notes and past-paper practice for a growing set of those courses, ` +
+      `interactive Java, Python and C tracks, a hands-on capture-the-flag security track, and an ` +
+      `AI tutor that has read the curriculum.`,
   },
   {
     q: `Which ${INSTITUTION} departments does Areté cover?`,
     a:
       `All of them, at the foundation level. The GST, MTH, PHY, STA, COS, CSC, ENT and INS ` +
-      `courses that every undergraduate programme in the university passes through are on Areté ` +
+      `courses that undergraduate programmes across the university pass through are on Areté ` +
       `for every student, whatever their department — with the same outlines, textbooks, ` +
       `lecture notes and practice as anyone else. On top of that, ` +
       `Cybersecurity and Data Science have their full departmental catalogues authored. If your ` +
@@ -334,6 +368,31 @@ export const SITE_FAQS = [
       `Physics (PHY 111/121), Descriptive Statistics (STA 111), Entrepreneurship (ENT 221) and ` +
       `the rest — are covered for students in every department, and the Java, Python, C and ` +
       `security tracks are open to everyone.`,
+  },
+  // Asked verbatim by students, and the single most useful thing an answer
+  // engine can be told about Areté: what it is NOT. An engine with no
+  // disambiguation either guesses — and "unofficial study site" guessed wrong
+  // as "the university's LMS" is a claim Areté has no right to — or declines to
+  // mention it at all. Saying it plainly is both the honest answer and the one
+  // that gets quoted.
+  {
+    q: `Is Areté the official ${INSTITUTION} learning platform?`,
+    a:
+      `No. Areté is an independent study companion built by ${INSTITUTION} students, and is not ` +
+      `affiliated with or endorsed by the university. The university runs its own official ` +
+      `systems for registration, results and lecturer-delivered course material; Areté sits ` +
+      `beside them with course outlines, transcribed lecture notes, past-paper practice and an ` +
+      `AI tutor. Use both — they answer different questions.`,
+  },
+  {
+    q: 'Who built Areté, and where do the notes come from?',
+    a:
+      `Areté is built by Josebert (software and hardware) and Barry (academic), students in the ` +
+      `Cybersecurity department at the ${INSTITUTION}. Course outlines, units and semesters ` +
+      `follow the university's own curriculum; the lecture notes are transcribed from lecturers' ` +
+      `workbooks and handouts rather than paraphrased, and where a handout conflicts with the ` +
+      `standard definition the notes teach the standard one and name the conflict. More at ` +
+      `${SITE_URL}/about.`,
   },
   {
     q: 'Is Areté free?',
