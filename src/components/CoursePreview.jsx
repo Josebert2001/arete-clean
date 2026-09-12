@@ -1,5 +1,14 @@
-import { BookOpen, GraduationCap, Lightbulb, ListChecks, Lock } from 'lucide-react';
-import { courseOfferings } from '../data/publicCatalogue';
+import {
+  BookOpen,
+  FileText,
+  GraduationCap,
+  HelpCircle,
+  Lightbulb,
+  ListChecks,
+  Lock,
+  Sparkles,
+} from 'lucide-react';
+import { courseAudience, courseFaqs, courseOfferings, courseSummary } from '../data/publicCatalogue';
 
 // The public face of a course: everything a prospective student — or a search
 // crawler — should be able to read without an account. The syllabus, the set
@@ -40,16 +49,85 @@ function Section({ icon: Icon, title, children }) {
   );
 }
 
-export default function CoursePreview({ course, department, siblings = [] }) {
+// One section of a lecture-note topic, prose only. publicNotes.js filters the
+// section list down to these three types precisely because this component is
+// hook-free and build-rendered — figures, code, maths and tables belong to
+// LectureNotes.jsx, which has the components and the browser to do them justice.
+function PreviewSection({ section }) {
+  if (section.type === 'bullets') {
+    return (
+      <div className="mb-4">
+        {section.heading && (
+          <h4 className="text-sm font-semibold text-ink mb-1.5">{section.heading}</h4>
+        )}
+        <ul className="list-disc pl-5 space-y-1 text-sm text-coffee-800 leading-relaxed">
+          {section.items.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </div>
+    );
+  }
+  if (section.type === 'termlist') {
+    return (
+      <dl className="mb-4 space-y-2">
+        {(section.items || []).map(({ term, def }) => (
+          <div key={term}>
+            <dt className="text-sm font-semibold text-ink inline">{term} — </dt>
+            <dd className="text-sm text-coffee-800 leading-relaxed inline">{def}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+  if (section.type === 'note') {
+    return (
+      <div className="mb-4 rounded-lg bg-coffee-100 px-4 py-3">
+        {section.text && (
+          <p className="text-sm text-coffee-800 leading-relaxed">{section.text}</p>
+        )}
+        {section.items?.length > 0 && (
+          <ul className="list-disc pl-5 space-y-1 text-sm text-coffee-800 leading-relaxed mt-1.5">
+            {section.items.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        )}
+      </div>
+    );
+  }
+  if (section.type === 'definition') {
+    return (
+      <div className="mb-4 rounded-lg border-l-2 border-ember-500 bg-paper pl-4 py-2.5">
+        {section.heading && (
+          <h4 className="text-sm font-semibold text-ink mb-1">{section.heading}</h4>
+        )}
+        <p className="text-sm text-coffee-800 leading-relaxed">{section.text}</p>
+      </div>
+    );
+  }
+  // `text` sections carry a heading too — 62 of the 139 in the note files do.
+  // Dropping it published a run of headless paragraphs: COS 221's topic 1
+  // became four consecutive definitions of `boolean`, `byte`, `char` and
+  // `short` with nothing saying which was which.
+  return (
+    <div className="mb-4">
+      {section.heading && (
+        <h4 className="text-sm font-semibold text-ink mb-1.5">{section.heading}</h4>
+      )}
+      <p className="text-sm text-coffee-800 leading-relaxed">{section.text}</p>
+    </div>
+  );
+}
+
+export default function CoursePreview({ course, department, siblings = [], notes = null }) {
   const offerings = courseOfferings(course);
   const related = siblings.filter((c) => c.slug !== course.slug).slice(0, 8);
+  const faqs = courseFaqs(course);
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
       <nav aria-label="Breadcrumb" className="mb-6 text-xs font-mono text-coffee-600">
         <a href="/courses" className="hover:text-ember-500">Courses</a>
         <span className="mx-2 opacity-50">/</span>
-        <a href={`/courses?level=${course.level}`} className="hover:text-ember-500">
+        {/* An anchor on /courses, not ?level= — see courseBreadcrumbJsonLd. */}
+        <a href={`/courses#level-${course.level}`} className="hover:text-ember-500">
           {course.level} Level
         </a>
         <span className="mx-2 opacity-50">/</span>
@@ -64,11 +142,18 @@ export default function CoursePreview({ course, department, siblings = [] }) {
           {SEMESTERS[course.semester] && <Pill>{SEMESTERS[course.semester]}</Pill>}
         </div>
         <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-3">{course.title}</h1>
-        <p className="text-sm text-coffee-600 mb-4">
-          {department?.degree ? `${department.degree}, ` : ''}University of Uyo
-        </p>
+        {/* Not "B.Sc. Cybersecurity" on GST 111. Areté serves the whole
+            university, and 22 of these pages are courses every programme
+            takes — naming one department there tells every other student the
+            page is not for them. */}
+        <p className="text-sm text-coffee-600 mb-4">{courseAudience(course, department)}</p>
+        {/* Definitional lead. The page used to open with prose written for a
+            student who already knows what the course is; an answer engine
+            extracts the first factual sentence, so this states the facts —
+            code, title, units, level, semester, institution — in one. */}
+        <p className="text-coffee-800 leading-relaxed font-medium">{courseSummary(course)}</p>
         {course.description && (
-          <p className="text-coffee-800 leading-relaxed">{course.description}</p>
+          <p className="text-coffee-800 leading-relaxed mt-3">{course.description}</p>
         )}
       </header>
 
@@ -105,6 +190,74 @@ export default function CoursePreview({ course, department, siblings = [] }) {
         </Section>
       )}
 
+      {/* ── The public slice of the lecture notes ────────────────────────
+          What a signed-out visitor and a crawler get: the table of contents,
+          the glossary, and the prose of the first topic. See publicNotes.js
+          for what each costs and why the rest stays gated. */}
+
+      {notes?.outline?.length > 0 && (
+        <Section icon={FileText} title={`What the ${course.code} lecture notes cover`}>
+          {/* Titles only. It is a table of contents, not the content — and it
+              is the thing a student weighing an account most wants to know:
+              does this match what my lecturer actually taught? */}
+          <ol className="space-y-2">
+            {notes.outline.map((title, i) => (
+              <li key={title} className="flex gap-3 text-sm text-coffee-800 leading-relaxed">
+                <span className="font-mono text-xs text-coffee-500 pt-0.5 shrink-0">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span>{title}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="text-xs text-coffee-600 mt-4">
+            {notes.topicCount} transcribed {notes.topicCount === 1 ? 'topic' : 'topics'}, taken from
+            the lecturer&rsquo;s own workbook. Readable in full once you sign in.
+          </p>
+        </Section>
+      )}
+
+      {notes?.glossary?.length > 0 && (
+        <Section icon={Sparkles} title={`${course.code} key concepts`}>
+          <dl className="space-y-4">
+            {notes.glossary.map(({ term, definition }) => (
+              <div key={term}>
+                <dt className="text-sm font-semibold text-ink">{term}</dt>
+                <dd className="text-sm text-coffee-700 leading-relaxed mt-0.5">{definition}</dd>
+              </div>
+            ))}
+          </dl>
+          {notes.glossaryTruncated && (
+            <p className="text-xs text-coffee-600 mt-4">
+              The {notes.topicCount} topics define many more terms than these — the full set, with
+              flashcards, is in the notes.
+            </p>
+          )}
+        </Section>
+      )}
+
+      {notes?.preview && (
+        <Section icon={BookOpen} title={`Read the start of “${notes.preview.title}”`}>
+          <div className="rounded-xl border border-coffee-200 bg-cream/50 p-5">
+            {notes.preview.sections.map((section, i) => (
+              <PreviewSection key={i} section={section} />
+            ))}
+            <div className="border-t border-coffee-200 pt-4 mt-1">
+              <p className="text-sm text-coffee-700 mb-3">
+                {notes.preview.truncated
+                  ? `That is the opening of topic 1 of ${notes.topicCount}.`
+                  : `That is topic 1 of ${notes.topicCount}.`}{' '}
+                Sign in — free, no password — to read the rest, take the practice questions, and
+                ask the AI tutor about any of it.
+              </p>
+              <a href="/signin" className="btn-primary text-sm inline-flex items-center gap-2">
+                <Lock size={14} /> Read all {notes.topicCount} {course.code} topics
+              </a>
+            </div>
+          </div>
+        </Section>
+      )}
+
       {course.textbooks?.length > 0 && (
         <Section icon={BookOpen} title="Recommended textbooks">
           <ul className="space-y-3">
@@ -129,17 +282,38 @@ export default function CoursePreview({ course, department, siblings = [] }) {
         </Section>
       )}
 
+      {faqs.length > 0 && (
+        <Section icon={HelpCircle} title={`${course.code} — questions and answers`}>
+          {/* Rendered, not merely serialised into the FAQPage JSON-LD:
+              Google requires an FAQPage's answers to be visible on the page,
+              and an engine that cannot read the text will not quote it. */}
+          <dl className="space-y-6">
+            {faqs.map(({ q, a }) => (
+              <div key={q}>
+                <dt className="font-semibold text-ink mb-1.5">{q}</dt>
+                <dd className="text-sm text-coffee-700 leading-relaxed">{a}</dd>
+              </div>
+            ))}
+          </dl>
+        </Section>
+      )}
+
       {related.length > 0 && (
         <Section icon={GraduationCap} title={`Other ${course.level} Level courses`}>
-          <ul className="flex flex-wrap gap-2">
+          {/* The course title is visible link text, not a title="" tooltip.
+              Answer engines and screen readers weigh what the anchor says, and
+              "CYB 101" on its own says nothing about where the link goes. */}
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
             {related.map((c) => (
               <li key={c.slug}>
                 <a
                   href={`/courses/${c.slug}`}
-                  className="inline-block text-xs font-mono px-2.5 py-1 rounded border border-coffee-200 text-coffee-700 hover:border-ember-500 hover:text-ember-500 transition-colors"
-                  title={c.title}
+                  className="flex gap-3 py-1.5 text-sm text-coffee-700 hover:text-ember-500 transition-colors"
                 >
-                  {c.code}
+                  <span className="font-mono text-xs text-coffee-500 pt-0.5 w-20 shrink-0">
+                    {c.code}
+                  </span>
+                  <span>{c.title}</span>
                 </a>
               </li>
             ))}
