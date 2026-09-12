@@ -10,6 +10,7 @@ import { cyb221Quiz } from './lectureNotes/cyb221Quiz.js';
 import { cyb222ExamPrep } from './lectureNotes/cyb222ExamPrep.js';
 import { cybInnovationExamPrep } from './lectureNotes/cybInnovationExamPrep.js';
 import { cos221ExamPrep } from './lectureNotes/cos221ExamPrep.js';
+import { ins224ExamPrep } from './lectureNotes/ins224ExamPrep.js';
 import { ent221Quiz } from './lectureNotes/ent221Quiz.js';
 
 export const courses = [
@@ -4727,6 +4728,7 @@ export const courses = [
         ],
       },
     ],
+    examPrep: ins224ExamPrep,
   },
   {
     code: 'CYB 224',
