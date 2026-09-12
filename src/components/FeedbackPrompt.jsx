@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { X, Star, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -12,7 +12,11 @@ import { useAuth } from '../context/AuthContext';
 //
 // Signed-in only: submissions are tied to auth.uid() and RLS
 // (supabase/migrations/20260825000000_feedback.sql) rejects anonymous rows.
-const PROMPT_KEY = 'feedback-prompt-v1';
+//
+// Both records below are keyed per user, following the convention in
+// src/utils/gettingStarted.js and for the same reason: a shared or lab
+// computer must not carry one student's answer over to the next one.
+const PROMPT_KEY_PREFIX = 'feedback-prompt-v1:';
 
 // "Actually used the app" is both conditions, not either. Three minutes with a
 // single page open is a student who walked away from their phone; five pages in
@@ -32,11 +36,15 @@ const SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
 // reloads twice an hour is never asked at all. sessionStorage is exactly the
 // right scope: it survives reloads within the tab and dies with it, so a new
 // visit genuinely starts a new session.
-const SESSION_KEY = 'feedback-session-v1';
+// It also carries `asked`, so that unmounting the component does not re-arm
+// the prompt. App hides every floating widget on the tutor chat page, which
+// means a student who opens the prompt and then goes to /tutor would otherwise
+// come back to it a second time without ever having answered.
+const SESSION_KEY_PREFIX = 'feedback-session-v1:';
 
-function readSession() {
+function readSession(userId) {
   try {
-    const s = JSON.parse(sessionStorage.getItem(SESSION_KEY));
+    const s = JSON.parse(sessionStorage.getItem(SESSION_KEY_PREFIX + userId));
     if (s && typeof s.startedAt === 'number' && Array.isArray(s.pages)) return s;
   } catch {
     /* fall through to a fresh session */
@@ -44,25 +52,25 @@ function readSession() {
   return null;
 }
 
-function writeSession(session) {
+function writeSession(userId, session) {
   try {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    sessionStorage.setItem(SESSION_KEY_PREFIX + userId, JSON.stringify(session));
   } catch {
     /* private mode — the gate falls back to this page load alone */
   }
 }
 
-function readState() {
+function readState(userId) {
   try {
-    return JSON.parse(localStorage.getItem(PROMPT_KEY)) || null;
+    return JSON.parse(localStorage.getItem(PROMPT_KEY_PREFIX + userId)) || null;
   } catch {
     return null;
   }
 }
 
-function writeState(status) {
+function writeState(userId, status) {
   try {
-    localStorage.setItem(PROMPT_KEY, JSON.stringify({ status, at: Date.now() }));
+    localStorage.setItem(PROMPT_KEY_PREFIX + userId, JSON.stringify({ status, at: Date.now() }));
   } catch {
     /* private mode — the prompt simply comes back in a later session */
   }
@@ -70,8 +78,8 @@ function writeState(status) {
 
 // A missing or unparseable record means "never asked", which is the right
 // default: the cost of asking once more is far lower than never asking at all.
-function isSuppressed(now = Date.now()) {
-  const saved = readState();
+function isSuppressed(userId, now = Date.now()) {
+  const saved = readState(userId);
   if (!saved) return false;
   if (saved.status === 'rated') return true;
   return saved.status === 'dismissed'
@@ -88,24 +96,42 @@ export default function FeedbackPrompt() {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
 
-  // Once this page load has asked, it is finished either way. Without this a
-  // student whose localStorage write failed would meet the prompt again on the
-  // very next navigation.
-  const askedThisSession = useRef(false);
+  const userId = user?.id;
+
+  // A shared or lab computer can see two students in one tab. Nothing the
+  // previous one left on screen may survive the handover — an open panel, a
+  // chosen rating, a half-typed message that would otherwise be submitted
+  // under the new student's id.
+  //
+  // Adjusted during render rather than in an effect: React re-runs this
+  // component before touching the DOM, so the previous student's draft never
+  // reaches the screen under the new account.
+  const [lastUserId, setLastUserId] = useState(userId);
+  if (userId !== lastUserId) {
+    setLastUserId(userId);
+    setOpen(false);
+    setRating(0);
+    setHoverRating(0);
+    setMessage('');
+    setStatus('idle');
+  }
 
   useEffect(() => {
-    if (!authEnabled || !user) return undefined;
+    if (!authEnabled || !userId) return undefined;
 
     // Record the visit before any gate check, so the page the student is on
     // when they are ineligible still counts towards the next check.
-    const session = readSession() || { startedAt: Date.now(), pages: [] };
+    const session = readSession(userId) || { startedAt: Date.now(), pages: [], asked: false };
     if (!session.pages.includes(pathname)) session.pages.push(pathname);
-    writeSession(session);
+    writeSession(userId, session);
 
-    if (askedThisSession.current || isSuppressed()) return undefined;
+    if (session.asked || isSuppressed(userId)) return undefined;
 
+    // `asked` is persisted rather than held in a ref so that it survives an
+    // unmount — see the note on SESSION_KEY_PREFIX. Re-read first: pages may
+    // have been added since this effect captured the session.
     const ask = () => {
-      askedThisSession.current = true;
+      writeSession(userId, { ...(readSession(userId) || session), asked: true });
       setOpen(true);
     };
 
@@ -119,24 +145,31 @@ export default function FeedbackPrompt() {
     // making the student navigate once more just to be asked — on a long
     // lecture-note page that next navigation may be a while coming.
     const timer = setTimeout(() => {
-      if (!askedThisSession.current && !isSuppressed()) ask();
+      if (!readSession(userId)?.asked && !isSuppressed(userId)) ask();
     }, MIN_SESSION_MS - waited);
     return () => clearTimeout(timer);
-  }, [pathname, authEnabled, user]);
+  }, [pathname, authEnabled, userId]);
 
   // Closing always records an outcome, so the prompt cannot reappear on the
   // next navigation. There is deliberately no click-outside handler: this
   // panel opens unbidden, and dismissing it by accident would silence it for
   // a month without the student ever deciding to.
   const close = useCallback((outcome) => {
+    // A send in flight owns the outcome. Dismissing mid-request would record a
+    // "not now" that the insert is about to contradict.
+    if (status === 'sending') return;
+    // Never downgrade a rating to a dismissal: once the insert has landed the
+    // student has answered, so the × and Escape must not re-arm the 30-day
+    // snooze behind them.
+    const recorded = status === 'sent' ? 'rated' : outcome;
     setOpen(false);
-    writeState(outcome);
-    if (outcome === 'rated') {
+    if (userId) writeState(userId, recorded);
+    if (recorded === 'rated') {
       setRating(0);
       setMessage('');
       setStatus('idle');
     }
-  }, []);
+  }, [status, userId]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -165,13 +198,19 @@ export default function FeedbackPrompt() {
     setStatus('sent');
     // Recorded the moment it lands, not when the panel is closed: the student
     // has answered, and a reload before they press Close must not re-ask.
-    writeState('rated');
+    writeState(userId, 'rated');
   };
 
+  // Announced, not focused. The panel appears unbidden and the page behind it
+  // stays usable, so seizing focus would yank a student out of the sentence
+  // they were reading. `aria-live="polite"` lets a screen reader finish its
+  // current utterance and then mention the prompt, which is what a
+  // non-modal dialog with no trigger needs to be discoverable at all.
   return (
     <div
       role="dialog"
       aria-label="Feedback on Areté"
+      aria-live="polite"
       className="feedback-pop fixed bottom-24 left-4 z-50 w-[min(20rem,calc(100vw-1.5rem))] print:hidden sm:bottom-28 sm:left-6"
     >
       <div className="bg-paper border border-coffee-200 rounded-xl shadow-xl overflow-hidden">

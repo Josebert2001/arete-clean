@@ -28,8 +28,10 @@ vi.mock('../lib/supabase', () => ({
   supabase: { from: () => ({ insert: (...args) => insertMock(...args) }) },
 }));
 
-const PROMPT_KEY = 'feedback-prompt-v1';
-const SESSION_KEY = 'feedback-session-v1';
+// Both records are keyed per user, as src/utils/gettingStarted.js does, so a
+// shared lab computer cannot carry one student's answer over to the next.
+const PROMPT_KEY = 'feedback-prompt-v1:u1';
+const SESSION_KEY = 'feedback-session-v1:u1';
 const MIN_SESSION_MS = 3 * 60 * 1000;
 
 // The component counts distinct pathnames, so the harness needs real
@@ -177,6 +179,71 @@ describe('FeedbackPrompt · when it stays away', () => {
     render(<Harness />);
     act(() => { vi.advanceTimersByTime(MIN_SESSION_MS); });
     expect(panel()).toBeInTheDocument();
+  });
+
+  // Regression: the × and Escape both call close('dismissed'), and before this
+  // was fixed that overwrote the 'rated' record written on a successful send —
+  // quietly downgrading "never ask again" to "ask again in 30 days".
+  it('does not downgrade a rating to a dismissal when closed with the ×', async () => {
+    render(<Harness />);
+    visitDistinctPages(5);
+    act(() => { vi.advanceTimersByTime(MIN_SESSION_MS); });
+
+    fireEvent.click(screen.getByRole('radio', { name: '5 stars' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Send feedback' }));
+    await waitFor(() => expect(screen.getByText('Thanks — that helps.')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close feedback' }));
+    expect(JSON.parse(localStorage.getItem(PROMPT_KEY)).status).toBe('rated');
+  });
+
+  // App hides every floating widget on /tutor, so the component unmounts there.
+  // `asked` lives in sessionStorage rather than a ref precisely so that coming
+  // back from the chat page does not present the prompt a second time to a
+  // student who never answered it.
+  it('does not ask again after unmounting, when the student answered nothing', () => {
+    const { unmount } = render(<Harness />);
+    visitDistinctPages(5);
+    act(() => { vi.advanceTimersByTime(MIN_SESSION_MS); });
+    expect(panel()).toBeInTheDocument();
+    expect(JSON.parse(sessionStorage.getItem(SESSION_KEY)).asked).toBe(true);
+
+    unmount(); // e.g. navigating to /tutor
+    render(<Harness />);
+    act(() => { vi.advanceTimersByTime(MIN_SESSION_MS); });
+    expect(panel()).not.toBeInTheDocument();
+  });
+
+  it('keeps one student’s record off another on a shared computer', () => {
+    localStorage.setItem('feedback-prompt-v1:someone-else', JSON.stringify({ status: 'rated', at: 0 }));
+    render(<Harness />);
+    visitDistinctPages(5);
+    act(() => { vi.advanceTimersByTime(MIN_SESSION_MS); });
+    // u1 has answered nothing, so the other student's rating must not silence them.
+    expect(panel()).toBeInTheDocument();
+  });
+
+  it('clears an unsent draft when the account changes', () => {
+    render(<Harness />);
+    visitDistinctPages(5);
+    act(() => { vi.advanceTimersByTime(MIN_SESSION_MS); });
+
+    fireEvent.click(screen.getByRole('radio', { name: '2 stars' }));
+    fireEvent.change(screen.getByLabelText('Feedback message'), {
+      target: { value: 'half-typed thought' },
+    });
+
+    // A second student signs in on the same tab.
+    mockUser = { id: 'u2' };
+    fireEvent.click(screen.getByText('go /profile'));
+    expect(panel()).not.toBeInTheDocument();
+
+    // Nothing of the first student's draft survives into the new session.
+    act(() => { vi.advanceTimersByTime(MIN_SESSION_MS); });
+    if (panel()) {
+      expect(screen.getByLabelText('Feedback message')).toHaveValue('');
+      expect(screen.getByRole('radio', { name: '2 stars' })).toHaveAttribute('aria-checked', 'false');
+    }
   });
 
   it('closes on Escape and records the dismissal', () => {
