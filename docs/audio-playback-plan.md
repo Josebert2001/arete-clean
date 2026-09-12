@@ -281,11 +281,18 @@ or fetched. The text comes from `topicToSpeechUnits()` at render time.
    *is* the gesture — just never auto-play, and never call `speak()` from an effect.
 4. **Mobile suspends synthesis when the screen locks or the tab backgrounds.** This is not
    fixable — it is the Web Speech API's defined behaviour and the reason Option B exists.
-   *Mitigation:* detect `visibilitychange`, pause cleanly, and show "Paused — audio stops when the
-   screen locks" rather than letting it die silently (ground rule 7). Optionally hold a
-   `navigator.wakeLock` while playing, which keeps the screen on — helps the "resting my eyes"
-   case, does nothing for the pocket case, and costs battery. Offer it as an opt-in toggle, off by
-   default.
+   *Mitigation:* detect it and show "Paused — audio stops when the screen locks" rather than
+   letting it die silently (ground rule 7). Optionally hold a `navigator.wakeLock` while playing,
+   which keeps the screen on — helps the "resting my eyes" case, does nothing for the pocket case,
+   and costs battery. Offer it as an opt-in toggle, off by default.
+
+   **Built, but not the way this said.** "Pause on `visibilitychange`" is wrong on desktop, where
+   Chrome, Edge and Firefox all keep speaking in a background tab — a student switching tabs to
+   take notes would have had the audio stop for no reason. The suspension is therefore **detected
+   on return, never predicted on leaving**: when the page becomes visible again mid-playback, if
+   `speechSynthesis` reports nothing speaking and nothing paused, the platform killed it. That is
+   correct on both platforms and needs no user-agent sniffing. Two tests pin the pair — one phone,
+   one desktop — because the same event has to mean opposite things.
 
 ### 4.4 UI
 
@@ -313,6 +320,11 @@ Call `onSetRead(true)` when the final unit's `onend` fires **and** no chapter wa
 mark a topic read when the student skipped to the end. Keep the dwell timer running in parallel and
 unchanged.
 
+**Built.** `useSpeech` tracks a clean run — started at unit 0, no `skipTo` — and passes that as
+`onFinished(clean)`; `TopicAccordion`'s `onListenFinished` marks the topic read only when it is
+`true`. Pausing and resuming stays clean; pressing next to the end does not. Both signals run in
+parallel and `setRead` is idempotent, so whichever lands first wins.
+
 ### 4.6 Phases
 
 | Phase | Work | Est. |
@@ -320,7 +332,7 @@ unchanged.
 | ~~A0~~ | ~~§3 shared foundation (serialiser + dictionary + tests)~~ — **done**, 38 tests | 4–6 h |
 | ~~A1~~ | ~~`useSpeech.js` with all four landmines + stub tests~~ — **done**, 29 tests | 3–4 h |
 | ~~A2~~ | ~~`ListenToTopic.jsx`, wired into `LectureNotes.jsx`~~ — **done**, 14 tests | 2–3 h |
-| A3 | Progress integration, wake-lock toggle (the skipped caption shipped in A2) | 1–2 h |
+| ~~A3~~ | ~~Progress integration, wake-lock toggle~~ — **done** (the skipped caption shipped in A2) | 1–2 h |
 | A4 | Real-device pass: Android Chrome, iOS Safari, desktop | 2 h |
 | | **Total** | **~1.5–2 days** (~1 day after A0) |
 

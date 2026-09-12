@@ -179,16 +179,71 @@ describe('ListenToTopic', () => {
     expect(screen.queryByRole('group', { name: 'Listen to this topic' })).not.toBeInTheDocument();
   });
 
-  it('explains a screen-lock suspension instead of just going quiet', async () => {
+  it('offers the keep-screen-on toggle only where the platform has the API', async () => {
     installSynth();
+    const originalNavigator = navigator;
+
+    vi.stubGlobal('navigator', { ...originalNavigator, wakeLock: undefined });
+    const { unmount } = render(<ListenToTopic topic={richTopic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('group', { name: 'Listen to this topic' });
+    expect(screen.queryByRole('button', { name: /Keep the screen on/ })).not.toBeInTheDocument();
+    unmount();
+
+    installSynth();
+    vi.stubGlobal('navigator', {
+      ...originalNavigator,
+      wakeLock: { request: vi.fn().mockResolvedValue({ release: vi.fn().mockResolvedValue() }) },
+    });
+    render(<ListenToTopic topic={richTopic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+
+    const toggle = await screen.findByRole('button', { name: /Keep the screen on/ });
+    // Opt-in: a wake lock costs battery, so it is never on by default.
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(toggle);
+    await waitFor(() => expect(toggle).toHaveAttribute('aria-pressed', 'true'));
+    expect(localStorage.getItem('arete:speech:awake')).toBe('1');
+  });
+
+  it('reports a clean finish so the caller can mark the topic read', async () => {
+    const state = installSynth();
+    const onFinished = vi.fn();
+    render(<ListenToTopic topic={richTopic} onFinished={onFinished} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+
+    // Play every chunk through to the end without touching the skip buttons.
+    for (let i = 0; i < 20 && !onFinished.mock.calls.length; i += 1) {
+      const utterance = state.current;
+      if (!utterance) break;
+      state.current = null;
+      state.speaking = false;
+      await waitFor(() => utterance.onend?.());
+    }
+
+    await waitFor(() => expect(onFinished).toHaveBeenCalledWith(true));
+  });
+
+  it('explains a screen-lock suspension instead of just going quiet', async () => {
+    const state = installSynth();
+    const visibility = (v) =>
+      Object.defineProperty(document, 'visibilityState', { value: v, configurable: true });
+
     render(<ListenToTopic topic={richTopic} />);
     fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
     await screen.findByRole('button', { name: 'Pause' });
 
-    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    // The suspension is detected on RETURN, not predicted on leaving — a
+    // backgrounded desktop tab keeps speaking and must not be paused.
+    visibility('hidden');
+    fireEvent(document, new Event('visibilitychange'));
+    state.speaking = false;
+    state.paused = false;
+    state.current = null;
+    visibility('visible');
     fireEvent(document, new Event('visibilitychange'));
 
     expect(await screen.findByText(/audio stops when the screen locks/)).toBeInTheDocument();
-    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+    visibility('visible');
   });
 });

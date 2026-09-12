@@ -212,7 +212,7 @@ describe('useSpeech', () => {
     await waitFor(() => expect(state.spoken).toHaveLength(3));
   });
 
-  it('tracks which unit is playing and finishes once', async () => {
+  it('tracks which unit is playing and finishes once, cleanly', async () => {
     const state = install([{ name: 'NG', lang: 'en-NG' }]);
     const onFinished = vi.fn();
     const { result } = renderHook(() => useSpeech(units('First.', 'Second.'), { onFinished }));
@@ -225,7 +225,37 @@ describe('useSpeech', () => {
 
     act(() => state.endCurrent());
     await waitFor(() => expect(result.current.status).toBe('ended'));
+    // `true` = played start to finish with no skipping, which is what lets the
+    // caller treat it as proof the student actually listened.
     expect(onFinished).toHaveBeenCalledTimes(1);
+    expect(onFinished).toHaveBeenCalledWith(true);
+  });
+
+  it('reports an unclean finish when the student skipped to the end', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const onFinished = vi.fn();
+    const { result } = renderHook(() => useSpeech(units('First.', 'Second.'), { onFinished }));
+
+    act(() => result.current.play());
+    act(() => result.current.next());        // jumped — did not listen to unit 1
+    act(() => state.endCurrent());
+
+    await waitFor(() => expect(onFinished).toHaveBeenCalled());
+    expect(onFinished).toHaveBeenCalledWith(false);
+  });
+
+  it('counts a pause and resume as still clean', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const onFinished = vi.fn();
+    // One unit, one chunk — so ending it once exhausts the queue.
+    const { result } = renderHook(() => useSpeech(units('A short unit.'), { onFinished }));
+
+    act(() => result.current.play());
+    act(() => result.current.pause());
+    act(() => result.current.resume());
+    act(() => state.endCurrent());
+    await waitFor(() => expect(onFinished).toHaveBeenCalled());
+    expect(onFinished).toHaveBeenCalledWith(true);
   });
 
   it('does not advance on a callback from a cancelled run', async () => {
@@ -331,25 +361,46 @@ describe('useSpeech', () => {
     await waitFor(() => expect(result.current.unitIndex).toBe(0));
   });
 
-  it('pauses and flags an interruption when the screen locks — landmine 4', async () => {
-    install([{ name: 'NG', lang: 'en-NG' }]);
-    const { result } = renderHook(() => useSpeech(units('One. Two.')));
+  // Landmine 4 is DETECTED on return rather than predicted on leaving — see the
+  // comment on the visibilitychange effect. These two tests are the pair that
+  // justifies it: the same event has to mean different things on the two
+  // platforms, and the only honest signal is whether anything is still speaking.
+  const setVisibility = (value) =>
+    Object.defineProperty(document, 'visibilityState', { value, configurable: true });
+
+  afterEach(() => setVisibility('visible'));
+
+  it('flags an interruption when the phone suspended synthesis while away', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
     act(() => result.current.play());
 
-    act(() => {
-      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
-      document.dispatchEvent(new Event('visibilitychange'));
-    });
+    act(() => { setVisibility('hidden'); document.dispatchEvent(new Event('visibilitychange')); });
+    // What a locked phone does: synthesis simply stops.
+    act(() => { state.speaking = false; state.paused = false; state.current = null; });
+    act(() => { setVisibility('visible'); document.dispatchEvent(new Event('visibilitychange')); });
 
     await waitFor(() => expect(result.current.status).toBe('paused'));
     // The distinction the UI needs: the student did not do this.
     expect(result.current.interrupted).toBe(true);
 
-    act(() => {
-      Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
-    });
     act(() => result.current.resume());
     expect(result.current.interrupted).toBe(false);
+  });
+
+  it('leaves desktop playback alone when a background tab kept speaking', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    act(() => result.current.play());
+    const spokenBefore = state.spoken.length;
+
+    act(() => { setVisibility('hidden'); document.dispatchEvent(new Event('visibilitychange')); });
+    // Desktop Chrome/Edge/Firefox carry on in a background tab.
+    act(() => { setVisibility('visible'); document.dispatchEvent(new Event('visibilitychange')); });
+
+    expect(result.current.status).toBe('playing');
+    expect(result.current.interrupted).toBe(false);
+    expect(state.spoken).toHaveLength(spokenBefore);
   });
 
   it('stops talking when the component unmounts', () => {
@@ -398,6 +449,36 @@ describe('useSpeech', () => {
 
     await waitFor(() => expect(result.current.status).toBe('idle'));
     expect(state.cancels).toBeGreaterThan(before);
+  });
+
+  it('persists the keep-awake preference and reports platform support', async () => {
+    install([{ name: 'NG', lang: 'en-NG' }]);
+    const request = vi.fn().mockResolvedValue({ release: vi.fn().mockResolvedValue(undefined) });
+    vi.stubGlobal('navigator', { ...navigator, wakeLock: { request } });
+
+    const { result } = renderHook(() => useSpeech(units(multiChunk(2))));
+    expect(result.current.wakeLockSupported).toBe(true);
+    expect(result.current.keepAwake).toBe(false); // opt-in, never on by default
+
+    act(() => result.current.setKeepAwake(true));
+    await waitFor(() => expect(result.current.keepAwake).toBe(true));
+    expect(localStorage.getItem('arete:speech:awake')).toBe('1');
+
+    act(() => result.current.play());
+    await waitFor(() => expect(request).toHaveBeenCalledWith('screen'));
+  });
+
+  it('plays on regardless when the platform refuses a wake lock', async () => {
+    install([{ name: 'NG', lang: 'en-NG' }]);
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      wakeLock: { request: vi.fn().mockRejectedValue(new Error('denied')) },
+    });
+
+    const { result } = renderHook(() => useSpeech(units(multiChunk(2))));
+    act(() => result.current.setKeepAwake(true));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.status).toBe('playing'));
   });
 
   it('does nothing useful but does not throw with no units', () => {

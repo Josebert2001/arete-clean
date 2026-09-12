@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useId } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, useId } from 'react';
 import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, Circle, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink, ListChecks } from 'lucide-react';
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
@@ -570,6 +570,17 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
     onRead: () => onSetRead(true),
   });
 
+  // Hearing a topic out is a read signal, and a stronger one than the dwell
+  // timer beside it: the dwell timer infers attention from a visible panel,
+  // whereas finishing the audio is elapsed time the student actually spent on
+  // this material. `clean` is false when they skipped, so pressing next to the
+  // end does not count — which is the same reason "Expand all" plus a fast
+  // scroll marks nothing (see useAutoMarkRead). Both run in parallel; whichever
+  // happens first marks the topic, and setRead is idempotent.
+  const onListenFinished = useCallback((clean) => {
+    if (clean && tracksReading && !isRead) onSetRead(true);
+  }, [tracksReading, isRead, onSetRead]);
+
   const items = useMemo(() => buildOutline(topic.sections), [topic.sections]);
 
   // Simplify text per heading group, keyed by the heading section itself so
@@ -723,7 +734,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
           {/* Renders nothing without the Web Speech API, or on a topic that is
               listings with a sentence of glue — see canNarrate. No availability
               probe: the voice is on the device, so there is no endpoint to ask. */}
-          <ListenToTopic topic={topic} />
+          <ListenToTopic topic={topic} onFinished={onListenFinished} />
 
           {showKeyPoints && <KeyPoints topic={topic} plain={plain} context={context} />}
 

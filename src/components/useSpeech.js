@@ -42,6 +42,7 @@ const NOT_SENTENCE_END = /(?:\s[A-Z]|\b(?:Prof|Dr|Mr|Mrs|Ms|St|Vol|No|Ch|Sec|Inc
 
 const VOICE_PREF_KEY = 'arete:speech:voice';
 const RATE_PREF_KEY = 'arete:speech:rate';
+const AWAKE_PREF_KEY = 'arete:speech:awake';
 
 export const SPEECH_RATES = [0.75, 1, 1.25, 1.5];
 
@@ -174,10 +175,12 @@ const synth = () => (typeof window !== 'undefined' ? window.speechSynthesis : nu
  * @param {Object} [options]
  * @param {boolean} [options.keepAwake]  hold a screen wake lock while playing.
  *   Helps the "resting my eyes" case; does nothing for a locked phone.
- * @param {Function} [options.onFinished]  called once when the last unit ends
- *   naturally. Not called after stop() or a skip to the end.
+ * @param {Function} [options.onFinished]  called when the last unit ends, with
+ *   `true` only if the whole topic played start to finish with no skipping.
+ *   Never called after stop(). The flag is what lets a caller treat finishing
+ *   the audio as proof of attention — see LectureNotes' read marking.
  */
-export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
+export function useSpeech(units, { onFinished } = {}) {
   // The VALUE, not just the key: `'speechSynthesis' in window` is true for a
   // property that exists and is undefined, which is what a test double or a
   // stripped-down webview leaves behind.
@@ -188,6 +191,7 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
   const [voices, setVoices] = useState([]);
   const [voiceName, setVoiceName] = useState(() => readPref(VOICE_PREF_KEY, ''));
   const [rate, setRateState] = useState(() => Number(readPref(RATE_PREF_KEY, '1')) || 1);
+  const [keepAwake, setKeepAwakeState] = useState(() => readPref(AWAKE_PREF_KEY, '0') === '1');
   // True when the browser suspended us rather than the student pausing — the UI
   // needs to say which, or a phone-lock stop looks like a bug.
   const [interrupted, setInterrupted] = useState(false);
@@ -201,7 +205,7 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
   //
   // `hash` comes from topicToSpeechUnits and is a short djb2, so this is cheap;
   // the speech text is only the fallback for a hand-built unit.
-  const signature = (units ?? []).map((u) => u?.hash ?? u?.speech ?? '').join(' ');
+  const signature = (units ?? []).map((u) => u?.hash ?? u?.speech ?? '').join('\u0000');
 
   const queue = useMemo(() => {
     const out = [];
@@ -216,6 +220,17 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
   const cursorRef = useRef(0);     // index into `queue`
   const pausedRef = useRef(false);
   const wakeLockRef = useRef(null);
+  // True while the current run has played straight through from unit 0. Any
+  // skip clears it, which is what stops "skip to the end" from counting as
+  // having listened to the topic.
+  const cleanRunRef = useRef(false);
+  // `status` as a ref, for the event handlers that would otherwise close over a
+  // stale value (visibilitychange in particular fires long after its effect ran).
+  const statusRef = useRef(status);
+  useEffect(() => { statusRef.current = status; }, [status]);
+  // Whether the page went away mid-playback, so the visibility handler knows
+  // there is anything to check when it comes back.
+  const hiddenWhilePlayingRef = useRef(false);
   // Held in a ref so a caller that passes a fresh arrow every render does not
   // rebuild the whole speak chain. Written in an effect, never during render.
   const finishedRef = useRef(onFinished);
@@ -261,6 +276,17 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
     }
   }, [keepAwake]);
 
+  const setKeepAwake = useCallback((value) => {
+    setKeepAwakeState(value);
+    writePref(AWAKE_PREF_KEY, value ? '1' : '0');
+  }, []);
+
+  // Turning it on mid-topic should take effect now, not at the next play().
+  useEffect(() => {
+    if (keepAwake && statusRef.current === 'playing') acquireWakeLock();
+    if (!keepAwake) releaseWakeLock();
+  }, [keepAwake, acquireWakeLock, releaseWakeLock]);
+
   // ── The queue ─────────────────────────────────────────────────────────────
 
   const speakFrom = useCallback((index, run) => {
@@ -271,7 +297,9 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
     if (!item) {
       setStatus('ended');
       releaseWakeLock();
-      finishedRef.current?.();
+      // The flag matters: a caller that marks the topic read off this must not
+      // be fooled by a student who pressed skip until the end.
+      finishedRef.current?.(cleanRunRef.current);
       return;
     }
 
@@ -319,13 +347,18 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
   }, [releaseWakeLock]);
 
   // Landmine 3: this must be reached from a click, never from an effect.
-  const play = useCallback((fromUnit = 0) => {
+  //
+  // `viaSkip` is set only by skipTo — a caller asking to start somewhere other
+  // than the beginning is still a clean listen if they chose it deliberately
+  // from idle, but jumping mid-playback is not.
+  const play = useCallback((fromUnit = 0, { viaSkip = false } = {}) => {
     if (!supported || queue.length === 0) return;
     const api = synth();
 
     runRef.current += 1;
     const run = runRef.current;
     pausedRef.current = false;
+    cleanRunRef.current = !viaSkip && fromUnit === 0;
     setInterrupted(false);
 
     api.cancel(); // clear anything the previous run left queued
@@ -368,7 +401,7 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
 
   const skipTo = useCallback((target) => {
     const clamped = Math.max(0, Math.min(target, (units?.length ?? 1) - 1));
-    if (status === 'playing' || status === 'paused') play(clamped);
+    if (status === 'playing' || status === 'paused') play(clamped, { viaSkip: true });
     else setUnitIndex(clamped);
   }, [units, status, play]);
 
@@ -386,25 +419,47 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
   }, []);
 
   // ── Landmine 4: the screen locks and synthesis is suspended ───────────────
+  //
+  // DETECTED on return, not predicted on leaving. Pausing whenever the document
+  // hides is wrong on desktop, where Chrome, Edge and Firefox all keep speaking
+  // in a background tab — a student who switched tabs to take notes would have
+  // had the audio stop for no reason. Mobile is the platform that suspends, and
+  // the reliable signal is simply that nothing is speaking any more when the
+  // page comes back. No user-agent sniffing, and correct on both.
   useEffect(() => {
     if (!supported) return undefined;
 
     const onVisibility = () => {
-      if (document.visibilityState !== 'hidden') return;
-      // Read the live status, not the closed-over one.
-      setStatus((current) => {
-        if (current !== 'playing') return current;
+      if (document.visibilityState === 'hidden') {
+        hiddenWhilePlayingRef.current = statusRef.current === 'playing';
+        // The browser drops the lock on hide regardless; keep our handle honest.
+        releaseWakeLock();
+        return;
+      }
+
+      if (!hiddenWhilePlayingRef.current) return;
+      hiddenWhilePlayingRef.current = false;
+
+      const api = synth();
+      if (statusRef.current !== 'playing' || !api) return;
+
+      if (!api.speaking && !api.paused) {
+        // Suspended while we were away. Abandon the dead chain so a late
+        // callback cannot resurrect it, and tell the student what happened.
+        runRef.current += 1;
+        api.cancel();
         pausedRef.current = true;
-        synth()?.pause();
+        setStatus('paused');
         setInterrupted(true);
-        return 'paused';
-      });
-      releaseWakeLock();
+      } else {
+        // Desktop: it carried on talking the whole time. Just re-take the lock.
+        acquireWakeLock();
+      }
     };
 
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
-  }, [supported, releaseWakeLock]);
+  }, [supported, releaseWakeLock, acquireWakeLock]);
 
   // A changed voice or rate only takes effect on the NEXT utterance, so a
   // student who changes either mid-topic would otherwise hear no difference
@@ -462,5 +517,11 @@ export function useSpeech(units, { keepAwake = false, onFinished } = {}) {
     setVoice,
     rate,
     setRate,
+    keepAwake,
+    setKeepAwake,
+    // No point offering a toggle the platform will refuse. Safari on iOS has no
+    // Wake Lock API at all, which is also where it would have helped most.
+    // The VALUE again, not the key — same reason as `supported` above.
+    wakeLockSupported: typeof navigator !== 'undefined' && Boolean(navigator.wakeLock),
   };
 }

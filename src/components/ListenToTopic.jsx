@@ -17,7 +17,7 @@
 //   what happened instead of going quiet and looking broken.
 
 import { useMemo, useState, useId } from 'react';
-import { Volume2, Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
+import { Volume2, Play, Pause, SkipBack, SkipForward, X, Sun } from 'lucide-react';
 import { topicToSpeechUnits, canNarrate, skippedSummary, describeSkips } from '../utils/speechText';
 import { useSpeech, SPEECH_RATES } from './useSpeech';
 
@@ -41,6 +41,7 @@ export default function ListenToTopic({ topic, onFinished }) {
   const {
     supported, playing, paused, interrupted, unitIndex, unitCount,
     play, pause, resume, stop, next, prev, voices, voice, setVoice, rate, setRate,
+    keepAwake, setKeepAwake, wakeLockSupported,
   } = speech;
 
   // Nothing to offer: no Web Speech API, or a topic that is listings with a
@@ -126,6 +127,26 @@ export default function ListenToTopic({ topic, onFinished }) {
         >
           {rate}×
         </button>
+
+        {/* Opt-in and off by default — a wake lock costs battery, and it only
+            helps the student who is reading along. It does nothing for a phone
+            in a pocket, which is the case this whole option cannot serve. */}
+        {wakeLockSupported && (
+          <button
+            type="button"
+            onClick={() => setKeepAwake(!keepAwake)}
+            aria-pressed={keepAwake}
+            aria-label="Keep the screen on while listening"
+            title="Keep the screen on while listening"
+            className={`rounded-full border p-1.5 transition-colors shrink-0 ${
+              keepAwake
+                ? 'border-ember-500/40 bg-ember-500/10 text-ember-500'
+                : 'border-coffee-200 bg-paper text-coffee-500 hover:border-coffee-400 hover:text-ink'
+            }`}
+          >
+            <Sun size={14} />
+          </button>
+        )}
 
         {/* Only worth showing when the device actually offers a choice. */}
         {englishVoices.length > 1 && (
