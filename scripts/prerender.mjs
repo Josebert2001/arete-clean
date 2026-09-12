@@ -33,9 +33,10 @@ const SITE_URL = 'https://www.aretecyb.tech';
 // them fine. The gated routes (/lab, /tracks/*, /tutor, /explainer,
 // /cheatsheet) are deliberately absent — listing a URL that redirects to a
 // disallowed sign-in page is worse than not listing it.
+//
+// "/" and "/install" used to be here. They are prerendered now, so they arrive
+// through collectPages() instead; leaving them would list each URL twice.
 const STATIC_PAGES = [
-  { path: '/', changefreq: 'weekly', priority: '1.0' },
-  { path: '/install', changefreq: 'monthly', priority: '0.5' },
   { path: '/privacy', changefreq: 'yearly', priority: '0.3' },
   { path: '/terms', changefreq: 'yearly', priority: '0.3' },
 ];
@@ -90,6 +91,9 @@ function buildPage(shell, page) {
   html = setTagAttr(html, 'property="og:description"', 'content', page.description);
   html = setTagAttr(html, 'name="twitter:title"', 'content', page.title);
   html = setTagAttr(html, 'name="twitter:description"', 'content', page.description);
+  // Without this every prerendered page inherited the shell's og:type=website,
+  // so 95 syllabus pages each announced themselves as the site's front door.
+  html = setTagAttr(html, 'property="og:type"', 'content', page.ogType || 'website');
 
   const blocks = (page.jsonLd || []).map(jsonLdBlock).join('');
   html = html.replace('</head>', `${blocks}</head>`);
@@ -103,11 +107,15 @@ function buildPage(shell, page) {
   return html.replace('<div id="root"></div>', `<div id="root">${page.html}</div>`);
 }
 
-function buildSitemap(urls) {
+// `lastmod` is the build date, which is the honest answer: this deploy is when
+// these bytes were last written. Answer engines weight recency, and a sitemap
+// with no lastmod at all gives them nothing to weight.
+function buildSitemap(urls, lastmod) {
   const body = urls
     .map(
       (u) =>
         `  <url>\n    <loc>${escapeXml(SITE_URL + u.path)}</loc>\n` +
+        `    <lastmod>${lastmod}</lastmod>\n` +
         `    <changefreq>${u.changefreq}</changefreq>\n` +
         `    <priority>${u.priority}</priority>\n  </url>`
     )
@@ -120,28 +128,45 @@ async function main() {
   // pathToFileURL, not a bare path: a Windows absolute path ("C:\…") is not a
   // valid ESM specifier and import() rejects it.
   const entry = pathToFileURL(path.join(root, 'dist-ssr', 'entry-server.js')).href;
-  const { collectPages } = await import(entry);
+  const { collectPages, collectLlmsTxt } = await import(entry);
 
-  const pages = await collectPages();
+  // One timestamp for the whole run, so the sitemap's lastmod and the pages'
+  // dateModified describe the same deploy rather than two adjacent instants.
+  const buildDate = new Date().toISOString();
+  const pages = await collectPages({ buildDate });
 
   for (const page of pages) {
+    // "/" resolves to dist itself, so this rewrites dist/index.html — the SPA
+    // shell. Safe because `shell` was read into memory above, before the loop.
     const dir = path.join(dist, page.path.replace(/^\//, ''));
     await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, 'index.html'), buildPage(shell, page), 'utf8');
   }
 
-  const sitemap = buildSitemap([
-    ...STATIC_PAGES,
-    ...pages.map((p) => ({ path: p.path, changefreq: p.changefreq, priority: p.priority })),
-  ]);
+  const sitemap = buildSitemap(
+    [
+      ...pages.map((p) => ({ path: p.path, changefreq: p.changefreq, priority: p.priority })),
+      ...STATIC_PAGES,
+    ],
+    buildDate.slice(0, 10)
+  );
   // Written to both: dist/ is what deploys, public/ keeps the copy in git from
   // going stale as courses are added (Vite copies public/ into dist at the
   // START of a build, so the repo copy is what a build without this step ships).
   await writeFile(path.join(dist, 'sitemap.xml'), sitemap, 'utf8');
   await writeFile(path.join(root, 'public', 'sitemap.xml'), sitemap, 'utf8');
 
+  // Same two-destination rule as the sitemap, for the same reason.
+  const llms = await collectLlmsTxt({ buildDate });
+  for (const [name, body] of Object.entries(llms)) {
+    await writeFile(path.join(dist, name), body, 'utf8');
+    await writeFile(path.join(root, 'public', name), body, 'utf8');
+  }
+
   process.stdout.write(
-    `prerendered ${pages.length} pages · sitemap has ${STATIC_PAGES.length + pages.length} urls\n`
+    `prerendered ${pages.length} pages · sitemap has ${STATIC_PAGES.length + pages.length} urls · ` +
+      `llms.txt ${Math.round(llms['llms.txt'].length / 1024)}kB, ` +
+      `llms-full.txt ${Math.round(llms['llms-full.txt'].length / 1024)}kB\n`
   );
 }
 
