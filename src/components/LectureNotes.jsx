@@ -24,6 +24,7 @@ import {
   requestSummary,
 } from '../utils/summarizeTopic';
 import { useAutoMarkRead } from './useReadingProgress';
+import ListenToTopic from './ListenToTopic';
 
 function DefinitionBox({ text }) {
   return (
@@ -718,6 +719,11 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
               </button>
             </div>
           )}
+
+          {/* Renders nothing without the Web Speech API, or on a topic that is
+              listings with a sentence of glue — see canNarrate. No availability
+              probe: the voice is on the device, so there is no endpoint to ask. */}
+          <ListenToTopic topic={topic} />
 
           {showKeyPoints && <KeyPoints topic={topic} plain={plain} context={context} />}
 

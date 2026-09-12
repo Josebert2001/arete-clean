@@ -520,3 +520,34 @@ export function skippedSummary(topic) {
   }
   return counts;
 }
+
+// Singular/plural wording for each `skipped.kind` sectionToSpeech emits. It
+// lives here rather than in the player so the wording and the kinds it describes
+// cannot drift apart — a kind added above with no entry here is silently
+// dropped from the caption rather than printed as a raw key.
+const SKIP_LABELS = {
+  code: ['code listing', 'code listings'],
+  output: ['output block', 'output blocks'],
+  math: ['equation', 'equations'],
+  table: ['table', 'tables'],
+  image: ['figure', 'figures'],
+  widget: ['interactive panel', 'interactive panels'],
+};
+
+/**
+ * { code: 12, table: 1 } → { text: '12 code listings and 1 table', total: 13 }
+ *
+ * The list punctuation and the number agreement are both easy to get subtly
+ * wrong, and both end up in front of every student who opens a practical.
+ */
+export function describeSkips(counts) {
+  const entries = Object.entries(counts ?? {}).filter(([kind]) => SKIP_LABELS[kind]);
+  const total = entries.reduce((sum, [, n]) => sum + n, 0);
+  const parts = entries.map(([kind, n]) => `${n} ${SKIP_LABELS[kind][n === 1 ? 0 : 1]}`);
+
+  if (parts.length === 0) return { text: '', total: 0 };
+  const text = parts.length === 1
+    ? parts[0]
+    : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+  return { text, total };
+}

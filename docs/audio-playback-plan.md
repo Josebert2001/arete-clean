@@ -264,7 +264,7 @@ or fetched. The text comes from `topicToSpeechUnits()` at render time.
 | File | Purpose |
 |---|---|
 | `src/components/useSpeech.js` | **BUILT.** The hook: voice selection, queue, play/pause/stop/skip, the four landmines in §4.3. Exposes `{ supported, status, playing, paused, interrupted, unitIndex, unitCount, play, pause, resume, stop, next, prev, skipTo, voices, voice, setVoice, rate, setRate }`. 29 tests in `useSpeech.test.jsx` against a deliberately hostile `speechSynthesis` stub that never auto-completes an utterance and delivers `cancel()` asynchronously, the way a real browser does.<br><br>Three things implementation added to §4.3's list. **The queue is keyed on unit CONTENT, not array identity** — `topicToSpeechUnits(topic)` in a component body returns a fresh array every render, so an identity-keyed "new topic" reset fired on every render and put `status` back to `idle` the instant `play()` set it to `playing`. Requiring every caller to `useMemo` would have been one forgotten memo away from the same bug in production. **`supported` checks the value, not the key** — `'speechSynthesis' in window` is true for a property that exists and is `undefined`. And **`speakFrom` recurses through a ref**, so a voice or rate change mid-topic cannot leave the in-flight chain calling a stale closure. |
-| `src/components/ListenToTopic.jsx` | The UI: one button in the topic header that expands to a control bar. |
+| `src/components/ListenToTopic.jsx` | **BUILT.** The UI: a pill matching the Key points and Plain English buttons, expanding to a control bar (prev / play-pause / next · `n/total` · current heading · speed cycle · voice picker when the device offers a choice · close). Rendered from `LectureNotes.jsx`'s `TopicAccordion` panel, just above `<KeyPoints>`. **No availability probe** — the voice is on the device, so there is no endpoint to ask, which is the one way this feature is cheaper than every other AI button on the page. Returns `null` when the API is missing or `canNarrate` is false, so the four courses of listing-heavy practicals simply never show it.<br><br>The skipped-content caption shipped here rather than in A3: the component is misleading without it. `describeSkips()` lives in `speechText.js` beside `skippedSummary()`, so the wording and the `skipped.kind` values it describes cannot drift — a kind with no entry is dropped from the caption rather than printed as a raw key. |
 | `src/__tests__/speechText.test.js` | §3.3. |
 | `src/__tests__/useSpeech.test.jsx` | Hook behaviour against a stubbed `speechSynthesis` (see `src/__tests__/stubs/`). |
 
@@ -319,8 +319,8 @@ unchanged.
 |---|---|---|
 | ~~A0~~ | ~~§3 shared foundation (serialiser + dictionary + tests)~~ — **done**, 38 tests | 4–6 h |
 | ~~A1~~ | ~~`useSpeech.js` with all four landmines + stub tests~~ — **done**, 29 tests | 3–4 h |
-| A2 | `ListenToTopic.jsx`, wired into `LectureNotes.jsx` | 2–3 h |
-| A3 | Progress integration, skipped-content caption, wake-lock toggle | 1–2 h |
+| ~~A2~~ | ~~`ListenToTopic.jsx`, wired into `LectureNotes.jsx`~~ — **done**, 14 tests | 2–3 h |
+| A3 | Progress integration, wake-lock toggle (the skipped caption shipped in A2) | 1–2 h |
 | A4 | Real-device pass: Android Chrome, iOS Safari, desktop | 2 h |
 | | **Total** | **~1.5–2 days** (~1 day after A0) |
 
