@@ -67,6 +67,10 @@ ran. The lesson there applies verbatim — **no audio beats broken audio.**
 
 ## 3. The shared foundation — BOTH options need this, build it first
 
+> **Status: BUILT.** `src/utils/speechText.js` + `src/__tests__/speechText.test.js` (38 tests).
+> The corpus guard runs all 111 topics end to end and asserts zero LaTeX, code-fence, pipe-row or
+> stray-brace residue. §3.4 and §3.5 record what implementation changed about this plan.
+
 This is ~60% of the total work and it is identical either way. Whichever option ships first, this
 lands first, and the second option reuses it untouched.
 
@@ -188,32 +192,60 @@ Non-negotiable, because every failure mode here is silent-but-wrong:
 
 ### 3.4 `canNarrate()` needs a floor, not a boolean — measured
 
+> **Built — see `src/utils/speechText.js`.** The numbers below are the final ones; an earlier draft
+> of this section said *nine* topics, counted before the serialiser existed by summing raw `text`
+> and `items` fields. The shipped `speakableCharCount()` measures the prose actually spoken (so it
+> includes `"Note."` prefixes and `"Term. Definition."` joins, and excludes headings and markers),
+> which is the more accurate figure and puts four borderline topics above the line. Checked by
+> reading their output: *"Concept of Computing"* at 425 chars is real prose and narrates fine.
+
 No topic in the corpus has *zero* speakable sections, so "has any prose" is not a usable gate. But
-**nine topics carry under 400 chars of speakable text**, because they are practicals that are almost
+**five topics carry under 400 chars of speakable text**, because they are practicals that are almost
 entirely listings:
 
 ```
-cos121 — Arrays and Lists                          74 speakable chars,  2 sections
-cos121 — Input, Output, and Type-Casting           64 chars,  4 sections
-cos121 — GUI with Tkinter                          65 chars,  3 sections
-cos121 — Writing Mathematical Formulas in Python   76 chars,  2 sections
-cyb123 — CSS Borders, Margin and Padding          207 chars,  4 sections
-cyb221 — Practical 3: Cryptography Challenge      189 chars,  5 sections
-cyb221 — Practical 4: Detecting File Tampering    353 chars,  4 sections
-cos121 — Control Structures                       313 chars,  3 sections
-(+1 more)
+cos121 — Input, Output, and Type-Casting           69 speakable chars
+cos121 — Arrays and Lists                          74
+cos121 — Writing Mathematical Formulas in Python   76
+cos121 — GUI with Tkinter                         244
+cos121 — Control Structures                       336
 ```
 
-Narrated, "Arrays and Lists" is about fifteen seconds of *"Code listing — Python, 12 lines. It's on
-screen."* repeated. That is the broken-audio failure this plan exists to avoid, and it would ship on
+Narrated, "Arrays and Lists" is about fifteen seconds of *"Code listing on screen — Python, 12
+lines."* repeated. That is the broken-audio failure this plan exists to avoid, and it would ship on
 day one without a floor.
 
-**So `canNarrate(topic)` gates on speakable chars, not section count.** Use
-`MIN_NARRATE_CHARS = 400`, mirroring how `canSimplifyGroup` gates on `MIN_SIMPLIFY_CHARS` rather
-than on types (`noteText.js:127-138`). Export the constant and assert the nine above fail it.
+**So `canNarrate(topic)` gates on speakable chars, not section count.** `MIN_NARRATE_CHARS = 400`,
+mirroring how `canSimplifyGroup` gates on `MIN_SIMPLIFY_CHARS` rather than on types
+(`noteText.js:127-138`). The corpus guard in `speechText.test.js` asserts the refusals stay within
+`cos121` and do not creep.
 
-These nine are exactly the topics `CodeWalkthrough.jsx` was built for — the button they want is
+These five are exactly the topics `CodeWalkthrough.jsx` was built for — the button they want is
 "Code Walkthrough", not "Listen", and it is already there.
+
+### 3.5 Inline maths — found during implementation, not planned for
+
+The census in §1 counts `type: 'math'` sections (217 of them). It does **not** catch maths written
+inline inside ordinary prose, and **205 `text` / `bullets` / `definition` / `note` / `termlist`
+sections carry `$...$` spans**. MTH 121 is built almost entirely from them; COS 221 uses them too.
+
+Handling only the `math` section type therefore left *"dollar backslash frac open brace d y"* in the
+middle of otherwise clean sentences — the same defect as rendering raw TeX, just audible.
+
+`mathToSpeech()` covers the shapes these notes actually use (`f(x)` → "f of x", `x^2` → "x squared",
+`t_0` → "t sub 0", `\frac{dy}{dx}` → "dy over dx", `\sqrt{}`, `\int`, the Greek letters, the
+comparison operators) and **refuses everything else** by returning `complete: false`, which the
+caller turns into a spoken *"an expression on screen"* marker. A wrong reading of an equation is
+worse than being told to look.
+
+Three smaller things the corpus forced, all now covered by tests:
+
+- **Real currency.** CYB 122 quotes breach losses as `$500,000`; that is money, not a maths
+  delimiter, and it is handled before the structural strip.
+- **Prose that discusses a symbol.** COS 221 writes *"the curly braces {"* and *"the currency symbol
+  ($)"*. The words already carry the meaning, so the leftover character is dropped, not spoken.
+- **Escape sequences.** COS 221's "Java String API" prints `\\` and `\t` as prose. A lone backslash
+  is not followed by letters, so a command-only strip missed it and the voice said "backslash".
 
 ---
 
@@ -499,8 +531,8 @@ until it exists.
 ## 8. Open questions
 
 1. **Screen-on or pocket?** Already asked; the answer decides whether B is ever needed.
-2. ~~Is there a topic that is entirely code/math?~~ **Answered in §3.4** — none are, but nine are
-   near-silent, so `canNarrate` needs a 400-char floor.
+2. ~~Is there a topic that is entirely code/math?~~ **Answered in §3.4** — none are, but five are
+   near-silent, so `canNarrate` gates on a 400-char floor. Built.
 3. Do the 4 courses holding notes inline (no `notesKey`) need audio too? `pregenerate-simplify.mjs`
    handles them via `course.slug` — mirror that, don't invent a second key rule.
 4. Does the `en-NG` Google voice actually sound good on this material? One course, then decide.
