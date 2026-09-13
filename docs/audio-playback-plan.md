@@ -304,7 +304,8 @@ Collapsed: `▶ Listen (12 min)`. Expanded control bar: play/pause · ⏮ ⏭ ch
 (0.75/1/1.25/1.5) · voice picker (only if >1 `en-*` voice) · current chapter heading · a caption
 reading `"3 code listings and 1 equation skipped — they're on screen"`.
 
-**Highlight-follows-voice (worth it, do it in phase 2):** `SpeechSynthesisUtterance.onboundary`
+**Highlight-follows-voice — BUILT at group level, see §4.10.** The original sketch below is kept
+for the word-level part, which is still outstanding: `SpeechSynthesisUtterance.onboundary`
 gives a character index. Map it back to the section and add a `bg-ember-500/10` wash on the section
 being read. Chrome/Edge fire `onboundary` reliably; Safari does not — feature-detect and degrade to
 chapter-level highlighting. This is the thing that makes Option A feel finished rather than bolted
@@ -408,6 +409,52 @@ Play on a finished topic replaying only the closing section — and, because tha
 at unit 0, never marking the topic read.
 
 Ten tests added, 767 pass, lint clean.
+
+### 4.10 Highlight-follows-voice — built (2026-09-13)
+
+§4.4 called this "the thing that makes Option A feel finished", and it is built at **group level**,
+which is the granularity the data already supports on every browser including Safari.
+
+**The join is one field.** `topicToSpeechUnits` walks `buildOutline(topic.sections)`, and so does
+`TopicAccordion` — the same call over the same sections, keyed by the same index. Each unit now
+carries that index as `outlineIndex`, and the renderer matches on it. No second traversal, no
+mapping to maintain by hand. It is deliberately *not* the unit's position in the array: a group that
+produces no speech is dropped, so the two part company the moment a topic opens with a resource
+link (a test pins this).
+
+**Reported upward, not highlighted in place.** `ListenToTopic` sits above the sections, not around
+them, so it tells the page which outline item the voice is on and `TopicAccordion` paints. It
+reports through a ref, the same reason `useSpeech` holds `onFinished` in `finishedRef`: a parent
+passing a fresh arrow every render must not turn this into a report per render. It reports `null`
+whenever playback is not *playing* — a paused or finished player leaves no section lit — and on
+unmount, so collapsing the topic mid-listen clears the wash.
+
+**Matching is on section identity, not on an index**, because the two render branches index
+differently (the grouped branch by outline item, the flat one by section) and because a group's
+tail sections are being read just as much as its heading is.
+
+**Collapsed groups open themselves.** The voice reads straight through a topic and only one group
+is open by default, so without this the highlight spends most of a listen inside a closed panel —
+which is the same as not having it. Opening is one-way: nothing re-collapses behind the voice, so a
+student who opened something to read along keeps it. Done in the notify callback rather than an
+effect on `speakingIdx`; the React Compiler lint rejects a synchronous `setState` in an effect, and
+the callback is the more honest place anyway.
+
+**No auto-scroll.** Coursera scrolls; this does not. A page that scrolls itself while the student
+is reading ahead or looking back is fighting them, and the wash is cheap to find. Worth revisiting
+only if the phone passes say otherwise.
+
+The wash is a tint plus a left rule rather than a full border, with a negative inline margin, so
+nothing on the page moves as it turns on and off — a highlight that reflowed the text under a
+reader would be worse than no highlight.
+
+**Word-level highlighting is still not built**, and is a separate enhancement rather than a
+refinement of this. It needs `onboundary`, which Safari does not fire reliably, so it can only ever
+be a feature-detected layer on top of what is here.
+
+Verified in the browser: the wash appears on the opening paragraph, moves when the voice does,
+clears on pause, and opens the "Threat Actors" group when the voice reaches it (`aria-expanded`
+false → true). Play on a finished topic restarts at 1/3 with the wash back on the first section.
 
 ### 4.7 Risks
 

@@ -16,7 +16,7 @@
 //   around (docs/audio-playback-plan.md §4.3), so the one thing we can do is say
 //   what happened instead of going quiet and looking broken.
 
-import { useMemo, useState, useId } from 'react';
+import { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { Volume2, Play, Pause, SkipBack, SkipForward, X, Sun } from 'lucide-react';
 import { topicToSpeechUnits, canNarrate, skippedSummary, describeSkips } from '../utils/speechText';
 import { useSpeech, SPEECH_RATES } from './useSpeech';
@@ -26,7 +26,7 @@ function formatDuration(seconds) {
   return `${Math.round(seconds / 60)} min`;
 }
 
-export default function ListenToTopic({ topic, onFinished }) {
+export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineIndex }) {
   const [open, setOpen] = useState(false);
   const voiceSelectId = useId();
 
@@ -50,6 +50,24 @@ export default function ListenToTopic({ topic, onFinished }) {
     play, pause, resume, stop, next, prev, voices, voice, setVoice, rate, setRate,
     keepAwake, setKeepAwake, wakeLockSupported,
   } = speech;
+
+  // Tell the page which outline item the voice is on, so the section being read
+  // can be marked on screen. Only while actually PLAYING: a paused or finished
+  // player should not leave a section lit as though it were still being spoken.
+  //
+  // Reported upward rather than highlighted from in here because the sections
+  // are the parent's to render — this component sits above them, not around
+  // them. Must run before the early return below, like any other hook.
+  const speakingOutlineIndex = playing ? (units[unitIndex]?.outlineIndex ?? null) : null;
+
+  // Through a ref, so a parent that passes a fresh arrow every render does not
+  // turn this into a report on every render — the same reason useSpeech holds
+  // onFinished in finishedRef rather than depending on its identity.
+  const reportRef = useRef(onSpeakingOutlineIndex);
+  useEffect(() => { reportRef.current = onSpeakingOutlineIndex; }, [onSpeakingOutlineIndex]);
+  useEffect(() => { reportRef.current?.(speakingOutlineIndex); }, [speakingOutlineIndex]);
+  // Collapsing the topic must clear the highlight it left behind.
+  useEffect(() => () => reportRef.current?.(null), []);
 
   // Nothing to offer: no Web Speech API, or a topic that is listings with a
   // sentence of glue (see MIN_NARRATE_CHARS — narrating one of those is a few

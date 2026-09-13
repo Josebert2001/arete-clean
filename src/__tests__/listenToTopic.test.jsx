@@ -247,6 +247,40 @@ describe('ListenToTopic', () => {
     visibility('visible');
   });
 
+  it('reports the outline item being spoken, and clears it when stopped', async () => {
+    const state = installSynth();
+    const reports = [];
+    render(<ListenToTopic topic={richTopic} onSpeakingOutlineIndex={(i) => reports.push(i)} />);
+
+    // Nothing is playing yet, so the page has been told to highlight nothing.
+    expect(reports.at(-1)).toBe(null);
+
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await waitFor(() => expect(reports.at(-1)).toBe(0));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next section' }));
+    await waitFor(() => expect(reports.at(-1)).toBeGreaterThan(0));
+
+    // A pause is not "still reading this" — the wash has to come off.
+    fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
+    await waitFor(() => expect(reports.at(-1)).toBe(null));
+    expect(state.spoken.length).toBeGreaterThan(0);
+  });
+
+  it('clears the highlight when the player unmounts', async () => {
+    installSynth();
+    const reports = [];
+    const { unmount } = render(
+      <ListenToTopic topic={richTopic} onSpeakingOutlineIndex={(i) => reports.push(i)} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await waitFor(() => expect(reports.at(-1)).toBe(0));
+
+    unmount(); // the student collapsed the topic mid-listen
+    expect(reports.at(-1)).toBe(null);
+  });
+
   it('replays the whole topic after it ends, not just the closing section', async () => {
     const state = installSynth();
     render(<ListenToTopic topic={richTopic} onFinished={() => {}} />);

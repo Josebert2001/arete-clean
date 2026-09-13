@@ -517,6 +517,15 @@ export function topicToSpeechUnits(topic) {
     const words = speech.split(/\s+/).length;
     units.push({
       id: `unit-${index}`,
+      // Which buildOutline item this unit speaks. LectureNotes renders the very
+      // same outline and keys its sections on the same index, so this one field
+      // is the whole join between "what is being read" and "what is on screen" —
+      // no second traversal, and no mapping to keep in step by hand.
+      //
+      // It is NOT the unit's own position in this array: a group that produces
+      // no speech is skipped below, so the two drift apart the moment a topic
+      // opens with a figure.
+      outlineIndex: index,
       // Content-addressed, so a pre-rendered audio file for this unit is invalid
       // the moment the note changes — the same guarantee *.simplified.json and
       // *.explained.json already rely on.

@@ -313,7 +313,7 @@ function FiveVs({ items }) {
 // heads — supplied by TopicAccordion, which is the only level that knows which
 // sections belong under which heading. Sections that don't head a group (and the
 // `resource` cards, which have nothing to rewrite) get none and show no button.
-function Section({ section, simplifyReady, explainReady, explanations, simplifyText, bundledSimplified, plainEnglishMode, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
+function Section({ section, speaking = false, simplifyReady, explainReady, explanations, simplifyText, bundledSimplified, plainEnglishMode, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
   const [simplify, setSimplify] = useState({ status: 'idle', text: '', error: '' });
   const [showOriginal, setShowOriginal] = useState(false);
   const abortRef = useRef(null);
@@ -360,7 +360,18 @@ function Section({ section, simplifyReady, explainReady, explanations, simplifyT
   };
 
   return (
-    <div className={open ? 'mb-6' : 'mb-1'}>
+    // The wash marks the section the voice is reading. A tint and a left rule
+    // rather than a full border, so nothing on the page moves as it turns on and
+    // off — a highlight that reflowed the text under a reader would be worse
+    // than no highlight. The negative margin keeps the padded, tinted box the
+    // same measure as the untinted sections above and below it.
+    <div
+      className={`${open ? 'mb-6' : 'mb-1'}${
+        speaking
+          ? ' -mx-3 rounded-lg border-l-2 border-ember-500 bg-ember-500/10 px-3 py-2 transition-colors'
+          : ''
+      }`}
+    >
       {section.heading && (
         <h4
           id={anchorId}
@@ -583,6 +594,23 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
 
   const items = useMemo(() => buildOutline(topic.sections), [topic.sections]);
 
+  // Which outline item the voice is currently reading, or null when nothing is
+  // playing. `items` here and the units ListenToTopic speaks come from the SAME
+  // buildOutline call over the same sections, so the index means the same thing
+  // on both sides — see topicToSpeechUnits' outlineIndex.
+  const [speakingIdx, setSpeakingIdx] = useState(null);
+
+  // The sections that outline item covers, as a Set of the section objects
+  // themselves. Matching on identity rather than on an index because the two
+  // render branches below index differently — the grouped one by outline item,
+  // the flat one by section — and because a group's tail sections are being read
+  // just as much as its heading is.
+  const speakingSections = useMemo(() => {
+    const item = speakingIdx === null ? null : items[speakingIdx];
+    if (!item) return null;
+    return new Set(item.head ? [item.head, ...(item.tail ?? [])] : [item.standalone]);
+  }, [items, speakingIdx]);
+
   // Simplify text per heading group, keyed by the heading section itself so
   // either render branch below can look it up. Built here because buildOutline
   // is what knows which sections fall under which heading — a Section on its own
@@ -646,6 +674,25 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
       else next.add(ii);
       return next;
     });
+
+  // Told by ListenToTopic which outline item the voice has reached.
+  //
+  // Opening the group here rather than in an effect on `speakingIdx`: the voice
+  // reads straight through a topic including the groups the student has
+  // collapsed — and only one is open by default — so without this the highlight
+  // spends most of a listen inside a closed panel, which is the same as not
+  // having it. Opening is deliberately one-way; nothing re-collapses behind the
+  // voice, so a student who opened something to read along keeps it open.
+  const onSpeakingOutlineIndex = (idx) => {
+    setSpeakingIdx(idx);
+    if (idx === null) return;
+    setOpenSections((prev) => {
+      if (prev.has(idx)) return prev;
+      const next = new Set(prev);
+      next.add(idx);
+      return next;
+    });
+  };
 
   const toggleAllSections = () =>
     setOpenSections(allSectionsOpen ? new Set() : new Set(headedIndices));
@@ -734,14 +781,14 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
           {/* Renders nothing without the Web Speech API, or on a topic that is
               listings with a sentence of glue — see canNarrate. No availability
               probe: the voice is on the device, so there is no endpoint to ask. */}
-          <ListenToTopic topic={topic} onFinished={onListenFinished} />
+          <ListenToTopic topic={topic} onFinished={onListenFinished} onSpeakingOutlineIndex={onSpeakingOutlineIndex} />
 
           {showKeyPoints && <KeyPoints topic={topic} plain={plain} context={context} />}
 
           {collapsibleSections ? (
             <>
               {lead.map((it, ii) => (
-                <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
+                <Section key={ii} section={it.standalone} speaking={Boolean(speakingSections?.has(it.standalone))} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
               ))}
 
               {headedIndices.length >= 4 && (
@@ -780,7 +827,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
                 const ii = firstGroupIdx + i;
                 if (it.standalone) {
                   return (
-                    <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
+                    <Section key={ii} section={it.standalone} speaking={Boolean(speakingSections?.has(it.standalone))} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
                   );
                 }
                 const openG = openSections.has(ii);
@@ -788,6 +835,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
                   <div key={ii}>
                     <Section
                       section={it.head}
+                      speaking={Boolean(speakingSections?.has(it.head))}
                       simplifyReady={simplifyReady}
                       explainReady={explainReady} explanations={explanations}
                       simplifyText={groupText.get(it.head)}
@@ -800,7 +848,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
                       anchorId={`${panelId}-sec-${ii}`}
                     />
                     {openG && it.tail.map((s, si) => (
-                      <Section key={si} section={s} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
+                      <Section key={si} section={s} speaking={Boolean(speakingSections?.has(s))} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
                     ))}
                   </div>
                 );
@@ -811,6 +859,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
               <Section
                 key={si}
                 section={section}
+                speaking={Boolean(speakingSections?.has(section))}
                 simplifyReady={simplifyReady}
                 explainReady={explainReady} explanations={explanations}
                 simplifyText={groupText.get(section)}

@@ -54,6 +54,25 @@ describe('mathToSpeech', () => {
     }
   });
 
+  it('carries the outline index the renderer keys its sections on', () => {
+    // The join for highlight-follows-voice. It must be the buildOutline index,
+    // NOT the unit's position: a group that produces no speech is dropped from
+    // the array, so the two part company as soon as a topic opens with a figure.
+    const topic = {
+      title: 'T',
+      sections: [
+        // A download link: the one type that is dropped in silence rather than
+        // announced, so it takes an outline slot and produces no unit.
+        { type: 'resource', href: '/notes.pdf', label: 'Handout' }, // outline 0
+        { type: 'text', heading: 'First', text: 'Some prose.' },    // outline 1
+        { type: 'text', heading: 'Second', text: 'More prose.' },   // outline 2
+      ],
+    };
+    const units = topicToSpeechUnits(topic);
+    expect(units.map((u) => u.heading)).toEqual(['First', 'Second']);
+    expect(units.map((u) => u.outlineIndex)).toEqual([1, 2]);
+  });
+
   it('converts maths inside a heading, not only inside the body', () => {
     // MTH 121 has seven of these. Leaving the `$` pairs in the heading let them
     // reach applyPronunciation, where "$x$." tripped the currency rule and the
