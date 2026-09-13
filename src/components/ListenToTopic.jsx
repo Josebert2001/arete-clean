@@ -46,7 +46,7 @@ export default function ListenToTopic({ topic, onFinished }) {
 
   const speech = useSpeech(units, { onFinished });
   const {
-    supported, status, playing, paused, interrupted, unitIndex, unitCount,
+    supported, status, playing, paused, interrupted, failed, unitIndex, unitCount,
     play, pause, resume, stop, next, prev, voices, voice, setVoice, rate, setRate,
     keepAwake, setKeepAwake, wakeLockSupported,
   } = speech;
@@ -194,13 +194,21 @@ export default function ListenToTopic({ topic, onFinished }) {
         </p>
       )}
 
-      {/* Not a student-initiated pause. Saying so is the only thing that can be
-          done about a platform that suspends synthesis on screen lock. */}
-      {interrupted && (
-        <p aria-live="polite" className="mt-2 text-xs text-rust">
-          Paused — audio stops when the screen locks or you switch apps. Press play to carry on.
-        </p>
-      )}
+      {/* Neither of these is a student-initiated pause, and they have different
+          remedies — one is the platform suspending synthesis on screen lock, the
+          other is a voice that cannot speak at all.
+
+          The live region is mounted UNCONDITIONALLY and only its text changes.
+          A screen reader announces updates to a region it was already watching;
+          one that appears with its message already in it is usually missed
+          entirely, which defeats the point of saying anything. */}
+      <p aria-live="polite" className={failed || interrupted ? 'mt-2 text-xs text-rust' : 'sr-only'}>
+        {failed
+          ? 'This device could not play the audio. Try a different voice, if it offers one.'
+          : interrupted
+            ? 'Paused — audio stops when the screen locks or you switch apps. Press play to carry on.'
+            : ''}
+      </p>
     </div>
   );
 }

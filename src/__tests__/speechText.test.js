@@ -54,6 +54,21 @@ describe('mathToSpeech', () => {
     }
   });
 
+  it('converts maths inside a heading, not only inside the body', () => {
+    // MTH 121 has seven of these. Leaving the `$` pairs in the heading let them
+    // reach applyPronunciation, where "$x$." tripped the currency rule and the
+    // student heard a bare "dollars" between the heading and the first sentence.
+    const speech = (section) => sectionToSpeech(section).speech;
+
+    expect(speech({ type: 'text', heading: 'Integrating powers of $x$', text: 'Recall it.' }))
+      .toBe('Integrating powers of x. Recall it.');
+    expect(speech({ type: 'text', heading: 'Continuity at $x = a$', text: 'All three hold.' }))
+      .toBe('Continuity at x equals a. All three hold.');
+    // A caption is authored prose on the same footing.
+    expect(speech({ type: 'image', caption: 'The graph of $y = x^2$' }))
+      .toBe('Figure. The graph of y equals x squared.');
+  });
+
   it('names the whole exponent, not just a leading 2 or 3', () => {
     // "squared" is a reading of the entire exponent. Matching a bare digit
     // wherever it followed a caret split real corpus formulas down the middle:
@@ -240,6 +255,14 @@ describe('applyPronunciation', () => {
   it('does not read an ordinary word as a scale, or eat the space before it', () => {
     expect(applyPronunciation('$40 billed monthly')).toBe('40 dollars billed monthly');
     expect(applyPronunciation('$25 Metres away')).toBe('25 dollars Metres away');
+  });
+
+  it('needs a digit before it will say "dollars" at all', () => {
+    // `[\d,.]+` also matched a lone "." or ",", so any unbalanced `$` followed
+    // by punctuation spoke the word "dollars" attached to nothing.
+    expect(applyPronunciation('the $ sign.')).toBe('the sign.');
+    expect(applyPronunciation('cost $.')).toBe('cost.');
+    expect(applyPronunciation('powers of $x$.')).toBe('powers of x.');
   });
 
   it('strips markdown that would otherwise be read aloud', () => {

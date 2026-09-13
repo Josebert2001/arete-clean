@@ -240,7 +240,11 @@ const PHRASES = [
   // The whitespace lives INSIDE the optional group so that a number followed by
   // an ordinary word ("$25 million" vs "$40 billed monthly") does not have its
   // separating space eaten on the way to not matching a scale.
-  [/\$\s?([\d,.]+)(?:\s*(?:(million|billion|trillion|thousand|bn)|([mkbt])(?![a-z])))?/gi,
+  // The number must START with a digit. `[\d,.]+` also matched a lone "." or
+  // ",", so any unbalanced `$` followed by punctuation — "$x$." from a maths
+  // heading, a stray delimiter in prose — produced the literal spoken word
+  // "dollars" attached to nothing.
+  [/\$\s?(\d[\d,.]*)(?:\s*(?:(million|billion|trillion|thousand|bn)|([mkbt])(?![a-z])))?/gi,
     (_m, n, word, letter) => {
       const spelled = word?.toLowerCase();
       const scale = (spelled === 'bn' ? 'billion' : spelled)
@@ -356,7 +360,19 @@ function lineCount(code) {
 export function sectionToSpeech(section) {
   if (!section) return { speech: '', prose: '', skipped: [] };
 
-  const heading = section.heading ? endSentence(section.heading) : '';
+  // Headings carry inline maths too — MTH 121 has seven of them, including
+  // "Integrating powers of $x$" and "Derivative of $\sin x$ from first
+  // principles". Converting only the body left those `$` pairs to reach
+  // applyPronunciation, where the currency rule turned "$x$." into a spoken
+  // "dollars". A heading is the first thing the student hears in a unit, so it
+  // needs the same treatment as the prose under it, not less.
+  const heading = section.heading
+    ? endSentence(convertInlineMath(section.heading).text)
+    : '';
+
+  // Captions are authored prose on the same footing — see the math and image
+  // cases below, which both speak one.
+  const captionText = (raw) => convertInlineMath(String(raw ?? '')).text;
 
   // Body prose, with any inline maths converted or announced. The heading is
   // NOT part of `prose`: a heading is a label, and counting it would let a
@@ -426,13 +442,13 @@ export function sectionToSpeech(section) {
       // NEVER emit section.tex raw. Short, covered expressions are spoken;
       // anything mathToSpeech will not vouch for is announced instead.
       const { speech, complete } = mathToSpeech(section.tex);
-      const caption = section.caption ? ` ${endSentence(section.caption)}` : '';
+      const caption = section.caption ? ` ${endSentence(captionText(section.caption))}` : '';
       if (complete && speech && speech.length <= 120) {
         const body = `${speech}.${caption}`;
         return { speech: join([heading, body]), prose: '', skipped: [] };
       }
       return marker('math', section.caption
-        ? `An equation on screen — ${section.caption}`
+        ? `An equation on screen — ${captionText(section.caption)}`
         : 'An equation on screen');
     }
 
@@ -449,7 +465,7 @@ export function sectionToSpeech(section) {
       // The caption is authored prose and worth hearing; the picture is not
       // describable. Counted as a marker rather than content so a figure-heavy
       // topic cannot clear the narration floor on captions alone.
-      const caption = section.caption || section.alt || '';
+      const caption = captionText(section.caption || section.alt || '');
       return marker('image', caption ? `Figure. ${caption}` : 'A figure on screen');
     }
 

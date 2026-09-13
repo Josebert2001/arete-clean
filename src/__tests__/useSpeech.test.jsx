@@ -147,6 +147,17 @@ describe('chunkSpeech', () => {
     expect(chunkSpeech(null)).toEqual([]);
   });
 
+  it('ends a sentence after a spelled-out acronym, but not after an initial', () => {
+    // applyPronunciation runs BEFORE chunking and manufactures these by the
+    // hundred: "…over TCP." arrives here as "…over T C P.", and the lone-capital
+    // rule read that final "P." as somebody's initial.
+    expect(chunkSpeech('Data goes over T C P. The next layer adds routing.', 40))
+      .toEqual(['Data goes over T C P.', 'The next layer adds routing.']);
+    // An initial is still an initial — one capital standing alone, not a run.
+    expect(chunkSpeech('Authors: Sunday S. Akpan wrote it. Another sentence follows.', 40))
+      .toEqual(['Authors: Sunday S. Akpan wrote it.', 'Another sentence follows.']);
+  });
+
   it('is written without regex lookbehind, which older iOS Safari cannot parse', () => {
     // Not a style preference. A lookbehind is an early SyntaxError on an engine
     // that lacks it — thrown when this MODULE is parsed — and LectureNotes
@@ -548,6 +559,74 @@ describe('useSpeech — recovering the device after a pause', () => {
     act(() => result.current.stop());
 
     expect(state.paused).toBe(false);
+  });
+});
+
+describe('useSpeech — a voice that cannot speak', () => {
+  beforeEach(() => { localStorage.clear(); });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  const failEverything = (state) => {
+    // Every chunk errors the moment it is handed over, the way a device with a
+    // broken voice behaves (synthesis-failed / synthesis-unavailable).
+    const realSpeak = speechSynthesis.speak;
+    vi.stubGlobal('speechSynthesis', new Proxy(speechSynthesis, {
+      get(target, prop) {
+        if (prop !== 'speak') return Reflect.get(target, prop);
+        return (utterance) => {
+          realSpeak.call(target, utterance);
+          state.speaking = false;
+          queueMicrotask(() => utterance.onerror?.({ error: 'synthesis-failed' }));
+        };
+      },
+    }));
+  };
+
+  it('stops and says so, instead of draining the queue and reporting a finish', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const onFinished = vi.fn();
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3), multiChunk(3)), { onFinished }));
+
+    failEverything(state);
+    act(() => result.current.play());
+
+    await waitFor(() => expect(result.current.failed).toBe(true));
+    expect(result.current.status).toBe('paused');
+
+    // The whole point: every chunk erroring used to walk the queue to its end in
+    // milliseconds and call onFinished(true), which marks the topic READ with no
+    // audio ever played and nothing shown to the student.
+    expect(onFinished).not.toHaveBeenCalled();
+  });
+
+  it('does not report a clean listen when nothing was ever spoken', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const onFinished = vi.fn();
+    // One unit, one chunk — too short to ever hit the consecutive-error cut-off,
+    // so the empty-slot finish is what has to refuse.
+    const { result } = renderHook(() => useSpeech(units('Short one.'), { onFinished }));
+
+    failEverything(state);
+    act(() => result.current.play());
+
+    await waitFor(() => expect(onFinished).toHaveBeenCalled());
+    expect(onFinished).toHaveBeenCalledWith(false);
+  });
+
+  it('recovers when a single chunk fails and the rest are fine', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.status).toBe('playing'));
+
+    const first = state.current;
+    state.current = null;
+    act(() => first.onerror({ error: 'synthesis-failed' }));
+
+    await waitFor(() => expect(state.spoken.length).toBeGreaterThan(1));
+    expect(result.current.failed).toBe(false);
+    expect(result.current.status).toBe('playing');
   });
 });
 

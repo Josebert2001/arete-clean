@@ -40,11 +40,31 @@ const MAX_CHUNK_CHARS = 200;
 // so the sentence split never sees it as a boundary.
 const NOT_SENTENCE_END = /(?:\s[A-Z]|\b(?:Prof|Dr|Mr|Mrs|Ms|St|Vol|No|Ch|Sec|Inc|Ltd|Ph\.D))\.$/;
 
+// …except that the lone-capital arm above cannot tell an initial from the LAST
+// letter of an acronym, and applyPronunciation manufactures those by the
+// hundred: it runs before chunking, so "…carried over TCP." arrives here as
+// "…carried over T C P." and "P." reads as an initial. 463 sentence ends in the
+// corpus look like that, and every one of them lost its pause.
+//
+// An initial is a single capital standing alone ("Ntiedo J."); a spelled
+// acronym is at least two in a row. So: two or more single capitals running up
+// to the dot means the sentence really has ended.
+const SPELLED_ACRONYM_END = /(?:\b[A-Z]\s){1,}[A-Z]\.$/;
+
+function isSentenceEnd(text) {
+  if (SPELLED_ACRONYM_END.test(text)) return true;
+  return !NOT_SENTENCE_END.test(text);
+}
+
 const VOICE_PREF_KEY = 'arete:speech:voice';
 const RATE_PREF_KEY = 'arete:speech:rate';
 const AWAKE_PREF_KEY = 'arete:speech:awake';
 
 export const SPEECH_RATES = [0.75, 1, 1.25, 1.5];
+
+// Consecutive failed chunks before we stop and say so. One is ordinary — the
+// next sentence usually synthesises fine. Three in a row is the voice itself.
+const MAX_ERROR_STREAK = 3;
 
 /**
  * `text.split(/(?<=[chars])\s+/)` without the lookbehind.
@@ -95,7 +115,7 @@ export function chunkSpeech(text, maxChars = MAX_CHUNK_CHARS) {
   const sentences = [];
   for (const piece of splitAfterChars(source, '.!?')) {
     const previous = sentences[sentences.length - 1];
-    if (previous && NOT_SENTENCE_END.test(previous)) {
+    if (previous && !isSentenceEnd(previous)) {
       sentences[sentences.length - 1] = `${previous} ${piece}`;
     } else {
       sentences.push(piece);
@@ -275,6 +295,9 @@ export function useSpeech(units, { onFinished } = {}) {
   // True when the browser suspended us rather than the student pausing — the UI
   // needs to say which, or a phone-lock stop looks like a bug.
   const [interrupted, setInterrupted] = useState(false);
+  // The device could not synthesise at all — a different message from the
+  // screen-lock one, and a different remedy (try another voice).
+  const [failed, setFailed] = useState(false);
 
   // Keyed on CONTENT, not array identity. `topicToSpeechUnits(topic)` called in
   // a component body returns a fresh array every render, and keying the queue on
@@ -300,6 +323,8 @@ export function useSpeech(units, { onFinished } = {}) {
   const cursorRef = useRef(0);     // index into `queue`
   const pausedRef = useRef(false);
   const wakeLockRef = useRef(null);
+  const spokeRef = useRef(0);            // chunks this run actually finished
+  const errorStreakRef = useRef(0);      // consecutive synthesis failures
   const wakeLockGenRef = useRef(0);      // invalidates an in-flight request()
   const wakeLockPendingRef = useRef(false);
   // This instance's claim on the one global speechSynthesis — see claimDevice.
@@ -399,6 +424,7 @@ export function useSpeech(units, { onFinished } = {}) {
     setStatus('idle');
     setUnitIndex(0);
     setInterrupted(false);
+    setFailed(false);
     releaseWakeLock();
   }, [releaseWakeLock]);
 
@@ -418,9 +444,12 @@ export function useSpeech(units, { onFinished } = {}) {
     if (!item) {
       setStatus('ended');
       releaseWakeLock();
-      // The flag matters: a caller that marks the topic read off this must not
-      // be fooled by a student who pressed skip until the end.
-      finishedRef.current?.(cleanRunRef.current);
+      // The flag matters twice over. A caller that marks the topic read off this
+      // must not be fooled by a student who pressed skip until the end, NOR by a
+      // device whose voice failed on every chunk: those errors advance the queue
+      // too, so without spokeRef the whole topic drained in milliseconds and
+      // reported a complete, clean listen with nothing ever played.
+      finishedRef.current?.(cleanRunRef.current && spokeRef.current > 0);
       return;
     }
 
@@ -437,17 +466,42 @@ export function useSpeech(units, { onFinished } = {}) {
       // Landmine: cancel() delivers end/error asynchronously, so a callback from
       // a run we already abandoned must not move this one along.
       if (run !== runRef.current) return;
-      if (pausedRef.current) return; // resume() picks up from cursorRef
+      if (pausedRef.current) {
+        // This chunk FINISHED and we are paused, so what resume() should pick up
+        // is the next one. Leaving the cursor here made the Android path — where
+        // pause() did not take and the sentence ran to its end — replay the
+        // sentence the student had already heard.
+        cursorRef.current = index + 1;
+        return;
+      }
       speakFromRef.current?.(index + 1, run);
     };
 
-    utterance.onend = advance;
+    utterance.onend = () => {
+      if (run === runRef.current) { spokeRef.current += 1; errorStreakRef.current = 0; }
+      advance();
+    };
+
     utterance.onerror = (event) => {
       // 'interrupted' and 'canceled' are what our own cancel() produces — not
       // failures, and not something to report.
       if (event?.error === 'interrupted' || event?.error === 'canceled') return;
       if (run !== runRef.current) return;
-      // A genuine synthesis failure on one chunk should not end the topic.
+
+      errorStreakRef.current += 1;
+      // One bad chunk should not end the topic — the next sentence usually
+      // synthesises fine. A run of them means the voice itself cannot speak
+      // (synthesis-failed, synthesis-unavailable, audio-busy), and advancing
+      // through the rest is not resilience: it empties the queue in
+      // milliseconds and looks exactly like a finished listen.
+      if (errorStreakRef.current >= MAX_ERROR_STREAK) {
+        runRef.current += 1;
+        pausedRef.current = true;
+        setStatus('paused');
+        setFailed(true);
+        releaseWakeLock();
+        return;
+      }
       advance();
     };
 
@@ -466,6 +520,7 @@ export function useSpeech(units, { onFinished } = {}) {
     setStatus('idle');
     setUnitIndex(0);
     setInterrupted(false);
+    setFailed(false);
     releaseWakeLock();
   }, [releaseWakeLock, deviceId]);
 
@@ -482,7 +537,10 @@ export function useSpeech(units, { onFinished } = {}) {
     const run = runRef.current;
     pausedRef.current = false;
     cleanRunRef.current = !viaSkip && fromUnit === 0;
+    spokeRef.current = 0;
+    errorStreakRef.current = 0;
     setInterrupted(false);
+    setFailed(false);
 
     // Take the device first: this stands down whichever topic was playing, so
     // its bar resets instead of sitting there claiming to still be running.
@@ -510,8 +568,10 @@ export function useSpeech(units, { onFinished } = {}) {
     if (!supported || status !== 'paused') return;
     const api = synth();
     pausedRef.current = false;
+    errorStreakRef.current = 0;
     setStatus('playing');
     setInterrupted(false);
+    setFailed(false);
     acquireWakeLock();
 
     if (api.paused && api.speaking) {
@@ -638,6 +698,7 @@ export function useSpeech(units, { onFinished } = {}) {
     playing: status === 'playing',
     paused: status === 'paused',
     interrupted,
+    failed,
     unitIndex,
     unitCount: units?.length ?? 0,
     play,
