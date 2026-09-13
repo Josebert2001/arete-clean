@@ -562,6 +562,29 @@ describe('useSpeech — recovering the device after a pause', () => {
   });
 });
 
+describe('useSpeech — the arrows on a finished topic', () => {
+  beforeEach(() => { localStorage.clear(); });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('leaves the chosen section standing, instead of Play throwing it away', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One. ', multiChunk(2), multiChunk(2))));
+
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.status).toBe('playing'));
+
+    // Play it out to 'ended'.
+    for (let i = 0; i < 30 && state.current; i += 1) act(() => state.endCurrent());
+    await waitFor(() => expect(result.current.status).toBe('ended'));
+
+    // Now pick a section with the arrows. Status must leave 'ended', or the
+    // Play button — which reads 'ended' as "start over" — discards the choice.
+    act(() => result.current.prev());
+    expect(result.current.unitIndex).toBe(1);
+    expect(result.current.status).not.toBe('ended');
+  });
+});
+
 describe('useSpeech — a voice that cannot speak', () => {
   beforeEach(() => { localStorage.clear(); });
   afterEach(() => { vi.unstubAllGlobals(); });
@@ -671,6 +694,26 @@ describe('useSpeech — one device, many mounted players', () => {
 
     first.unmount();
     second.unmount();
+  });
+
+  it('does not restart the chunk when the voice list first arrives mid-listen', async () => {
+    // Landmine 1: getVoices() is empty on the first Chrome call. A student who
+    // presses Listen before `voiceschanged` lands begins with voice === null,
+    // and treating null → the real voice as a settings change restarted the
+    // chunk in flight — so they heard the opening sentence twice.
+    const state = install([]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    expect(result.current.voice).toBeNull();
+
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.status).toBe('playing'));
+    const spokenBefore = state.spoken.length;
+
+    act(() => state.emitVoicesChanged([{ name: 'NG', lang: 'en-NG', default: true }]));
+    await waitFor(() => expect(result.current.voice?.name).toBe('NG'));
+
+    expect(state.spoken.length).toBe(spokenBefore); // nothing re-spoken
+    expect(result.current.status).toBe('playing');
   });
 
   it('still stops the device when the player that owns it unmounts', async () => {

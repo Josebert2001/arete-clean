@@ -276,6 +276,17 @@ describe('applyPronunciation', () => {
     expect(applyPronunciation('$25 Metres away')).toBe('25 dollars Metres away');
   });
 
+  it('keeps the full stop that ended a sentence in "etc."', () => {
+    // Swallowing it merged two sentences, costing the voice its pause and
+    // chunkSpeech the boundary it splits on. 34 of these in the corpus.
+    expect(applyPronunciation('Firewalls, routers, etc. The next sentence follows.'))
+      .toBe('Firewalls, routers, and so on. The next sentence follows.');
+    // Mid-sentence it still has no stop to keep.
+    expect(applyPronunciation('routers, etc, and more')).toBe('routers, and so on, and more');
+    // And it is a whole word, not a prefix.
+    expect(applyPronunciation('etcetera is a word')).toBe('etcetera is a word');
+  });
+
   it('needs a digit before it will say "dollars" at all', () => {
     // `[\d,.]+` also matched a lone "." or ",", so any unbalanced `$` followed
     // by punctuation spoke the word "dollars" attached to nothing.

@@ -18,7 +18,7 @@
 
 import { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { Volume2, Play, Pause, SkipBack, SkipForward, X, Sun } from 'lucide-react';
-import { topicToSpeechUnits, canNarrate, skippedSummary, describeSkips } from '../utils/speechText';
+import { topicToSpeechUnits, canNarrateUnits, skippedIn, describeSkips } from '../utils/speechText';
 import { useSpeech, SPEECH_RATES } from './useSpeech';
 
 function formatDuration(seconds) {
@@ -30,19 +30,21 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   const [open, setOpen] = useState(false);
   const voiceSelectId = useId();
 
+  // ONE serialisation per topic, and everything else is derived from it.
+  // topicToSpeechUnits is the expensive call — buildOutline, every section, then
+  // ~40 pronunciation passes — and the topic-taking forms of the next two each
+  // run it again internally, so asking all three cost three full passes per open
+  // accordion. "Expand all" on a 26-topic course made that 78.
   const units = useMemo(() => topicToSpeechUnits(topic), [topic]);
-  const skips = useMemo(() => describeSkips(skippedSummary(topic)), [topic]);
+  const skips = useMemo(() => describeSkips(skippedIn(units)), [units]);
   const totalSeconds = useMemo(
     () => units.reduce((sum, u) => sum + u.estimatedSeconds, 0),
     [units],
   );
-
-  // Memoised for the same reason `units` is: canNarrate runs the whole
-  // serialiser (buildOutline, every section, the ~40 pronunciation passes) and
-  // this sits on the render path of every OPEN accordion. Unmemoised, "Expand
-  // all" on a 26-topic course paid for 26 extra full serialisations on every
-  // re-render of the notes — a read marker ticking over, a section toggling.
-  const narratable = useMemo(() => canNarrate(topic), [topic]);
+  // Memoised as well as derived: this sits on the render path of every open
+  // accordion, so unmemoised it would re-run on every re-render of the notes —
+  // a read marker ticking over, a section toggling.
+  const narratable = useMemo(() => canNarrateUnits(units, topic), [units, topic]);
 
   const speech = useSpeech(units, { onFinished });
   const {

@@ -220,7 +220,11 @@ const SLASH_PAIRS = /\b([A-Z]{2,6})\/([A-Z0-9]{2,6})\b/g;
 const PHRASES = [
   [/\be\.g\.,?/gi, 'for example,'],
   [/\bi\.e\.,?/gi, 'that is,'],
-  [/\betc\.?/gi, 'and so on'],
+  // Keep the full stop when there was one. Swallowing it merged the sentence
+  // into the next — "routers, and so on The next sentence" — which costs the
+  // voice its pause AND costs chunkSpeech the boundary it splits on. 34 of
+  // these in the corpus. The \b stops "etcetera" becoming "and so onetera".
+  [/\betc\b(\.?)/gi, (_m, dot) => (dot ? 'and so on.' : 'and so on')],
   [/\bvs\.?\b/gi, 'versus'],
   [/\bFig\.\s*/gi, 'Figure '],
   [/\bNo\.\s*(?=\d)/g, 'number '],
@@ -554,7 +558,7 @@ export function topicToSpeechText(topic) {
  * Measured on the same section set MIN_NARRATE_CHARS was calibrated against.
  */
 export function speakableCharCount(topic) {
-  return topicToSpeechUnits(topic).reduce((sum, u) => sum + u.proseChars, 0);
+  return speakableCharsIn(topicToSpeechUnits(topic));
 }
 
 /** Whether to offer a Listen button for this topic at all. */
@@ -565,11 +569,40 @@ export function canNarrate(topic) {
 
 /** Flattened skip counts for a topic, for the "what you'll miss" caption. */
 export function skippedSummary(topic) {
+  return skippedIn(topicToSpeechUnits(topic));
+}
+
+// ── The same three answers, from units the caller already has ────────────────
+//
+// topicToSpeechUnits is the expensive call in this file — buildOutline, every
+// section, then ~40 pronunciation passes over the result — and the three
+// topic-taking helpers above each make it again. A player that wants all three
+// paid for the whole serialisation three times per topic, which "Expand all" on
+// a 26-topic course multiplies accordingly. The units already carry everything
+// the answers are computed from, so a caller holding them should ask these.
+
+/** @param {Array} units from topicToSpeechUnits. */
+export function speakableCharsIn(units) {
+  return (units ?? []).reduce((sum, u) => sum + (u?.proseChars ?? 0), 0);
+}
+
+/** @param {Array} units from topicToSpeechUnits. */
+export function skippedIn(units) {
   const counts = {};
-  for (const unit of topicToSpeechUnits(topic)) {
-    for (const s of unit.skipped) counts[s.kind] = (counts[s.kind] ?? 0) + 1;
+  for (const unit of units ?? []) {
+    for (const s of unit?.skipped ?? []) counts[s.kind] = (counts[s.kind] ?? 0) + 1;
   }
   return counts;
+}
+
+/**
+ * @param {Array} units from topicToSpeechUnits.
+ * @param {Object} topic the topic they came from — the empty-sections guard in
+ *   canNarrate cannot be answered from units alone.
+ */
+export function canNarrateUnits(units, topic) {
+  if (!topic?.sections?.length) return false;
+  return speakableCharsIn(units) >= MIN_NARRATE_CHARS;
 }
 
 // Singular/plural wording for each `skipped.kind` sectionToSpeech emits. It

@@ -589,7 +589,13 @@ export function useSpeech(units, { onFinished } = {}) {
   const skipTo = useCallback((target) => {
     const clamped = Math.max(0, Math.min(target, (units?.length ?? 1) - 1));
     if (status === 'playing' || status === 'paused') play(clamped, { viaSkip: true });
-    else setUnitIndex(clamped);
+    else {
+      setUnitIndex(clamped);
+      // Leaving 'ended' set here made the arrows look broken from a finished
+      // topic: they moved the counter, and then Play — which treats 'ended' as
+      // "start over" — threw the choice away and went back to section one.
+      if (status === 'ended') setStatus('idle');
+    }
   }, [units, status, play]);
 
   const next = useCallback(() => skipTo(unitIndex + 1), [skipTo, unitIndex]);
@@ -653,8 +659,19 @@ export function useSpeech(units, { onFinished } = {}) {
   // until the current chunk ends. Restart from the current chunk instead.
   const settingsRef = useRef({ voice, rate });
   useEffect(() => {
-    const changed = settingsRef.current.voice !== voice || settingsRef.current.rate !== rate;
+    const previous = settingsRef.current;
     settingsRef.current = { voice, rate };
+
+    // The FIRST voice to arrive is not a change the student made. Landmine 1 at
+    // the top of this file: getVoices() is empty on the first call in Chrome, so
+    // a listen started before `voiceschanged` lands begins with voice === null —
+    // and treating null → the real voice as a settings change restarted the
+    // chunk in flight, so the student heard the opening sentence twice.
+    //
+    // Compared by name rather than identity for the same reason: some browsers
+    // hand back fresh SpeechSynthesisVoice objects on each getVoices() call.
+    const voiceChanged = previous.voice !== null && previous.voice?.name !== voice?.name;
+    const changed = voiceChanged || previous.rate !== rate;
     if (!changed || status !== 'playing') return;
     runRef.current += 1;
     claimDevice(deviceId, notifyStandDown);
@@ -690,6 +707,10 @@ export function useSpeech(units, { onFinished } = {}) {
     setStatus('idle');
     setUnitIndex(0);
     setInterrupted(false);
+    // Or the "this device could not play the audio" line survives the reset and
+    // sits under a player that is back to idle — the realistic path being lazily
+    // loaded notes replacing the topic after a voice failure.
+    setFailed(false);
   }, [signature, deviceId]);
 
   return {

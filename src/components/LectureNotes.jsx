@@ -360,16 +360,19 @@ function Section({ section, speaking = false, simplifyReady, explainReady, expla
   };
 
   return (
-    // The wash marks the section the voice is reading. A tint and a left rule
-    // rather than a full border, so nothing on the page moves as it turns on and
-    // off — a highlight that reflowed the text under a reader would be worse
-    // than no highlight. The negative margin keeps the padded, tinted box the
-    // same measure as the untinted sections above and below it.
+    // The wash marks the section the voice is reading: a tint and a left rule
+    // rather than a full border.
+    //
+    // EVERY box-affecting class is present in both states and only the colours
+    // change, because the alternative reflows the page. Adding the padding and
+    // the rule only while speaking grew the section by their own size and shoved
+    // everything below it down each time the voice moved on — under the eyes of
+    // someone reading along, which is worse than having no highlight at all.
+    // Hence the transparent border and the horizontal-only padding, cancelled by
+    // the negative margin so the text keeps the same measure as the rest.
     <div
-      className={`${open ? 'mb-6' : 'mb-1'}${
-        speaking
-          ? ' -mx-3 rounded-lg border-l-2 border-ember-500 bg-ember-500/10 px-3 py-2 transition-colors'
-          : ''
+      className={`${open ? 'mb-6' : 'mb-1'} -mx-3 px-3 rounded-lg border-l-2 transition-colors ${
+        speaking ? 'border-ember-500 bg-ember-500/10' : 'border-transparent'
       }`}
     >
       {section.heading && (
