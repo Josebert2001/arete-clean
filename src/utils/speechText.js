@@ -94,11 +94,23 @@ const MATH_COMMANDS = [
   [/\\text\s*\{([^{}]*)\}/g, '$1'],
 ];
 
+// "squared"/"cubed" are a reading of the WHOLE exponent, so the exponent has to
+// be identified before it can be named. Matching a bare `2` wherever it followed
+// a caret read `I^2R` as "I squaredR" and `2^256` as "2 squared56" — and the
+// latter with `complete: true`, so the refusal above could not catch it.
+//
+// The two shapes are LaTeX's own: braces take everything inside them, and an
+// unbraced caret takes exactly one character (`I^2R` is I²R, not I to the 2R).
+function powerPhrase(exponent) {
+  const e = exponent.trim();
+  if (e === '2') return ' squared ';
+  if (e === '3') return ' cubed ';
+  return ` to the power ${e} `;
+}
+
 const POWERS = [
-  [/\^\s*\{?2\}?/g, ' squared'],
-  [/\^\s*\{?3\}?/g, ' cubed'],
-  [/\^\s*\{([^{}]+)\}/g, ' to the power $1'],
-  [/\^\s*([A-Za-z0-9]+)/g, ' to the power $1'],
+  [/\^\s*\{([^{}]+)\}/g, (_m, exp) => powerPhrase(exp)],
+  [/\^\s*([A-Za-z0-9])/g, (_m, exp) => powerPhrase(exp)],
 ];
 
 /**
@@ -219,8 +231,22 @@ const PHRASES = [
   // Real currency, not maths — CYB 122 quotes breach losses as "$500,000".
   // Must run before the structural strip below, which would otherwise drop the
   // symbol and leave a bare number.
-  [/\$\s?([\d,.]+)\s*(million|billion|trillion)?/gi,
-    (m, n, scale) => `${n}${scale ? ` ${scale}` : ''} dollars`],
+  //
+  // The abbreviated scales are not optional extras: the corpus writes "$3.4M"
+  // and "$234K" (cyb122.js) far more often than it spells the word out, and
+  // knowing only the words left the letter stranded on the wrong side of the
+  // unit — "3.4 dollarsM". The letters need the lookahead so a genuine word
+  // starting with one ("$25 million", "$40 billed") cannot be read as a scale.
+  // The whitespace lives INSIDE the optional group so that a number followed by
+  // an ordinary word ("$25 million" vs "$40 billed monthly") does not have its
+  // separating space eaten on the way to not matching a scale.
+  [/\$\s?([\d,.]+)(?:\s*(?:(million|billion|trillion|thousand|bn)|([mkbt])(?![a-z])))?/gi,
+    (_m, n, word, letter) => {
+      const spelled = word?.toLowerCase();
+      const scale = (spelled === 'bn' ? 'billion' : spelled)
+        ?? { m: 'million', k: 'thousand', b: 'billion', t: 'trillion' }[letter?.toLowerCase()];
+      return `${n}${scale ? ` ${scale}` : ''} dollars`;
+    }],
 ];
 
 /**

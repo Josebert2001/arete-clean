@@ -333,8 +333,81 @@ parallel and `setRead` is idempotent, so whichever lands first wins.
 | ~~A1~~ | ~~`useSpeech.js` with all four landmines + stub tests~~ — **done**, 29 tests | 3–4 h |
 | ~~A2~~ | ~~`ListenToTopic.jsx`, wired into `LectureNotes.jsx`~~ — **done**, 14 tests | 2–3 h |
 | ~~A3~~ | ~~Progress integration, wake-lock toggle~~ — **done** (the skipped caption shipped in A2) | 1–2 h |
-| A4 | Real-device pass: Android Chrome, iOS Safari, desktop | 2 h |
+| A4 | Real-device pass: Android Chrome, iOS Safari, desktop — **desktop done** (§4.8), the two phones outstanding | 2 h |
 | | **Total** | **~1.5–2 days** (~1 day after A0) |
+
+### 4.8 Desktop pass — what the real browser showed (2026-09-13)
+
+Driven on Windows Chrome against the dev server with Supabase unconfigured, which makes
+`PublicOrGated` fall through to the full `CourseDetail` — the notes render with no sign-in, so the
+pass needs no account. Course: UUY-CYB 122, topic 1.
+
+Working end to end, in the browser and not only against the stub:
+
+- The pill renders in the notes panel, expands to the control bar, and starts speaking on the click
+  that opened it — the gesture requirement is satisfied by the button itself, as §4.3.3 planned.
+- Unit 1 ran well past 15 seconds and advanced to 2/3 on its own. **Landmine 2 is genuinely
+  handled** — chunking plus `onend` chaining survives the cutoff that was the whole reason for it.
+- Pause, resume, the speed cycle and a voice change mid-topic all behave: the last two restart the
+  current chunk and keep both the unit index and the playing state, rather than going silent until
+  the chunk happened to end.
+- Playing the topic out marked it read — the check appeared on topic 1 and the header went to
+  "1 of 12 topics read". §4.5's clean-run signal works through the real `onend`, and pausing,
+  resuming and changing settings mid-run all stayed clean, as intended.
+- COS 121 offers Listen on 4 of its 9 topics. `canNarrate`'s floor is doing exactly the job §3.4
+  measured it for on the listing-heavy course, in the live UI.
+- No console errors across the run.
+
+**One thing the stub could not have caught: `speechSynthesis.paused` lies on Windows Chrome.**
+After `pause()` the audio genuinely stops and `speaking` stays `true`, but `paused` reads `false` —
+so the pair `(!speaking && !paused)` is *not* a reliable "is it paused" test on desktop. This does
+not affect §4.3.4's detector, which is gated on our own `statusRef.current === 'playing'` and so
+never runs while the student has paused deliberately. It is recorded because the mobile pass will
+be reading the same two flags to confirm the suspension path, and reading `paused` as authoritative
+there would produce a false result.
+
+Outstanding: Android Chrome and iOS Safari. Both need a real handset — the screen-lock suspension
+in §4.3.4 cannot be provoked in a desktop browser or in a device emulator, and it is the one
+behaviour Option B exists to work around.
+
+### 4.9 Review round — eight findings, all real (2026-09-13)
+
+`/code-review high` over `master...HEAD`. Every finding was reproduced before being fixed — two of
+them by driving the page, which is the only place they were visible.
+
+**The two that mattered, and what they have in common:** both left the control bar showing a
+running player with nothing coming out of the speakers.
+
+1. **One device, many players.** `speechSynthesis` is a single global, but `LectureNotes` keeps a
+   *Set* of open accordions and mounts a `ListenToTopic` — and therefore a `useSpeech` — inside
+   each one. Every instance called `cancel()` on unmount, so collapsing an unrelated topic killed
+   the audio of the topic actually playing. The dead run came back as `error: 'interrupted'`, which
+   the queue deliberately ignores, so nothing ever updated the UI. Reproduced live: play topic 1,
+   collapse topic 3, `speaking` goes false while the bar still reads Pause. Fixed with a
+   module-level owner claim — an instance touches the device only while it holds it, and claiming
+   stands the previous owner down, so two bars can never both read Pause.
+2. **`cancel()` does not lift a pause.** Verified in Chrome: `pause()` then `cancel()` leaves
+   `paused` true, and `speak()` on a paused synth queues without voicing. So Pause → Next and
+   Pause → close → Listen queued utterances nobody could hear. Every cancel-then-speak path now
+   goes through `resetDevice`, which lifts the pause.
+
+**The stub was part of the problem.** `useSpeech.test.jsx`'s fake `speechSynthesis` cleared
+`paused` in both `cancel()` and `speak()` — neither of which a real engine does — so a full suite of
+passing tests could not see either defect. The stub now models both, and three of the new tests
+fail against the old code.
+
+**Also fixed:** a regex lookbehind in `chunkSpeech` (an early SyntaxError on iOS Safari below 16.4,
+which would have taken down the whole notes renderer rather than just the button — there is no
+browserslist here and Vite's default target still lists safari14); `^2`/`^3` matching a leading
+digit anywhere after a caret, which read PHY 128's `I^2R` and MTH 121's `d^2y` with the exponent
+fused to the next symbol and `2^256` as "2 squared 56" *while reporting complete*, so the refusal
+path could not catch it; `$3.4M` and `$234K` (both real, in cyb122.js) read as "3.4 dollarsM"; a
+wake-lock request that could resolve after its release and leave the screen on with nothing
+playing; `canNarrate` re-running the full serialiser on every render of every open accordion; and
+Play on a finished topic replaying only the closing section — and, because that run did not start
+at unit 0, never marking the topic read.
+
+Ten tests added, 767 pass, lint clean.
 
 ### 4.7 Risks
 

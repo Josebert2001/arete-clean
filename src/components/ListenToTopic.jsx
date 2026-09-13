@@ -37,9 +37,16 @@ export default function ListenToTopic({ topic, onFinished }) {
     [units],
   );
 
+  // Memoised for the same reason `units` is: canNarrate runs the whole
+  // serialiser (buildOutline, every section, the ~40 pronunciation passes) and
+  // this sits on the render path of every OPEN accordion. Unmemoised, "Expand
+  // all" on a 26-topic course paid for 26 extra full serialisations on every
+  // re-render of the notes — a read marker ticking over, a section toggling.
+  const narratable = useMemo(() => canNarrate(topic), [topic]);
+
   const speech = useSpeech(units, { onFinished });
   const {
-    supported, playing, paused, interrupted, unitIndex, unitCount,
+    supported, status, playing, paused, interrupted, unitIndex, unitCount,
     play, pause, resume, stop, next, prev, voices, voice, setVoice, rate, setRate,
     keepAwake, setKeepAwake, wakeLockSupported,
   } = speech;
@@ -47,7 +54,7 @@ export default function ListenToTopic({ topic, onFinished }) {
   // Nothing to offer: no Web Speech API, or a topic that is listings with a
   // sentence of glue (see MIN_NARRATE_CHARS — narrating one of those is a few
   // seconds of "code listing on screen" repeated).
-  if (!supported || !canNarrate(topic) || unitCount === 0) return null;
+  if (!supported || !narratable || unitCount === 0) return null;
 
   const englishVoices = voices.filter((v) => /^en([-_]|$)/i.test(v.lang || ''));
 
@@ -94,7 +101,11 @@ export default function ListenToTopic({ topic, onFinished }) {
 
         <button
           type="button"
-          onClick={playing ? pause : (paused ? resume : () => play(unitIndex))}
+          // From 'ended', unitIndex is the LAST section: replaying from there
+          // gave the student the closing paragraph again, and because it did not
+          // start at 0 the run counted as unclean, so finishing it never marked
+          // the topic read. Play on a finished topic means play the topic.
+          onClick={playing ? pause : (paused ? resume : () => play(status === 'ended' ? 0 : unitIndex))}
           aria-label={playing ? 'Pause' : 'Play'}
           className="rounded-full border border-ember-500/40 bg-ember-500/10 p-2 text-ember-500 transition-colors hover:bg-ember-500/20"
         >

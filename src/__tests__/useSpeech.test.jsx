@@ -9,6 +9,8 @@
 // delivers its callbacks the way a real browser does — asynchronously, which is
 // what makes stale-callback bugs possible in the first place.
 
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSpeech, chunkSpeech, pickVoice, SPEECH_RATES } from '../components/useSpeech.js';
@@ -35,17 +37,22 @@ function makeSynth(voices = []) {
     speak: (utterance) => {
       state.spoken.push(utterance);
       state.current = utterance;
-      state.speaking = true;
-      state.paused = false;
+      // A PAUSED synth queues an utterance without voicing it — it does not
+      // un-pause itself. Modelling speak() as always starting the voice is what
+      // let a silent player pass this suite: after pause() → cancel() the flag
+      // is still set, and everything queued behind it goes unheard.
+      if (!state.paused) state.speaking = true;
     },
     cancel: () => {
       state.cancels += 1;
       const victim = state.current;
       state.current = null;
       state.speaking = false;
-      state.paused = false;
-      // Real browsers deliver this asynchronously — the whole reason the hook
-      // gates its callbacks on a run id.
+      // NOT `paused = false`. Verified in Chrome: pause() then cancel() leaves
+      // speechSynthesis.paused true, and a speak() while paused queues the
+      // utterance without ever voicing it. The stub used to clear the flag here,
+      // which is precisely why it could not catch the silent player that
+      // Pause → Next and Pause → close → Listen produced.
       if (victim) queueMicrotask(() => victim.onerror?.({ error: 'canceled' }));
     },
     pause: () => { if (state.speaking) state.paused = true; },
@@ -138,6 +145,17 @@ describe('chunkSpeech', () => {
   it('returns nothing for empty input', () => {
     expect(chunkSpeech('')).toEqual([]);
     expect(chunkSpeech(null)).toEqual([]);
+  });
+
+  it('is written without regex lookbehind, which older iOS Safari cannot parse', () => {
+    // Not a style preference. A lookbehind is an early SyntaxError on an engine
+    // that lacks it — thrown when this MODULE is parsed — and LectureNotes
+    // imports it, so it would have taken the whole notes renderer down on an
+    // iPhone below iOS 16.4 rather than merely hiding the Listen button.
+    const source = readFileSync(
+      resolve(process.cwd(), 'src/components/useSpeech.js'), 'utf8',
+    ).replace(/\/\*[\s\S]*?\*\//g, ''); // the doc comment names the construct
+    expect(source).not.toMatch(/\(\?<[=!]/);
   });
 });
 
@@ -487,5 +505,106 @@ describe('useSpeech', () => {
     act(() => result.current.play());
     expect(result.current.status).toBe('idle');
     expect(result.current.unitCount).toBe(0);
+  });
+});
+
+// ─── The two defects a single-hook test could not reach ──────────────────────
+//
+// Both were found by driving the real page rather than the stub, and both fail
+// silently: the control bar goes on showing a running player with nothing coming
+// out of the speakers. See docs/audio-playback-plan.md §4.8.
+
+describe('useSpeech — recovering the device after a pause', () => {
+  beforeEach(() => { localStorage.clear(); });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('speaks again after pause → skip, instead of queueing onto a paused synth', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(2), multiChunk(2))));
+
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.status).toBe('playing'));
+
+    act(() => result.current.pause());
+    expect(state.paused).toBe(true);
+
+    // cancel() does not lift the pause, so a play() that only cancels leaves the
+    // synth paused and every utterance it queues is silent.
+    const before = state.spoken.length;
+    act(() => result.current.play(1, { viaSkip: true }));
+
+    await waitFor(() => expect(result.current.status).toBe('playing'));
+    expect(state.spoken.length).toBeGreaterThan(before);
+    expect(state.paused).toBe(false); // the new utterance can actually be voiced
+  });
+
+  it('lifts the pause on stop too, so the next Listen is not born mute', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(2))));
+
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.status).toBe('playing'));
+    act(() => result.current.pause());
+    act(() => result.current.stop());
+
+    expect(state.paused).toBe(false);
+  });
+});
+
+describe('useSpeech — one device, many mounted players', () => {
+  beforeEach(() => { localStorage.clear(); });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('does not silence a playing topic when another topic unmounts', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+
+    // Two accordions open at once — LectureNotes keeps a Set of open topics.
+    const playing = renderHook(() => useSpeech(units(multiChunk(3))));
+    const other = renderHook(() => useSpeech(units(multiChunk(2))));
+
+    act(() => playing.result.current.play());
+    await waitFor(() => expect(playing.result.current.status).toBe('playing'));
+    const cancelsBefore = state.cancels;
+
+    other.unmount(); // collapse the OTHER topic
+
+    expect(state.cancels).toBe(cancelsBefore); // it never touched the device
+    expect(playing.result.current.status).toBe('playing');
+    expect(state.speaking).toBe(true);
+
+    playing.unmount();
+  });
+
+  it('stands the previous player down when another topic takes over', async () => {
+    install([{ name: 'NG', lang: 'en-NG' }]);
+
+    const first = renderHook(() => useSpeech(units(multiChunk(3))));
+    const second = renderHook(() => useSpeech(units(multiChunk(2))));
+
+    act(() => first.result.current.play());
+    await waitFor(() => expect(first.result.current.status).toBe('playing'));
+
+    act(() => second.result.current.play());
+    await waitFor(() => expect(second.result.current.status).toBe('playing'));
+
+    // Two bars both reading "Pause" is the thing to avoid: only one can be live.
+    await waitFor(() => expect(first.result.current.status).toBe('idle'));
+
+    first.unmount();
+    second.unmount();
+  });
+
+  it('still stops the device when the player that owns it unmounts', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result, unmount } = renderHook(() => useSpeech(units(multiChunk(3))));
+
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.status).toBe('playing'));
+
+    const cancelsBefore = state.cancels;
+    unmount();
+
+    expect(state.cancels).toBeGreaterThan(cancelsBefore);
+    expect(state.speaking).toBe(false);
   });
 });

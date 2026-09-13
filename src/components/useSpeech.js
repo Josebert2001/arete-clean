@@ -47,6 +47,40 @@ const AWAKE_PREF_KEY = 'arete:speech:awake';
 export const SPEECH_RATES = [0.75, 1, 1.25, 1.5];
 
 /**
+ * `text.split(/(?<=[chars])\s+/)` without the lookbehind.
+ *
+ * Deliberately not a regex. A lookbehind is an early SyntaxError on engines that
+ * do not implement it — thrown when the module is PARSED, not when the function
+ * is called — and iOS Safari only shipped them in 16.4. LectureNotes imports
+ * this file, so the two lookbehinds that used to be here would have taken the
+ * whole lecture-note renderer down on an older iPhone, not merely hidden the
+ * Listen button. There is no browserslist here and Vite's default target still
+ * lists safari14, so nothing in the build would have caught it either.
+ *
+ * Splits at each whitespace run that follows one of `chars`, dropping the
+ * whitespace, exactly as the lookbehind form did.
+ */
+function splitAfterChars(text, chars) {
+  const parts = [];
+  let start = 0;
+
+  for (let i = 0; i < text.length; i += 1) {
+    if (!chars.includes(text[i])) continue;
+
+    let end = i + 1;
+    while (end < text.length && /\s/.test(text[end])) end += 1;
+    if (end === i + 1) continue; // no whitespace followed — not a boundary
+
+    parts.push(text.slice(start, i + 1));
+    start = end;
+    i = end - 1;
+  }
+
+  parts.push(text.slice(start));
+  return parts;
+}
+
+/**
  * Splits one unit's speech into utterance-sized pieces.
  *
  * Exported for its own test: the sentence rules are the kind of thing that looks
@@ -59,7 +93,7 @@ export function chunkSpeech(text, maxChars = MAX_CHUNK_CHARS) {
   // Split on sentence enders, then glue back anything that followed an
   // abbreviation rather than a real full stop.
   const sentences = [];
-  for (const piece of source.split(/(?<=[.!?])\s+/)) {
+  for (const piece of splitAfterChars(source, '.!?')) {
     const previous = sentences[sentences.length - 1];
     if (previous && NOT_SENTENCE_END.test(previous)) {
       sentences[sentences.length - 1] = `${previous} ${piece}`;
@@ -97,7 +131,7 @@ function splitLongSentence(sentence, maxChars) {
   const out = [];
   let current = '';
 
-  const parts = sentence.split(/(?<=,)\s+/);
+  const parts = splitAfterChars(sentence, ',');
   for (const part of parts) {
     if (part.length > maxChars) {
       if (current.trim()) { out.push(current.trim()); current = ''; }
@@ -168,6 +202,52 @@ function writePref(key, value) {
 
 const synth = () => (typeof window !== 'undefined' ? window.speechSynthesis : null);
 
+// ── Who owns the device ──────────────────────────────────────────────────────
+//
+// speechSynthesis is ONE global object, but there is one useSpeech per open
+// topic: LectureNotes keeps a Set of open accordions, so a student reading with
+// three topics expanded has three of these hooks mounted, each holding a cancel()
+// that stops everything.
+//
+// That made collapsing an unrelated topic kill the audio of the one actually
+// playing. The dead run's utterance came back as `error: 'interrupted'`, which
+// the queue deliberately ignores, so the player was never told: its bar sat
+// there showing Pause with nothing coming out — the exact silent failure the
+// header comment above says this file exists to prevent.
+//
+// So cancel() is not a thing any instance may just call. An instance claims the
+// device before it speaks, and only the claimant may cancel. Claiming also
+// stands the previous owner down, which is what makes pressing Listen on a
+// second topic reset the first one's bar instead of leaving two bars both
+// claiming to be playing.
+let deviceOwner = null; // { id, standDown }
+
+function claimDevice(id, standDown) {
+  if (deviceOwner && deviceOwner.id !== id) deviceOwner.standDown();
+  deviceOwner = { id, standDown };
+}
+
+function releaseDevice(id) {
+  if (deviceOwner?.id === id) deviceOwner = null;
+}
+
+function ownsDevice(id) {
+  return deviceOwner?.id === id;
+}
+
+// cancel() does NOT clear the global paused flag (verified in Chrome: pause()
+// then cancel() leaves speechSynthesis.paused true), and speak() on a paused
+// synth queues the utterance without speaking it. So every cancel-then-speak
+// path has to lift the pause, or playback after Pause → Next / Pause → close →
+// Listen is silent while the UI shows a running player.
+function resetDevice(api) {
+  if (!api) return;
+  api.cancel();
+  if (api.paused) api.resume?.();
+}
+
+let nextDeviceId = 0;
+
 /**
  * @param {Array} units  from topicToSpeechUnits(topic). Identity does not
  *   matter — the queue is keyed on unit CONTENT (see `signature`), so a caller
@@ -220,6 +300,10 @@ export function useSpeech(units, { onFinished } = {}) {
   const cursorRef = useRef(0);     // index into `queue`
   const pausedRef = useRef(false);
   const wakeLockRef = useRef(null);
+  const wakeLockGenRef = useRef(0);      // invalidates an in-flight request()
+  const wakeLockPendingRef = useRef(false);
+  // This instance's claim on the one global speechSynthesis — see claimDevice.
+  const [deviceId] = useState(() => { nextDeviceId += 1; return nextDeviceId; });
   // True while the current run has played straight through from unit 0. Any
   // skip clears it, which is what stops "skip to the end" from counting as
   // having listened to the topic.
@@ -260,19 +344,35 @@ export function useSpeech(units, { onFinished } = {}) {
   const voice = useMemo(() => pickVoice(voices, voiceName), [voices, voiceName]);
 
   // ── Wake lock (opt-in) ────────────────────────────────────────────────────
+  // request() is async, so a release that lands while one is in flight would
+  // otherwise be a no-op against a null ref and the lock would arrive afterwards
+  // with nobody holding it — the screen then stays on, with nothing playing,
+  // until the tab closes. The generation counter is what the resolved request
+  // checks itself against before keeping the lock it was handed.
   const releaseWakeLock = useCallback(() => {
+    wakeLockGenRef.current += 1;
     wakeLockRef.current?.release?.().catch(() => {});
     wakeLockRef.current = null;
   }, []);
 
   const acquireWakeLock = useCallback(async () => {
-    if (!keepAwake || wakeLockRef.current) return;
+    if (!keepAwake || wakeLockRef.current || wakeLockPendingRef.current) return;
+    const gen = wakeLockGenRef.current;
+    wakeLockPendingRef.current = true;
     try {
-      wakeLockRef.current = await navigator.wakeLock.request('screen');
+      const lock = await navigator.wakeLock.request('screen');
+      if (gen !== wakeLockGenRef.current) {
+        // Released while we were waiting — this lock is already unwanted.
+        lock?.release?.().catch(() => {});
+        return;
+      }
+      wakeLockRef.current = lock;
     } catch {
       // Unsupported, denied, or the document is not visible. Playback is
       // unaffected — the screen just dims on its own schedule.
       wakeLockRef.current = null;
+    } finally {
+      wakeLockPendingRef.current = false;
     }
   }, [keepAwake]);
 
@@ -286,6 +386,27 @@ export function useSpeech(units, { onFinished } = {}) {
     if (keepAwake && statusRef.current === 'playing') acquireWakeLock();
     if (!keepAwake) releaseWakeLock();
   }, [keepAwake, acquireWakeLock, releaseWakeLock]);
+
+  // Another topic's player has taken the device. Reset OUR state only: the new
+  // owner is about to cancel and speak, and cancelling here would cut off the
+  // audio it is in the middle of starting. Without this a student who pressed
+  // Listen on a second topic was left looking at two control bars, both showing
+  // Pause, only one of them connected to any sound.
+  const standDown = useCallback(() => {
+    runRef.current += 1;
+    pausedRef.current = false;
+    cursorRef.current = 0;
+    setStatus('idle');
+    setUnitIndex(0);
+    setInterrupted(false);
+    releaseWakeLock();
+  }, [releaseWakeLock]);
+
+  // Held in a ref so the callback the module registry keeps can never be a stale
+  // closure, the same reason finishedRef exists below.
+  const standDownRef = useRef(standDown);
+  useEffect(() => { standDownRef.current = standDown; }, [standDown]);
+  const notifyStandDown = useCallback(() => standDownRef.current?.(), []);
 
   // ── The queue ─────────────────────────────────────────────────────────────
 
@@ -339,12 +460,14 @@ export function useSpeech(units, { onFinished } = {}) {
     runRef.current += 1;
     pausedRef.current = false;
     cursorRef.current = 0;
-    synth()?.cancel();
+    // Only if we are the one talking: another topic's player may hold the device.
+    if (ownsDevice(deviceId)) resetDevice(synth());
+    releaseDevice(deviceId);
     setStatus('idle');
     setUnitIndex(0);
     setInterrupted(false);
     releaseWakeLock();
-  }, [releaseWakeLock]);
+  }, [releaseWakeLock, deviceId]);
 
   // Landmine 3: this must be reached from a click, never from an effect.
   //
@@ -361,12 +484,15 @@ export function useSpeech(units, { onFinished } = {}) {
     cleanRunRef.current = !viaSkip && fromUnit === 0;
     setInterrupted(false);
 
-    api.cancel(); // clear anything the previous run left queued
+    // Take the device first: this stands down whichever topic was playing, so
+    // its bar resets instead of sitting there claiming to still be running.
+    claimDevice(deviceId, notifyStandDown);
+    resetDevice(api); // clear anything the previous run left queued, pause included
     const start = queue.findIndex((q) => q.unitIndex >= fromUnit);
     setStatus('playing');
     acquireWakeLock();
     speakFrom(start === -1 ? 0 : start, run);
-  }, [supported, queue, speakFrom, acquireWakeLock]);
+  }, [supported, queue, speakFrom, acquireWakeLock, deviceId, notifyStandDown]);
 
   const pause = useCallback(() => {
     if (!supported || status !== 'playing') return;
@@ -394,10 +520,11 @@ export function useSpeech(units, { onFinished } = {}) {
       // pause() did not take (Android) or the utterance already ended while
       // paused — restart from the chunk we stopped on.
       runRef.current += 1;
-      api.cancel();
+      claimDevice(deviceId, notifyStandDown);
+      resetDevice(api);
       speakFrom(cursorRef.current, runRef.current);
     }
-  }, [supported, status, speakFrom, acquireWakeLock]);
+  }, [supported, status, speakFrom, acquireWakeLock, deviceId, notifyStandDown]);
 
   const skipTo = useCallback((target) => {
     const clamped = Math.max(0, Math.min(target, (units?.length ?? 1) - 1));
@@ -447,7 +574,7 @@ export function useSpeech(units, { onFinished } = {}) {
         // Suspended while we were away. Abandon the dead chain so a late
         // callback cannot resurrect it, and tell the student what happened.
         runRef.current += 1;
-        api.cancel();
+        if (ownsDevice(deviceId)) resetDevice(api);
         pausedRef.current = true;
         setStatus('paused');
         setInterrupted(true);
@@ -459,7 +586,7 @@ export function useSpeech(units, { onFinished } = {}) {
 
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
-  }, [supported, releaseWakeLock, acquireWakeLock]);
+  }, [supported, releaseWakeLock, acquireWakeLock, deviceId]);
 
   // A changed voice or rate only takes effect on the NEXT utterance, so a
   // student who changes either mid-topic would otherwise hear no difference
@@ -470,17 +597,25 @@ export function useSpeech(units, { onFinished } = {}) {
     settingsRef.current = { voice, rate };
     if (!changed || status !== 'playing') return;
     runRef.current += 1;
-    synth()?.cancel();
+    claimDevice(deviceId, notifyStandDown);
+    resetDevice(synth());
     speakFrom(cursorRef.current, runRef.current);
-  }, [voice, rate, status, speakFrom]);
+  }, [voice, rate, status, speakFrom, deviceId, notifyStandDown]);
 
-  // Leaving the page mid-sentence must not leave the browser talking.
+  // Leaving the page mid-sentence must not leave the browser talking — but
+  // collapsing ONE topic accordion unmounts only that topic's player, and it
+  // must not silence a different topic that is mid-sentence. Hence the guard:
+  // an instance stops the device only while it is the one using it.
   useEffect(() => () => {
     runRef.current += 1;
-    synth()?.cancel();
+    if (ownsDevice(deviceId)) {
+      resetDevice(synth());
+      releaseDevice(deviceId);
+    }
+    wakeLockGenRef.current += 1; // a request still in flight must not keep its lock
     wakeLockRef.current?.release?.().catch(() => {});
     wakeLockRef.current = null;
-  }, []);
+  }, [deviceId]);
 
   // New topic (or notes that finished loading) — abandon whatever was playing.
   // Keyed on the content signature, so this fires when the material genuinely
@@ -489,13 +624,13 @@ export function useSpeech(units, { onFinished } = {}) {
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
     runRef.current += 1;
-    synth()?.cancel();
+    if (ownsDevice(deviceId)) { resetDevice(synth()); releaseDevice(deviceId); }
     pausedRef.current = false;
     cursorRef.current = 0;
     setStatus('idle');
     setUnitIndex(0);
     setInterrupted(false);
-  }, [signature]);
+  }, [signature, deviceId]);
 
   return {
     supported,

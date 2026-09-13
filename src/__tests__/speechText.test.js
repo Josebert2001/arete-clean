@@ -53,6 +53,23 @@ describe('mathToSpeech', () => {
       if (complete) expect(speech).not.toMatch(RESIDUE);
     }
   });
+
+  it('names the whole exponent, not just a leading 2 or 3', () => {
+    // "squared" is a reading of the entire exponent. Matching a bare digit
+    // wherever it followed a caret split real corpus formulas down the middle:
+    // PHY 128's I^2R and MTH 121's d^2y came out with the exponent fused to the
+    // next symbol, and 2^256 read as "2 squared 56" while still reporting
+    // complete — so the refusal path could not catch it.
+    expect(mathToSpeech('I^2R').speech).toBe('I squared R');
+    expect(mathToSpeech('d^2y').speech).toBe('d squared y');
+    expect(mathToSpeech('P = I^2R').speech).toBe('P equals I squared R');
+    expect(mathToSpeech('2^{24}').speech).toBe('2 to the power 24');
+    expect(mathToSpeech('x^{2n}').speech).toBe('x to the power 2n');
+    expect(mathToSpeech('e^{2x}').speech).toBe('e to the power 2x');
+    // Still the plain readings for the plain cases.
+    expect(mathToSpeech('E = mc^2').speech).toBe('E equals mc squared');
+    expect(mathToSpeech('10^3').speech).toBe('10 cubed');
+  });
 });
 
 describe('sectionToSpeech — announced, never read', () => {
@@ -209,6 +226,20 @@ describe('applyPronunciation', () => {
   it('reads currency as money, not as a maths delimiter', () => {
     expect(applyPronunciation('a loss of $500,000')).toBe('a loss of 500,000 dollars');
     expect(applyPronunciation('$5 million')).toBe('5 million dollars');
+  });
+
+  it('reads the abbreviated scales the notes actually use', () => {
+    // cyb122.js writes "$3.4M" and "$234K" far more often than it spells the
+    // scale out, and knowing only the words stranded the letter on the wrong
+    // side of the unit — "3.4 dollarsM".
+    expect(applyPronunciation('for $3.4M')).toBe('for 3.4 million dollars');
+    expect(applyPronunciation('$234K per respondent')).toBe('234 thousand dollars per respondent');
+    expect(applyPronunciation('$1.2bn')).toBe('1.2 billion dollars');
+  });
+
+  it('does not read an ordinary word as a scale, or eat the space before it', () => {
+    expect(applyPronunciation('$40 billed monthly')).toBe('40 dollars billed monthly');
+    expect(applyPronunciation('$25 Metres away')).toBe('25 dollars Metres away');
   });
 
   it('strips markdown that would otherwise be read aloud', () => {

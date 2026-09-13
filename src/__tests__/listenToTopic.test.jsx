@@ -246,4 +246,32 @@ describe('ListenToTopic', () => {
     expect(await screen.findByText(/audio stops when the screen locks/)).toBeInTheDocument();
     visibility('visible');
   });
+
+  it('replays the whole topic after it ends, not just the closing section', async () => {
+    const state = installSynth();
+    render(<ListenToTopic topic={richTopic} onFinished={() => {}} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('button', { name: 'Pause' });
+
+    // Play it out: each chunk ends, the queue walks to the last unit and stops.
+    for (let i = 0; i < 40 && state.current; i += 1) {
+      const utterance = state.current;
+      state.current = null;
+      state.speaking = false;
+      await waitFor(() => expect(utterance.onend).toBeTypeOf('function'));
+      fireEvent(window, new Event('noop')); // flush pending React work
+      utterance.onend();
+    }
+
+    const play = await screen.findByRole('button', { name: 'Play' });
+    state.spoken.length = 0;
+    fireEvent.click(play);
+
+    // From 'ended', unitIndex is the LAST section. Replaying from there gave the
+    // student the closing paragraph alone, and because the run did not start at
+    // unit 0 it counted as unclean, so finishing it never marked the topic read.
+    await waitFor(() => expect(state.spoken.length).toBeGreaterThan(0));
+    expect(state.spoken[0].text).toContain('A network service');
+  });
 });
