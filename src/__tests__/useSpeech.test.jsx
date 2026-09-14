@@ -117,6 +117,17 @@ describe('chunkSpeech', () => {
     for (const chunk of chunkSpeech(long)) expect(chunk.length).toBeLessThanOrEqual(200);
   });
 
+  it('budgets for the SLOWEST rate, since the cut-off is a duration', () => {
+    // 200 chars is the ~15s budget at rate 1. At 0.75× the same text runs about
+    // 20 seconds and trips the cut-off, so the default cap has to assume the
+    // slowest speed the control bar offers.
+    const slowest = Math.min(...SPEECH_RATES);
+    const long = 'This is a sentence about networking. '.repeat(30);
+    for (const chunk of chunkSpeech(long)) {
+      expect(chunk.length).toBeLessThanOrEqual(Math.floor(200 * slowest));
+    }
+  });
+
   it('splits on sentence boundaries, not mid-thought', () => {
     expect(chunkSpeech('One thing. Two things. Three things.', 20))
       .toEqual(['One thing.', 'Two things.', 'Three things.']);
@@ -497,6 +508,34 @@ describe('useSpeech', () => {
     await waitFor(() => expect(request).toHaveBeenCalledWith('screen'));
   });
 
+  it('reacquires the wake lock when a pause lands while the request is in flight', async () => {
+    install([{ name: 'NG', lang: 'en-NG' }]);
+
+    // A request() we control, so the pause can land mid-flight.
+    let settle;
+    const locks = [];
+    const request = vi.fn(() => new Promise((resolve) => {
+      settle = () => { const lock = { release: vi.fn().mockResolvedValue() }; locks.push(lock); resolve(lock); };
+    }));
+    vi.stubGlobal('navigator', { ...navigator, wakeLock: { request } });
+
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    act(() => result.current.setKeepAwake(true));
+    await waitFor(() => expect(result.current.keepAwake).toBe(true));
+
+    act(() => result.current.play());
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(1));
+
+    // Pause while the first request is still pending, then resume immediately.
+    act(() => result.current.pause());
+    act(() => result.current.resume());
+    await act(async () => { settle(); await Promise.resolve(); });
+
+    // The resume must have asked again; blocking on the stale pending request
+    // left playback running with the screen free to sleep.
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
+  });
+
   it('plays on regardless when the platform refuses a wake lock', async () => {
     install([{ name: 'NG', lang: 'en-NG' }]);
     vi.stubGlobal('navigator', {
@@ -633,6 +672,39 @@ describe('useSpeech — a voice that cannot speak', () => {
     act(() => result.current.play());
 
     await waitFor(() => expect(onFinished).toHaveBeenCalled());
+    expect(onFinished).toHaveBeenCalledWith(false);
+  });
+
+  it('says so on screen too, rather than showing a normal finish', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    // Same one-chunk topic: too short for the error streak, so the exhaustion
+    // path is the only thing that can tell the student anything.
+    const { result } = renderHook(() => useSpeech(units('Short one.')));
+
+    failEverything(state);
+    act(() => result.current.play());
+
+    await waitFor(() => expect(result.current.failed).toBe(true));
+    expect(result.current.status).toBe('paused');
+    expect(result.current.status).not.toBe('ended');
+  });
+
+  it('does not call a run clean when one chunk failed in the middle of it', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const onFinished = vi.fn();
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3)), { onFinished }));
+
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.status).toBe('playing'));
+
+    // First chunk fails, every later chunk succeeds.
+    const first = state.current;
+    state.current = null;
+    act(() => first.onerror({ error: 'synthesis-failed' }));
+    for (let i = 0; i < 30 && state.current; i += 1) act(() => state.endCurrent());
+
+    await waitFor(() => expect(onFinished).toHaveBeenCalled());
+    // That sentence was never heard, so the topic must not be marked read.
     expect(onFinished).toHaveBeenCalledWith(false);
   });
 

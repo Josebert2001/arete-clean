@@ -1,6 +1,10 @@
 # Lecture-Note Audio — Implementation Plan (two options)
 
-**Status:** awaiting decision — which option ships first.
+**Status:** **Option A shipped** — the shared serialiser (§3) and the whole Web Speech player
+(§4, phases A0–A3) are built and integrated, along with the highlight §4.4 called for (§4.10). What
+remains of Option A is the real-device pass on Android Chrome and iOS Safari (§4.8), and word-level
+highlighting. **Option B (§5) is not started** and is still a decision, not a plan of record — it is
+the only thing that reaches the commute case.
 **Audience:** the implementing agent/developer. Every file reference below was verified against the
 codebase on 2026-09-12 (branch `perf/ai-cost`). Read each file before editing it — line numbers
 drift.

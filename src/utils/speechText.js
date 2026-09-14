@@ -135,9 +135,17 @@ export function mathToSpeech(tex) {
     .replace(/\b([A-Za-z])\s*\(\s*([^()]{1,12})\s*\)/g, '$1 of $2')
     .replace(/\s*=\s*/g, ' equals ')
     .replace(/\s*\+\s*/g, ' plus ')
-    // Only a binary minus: a leading "-3" stays "minus 3" too, which is right,
-    // but "x-axis" must not become "x minus axis".
-    .replace(/(\d|\))\s*-\s*(?=[\dA-Za-z(])/g, '$1 minus ')
+    // A binary minus, told apart from a prose hyphen by what follows it.
+    //
+    // Requiring a digit or ")" on the LEFT missed most of the real cases — MTH
+    // 121's x^2-9, and plain "a - b" and "f(x)-g(x)" — which kept their hyphen
+    // and were still reported complete, so the refusal path could not catch
+    // them and a synthesiser read the dash as nothing at all.
+    //
+    // The right-hand side is what distinguishes them: an operand is a number, a
+    // bracket, or a SINGLE letter. "x-axis" has a word after the dash, so it
+    // stays a hyphen — which is the case the old rule existed to protect.
+    .replace(/([\dA-Za-z)])\s*-\s*(?=[\d(]|[A-Za-z](?![A-Za-z]))/g, '$1 minus ')
     .replace(/\s*\/\s*/g, ' over ');
 
   // Anything still carrying LaTeX structure is beyond this translator. `|` is in
@@ -166,17 +174,25 @@ const INLINE_MATH = /\$\$([\s\S]+?)\$\$|\$([^$]{1,200}?)\$/g;
  */
 function convertInlineMath(text) {
   const skipped = [];
-  if (!text || !text.includes('$')) return { text: String(text ?? ''), skipped };
+  const raw = String(text ?? '');
+  if (!raw.includes('$')) return { text: raw, markerChars: 0, skipped };
 
-  const out = String(text).replace(INLINE_MATH, (match, display, inline) => {
+  // `markerChars` is what the refusals contributed to the returned string. Rule
+  // 2 at the top of this file says markers are not content, and an inline
+  // refusal is a marker like any other — counting "an expression on screen"
+  // towards the narration floor would let a topic that is mostly equations this
+  // translator declines clear MIN_NARRATE_CHARS on the text of its own excuses.
+  let markerChars = 0;
+  const out = raw.replace(INLINE_MATH, (match, display, inline) => {
     const { speech, complete } = mathToSpeech(display ?? inline);
     if (complete && speech) return speech;
     const label = 'an expression on screen';
     skipped.push({ kind: 'math', label });
+    markerChars += label.length;
     return label;
   });
 
-  return { text: out, skipped };
+  return { text: out, markerChars, skipped };
 }
 
 // ── Pronunciation ───────────────────────────────────────────────────────────
@@ -355,14 +371,16 @@ function lineCount(code) {
 
 /**
  * @param {Object} section a lecture-note section
- * @returns {{ speech: string, prose: string, skipped: Array<{kind, label}> }}
- *   `speech` is everything to say, heading and markers included. `prose` is the
- *   body content only — no heading, no markers — and is what the
- *   MIN_NARRATE_CHARS floor measures. `skipped` is what the UI captions as
- *   "3 code listings skipped".
+ * @returns {{ speech: string, prose: string, proseChars: number,
+ *   skipped: Array<{kind, label}> }} `speech` is everything to say, heading and
+ *   markers included. `prose` is the body content only — no heading. `proseChars`
+ *   is what the MIN_NARRATE_CHARS floor measures, and is NOT prose.length: an
+ *   inline expression this translator refused is replaced inside `prose` by a
+ *   spoken marker, and a marker is not content (rule 2 above). `skipped` is what
+ *   the UI captions as "3 code listings skipped".
  */
 export function sectionToSpeech(section) {
-  if (!section) return { speech: '', prose: '', skipped: [] };
+  if (!section) return { speech: '', prose: '', proseChars: 0, skipped: [] };
 
   // Headings carry inline maths too — MTH 121 has seven of them, including
   // "Integrating powers of $x$" and "Derivative of $\sin x$ from first
@@ -370,26 +388,43 @@ export function sectionToSpeech(section) {
   // applyPronunciation, where the currency rule turned "$x$." into a spoken
   // "dollars". A heading is the first thing the student hears in a unit, so it
   // needs the same treatment as the prose under it, not less.
-  const heading = section.heading
-    ? endSentence(convertInlineMath(section.heading).text)
-    : '';
+  // Refusals found in a heading or a caption are collected here and folded into
+  // every return below. Dropping them made the voice announce "an expression on
+  // screen" that skippedSummary had never counted, so the up-front caption
+  // promised the student fewer omissions than they were about to hear.
+  const asideSkips = [];
+
+  const convertAside = (raw) => {
+    const { text, skipped } = convertInlineMath(String(raw ?? ''));
+    asideSkips.push(...skipped);
+    return text;
+  };
+
+  const heading = section.heading ? endSentence(convertAside(section.heading)) : '';
 
   // Captions are authored prose on the same footing — see the math and image
   // cases below, which both speak one.
-  const captionText = (raw) => convertInlineMath(String(raw ?? '')).text;
+  const captionText = (raw) => convertAside(raw);
 
   // Body prose, with any inline maths converted or announced. The heading is
   // NOT part of `prose`: a heading is a label, and counting it would let a
   // topic of listings clear the narration floor on its own section titles.
   const spoken = (body) => {
-    const { text, skipped } = convertInlineMath(body);
-    return { speech: join([heading, text]), prose: text, skipped };
+    const { text, markerChars, skipped } = convertInlineMath(body);
+    return {
+      speech: join([heading, text]),
+      prose: text,
+      // Not text.length: the refusal markers inside it are not content.
+      proseChars: Math.max(0, text.length - markerChars),
+      skipped: [...asideSkips, ...skipped],
+    };
   };
 
   const marker = (kind, label) => ({
     speech: join([heading, label]),
     prose: '',
-    skipped: [{ kind, label }],
+    proseChars: 0,
+    skipped: [...asideSkips, { kind, label }],
   });
 
   switch (section.type) {
@@ -449,7 +484,7 @@ export function sectionToSpeech(section) {
       const caption = section.caption ? ` ${endSentence(captionText(section.caption))}` : '';
       if (complete && speech && speech.length <= 120) {
         const body = `${speech}.${caption}`;
-        return { speech: join([heading, body]), prose: '', skipped: [] };
+        return { speech: join([heading, body]), prose: '', proseChars: 0, skipped: [...asideSkips] };
       }
       return marker('math', section.caption
         ? `An equation on screen — ${captionText(section.caption)}`
@@ -479,7 +514,7 @@ export function sectionToSpeech(section) {
     // `resource` is a download link, not prose — buildOutline already treats it
     // as standalone for the same reason. Nothing to announce mid-listen.
     default:
-      return { speech: '', prose: '', skipped: [] };
+      return { speech: '', prose: '', proseChars: 0, skipped: [...asideSkips] };
   }
 }
 
@@ -512,7 +547,7 @@ export function topicToSpeechUnits(topic) {
       const result = sectionToSpeech(section);
       if (result.speech) speechParts.push(result.speech);
       skipped.push(...result.skipped);
-      if (SPEAKABLE_TYPES.has(section?.type)) proseChars += result.prose.length;
+      if (SPEAKABLE_TYPES.has(section?.type)) proseChars += result.proseChars;
     }
 
     const speech = applyPronunciation(speechParts.join(' '));

@@ -247,6 +247,28 @@ describe('ListenToTopic', () => {
     visibility('visible');
   });
 
+  it('renders a maths heading in the bar, rather than printing its LaTeX', async () => {
+    installSynth();
+    // MTH 121 has seven headings like this. The notes render them through
+    // MathText; the player printed the same string raw, so the student saw
+    // "Integrating powers of $x$" in the bar while the section above read fine.
+    const topic = {
+      title: 'Integration',
+      number: 4,
+      sections: [
+        { type: 'text', heading: 'Integrating powers of $x$', text: prose('The power rule') },
+        { type: 'text', heading: 'Plain heading', text: prose('Something else') },
+      ],
+    };
+
+    render(<ListenToTopic topic={topic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+
+    const bar = await screen.findByRole('group', { name: 'Listen to this topic' });
+    expect(bar.textContent).not.toContain('$');
+    expect(bar.textContent).toContain('Integrating powers of');
+  });
+
   it('reports the outline item being spoken, and clears it when stopped', async () => {
     const state = installSynth();
     const reports = [];

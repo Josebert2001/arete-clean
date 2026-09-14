@@ -54,6 +54,34 @@ describe('mathToSpeech', () => {
     }
   });
 
+  it('counts a refusal found in a heading or caption, not just in the body', () => {
+    // The voice announces "an expression on screen" for these too, so leaving
+    // them out of `skipped` made the up-front caption promise the student fewer
+    // omissions than they were about to hear.
+    const refused = '$\\oint_C \\vec{F}$';
+
+    const headed = sectionToSpeech({ type: 'text', heading: `Flux ${refused}`, text: 'Plain prose.' });
+    expect(headed.speech).toContain('an expression on screen');
+    expect(headed.skipped.filter((s) => s.kind === 'math')).toHaveLength(1);
+
+    const figure = sectionToSpeech({ type: 'image', caption: `The field ${refused}` });
+    expect(figure.skipped.filter((s) => s.kind === 'math')).toHaveLength(1);
+  });
+
+  it('does not let a refused expression count towards the narration floor', () => {
+    // Rule 2 at the top of speechText.js: markers are not content. An inline
+    // expression this translator declines is replaced by "an expression on
+    // screen", and counting that let a topic made mostly of equations it cannot
+    // read clear MIN_NARRATE_CHARS on the text of its own excuses.
+    const refused = '$\\oint_C \\vec{F}$';
+    const section = { type: 'text', text: `${refused} ${refused} ${refused}` };
+    const r = sectionToSpeech(section);
+
+    expect(r.speech).toContain('an expression on screen');
+    expect(r.proseChars).toBeLessThan(r.prose.length);
+    expect(r.proseChars).toBeLessThan(10); // only the spaces between them
+  });
+
   it('carries the outline index the renderer keys its sections on', () => {
     // The join for highlight-follows-voice. It must be the buildOutline index,
     // NOT the unit's position: a group that produces no speech is dropped from
@@ -86,6 +114,19 @@ describe('mathToSpeech', () => {
     // A caption is authored prose on the same footing.
     expect(speech({ type: 'image', caption: 'The graph of $y = x^2$' }))
       .toBe('Figure. The graph of y equals x squared.');
+  });
+
+  it('speaks a binary minus but leaves a prose hyphen alone', () => {
+    // Requiring a digit or ")" on the left missed most real cases: MTH 121's
+    // x^2-9 and plain "a - b" kept their dash AND reported complete, so the
+    // refusal path could not catch them and the voice read nothing there.
+    expect(mathToSpeech('x-9').speech).toBe('x minus 9');
+    expect(mathToSpeech('x^2-9').speech).toBe('x squared minus 9');
+    expect(mathToSpeech('a - b').speech).toBe('a minus b');
+    expect(mathToSpeech('f(x)-g(x)').speech).toBe('f of x minus g of x');
+    // A word after the dash means prose — the case the old rule protected.
+    expect(mathToSpeech('x-axis').speech).toBe('x-axis');
+    expect(mathToSpeech('y-intercept').speech).toBe('y-intercept');
   });
 
   it('names the whole exponent, not just a leading 2 or 3', () => {
@@ -171,7 +212,7 @@ describe('sectionToSpeech — announced, never read', () => {
 
   it('drops a resource link with nothing to announce', () => {
     const r = sectionToSpeech({ type: 'resource', href: '/x.pdf', label: 'Slides' });
-    expect(r).toEqual({ speech: '', prose: '', skipped: [] });
+    expect(r).toEqual({ speech: '', prose: '', proseChars: 0, skipped: [] });
   });
 
   it('gives every skipped entry a spoken label — no silent drops', () => {

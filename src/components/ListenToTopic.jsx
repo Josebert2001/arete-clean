@@ -18,6 +18,7 @@
 
 import { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { Volume2, Play, Pause, SkipBack, SkipForward, X, Sun } from 'lucide-react';
+import MathText from './MathText';
 import { topicToSpeechUnits, canNarrateUnits, skippedIn, describeSkips } from '../utils/speechText';
 import { useSpeech, SPEECH_RATES } from './useSpeech';
 
@@ -146,8 +147,12 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
           {unitIndex + 1}/{unitCount}
         </span>
 
+        {/* Through MathText, like the headings in the notes themselves. These
+            are the same strings — MTH 121 has seven carrying inline maths — so
+            printed raw the player showed "Integrating powers of $x$" while the
+            section above it read properly. */}
         <span className="flex-1 min-w-0 text-xs text-coffee-600 truncate">
-          {current?.heading || topic.title}
+          <MathText text={current?.heading || topic.title} />
         </span>
 
         <button

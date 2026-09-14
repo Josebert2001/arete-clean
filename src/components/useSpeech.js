@@ -28,10 +28,24 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-// Chrome's ~15s cut-off at a normal 150wpm is about 220 characters. 200 leaves
-// headroom, and a slower `rate` only makes chunks shorter in wall-clock terms,
-// never longer.
-const MAX_CHUNK_CHARS = 200;
+// The speeds the control bar offers. Declared here because the chunk budget
+// below is derived from the slowest of them.
+export const SPEECH_RATES = [0.75, 1, 1.25, 1.5];
+
+// Chrome's ~15s cut-off at a normal 150wpm is about 220 characters, and 200
+// leaves headroom AT RATE 1.
+//
+// The cut-off is a duration, not a length, so a SLOWER rate makes a chunk of
+// the same text run LONGER — 200 characters at 0.75× is about 20 seconds, well
+// past it. (An earlier comment here claimed the opposite, which is how the cap
+// came to ignore rate at all.)
+//
+// So the budget is set for the slowest rate offered rather than recomputed per
+// playback. Rebuilding the queue when the speed changes was the alternative, and
+// it is worse: `cursorRef` is an index INTO the queue, so re-chunking mid-topic
+// silently moves the playback position. A few extra chunks at 1× costs one more
+// `onend` hop each, which is the mechanism the queue already runs on.
+const MAX_CHUNK_CHARS = Math.floor(200 * Math.min(...SPEECH_RATES));
 
 // A full stop that is not the end of a sentence. The prose here really does
 // contain "Prof. Ntiedo J. Umoren and Sunday S. Akpan, Ph.D." (ENT 221) and
@@ -60,7 +74,6 @@ const VOICE_PREF_KEY = 'arete:speech:voice';
 const RATE_PREF_KEY = 'arete:speech:rate';
 const AWAKE_PREF_KEY = 'arete:speech:awake';
 
-export const SPEECH_RATES = [0.75, 1, 1.25, 1.5];
 
 // Consecutive failed chunks before we stop and say so. One is ordinary — the
 // next sentence usually synthesises fine. Three in a row is the voice itself.
@@ -326,7 +339,9 @@ export function useSpeech(units, { onFinished } = {}) {
   const spokeRef = useRef(0);            // chunks this run actually finished
   const errorStreakRef = useRef(0);      // consecutive synthesis failures
   const wakeLockGenRef = useRef(0);      // invalidates an in-flight request()
-  const wakeLockPendingRef = useRef(false);
+  // Generation of the in-flight request(), or -1 when none. A plain boolean
+  // could not tell a live request from one already invalidated by a release.
+  const wakeLockPendingGenRef = useRef(-1);
   // This instance's claim on the one global speechSynthesis — see claimDevice.
   const [deviceId] = useState(() => { nextDeviceId += 1; return nextDeviceId; });
   // True while the current run has played straight through from unit 0. Any
@@ -381,9 +396,15 @@ export function useSpeech(units, { onFinished } = {}) {
   }, []);
 
   const acquireWakeLock = useCallback(async () => {
-    if (!keepAwake || wakeLockRef.current || wakeLockPendingRef.current) return;
+    if (!keepAwake || wakeLockRef.current) return;
     const gen = wakeLockGenRef.current;
-    wakeLockPendingRef.current = true;
+    // Only a request for the CURRENT generation blocks a new one. A pending
+    // request that a release has already invalidated is destined for the bin,
+    // and letting it block meant a pause-then-immediate-resume left playback
+    // with no lock at all: the resume bailed out here, and the old request then
+    // released the lock it was finally handed.
+    if (wakeLockPendingGenRef.current === gen) return;
+    wakeLockPendingGenRef.current = gen;
     try {
       const lock = await navigator.wakeLock.request('screen');
       if (gen !== wakeLockGenRef.current) {
@@ -397,7 +418,7 @@ export function useSpeech(units, { onFinished } = {}) {
       // unaffected — the screen just dims on its own schedule.
       wakeLockRef.current = null;
     } finally {
-      wakeLockPendingRef.current = false;
+      if (wakeLockPendingGenRef.current === gen) wakeLockPendingGenRef.current = -1;
     }
   }, [keepAwake]);
 
@@ -442,8 +463,22 @@ export function useSpeech(units, { onFinished } = {}) {
 
     const item = queue[index];
     if (!item) {
-      setStatus('ended');
       releaseWakeLock();
+
+      // Reaching the end having spoken NOTHING is a failure wearing a finish's
+      // clothes. A one- or two-chunk topic whose every utterance errors never
+      // reaches MAX_ERROR_STREAK, so without this the bar showed an ordinary
+      // completed listen and the student was left to guess why it was silent.
+      if (spokeRef.current === 0 && errorStreakRef.current > 0) {
+        pausedRef.current = true;
+        cursorRef.current = 0;
+        setStatus('paused');
+        setFailed(true);
+        finishedRef.current?.(false);
+        return;
+      }
+
+      setStatus('ended');
       // The flag matters twice over. A caller that marks the topic read off this
       // must not be fooled by a student who pressed skip until the end, NOR by a
       // device whose voice failed on every chunk: those errors advance the queue
@@ -489,6 +524,11 @@ export function useSpeech(units, { onFinished } = {}) {
       if (run !== runRef.current) return;
 
       errorStreakRef.current += 1;
+      // A chunk that failed was NOT heard, so this is no longer a clean listen
+      // even if every chunk after it succeeds. Without this, one failed sentence
+      // in the middle of a topic still ended with onFinished(true) and the topic
+      // was marked read on audio the student never got.
+      cleanRunRef.current = false;
       // One bad chunk should not end the topic — the next sentence usually
       // synthesises fine. A run of them means the voice itself cannot speak
       // (synthesis-failed, synthesis-unavailable, audio-busy), and advancing
