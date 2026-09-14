@@ -543,6 +543,14 @@ scroll-suppression listeners were gated on `speakingIdx`, which is null while *p
 to scroll up and re-read left nothing to suppress, and resuming yanked the page straight back down.
 Each is pinned by a test that fails without its fix.
 
+**Codex's round — one more, also real.** `wheel` and `touchmove` are not every way a page gets
+scrolled: PageDown, Space, the arrow keys, dragging the scrollbar and find-in-page move it without
+firing either, so a student reading ahead that way was still being pulled back to the voice. A
+`scroll` listener catches all of them, at the cost of also firing for our own smooth scroll — hence
+`SELF_SCROLL_MS`, a window the follow effect opens before it scrolls, inside which a `scroll` is
+ours and not theirs. The wheel and touch listeners stay: they are unambiguous, and they land before
+the page has moved at all.
+
 Verified in Chrome against CYB 224: the bar docks with the topic and section on it, the wash moves
 and the page follows it, a wheel gesture suppresses the next follow, and both floating buttons clear
 the bar. One trap worth recording for the next browser pass — **in an occluded window
