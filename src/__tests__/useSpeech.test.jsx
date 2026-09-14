@@ -25,6 +25,7 @@ function makeSynth(voices = []) {
     speaking: false,
     cancels: 0,
     listeners: {},
+    refuse: false,
     voices,
   };
 
@@ -41,7 +42,16 @@ function makeSynth(voices = []) {
       // un-pause itself. Modelling speak() as always starting the voice is what
       // let a silent player pass this suite: after pause() → cancel() the flag
       // is still set, and everything queued behind it goes unheard.
-      if (!state.paused) state.speaking = true;
+      // `refuse` is the iOS-after-a-screen-lock device: it accepts the
+      // utterance and then does nothing with it — no voice, no start, no error.
+      if (!state.paused && !state.refuse) {
+        state.speaking = true;
+        // `onstart` is what tells the stall watchdog a chunk got a voice at all,
+        // and that is the difference between "something cut it, say it again"
+        // and "the platform is refusing, stop and say so". A stub that never
+        // fires it models a device that never speaks.
+        queueMicrotask(() => { if (state.current === utterance) utterance.onstart?.(); });
+      }
     },
     cancel: () => {
       state.cancels += 1;
@@ -84,6 +94,8 @@ function install(voices) {
       this.text = text;
       this.rate = 1;
       this.voice = null;
+      this.onstart = null;
+      this.onboundary = null;
       this.onend = null;
       this.onerror = null;
     }
@@ -315,15 +327,67 @@ describe('useSpeech', () => {
     expect(result.current.status).toBe('idle');
   });
 
-  it('treats our own cancel error as normal, not as a failure', async () => {
+  // Landmine 5. These two are a pair: the same error code means opposite things
+  // depending on whose cancel produced it, and the run id is what tells them
+  // apart. Every internal cancel bumps it BEFORE calling cancel(), so one that
+  // arrives still carrying the CURRENT id came from outside the page.
+  it('says the chunk again when something outside the page cut it', async () => {
     const state = install([{ name: 'NG', lang: 'en-NG' }]);
-    const { result } = renderHook(() => useSpeech(units('One. Two.')));
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
     act(() => result.current.play());
-    const utterance = state.spoken[0];
+    await act(async () => { await Promise.resolve(); }); // let onstart land
+    const cut = state.spoken[0];
+    const before = state.spoken.length;
 
-    act(() => utterance.onerror?.({ error: 'interrupted' }));
-    // Still playing — an interruption we caused must not end the topic.
+    act(() => cut.onerror?.({ error: 'interrupted' }));
+
+    // Ignoring this — which is what it used to do — left the bar showing Pause
+    // with nothing coming out and no way back but pressing play.
+    await waitFor(() => expect(state.spoken.length).toBeGreaterThan(before));
+    expect(state.spoken[state.spoken.length - 1].text).toBe(cut.text);
     expect(result.current.status).toBe('playing');
+  });
+
+  it('gives up on a chunk that is cut twice running, and says so', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    act(() => result.current.play());
+    await act(async () => { await Promise.resolve(); });
+
+    act(() => state.spoken[state.spoken.length - 1].onerror?.({ error: 'interrupted' }));
+    await waitFor(() => expect(state.spoken).toHaveLength(2));
+    await act(async () => { await Promise.resolve(); });
+    act(() => state.spoken[state.spoken.length - 1].onerror?.({ error: 'interrupted' }));
+
+    // Twice on the same chunk is the platform, not the chunk. Saying the same
+    // sentence forever is not resilience.
+    await waitFor(() => expect(result.current.status).toBe('paused'));
+    expect(result.current.interrupted).toBe(true);
+  });
+
+  it('says the chunk again when the engine wedges and fires nothing at all', async () => {
+    // The worst shape of landmine 5: the utterance starts, the audio dies, and
+    // no end and no error ever arrive. Without the watchdog the chain simply
+    // stops while the bar still says Pause — silence the player cannot see.
+    vi.useFakeTimers();
+    try {
+      const state = install([{ name: 'NG', lang: 'en-NG' }]);
+      const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+      act(() => result.current.play());
+      await act(async () => { await Promise.resolve(); }); // onstart lands
+      const stuck = state.spoken[state.spoken.length - 1];
+      const before = state.spoken.length;
+
+      // Past this chunk's budget, but not past the retry's — a second silence
+      // would give up, and that is the next test's job.
+      act(() => { vi.advanceTimersByTime(25000); });
+
+      expect(state.spoken.length).toBeGreaterThan(before);
+      expect(state.spoken[state.spoken.length - 1].text).toBe(stuck.text);
+      expect(result.current.status).toBe('playing');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('keeps going when one chunk genuinely fails to synthesise', async () => {
@@ -410,22 +474,49 @@ describe('useSpeech', () => {
 
   afterEach(() => setVisibility('visible'));
 
-  it('flags an interruption when the phone suspended synthesis while away', async () => {
+  it('picks the chunk back up when the phone suspended synthesis while away', async () => {
     const state = install([{ name: 'NG', lang: 'en-NG' }]);
     const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
     act(() => result.current.play());
+    const cut = state.spoken[state.spoken.length - 1];
+    const before = state.spoken.length;
 
     act(() => { setVisibility('hidden'); document.dispatchEvent(new Event('visibilitychange')); });
     // What a locked phone does: synthesis simply stops.
     act(() => { state.speaking = false; state.paused = false; state.current = null; });
     act(() => { setVisibility('visible'); document.dispatchEvent(new Event('visibilitychange')); });
 
-    await waitFor(() => expect(result.current.status).toBe('paused'));
-    // The distinction the UI needs: the student did not do this.
-    expect(result.current.interrupted).toBe(true);
+    // The student never pressed pause, so what they are waiting for is the next
+    // sentence, not a notice. This used to stop dead and make them find the bar.
+    await waitFor(() => expect(state.spoken.length).toBeGreaterThan(before));
+    expect(state.spoken[state.spoken.length - 1].text).toBe(cut.text);
+    expect(result.current.status).toBe('playing');
+  });
 
-    act(() => result.current.resume());
-    expect(result.current.interrupted).toBe(false);
+  it('falls back to the screen-lock notice when the platform will not restart', async () => {
+    // iOS wants a fresh gesture after a lock, so the restart above gets no
+    // voice at all. The watchdog is the only thing that can tell — nothing
+    // errors, nothing ends.
+    vi.useFakeTimers();
+    try {
+      const state = install([{ name: 'NG', lang: 'en-NG' }]);
+      const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+      act(() => result.current.play());
+
+      // A device that takes the utterance and never speaks it.
+      state.refuse = true;
+
+      act(() => { setVisibility('hidden'); document.dispatchEvent(new Event('visibilitychange')); });
+      act(() => { state.speaking = false; state.paused = false; state.current = null; });
+      act(() => { setVisibility('visible'); document.dispatchEvent(new Event('visibilitychange')); });
+
+      act(() => { vi.advanceTimersByTime(60000); });
+
+      expect(result.current.status).toBe('paused');
+      expect(result.current.interrupted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('leaves desktop playback alone when a background tab kept speaking', async () => {

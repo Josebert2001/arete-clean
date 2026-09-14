@@ -457,6 +457,9 @@ the callback is the more honest place anyway.
 is reading ahead or looking back is fighting them, and the wash is cheap to find. Worth revisiting
 only if the phone passes say otherwise.
 
+> **Revisited — §4.11.** They said otherwise. On a phone the wash is a screen and a half below the
+> player by the time the voice reaches it, so "cheap to find" was a desktop judgement.
+
 The wash is a tint plus a left rule rather than a full border, with a negative inline margin, so
 nothing on the page moves as it turns on and off — a highlight that reflowed the text under a
 reader would be worse than no highlight.
@@ -468,6 +471,62 @@ be a feature-detected layer on top of what is here.
 Verified in the browser: the wash appears on the opening paragraph, moves when the voice does,
 clears on pause, and opens the "Threat Actors" group when the voice reaches it (`aria-expanded`
 false → true). Play on a finished topic restarts at 1/3 with the wash back on the first section.
+
+### 4.11 The first real-use pass — it stopped, and you had to scroll back up (2026-09-14)
+
+Two complaints, one sentence each, and they turned out to be the same shape: the player knew less
+about itself than the student did.
+
+**"It stops most of the time and doesn't continue."** Landmine 5, now documented at the top of
+`useSpeech.js`. Three separate holes, all of which end the same way — the chain stops, the bar still
+says Pause, and nothing is coming out:
+
+1. **An `interrupted` error was ignored outright.** It is what our own `cancel()` produces, so the
+   handler returned before it even checked the run id. But every internal cancel bumps `runRef`
+   *before* calling `cancel()`, so one of ours is always stale by the time its error lands — which
+   means an `interrupted` still carrying the **current** run id came from outside the page: the OS
+   took the audio, another app spoke, a notification landed. Checking staleness *first* and treating
+   what survives as a real interruption is the whole fix, and it is the commonest of the three.
+2. **A chunk can die with no event at all** — the engine wedges, or the utterance is collected.
+   Nothing can detect that except a clock, so there is now a watchdog per chunk: `onstart` sets the
+   budget from the chunk's own length and rate, and `onboundary` (Chrome and Edge fire one per word;
+   Safari fires none) re-arms it at four seconds, which is the difference between noticing in four
+   seconds and noticing in twenty. A module-level reference holds the live utterance, the documented
+   workaround for the collector case.
+3. **Recovery says the chunk again rather than skipping it**, once, then stops and says so. The
+   retry starts the chunk from its beginning, so nothing is missed and `cleanRunRef` is deliberately
+   *not* cleared — a phone that buzzed mid-topic should not cost the student their read mark.
+
+And the suspension case now **tries before it explains**: a student who never pressed pause is
+waiting for the next sentence, not a notice, so returning to the page restarts the chunk. The
+screen-lock notice is what is left when even that gets no voice — the same message, arrived at by
+trying first. `resume()` also stopped calling `speechSynthesis.resume()` on the utterance in flight:
+saving half a sentence costs the watchdog, since there is no event left to hang one on.
+
+**"I have to scroll back up to pause it, and it should go to where it's reading."** Both are the
+same problem — the player is at the top of a topic that is several screens long.
+
+- The transport **docks to the bottom of the window** once the real bar scrolls off (an
+  IntersectionObserver on the bar itself, not the panel; through a portal, because `fixed` is
+  measured against any transformed ancestor). Same hook, same state — a copy of the controls, not a
+  second player. Where there is no IntersectionObserver it simply never docks.
+- The page **follows the voice**, which §4.10 had decided against. It moves only when it has to:
+  nothing happens while the section is already in the band a reader is looking at, and a `wheel` or
+  `touchmove` holds it off for eight seconds — those two events are the honest signal for "the
+  student is scrolling", because a programmatic smooth scroll fires `scroll` but fires neither.
+  There is a toggle in the bar (on by default, remembered), and the page does the scrolling because
+  the page owns the sections; the player only carries the preference.
+- The campus-map and help buttons are `fixed` at z-50 in the two bottom corners — exactly where the
+  docked bar's transport and close controls land on a phone. They step up while it is docked
+  (`.docked-player-open .floating-dock-item` in `index.css`), on `bottom` rather than a transform,
+  because `.float-bob` animates transform and would overwrite one on its next frame.
+
+Verified in Chrome against CYB 224: the bar docks with the topic and section on it, the wash moves
+and the page follows it, a wheel gesture suppresses the next follow, and both floating buttons clear
+the bar. One trap worth recording for the next browser pass — **in an occluded window
+`visibilityState` is `hidden`, and IntersectionObserver, `requestAnimationFrame`, CSS transitions
+and smooth scrolling all stop**, so a transitioned property reads its old value forever and the
+feature looks broken when it is not.
 
 ### 4.7 Risks
 

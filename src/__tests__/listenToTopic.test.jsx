@@ -5,17 +5,26 @@
 // pause they chose.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import ListenToTopic from '../components/ListenToTopic.jsx';
 import { describeSkips } from '../utils/speechText.js';
 
 function installSynth(voices = [{ name: 'NG', lang: 'en-NG', default: true }]) {
-  const state = { spoken: [], current: null, speaking: false, paused: false, listeners: {} };
+  const state = { spoken: [], current: null, speaking: false, paused: false, listeners: {}, refuse: false };
   vi.stubGlobal('speechSynthesis', {
     getVoices: () => voices,
     addEventListener: (t, fn) => { (state.listeners[t] ??= []).push(fn); },
     removeEventListener: () => {},
-    speak: (u) => { state.spoken.push(u); state.current = u; state.speaking = true; },
+    // `refuse` is the device that takes the utterance and never speaks it —
+    // iOS after a screen lock, which wants a fresh gesture. No voice, no
+    // `onstart`, no error: the stall watchdog is the only thing that can tell.
+    speak: (u) => {
+      state.spoken.push(u);
+      state.current = u;
+      if (state.refuse) return;
+      state.speaking = true;
+      queueMicrotask(() => { if (state.current === u) u.onstart?.(); });
+    },
     cancel: () => { state.current = null; state.speaking = false; state.paused = false; },
     pause: () => { state.paused = true; },
     resume: () => { state.paused = false; },
@@ -224,14 +233,16 @@ describe('ListenToTopic', () => {
     await waitFor(() => expect(onFinished).toHaveBeenCalledWith(true));
   });
 
-  it('explains a screen-lock suspension instead of just going quiet', async () => {
+  const visibility = (v) =>
+    Object.defineProperty(document, 'visibilityState', { value: v, configurable: true });
+
+  it('carries on by itself when the phone comes back', async () => {
     const state = installSynth();
-    const visibility = (v) =>
-      Object.defineProperty(document, 'visibilityState', { value: v, configurable: true });
 
     render(<ListenToTopic topic={richTopic} />);
     fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
     await screen.findByRole('button', { name: 'Pause' });
+    const before = state.spoken.length;
 
     // The suspension is detected on RETURN, not predicted on leaving — a
     // backgrounded desktop tab keeps speaking and must not be paused.
@@ -243,8 +254,40 @@ describe('ListenToTopic', () => {
     visibility('visible');
     fireEvent(document, new Event('visibilitychange'));
 
-    expect(await screen.findByText(/audio stops when the screen locks/)).toBeInTheDocument();
+    // The student never pressed pause. Making them find the bar and press play
+    // was the single most-reported thing wrong with this player.
+    await waitFor(() => expect(state.spoken.length).toBeGreaterThan(before));
+    expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
     visibility('visible');
+  });
+
+  it('explains a screen-lock suspension instead of just going quiet', async () => {
+    vi.useFakeTimers();
+    try {
+      const state = installSynth();
+
+      render(<ListenToTopic topic={richTopic} />);
+      fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+      expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
+
+      // A device that will not start again without a fresh gesture: the restart
+      // above is attempted and gets nowhere, and the notice is what is left.
+      state.refuse = true;
+      visibility('hidden');
+      fireEvent(document, new Event('visibilitychange'));
+      state.speaking = false;
+      state.paused = false;
+      state.current = null;
+      visibility('visible');
+      fireEvent(document, new Event('visibilitychange'));
+
+      act(() => { vi.advanceTimersByTime(60000); });
+
+      expect(screen.getByText(/audio stops when the screen locks/)).toBeInTheDocument();
+      visibility('visible');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('shows what will be skipped BEFORE the student presses play', () => {
@@ -300,6 +343,65 @@ describe('ListenToTopic', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
     await waitFor(() => expect(reports.at(-1)).toBe(null));
     expect(state.spoken.length).toBeGreaterThan(0);
+  });
+
+  it('carries the follow preference to the page, and remembers it', async () => {
+    installSynth();
+    const reports = [];
+    render(
+      <ListenToTopic
+        topic={richTopic}
+        onSpeakingOutlineIndex={(i, opts) => reports.push(opts?.follow)}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await waitFor(() => expect(reports.at(-1)).toBe(true));
+
+    // Turning it off has to reach the page immediately — it is the page that
+    // scrolls, and a preference that only lands at the next section is a
+    // toggle that looks broken.
+    fireEvent.click(screen.getByRole('button', { name: /Scroll to the section being read/ }));
+    await waitFor(() => expect(reports.at(-1)).toBe(false));
+    expect(localStorage.getItem('arete:speech:follow')).toBe('0');
+  });
+
+  it('docks the transport once the real bar has scrolled away', async () => {
+    // The bar sits at the top of a topic that is several screens long, so by the
+    // time the voice is halfway through it, pausing meant scrolling back up to
+    // find the buttons. The docked copy is the same player, not a second one.
+    const observers = [];
+    vi.stubGlobal('IntersectionObserver', class {
+      constructor(callback) { this.callback = callback; observers.push(this); }
+      observe() {}
+      disconnect() {}
+    });
+    installSynth();
+    render(<ListenToTopic topic={richTopic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('group', { name: 'Listen to this topic' });
+
+    // On screen: one bar, one set of controls.
+    expect(screen.queryByRole('group', { name: 'Listen controls' })).toBeNull();
+
+    act(() => observers.at(-1).callback([{ isIntersecting: false }]));
+    expect(screen.getByRole('group', { name: 'Listen controls' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Pause' })).toHaveLength(2);
+
+    // …and it goes away again when the real bar comes back, rather than
+    // stacking two players on a short topic.
+    act(() => observers.at(-1).callback([{ isIntersecting: true }]));
+    expect(screen.queryByRole('group', { name: 'Listen controls' })).toBeNull();
+  });
+
+  it('does not dock at all where there is no IntersectionObserver', async () => {
+    // An old WebView, and jsdom. Docking permanently would be worse than never
+    // docking, so the bar starts out considered visible.
+    vi.stubGlobal('IntersectionObserver', undefined);
+    installSynth();
+    render(<ListenToTopic topic={richTopic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('group', { name: 'Listen to this topic' });
+    expect(screen.queryByRole('group', { name: 'Listen controls' })).toBeNull();
   });
 
   it('clears the highlight when the player unmounts', async () => {
