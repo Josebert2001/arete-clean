@@ -365,3 +365,55 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Campus map pin preview card. Tapping a pin and asking for directions is the
+   core interaction, so the button has to be a real control inside the popup —
+   see the DOM-built popup in CampusMap.jsx. */
+.campus-popup {
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 9rem;
+}
+.campus-popup strong {
+  font-size: 14px;
+  color: rgb(var(--ink));
+  line-height: 1.25;
+}
+.campus-popup span {
+  font-size: 11px;
+  color: rgb(var(--coffee-500));
+}
+.campus-popup__go {
+  margin-top: 6px;
+  align-self: flex-start;
+  background: rgb(var(--ember));
+  color: rgb(var(--cream));
+  border: 0;
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.campus-popup__go:hover {
+  background: rgb(var(--ember-400));
+}
+.campus-popup__go:focus-visible {
+  outline: 2px solid rgb(var(--ink));
+  outline-offset: 2px;
+}
+
+/* The OSM id on an unnamed pin — the key campusOverrides.js is written against,
+   so it has to be readable and selectable straight off the map. */
+.campus-popup__ref {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgb(var(--coffee-600));
+  background: rgb(var(--coffee-100));
+  border-radius: 4px;
+  padding: 1px 5px;
+  align-self: flex-start;
+  user-select: all;
+}

@@ -11,7 +11,9 @@
 //    admin editor (roadmap §6.1): it must be the ONLY way user-entered pins and
 //    edges reach the map. No bypass.
 
-import { dijkstra } from './campusRoute';
+// Extension is required, not optional: scripts/validate-modules.mjs imports this
+// module under plain Node ESM, which does not do Vite's extensionless resolution.
+import { dijkstra } from './campusRoute.js';
 
 // Escape a string for safe interpolation into an HTML string. Used wherever
 // content is written via innerHTML (Leaflet bindPopup). Leaves text intact and

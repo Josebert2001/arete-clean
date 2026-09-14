@@ -11,6 +11,13 @@ import { trackMeta } from '../src/data/trackMeta.js';
 import { courses as cybersecurityCourses } from '../src/data/courses.js';
 import { courses as dataScienceCourses } from '../src/data/dataScienceCourses.js';
 import { noteLoaders, NOTE_TOPIC_COUNTS } from '../src/data/lectureNotes/index.js';
+import {
+  pins as campusPins,
+  edges as campusEdges,
+  MAP_BOUNDS as CAMPUS_BOUNDS,
+  CATEGORIES,
+} from '../src/data/campusMap.js';
+import { validateGraph, isWithinBounds } from '../src/utils/locationSafety.js';
 
 // Every department catalogue, so the course checks below cover all of them.
 // A new department must be added here too — otherwise its courses are silently
@@ -359,6 +366,69 @@ for (const key of Object.keys(noteLoaders)) {
 for (const key of Object.keys(NOTE_TOPIC_COUNTS)) {
   check(key in noteLoaders,
         `lectureNotes/index.js: NOTE_TOPIC_COUNTS.${key} has no matching entry in noteLoaders`);
+}
+
+// ── Campus map graph ─────────────────────────────────────────────────────────
+// The pins and edges are generated from OpenStreetMap by
+// scripts/build-campus-graph.mjs, but "generated" is not the same as "correct":
+// a building whose connector failed to attach, or an edge left pointing at a
+// node the simplifier removed, produces a pin that exists, renders, appears in
+// the picker — and can never be routed to. That failure used to surface at
+// runtime as "No walking route is mapped between …", in front of a student
+// standing in the sun.
+//
+// validateGraph() has always been able to catch it (it checks that every
+// destination is reachable from the main gate) and until now nothing called it.
+check(campusPins.length > 0, 'campusMap: no pins — the generated graph is empty');
+
+const campusGraph = validateGraph(campusPins, campusEdges, 'main-gate');
+for (const e of campusGraph.errors) errors.push(`campusMap: ${e}`);
+
+{
+  const ids = new Set();
+  for (const p of campusPins) {
+    check(!ids.has(p.id), `campusMap: duplicate pin id "${p.id}"`);
+    ids.add(p.id);
+    check(Number.isFinite(p.lat) && Number.isFinite(p.lng), `campusMap: ${p.id} has non-finite coordinates`);
+    check(
+      isWithinBounds(p.lat, p.lng, CAMPUS_BOUNDS, 0),
+      `campusMap: ${p.id} sits outside MAP_BOUNDS — the map would refuse to pan to it`,
+    );
+    if (p.type === 'destination') {
+      check(!!p.name, `campusMap: destination ${p.id} has no name`);
+      check(p.category in CATEGORIES,
+            `campusMap: ${p.id} has category "${p.category}", which is not in CATEGORIES (it would render with no colour and no legend entry)`);
+    }
+  }
+
+  const seenEdges = new Set();
+  for (const e of campusEdges) {
+    check(e.a !== e.b, `campusMap: self-edge on ${e.a}`);
+    const k = e.a < e.b ? `${e.a}|${e.b}` : `${e.b}|${e.a}`;
+    check(!seenEdges.has(k), `campusMap: duplicate edge ${k} (it would be weighted twice)`);
+    seenEdges.add(k);
+  }
+}
+
+// Progress markers, not failures. Both shrink as the campus gets surveyed, and
+// keeping them visible is the point — a map that quietly stays 94% unnamed is
+// how this feature stalls.
+{
+  const dests = campusPins.filter((p) => p.type === 'destination');
+  const unnamed = dests.filter((p) => !p.source).length;
+  if (unnamed > 0) {
+    warnings.push(
+      `campusMap: ${unnamed} of ${dests.length} destinations are unnamed building footprints — ` +
+        `name them in src/data/campusOverrides.js and re-run scripts/build-campus-graph.mjs`,
+    );
+  }
+  const inferred = campusEdges.filter((e) => e.inferred).length;
+  if (inferred > 0) {
+    warnings.push(
+      `campusMap: ${inferred} inferred bridge(s) span gaps in OSM's road coverage — ` +
+        `verify against imagery and replace with surveyed geometry`,
+    );
+  }
 }
 
 // Warnings never fail the build — they mark work that is known and outstanding,
