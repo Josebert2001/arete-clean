@@ -177,7 +177,12 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   const englishVoices = voices.filter((v) => /^en([-_]|$)/i.test(v.lang || ''));
 
   const start = () => { setOpen(true); play(0); };
-  const close = () => { stop(); setOpen(false); };
+  // `barOnScreen` has to go back to true here, not just `open` to false. Closing
+  // from the DOCKED bar means closing while the real one is off screen, and the
+  // observer's first callback after the next Listen is a frame or two away — so
+  // the reopened player rendered a docked bar at the bottom of the window, and
+  // shoved the floating buttons up, before correcting itself.
+  const close = () => { stop(); setOpen(false); setBarOnScreen(true); };
   const cycleRate = () => {
     const i = SPEECH_RATES.indexOf(rate);
     setRate(SPEECH_RATES[(i + 1) % SPEECH_RATES.length]);

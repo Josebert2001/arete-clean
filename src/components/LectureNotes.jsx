@@ -623,13 +623,20 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
   // on both sides — see topicToSpeechUnits' outlineIndex.
   const [speakingIdx, setSpeakingIdx] = useState(null);
   const [following, setFollowing] = useState(true);
+  // Latched on the first section the voice reaches, and never cleared until the
+  // topic unmounts — NOT gated on `speakingIdx`, which goes back to null the
+  // moment the player is paused. Pausing to scroll up and re-read something is
+  // exactly the case this suppression exists for, and listeners that were off
+  // during the pause left nothing to suppress: resuming yanked the page
+  // straight back down.
+  const [followArmed, setFollowArmed] = useState(false);
   // When the student last moved the page themselves. `wheel` and `touchmove` are
   // the honest signal for that: a programmatic smooth scroll fires `scroll`, but
   // it fires neither of these, so this cannot be tripped by our own scrolling.
   const userScrolledAt = useRef(0);
 
   useEffect(() => {
-    if (speakingIdx === null) return undefined;
+    if (!followArmed) return undefined;
     const seen = () => { userScrolledAt.current = Date.now(); };
     window.addEventListener('wheel', seen, { passive: true });
     window.addEventListener('touchmove', seen, { passive: true });
@@ -637,7 +644,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
       window.removeEventListener('wheel', seen);
       window.removeEventListener('touchmove', seen);
     };
-  }, [speakingIdx]);
+  }, [followArmed]);
 
   useEffect(() => {
     if (!following || speakingIdx === null) return;
@@ -739,6 +746,7 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
     setFollowing(opts?.follow !== false);
     setSpeakingIdx(idx);
     if (idx === null) return;
+    setFollowArmed(true);
     setOpenSections((prev) => {
       if (prev.has(idx)) return prev;
       const next = new Set(prev);

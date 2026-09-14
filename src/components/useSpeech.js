@@ -594,6 +594,11 @@ export function useSpeech(units, { onFinished } = {}) {
     // student whose phone buzzed mid-topic has still heard all of it.
     const recover = () => {
       if (run !== runRef.current) return;
+      // A pause is dead air the student asked for. Recovering from one would
+      // start the voice again behind a bar that says Play — and `pause()`
+      // early-returns on a status that is already 'paused', so the only way out
+      // would be to close the player.
+      if (pausedRef.current) { clearStall(); return; }
       clearStall();
 
       retryRef.current = retryRef.current.index === index
@@ -609,8 +614,14 @@ export function useSpeech(units, { onFinished } = {}) {
       speakFromRef.current?.(index, retryRun);
     };
 
+    // Never arms during a pause. `pause()` does not bump runRef — it only stops
+    // the clock — so a `start` or `boundary` that lands just after the click
+    // would otherwise re-arm a watchdog that nothing will ever clear, since no
+    // further events arrive while paused. Android is where that is routine: its
+    // pause() is unreliable, so boundaries keep coming.
     const armStall = (ms) => {
       clearStall();
+      if (pausedRef.current) return;
       stallRef.current = setTimeout(() => { stallRef.current = null; recover(); }, ms);
     };
 
@@ -636,19 +647,31 @@ export function useSpeech(units, { onFinished } = {}) {
     };
 
     // Not a progress display — a heartbeat. See BOUNDARY_SILENCE_MS.
-    utterance.onboundary = () => {
+    //
+    // Only a WORD boundary is tight enough to shorten the deadline. The spec
+    // allows `name` to be 'sentence' too, and an engine that emits those can
+    // legitimately go longer than four seconds between them inside one chunk —
+    // which would have the watchdog cut working audio, repeat the sentence, and
+    // then show a screen-lock notice on a device that never locked.
+    utterance.onboundary = (event) => {
       if (run !== runRef.current) return;
       started = true;
-      armStall(BOUNDARY_SILENCE_MS);
+      armStall(event?.name === 'word' ? BOUNDARY_SILENCE_MS : stallBudget(item.text.length, rate));
     };
 
     utterance.onend = () => {
+      // Stale first, watchdog included. Our own cancel() fires `end` rather than
+      // `error` on some browsers (see the header), and every cancel-and-respeak
+      // path arms a fresh watchdog synchronously — so clearing before this check
+      // disarmed the REPLACEMENT chunk's timer a task later. That left the retry
+      // inside recover() unwatched, which is the one thing that must not be:
+      // a chunk that wedges twice would then never reach giveUp(), and the
+      // notice this whole change exists to show would never appear.
+      if (run !== runRef.current) return;
       clearStall();
-      if (run === runRef.current) {
-        spokeRef.current += 1;
-        errorStreakRef.current = 0;
-        retryRef.current = { index: -1, tries: 0 };
-      }
+      spokeRef.current += 1;
+      errorStreakRef.current = 0;
+      retryRef.current = { index: -1, tries: 0 };
       advance();
     };
 

@@ -521,6 +521,28 @@ same problem — the player is at the top of a topic that is several screens lon
   (`.docked-player-open .floating-dock-item` in `index.css`), on `bottom` rather than a transform,
   because `.float-bob` animates transform and would overwrite one on its next frame.
 
+**Review round — five findings, all real.** Three of them were in the new watchdog, and each one
+disarmed exactly the guard it was added to provide:
+
+- `onend` cleared the watchdog *before* checking the run id. Our own `cancel()` fires `end` rather
+  than `error` on some browsers, and every cancel-and-respeak path arms the replacement's watchdog
+  synchronously — so the stale `end` disarmed the chunk now in flight, a task later. The retry
+  inside `recover()` was therefore never watched, which means a chunk that wedges twice could never
+  reach `giveUp()` and the screen-lock notice was unreachable on those browsers.
+- `pause()` stops the clock but does not bump `runRef`, so a `start` or `boundary` landing just after
+  the click re-armed a watchdog nothing would ever clear — and `recover()` then started the voice
+  again behind a bar that said Play, which `pause()` refuses to act on. `armStall` and `recover` now
+  both bail on `pausedRef`.
+- The boundary heartbeat ignored `event.name`. `BOUNDARY_SILENCE_MS` is a word rate; an engine
+  reporting `'sentence'` boundaries can legitimately exceed it inside one chunk, so the watchdog
+  would have cut working audio and blamed a screen lock on a device that never locked.
+
+And two in the UI: `barOnScreen` was not reset on close, so closing from the docked bar and pressing
+Listen again flashed a docked bar and shoved the floating buttons up for a frame; and the
+scroll-suppression listeners were gated on `speakingIdx`, which is null while *paused* — so pausing
+to scroll up and re-read left nothing to suppress, and resuming yanked the page straight back down.
+Each is pinned by a test that fails without its fix.
+
 Verified in Chrome against CYB 224: the bar docks with the topic and section on it, the wash moves
 and the page follows it, a wheel gesture suppresses the next follow, and both floating buttons clear
 the bar. One trap worth recording for the next browser pass — **in an occluded window

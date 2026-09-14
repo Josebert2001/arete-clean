@@ -390,6 +390,80 @@ describe('useSpeech', () => {
     }
   });
 
+  it('keeps watching the retry when the browser fires `end` on our own cancel', async () => {
+    // Some browsers deliver `end` rather than `error` for a cancelled
+    // utterance. Every cancel-and-respeak path arms the replacement's watchdog
+    // synchronously, so a stale `end` that clears the timer before checking the
+    // run id disarms the chunk that is now in flight — and the retry inside
+    // recover() is the one that must never go unwatched, or a chunk that wedges
+    // twice never reaches the notice.
+    vi.useFakeTimers();
+    try {
+      const state = install([{ name: 'NG', lang: 'en-NG' }]);
+      const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+      act(() => result.current.play());
+      await act(async () => { await Promise.resolve(); });
+      const first = state.spoken[0];
+
+      act(() => { vi.advanceTimersByTime(25000); });          // first stall → retry
+      await act(async () => { await Promise.resolve(); });
+      act(() => first.onend?.());                             // the cancelled one, late
+      act(() => { vi.advanceTimersByTime(25000); });          // the retry wedges too
+
+      expect(result.current.status).toBe('paused');
+      expect(result.current.interrupted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not restart itself behind a bar that says Play', async () => {
+    // pause() stops the clock but does not bump runRef, so a `boundary` landing
+    // just after the click used to re-arm a watchdog nothing would ever clear —
+    // and recover() then started the voice again while the UI showed Paused,
+    // with pause() refusing to act on a status that is already 'paused'.
+    vi.useFakeTimers();
+    try {
+      const state = install([{ name: 'NG', lang: 'en-NG' }]);
+      const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+      act(() => result.current.play());
+      const utterance = state.spoken[0];
+      act(() => result.current.pause());
+      const before = state.spoken.length;
+
+      act(() => utterance.onboundary?.({ name: 'word' }));
+      act(() => { vi.advanceTimersByTime(60000); });
+
+      expect(state.spoken).toHaveLength(before);
+      expect(result.current.status).toBe('paused');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not let a sentence-granularity boundary cut working audio', async () => {
+    // BOUNDARY_SILENCE_MS is a word-rate heartbeat. An engine that reports
+    // 'sentence' boundaries can legitimately go longer than that inside one
+    // chunk, and cutting it would repeat the sentence and then blame a screen
+    // lock on a device that never locked.
+    vi.useFakeTimers();
+    try {
+      const state = install([{ name: 'NG', lang: 'en-NG' }]);
+      const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+      act(() => result.current.play());
+      await act(async () => { await Promise.resolve(); });
+      const before = state.spoken.length;
+
+      act(() => state.spoken[0].onboundary?.({ name: 'sentence' }));
+      act(() => { vi.advanceTimersByTime(8000); }); // past 4s, inside the chunk's own budget
+
+      expect(state.spoken).toHaveLength(before);
+      expect(result.current.status).toBe('playing');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('keeps going when one chunk genuinely fails to synthesise', async () => {
     const state = install([{ name: 'NG', lang: 'en-NG' }]);
     const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
