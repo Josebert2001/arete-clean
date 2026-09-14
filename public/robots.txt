@@ -1,4 +1,24 @@
+# Answer engines are named alongside * on purpose, in ONE group rather than in
+# groups of their own. robots.txt has no inheritance: a `User-agent: GPTBot`
+# group that repeats only some of the rules below silently grants GPTBot the
+# whole gated surface, because the moment a named group matches, the * group
+# stops applying to it. Listing the agents as extra tokens on this group means
+# they match it directly and get exactly these rules.
+#
+# Why name them at all if the rules are identical: an agent that finds its own
+# token is not guessing, and the list is where a future divergence would go.
 User-agent: *
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bingbot
 Allow: /
 
 # Auth and API surfaces have nothing to index. /signin in particular must stay

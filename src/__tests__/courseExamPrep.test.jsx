@@ -20,6 +20,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import CourseExamPrep from '../components/CourseExamPrep';
 import { cyb122ExamPrep } from '../data/lectureNotes/cyb122ExamPrep';
 import { cyb221ExamPrep } from '../data/lectureNotes/cyb221ExamPrep';
+import { ins224ExamPrep } from '../data/lectureNotes/ins224ExamPrep';
 
 const longform = {
   type: 'longform',
@@ -273,6 +274,103 @@ describe('the shipped UUY-CYB 221 written-exam bank', () => {
     for (const q of cyb221ExamPrep.filter((x) => x.code || x.modelCode)) {
       expect(q.type).toBe('longform');
       expect(q.language, `language missing on "${q.question}"`).toBeTruthy();
+    }
+  });
+});
+
+// A bank whose notes divide into textbook chapters (INS 224 — 27 topics under
+// seven chapters) tags each question with `chapter`, and the picker must then
+// offer seven pills rather than twenty-seven. The fallback matters just as
+// much: every other shipped bank has no `chapter` at all and must keep the
+// topic pills it has always had.
+describe('the chapter picker', () => {
+  const chaptered = [
+    { ...longform, chapter: 'Chapter 1 · Systems', source: 'Topic 1 · 1.2 Systems Defined', question: 'Define a system.' },
+    { ...longform, chapter: 'Chapter 1 · Systems', source: 'Topic 2 · 1.4 Types of Systems', question: 'Contrast open and closed systems.' },
+    { ...longform, chapter: 'Chapter 2 · Feasibility', source: 'Topic 3 · 2.3 Types of Feasibility', question: 'Name the five dimensions of feasibility.' },
+  ];
+
+  beforeEach(() => localStorage.clear());
+
+  it('groups by chapter, not by topic, when the bank declares chapters', () => {
+    render(<CourseExamPrep course={courseWith(chaptered)} />);
+
+    expect(screen.getByText(/Or pick by chapter/i)).toBeInTheDocument();
+    // Two chapters across three topics: the pills follow the chapters.
+    expect(screen.getByRole('button', { name: /Chapter 1 · Systems/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Chapter 2 · Feasibility/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Topic 1/ })).not.toBeInTheDocument();
+  });
+
+  it('draws only the selected chapter’s questions', () => {
+    render(<CourseExamPrep course={courseWith(chaptered)} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Chapter 2 · Feasibility/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Start · 1 question from 1 chapter/ }));
+
+    expect(screen.getByText('Name the five dimensions of feasibility.')).toBeInTheDocument();
+    expect(screen.queryByText('Define a system.')).not.toBeInTheDocument();
+  });
+
+  it('still groups by topic for a bank that declares no chapters', () => {
+    const byTopic = [
+      { ...longform, source: 'Topic 1 · §1', question: 'First.' },
+      { ...longform, source: 'Topic 2 · §2', question: 'Second.' },
+    ];
+    render(<CourseExamPrep course={courseWith(byTopic)} />);
+
+    expect(screen.getByText(/Or pick by topic/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Topic 1/ })).toBeInTheDocument();
+  });
+});
+
+// INS 224 is examined on paper, and its bank is built from the lecturer's own
+// Review Questions — one block at the end of each of the seven chapters. A
+// chapter that loses its questions would leave a pill a student can select and
+// get nothing from, so every chapter is checked for coverage.
+describe('the shipped INS 224 written-exam bank', () => {
+  const CHAPTERS = [
+    'Chapter 1 · Introduction to SAD',
+    'Chapter 2 · Feasibility Study',
+    'Chapter 3 · The SDLC',
+    'Chapter 4 · SDLC Models',
+    'Chapter 5 · Requirement Analysis',
+    'Chapter 6 · System Modeling',
+    'Chapter 7 · UML Diagrams',
+  ];
+
+  it.each(CHAPTERS)('carries both written and recall questions for %s', (chapter) => {
+    const questions = ins224ExamPrep.filter((q) => q.chapter === chapter);
+    expect(questions.length).toBeGreaterThan(2);
+    expect(questions.some((q) => q.type === 'longform')).toBe(true);
+    expect(questions.some((q) => q.type === 'recall')).toBe(true);
+  });
+
+  it('tags every question with a chapter and a source to re-read', () => {
+    for (const q of ins224ExamPrep) {
+      expect(CHAPTERS, `unknown chapter on "${q.question}"`).toContain(q.chapter);
+      expect(q.source, `source missing on "${q.question}"`).toBeTruthy();
+    }
+  });
+
+  it('gives every longform question a mark scheme totalling its stated marks', () => {
+    for (const q of ins224ExamPrep.filter((x) => x.type === 'longform')) {
+      const total = q.markScheme.reduce((sum, point) => {
+        const m = point.match(/\(([0-9.]+)\)\s*$/);
+        expect(m, `no mark value on "${point}"`).not.toBeNull();
+        return sum + parseFloat(m[1]);
+      }, 0);
+      expect(total, `mark scheme for "${q.question}"`).toBeCloseTo(q.marks, 3);
+    }
+  });
+
+  it('gives every recall drill one item per mark, each with an explanation', () => {
+    for (const q of ins224ExamPrep.filter((x) => x.type === 'recall')) {
+      expect(q.items).toHaveLength(q.marks);
+      for (const item of q.items) {
+        expect(item.name).toBeTruthy();
+        expect(item.explain).toBeTruthy();
+      }
     }
   });
 });

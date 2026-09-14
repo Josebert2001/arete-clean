@@ -1,9 +1,14 @@
 import { useEffect } from 'react';
+import { homeTitle, homeDescription, SITE_URL } from '../data/siteMeta';
 
-const DEFAULT_TITLE = 'Areté — Excellence, Engineered.';
-const DEFAULT_DESCRIPTION =
-  'Academic companion for University of Uyo students — every course from 100L to 400L, interactive Java, Python & C tracks, and an AI tutor that knows the curriculum.';
-const SITE_URL = 'https://www.aretecyb.tech';
+// The fallback head text is the home page's head text, taken from the module
+// that also writes it into dist/index.html at build time. It used to be two
+// literals here, which was fine while "/" was not prerendered — now a second
+// copy would mean navigating back to "/" replaced the title a crawler had
+// already been served with a different one. siteMeta is a leaf module, so this
+// costs the ~15 pages that import usePageTitle nothing.
+const DEFAULT_TITLE = homeTitle();
+const DEFAULT_DESCRIPTION = homeDescription();
 
 // Sets the document title for the current page and restores the default on
 // unmount so the SPA's tab label always matches what's on screen.

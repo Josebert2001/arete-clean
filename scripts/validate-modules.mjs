@@ -284,6 +284,13 @@ for (const { department, courses } of catalogues) {
       check(isNonEmptyString(q?.source), where(qi, 'source missing — students need the section to re-read'));
       check(typeof q?.marks === 'number' && q.marks > 0, where(qi, 'marks must be a positive number'));
 
+      // Optional coarser revision unit. A bank whose notes divide into textbook
+      // chapters (INS 224) tags every question with one, and CourseExamPrep
+      // groups the picker on it instead of on the "Topic N" prefix of `source`.
+      // It is the pill's own label, so it must be a non-empty string when present.
+      check(q?.chapter === undefined || isNonEmptyString(q.chapter),
+            where(qi, 'chapter must be a non-empty string when present'));
+
       // A code question prints a listing with the stem (`code`) or answers with
       // one (`modelCode`). `language` is mandatory alongside either, and not
       // defaulted: a Java listing highlighted as Python reads as broken code.

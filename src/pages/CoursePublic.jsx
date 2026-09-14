@@ -10,6 +10,7 @@ import {
   indexDescription,
   groupByLevel,
 } from '../data/publicCatalogue';
+import { loadPublicNotes } from '../data/publicNotes';
 import { usePageMeta } from '../utils/usePageTitle';
 
 // What a signed-out visitor sees at /courses and /courses/:slug. The same two
@@ -40,6 +41,31 @@ export default function CoursePublic() {
 
   const entry = slug && entries ? entries.find((e) => e.course.slug === slug) : null;
 
+  // The public note slice, fetched after the course resolves. The prerendered
+  // file already has it in its bytes; this reproduces it once React takes over,
+  // and for a client-side navigation that never touched the static file.
+  //
+  // Deliberately a second, later load rather than part of the first: the note
+  // chunk is the heaviest thing on the page (ENT 221 alone is ~583 kB) and the
+  // outline, textbooks and FAQ should not wait behind it. A failure here leaves
+  // `notes` null, which renders the page exactly as a course with no notes —
+  // the same graceful degradation the rest of the app uses.
+  // Stored with the slug it belongs to, and read back only on a match. Holding
+  // a bare `notes` would need a synchronous reset in the effect, and until that
+  // reset landed a client-side navigation from one noted course to another
+  // would render the previous course's glossary under the new course's title.
+  const [noteState, setNoteState] = useState({ slug: null, notes: null });
+  useEffect(() => {
+    if (!entry) return undefined;
+    let active = true;
+    const { slug: forSlug } = entry.course;
+    loadPublicNotes(entry.course)
+      .then((n) => { if (active) setNoteState({ slug: forSlug, notes: n }); })
+      .catch(() => { if (active) setNoteState({ slug: forSlug, notes: null }); });
+    return () => { active = false; };
+  }, [entry]);
+  const notes = entry && noteState.slug === entry.course.slug ? noteState.notes : null;
+
   // Must match what scripts/prerender.mjs baked into this page's head, or the
   // crawl and the render pass disagree about the title. Both read the strings
   // from publicCatalogue.js for that reason.
@@ -67,7 +93,14 @@ export default function CoursePublic() {
     const siblings = entries
       .filter((e) => e.course.level === entry.course.level)
       .map((e) => e.course);
-    return <CoursePreview course={entry.course} department={entry.department} siblings={siblings} />;
+    return (
+      <CoursePreview
+        course={entry.course}
+        department={entry.department}
+        siblings={siblings}
+        notes={notes}
+      />
+    );
   }
 
   return <CourseIndexPreview groups={groupByLevel(entries)} />;
