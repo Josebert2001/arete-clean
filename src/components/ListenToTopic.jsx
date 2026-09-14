@@ -86,17 +86,30 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
     setRate(SPEECH_RATES[(i + 1) % SPEECH_RATES.length]);
   };
 
+  // Rendered in BOTH states. Living only inside the expanded bar defeated its
+  // entire purpose: the point of this line is that a student deciding whether to
+  // press play knows what will not be read to them, rather than finding out four
+  // minutes in. It has to be readable before the first click.
+  const skippedCaption = skips.text ? (
+    <p className="mt-2 text-xs text-coffee-500">
+      {skips.text} {skips.total === 1 ? 'is' : 'are'} announced, not read aloud — {skips.total === 1 ? 'it stays' : 'they stay'} on screen.
+    </p>
+  ) : null;
+
   if (!open) {
     return (
-      <div className="flex justify-end mb-3">
-        <button
-          type="button"
-          onClick={start}
-          className="inline-flex items-center gap-1.5 rounded-full border border-coffee-200 bg-paper px-3 py-1.5 text-xs font-mono font-medium text-coffee-600 transition-colors hover:border-coffee-400 hover:text-ink"
-        >
-          <Volume2 size={12} className="text-ember-500" />
-          Listen · {formatDuration(totalSeconds)}
-        </button>
+      <div className="mb-3">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={start}
+            className="inline-flex items-center gap-1.5 rounded-full border border-coffee-200 bg-paper px-3 py-1.5 text-xs font-mono font-medium text-coffee-600 transition-colors hover:border-coffee-400 hover:text-ink"
+          >
+            <Volume2 size={12} className="text-ember-500" />
+            Listen · {formatDuration(totalSeconds)}
+          </button>
+        </div>
+        {skippedCaption && <div className="text-right">{skippedCaption}</div>}
       </div>
     );
   }
@@ -211,13 +224,9 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
         </button>
       </div>
 
-      {/* What the voice will announce but not read. Said before the student has
-          invested ten minutes in finding out. */}
-      {skips.text && (
-        <p className="mt-2 text-xs text-coffee-500">
-          {skips.text} {skips.total === 1 ? 'is' : 'are'} announced, not read aloud — {skips.total === 1 ? 'it stays' : 'they stay'} on screen.
-        </p>
-      )}
+      {/* What the voice will announce but not read — the same line the collapsed
+          pill shows, so it does not appear to change on opening. */}
+      {skippedCaption}
 
       {/* Neither of these is a student-initiated pause, and they have different
           remedies — one is the platform suspending synthesis on screen lock, the

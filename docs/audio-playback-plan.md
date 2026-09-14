@@ -71,9 +71,16 @@ ran. The lesson there applies verbatim — **no audio beats broken audio.**
 
 ## 3. The shared foundation — BOTH options need this, build it first
 
-> **Status: BUILT.** `src/utils/speechText.js` + `src/__tests__/speechText.test.js` (38 tests).
-> The corpus guard runs all 111 topics end to end and asserts zero LaTeX, code-fence, pipe-row or
-> stray-brace residue. §3.4 and §3.5 record what implementation changed about this plan.
+> **Status: BUILT.** `src/utils/speechText.js` + `src/__tests__/speechText.test.js`.
+> The corpus guard runs every topic the player can reach end to end — **189 of them: 111 from the
+> lazy `noteLoaders`, and 78 that live inline on the course object** — and asserts zero LaTeX,
+> code-fence, pipe-row or stray-brace residue. It walked only the keyed half until Copilot pointed
+> out that `loadNotesFor` returns `course.lectureNotes` directly for the rest, so a guard that read
+> as full coverage was missing 41% of production data. §3.4 and §3.5 record what implementation
+> changed about this plan.
+>
+> Test counts are deliberately not quoted here; they go stale within a commit or two and
+> `npm test` is the honest answer.
 
 This is ~60% of the total work and it is identical either way. Whichever option ships first, this
 lands first, and the second option reuses it untouched.
@@ -93,7 +100,9 @@ reads the same section objects and answers a different question.
 #### Exports
 
 ```js
-// One section → { speech: string, skipped: null | { kind, label } }
+// One section → { speech, prose, proseChars, skipped: Array<{ kind, label }> }
+// `proseChars` is NOT prose.length — a refused inline expression is replaced
+// inside `prose` by a spoken marker, and markers are not content.
 export function sectionToSpeech(section)
 
 // A whole topic → ordered array of speakable units (see §3.3)
@@ -121,7 +130,7 @@ export function applyPronunciation(text)
 | `proscons` | 6 | `"Advantages. …"` / `"Disadvantages. …"`. |
 | **`code`** | **361** | **SKIP.** Emit marker: `"Code listing — {language}, {n} lines. It's on screen."` |
 | **`math`** | **217** | **SKIP.** Emit marker: `"An equation on screen{, caption if present}."` Never read `section.tex`. |
-| **`image`** | **95** | **SKIP.** Emit marker: `"Figure. {caption}"`, or nothing at all when there is no caption. |
+| **`image`** | **95** | **SKIP.** Emit marker: `"Figure. {caption}"`, falling back to `alt`, and `"A figure on screen"` when there is neither. (The plan first said a captionless figure would emit nothing; announcing it is what rule 1 actually requires.) |
 | **`table`** | **39** | **SKIP.** Emit marker: `"A table on screen comparing {headers joined}."` The headers are short and genuinely orienting; the rows are not. |
 | `resource` | — | Silent skip. It is a link, not prose. |
 
@@ -267,7 +276,7 @@ or fetched. The text comes from `topicToSpeechUnits()` at render time.
 
 | File | Purpose |
 |---|---|
-| `src/components/useSpeech.js` | **BUILT.** The hook: voice selection, queue, play/pause/stop/skip, the four landmines in §4.3. Exposes `{ supported, status, playing, paused, interrupted, unitIndex, unitCount, play, pause, resume, stop, next, prev, skipTo, voices, voice, setVoice, rate, setRate }`. 29 tests in `useSpeech.test.jsx` against a deliberately hostile `speechSynthesis` stub that never auto-completes an utterance and delivers `cancel()` asynchronously, the way a real browser does.<br><br>Three things implementation added to §4.3's list. **The queue is keyed on unit CONTENT, not array identity** — `topicToSpeechUnits(topic)` in a component body returns a fresh array every render, so an identity-keyed "new topic" reset fired on every render and put `status` back to `idle` the instant `play()` set it to `playing`. Requiring every caller to `useMemo` would have been one forgotten memo away from the same bug in production. **`supported` checks the value, not the key** — `'speechSynthesis' in window` is true for a property that exists and is `undefined`. And **`speakFrom` recurses through a ref**, so a voice or rate change mid-topic cannot leave the in-flight chain calling a stale closure. |
+| `src/components/useSpeech.js` | **BUILT.** The hook: voice selection, queue, play/pause/stop/skip, the four landmines in §4.3. Exposes `{ supported, status, playing, paused, interrupted, unitIndex, unitCount, play, pause, resume, stop, next, prev, skipTo, voices, voice, setVoice, rate, setRate, failed, keepAwake, setKeepAwake, wakeLockSupported }`. Covered in `useSpeech.test.jsx` against a deliberately hostile `speechSynthesis` stub that never auto-completes an utterance and delivers `cancel()` asynchronously, the way a real browser does.<br><br>Three things implementation added to §4.3's list. **The queue is keyed on unit CONTENT, not array identity** — `topicToSpeechUnits(topic)` in a component body returns a fresh array every render, so an identity-keyed "new topic" reset fired on every render and put `status` back to `idle` the instant `play()` set it to `playing`. Requiring every caller to `useMemo` would have been one forgotten memo away from the same bug in production. **`supported` checks the value, not the key** — `'speechSynthesis' in window` is true for a property that exists and is `undefined`. And **`speakFrom` recurses through a ref**, so a voice or rate change mid-topic cannot leave the in-flight chain calling a stale closure. |
 | `src/components/ListenToTopic.jsx` | **BUILT.** The UI: a pill matching the Key points and Plain English buttons, expanding to a control bar (prev / play-pause / next · `n/total` · current heading · speed cycle · voice picker when the device offers a choice · close). Rendered from `LectureNotes.jsx`'s `TopicAccordion` panel, just above `<KeyPoints>`. **No availability probe** — the voice is on the device, so there is no endpoint to ask, which is the one way this feature is cheaper than every other AI button on the page. Returns `null` when the API is missing or `canNarrate` is false, so the four courses of listing-heavy practicals simply never show it.<br><br>The skipped-content caption shipped here rather than in A3: the component is misleading without it. `describeSkips()` lives in `speechText.js` beside `skippedSummary()`, so the wording and the `skipped.kind` values it describes cannot drift — a kind with no entry is dropped from the caption rather than printed as a raw key. |
 | `src/__tests__/speechText.test.js` | §3.3. |
 | `src/__tests__/useSpeech.test.jsx` | Hook behaviour against a stubbed `speechSynthesis` (see `src/__tests__/stubs/`). |
@@ -334,9 +343,9 @@ parallel and `setRead` is idempotent, so whichever lands first wins.
 
 | Phase | Work | Est. |
 |---|---|---|
-| ~~A0~~ | ~~§3 shared foundation (serialiser + dictionary + tests)~~ — **done**, 38 tests | 4–6 h |
-| ~~A1~~ | ~~`useSpeech.js` with all four landmines + stub tests~~ — **done**, 29 tests | 3–4 h |
-| ~~A2~~ | ~~`ListenToTopic.jsx`, wired into `LectureNotes.jsx`~~ — **done**, 14 tests | 2–3 h |
+| ~~A0~~ | ~~§3 shared foundation (serialiser + dictionary + tests)~~ — **done** | 4–6 h |
+| ~~A1~~ | ~~`useSpeech.js` with all four landmines + stub tests~~ — **done** | 3–4 h |
+| ~~A2~~ | ~~`ListenToTopic.jsx`, wired into `LectureNotes.jsx`~~ — **done** | 2–3 h |
 | ~~A3~~ | ~~Progress integration, wake-lock toggle~~ — **done** (the skipped caption shipped in A2) | 1–2 h |
 | A4 | Real-device pass: Android Chrome, iOS Safari, desktop — **desktop done** (§4.8), the two phones outstanding | 2 h |
 | | **Total** | **~1.5–2 days** (~1 day after A0) |

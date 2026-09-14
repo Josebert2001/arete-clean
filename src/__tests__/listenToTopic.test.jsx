@@ -247,6 +247,19 @@ describe('ListenToTopic', () => {
     visibility('visible');
   });
 
+  it('shows what will be skipped BEFORE the student presses play', () => {
+    installSynth();
+    render(<ListenToTopic topic={richTopic} />);
+
+    // The whole point of this line is the decision to press play. Living only
+    // inside the expanded bar meant it could not be read until after the click.
+    const caption = describeSkips({ code: 2, table: 1 });
+    expect(screen.getByText(new RegExp(caption.text.split(' ')[0]))).toBeInTheDocument();
+    expect(screen.getByText(/announced, not read aloud/)).toBeInTheDocument();
+    // Still collapsed — no transport controls yet.
+    expect(screen.queryByRole('button', { name: 'Pause' })).toBeNull();
+  });
+
   it('renders a maths heading in the bar, rather than printing its LaTeX', async () => {
     installSynth();
     // MTH 121 has seven headings like this. The notes render them through

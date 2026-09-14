@@ -152,7 +152,14 @@ export function mathToSpeech(tex) {
   // the list because it is a delimiter with several meanings here (absolute
   // value, set-builder, a stray table pipe) and guessing wrong reads as
   // nonsense — announce instead.
-  const complete = !/[\\{}^_|]/.test(s);
+  //
+  // Square brackets belong here for the same reason, and MTH 121 is full of the
+  // case that proves it: `\left[\frac{x^3}{3}\right]_0^4` is the evaluation of
+  // an integral between limits. `\left`/`\right` are stripped above, which left
+  // bare "[" and "]" that a synthesiser voices as nothing at all — so the
+  // student heard "x cubed over 3 sub 0 to the power 4", a different statement
+  // from the one on screen, and `complete: true` vouched for it.
+  const complete = !/[\\{}[\]^_|]/.test(s);
 
   return { speech: s.replace(/\s+/g, ' ').trim(), complete };
 }
