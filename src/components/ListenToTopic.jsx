@@ -37,6 +37,14 @@ import { useSpeech, SPEECH_RATES, readSpeechPref, writeSpeechPref } from './useS
 
 const FOLLOW_PREF_KEY = 'arete:speech:follow';
 
+// Follow is ONE setting shared by every player on the page, and LectureNotes
+// keeps a player mounted per open topic — so the toggle has to reach all of
+// them, not just the bar it was clicked in. Reading the preference at mount left
+// a second, already-open topic reporting `follow: true` after the student had
+// turned it off in the first, and scrolling the page for a setting that was
+// saved as off. `storage` events are no use here: they fire in OTHER tabs only.
+const followListeners = new Set();
+
 function formatDuration(seconds) {
   if (seconds < 60) return `${Math.max(1, Math.round(seconds))} sec`;
   return `${Math.round(seconds / 60)} min`;
@@ -141,6 +149,11 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   // Collapsing the topic must clear the highlight it left behind.
   useEffect(() => () => reportRef.current?.(null, { follow: false }), []);
 
+  useEffect(() => {
+    followListeners.add(setFollowState);
+    return () => { followListeners.delete(setFollowState); };
+  }, []);
+
   // Dock the transport once the real bar has scrolled away. Watching the bar
   // itself rather than the topic panel: the bar is what the student is looking
   // for, and the panel is several screens tall, so a panel-level test would dock
@@ -161,7 +174,12 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   // controls are. They step up out of the way while it is there — see
   // `.docked-player-open` in index.css. A class on <html> rather than a prop
   // because neither button knows this component exists, and neither should.
-  const docked = open && !barOnScreen && (playing || paused);
+  // 'ended' belongs here as much as playing and paused do: a topic that finished
+  // while the student was reading further down left them with no Play and no
+  // Previous until they scrolled back up, which is the complaint this docked bar
+  // exists to answer. 'idle' does not — that is a player another topic has stood
+  // down, and docking it would put two bars on the same edge of the window.
+  const docked = open && !barOnScreen && (playing || paused || status === 'ended');
   useEffect(() => {
     if (!docked) return undefined;
     const root = document.documentElement;
@@ -187,9 +205,12 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
     const i = SPEECH_RATES.indexOf(rate);
     setRate(SPEECH_RATES[(i + 1) % SPEECH_RATES.length]);
   };
+  // Through the broadcast rather than straight to state, so this player is
+  // updated by the same path as every other one — there is no case where the bar
+  // that was clicked and the bars that were not can disagree.
   const setFollow = (value) => {
-    setFollowState(value);
     writeSpeechPref(FOLLOW_PREF_KEY, value ? '1' : '0');
+    for (const listener of followListeners) listener(value);
   };
   // From 'ended', unitIndex is the LAST section: replaying from there gave the
   // student the closing paragraph again, and because it did not start at 0 the

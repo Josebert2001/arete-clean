@@ -551,6 +551,23 @@ firing either, so a student reading ahead that way was still being pulled back t
 ours and not theirs. The wheel and touch listeners stay: they are unambiguous, and they land before
 the page has moved at all.
 
+**Copilot's round — three more, all real, and all of them the same mistake in different places:
+state that is shared behaving as though it were not.**
+
+- The docked bar was shown for `playing || paused` only, so a topic that ran out while the student
+  was reading further down took the Play and Previous buttons away with it — leaving exactly the
+  scroll-back-up this bar exists to abolish. `ended` belongs there too. `idle` does not: that is a
+  player another topic has stood down, and docking it would put two bars on one edge of the window.
+- Follow is **one setting**, but it was read per player at mount, and LectureNotes keeps a player
+  mounted per open topic. Turning it off in one topic left every other mounted topic reporting
+  `follow: true` and scrolling the page for a preference saved as off. A module-level listener set
+  now broadcasts the change to all of them, and the bar that was clicked goes through the same path
+  as the ones that were not, so they cannot disagree. (`storage` events are no help — they fire in
+  *other* tabs only.)
+- The suspension restart did not reacquire the wake lock the hide had released, so for a student
+  with "Keep screen on" enabled the first screen lock quietly turned it off for the rest of the
+  topic — and the next lock interrupted the same listen again.
+
 Verified in Chrome against CYB 224: the bar docks with the topic and section on it, the wash moves
 and the page follows it, a wheel gesture suppresses the next follow, and both floating buttons clear
 the bar. One trap worth recording for the next browser pass — **in an occluded window

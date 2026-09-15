@@ -393,6 +393,64 @@ describe('ListenToTopic', () => {
     expect(screen.queryByRole('group', { name: 'Listen controls' })).toBeNull();
   });
 
+  it('keeps the docked bar on a topic that finished off screen', async () => {
+    // Play on a finished topic means play the topic — but that control lived
+    // only in the real bar, so a student who let a topic run out while reading
+    // further down had to scroll back up to reach it. That is the complaint the
+    // docked bar exists to answer.
+    const observers = [];
+    vi.stubGlobal('IntersectionObserver', class {
+      constructor(callback) { this.callback = callback; observers.push(this); }
+      observe() {}
+      disconnect() {}
+    });
+    const state = installSynth();
+    render(<ListenToTopic topic={richTopic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('group', { name: 'Listen to this topic' });
+    act(() => observers.at(-1).callback([{ isIntersecting: false }]));
+
+    for (let i = 0; i < 20; i += 1) {
+      const utterance = state.current;
+      if (!utterance) break;
+      state.current = null;
+      state.speaking = false;
+      await waitFor(() => utterance.onend?.());
+    }
+
+    await waitFor(() => expect(screen.getAllByRole('button', { name: 'Play' }).length).toBeGreaterThan(0));
+    expect(screen.getByRole('group', { name: 'Listen controls' })).toBeInTheDocument();
+  });
+
+  it('reaches every open topic when the follow toggle is clicked in one of them', async () => {
+    // LectureNotes keeps a player mounted per open topic, and follow is one
+    // shared setting. Reading it at mount left the other topics reporting
+    // `follow: true` after it had been turned off, and scrolling the page for a
+    // preference that was saved as off.
+    installSynth();
+    const second = [];
+    render(
+      <>
+        <ListenToTopic topic={richTopic} />
+        <ListenToTopic
+          topic={{ ...richTopic, title: 'Another topic', number: 5 }}
+          onSpeakingOutlineIndex={(i, opts) => second.push(opts?.follow)}
+        />
+      </>,
+    );
+    const pills = screen.getAllByRole('button', { name: /Listen ·/ });
+    fireEvent.click(pills[1]);
+    await waitFor(() => expect(second.at(-1)).toBe(true));
+
+    // Clicked in the FIRST topic's bar; the second topic is the one playing.
+    fireEvent.click(pills[0]);
+    const toggles = await screen.findAllByRole('button', { name: /Scroll to the section being read/ });
+    fireEvent.click(toggles[0]);
+
+    await waitFor(() => expect(second.at(-1)).toBe(false));
+    expect(localStorage.getItem('arete:speech:follow')).toBe('0');
+  });
+
   it('does not dock at all where there is no IntersectionObserver', async () => {
     // An old WebView, and jsdom. Docking permanently would be worse than never
     // docking, so the bar starts out considered visible.

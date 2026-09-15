@@ -701,6 +701,29 @@ describe('useSpeech', () => {
     await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
   });
 
+  it('takes the wake lock back when it carries on after a suspension', async () => {
+    // Hiding releases the lock, and the restart branch used not to ask for it
+    // again — so the first screen lock quietly turned "Keep screen on" off for
+    // the rest of the topic, and the next lock interrupted the same listen.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const request = vi.fn().mockResolvedValue({ release: vi.fn().mockResolvedValue() });
+    vi.stubGlobal('navigator', { ...navigator, wakeLock: { request } });
+
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    act(() => result.current.setKeepAwake(true));
+    await waitFor(() => expect(result.current.keepAwake).toBe(true));
+    act(() => result.current.play());
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(1));
+
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    act(() => { state.speaking = false; state.paused = false; state.current = null; });
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
+  });
+
   it('plays on regardless when the platform refuses a wake lock', async () => {
     install([{ name: 'NG', lang: 'en-NG' }]);
     vi.stubGlobal('navigator', {

@@ -871,6 +871,11 @@ export function useSpeech(units, { onFinished } = {}) {
         const run = runRef.current;
         claimDevice(deviceId, notifyStandDown);
         resetDevice(api);
+        // Hiding released the lock (above), and playback is about to carry on —
+        // so take it back, exactly as the branch below does. Without this the
+        // first screen lock quietly turned "Keep screen on" off for the rest of
+        // the topic, and the next lock interrupted the same listen again.
+        acquireWakeLock();
         speakFromRef.current?.(cursorRef.current, run);
       } else {
         // Desktop: it carried on talking the whole time. Just re-take the lock.
