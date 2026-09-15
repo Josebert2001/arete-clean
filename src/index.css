@@ -342,6 +342,16 @@ body {
   animation-play-state: paused;
 }
 
+/* The docked Listen bar owns the bottom edge of the window while it is there,
+   and the two always-on floating buttons sit in exactly the corners its
+   transport and close controls occupy on a phone. So they step up out of its
+   way — on `bottom`, not a transform, because .float-bob animates transform and
+   would overwrite one on its next frame. `.docked-player-open` is set on <html>
+   by ListenToTopic for as long as the bar is docked. */
+.docked-player-open .floating-dock-item {
+  bottom: 4.25rem;
+}
+
 /* Entrance for the feedback prompt. It appears unbidden, so it rises into
    place rather than snapping in — a panel that simply materialises beside the
    campus map button reads as a glitch. Covered by the reduced-motion rule

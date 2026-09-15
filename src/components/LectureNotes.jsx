@@ -371,7 +371,12 @@ function Section({ section, speaking = false, simplifyReady, explainReady, expla
     // Hence the transparent border and the horizontal-only padding, cancelled by
     // the negative margin so the text keeps the same measure as the rest.
     <div
-      className={`${open ? 'mb-6' : 'mb-1'} -mx-3 px-3 rounded-lg border-l-2 transition-colors ${
+      // What the follow-the-voice scroll in TopicAccordion aims at. An attribute
+      // rather than a ref per section: the sections are rendered from three
+      // different branches below, and threading a ref through all of them to
+      // find the one element that is already marked would be work for nothing.
+      data-speaking={speaking ? 'true' : undefined}
+      className={`${open ? 'mb-6' : 'mb-1'} -mx-3 px-3 scroll-mt-24 rounded-lg border-l-2 transition-colors ${
         speaking ? 'border-ember-500 bg-ember-500/10' : 'border-transparent'
       }`}
     >
@@ -566,6 +571,26 @@ function KeyPoints({ topic, plain, context }) {
   );
 }
 
+// ── Following the voice down the page ────────────────────────────────────────
+// §4.10 of docs/audio-playback-plan.md said no auto-scroll — "the wash is cheap
+// to find, worth revisiting only if the phone passes say otherwise". They said
+// otherwise: on a phone the section being read is usually a screen and a half
+// below the player by the time the voice reaches it, so following along meant
+// scrolling by hand every time it moved on.
+//
+// So it follows, but only when it has to. Nothing moves while the section is
+// already in the band a reader is looking at, which is the whole of the
+// read-along case, and a wheel or touch gesture holds it off for long enough
+// that it never pulls the page out from under someone reading something else.
+const FOLLOW_BAND_TOP = 88;      // clears the sticky navbar
+const FOLLOW_BAND_BOTTOM = 0.6;  // of the viewport height
+const FOLLOW_PAUSE_MS = 8000;
+// How long after our own scrollIntoView a `scroll` event is still ours. Chrome's
+// smooth scroll settles well inside this for any distance the follow covers;
+// overrunning it only costs one skipped follow, whereas too short a window would
+// have the page read its own scrolling as the student taking over.
+const SELF_SCROLL_MS = 1200;
+
 function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplifiedMap, explainReady, explanations, summarizeReady, context, tracksReading, isRead, onSetRead, mapEntry, mapPart, onJumpToTopic, headingLevel = 3 }) {
   const panelId = `lecture-panel-${index}`;
   const buttonId = `lecture-header-${index}`;
@@ -602,6 +627,55 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
   // buildOutline call over the same sections, so the index means the same thing
   // on both sides — see topicToSpeechUnits' outlineIndex.
   const [speakingIdx, setSpeakingIdx] = useState(null);
+  const [following, setFollowing] = useState(true);
+  // Latched on the first section the voice reaches, and never cleared until the
+  // topic unmounts — NOT gated on `speakingIdx`, which goes back to null the
+  // moment the player is paused. Pausing to scroll up and re-read something is
+  // exactly the case this suppression exists for, and listeners that were off
+  // during the pause left nothing to suppress: resuming yanked the page
+  // straight back down.
+  const [followArmed, setFollowArmed] = useState(false);
+  // When the student last moved the page themselves, and the window in which a
+  // scroll is ours rather than theirs.
+  const userScrolledAt = useRef(0);
+  const selfScrollUntil = useRef(0);
+
+  useEffect(() => {
+    if (!followArmed) return undefined;
+    const seen = () => { userScrolledAt.current = Date.now(); };
+    // `wheel` and `touchmove` are unambiguous — a programmatic scroll fires
+    // neither — and they land before the page has even moved.
+    //
+    // But they are not every way a page gets scrolled: PageDown, Space, the
+    // arrow keys, dragging the scrollbar and find-in-page all move it without
+    // either, and a student reading ahead that way was being pulled back to the
+    // voice. `scroll` catches all of those — at the cost of also firing for our
+    // own smooth scroll, which is what `selfScrollUntil` exists to discount.
+    const onScroll = () => { if (Date.now() >= selfScrollUntil.current) seen(); };
+    window.addEventListener('wheel', seen, { passive: true });
+    window.addEventListener('touchmove', seen, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', seen);
+      window.removeEventListener('touchmove', seen);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [followArmed]);
+
+  useEffect(() => {
+    if (!following || speakingIdx === null) return;
+    if (Date.now() - userScrolledAt.current < FOLLOW_PAUSE_MS) return;
+    // The element the wash is on, whichever branch below rendered it.
+    const el = panelRef.current?.querySelector('[data-speaking="true"]');
+    if (!el?.scrollIntoView) return; // jsdom, and any browser that lacks it
+    const { top } = el.getBoundingClientRect();
+    const bottom = (window.innerHeight || 0) * FOLLOW_BAND_BOTTOM;
+    if (top >= FOLLOW_BAND_TOP && top <= bottom) return; // already where they are reading
+    // Claim the scrolls this is about to cause, so the listener above does not
+    // read our own smooth scroll as the student taking over.
+    selfScrollUntil.current = Date.now() + SELF_SCROLL_MS;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [speakingIdx, following, panelRef]);
 
   // The sections that outline item covers, as a Set of the section objects
   // themselves. Matching on identity rather than on an index because the two
@@ -678,7 +752,8 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
       return next;
     });
 
-  // Told by ListenToTopic which outline item the voice has reached.
+  // Told by ListenToTopic which outline item the voice has reached, and whether
+  // the student wants the page to follow it.
   //
   // Opening the group here rather than in an effect on `speakingIdx`: the voice
   // reads straight through a topic including the groups the student has
@@ -686,9 +761,11 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
   // spends most of a listen inside a closed panel, which is the same as not
   // having it. Opening is deliberately one-way; nothing re-collapses behind the
   // voice, so a student who opened something to read along keeps it open.
-  const onSpeakingOutlineIndex = (idx) => {
+  const onSpeakingOutlineIndex = (idx, opts) => {
+    setFollowing(opts?.follow !== false);
     setSpeakingIdx(idx);
     if (idx === null) return;
+    setFollowArmed(true);
     setOpenSections((prev) => {
       if (prev.has(idx)) return prev;
       const next = new Set(prev);

@@ -3,7 +3,7 @@
 // network, no API key, no bytes on the student's data bundle — the voice is the
 // one already on their device.
 //
-// Everything awkward in here is a browser defect, not a design choice. Four of
+// Everything awkward in here is a browser defect, not a design choice. Five of
 // them, each of which silently breaks playback if unhandled:
 //
 //   1. getVoices() returns [] on the first call in Chrome. Voices arrive later
@@ -19,12 +19,21 @@
 //      of the API and the entire reason the pre-rendered-audio option exists
 //      (docs/audio-playback-plan.md §4.3). We detect it and say so, because a
 //      voice that just stops is exactly the silent failure the project rules
-//      forbid.
+//      forbid — and then we try to carry on, because a student who never
+//      pressed pause is waiting for the next sentence, not for a notice.
+//   5. A chunk can die without the queue ever being told. Chrome reports
+//      `interrupted` when something outside the page takes the audio, and
+//      sometimes reports nothing at all — the engine simply wedges. Either way
+//      the chain below stops dead while the bar still says Pause. Hence the
+//      stall watchdog (see `armStall`), which is the only thing that can tell
+//      a chunk still being read from one that will never end.
 //
 // cancel() is the other sharp edge: it fires `end` on some browsers and `error`
 // on others, both asynchronously, so a stale callback can advance the queue of a
 // playback run that is already over. Every callback is therefore gated on a run
-// id (see `runRef`).
+// id (see `runRef`) — and because every internal cancel bumps that id BEFORE
+// calling cancel(), an `interrupted` still carrying the current id is by
+// definition not ours. That is what makes landmine 5 detectable at all.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -78,6 +87,38 @@ const AWAKE_PREF_KEY = 'arete:speech:awake';
 // Consecutive failed chunks before we stop and say so. One is ordinary — the
 // next sentence usually synthesises fine. Three in a row is the voice itself.
 const MAX_ERROR_STREAK = 3;
+
+// ── Landmine 5: the chunk that never ends ────────────────────────────────────
+//
+// One retry of a chunk that was cut, then we stop and say so. Saying a sentence
+// again that the student only half-heard is the right trade; saying it forever
+// is not.
+const MAX_CHUNK_RETRIES = 1;
+
+// Words per second at a typical 150wpm narration — the same figure speechText.js
+// estimates a topic's length with. Used here only to budget how long a chunk may
+// go without an event before we call it dead.
+const WORDS_PER_SECOND = 2.5;
+const AVG_WORD_CHARS = 5.5;
+
+// Getting a cold engine talking is not instant, so the first budget of a chunk
+// carries this on top of the chunk's own estimate. `onstart` replaces it.
+const START_GRACE_MS = 2500;
+
+// Chrome and Edge fire `onboundary` once per word, which is a liveness signal a
+// wedged engine cannot fake: while they are arriving, four seconds of silence
+// already means the voice is gone. Safari fires none, so a chunk that has never
+// produced one falls back to the whole-chunk budget instead.
+const BOUNDARY_SILENCE_MS = 4000;
+
+/** How long a chunk may run before silence means something is wrong. */
+function stallBudget(chars, rate) {
+  const words = Math.max(1, chars / AVG_WORD_CHARS);
+  const expected = (words / (WORDS_PER_SECOND * Math.max(rate, 0.1))) * 1000;
+  // 1.6× covers a voice slower than the estimate; the flat three seconds covers
+  // a short chunk, where the multiplier alone leaves almost no margin.
+  return Math.round(expected * 1.6) + 3000;
+}
 
 /**
  * `text.split(/(?<=[chars])\s+/)` without the lookbehind.
@@ -215,7 +256,10 @@ export function pickVoice(voices, preferredName) {
   );
 }
 
-function readPref(key, fallback) {
+// Exported for the player's own preferences — the follow-the-voice toggle lives
+// in ListenToTopic, not here, and a second copy of this try/catch is exactly the
+// kind of thing that drifts.
+export function readSpeechPref(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
     return raw === null ? fallback : raw;
@@ -225,7 +269,7 @@ function readPref(key, fallback) {
   }
 }
 
-function writePref(key, value) {
+export function writeSpeechPref(key, value) {
   try {
     localStorage.setItem(key, String(value));
   } catch {
@@ -281,6 +325,16 @@ function resetDevice(api) {
 
 let nextDeviceId = 0;
 
+// Chrome and Safari have both been seen dropping an utterance that no JavaScript
+// reference points at any more: the audio stops mid-sentence and NO event fires,
+// which from the queue's side is indistinguishable from a chunk still being
+// read. Holding the live one costs nothing and is the documented workaround.
+//
+// Write-only on purpose: the reference IS the feature, and the lint rule cannot
+// see a use that exists only to keep an object reachable.
+// eslint-disable-next-line no-unused-vars -- see above
+let liveUtterance = null;
+
 /**
  * @param {Array} units  from topicToSpeechUnits(topic). Identity does not
  *   matter — the queue is keyed on unit CONTENT (see `signature`), so a caller
@@ -302,9 +356,9 @@ export function useSpeech(units, { onFinished } = {}) {
   const [status, setStatus] = useState('idle'); // idle | playing | paused | ended
   const [unitIndex, setUnitIndex] = useState(0);
   const [voices, setVoices] = useState([]);
-  const [voiceName, setVoiceName] = useState(() => readPref(VOICE_PREF_KEY, ''));
-  const [rate, setRateState] = useState(() => Number(readPref(RATE_PREF_KEY, '1')) || 1);
-  const [keepAwake, setKeepAwakeState] = useState(() => readPref(AWAKE_PREF_KEY, '0') === '1');
+  const [voiceName, setVoiceName] = useState(() => readSpeechPref(VOICE_PREF_KEY, ''));
+  const [rate, setRateState] = useState(() => Number(readSpeechPref(RATE_PREF_KEY, '1')) || 1);
+  const [keepAwake, setKeepAwakeState] = useState(() => readSpeechPref(AWAKE_PREF_KEY, '0') === '1');
   // True when the browser suspended us rather than the student pausing — the UI
   // needs to say which, or a phone-lock stop looks like a bug.
   const [interrupted, setInterrupted] = useState(false);
@@ -348,6 +402,10 @@ export function useSpeech(units, { onFinished } = {}) {
   // skip clears it, which is what stops "skip to the end" from counting as
   // having listened to the topic.
   const cleanRunRef = useRef(false);
+  // Landmine 5: the watchdog on the chunk in flight, and how many times we have
+  // already tried to re-speak that same chunk after it was cut.
+  const stallRef = useRef(null);
+  const retryRef = useRef({ index: -1, tries: 0 });
   // `status` as a ref, for the event handlers that would otherwise close over a
   // stale value (visibilitychange in particular fires long after its effect ran).
   const statusRef = useRef(status);
@@ -424,7 +482,7 @@ export function useSpeech(units, { onFinished } = {}) {
 
   const setKeepAwake = useCallback((value) => {
     setKeepAwakeState(value);
-    writePref(AWAKE_PREF_KEY, value ? '1' : '0');
+    writeSpeechPref(AWAKE_PREF_KEY, value ? '1' : '0');
   }, []);
 
   // Turning it on mid-topic should take effect now, not at the next play().
@@ -442,6 +500,7 @@ export function useSpeech(units, { onFinished } = {}) {
     runRef.current += 1;
     pausedRef.current = false;
     cursorRef.current = 0;
+    if (stallRef.current !== null) { clearTimeout(stallRef.current); stallRef.current = null; }
     setStatus('idle');
     setUnitIndex(0);
     setInterrupted(false);
@@ -457,9 +516,18 @@ export function useSpeech(units, { onFinished } = {}) {
 
   // ── The queue ─────────────────────────────────────────────────────────────
 
+  const clearStall = useCallback(() => {
+    if (stallRef.current !== null) {
+      clearTimeout(stallRef.current);
+      stallRef.current = null;
+    }
+  }, []);
+
   const speakFrom = useCallback((index, run) => {
     const api = synth();
     if (!api || run !== runRef.current) return;
+
+    clearStall();
 
     const item = queue[index];
     if (!item) {
@@ -496,6 +564,66 @@ export function useSpeech(units, { onFinished } = {}) {
     utterance.rate = rate;
     // Left at the browser default deliberately: pitch and volume are the
     // student's system preferences, not ours to override.
+    liveUtterance = utterance; // landmine 5: out of the collector's reach
+
+    // Landmine 5. Two ways a chunk dies without the chain below being told, and
+    // they want opposite answers:
+    //
+    //   it had started — something cut it (an OS notification, another app
+    //     taking the audio, the engine wedging). Say the chunk again: one
+    //     repeated sentence is a far smaller loss than the rest of the topic.
+    //   it never started — the platform is refusing us outright (iOS wants a
+    //     fresh gesture after a screen lock). Trying again does not change that,
+    //     so stop and say what happened.
+    let started = false;
+
+    const giveUp = () => {
+      runRef.current += 1;
+      if (ownsDevice(deviceId)) resetDevice(synth());
+      pausedRef.current = true;
+      // Left ON this chunk, not past it: nothing of it was heard, so pressing
+      // play should pick it up rather than skip it.
+      cursorRef.current = index;
+      setStatus('paused');
+      setInterrupted(true);
+      releaseWakeLock();
+    };
+
+    // Deliberately does NOT clear cleanRunRef the way a synthesis error does:
+    // the retry re-speaks the chunk from its start, so nothing is skipped and a
+    // student whose phone buzzed mid-topic has still heard all of it.
+    const recover = () => {
+      if (run !== runRef.current) return;
+      // A pause is dead air the student asked for. Recovering from one would
+      // start the voice again behind a bar that says Play — and `pause()`
+      // early-returns on a status that is already 'paused', so the only way out
+      // would be to close the player.
+      if (pausedRef.current) { clearStall(); return; }
+      clearStall();
+
+      retryRef.current = retryRef.current.index === index
+        ? { index, tries: retryRef.current.tries + 1 }
+        : { index, tries: 1 };
+
+      if (!started || retryRef.current.tries > MAX_CHUNK_RETRIES) { giveUp(); return; }
+
+      runRef.current += 1;
+      const retryRun = runRef.current;
+      claimDevice(deviceId, notifyStandDown);
+      resetDevice(synth());
+      speakFromRef.current?.(index, retryRun);
+    };
+
+    // Never arms during a pause. `pause()` does not bump runRef — it only stops
+    // the clock — so a `start` or `boundary` that lands just after the click
+    // would otherwise re-arm a watchdog that nothing will ever clear, since no
+    // further events arrive while paused. Android is where that is routine: its
+    // pause() is unreliable, so boundaries keep coming.
+    const armStall = (ms) => {
+      clearStall();
+      if (pausedRef.current) return;
+      stallRef.current = setTimeout(() => { stallRef.current = null; recover(); }, ms);
+    };
 
     const advance = () => {
       // Landmine: cancel() delivers end/error asynchronously, so a callback from
@@ -512,16 +640,54 @@ export function useSpeech(units, { onFinished } = {}) {
       speakFromRef.current?.(index + 1, run);
     };
 
+    utterance.onstart = () => {
+      if (run !== runRef.current) return;
+      started = true;
+      armStall(stallBudget(item.text.length, rate));
+    };
+
+    // Not a progress display — a heartbeat. See BOUNDARY_SILENCE_MS.
+    //
+    // Only a WORD boundary is tight enough to shorten the deadline. The spec
+    // allows `name` to be 'sentence' too, and an engine that emits those can
+    // legitimately go longer than four seconds between them inside one chunk —
+    // which would have the watchdog cut working audio, repeat the sentence, and
+    // then show a screen-lock notice on a device that never locked.
+    utterance.onboundary = (event) => {
+      if (run !== runRef.current) return;
+      started = true;
+      armStall(event?.name === 'word' ? BOUNDARY_SILENCE_MS : stallBudget(item.text.length, rate));
+    };
+
     utterance.onend = () => {
-      if (run === runRef.current) { spokeRef.current += 1; errorStreakRef.current = 0; }
+      // Stale first, watchdog included. Our own cancel() fires `end` rather than
+      // `error` on some browsers (see the header), and every cancel-and-respeak
+      // path arms a fresh watchdog synchronously — so clearing before this check
+      // disarmed the REPLACEMENT chunk's timer a task later. That left the retry
+      // inside recover() unwatched, which is the one thing that must not be:
+      // a chunk that wedges twice would then never reach giveUp(), and the
+      // notice this whole change exists to show would never appear.
+      if (run !== runRef.current) return;
+      clearStall();
+      spokeRef.current += 1;
+      errorStreakRef.current = 0;
+      retryRef.current = { index: -1, tries: 0 };
       advance();
     };
 
     utterance.onerror = (event) => {
-      // 'interrupted' and 'canceled' are what our own cancel() produces — not
-      // failures, and not something to report.
-      if (event?.error === 'interrupted' || event?.error === 'canceled') return;
+      // Stale first. Every internal cancel bumps runRef BEFORE calling cancel(),
+      // so a callback carrying an old run id is one of ours and there is nothing
+      // to do with it.
       if (run !== runRef.current) return;
+      clearStall();
+
+      // …and by that same token, an 'interrupted' still carrying the CURRENT run
+      // id did not come from us: something outside the page took the audio.
+      // Ignoring it — which is what this did — left the bar showing Pause with
+      // nothing coming out and no way back but scrolling up and pressing play.
+      // That is the commonest way this player went quiet.
+      if (event?.error === 'interrupted' || event?.error === 'canceled') { recover(); return; }
 
       errorStreakRef.current += 1;
       // A chunk that failed was NOT heard, so this is no longer a clean listen
@@ -545,8 +711,18 @@ export function useSpeech(units, { onFinished } = {}) {
       advance();
     };
 
-    api.speak(utterance);
-  }, [queue, voice, rate, releaseWakeLock]);
+    try {
+      api.speak(utterance);
+    } catch {
+      // Some platforms throw rather than failing quietly — same outcome as an
+      // utterance that never starts.
+      giveUp();
+      return;
+    }
+    // Nothing has started yet, so this first budget carries the engine's
+    // start-up on top of the chunk's own estimate.
+    armStall(START_GRACE_MS + stallBudget(item.text.length, rate));
+  }, [queue, voice, rate, releaseWakeLock, clearStall, deviceId, notifyStandDown]);
 
   useEffect(() => { speakFromRef.current = speakFrom; }, [speakFrom]);
 
@@ -554,6 +730,7 @@ export function useSpeech(units, { onFinished } = {}) {
     runRef.current += 1;
     pausedRef.current = false;
     cursorRef.current = 0;
+    clearStall();
     // Only if we are the one talking: another topic's player may hold the device.
     if (ownsDevice(deviceId)) resetDevice(synth());
     releaseDevice(deviceId);
@@ -562,7 +739,7 @@ export function useSpeech(units, { onFinished } = {}) {
     setInterrupted(false);
     setFailed(false);
     releaseWakeLock();
-  }, [releaseWakeLock, deviceId]);
+  }, [releaseWakeLock, deviceId, clearStall]);
 
   // Landmine 3: this must be reached from a click, never from an effect.
   //
@@ -579,6 +756,7 @@ export function useSpeech(units, { onFinished } = {}) {
     cleanRunRef.current = !viaSkip && fromUnit === 0;
     spokeRef.current = 0;
     errorStreakRef.current = 0;
+    retryRef.current = { index: -1, tries: 0 };
     setInterrupted(false);
     setFailed(false);
 
@@ -595,6 +773,9 @@ export function useSpeech(units, { onFinished } = {}) {
   const pause = useCallback(() => {
     if (!supported || status !== 'playing') return;
     pausedRef.current = true;
+    // The watchdog measures dead air, and a pause is dead air the student asked
+    // for. Leaving it armed would have it "recover" from the pause.
+    clearStall();
     // Android Chrome's pause() is unreliable. Because we queue one chunk at a
     // time, the worst case is that the current sentence finishes and `advance`
     // then stops on pausedRef — a graceful degradation rather than a stuck
@@ -602,28 +783,29 @@ export function useSpeech(units, { onFinished } = {}) {
     synth()?.pause();
     setStatus('paused');
     releaseWakeLock();
-  }, [supported, status, releaseWakeLock]);
+  }, [supported, status, releaseWakeLock, clearStall]);
 
+  // Always restarts the chunk rather than calling speechSynthesis.resume() on
+  // the one in flight. Resuming mid-utterance saves the student half a sentence
+  // and costs them the watchdog: there is no event left to hang one on, so an
+  // engine that does not actually pick the chunk back up leaves the bar showing
+  // Pause with nothing coming out — the very failure this file now guards. It
+  // also deletes the whole Android "pause() did not take" branch, since
+  // `advance` has already moved the cursor past a chunk that ran to its end.
   const resume = useCallback(() => {
     if (!supported || status !== 'paused') return;
-    const api = synth();
     pausedRef.current = false;
     errorStreakRef.current = 0;
+    retryRef.current = { index: -1, tries: 0 };
     setStatus('playing');
     setInterrupted(false);
     setFailed(false);
     acquireWakeLock();
 
-    if (api.paused && api.speaking) {
-      api.resume();
-    } else {
-      // pause() did not take (Android) or the utterance already ended while
-      // paused — restart from the chunk we stopped on.
-      runRef.current += 1;
-      claimDevice(deviceId, notifyStandDown);
-      resetDevice(api);
-      speakFrom(cursorRef.current, runRef.current);
-    }
+    runRef.current += 1;
+    claimDevice(deviceId, notifyStandDown);
+    resetDevice(synth());
+    speakFrom(cursorRef.current, runRef.current);
   }, [supported, status, speakFrom, acquireWakeLock, deviceId, notifyStandDown]);
 
   const skipTo = useCallback((target) => {
@@ -643,12 +825,12 @@ export function useSpeech(units, { onFinished } = {}) {
 
   const setVoice = useCallback((name) => {
     setVoiceName(name);
-    writePref(VOICE_PREF_KEY, name);
+    writeSpeechPref(VOICE_PREF_KEY, name);
   }, []);
 
   const setRate = useCallback((value) => {
     setRateState(value);
-    writePref(RATE_PREF_KEY, value);
+    writeSpeechPref(RATE_PREF_KEY, value);
   }, []);
 
   // ── Landmine 4: the screen locks and synthesis is suspended ───────────────
@@ -678,12 +860,23 @@ export function useSpeech(units, { onFinished } = {}) {
 
       if (!api.speaking && !api.paused) {
         // Suspended while we were away. Abandon the dead chain so a late
-        // callback cannot resurrect it, and tell the student what happened.
+        // callback cannot resurrect it — and then carry on, rather than leaving
+        // a notice and a play button. The student never pressed pause; they put
+        // the phone down and picked it back up, and what they are waiting for is
+        // the next sentence. If the platform refuses (iOS wants a fresh gesture
+        // after a screen lock) nothing starts, and the stall watchdog turns that
+        // into the honest "audio stops when the screen locks" notice a few
+        // seconds later — the same message, arrived at by trying first.
         runRef.current += 1;
-        if (ownsDevice(deviceId)) resetDevice(api);
-        pausedRef.current = true;
-        setStatus('paused');
-        setInterrupted(true);
+        const run = runRef.current;
+        claimDevice(deviceId, notifyStandDown);
+        resetDevice(api);
+        // Hiding released the lock (above), and playback is about to carry on —
+        // so take it back, exactly as the branch below does. Without this the
+        // first screen lock quietly turned "Keep screen on" off for the rest of
+        // the topic, and the next lock interrupted the same listen again.
+        acquireWakeLock();
+        speakFromRef.current?.(cursorRef.current, run);
       } else {
         // Desktop: it carried on talking the whole time. Just re-take the lock.
         acquireWakeLock();
@@ -692,7 +885,7 @@ export function useSpeech(units, { onFinished } = {}) {
 
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
-  }, [supported, releaseWakeLock, acquireWakeLock, deviceId]);
+  }, [supported, releaseWakeLock, acquireWakeLock, deviceId, notifyStandDown]);
 
   // A changed voice or rate only takes effect on the NEXT utterance, so a
   // student who changes either mid-topic would otherwise hear no difference
@@ -725,9 +918,11 @@ export function useSpeech(units, { onFinished } = {}) {
   // an instance stops the device only while it is the one using it.
   useEffect(() => () => {
     runRef.current += 1;
+    if (stallRef.current !== null) { clearTimeout(stallRef.current); stallRef.current = null; }
     if (ownsDevice(deviceId)) {
       resetDevice(synth());
       releaseDevice(deviceId);
+      liveUtterance = null;
     }
     wakeLockGenRef.current += 1; // a request still in flight must not keep its lock
     wakeLockRef.current?.release?.().catch(() => {});
@@ -741,9 +936,11 @@ export function useSpeech(units, { onFinished } = {}) {
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
     runRef.current += 1;
+    if (stallRef.current !== null) { clearTimeout(stallRef.current); stallRef.current = null; }
     if (ownsDevice(deviceId)) { resetDevice(synth()); releaseDevice(deviceId); }
     pausedRef.current = false;
     cursorRef.current = 0;
+    retryRef.current = { index: -1, tries: 0 };
     setStatus('idle');
     setUnitIndex(0);
     setInterrupted(false);

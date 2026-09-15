@@ -14,7 +14,7 @@ export default function CampusMapFloatingButton() {
       to="/campus-map"
       aria-label="Open school campus map"
       title="Campus Map"
-      className="float-bob fixed bottom-4 left-4 z-50 print:hidden sm:bottom-6 sm:left-6 flex items-center gap-2.5 rounded-full bg-ink px-4 py-2.5 text-cream shadow-[0_6px_24px_rgba(0,0,0,0.25)] ring-1 ring-cream/20 transition-all hover:scale-[1.03] hover:bg-coffee-700 sm:px-5 sm:py-3"
+      className="floating-dock-item float-bob fixed bottom-4 left-4 z-50 print:hidden sm:bottom-6 sm:left-6 flex items-center gap-2.5 rounded-full bg-ink px-4 py-2.5 text-cream shadow-[0_6px_24px_rgba(0,0,0,0.25)] ring-1 ring-cream/20 transition-all hover:scale-[1.03] hover:bg-coffee-700 sm:px-5 sm:py-3"
     >
       <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-ember-500 text-cream shadow-inner">
         <MapPin size={20} />
