@@ -674,7 +674,12 @@ export function useSpeech(units, { onFinished } = {}) {
       // The caption tracks the chunk actually speaking, not the one queued —
       // set here rather than where the utterance was built, so a retry after
       // landmine 5 replaces stale text from the attempt that never started.
-      setCaption({ text: item.text, start: -1, end: -1 });
+      //
+      // Gated on pausedRef for the same reason `advance` is: speak() is
+      // synchronous but onstart is not, so a Pause click in that gap already
+      // has pausedRef.current true by the time this runs. Updating anyway
+      // would change what the caption shows while the bar reads Paused.
+      if (!pausedRef.current) setCaption({ text: item.text, start: -1, end: -1 });
     };
 
     // Not a progress display — a heartbeat. See BOUNDARY_SILENCE_MS.
@@ -690,17 +695,28 @@ export function useSpeech(units, { onFinished } = {}) {
       armStall(event?.name === 'word' ? BOUNDARY_SILENCE_MS : stallBudget(item.text.length, rate));
       // The karaoke caption. Only a word boundary moves it — a sentence
       // boundary (some engines emit both) would jump the highlight to the
-      // start of a sentence it has not reached yet.
-      if (event?.name === 'word' && typeof event.charIndex === 'number') {
+      // start of a sentence it has not reached yet. Gated on pausedRef too:
+      // pause() does not stop Android's engine reliably (see armStall above),
+      // so boundaries for the rest of the sentence can keep arriving after the
+      // click — updating the caption through them would have it visibly
+      // advance behind a bar that says Paused.
+      if (event?.name === 'word' && typeof event.charIndex === 'number' && !pausedRef.current) {
         const start = event.charIndex;
-        // Spec says `charLength` is a number, but it is a value the ENGINE
-        // hands us, not one this app controls — a non-conforming engine
-        // reporting it as a numeric string would otherwise make `start +
-        // length` concatenate ("4" + "3" = "43") instead of add, slicing a
-        // multi-word span instead of the one word actually spoken.
+        // The scan-based length doubles as a ceiling, not just a fallback:
+        // `charLength` is a value the ENGINE hands back, not one this app
+        // controls, and clamping to it is what stops two different
+        // misbehaviours. A non-conforming engine reporting it as a numeric
+        // STRING would otherwise make `start + length` concatenate
+        // ("4" + "3" = "43") instead of add. And an engine reporting a
+        // charLength that is numeric but genuinely too large — trailing
+        // punctuation or whitespace folded into the word — would otherwise
+        // extend the highlight past the word actually spoken; capping it at
+        // the natural scan-to-whitespace length is the one bound a word
+        // cannot legitimately cross.
+        const scanned = wordLengthAfter(item.text, start);
         const reported = typeof event.charLength === 'number' && event.charLength > 0
           ? event.charLength : 0;
-        const length = reported || wordLengthAfter(item.text, start);
+        const length = reported ? Math.min(reported, scanned) : scanned;
         setCaption({ text: item.text, start, end: start + length });
       }
     };

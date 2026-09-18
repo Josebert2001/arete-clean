@@ -1192,4 +1192,52 @@ describe('useSpeech — the karaoke caption', () => {
     const { start, end, text } = result.current.caption;
     expect(text.slice(start, end)).toBe('two');
   });
+
+  it('clamps an oversized charLength instead of overshooting the word', async () => {
+    // A numeric but implausibly large charLength (trailing punctuation or
+    // whitespace folded in by a non-conforming engine) used to extend the
+    // highlight straight past the word actually spoken.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: 20 }));
+
+    const { start, end, text } = result.current.caption;
+    expect(text.slice(start, end)).toBe('two');
+  });
+
+  it('freezes even if the engine keeps sending boundaries after pause — Android', async () => {
+    // pause() does not reliably stop Android's engine (see armStall's own
+    // comment on this), so boundaries for the rest of the sentence can keep
+    // arriving after the click. The caption must not keep advancing through
+    // them behind a bar that reads Paused.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 0, charLength: 3 }));
+    const before = result.current.caption;
+
+    act(() => result.current.pause());
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: 3 }));
+
+    expect(result.current.caption).toEqual(before);
+  });
+
+  it('does not let a late onstart update the caption once pause has landed', async () => {
+    // speak() is synchronous but onstart is not (queued as a microtask by the
+    // stub, the way a real engine defers it too). A Pause click in that gap
+    // used to still have onstart overwrite the caption once it finally fired.
+    install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    act(() => result.current.pause());
+    expect(result.current.caption).toBeNull();
+
+    await act(async () => { await Promise.resolve(); }); // the queued onstart fires
+
+    expect(result.current.caption).toBeNull();
+  });
 });

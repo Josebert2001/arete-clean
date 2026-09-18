@@ -516,28 +516,37 @@ silently, with no error and no event to say so. The caption already degrades cor
 (plain text, still updating per chunk), because that fallback was designed in from the start rather
 than discovered after.
 
-Thirteen tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin: the chunk
+Sixteen tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin: the chunk
 appearing on start with no word chosen yet, a `word` boundary picking out the right slice, the
-`charLength`-missing fallback, a `sentence` boundary being ignored, freezing (not clearing) on pause,
-clearing on `stop()`, on a topic change, and on `standDown()` when a second topic takes the device,
-clearing on each of the four separate failure exits in `speakFrom` — reaching the end having spoken
-nothing, the `MAX_ERROR_STREAK` cut-off, landmine 5's `giveUp()`, and `skipTo()`'s not-playing branch
-picking a new section from a finished topic — and a non-numeric `charLength` being treated as absent
-rather than string-concatenated into the highlight range.
+`charLength`-missing fallback and a numeric-but-oversized one both clamping to the scanned word rather
+than overshooting it, a non-numeric `charLength` being treated as absent rather than
+string-concatenated into the range, a `sentence` boundary being ignored, freezing (not clearing) on
+pause including a late boundary or a late `onstart` landing *after* the click, clearing on `stop()`,
+on a topic change, and on `standDown()` when a second topic takes the device, clearing on `speakFrom`'s
+three failure exits (reaching the end having spoken nothing, the `MAX_ERROR_STREAK` cut-off, and
+landmine 5's `giveUp()`), and clearing on `skipTo()`'s ordinary not-playing branch when a student picks
+a new section from a finished topic — a ui-consistency fix, not a failure path; it lives outside
+`speakFrom` entirely and was grouped with the three above only by what it fixed, not by cause.
 
-Two rounds of `/code-review high` over the first cut of this found five real issues, none caught by
-the tests written alongside the feature: three of the four failure exits above left a chunk's text
-(sometimes mid-word-highlighted) sitting under a UI that had just told the student playback stopped;
-`giveUp()` — landmine 5's own failure exit — turned out to be a fourth, found only on the *second*
-review pass once the first round's fix made "failure exits" a named category to check exhaustively
-against; and `event.charLength`, which is a value the *engine* hands back rather than one this app
-controls, was used in `start + length` with no type guard, so a non-conforming engine reporting it as
-a numeric string would silently concatenate instead of add. The reviewer also flagged that the reset
-of this flag — `status`/`unitIndex`/`interrupted`/`failed`/`caption`/wake-lock — is hand-duplicated
-across five-plus exit sites (`standDown`, `stop`, `play`, the signature-change effect, and now
-`giveUp`), which is exactly the shape of bug this was: not refactored into one shared path here,
-since doing that safely across every existing exit is a larger, separate change against an already
-heavily-tested file — left as a real future risk rather than a silent one.
+Three rounds of `/code-review high` over the first cut of this found seven real issues, none caught by
+the tests written alongside the feature. Four were the failure-exit family above, found two at a time
+across two passes — `giveUp()` only surfaced on the *second* pass, once the first round's fix had made
+"failure exits" a named category to check exhaustively against. The third pass, run only because a new
+commit re-triggers the repo's pre-push review gate, found two more in the `onboundary`/`onstart`
+handlers themselves: neither was gated on `pausedRef`, so a late `boundary` on a platform whose
+`pause()` is unreliable (Android — see `armStall`'s own comment on this) kept the caption advancing
+behind a bar reading Paused, and a `pause()` landing in the async gap between `speak()` and `onstart`
+firing was still overwritten once `onstart` finally ran. The same pass caught `event.charLength` —
+a value the *engine* hands back, not one this app controls — being trusted at face value twice over:
+a non-conforming engine could report it as a numeric string (`start + length` would then concatenate
+instead of add) or as a numeric but implausible length (overshooting the word into whatever followed
+it); the fix clamps it to the scan-to-whitespace length either way rather than discarding it outright,
+so a well-behaved engine's own reported length is still used when it agrees with that scan. The
+reviewer also flagged that the reset of this flag — `status`/`unitIndex`/`interrupted`/`failed`/
+`caption`/wake-lock — is hand-duplicated across five-plus exit sites (`standDown`, `stop`, `play`, the
+signature-change effect, and now `giveUp`), which is exactly the shape of bug this was: not refactored
+into one shared path here, since doing that safely across every existing exit is a larger, separate
+change against an already heavily-tested file — left as a real future risk rather than a silent one.
 
 ### 4.11 The first real-use pass — it stopped, and you had to scroll back up (2026-09-14)
 
