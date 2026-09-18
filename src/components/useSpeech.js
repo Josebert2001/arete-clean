@@ -38,8 +38,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // The speeds the control bar offers. Declared here because the chunk budget
-// below is derived from the slowest of them.
-export const SPEECH_RATES = [0.75, 1, 1.25, 1.5];
+// below is derived from the slowest of them. 2× is the top: revision listening
+// is routinely at double speed, and a faster rate only shortens a chunk's
+// duration, so the slowest-rate budget still covers it.
+export const SPEECH_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
 // Chrome's ~15s cut-off at a normal 150wpm is about 220 characters, and 200
 // leaves headroom AT RATE 1.

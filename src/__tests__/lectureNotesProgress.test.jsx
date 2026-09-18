@@ -11,8 +11,8 @@
 // Interaction goes through fireEvent rather than user-event, matching
 // profileForm.test.jsx — user-event is not a dependency of this project.
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import LectureNotes from '../components/LectureNotes';
 import { READING_STORAGE_KEY, topicReadId, useReadingProgress } from '../components/useReadingProgress';
 
@@ -57,6 +57,34 @@ const renderNotes = () => render(<NotesHost />);
 beforeEach(() => {
   localStorage.clear();
 });
+afterEach(() => vi.unstubAllGlobals());
+
+// Speech stub in the style of listenToTopic.test.jsx: utterances never end on
+// their own (the test decides), so the caption the strip shows is the test's
+// to assert on.
+function installSynth() {
+  const state = { spoken: [], current: null, speaking: false, paused: false };
+  vi.stubGlobal('speechSynthesis', {
+    getVoices: () => [{ name: 'NG', lang: 'en-NG', default: true }],
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    speak: (u) => {
+      state.spoken.push(u);
+      state.current = u;
+      state.speaking = true;
+      queueMicrotask(() => { if (state.current === u) u.onstart?.(); });
+    },
+    cancel: () => { state.current = null; state.speaking = false; state.paused = false; },
+    pause: () => { state.paused = true; },
+    resume: () => { state.paused = false; },
+    get speaking() { return state.speaking; },
+    get paused() { return state.paused; },
+  });
+  vi.stubGlobal('SpeechSynthesisUtterance', class {
+    constructor(text) { this.text = text; this.rate = 1; this.voice = null; }
+  });
+  return state;
+}
 
 describe('reading progress', () => {
   it('starts at zero and counts the topics on the page', () => {
@@ -137,5 +165,31 @@ describe('without a reading owner', () => {
     expect(screen.getByText('2 topics')).toBeInTheDocument();
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Mark as read' })).not.toBeInTheDocument();
+  });
+});
+
+describe('read-along strip', () => {
+  it('renders the spoken words above the section being read, not in the player bar', async () => {
+    installSynth();
+    renderNotes();
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    const bar = await screen.findByRole('group', { name: 'Listen to this topic' });
+
+    await waitFor(() => expect(document.querySelector('[data-read-along]')).toBeInTheDocument());
+    const strip = document.querySelector('[data-read-along]');
+    expect(strip.textContent).toMatch(/Untrusted data is sent/);
+    // In the text flow — carried by the player, placed by the page.
+    expect(bar).not.toContainElement(strip);
+  });
+
+  it('leaves no strip behind once the player is closed', async () => {
+    installSynth();
+    renderNotes();
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await waitFor(() => expect(document.querySelector('[data-read-along]')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Stop and close' }));
+    await screen.findByRole('button', { name: /Listen ·/ });
+    await waitFor(() => expect(document.querySelector('[data-read-along]')).toBeNull());
   });
 });

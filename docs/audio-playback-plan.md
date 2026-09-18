@@ -550,6 +550,42 @@ scan-to-whitespace length computed independently (`wordLengthAfter`), so a well-
 is still used when it agrees with that scan, and a non-conforming one cannot produce a multi-word or
 out-of-bounds highlight.
 
+### 4.13 Headset controls, revision speeds, progress (2026-09-18)
+
+Three small gaps, one change. Bluetooth earbuds, wired headset buttons and the system media
+notification all speak to `navigator.mediaSession`, not to `speechSynthesis` — without it every one of
+those buttons did nothing while a topic played. `ListenToTopic` now registers `play`/`pause` (both
+through the bar's own `playPause`, so a headset button can never disagree with it),
+`previoustrack`/`nexttrack` and `stop`, plus topic metadata and whole-unit position state. Gated on
+active playback rather than just an open bar: one player is mounted per open topic and the session is
+a single global, so an idle player must neither claim what the playing one owns nor clear it. Where
+the API is missing the effect is a no-op and playback works exactly as before. Alongside it: speeds
+now run to 2× (`SPEECH_RATES` — revision listening is routinely double-speed, and a faster rate only
+shortens a chunk, so the slowest-rate chunk budget still covers it), and the bar shows a progress bar
+with time remaining, since a twelve-minute listen with no sense of place is a scrubber with no
+handle. `playPause` moved above the `supported`/`narratable` early return and into a `useCallback`,
+because effects cannot live past a conditional return.
+
+### 4.14 Read-along strip in the text flow (2026-09-18)
+
+The karaoke caption moved out of the player bar to above the section being read, so the student
+reads along where their eyes already are. The alternative — lighting up words inside the original
+paragraph — was measured first and rejected on evidence: across the 111 keyed topics (1,987
+speakable sections), the spoken words line up 1:1 with the displayed words in only 71% of sections.
+The other 29% drift (letter-spaced acronyms, `e.g.` → "for example,", maths → words), and once
+offset every following word highlights wrong. True in-place highlighting would need a
+word-alignment layer plus word-span rendering in every section component, for a result that is
+still approximate at the corners — so the strip, which reads the engine's own utterance text and
+cannot drift by construction, moved instead.
+
+`ListenToTopic` carries what the strip shows and the page places it: a new `onReadAlong(caption,
+outlineIndex)` report, held in a ref like `onSpeakingOutlineIndex`, frozen (not cleared) on pause
+so the strip stays on the sentence the voice stopped at, and cleared exactly when the caption
+itself clears. `TopicAccordion` renders one `ReadAlongStrip` above the matching outline item — in
+the grouped branch from the loop index, in the flat branch through an `outlineIndexBySection` map
+with a first-of-group guard, since several flat sections can share one outline item. The bar keeps
+transport, progress and notices; the words live with the text.
+
 A reviewer flagged, and this plan record agrees, that the repeated reset of this one flag —
 `status`/`unitIndex`/`interrupted`/`failed`/`caption`/wake-lock — being hand-duplicated across seven-plus
 exit sites is the root cause of the whole pattern above, not incidental to it: each new exit is another
