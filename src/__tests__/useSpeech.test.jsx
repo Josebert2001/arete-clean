@@ -1240,4 +1240,72 @@ describe('useSpeech — the karaoke caption', () => {
 
     expect(result.current.caption).toBeNull();
   });
+
+  it('clears the caption when only the final chunk errors after earlier ones played cleanly', async () => {
+    // errorStreakRef is reset by onend and only incremented by onerror, so a
+    // nonzero value at the normal 'ended' branch means the LAST chunk errored
+    // rather than finished — its onstart set the caption, but no onend ever
+    // confirmed it was heard. Distinct from the "spoke nothing" branch: earlier
+    // chunks here played fine.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One.', 'Two.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    act(() => state.endCurrent()); // first unit's chunk finishes cleanly
+    expect(result.current.unitIndex).toBe(1);
+    // Let the last chunk's own onstart actually land before it errors — a
+    // real engine never fires onstart AFTER onerror for the same utterance,
+    // and firing them out of order here would leave that late onstart's own
+    // setCaption to race the fix under test.
+    await act(async () => { await Promise.resolve(); });
+
+    act(() => state.current?.onerror?.({ error: 'synthesis-failed' })); // the last chunk fails instead
+
+    await waitFor(() => expect(result.current.status).toBe('ended'));
+    expect(result.current.caption).toBeNull();
+  });
+
+  it('ignores a non-finite charIndex rather than producing a NaN highlight', async () => {
+    // typeof NaN === 'number', so the existing type check alone does not
+    // exclude it.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    const before = result.current.caption;
+
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: NaN, charLength: 3 }));
+
+    expect(result.current.caption).toEqual(before);
+  });
+
+  it('clamps an out-of-range charIndex into the chunk instead of highlighting nothing', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    const text = state.spoken[0].text;
+
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: text.length + 50, charLength: 3 }));
+
+    const { start, end } = result.current.caption;
+    expect(start).toBeLessThan(text.length);
+    expect(end).toBeGreaterThan(start);
+  });
+
+  it('clears the caption on a mid-playback voice change', async () => {
+    // The restart's own onstart is async — the OLD caption, possibly further
+    // into the sentence than where the restarted chunk actually begins, must
+    // not sit on screen implying the voice picked up further along than it did.
+    const state = install([{ name: 'NG', lang: 'en-NG' }, { name: 'GB', lang: 'en-GB' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: 3 }));
+
+    act(() => result.current.setVoice('GB'));
+
+    expect(result.current.caption).toBeNull();
+  });
 });

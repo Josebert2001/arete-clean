@@ -516,37 +516,38 @@ silently, with no error and no event to say so. The caption already degrades cor
 (plain text, still updating per chunk), because that fallback was designed in from the start rather
 than discovered after.
 
-Sixteen tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin: the chunk
-appearing on start with no word chosen yet, a `word` boundary picking out the right slice, the
-`charLength`-missing fallback and a numeric-but-oversized one both clamping to the scanned word rather
-than overshooting it, a non-numeric `charLength` being treated as absent rather than
-string-concatenated into the range, a `sentence` boundary being ignored, freezing (not clearing) on
-pause including a late boundary or a late `onstart` landing *after* the click, clearing on `stop()`,
-on a topic change, and on `standDown()` when a second topic takes the device, clearing on `speakFrom`'s
-three failure exits (reaching the end having spoken nothing, the `MAX_ERROR_STREAK` cut-off, and
-landmine 5's `giveUp()`), and clearing on `skipTo()`'s ordinary not-playing branch when a student picks
-a new section from a finished topic — a ui-consistency fix, not a failure path; it lives outside
-`speakFrom` entirely and was grouped with the three above only by what it fixed, not by cause.
+Twenty tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin the caption's
+behaviour: the chunk appearing on start with no word chosen yet; a `word` boundary picking out the
+right slice; a `sentence` boundary being ignored; freezing (not clearing) on pause, including a late
+boundary from an engine whose `pause()` doesn't reliably stop it, or a `pause()` landing in the gap
+before a queued `onstart` fires; a NaN or out-of-range `charIndex`, and a non-numeric or implausibly
+large `charLength`, all handled without producing a garbled highlight; and the caption clearing on
+every exit that ends, resets, or restarts a run — `stop()`, `standDown()`, a topic change, a
+mid-playback voice/rate change, each of `speakFrom`'s three failure exits (spoke nothing, the
+`MAX_ERROR_STREAK` cut-off, landmine 5's `giveUp()`), the normal `'ended'` exit when only the *last*
+chunk of an otherwise-clean run errored, and `skipTo()`'s ordinary not-playing branch (not a failure
+path itself, grouped here only by what it fixed).
 
-Three rounds of `/code-review high` over the first cut of this found seven real issues, none caught by
-the tests written alongside the feature. Four were the failure-exit family above, found two at a time
-across two passes — `giveUp()` only surfaced on the *second* pass, once the first round's fix had made
-"failure exits" a named category to check exhaustively against. The third pass, run only because a new
-commit re-triggers the repo's pre-push review gate, found two more in the `onboundary`/`onstart`
-handlers themselves: neither was gated on `pausedRef`, so a late `boundary` on a platform whose
-`pause()` is unreliable (Android — see `armStall`'s own comment on this) kept the caption advancing
-behind a bar reading Paused, and a `pause()` landing in the async gap between `speak()` and `onstart`
-firing was still overwritten once `onstart` finally ran. The same pass caught `event.charLength` —
-a value the *engine* hands back, not one this app controls — being trusted at face value twice over:
-a non-conforming engine could report it as a numeric string (`start + length` would then concatenate
-instead of add) or as a numeric but implausible length (overshooting the word into whatever followed
-it); the fix clamps it to the scan-to-whitespace length either way rather than discarding it outright,
-so a well-behaved engine's own reported length is still used when it agrees with that scan. The
-reviewer also flagged that the reset of this flag — `status`/`unitIndex`/`interrupted`/`failed`/
-`caption`/wake-lock — is hand-duplicated across five-plus exit sites (`standDown`, `stop`, `play`, the
-signature-change effect, and now `giveUp`), which is exactly the shape of bug this was: not refactored
-into one shared path here, since doing that safely across every existing exit is a larger, separate
-change against an already heavily-tested file — left as a real future risk rather than a silent one.
+**Four rounds of `/code-review high` — the repo's pre-push gate re-runs one on every new commit — found
+eleven real issues in this feature, all in exactly one shape: a code path that ends, restarts, or
+invalidates a chunk without also clearing (or re-setting) the caption, so it goes on naming a sentence
+that is no longer the one actually playing.** None were caught by the tests written alongside the
+feature that introduced each hole; each was caught by the next review pass, most only after the
+category ("every exit needs to clear the caption") existed to check exhaustively against — `giveUp()`
+surfaced only on round 2, and the normal-`'ended'`-but-last-chunk-failed case and the mid-playback
+voice-change restart only on round 4. Two issues were of a second shape: `onboundary`'s `charIndex` and
+`charLength` are the *engine's* own report, not values this app controls, and were trusted without
+validating their type or range — fixed by clamping both to the scan-to-whitespace length computed
+independently (`wordLengthAfter`), so a well-behaved engine's report is still used when it agrees with
+that scan, and a non-conforming one cannot produce a multi-word or out-of-bounds highlight.
+
+A reviewer flagged, and this plan record agrees, that the repeated reset of this one flag —
+`status`/`unitIndex`/`interrupted`/`failed`/`caption`/wake-lock — being hand-duplicated across seven-plus
+exit sites is the root cause of the whole pattern above, not incidental to it: each new exit is another
+chance to forget one flag, which is exactly what happened four separate times here. Not refactored into
+one shared reset path in this change, since doing that safely across every existing exit in an already
+heavily-tested file is a larger, separate change with its own risk — recorded here as a real, named
+future risk rather than a silent one.
 
 ### 4.11 The first real-use pass — it stopped, and you had to scroll back up (2026-09-14)
 

@@ -570,6 +570,14 @@ export function useSpeech(units, { onFinished } = {}) {
       }
 
       setStatus('ended');
+      // errorStreakRef is reset to 0 by onend and only ever incremented by
+      // onerror, so still carrying a nonzero value here means the LAST chunk
+      // attempted errored rather than finished — its onstart set the caption,
+      // but no matching onend ever confirmed it was actually heard. Earlier
+      // chunks may well have played cleanly (spokeRef.current > 0, so this is
+      // not the "spoke nothing" branch above), but the caption is left naming
+      // a sentence that was, in fact, skipped.
+      if (errorStreakRef.current > 0) setCaption(null);
       // The flag matters twice over. A caller that marks the topic read off this
       // must not be fooled by a student who pressed skip until the end, NOR by a
       // device whose voice failed on every chunk: those errors advance the queue
@@ -700,8 +708,20 @@ export function useSpeech(units, { onFinished } = {}) {
       // so boundaries for the rest of the sentence can keep arriving after the
       // click — updating the caption through them would have it visibly
       // advance behind a bar that says Paused.
-      if (event?.name === 'word' && typeof event.charIndex === 'number' && !pausedRef.current) {
-        const start = event.charIndex;
+      //
+      // `charIndex` gets the same distrust as `charLength` below: it is the
+      // engine's own report, not this app's. `typeof x === 'number'` alone
+      // does not exclude NaN — `typeof NaN` IS `'number'` — and an
+      // out-of-range index would hand `wordLengthAfter` a start past the
+      // text, degenerating to an empty highlight. Number.isFinite excludes
+      // NaN/Infinity; the clamp keeps the index inside the chunk.
+      if (
+        event?.name === 'word'
+        && typeof event.charIndex === 'number'
+        && Number.isFinite(event.charIndex)
+        && !pausedRef.current
+      ) {
+        const start = Math.max(0, Math.min(event.charIndex, item.text.length - 1));
         // The scan-based length doubles as a ceiling, not just a fallback:
         // `charLength` is a value the ENGINE hands back, not one this app
         // controls, and clamping to it is what stops two different
@@ -982,6 +1002,12 @@ export function useSpeech(units, { onFinished } = {}) {
     runRef.current += 1;
     claimDevice(deviceId, notifyStandDown);
     resetDevice(synth());
+    // The restarted chunk's own onstart is about to set this again — but that
+    // is async, and the OLD caption (possibly a word or two further into the
+    // sentence than where the restarted chunk will actually begin) would
+    // otherwise sit on screen until it does, implying the voice picked up
+    // further along than it really did.
+    setCaption(null);
     speakFrom(cursorRef.current, runRef.current);
   }, [voice, rate, status, speakFrom, deviceId, notifyStandDown]);
 
