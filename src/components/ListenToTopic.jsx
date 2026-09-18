@@ -61,6 +61,16 @@ function formatDuration(seconds) {
   return `${Math.round(seconds / 60)} min`;
 }
 
+// Whole-unit granularity, matching the n/total counter and the Media Session
+// position — an estimate either way, and honest about it. From 'ended',
+// unitIndex stops advancing at the last unit's index once the queue drains
+// (useSpeech never sets it again), so slicing on it there would undercount
+// the final unit's own seconds even though the whole topic was heard.
+function elapsedSecondsFor(units, unitIndex, status, totalSeconds) {
+  if (status === 'ended') return totalSeconds;
+  return units.slice(0, unitIndex).reduce((sum, u) => sum + (u?.estimatedSeconds ?? 0), 0);
+}
+
 // Prev / play / next / position — the four controls that have to be reachable
 // wherever the student is on the page. Shared so the docked copy cannot drift
 // from the real bar; the speed, voice and wake-lock controls stay in the real
@@ -268,6 +278,11 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   useEffect(() => { playPauseRef.current = playPause; }, [playPause]);
   const transportRef = useRef({ prev, next, close });
   useEffect(() => { transportRef.current = { prev, next, close }; });
+  // Registration only, on deps that change rarely (open/close, play/pause/
+  // finish) — NOT unitIndex or rate, which move on every word and every speed
+  // change. The handlers are ref-indirected specifically so identity never has
+  // to change; re-running this to refresh a position number would mean
+  // unregistering and re-registering all five actions at every unit boundary.
   useEffect(() => {
     if (!supported || !narratable || unitCount === 0) return undefined;
     const session = typeof navigator !== 'undefined' ? navigator.mediaSession : null;
@@ -281,11 +296,47 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
       nexttrack: () => transportRef.current?.next?.(),
       stop: () => transportRef.current?.close?.(),
     };
+    const registered = [];
     try {
-      for (const [action, handler] of Object.entries(actions)) session.setActionHandler(action, handler);
+      for (const [action, handler] of Object.entries(actions)) {
+        session.setActionHandler(action, handler);
+        registered.push(action);
+      }
     } catch {
-      // A platform that rejects the registration has no session to drive.
+      // A platform that throws partway through has no reliable session to
+      // drive — release whatever it did accept rather than leave stray
+      // handlers bound to this topic's closures on the single global session.
+      for (const action of registered) {
+        try { session.setActionHandler(action, null); } catch { /* releasing anyway */ }
+      }
       return undefined;
+    }
+
+    return () => {
+      try {
+        for (const action of Object.keys(actions)) session.setActionHandler(action, null);
+      } catch {
+        // Shutting down; nothing left to protect.
+      }
+    };
+  }, [supported, narratable, unitCount, open, status]);
+
+  // Metadata and position, on the finer deps that move during playback. Split
+  // out from registration above so a word boundary or a speed change updates
+  // only these, not the action handlers.
+  useEffect(() => {
+    if (!supported || !narratable || unitCount === 0) return undefined;
+    const session = typeof navigator !== 'undefined' ? navigator.mediaSession : null;
+    if (!session) return undefined;
+    if (!open || (status !== 'playing' && status !== 'paused' && status !== 'ended')) return undefined;
+
+    try {
+      // Without this, the lock screen/notification has nothing to decide its
+      // Play/Pause icon from — there is no <audio>/<video> element driving
+      // playback for the browser to read state off instead.
+      session.playbackState = status === 'playing' ? 'playing' : 'paused';
+    } catch {
+      // Some implementations reject the assignment; the icon may lag.
     }
 
     try {
@@ -303,10 +354,8 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
     }
 
     try {
-      // Whole-unit granularity, matching the bar's own n/total counter — an
-      // estimate either way, and honest about it.
-      const elapsed = units.slice(0, unitIndex).reduce((sum, u) => sum + (u?.estimatedSeconds ?? 0), 0);
       const duration = Math.max(1, totalSeconds);
+      const elapsed = elapsedSecondsFor(units, unitIndex, status, totalSeconds);
       session.setPositionState?.({
         duration,
         playbackRate: rate,
@@ -317,11 +366,6 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
     }
 
     return () => {
-      try {
-        for (const action of Object.keys(actions)) session.setActionHandler(action, null);
-      } catch {
-        // Shutting down; nothing left to protect.
-      }
       try {
         session.metadata = null;
       } catch {
@@ -364,9 +408,7 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
 
   const current = units[unitIndex];
   const heading = <MathText text={current?.heading || topic.title} />;
-  // Whole-unit granularity, matching the n/total counter and the Media Session
-  // position above — an estimate either way, and honest about it.
-  const elapsedSeconds = units.slice(0, unitIndex).reduce((sum, u) => sum + (u?.estimatedSeconds ?? 0), 0);
+  const elapsedSeconds = elapsedSecondsFor(units, unitIndex, status, totalSeconds);
   const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
   const progressPct = unitCount > 0
     ? Math.max(0, Math.min(100, ((unitIndex + 1) / unitCount) * 100))
