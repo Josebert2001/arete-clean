@@ -3,7 +3,14 @@
 // expands into a control bar once playback starts. Everything it renders comes
 // from useSpeech (playback) and speechText (what there is to say).
 //
-// Four things here are not decoration:
+// Five things here are not decoration:
+//
+//   The KARAOKE CAPTION. The section-level wash says which paragraph the voice
+//   is in; this says which word, live, in a caption line reading useSpeech's own
+//   utterance text — never the displayed note — so it cannot drift out of sync
+//   with what is actually heard. Word-accurate only where the engine reports
+//   `boundary` events (Chrome, Edge); Safari fires none, so there the caption
+//   still tracks the chunk but nothing inside it is picked out.
 //
 //   The SKIPPED CAPTION. A quarter of these notes is code, equations, tables and
 //   figures, and none of it is read aloud. The voice announces each one as it
@@ -120,7 +127,7 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
 
   const speech = useSpeech(units, { onFinished });
   const {
-    supported, status, playing, paused, interrupted, failed, unitIndex, unitCount,
+    supported, status, playing, paused, interrupted, failed, caption, unitIndex, unitCount,
     play, pause, resume, stop, next, prev, voices, voice, setVoice, rate, setRate,
     keepAwake, setKeepAwake, wakeLockSupported,
   } = speech;
@@ -356,6 +363,33 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
             <X size={14} />
           </button>
         </div>
+
+        {/* Karaoke caption — the chunk actually being spoken, with the exact word
+            the engine just reported lit up. It reads useSpeech's own utterance
+            text, not the note on screen: the same words, but letter-spaced
+            acronyms and skip markers included, exactly as heard. That is what
+            keeps it perfectly in sync with no mapping back to the rendered note
+            to maintain — the section-level wash above already marks *where* in
+            the notes the voice is; this says exactly *what* it is saying right
+            now. `caption.start === -1` is a chunk that has started but has not
+            had its first word boundary yet (always true on Safari, which fires
+            none at all) — shown plain, with nothing picked out. Hidden from
+            assistive tech: the same words are already in the document as the
+            actual note text, so a screen reader repeating this every few hundred
+            milliseconds would just be noise. */}
+        {caption && (
+          <p aria-hidden="true" className="mt-3 rounded-lg border border-coffee-200 bg-paper px-3 py-2 text-sm leading-relaxed text-coffee-600">
+            {caption.start >= 0 ? (
+              <>
+                {caption.text.slice(0, caption.start)}
+                <span className="rounded bg-ember-500/20 px-0.5 font-semibold text-ink">
+                  {caption.text.slice(caption.start, caption.end)}
+                </span>
+                {caption.text.slice(caption.end)}
+              </>
+            ) : caption.text}
+          </p>
+        )}
 
         {/* What the voice will announce but not read — the same line the collapsed
             pill shows, so it does not appear to change on opening. */}

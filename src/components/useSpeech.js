@@ -120,6 +120,17 @@ function stallBudget(chars, rate) {
   return Math.round(expected * 1.6) + 3000;
 }
 
+// `onboundary` reports `charLength` on Chrome and Edge, but older builds and
+// some Android WebViews send a word boundary with no length at all — so the
+// caption needs its own way to find where the word ends. Scanning to the next
+// whitespace is exactly what the engine itself just did to find the word.
+function wordLengthAfter(text, index) {
+  const start = Math.max(0, index);
+  let end = start;
+  while (end < text.length && !/\s/.test(text[end])) end += 1;
+  return Math.max(1, end - start);
+}
+
 /**
  * `text.split(/(?<=[chars])\s+/)` without the lookbehind.
  *
@@ -365,6 +376,13 @@ export function useSpeech(units, { onFinished } = {}) {
   // The device could not synthesise at all — a different message from the
   // screen-lock one, and a different remedy (try another voice).
   const [failed, setFailed] = useState(false);
+  // The chunk currently being spoken, and (Chrome/Edge only — Safari fires no
+  // `boundary` event at all) the word inside it the engine just reached. This
+  // is the utterance's OWN text, after chunking and pronunciation — never
+  // re-derived from the displayed note — so what lights up is always exactly
+  // what is heard, with no mapping between the two to keep in sync. `start:
+  // -1` means the chunk has started but no word boundary has arrived yet.
+  const [caption, setCaption] = useState(null);
 
   // Keyed on CONTENT, not array identity. `topicToSpeechUnits(topic)` called in
   // a component body returns a fresh array every render, and keying the queue on
@@ -505,6 +523,7 @@ export function useSpeech(units, { onFinished } = {}) {
     setUnitIndex(0);
     setInterrupted(false);
     setFailed(false);
+    setCaption(null);
     releaseWakeLock();
   }, [releaseWakeLock]);
 
@@ -644,6 +663,10 @@ export function useSpeech(units, { onFinished } = {}) {
       if (run !== runRef.current) return;
       started = true;
       armStall(stallBudget(item.text.length, rate));
+      // The caption tracks the chunk actually speaking, not the one queued —
+      // set here rather than where the utterance was built, so a retry after
+      // landmine 5 replaces stale text from the attempt that never started.
+      setCaption({ text: item.text, start: -1, end: -1 });
     };
 
     // Not a progress display — a heartbeat. See BOUNDARY_SILENCE_MS.
@@ -657,6 +680,14 @@ export function useSpeech(units, { onFinished } = {}) {
       if (run !== runRef.current) return;
       started = true;
       armStall(event?.name === 'word' ? BOUNDARY_SILENCE_MS : stallBudget(item.text.length, rate));
+      // The karaoke caption. Only a word boundary moves it — a sentence
+      // boundary (some engines emit both) would jump the highlight to the
+      // start of a sentence it has not reached yet.
+      if (event?.name === 'word' && typeof event.charIndex === 'number') {
+        const start = event.charIndex;
+        const length = event.charLength || wordLengthAfter(item.text, start);
+        setCaption({ text: item.text, start, end: start + length });
+      }
     };
 
     utterance.onend = () => {
@@ -738,6 +769,7 @@ export function useSpeech(units, { onFinished } = {}) {
     setUnitIndex(0);
     setInterrupted(false);
     setFailed(false);
+    setCaption(null);
     releaseWakeLock();
   }, [releaseWakeLock, deviceId, clearStall]);
 
@@ -759,6 +791,7 @@ export function useSpeech(units, { onFinished } = {}) {
     retryRef.current = { index: -1, tries: 0 };
     setInterrupted(false);
     setFailed(false);
+    setCaption(null);
 
     // Take the device first: this stands down whichever topic was playing, so
     // its bar resets instead of sitting there claiming to still be running.
@@ -948,6 +981,7 @@ export function useSpeech(units, { onFinished } = {}) {
     // sits under a player that is back to idle — the realistic path being lazily
     // loaded notes replacing the topic after a voice failure.
     setFailed(false);
+    setCaption(null);
   }, [signature, deviceId]);
 
   return {
@@ -957,6 +991,7 @@ export function useSpeech(units, { onFinished } = {}) {
     paused: status === 'paused',
     interrupted,
     failed,
+    caption,
     unitIndex,
     unitCount: units?.length ?? 0,
     play,

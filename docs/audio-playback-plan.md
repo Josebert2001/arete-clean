@@ -1,10 +1,10 @@
 # Lecture-Note Audio — Implementation Plan (two options)
 
 **Status:** **Option A shipped** — the shared serialiser (§3) and the whole Web Speech player
-(§4, phases A0–A3) are built and integrated, along with the highlight §4.4 called for (§4.10). What
-remains of Option A is the real-device pass on Android Chrome and iOS Safari (§4.8), and word-level
-highlighting. **Option B (§5) is not started** and is still a decision, not a plan of record — it is
-the only thing that reaches the commute case.
+(§4, phases A0–A3) are built and integrated, along with the highlight §4.4 called for (§4.10) and the
+word-level caption §4.12 added on top of it. What remains of Option A is the real-device pass on
+Android Chrome and iOS Safari (§4.8). **Option B (§5) is not started** and is still a decision, not a
+plan of record — it is the only thing that reaches the commute case.
 **Audience:** the implementing agent/developer. Every file reference below was verified against the
 codebase on 2026-09-12 (branch `perf/ai-cost`). Read each file before editing it — line numbers
 drift.
@@ -464,13 +464,63 @@ The wash is a tint plus a left rule rather than a full border, with a negative i
 nothing on the page moves as it turns on and off — a highlight that reflowed the text under a
 reader would be worse than no highlight.
 
-**Word-level highlighting is still not built**, and is a separate enhancement rather than a
-refinement of this. It needs `onboundary`, which Safari does not fire reliably, so it can only ever
-be a feature-detected layer on top of what is here.
+Word-level highlighting inside the note text itself is not built, and would be a separate, larger
+enhancement — the utterance's own text is post-pronunciation (acronyms letter-spaced, inline maths
+converted) and post-chunking, so lighting up a word IN the displayed note means mapping a spoken
+position back through both transforms onto the original prose, which the corpus's acronym density
+makes genuinely lossy. §4.12 below took the lower-risk route to the same experience instead.
 
 Verified in the browser: the wash appears on the opening paragraph, moves when the voice does,
 clears on pause, and opens the "Threat Actors" group when the voice reaches it (`aria-expanded`
 false → true). Play on a finished topic restarts at 1/3 with the wash back on the first section.
+
+### 4.12 Word-level highlighting — the karaoke caption (2026-09-18)
+
+Built as a caption line, not as highlighting inside the note text — a deliberate choice between two
+real options, made with the user rather than assumed:
+
+- **In place, inside the paragraph.** Closer to what §4.4 originally sketched, but the utterance text
+  `onboundary` reports position *into* is the spoken form — after `applyPronunciation` (acronyms
+  letter-spaced: "TCP" → "T C P") and after `chunkSpeech`. Lighting up the right word in the
+  *displayed* note means mapping that position back through both transforms onto the original prose,
+  and the acronym density in this corpus (§3.1) makes that mapping lossy, not exact.
+- **A caption strip, echoing the utterance's own text.** What ships. No mapping at all — the caption
+  *is* the text `onboundary`'s `charIndex` already indexes into, so it is exactly as in sync as the
+  browser's own event, with nothing to keep in step by hand.
+
+**What it shows.** A line in the real control bar (never the docked one — see §4.11, a docked bar has
+to stay one line on a phone) holding the chunk currently speaking, with the reported word lit up
+(`bg-ember-500/20`, matching the wash's own highlight colour). `caption.start === -1` — a chunk that
+has started but has had no word boundary yet — renders the line plain. Marked `aria-hidden`: the same
+words are already in the document as the real note text, so a screen reader repeating this every few
+hundred milliseconds would be noise, not help.
+
+**State lives in `useSpeech`, not the component.** `onstart` sets the chunk text; each `word`-named
+`boundary` event replaces it with `{ text, start, end }`, computing the word's end from
+`event.charLength` where the engine reports it and scanning to the next whitespace where it does not
+(`wordLengthAfter` — some Android WebViews send a boundary with no length at all). A `sentence`
+boundary is explicitly ignored, or an engine that emits both would jump the highlight to a word it has
+not reached yet. Cleared on `stop()`, `standDown()` (another topic takes the device) and a topic
+change; deliberately **not** cleared on `pause()` — freezing on the last word read is more useful than
+blanking the line, the same reasoning as leaving the section wash lit while paused.
+
+**Real-device finding, not a code defect.** Driven in Windows Chrome against UUY-CYB 122: the caption
+text updated correctly every chunk regardless of voice, but the network "Google UK English" voice —
+what `pickVoice` reaches for by default, en-NG not being installed — fired `start` and nothing else;
+no `boundary` event ever arrived, so no word was ever picked out. Switching to a local voice (Windows'
+own SAPI "Microsoft David") produced a clean `word` boundary roughly every 300–700ms with a correct
+`charIndex`/`charLength`, and the caption highlighted each one live, confirmed by both a DOM poll and
+a zoomed screenshot mid-word. This is §4.3's landmine 1 territory from the other side: it is not only
+Safari that can fall back to "caption with nothing picked out" — a *network* voice on Chrome does too,
+silently, with no error and no event to say so. The caption already degrades correctly for this case
+(plain text, still updating per chunk), because that fallback was designed in from the start rather
+than discovered after.
+
+Nine tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin: the chunk
+appearing on start with no word chosen yet, a `word` boundary picking out the right slice, the
+`charLength`-missing fallback, a `sentence` boundary being ignored, freezing (not clearing) on pause,
+and clearing on `stop()`, on a topic change, and on `standDown()` when a second topic takes the
+device.
 
 ### 4.11 The first real-use pass — it stopped, and you had to scroll back up (2026-09-14)
 

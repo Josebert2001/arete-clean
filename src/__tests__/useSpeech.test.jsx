@@ -990,3 +990,114 @@ describe('useSpeech — one device, many mounted players', () => {
     expect(state.speaking).toBe(false);
   });
 });
+
+describe('useSpeech — the karaoke caption', () => {
+  beforeEach(() => { localStorage.clear(); });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('shows the chunk once it starts speaking, with no word picked out yet', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    expect(result.current.caption.text).toBe(state.spoken[0].text);
+    expect(result.current.caption.start).toBe(-1);
+  });
+
+  it('picks out the exact word the engine reports', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: 3 }));
+
+    expect(result.current.caption.start).toBe(4);
+    expect(result.current.caption.end).toBe(7);
+    expect(result.current.caption.text.slice(4, 7)).toBe('two');
+  });
+
+  it('finds the word boundary itself when the engine reports no charLength', async () => {
+    // Some Android WebViews send a word boundary with charIndex only. The
+    // caption cannot show a one-character highlight in that case — it has to
+    // scan forward the way the engine itself just did.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4 }));
+
+    const { start, end, text } = result.current.caption;
+    expect(text.slice(start, end)).toBe('two');
+  });
+
+  it('only a word boundary moves the highlight, never a sentence one', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: 3 }));
+    const before = result.current.caption;
+
+    act(() => state.spoken[0].onboundary?.({ name: 'sentence', charIndex: 0 }));
+
+    expect(result.current.caption).toEqual(before);
+  });
+
+  it('freezes rather than clearing on pause', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: 3 }));
+
+    act(() => result.current.pause());
+
+    expect(result.current.caption?.start).toBe(4);
+  });
+
+  it('clears on stop, so a fresh Listen does not open on stale text', async () => {
+    install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    act(() => result.current.stop());
+
+    expect(result.current.caption).toBeNull();
+  });
+
+  it('drops the caption when the topic changes underneath it', async () => {
+    install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result, rerender } = renderHook(({ u }) => useSpeech(u), {
+      initialProps: { u: units('First topic.') },
+    });
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    rerender({ u: units('A different topic.') });
+
+    await waitFor(() => expect(result.current.caption).toBeNull());
+  });
+
+  it('stands down silently when another topic takes the device', async () => {
+    // claimDevice's standDown() is a separate reset path from stop() — the
+    // caption has to be cleared there too, or a second topic's Listen leaves
+    // the first one's last sentence lit up behind an idle bar.
+    install([{ name: 'NG', lang: 'en-NG' }]);
+    const first = renderHook(() => useSpeech(units(multiChunk(3))));
+    const second = renderHook(() => useSpeech(units(multiChunk(2))));
+
+    act(() => first.result.current.play());
+    await waitFor(() => expect(first.result.current.caption).not.toBeNull());
+
+    act(() => second.result.current.play());
+    await waitFor(() => expect(first.result.current.status).toBe('idle'));
+    expect(first.result.current.caption).toBeNull();
+
+    first.unmount();
+    second.unmount();
+  });
+});
