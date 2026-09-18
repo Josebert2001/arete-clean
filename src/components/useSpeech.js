@@ -609,6 +609,10 @@ export function useSpeech(units, { onFinished } = {}) {
       cursorRef.current = index;
       setStatus('paused');
       setInterrupted(true);
+      // The same stale-caption defect as the other failure exits: nothing of
+      // this chunk was heard, so it must not go on sitting in the caption
+      // (word highlighted, mid-sentence) under the screen-lock notice.
+      setCaption(null);
       releaseWakeLock();
     };
 
@@ -689,7 +693,14 @@ export function useSpeech(units, { onFinished } = {}) {
       // start of a sentence it has not reached yet.
       if (event?.name === 'word' && typeof event.charIndex === 'number') {
         const start = event.charIndex;
-        const length = event.charLength || wordLengthAfter(item.text, start);
+        // Spec says `charLength` is a number, but it is a value the ENGINE
+        // hands us, not one this app controls — a non-conforming engine
+        // reporting it as a numeric string would otherwise make `start +
+        // length` concatenate ("4" + "3" = "43") instead of add, slicing a
+        // multi-word span instead of the one word actually spoken.
+        const reported = typeof event.charLength === 'number' && event.charLength > 0
+          ? event.charLength : 0;
+        const length = reported || wordLengthAfter(item.text, start);
         setCaption({ text: item.text, start, end: start + length });
       }
     };

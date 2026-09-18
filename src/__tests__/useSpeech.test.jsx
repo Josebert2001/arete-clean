@@ -1151,4 +1151,45 @@ describe('useSpeech — the karaoke caption', () => {
 
     expect(result.current.caption).toBeNull();
   });
+
+  it('clears the caption when a chunk stalls twice and playback gives up', async () => {
+    // Landmine 5's giveUp() is a fourth failure exit, separate from the three
+    // above — the caption must not go on showing the wedged chunk under the
+    // screen-lock notice.
+    vi.useFakeTimers();
+    try {
+      const state = install([{ name: 'NG', lang: 'en-NG' }]);
+      const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+      act(() => result.current.play());
+      await act(async () => { await Promise.resolve(); });
+      expect(result.current.caption).not.toBeNull();
+      const first = state.spoken[0];
+
+      act(() => { vi.advanceTimersByTime(25000); });          // first stall → retry
+      await act(async () => { await Promise.resolve(); });
+      act(() => first.onend?.());                             // the cancelled one, late
+      act(() => { vi.advanceTimersByTime(25000); });          // the retry wedges too
+
+      expect(result.current.status).toBe('paused');
+      expect(result.current.interrupted).toBe(true);
+      expect(result.current.caption).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('treats a non-numeric charLength as missing rather than concatenating it', async () => {
+    // A non-conforming engine reporting charLength as a numeric STRING used to
+    // make `start + length` concatenate ("4" + "3" = "43") instead of add,
+    // slicing a multi-word span instead of the one word actually spoken.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: '3' }));
+
+    const { start, end, text } = result.current.caption;
+    expect(text.slice(start, end)).toBe('two');
+  });
 });
