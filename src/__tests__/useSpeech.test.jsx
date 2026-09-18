@@ -1360,4 +1360,21 @@ describe('useSpeech — the karaoke caption', () => {
 
     expect(result.current.caption).toBeNull();
   });
+
+  it('clears the caption immediately when a mid-topic chunk fails without ending the run', async () => {
+    // One failed chunk below MAX_ERROR_STREAK does not end the run — advance()
+    // moves straight to the next chunk instead. That chunk's own onstart is
+    // async and can lag well behind this handler on a real engine, so the
+    // caption has to clear here rather than wait for it to arrive.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: 3 }));
+
+    const first = state.current;
+    act(() => first?.onerror?.({ error: 'synthesis-failed' }));
+
+    expect(result.current.caption).toBeNull();
+  });
 });

@@ -516,7 +516,7 @@ silently, with no error and no event to say so. The caption already degrades cor
 (plain text, still updating per chunk), because that fallback was designed in from the start rather
 than discovered after.
 
-Twenty-three tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin the
+Twenty-four tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin the
 caption's behaviour: the chunk appearing on start with no word chosen yet; a `word` boundary picking
 out the right slice; a `sentence` boundary being ignored; freezing (not clearing) on pause, including a
 late boundary from an engine whose `pause()` doesn't reliably stop it, or a `pause()` landing in the gap
@@ -525,27 +525,30 @@ large `charLength`, all handled without producing a garbled highlight; and the c
 every exit that ends, resets, or **restarts** a run — `stop()`, `standDown()`, a topic change, a
 mid-playback voice/rate change, `resume()` (which restarts the paused chunk from its own beginning, not
 the paused position), the stalled-chunk retry inside `recover()`, picking back up after a screen-lock
-suspension, each of `speakFrom`'s three failure exits (spoke nothing, the `MAX_ERROR_STREAK` cut-off,
-landmine 5's `giveUp()`), the normal `'ended'` exit when only the *last* chunk of an otherwise-clean run
-errored, and `skipTo()`'s ordinary not-playing branch (not a failure path itself, grouped here only by
-what it fixed).
+suspension, an ordinary mid-topic chunk error that does not end the run, each of `speakFrom`'s three
+*failure* exits proper (spoke nothing, the `MAX_ERROR_STREAK` cut-off, landmine 5's `giveUp()`), the
+normal `'ended'` exit when only the *last* chunk of an otherwise-clean run errored, and `skipTo()`'s
+ordinary not-playing branch (not a failure path itself, grouped here only by what it fixed).
 
-**Four rounds of `/code-review high` — the repo's pre-push gate re-runs one on every new commit — found
-eleven real issues in this feature, all in exactly one shape: a code path that ends, restarts, or
-invalidates a chunk without also clearing (or re-setting) the caption, so it goes on naming a sentence
-that is no longer the one actually playing.** None were caught by the tests written alongside the
-feature that introduced each hole; each was caught by the next review pass, most only after the
+**Five rounds of `/code-review high` — the repo's pre-push gate re-runs one on every new commit — found
+twelve real issues in this feature, all but two in exactly one shape: a code path that ends, restarts,
+or invalidates a chunk without also clearing (or re-setting) the caption, so it goes on naming a
+sentence that is no longer the one actually playing.** None were caught by the tests written alongside
+the feature that introduced each hole; each was caught by the next review pass, most only after the
 category ("every exit needs to clear the caption") existed to check exhaustively against — `giveUp()`
-surfaced only on round 2, and the normal-`'ended'`-but-last-chunk-failed case and the mid-playback
-voice-change restart only on round 4. Once that shape was legible from the review history itself, three
-more of the same kind — `resume()`, the stalled-chunk retry, and the suspension pickup — were found by
-re-reading every `runRef.current += 1` site in the file rather than waiting for a fifth pass to find
-them one at a time; recorded here because *how* they were found is as reusable as the fixes. Two issues
-were of a second shape: `onboundary`'s `charIndex` and `charLength` are the *engine's* own report, not
-values this app controls, and were trusted without validating their type or range — fixed by clamping
-both to the scan-to-whitespace length computed independently (`wordLengthAfter`), so a well-behaved
-engine's report is still used when it agrees with that scan, and a non-conforming one cannot produce a
-multi-word or out-of-bounds highlight.
+surfaced only on round 2, the normal-`'ended'`-but-last-chunk-failed case and the mid-playback
+voice-change restart only on round 4, and the ordinary mid-topic-error-that-does-not-end-the-run case
+only on round 5, past the point two existing tests already exercised that exact branch without ever
+asserting what the caption did. Between rounds four and five, three more of the same kind —
+`resume()`, the stalled-chunk retry, and the suspension pickup — were found by re-reading every
+`runRef.current += 1` site in the file rather than waiting for the next pass to find them one at a
+time; recorded here because *how* they were found is as reusable as the fixes, and it is the reason
+round five found only one remaining gap rather than several. The other two issues were of a second
+shape: `onboundary`'s `charIndex` and `charLength` are the *engine's* own report, not values this app
+controls, and were trusted without validating their type or range — fixed by clamping both to the
+scan-to-whitespace length computed independently (`wordLengthAfter`), so a well-behaved engine's report
+is still used when it agrees with that scan, and a non-conforming one cannot produce a multi-word or
+out-of-bounds highlight.
 
 A reviewer flagged, and this plan record agrees, that the repeated reset of this one flag —
 `status`/`unitIndex`/`interrupted`/`failed`/`caption`/wake-lock — being hand-duplicated across seven-plus

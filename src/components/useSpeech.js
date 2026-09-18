@@ -799,6 +799,13 @@ export function useSpeech(units, { onFinished } = {}) {
         releaseWakeLock();
         return;
       }
+      // This chunk was NOT heard either — same reasoning as every other
+      // caption-clearing exit — but advance() is about to move to the NEXT
+      // chunk rather than end the run, and that chunk's own onstart is async
+      // and can lag well behind this handler on a real engine. Left in place,
+      // the caption would keep showing the failed sentence (sometimes with a
+      // word still highlighted from before it errored) until that arrives.
+      setCaption(null);
       advance();
     };
 
