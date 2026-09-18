@@ -120,6 +120,17 @@ function stallBudget(chars, rate) {
   return Math.round(expected * 1.6) + 3000;
 }
 
+// `onboundary` reports `charLength` on Chrome and Edge, but older builds and
+// some Android WebViews send a word boundary with no length at all — so the
+// caption needs its own way to find where the word ends. Scanning to the next
+// whitespace is exactly what the engine itself just did to find the word.
+function wordLengthAfter(text, index) {
+  const start = Math.max(0, index);
+  let end = start;
+  while (end < text.length && !/\s/.test(text[end])) end += 1;
+  return Math.max(1, end - start);
+}
+
 /**
  * `text.split(/(?<=[chars])\s+/)` without the lookbehind.
  *
@@ -365,6 +376,13 @@ export function useSpeech(units, { onFinished } = {}) {
   // The device could not synthesise at all — a different message from the
   // screen-lock one, and a different remedy (try another voice).
   const [failed, setFailed] = useState(false);
+  // The chunk currently being spoken, and (Chrome/Edge only — Safari fires no
+  // `boundary` event at all) the word inside it the engine just reached. This
+  // is the utterance's OWN text, after chunking and pronunciation — never
+  // re-derived from the displayed note — so what lights up is always exactly
+  // what is heard, with no mapping between the two to keep in sync. `start:
+  // -1` means the chunk has started but no word boundary has arrived yet.
+  const [caption, setCaption] = useState(null);
 
   // Keyed on CONTENT, not array identity. `topicToSpeechUnits(topic)` called in
   // a component body returns a fresh array every render, and keying the queue on
@@ -505,6 +523,7 @@ export function useSpeech(units, { onFinished } = {}) {
     setUnitIndex(0);
     setInterrupted(false);
     setFailed(false);
+    setCaption(null);
     releaseWakeLock();
   }, [releaseWakeLock]);
 
@@ -542,11 +561,23 @@ export function useSpeech(units, { onFinished } = {}) {
         cursorRef.current = 0;
         setStatus('paused');
         setFailed(true);
+        // Whatever chunk got as far as onstart before it errored must not go on
+        // looking like it is still being read under a notice saying the device
+        // could not play the audio.
+        setCaption(null);
         finishedRef.current?.(false);
         return;
       }
 
       setStatus('ended');
+      // errorStreakRef is reset to 0 by onend and only ever incremented by
+      // onerror, so still carrying a nonzero value here means the LAST chunk
+      // attempted errored rather than finished — its onstart set the caption,
+      // but no matching onend ever confirmed it was actually heard. Earlier
+      // chunks may well have played cleanly (spokeRef.current > 0, so this is
+      // not the "spoke nothing" branch above), but the caption is left naming
+      // a sentence that was, in fact, skipped.
+      if (errorStreakRef.current > 0) setCaption(null);
       // The flag matters twice over. A caller that marks the topic read off this
       // must not be fooled by a student who pressed skip until the end, NOR by a
       // device whose voice failed on every chunk: those errors advance the queue
@@ -586,6 +617,10 @@ export function useSpeech(units, { onFinished } = {}) {
       cursorRef.current = index;
       setStatus('paused');
       setInterrupted(true);
+      // The same stale-caption defect as the other failure exits: nothing of
+      // this chunk was heard, so it must not go on sitting in the caption
+      // (word highlighted, mid-sentence) under the screen-lock notice.
+      setCaption(null);
       releaseWakeLock();
     };
 
@@ -611,6 +646,11 @@ export function useSpeech(units, { onFinished } = {}) {
       const retryRun = runRef.current;
       claimDevice(deviceId, notifyStandDown);
       resetDevice(synth());
+      // Same reasoning as the voice-change and suspension-recovery restarts:
+      // the retry's own onstart is async, so the caption from before the
+      // stall — potentially a word highlighted partway through this chunk —
+      // would otherwise sit on screen through the gap before it fires again.
+      setCaption(null);
       speakFromRef.current?.(index, retryRun);
     };
 
@@ -644,6 +684,15 @@ export function useSpeech(units, { onFinished } = {}) {
       if (run !== runRef.current) return;
       started = true;
       armStall(stallBudget(item.text.length, rate));
+      // The caption tracks the chunk actually speaking, not the one queued —
+      // set here rather than where the utterance was built, so a retry after
+      // landmine 5 replaces stale text from the attempt that never started.
+      //
+      // Gated on pausedRef for the same reason `advance` is: speak() is
+      // synchronous but onstart is not, so a Pause click in that gap already
+      // has pausedRef.current true by the time this runs. Updating anyway
+      // would change what the caption shows while the bar reads Paused.
+      if (!pausedRef.current) setCaption({ text: item.text, start: -1, end: -1 });
     };
 
     // Not a progress display — a heartbeat. See BOUNDARY_SILENCE_MS.
@@ -657,6 +706,44 @@ export function useSpeech(units, { onFinished } = {}) {
       if (run !== runRef.current) return;
       started = true;
       armStall(event?.name === 'word' ? BOUNDARY_SILENCE_MS : stallBudget(item.text.length, rate));
+      // The karaoke caption. Only a word boundary moves it — a sentence
+      // boundary (some engines emit both) would jump the highlight to the
+      // start of a sentence it has not reached yet. Gated on pausedRef too:
+      // pause() does not stop Android's engine reliably (see armStall above),
+      // so boundaries for the rest of the sentence can keep arriving after the
+      // click — updating the caption through them would have it visibly
+      // advance behind a bar that says Paused.
+      //
+      // `charIndex` gets the same distrust as `charLength` below: it is the
+      // engine's own report, not this app's. `typeof x === 'number'` alone
+      // does not exclude NaN — `typeof NaN` IS `'number'` — and an
+      // out-of-range index would hand `wordLengthAfter` a start past the
+      // text, degenerating to an empty highlight. Number.isFinite excludes
+      // NaN/Infinity; the clamp keeps the index inside the chunk.
+      if (
+        event?.name === 'word'
+        && typeof event.charIndex === 'number'
+        && Number.isFinite(event.charIndex)
+        && !pausedRef.current
+      ) {
+        const start = Math.max(0, Math.min(event.charIndex, item.text.length - 1));
+        // The scan-based length doubles as a ceiling, not just a fallback:
+        // `charLength` is a value the ENGINE hands back, not one this app
+        // controls, and clamping to it is what stops two different
+        // misbehaviours. A non-conforming engine reporting it as a numeric
+        // STRING would otherwise make `start + length` concatenate
+        // ("4" + "3" = "43") instead of add. And an engine reporting a
+        // charLength that is numeric but genuinely too large — trailing
+        // punctuation or whitespace folded into the word — would otherwise
+        // extend the highlight past the word actually spoken; capping it at
+        // the natural scan-to-whitespace length is the one bound a word
+        // cannot legitimately cross.
+        const scanned = wordLengthAfter(item.text, start);
+        const reported = typeof event.charLength === 'number' && event.charLength > 0
+          ? event.charLength : 0;
+        const length = reported ? Math.min(reported, scanned) : scanned;
+        setCaption({ text: item.text, start, end: start + length });
+      }
     };
 
     utterance.onend = () => {
@@ -705,9 +792,20 @@ export function useSpeech(units, { onFinished } = {}) {
         pausedRef.current = true;
         setStatus('paused');
         setFailed(true);
+        // Otherwise the last chunk that DID speak stays lit under a notice
+        // saying the device could not play the audio — a frozen caption
+        // implying playback is still live when it has just stopped for good.
+        setCaption(null);
         releaseWakeLock();
         return;
       }
+      // This chunk was NOT heard either — same reasoning as every other
+      // caption-clearing exit — but advance() is about to move to the NEXT
+      // chunk rather than end the run, and that chunk's own onstart is async
+      // and can lag well behind this handler on a real engine. Left in place,
+      // the caption would keep showing the failed sentence (sometimes with a
+      // word still highlighted from before it errored) until that arrives.
+      setCaption(null);
       advance();
     };
 
@@ -738,6 +836,7 @@ export function useSpeech(units, { onFinished } = {}) {
     setUnitIndex(0);
     setInterrupted(false);
     setFailed(false);
+    setCaption(null);
     releaseWakeLock();
   }, [releaseWakeLock, deviceId, clearStall]);
 
@@ -759,6 +858,7 @@ export function useSpeech(units, { onFinished } = {}) {
     retryRef.current = { index: -1, tries: 0 };
     setInterrupted(false);
     setFailed(false);
+    setCaption(null);
 
     // Take the device first: this stands down whichever topic was playing, so
     // its bar resets instead of sitting there claiming to still be running.
@@ -802,6 +902,14 @@ export function useSpeech(units, { onFinished } = {}) {
     setFailed(false);
     acquireWakeLock();
 
+    // The frozen caption from pause() is wherever the chunk got to before the
+    // click — but resume restarts that chunk from ITS OWN beginning (see the
+    // comment above on why), not from the paused position. Left in place, the
+    // stale word stays lit through the gap before the restarted chunk's own
+    // onstart/onboundary land, implying the voice resumed further in than it
+    // is about to.
+    setCaption(null);
+
     runRef.current += 1;
     claimDevice(deviceId, notifyStandDown);
     resetDevice(synth());
@@ -817,6 +925,11 @@ export function useSpeech(units, { onFinished } = {}) {
       // topic: they moved the counter, and then Play — which treats 'ended' as
       // "start over" — threw the choice away and went back to section one.
       if (status === 'ended') setStatus('idle');
+      // The caption is frozen on whatever last spoke — from 'ended', that is
+      // the topic's closing chunk. Left in place, Previous/Next from a finished
+      // topic moved the heading above the caption to the newly-picked section
+      // while the caption itself kept naming the old one.
+      setCaption(null);
     }
   }, [units, status, play]);
 
@@ -871,6 +984,12 @@ export function useSpeech(units, { onFinished } = {}) {
         const run = runRef.current;
         claimDevice(deviceId, notifyStandDown);
         resetDevice(api);
+        // The same restart-without-a-fresh-caption gap as a mid-playback voice
+        // or rate change: this chunk is about to restart from its own
+        // beginning, but the caption is still showing wherever the voice had
+        // gotten to before the suspension — a word highlighted mid-sentence,
+        // implying the voice picked back up further in than it actually did.
+        setCaption(null);
         // Hiding released the lock (above), and playback is about to carry on —
         // so take it back, exactly as the branch below does. Without this the
         // first screen lock quietly turned "Keep screen on" off for the rest of
@@ -909,6 +1028,12 @@ export function useSpeech(units, { onFinished } = {}) {
     runRef.current += 1;
     claimDevice(deviceId, notifyStandDown);
     resetDevice(synth());
+    // The restarted chunk's own onstart is about to set this again — but that
+    // is async, and the OLD caption (possibly a word or two further into the
+    // sentence than where the restarted chunk will actually begin) would
+    // otherwise sit on screen until it does, implying the voice picked up
+    // further along than it really did.
+    setCaption(null);
     speakFrom(cursorRef.current, runRef.current);
   }, [voice, rate, status, speakFrom, deviceId, notifyStandDown]);
 
@@ -948,6 +1073,7 @@ export function useSpeech(units, { onFinished } = {}) {
     // sits under a player that is back to idle — the realistic path being lazily
     // loaded notes replacing the topic after a voice failure.
     setFailed(false);
+    setCaption(null);
   }, [signature, deviceId]);
 
   return {
@@ -957,6 +1083,7 @@ export function useSpeech(units, { onFinished } = {}) {
     paused: status === 'paused',
     interrupted,
     failed,
+    caption,
     unitIndex,
     unitCount: units?.length ?? 0,
     play,
