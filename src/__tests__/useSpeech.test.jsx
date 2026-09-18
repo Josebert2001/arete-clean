@@ -1308,4 +1308,56 @@ describe('useSpeech — the karaoke caption', () => {
 
     expect(result.current.caption).toBeNull();
   });
+
+  it('clears the frozen caption on resume, before the restarted chunk speaks again', async () => {
+    // resume() always restarts the current chunk from ITS OWN beginning
+    // rather than the exact paused position — so the caption frozen by pause()
+    // is stale the instant resume is pressed, not just once the restarted
+    // chunk's own onstart eventually lands.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One two three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    act(() => state.spoken[0].onboundary?.({ name: 'word', charIndex: 4, charLength: 3 }));
+
+    act(() => result.current.pause());
+    act(() => result.current.resume());
+
+    expect(result.current.caption).toBeNull();
+  });
+
+  it('clears the caption when a stalled chunk is retried', async () => {
+    // Landmine 5's one-retry-before-giving-up path restarts the same chunk
+    // from its beginning — same stale-caption gap as every other restart.
+    vi.useFakeTimers();
+    try {
+      install([{ name: 'NG', lang: 'en-NG' }]);
+      const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+      act(() => result.current.play());
+      await act(async () => { await Promise.resolve(); });
+      expect(result.current.caption).not.toBeNull();
+
+      act(() => { vi.advanceTimersByTime(25000); }); // stall → retry
+
+      expect(result.current.caption).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('clears the caption when picking back up after a screen-lock suspension', async () => {
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    act(() => { state.speaking = false; state.paused = false; state.current = null; });
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+
+    expect(result.current.caption).toBeNull();
+  });
 });

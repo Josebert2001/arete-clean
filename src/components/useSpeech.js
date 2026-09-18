@@ -646,6 +646,11 @@ export function useSpeech(units, { onFinished } = {}) {
       const retryRun = runRef.current;
       claimDevice(deviceId, notifyStandDown);
       resetDevice(synth());
+      // Same reasoning as the voice-change and suspension-recovery restarts:
+      // the retry's own onstart is async, so the caption from before the
+      // stall — potentially a word highlighted partway through this chunk —
+      // would otherwise sit on screen through the gap before it fires again.
+      setCaption(null);
       speakFromRef.current?.(index, retryRun);
     };
 
@@ -890,6 +895,14 @@ export function useSpeech(units, { onFinished } = {}) {
     setFailed(false);
     acquireWakeLock();
 
+    // The frozen caption from pause() is wherever the chunk got to before the
+    // click — but resume restarts that chunk from ITS OWN beginning (see the
+    // comment above on why), not from the paused position. Left in place, the
+    // stale word stays lit through the gap before the restarted chunk's own
+    // onstart/onboundary land, implying the voice resumed further in than it
+    // is about to.
+    setCaption(null);
+
     runRef.current += 1;
     claimDevice(deviceId, notifyStandDown);
     resetDevice(synth());
@@ -964,6 +977,12 @@ export function useSpeech(units, { onFinished } = {}) {
         const run = runRef.current;
         claimDevice(deviceId, notifyStandDown);
         resetDevice(api);
+        // The same restart-without-a-fresh-caption gap as a mid-playback voice
+        // or rate change: this chunk is about to restart from its own
+        // beginning, but the caption is still showing wherever the voice had
+        // gotten to before the suspension — a word highlighted mid-sentence,
+        // implying the voice picked back up further in than it actually did.
+        setCaption(null);
         // Hiding released the lock (above), and playback is about to carry on —
         // so take it back, exactly as the branch below does. Without this the
         // first screen lock quietly turned "Keep screen on" off for the rest of
