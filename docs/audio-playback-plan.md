@@ -516,11 +516,15 @@ silently, with no error and no event to say so. The caption already degrades cor
 (plain text, still updating per chunk), because that fallback was designed in from the start rather
 than discovered after.
 
-Nine tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin: the chunk
+Eleven tests in `useSpeech.test.jsx` (`describe('useSpeech — the karaoke caption')`) pin: the chunk
 appearing on start with no word chosen yet, a `word` boundary picking out the right slice, the
 `charLength`-missing fallback, a `sentence` boundary being ignored, freezing (not clearing) on pause,
-and clearing on `stop()`, on a topic change, and on `standDown()` when a second topic takes the
-device.
+and clearing on `stop()`, on a topic change, on `standDown()` when a second topic takes the device,
+and on each of the three separate failure exits in `speakFrom` — reaching the end having spoken
+nothing, the `MAX_ERROR_STREAK` cut-off, and `skipTo()`'s not-playing branch picking a new section
+from a finished topic. A `/code-review high` pass over the first cut of this found all three; each
+had left a chunk's text (sometimes mid-word-highlighted) sitting under a UI that had just told the
+student playback stopped.
 
 ### 4.11 The first real-use pass — it stopped, and you had to scroll back up (2026-09-14)
 

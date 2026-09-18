@@ -1100,4 +1100,55 @@ describe('useSpeech — the karaoke caption', () => {
     first.unmount();
     second.unmount();
   });
+
+  it('clears the caption when nothing was ever heard', async () => {
+    // The "reached the end having spoken nothing" branch sets failed=true but
+    // is a separate exit from stop()/standDown() — it needs its own clear, or
+    // the chunk that started right before it errored goes on looking read.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('Short one.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    act(() => state.spoken[0].onerror?.({ error: 'synthesis-failed' }));
+
+    await waitFor(() => expect(result.current.failed).toBe(true));
+    expect(result.current.caption).toBeNull();
+  });
+
+  it('clears the caption when the voice fails repeatedly mid-topic', async () => {
+    // The MAX_ERROR_STREAK branch is a third exit that sets failed=true — same
+    // requirement, different code path, so it needs its own assertion.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(3))));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    for (let i = 0; i < 3; i += 1) {
+      const u = state.current;
+      act(() => u?.onerror?.({ error: 'synthesis-failed' }));
+    }
+
+    await waitFor(() => expect(result.current.failed).toBe(true));
+    expect(result.current.caption).toBeNull();
+  });
+
+  it('clears the frozen caption when picking a new section from a finished topic', async () => {
+    // From 'ended' the caption is frozen on the closing chunk. skipTo's
+    // not-playing branch moves unitIndex and the heading above the caption
+    // without touching the caption itself, so Previous from a finished topic
+    // left the old chunk's text sitting under the newly-picked section.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units('One.', 'Two.', 'Three.')));
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+
+    for (let i = 0; i < 30 && state.current; i += 1) act(() => state.endCurrent());
+    await waitFor(() => expect(result.current.status).toBe('ended'));
+    expect(result.current.caption).not.toBeNull();
+
+    act(() => result.current.prev());
+
+    expect(result.current.caption).toBeNull();
+  });
 });

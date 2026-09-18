@@ -561,6 +561,10 @@ export function useSpeech(units, { onFinished } = {}) {
         cursorRef.current = 0;
         setStatus('paused');
         setFailed(true);
+        // Whatever chunk got as far as onstart before it errored must not go on
+        // looking like it is still being read under a notice saying the device
+        // could not play the audio.
+        setCaption(null);
         finishedRef.current?.(false);
         return;
       }
@@ -736,6 +740,10 @@ export function useSpeech(units, { onFinished } = {}) {
         pausedRef.current = true;
         setStatus('paused');
         setFailed(true);
+        // Otherwise the last chunk that DID speak stays lit under a notice
+        // saying the device could not play the audio — a frozen caption
+        // implying playback is still live when it has just stopped for good.
+        setCaption(null);
         releaseWakeLock();
         return;
       }
@@ -850,6 +858,11 @@ export function useSpeech(units, { onFinished } = {}) {
       // topic: they moved the counter, and then Play — which treats 'ended' as
       // "start over" — threw the choice away and went back to section one.
       if (status === 'ended') setStatus('idle');
+      // The caption is frozen on whatever last spoke — from 'ended', that is
+      // the topic's closing chunk. Left in place, Previous/Next from a finished
+      // topic moved the heading above the caption to the newly-picked section
+      // while the caption itself kept naming the old one.
+      setCaption(null);
     }
   }, [units, status, play]);
 
