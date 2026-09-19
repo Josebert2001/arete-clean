@@ -1143,12 +1143,50 @@ describe('useSpeech — the karaoke caption', () => {
     act(() => result.current.play());
     await waitFor(() => expect(result.current.caption).not.toBeNull());
 
-    for (let i = 0; i < 30 && state.current; i += 1) act(() => state.endCurrent());
+    // One flush per chunk, not one at the end: each unit's own onstart has to
+    // land before the next ends, or `state.current` moves on before the mock
+    // ever checks it against the queued callback and none of them fire.
+    for (let i = 0; i < 30 && state.current; i += 1) {
+      act(() => state.endCurrent());
+      await act(async () => { await Promise.resolve(); });
+    }
     await waitFor(() => expect(result.current.status).toBe('ended'));
     expect(result.current.caption).not.toBeNull();
 
     act(() => result.current.prev());
 
+    expect(result.current.caption).toBeNull();
+  });
+
+  it('clears the caption at a unit boundary instead of misattributing it to the new unit', async () => {
+    // unitIndex moves the instant the next chunk is queued, synchronously —
+    // but the caption for THAT chunk only arrives later, in its own async
+    // onstart. Read-along strip placement is keyed off unitIndex, so without
+    // this the old unit's last caption briefly sits under the new unit's
+    // heading. Within one unit (multiChunk splits one sentence group into
+    // several chunks) the caption must NOT be cleared this way — that gap is
+    // the continuity onstart's own comment relies on.
+    const state = install([{ name: 'NG', lang: 'en-NG' }]);
+    const { result } = renderHook(() => useSpeech(units(multiChunk(2), 'Two.')));
+
+    act(() => result.current.play());
+    await waitFor(() => expect(result.current.caption).not.toBeNull());
+    expect(result.current.unitIndex).toBe(0);
+
+    // Walk chunk by chunk through the first unit's several fragments. Each
+    // step here stays inside unit 0, so the caption must never go null in
+    // the gap before that chunk's own onstart lands.
+    for (let i = 0; i < 30 && result.current.unitIndex === 0; i += 1) {
+      act(() => state.endCurrent());
+      if (result.current.unitIndex !== 0) break; // just crossed into unit 1
+      expect(result.current.caption).not.toBeNull();
+      await act(async () => { await Promise.resolve(); }); // this chunk's onstart
+    }
+
+    // The step above crossed into unit 1: unitIndex already reports it, but
+    // the caption must already be cleared — not still naming unit 0 — in the
+    // gap before unit 1's own first chunk fires its onstart.
+    expect(result.current.unitIndex).toBe(1);
     expect(result.current.caption).toBeNull();
   });
 

@@ -38,8 +38,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // The speeds the control bar offers. Declared here because the chunk budget
-// below is derived from the slowest of them.
-export const SPEECH_RATES = [0.75, 1, 1.25, 1.5];
+// below is derived from the slowest of them. 2× is the top: revision listening
+// is routinely at double speed, and a faster rate only shortens a chunk's
+// duration, so the slowest-rate budget still covers it.
+export const SPEECH_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
 // Chrome's ~15s cut-off at a normal 150wpm is about 220 characters, and 200
 // leaves headroom AT RATE 1.
@@ -559,6 +561,11 @@ export function useSpeech(units, { onFinished } = {}) {
       if (spokeRef.current === 0 && errorStreakRef.current > 0) {
         pausedRef.current = true;
         cursorRef.current = 0;
+        // Nothing was heard, so the progress this leaves on screen must read
+        // as zero too — left at the last unit attempted, the bar and the
+        // Media Session position both reported the topic as nearly finished
+        // alongside the "could not play" notice.
+        setUnitIndex(0);
         setStatus('paused');
         setFailed(true);
         // Whatever chunk got as far as onstart before it errored must not go on
@@ -587,8 +594,20 @@ export function useSpeech(units, { onFinished } = {}) {
       return;
     }
 
+    // The read-along strip is positioned by the outline index attached to
+    // unitIndex, which moves the instant this fires; the caption text for the
+    // chunk now starting only arrives later, asynchronously, in its own
+    // onstart below. Left alone, crossing into a new unit shows the OLD
+    // unit's last caption under the NEW unit's heading for the gap between
+    // the two. Only clear on an actual unit change — within one unit, the
+    // stale caption sitting through the gap between chunks is the same
+    // continuity onstart's own comment relies on, not this bug.
+    const previousUnitIndex = queue[cursorRef.current]?.unitIndex;
     cursorRef.current = index;
     setUnitIndex(item.unitIndex);
+    if (previousUnitIndex !== undefined && previousUnitIndex !== item.unitIndex) {
+      setCaption(null);
+    }
 
     const utterance = new window.SpeechSynthesisUtterance(item.text);
     if (voice) utterance.voice = voice;

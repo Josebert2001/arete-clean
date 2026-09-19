@@ -7,6 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import ListenToTopic from '../components/ListenToTopic.jsx';
+import { SPEECH_RATES } from '../components/useSpeech.js';
 import { describeSkips } from '../utils/speechText.js';
 
 function installSynth(voices = [{ name: 'NG', lang: 'en-NG', default: true }]) {
@@ -502,5 +503,145 @@ describe('ListenToTopic', () => {
     // unit 0 it counted as unclean, so finishing it never marked the topic read.
     await waitFor(() => expect(state.spoken.length).toBeGreaterThan(0));
     expect(state.spoken[0].text).toContain('A network service');
+  });
+
+  it('drives headset and notification controls through the Media Session API', async () => {
+    // Bluetooth earbuds, wired headset buttons and the system notification all
+    // speak to navigator.mediaSession, not to speechSynthesis.
+    const handlers = {};
+    const session = {
+      setActionHandler: vi.fn((action, handler) => { handlers[action] = handler; }),
+      setPositionState: vi.fn(),
+      metadata: null,
+    };
+    vi.stubGlobal('navigator', { ...navigator, mediaSession: session });
+    vi.stubGlobal('MediaMetadata', class { constructor(init) { Object.assign(this, init); } });
+    installSynth();
+
+    render(<ListenToTopic topic={richTopic} />);
+    // Idle players must not claim the single global session — LectureNotes
+    // mounts one player per open topic.
+    expect(session.setActionHandler).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('button', { name: 'Pause' });
+
+    await waitFor(() => expect(handlers.play).toBeTypeOf('function'));
+    expect(handlers.pause).toBeTypeOf('function');
+    expect(handlers.previoustrack).toBeTypeOf('function');
+    expect(handlers.nexttrack).toBeTypeOf('function');
+    expect(handlers.stop).toBeTypeOf('function');
+    expect(session.metadata?.title).toBeTruthy();
+    expect(session.setPositionState).toHaveBeenCalled();
+
+    // A headset button toggles the same way the bar does — never disagreeing
+    // with it.
+    handlers.pause();
+    await screen.findByRole('button', { name: 'Play' });
+    handlers.play();
+    await screen.findByRole('button', { name: 'Pause' });
+
+    // Closing releases the session, so no stale Play lingers afterwards.
+    fireEvent.click(screen.getByRole('button', { name: 'Stop and close' }));
+    await screen.findByRole('button', { name: /Listen ·/ });
+    expect(handlers.play).toBeNull();
+  });
+
+  it('does nothing media-session-shaped where the platform has no such API', async () => {
+    // jsdom has no mediaSession: playback must work exactly as before, with no
+    // crash and no extra UI.
+    installSynth();
+    render(<ListenToTopic topic={richTopic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('button', { name: 'Pause' });
+    expect(screen.getByRole('progressbar', { name: 'Listening progress' })).toBeInTheDocument();
+  });
+
+  it('shows progress and time remaining while playing', async () => {
+    installSynth();
+    render(<ListenToTopic topic={richTopic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+
+    const bar = await screen.findByRole('progressbar', { name: 'Listening progress' });
+    expect(bar).toHaveAttribute('aria-valuemax', '2');
+    expect(bar).toHaveAttribute('aria-valuenow', '1');
+    expect(screen.getByText(/~.+ left/)).toBeInTheDocument();
+  });
+
+  it('cycles speeds up to double for revision listening', async () => {
+    installSynth();
+    render(<ListenToTopic topic={richTopic} />);
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+
+    const speed = await screen.findByRole('button', { name: /Playback speed/ });
+    expect(speed).toHaveTextContent('1×');
+    const seen = [];
+    for (let i = 0; i < SPEECH_RATES.length - 1; i += 1) {
+      fireEvent.click(speed);
+      seen.push(speed.textContent);
+    }
+    expect(seen).toContain('2×');
+    // …and wraps back to the start of the list afterwards.
+    expect(seen.at(-1)).toBe('0.75×');
+  });
+
+  it('reports the read-along caption to the page instead of rendering it in the bar', async () => {
+    // The strip lives in the text flow above the section being read; the bar
+    // carries transport, not the words.
+    installSynth();
+    const reports = [];
+    render(
+      <ListenToTopic
+        topic={richTopic}
+        onReadAlong={(caption, outlineIndex) => reports.push([caption, outlineIndex])}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('group', { name: 'Listen to this topic' });
+
+    await waitFor(() => expect(reports.some(([caption]) => caption)).toBe(true));
+    expect(reports.find(([caption]) => caption)[1]).toBe(0);
+    expect(screen.getByRole('group', { name: 'Listen to this topic' }).textContent)
+      .not.toMatch(/retrieved, processed and protected/);
+  });
+
+  it('freezes the read-along strip on pause and clears it on stop', async () => {
+    installSynth();
+    const reports = [];
+    render(
+      <ListenToTopic
+        topic={richTopic}
+        onReadAlong={(caption, outlineIndex) => reports.push([caption, outlineIndex])}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await screen.findByRole('button', { name: 'Pause' });
+    await waitFor(() => expect(reports.some(([caption]) => caption)).toBe(true));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
+    await screen.findByRole('button', { name: 'Play' });
+    // Pausing freezes the caption rather than clearing it, so the strip stays
+    // on the sentence the voice stopped at.
+    expect(reports.at(-1)[0]).not.toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Stop and close' }));
+    await screen.findByRole('button', { name: /Listen ·/ });
+    await waitFor(() => expect(reports.at(-1)).toEqual([null, null]));
+  });
+
+  it('clears the read-along strip when the player unmounts', async () => {
+    installSynth();
+    const reports = [];
+    const { unmount } = render(
+      <ListenToTopic
+        topic={richTopic}
+        onReadAlong={(caption, outlineIndex) => reports.push([caption, outlineIndex])}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Listen ·/ }));
+    await waitFor(() => expect(reports.some(([caption]) => caption)).toBe(true));
+
+    unmount(); // the student collapsed the topic mid-listen
+    expect(reports.at(-1)).toEqual([null, null]);
   });
 });

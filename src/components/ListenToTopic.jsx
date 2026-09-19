@@ -5,12 +5,16 @@
 //
 // Five things here are not decoration:
 //
-//   The KARAOKE CAPTION. The section-level wash says which paragraph the voice
-//   is in; this says which word, live, in a caption line reading useSpeech's own
+//   The READ-ALONG STRIP. The section-level wash says which paragraph the voice
+//   is in; this says which word, live, in a strip reading useSpeech's own
 //   utterance text — never the displayed note — so it cannot drift out of sync
 //   with what is actually heard. Word-accurate only where the engine reports
-//   `boundary` events (Chrome, Edge); Safari fires none, so there the caption
-//   still tracks the chunk but nothing inside it is picked out.
+//   `boundary` events (Chrome, Edge); Safari fires none, so there the strip
+//   still tracks the chunk but nothing inside it is picked out. It renders in
+//   the text flow above the section being read, not in this bar: on a topic
+//   several screens long the bar is nowhere near the student's eyes. This
+//   component only carries what the strip shows, reporting it upward through
+//   onReadAlong; the page owns the sections and places it.
 //
 //   The SKIPPED CAPTION. A quarter of these notes is code, equations, tables and
 //   figures, and none of it is read aloud. The voice announces each one as it
@@ -35,7 +39,7 @@
 //   the scrolling (it owns the sections); this only carries the preference, and
 //   reports it upward alongside the section index.
 
-import { useEffect, useMemo, useRef, useState, useId } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { Volume2, Play, Pause, SkipBack, SkipForward, X, Sun, LocateFixed } from 'lucide-react';
 import MathText from './MathText';
@@ -55,6 +59,16 @@ const followListeners = new Set();
 function formatDuration(seconds) {
   if (seconds < 60) return `${Math.max(1, Math.round(seconds))} sec`;
   return `${Math.round(seconds / 60)} min`;
+}
+
+// Whole-unit granularity, matching the n/total counter and the Media Session
+// position — an estimate either way, and honest about it. From 'ended',
+// unitIndex stops advancing at the last unit's index once the queue drains
+// (useSpeech never sets it again), so slicing on it there would undercount
+// the final unit's own seconds even though the whole topic was heard.
+function elapsedSecondsFor(units, unitIndex, status, totalSeconds) {
+  if (status === 'ended') return totalSeconds;
+  return units.slice(0, unitIndex).reduce((sum, u) => sum + (u?.estimatedSeconds ?? 0), 0);
 }
 
 // Prev / play / next / position — the four controls that have to be reachable
@@ -99,7 +113,7 @@ function Transport({ playing, onPlayPause, onPrev, onNext, atStart, atEnd, posit
   );
 }
 
-export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineIndex }) {
+export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineIndex, onReadAlong }) {
   const [open, setOpen] = useState(false);
   const voiceSelectId = useId();
   // Whether the real control bar is on screen. Starts true so a browser without
@@ -156,6 +170,25 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   // Collapsing the topic must clear the highlight it left behind.
   useEffect(() => () => reportRef.current?.(null, { follow: false }), []);
 
+  // The read-along strip lives in the text flow, not in this bar (see the
+  // header comment): the page renders it above the section being read, and
+  // this only carries what it shows. Through a ref, so a parent that passes a
+  // fresh arrow every render does not turn this into a report on every render
+  // — the same reason as the outline index above.
+  //
+  // Frozen, not cleared, on pause: the caption keeps the last word read, so
+  // pausing to re-read leaves the strip on the sentence the voice stopped at.
+  // It clears exactly when the caption itself clears — stop, another topic
+  // taking the device, topic change, every failure exit — plus on unmount.
+  const readAlongRef = useRef(onReadAlong);
+  useEffect(() => { readAlongRef.current = onReadAlong; }, [onReadAlong]);
+  const readAlongIndex = caption ? (units[unitIndex]?.outlineIndex ?? null) : null;
+  useEffect(() => {
+    readAlongRef.current?.(caption, readAlongIndex);
+  }, [caption, readAlongIndex]);
+  // Collapsing the topic must clear the strip it left behind, like the wash.
+  useEffect(() => () => readAlongRef.current?.(null, null), []);
+
   useEffect(() => {
     followListeners.add(setFollowState);
     return () => { followListeners.delete(setFollowState); };
@@ -197,10 +230,9 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   // Nothing to offer: no Web Speech API, or a topic that is listings with a
   // sentence of glue (see MIN_NARRATE_CHARS — narrating one of those is a few
   // seconds of "code listing on screen" repeated).
-  if (!supported || !narratable || unitCount === 0) return null;
-
-  const englishVoices = voices.filter((v) => /^en([-_]|$)/i.test(v.lang || ''));
-
+  // NOTE: every hook must sit above this return. The transport callbacks below
+  // are plain functions, so they are defined up here; the Media Session effect
+  // needs them and effects cannot live past a conditional return.
   const start = () => { setOpen(true); play(0); };
   // `barOnScreen` has to go back to true here, not just `open` to false. Closing
   // from the DOCKED bar means closing while the real one is off screen, and the
@@ -223,11 +255,141 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   // student the closing paragraph again, and because it did not start at 0 the
   // run counted as unclean, so finishing it never marked the topic read. Play on
   // a finished topic means play the topic.
-  const playPause = () => {
+  const playPause = useCallback(() => {
     if (playing) pause();
     else if (paused) resume();
     else play(status === 'ended' ? 0 : unitIndex);
-  };
+  }, [playing, paused, pause, resume, play, status, unitIndex]);
+
+  // ── Media Session: headset and notification controls ─────────────────────
+  //
+  // Bluetooth earbuds, wired headset buttons and the system media notification
+  // all speak to `navigator.mediaSession`, not to speechSynthesis — without
+  // this, every one of those buttons did nothing while a topic played. Both
+  // 'play' and 'pause' go through playPause: it already toggles the right way
+  // from any state, so a headset button can never disagree with the bar.
+  //
+  // Gated on ACTIVE playback, not just `open`. LectureNotes mounts one player
+  // per open topic and the session is a single global — the last effect to run
+  // wins it — so an idle player must neither claim what the playing one owns
+  // nor clear it on unmount. The cleanup releases the actions when this run
+  // ends, so a stale Play button never lingers in the notification shade.
+  const playPauseRef = useRef(playPause);
+  useEffect(() => { playPauseRef.current = playPause; }, [playPause]);
+  const transportRef = useRef({ prev, next, close });
+  useEffect(() => { transportRef.current = { prev, next, close }; });
+  // Shared by both effects below: whether THIS player currently owns the
+  // single global session at all. Each effect still has to guard on it
+  // separately (an early `return undefined` skips a hook's body, it cannot
+  // skip a whole effect), but computing it once keeps the two guards from
+  // drifting against each other.
+  const sessionActive = open && (status === 'playing' || status === 'paused' || status === 'ended');
+  // Registration only, on deps that change rarely (open/close, play/pause/
+  // finish) — NOT unitIndex or rate, which move on every word and every speed
+  // change. The handlers are ref-indirected specifically so identity never has
+  // to change; re-running this to refresh a position number would mean
+  // unregistering and re-registering all five actions at every unit boundary.
+  //
+  // This is also where the session is fully released — metadata, playback
+  // state and position included, not just the actions — because this effect
+  // only re-runs on a genuine start/stop, unlike the finer-grained one below.
+  useEffect(() => {
+    if (!supported || !narratable || unitCount === 0 || !sessionActive) return undefined;
+    const session = typeof navigator !== 'undefined' ? navigator.mediaSession : null;
+    if (!session || typeof session.setActionHandler !== 'function') return undefined;
+
+    const actions = {
+      play: () => playPauseRef.current?.(),
+      pause: () => playPauseRef.current?.(),
+      previoustrack: () => transportRef.current?.prev?.(),
+      nexttrack: () => transportRef.current?.next?.(),
+      stop: () => transportRef.current?.close?.(),
+    };
+    // Each action registered independently — a platform that supports four
+    // of the five and throws on the fifth (real fragmentation on older
+    // WebKit/Android WebViews) must still get the four it does support,
+    // rather than losing all of them to one rejected call.
+    const registered = [];
+    for (const [action, handler] of Object.entries(actions)) {
+      try {
+        session.setActionHandler(action, handler);
+        registered.push(action);
+      } catch {
+        // This one action is unsupported; the rest still get a chance.
+      }
+    }
+
+    return () => {
+      for (const action of registered) {
+        try { session.setActionHandler(action, null); } catch { /* releasing anyway */ }
+      }
+      try {
+        session.metadata = null;
+      } catch {
+        // Some implementations reject clearing; the next claimant overwrites it.
+      }
+      try {
+        session.playbackState = 'none';
+      } catch {
+        // Decorative; some implementations reject the assignment.
+      }
+      try {
+        session.setPositionState?.();
+      } catch {
+        // No-arg form clears position state; older implementations may reject it.
+      }
+    };
+  }, [supported, narratable, unitCount, sessionActive]);
+
+  // Metadata and position, on the finer deps that move during playback. Split
+  // out from registration above so a word boundary or a speed change updates
+  // only these, not the action handlers — and deliberately has NO cleanup:
+  // every value here is overwritten in place on the next run, and the actual
+  // release happens once, above, when the session stops being active at all.
+  useEffect(() => {
+    if (!supported || !narratable || unitCount === 0 || !sessionActive) return;
+    const session = typeof navigator !== 'undefined' ? navigator.mediaSession : null;
+    if (!session) return;
+
+    try {
+      // Without this, the lock screen/notification has nothing to decide its
+      // Play/Pause icon from — there is no <audio>/<video> element driving
+      // playback for the browser to read state off instead.
+      session.playbackState = status === 'playing' ? 'playing' : 'paused';
+    } catch {
+      // Some implementations reject the assignment; the icon may lag.
+    }
+
+    try {
+      // Decorative next to the transport above — but it is also what names the
+      // topic in the notification shade, where there is no heading otherwise.
+      if (typeof MediaMetadata !== 'undefined') {
+        session.metadata = new MediaMetadata({
+          title: units[unitIndex]?.heading || topic.title,
+          artist: 'Areté',
+          album: `Topic ${topic.number} · ${topic.title}`,
+        });
+      }
+    } catch {
+      // Metadata is decoration; the transport buttons above are the feature.
+    }
+
+    try {
+      const duration = Math.max(1, totalSeconds);
+      const elapsed = elapsedSecondsFor(units, unitIndex, status, totalSeconds);
+      session.setPositionState?.({
+        duration,
+        playbackRate: rate,
+        position: Math.max(0, Math.min(elapsed, duration)),
+      });
+    } catch {
+      // Older implementations throw on unexpected positions; ignore.
+    }
+  }, [supported, narratable, unitCount, sessionActive, status, unitIndex, rate, units, totalSeconds, topic.number, topic.title]);
+
+  if (!supported || !narratable || unitCount === 0) return null;
+
+  const englishVoices = voices.filter((v) => /^en([-_]|$)/i.test(v.lang || ''));
 
   // Rendered in BOTH states. Living only inside the expanded bar defeated its
   // entire purpose: the point of this line is that a student deciding whether to
@@ -259,6 +421,11 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
 
   const current = units[unitIndex];
   const heading = <MathText text={current?.heading || topic.title} />;
+  const elapsedSeconds = elapsedSecondsFor(units, unitIndex, status, totalSeconds);
+  const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+  const progressPct = unitCount > 0
+    ? Math.max(0, Math.min(100, ((unitIndex + 1) / unitCount) * 100))
+    : 0;
   const transport = (
     <Transport
       playing={playing}
@@ -364,32 +531,26 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
           </button>
         </div>
 
-        {/* Karaoke caption — the chunk actually being spoken, with the exact word
-            the engine just reported lit up. It reads useSpeech's own utterance
-            text, not the note on screen: the same words, but letter-spaced
-            acronyms and skip markers included, exactly as heard. That is what
-            keeps it perfectly in sync with no mapping back to the rendered note
-            to maintain — the section-level wash above already marks *where* in
-            the notes the voice is; this says exactly *what* it is saying right
-            now. `caption.start === -1` is a chunk that has started but has not
-            had its first word boundary yet (always true on Safari, which fires
-            none at all) — shown plain, with nothing picked out. Hidden from
-            assistive tech: the same words are already in the document as the
-            actual note text, so a screen reader repeating this every few hundred
-            milliseconds would just be noise. */}
-        {caption && (
-          <p aria-hidden="true" className="mt-3 rounded-lg border border-coffee-200 bg-paper px-3 py-2 text-sm leading-relaxed text-coffee-600">
-            {caption.start >= 0 ? (
-              <>
-                {caption.text.slice(0, caption.start)}
-                <span className="rounded bg-ember-500/20 px-0.5 font-semibold text-ink">
-                  {caption.text.slice(caption.start, caption.end)}
-                </span>
-                {caption.text.slice(caption.end)}
-              </>
-            ) : caption.text}
-          </p>
-        )}
+        {/* Where the voice is in the topic. A twelve-minute listen with no sense
+            of place is a scrubber with no handle. Whole-unit granularity, like
+            the n/total counter — it only moves at section boundaries, which is
+            honest about what an estimate it is. */}
+        <div
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={unitCount}
+          aria-valuenow={unitIndex + 1}
+          aria-label="Listening progress"
+          className="mt-3 h-1 overflow-hidden rounded-full bg-coffee-100"
+        >
+          <div
+            className="h-full rounded-full bg-ember-500/60 transition-[width] duration-300"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+        <p className="mt-1.5 text-xs font-mono text-coffee-500">
+          {status === 'ended' ? 'Finished' : `~${formatDuration(remainingSeconds)} left`}
+        </p>
 
         {/* What the voice will announce but not read — the same line the collapsed
             pill shows, so it does not appear to change on opening. */}
