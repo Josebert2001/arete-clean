@@ -995,7 +995,11 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
                 const openG = openSections.has(ii);
                 return (
                   <Fragment key={ii}>
-                    {readAlongFor(ii)}
+                    {/* Opening is one-way (see onSpeakingOutlineIndex), but a
+                        student can still collapse a group the voice is reading
+                        back down by hand — the strip would then be quoting
+                        tail text that is no longer on screen. */}
+                    {openG && readAlongFor(ii)}
                     <div>
                       <Section
                         section={it.head}

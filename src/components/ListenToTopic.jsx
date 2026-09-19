@@ -278,16 +278,25 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
   useEffect(() => { playPauseRef.current = playPause; }, [playPause]);
   const transportRef = useRef({ prev, next, close });
   useEffect(() => { transportRef.current = { prev, next, close }; });
+  // Shared by both effects below: whether THIS player currently owns the
+  // single global session at all. Each effect still has to guard on it
+  // separately (an early `return undefined` skips a hook's body, it cannot
+  // skip a whole effect), but computing it once keeps the two guards from
+  // drifting against each other.
+  const sessionActive = open && (status === 'playing' || status === 'paused' || status === 'ended');
   // Registration only, on deps that change rarely (open/close, play/pause/
   // finish) — NOT unitIndex or rate, which move on every word and every speed
   // change. The handlers are ref-indirected specifically so identity never has
   // to change; re-running this to refresh a position number would mean
   // unregistering and re-registering all five actions at every unit boundary.
+  //
+  // This is also where the session is fully released — metadata, playback
+  // state and position included, not just the actions — because this effect
+  // only re-runs on a genuine start/stop, unlike the finer-grained one below.
   useEffect(() => {
-    if (!supported || !narratable || unitCount === 0) return undefined;
+    if (!supported || !narratable || unitCount === 0 || !sessionActive) return undefined;
     const session = typeof navigator !== 'undefined' ? navigator.mediaSession : null;
     if (!session || typeof session.setActionHandler !== 'function') return undefined;
-    if (!open || (status !== 'playing' && status !== 'paused' && status !== 'ended')) return undefined;
 
     const actions = {
       play: () => playPauseRef.current?.(),
@@ -296,39 +305,51 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
       nexttrack: () => transportRef.current?.next?.(),
       stop: () => transportRef.current?.close?.(),
     };
+    // Each action registered independently — a platform that supports four
+    // of the five and throws on the fifth (real fragmentation on older
+    // WebKit/Android WebViews) must still get the four it does support,
+    // rather than losing all of them to one rejected call.
     const registered = [];
-    try {
-      for (const [action, handler] of Object.entries(actions)) {
+    for (const [action, handler] of Object.entries(actions)) {
+      try {
         session.setActionHandler(action, handler);
         registered.push(action);
+      } catch {
+        // This one action is unsupported; the rest still get a chance.
       }
-    } catch {
-      // A platform that throws partway through has no reliable session to
-      // drive — release whatever it did accept rather than leave stray
-      // handlers bound to this topic's closures on the single global session.
-      for (const action of registered) {
-        try { session.setActionHandler(action, null); } catch { /* releasing anyway */ }
-      }
-      return undefined;
     }
 
     return () => {
+      for (const action of registered) {
+        try { session.setActionHandler(action, null); } catch { /* releasing anyway */ }
+      }
       try {
-        for (const action of Object.keys(actions)) session.setActionHandler(action, null);
+        session.metadata = null;
       } catch {
-        // Shutting down; nothing left to protect.
+        // Some implementations reject clearing; the next claimant overwrites it.
+      }
+      try {
+        session.playbackState = 'none';
+      } catch {
+        // Decorative; some implementations reject the assignment.
+      }
+      try {
+        session.setPositionState?.();
+      } catch {
+        // No-arg form clears position state; older implementations may reject it.
       }
     };
-  }, [supported, narratable, unitCount, open, status]);
+  }, [supported, narratable, unitCount, sessionActive]);
 
   // Metadata and position, on the finer deps that move during playback. Split
   // out from registration above so a word boundary or a speed change updates
-  // only these, not the action handlers.
+  // only these, not the action handlers — and deliberately has NO cleanup:
+  // every value here is overwritten in place on the next run, and the actual
+  // release happens once, above, when the session stops being active at all.
   useEffect(() => {
-    if (!supported || !narratable || unitCount === 0) return undefined;
+    if (!supported || !narratable || unitCount === 0 || !sessionActive) return;
     const session = typeof navigator !== 'undefined' ? navigator.mediaSession : null;
-    if (!session) return undefined;
-    if (!open || (status !== 'playing' && status !== 'paused' && status !== 'ended')) return undefined;
+    if (!session) return;
 
     try {
       // Without this, the lock screen/notification has nothing to decide its
@@ -364,15 +385,7 @@ export default function ListenToTopic({ topic, onFinished, onSpeakingOutlineInde
     } catch {
       // Older implementations throw on unexpected positions; ignore.
     }
-
-    return () => {
-      try {
-        session.metadata = null;
-      } catch {
-        // Some implementations reject clearing; the next run overwrites it.
-      }
-    };
-  }, [supported, narratable, unitCount, open, status, unitIndex, rate, units, totalSeconds, topic.number, topic.title]);
+  }, [supported, narratable, unitCount, sessionActive, status, unitIndex, rate, units, totalSeconds, topic.number, topic.title]);
 
   if (!supported || !narratable || unitCount === 0) return null;
 

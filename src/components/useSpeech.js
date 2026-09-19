@@ -561,6 +561,11 @@ export function useSpeech(units, { onFinished } = {}) {
       if (spokeRef.current === 0 && errorStreakRef.current > 0) {
         pausedRef.current = true;
         cursorRef.current = 0;
+        // Nothing was heard, so the progress this leaves on screen must read
+        // as zero too — left at the last unit attempted, the bar and the
+        // Media Session position both reported the topic as nearly finished
+        // alongside the "could not play" notice.
+        setUnitIndex(0);
         setStatus('paused');
         setFailed(true);
         // Whatever chunk got as far as onstart before it errored must not go on
