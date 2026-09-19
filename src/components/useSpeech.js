@@ -589,8 +589,20 @@ export function useSpeech(units, { onFinished } = {}) {
       return;
     }
 
+    // The read-along strip is positioned by the outline index attached to
+    // unitIndex, which moves the instant this fires; the caption text for the
+    // chunk now starting only arrives later, asynchronously, in its own
+    // onstart below. Left alone, crossing into a new unit shows the OLD
+    // unit's last caption under the NEW unit's heading for the gap between
+    // the two. Only clear on an actual unit change — within one unit, the
+    // stale caption sitting through the gap between chunks is the same
+    // continuity onstart's own comment relies on, not this bug.
+    const previousUnitIndex = queue[cursorRef.current]?.unitIndex;
     cursorRef.current = index;
     setUnitIndex(item.unitIndex);
+    if (previousUnitIndex !== undefined && previousUnitIndex !== item.unitIndex) {
+      setCaption(null);
+    }
 
     const utterance = new window.SpeechSynthesisUtterance(item.text);
     if (voice) utterance.voice = voice;

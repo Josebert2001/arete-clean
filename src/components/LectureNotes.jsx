@@ -659,17 +659,23 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
   }, [tracksReading, isRead, onSetRead]);
 
   const items = useMemo(() => buildOutline(topic.sections), [topic.sections]);
+  const headedIndices = items.reduce((acc, it, ii) => (it.head ? [...acc, ii] : acc), []);
+  // Sub-sections collapse only when there are enough of them to feel like a
+  // wall of text; the first one starts open so the topic never looks empty.
+  const collapsibleSections = headedIndices.length >= 2;
 
-  // Outline index per section object, for placing the read-along strip. The
-  // grouped branch below knows its index from the loop; the flat branch
-  // renders raw sections, so it looks each one up here instead.
+  // Outline index per section object, for placing the read-along strip. Only
+  // the flat branch below needs this — it renders raw sections and looks each
+  // one up here; the grouped branch (the common case) already knows its index
+  // from the loop, so skip building the map for it.
   const outlineIndexBySection = useMemo(() => {
     const bySection = new Map();
+    if (collapsibleSections) return bySection;
     items.forEach((it, ii) => {
       for (const s of it.head ? [it.head, ...(it.tail ?? [])] : [it.standalone]) bySection.set(s, ii);
     });
     return bySection;
-  }, [items]);
+  }, [items, collapsibleSections]);
 
   // Which outline item the voice is currently reading, or null when nothing is
   // playing. `items` here and the units ListenToTopic speaks come from the SAME
@@ -789,10 +795,6 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
   const [plainEnglish, setPlainEnglish] = useState(false);
 
   const firstGroupIdx = items.findIndex((it) => it.head);
-  const headedIndices = items.reduce((acc, it, ii) => (it.head ? [...acc, ii] : acc), []);
-  // Sub-sections collapse only when there are enough of them to feel like a
-  // wall of text; the first one starts open so the topic never looks empty.
-  const collapsibleSections = headedIndices.length >= 2;
   const [openSections, setOpenSections] = useState(() => new Set(firstGroupIdx >= 0 ? [firstGroupIdx] : []));
   const allSectionsOpen = headedIndices.every((ii) => openSections.has(ii));
 
