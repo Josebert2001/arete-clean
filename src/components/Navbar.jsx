@@ -5,6 +5,7 @@ import AuthButton from './AuthButton';
 import InstallAppButton from './InstallAppButton';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../context/AuthContext';
+import { useLecturer } from './useLecturer';
 import { getDepartment } from '../data/departments';
 
 // Signed-in students see their own department; a signed-out visitor (who
@@ -32,6 +33,15 @@ export default function Navbar() {
   const { pathname } = useLocation();
   const tagline = useTagline();
 
+  // Who is this? Drives which attendance links appear. `isLecturer` reads the
+  // user_roles table (see useLecturer); it is only ever true for an account an
+  // admin granted the role to. The links below are a convenience — the real
+  // guard is the RLS on every table plus the "Lecturers only" page gates, so
+  // hiding a link is never the only thing standing between a student and
+  // lecturer data.
+  const { user } = useAuth();
+  const { isLecturer } = useLecturer();
+
   useEffect(() => {
     if (!open) return;
     function onKey(e) {
@@ -46,13 +56,28 @@ export default function Navbar() {
 
   // Tracks, Install, Code Explainer, and Cheatsheet all live inside Code Lab,
   // so the Code Lab item stays highlighted while browsing any of them.
-  const links = [
+  const baseLinks = [
     { to: '/', label: 'Home' },
     { to: '/courses', label: 'Courses' },
     { to: '/lab', label: 'Code Lab', also: ['/tracks', '/install', '/explainer', '/cheatsheet'] },
     { to: '/tutor', label: 'AI Tutor' },
     { to: '/campus-map', label: 'Campus Map' },
   ];
+
+  // Attendance links depend on the signed-in user's role:
+  //  - signed out        → none
+  //  - lecturer / admin  → Take Attendance + Register (never the student link)
+  //  - student           → Attendance (their own check-in + record)
+  const roleLinks = !user
+    ? []
+    : isLecturer
+      ? [
+          { to: '/teach', label: 'Take Attendance', also: ['/register'] },
+          { to: '/register', label: 'Register' },
+        ]
+      : [{ to: '/my-attendance', label: 'Attendance' }];
+
+  const links = [...baseLinks, ...roleLinks];
 
   const isLinkActive = (link, isActive) =>
     isActive || (link.also || []).some(p => pathname === p || pathname.startsWith(`${p}/`));
