@@ -31,6 +31,10 @@ const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
 const Welcome = lazy(() => import('./pages/Welcome'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
+const CheckIn = lazy(() => import('./pages/CheckIn'));
+const MyAttendance = lazy(() => import('./pages/MyAttendance'));
+const TeachSession = lazy(() => import('./pages/TeachSession'));
+const Register = lazy(() => import('./pages/Register'));
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -241,6 +245,10 @@ export default function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
             <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />
+            <Route path="/attendance" element={<RequireAuth><CheckIn /></RequireAuth>} />
+            <Route path="/my-attendance" element={<RequireAuth><MyAttendance /></RequireAuth>} />
+            <Route path="/teach" element={<RequireAuth><TeachSession /></RequireAuth>} />
+            <Route path="/register" element={<RequireAuth><Register /></RequireAuth>} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
