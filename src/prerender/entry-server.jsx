@@ -3,6 +3,7 @@ import CoursePreview from '../components/CoursePreview';
 import CourseIndexPreview from '../components/CourseIndexPreview';
 import HomePreview from '../components/HomePreview';
 import InstallPreview from '../components/InstallPreview';
+import AboutPreview from '../components/AboutPreview';
 import { tracks, installHowToJsonLd } from '../data/installGuides';
 import { loadPublicNotes, glossaryJsonLd } from '../data/publicNotes';
 import {
@@ -18,6 +19,8 @@ import {
   homeDescription,
   installTitle,
   installDescription,
+  aboutTitle,
+  aboutDescription,
   indexTitle,
   indexDescription,
   SITE_URL,
@@ -86,6 +89,34 @@ export async function collectPages({ buildDate } = {}) {
       },
     ],
     html: renderToStaticMarkup(<CourseIndexPreview groups={groupByLevel(entries)} />),
+  });
+
+  // Carries a Person and an AboutPage block rather than the site FAQ: the
+  // FAQPage on "/" is the site's one set of site-level questions, and the same
+  // questions serialised on a second URL is two pages competing to answer them.
+  pages.push({
+    path: '/about',
+    title: aboutTitle(),
+    description: aboutDescription(),
+    canonical: `${SITE_URL}/about`,
+    ogType: 'article',
+    changefreq: 'monthly',
+    priority: '0.5',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'AboutPage',
+        name: aboutTitle(),
+        url: `${SITE_URL}/about`,
+        dateModified: buildDate || undefined,
+        isPartOf: { '@id': `${SITE_URL}/#website` },
+        // Resolves the author node index.html declares. That node's `url` now
+        // points here, so the two halves of the claim meet on one page.
+        mainEntity: { '@id': `${SITE_URL}/#author` },
+        publisher: { '@id': `${SITE_URL}/#organization` },
+      },
+    ],
+    html: renderToStaticMarkup(<AboutPreview />),
   });
 
   pages.push({
@@ -173,8 +204,16 @@ export async function collectLlmsTxt({ buildDate } = {}) {
       'track, and an AI tutor that has read the curriculum.',
     '',
     `- Site: ${SITE_URL}`,
+    // The index is useless as an index if it does not name the thing it
+    // indexes. An agent that fetches /llms.txt and stops has no way to learn
+    // that every outline, textbook list, study tip and glossary is available in
+    // one more request instead of 95.
+    `- Full corpus in one file (every course's outline, textbooks, study tips and glossary): ` +
+      `${SITE_URL}/llms-full.txt`,
     `- Institution: ${INSTITUTION} (https://www.uniuyo.edu.ng/, https://www.wikidata.org/wiki/Q7896523)`,
     '- Audience: 100 Level – 400 Level undergraduates',
+    `- Not affiliated with the ${INSTITUTION}. Areté is an independent study companion built by ` +
+      'students of the university, not its official learning platform or student portal.',
     `- Scope: the whole university, not one department. ${foundation.length} of the ` +
       `${entries.length} courses below are foundation courses taken across ${INSTITUTION} ` +
       'programmes rather than owned by any one department (a programme takes either GST 211/311 ' +
@@ -218,6 +257,8 @@ export async function collectLlmsTxt({ buildDate } = {}) {
     '- AI Tutor: answers scoped to a student\'s year, department and course outline (account only).',
     '- Code Explainer: line-by-line plain-English walkthroughs of Java, Python, C and C++ listings.',
     '- Study Planner: weekly timetables exported to .ics or synced to Google Calendar.',
+    `- [About Areté](${SITE_URL}/about): who builds it, where the course outlines and transcribed`,
+    '  lecture notes come from, and what is free.',
     `- [Privacy policy](${SITE_URL}/privacy) · [Terms](${SITE_URL}/terms)`,
     '',
   ].join('\n');

@@ -3,12 +3,14 @@
 > ἀρετή (ar-eh-TAY). A free study companion for University of Uyo undergraduates in Akwa Ibom State, Nigeria: the outline, recommended textbooks and study tips for all 95 courses from 100 Level to Final Year, transcribed lecture notes and past-paper practice for a growing set of them, interactive Java, Python and C tracks, a capture-the-flag security track, and an AI tutor that has read the curriculum.
 
 - Site: https://www.aretecyb.tech
+- Full corpus in one file (every course's outline, textbooks, study tips and glossary): https://www.aretecyb.tech/llms-full.txt
 - Institution: University of Uyo (https://www.uniuyo.edu.ng/, https://www.wikidata.org/wiki/Q7896523)
 - Audience: 100 Level – 400 Level undergraduates
+- Not affiliated with the University of Uyo. Areté is an independent study companion built by students of the university, not its official learning platform or student portal.
 - Scope: the whole university, not one department. 29 of the 95 courses below are foundation courses taken across University of Uyo programmes rather than owned by any one department (a programme takes either GST 211/311 or GST 212/312, for instance, but every programme takes some of these): GST 111, MTH 111, PHY 111, PHY 117, COS 111, STA 111, UUY-CSC 111, UUY-CSC 112, GST 121, COS 121, MTH 121, PHY 121, PHY 128, GST 212, COS 211, ENT 221, COS 221, INS 224, GST 312, CSC 319, COS 411, ENT 321, GST 211, MTH 211, MTH 212, MTH 223, CSC 223, GST 311, INS 411. They are marked "foundation course" in the listing.
 - Departments with a fully authored catalogue: Cybersecurity, Data Science. A student in any other department signs up in foundation mode and gets those shared courses plus all four programming tracks; more catalogues are authored as students from those departments sign up.
 - Access: course outlines, textbooks and study tips are public. Lecture notes, question banks, the AI tutor and progress tracking need a free account (email code, no password).
-- Last generated: 2026-09-09
+- Last generated: 2026-09-11
 
 
 ## 100 Level
@@ -1360,9 +1362,6 @@ Advanced programming building on COS 211: deeper object-oriented programming (po
 - **Primitive** — Uses a small, fixed amount of memory to represent a single item of data. Java has exactly eight: `byte`, `short`, `int`, `long`, `float`, `double`, `char`, and `boolean` — a Java program cannot define any others. Primitives are used so often that making them full objects would noticeably hurt performance.
 - **Object (Non-Primitive)** — A larger chunk of memory that can hold a great deal of data along with the methods used to process it. Every data member and local variable must be declared as either a primitive or an object (class) type.
 - **char** — A 16-bit character using the Unicode encoding scheme.
-- **abs()** — Returns the absolute value of a number — the number without its negative sign, so the result is always positive. Works on `int`, `long`, `float`, or `double` values.
-- **sqrt()** — Returns the square root of a positive number. Takes an `int` or `double` as input and always returns a `double`.
-- **pow(x, y)** — Computes x raised to the power y. Takes two `double` arguments (base, then power) and returns a `double` — integer or float arguments are implicitly converted to `double` first.
 - **Conditional execution** — The most common use of the "if-else" statement is to conditionally execute a block of code based on the result of a Boolean expression. For example, you might want to execute a block of code that performs a calculation only if a certain variable has a specific value.
 - **Decision making** — The "if-else" statement can also be used to make decisions in your code based on different conditions. For example, you might use an "if-else" statement to determine which of two different actions to take based on the value of a variable.
 - **Error checking** — The "if-else" statement can also be used to check for errors or invalid inputs in your code. For example, you might use an "if-else" statement to validate user input and display an error message if the input is not valid.
@@ -1372,8 +1371,10 @@ Advanced programming building on COS 211: deeper object-oriented programming (po
 - **Step or increment** — This part updates the expression. In the above example, i = i + 1 is our update expression. After executing the body of the loop, the update expression increments the loop variable i by 1 and then moves to test the condition written in the test expression.
 - **Built-in Methods** — These methods are predefined, and we can use them any time we want in our Java program. For example pow(), sqrt(), min(), etc.
 - **User Defined Methods** — These methods are defined or created by the programmer for performing a specific task in a program.
-- **inputdetails()** — for storing information in the instance variables.
-- **calculate()** — for calculating and storing the total and percentage obtained.
+- **public** — When we declare class members as public, they are accessible from outside the class.
+- **private** — When we declare class members as private, they are only accessible within the class and are not accessible from outside the class.
+- **default** — When we declare class members with no access specifier is considered as default, they are only accessible within the package and are not accessible from outside the package.
+- **protected** — When we declare class members as protected, they are only accessible by any class within the same package or by any subclasses of the parent class in which the class members are declared as protected, regardless of whether the subclass is in the same package or a different package.
 
 ### CSC 223 — Discrete Structures
 
@@ -1547,17 +1548,17 @@ Big data fundamentals — characteristics, sources, platforms, and analytics —
 **Key concepts**
 
 - **Definition** — Big Data Security refers to the tools, policies, and measures used to protect large volumes of data from unauthorized access, breaches, and misuse throughout its lifecycle — from collection to processing and storage.
-- **M2M (Machine to Machine)** — data exchanged between connected devices
-- **People to Machine** — data generated through human interactions with technology
-- **Organisational Data** — data produced by businesses and institutions
+- **M2M (Machine to Machine)** — Data exchanged between connected devices
+- **People to Machine** — Data generated through human interactions with technology
+- **Organisational Data** — Data produced by businesses and institutions
 - **Operational Big Data** — Operational Big Data refers to real or nearly real-time data used to support daily business operations and decision making. It processes data immediately as it is generated, supports transactional systems, and requires fast processing.
 - **Analytical Big Data** — Analytical Big Data refers to historical and accumulated data used for analysis, forecasting, reporting, and strategic decision making. It focuses on past and current data, supports business intelligence, and is often stored in data warehouses.
-- **Technical Skills** — programming, database management, big data frameworks
-- **Analytical Skills** — data analysis, pattern recognition, statistical analysis
-- **Business Skills** — translating insights into actionable business strategies
-- **Communication Skills** — presenting findings clearly to non-technical audiences
-- **Problem Solving Skills** — using data-driven approaches to solve complex problems
-- **Programming** — ability to write code to manipulate and process data
+- **Technical Skills** — Programming, database management, big data frameworks
+- **Analytical Skills** — Data analysis, pattern recognition, statistical analysis
+- **Business Skills** — Translating insights into actionable business strategies
+- **Communication Skills** — Presenting findings clearly to non-technical audiences
+- **Problem Solving Skills** — Using data-driven approaches to solve complex problems
+- **Programming** — Ability to write code to manipulate and process data
 - **Database Skills** — MySQL, Oracle — querying and managing structured data
 - **Big Data Frameworks** — Hadoop, Spark, Kafka — large-scale data processing tools
 - **Data sources** — Records the university already holds: semester results and GPA history per course, lecture attendance registers, student-portal login and activity logs, library borrowing and e-resource access, JAMB and O-level entry scores, departmental and level enrolment figures, fee-payment timing, and student feedback or…
@@ -1788,8 +1789,8 @@ A structured approach to analysing information system needs and designing soluti
 
 **Key concepts**
 
-- **Business to Consumer (B2C)** — a computerized system that facilitates the exchange of products, services, and information directly between businesses and individual consumers through the internet.
-- **Business to Business (B2B)** — a computerized information system that supports the exchange of information, products, services, and transactions between business organizations through the internet to improve operational efficiency and collaboration.
+- **Business to Consumer (B2C)** — A computerized system that facilitates the exchange of products, services, and information directly between businesses and individual consumers through the internet.
+- **Business to Business (B2B)** — A computerized information system that supports the exchange of information, products, services, and transactions between business organizations through the internet to improve operational efficiency and collaboration.
 - **Break-Even Analysis** — Determines when cumulative benefits equal cumulative costs.
 - **Return on Investment (ROI)** — Measures the financial return relative to the cost of investment.
 - **Net Present Value (NPV)** — Accounts for the time value of money when comparing future benefits against current costs.
@@ -1927,13 +1928,13 @@ Practical network security: identification/authentication/authorization, threat 
 - **CIA Triad** — The CIA Triad is actually a security model that has been developed to help people think about various parts of IT security.
 - **Assets and Threat** — What is an Asset: An asset is any data, device or other component of an organization’s systems that is valuable – often because it contains sensitive data or can be used to access such information.
 - **Types of Cyber-Attacker Actions** — Active attacks: An active attack is a network exploit in which a hacker attempts to make changes to data on the target or data en route to the target.
-- **Masquerade** — in this attack, the intruder pretends to be a particular user of a system to gain access or to gain greater privileges than they are authorized for. A masquerade may be attempted through the use of stolen login IDs and passwords, through finding security gaps in programs or through bypassing the authentication…
+- **Masquerade** — In this attack, the intruder pretends to be a particular user of a system to gain access or to gain greater privileges than they are authorized for. A masquerade may be attempted through the use of stolen login IDs and passwords, through finding security gaps in programs or through bypassing the authentication…
 - **Session replay** — In this type of attack, a hacker steals an authorized user’s log in information by stealing the session ID. The intruder gains access and the ability to do anything the authorized user can do on the website.
 - **Message modification** — In this attack, an intruder alters packet header addresses to direct a message to a different destination or modify the data on a target machine.
 - **Denial of service (DoS)** — In a denial of service (DoS) attack, users are deprived of access to a network or web resource. This is generally accomplished by overwhelming the target with more traffic than it can handle.
 - **Distributed denial-of-service (DDoS)** — In a distributed denial-of-service (DDoS) exploit, large numbers of compromised systems (sometimes called a botnet or zombie army) attack a single target.
-- **Eavesdropping (tapping)** — the attacker simply listens to messages exchanged by two entities. For the attack to be useful, the traffic must not be encrypted. Any unencrypted information, such as a password sent in response to an HTTP request, may be retrieved by the attacker.
-- **Traffic analysis** — the attacker looks at the metadata transmitted in traffic in order to deduce information relating to the exchange and the participating entities, e.g. the form of the exchanged traffic (rate, duration, etc.).
+- **Eavesdropping (tapping)** — The attacker simply listens to messages exchanged by two entities. For the attack to be useful, the traffic must not be encrypted. Any unencrypted information, such as a password sent in response to an HTTP request, may be retrieved by the attacker.
+- **Traffic analysis** — The attacker looks at the metadata transmitted in traffic in order to deduce information relating to the exchange and the participating entities, e.g. the form of the exchanged traffic (rate, duration, etc.).
 
 ### UUY-CYB 222 — Web and Mobile Applications Security
 
@@ -1989,26 +1990,26 @@ Attacking and defending web and mobile applications. Covers the OWASP Top 10 in 
 - **Mobile Application** — A mobile application is software installed directly on a user’s device (iOS or Android), designed to run on a mobile device or tablet. Some mobile apps can also be accessed via an internet connection and a web browser.
 - **E-commerce** — E-commerce refers to markets enabled by the internet — the buying and selling of goods and services online.
 - **Teleconferencing & Remote Collaboration** — Teleconferencing is the use of digital technology to communicate between businesses or individuals located in different geographical areas.
-- **Audio Conferencing** — communication by voice only, with no video — e.g. a conference phone call
-- **Video Conferencing** — participants see and hear each other in real time — e.g. Zoom or Google Meet
-- **Web Conferencing** — online meetings that add shared screens, slides and documents to the call
-- **Hybrid Conferencing** — combines in-person and remote participants in the same meeting
+- **Audio Conferencing** — Communication by voice only, with no video — e.g. a conference phone call
+- **Video Conferencing** — Participants see and hear each other in real time — e.g. Zoom or Google Meet
+- **Web Conferencing** — Online meetings that add shared screens, slides and documents to the call
+- **Hybrid Conferencing** — Combines in-person and remote participants in the same meeting
 - **Marketing, Advertising & Customer Engagement** — The internet lets businesses reach and engage customers directly, and much of it is powered by tracking. When a cookie is dropped on a platform, it records that a person searched for a particular item — which lets the business show that person targeted adverts later.
 - **Supply Chain & Logistics** — Logistics and supply chain management benefit significantly from internet connectivity and web applications, which coordinate the flow of goods, information and resources.
-- **Recreational / “for fun”** — curiosity or a technical challenge, without intent to cause damage
-- **Fame** — the desire for recognition within a hacking community
-- **Activism (“hacktivism”)** — pursuing a political, social, or ideological cause
-- **Financial gain** — the most common driver of serious cybercrime — fraud, extortion, data resale
-- **Coercion** — an individual is forced or blackmailed into compromising a system
-- **Destruction** — intent to disrupt, delete, or disable systems and data
-- **Espionage** — gathering confidential information for competitive, corporate, or state advantage
-- **Hobbyists** — informal, curiosity-driven individuals, often with limited resources
-- **Government & law-enforcement agencies** — acting under legal authority, though their tools and techniques mirror those of attackers
-- **Activists** — acting in pursuit of a cause rather than personal gain
-- **Cyberterrorists** — seeking to cause fear, disruption, or harm at scale
-- **Criminal actors** — organized groups pursuing financial gain
-- **Insiders** — employees or contractors who already hold legitimate access, making them uniquely positioned to cause damage
-- **AI-augmented hackers** — an emerging category using automated and AI-assisted tools to scale reconnaissance and attacks
+- **Recreational / “for fun”** — Curiosity or a technical challenge, without intent to cause damage
+- **Fame** — The desire for recognition within a hacking community
+- **Activism (“hacktivism”)** — Pursuing a political, social, or ideological cause
+- **Financial gain** — The most common driver of serious cybercrime — fraud, extortion, data resale
+- **Coercion** — An individual is forced or blackmailed into compromising a system
+- **Destruction** — Intent to disrupt, delete, or disable systems and data
+- **Espionage** — Gathering confidential information for competitive, corporate, or state advantage
+- **Hobbyists** — Informal, curiosity-driven individuals, often with limited resources
+- **Government & law-enforcement agencies** — Acting under legal authority, though their tools and techniques mirror those of attackers
+- **Activists** — Acting in pursuit of a cause rather than personal gain
+- **Cyberterrorists** — Seeking to cause fear, disruption, or harm at scale
+- **Criminal actors** — Organized groups pursuing financial gain
+- **Insiders** — Employees or contractors who already hold legitimate access, making them uniquely positioned to cause damage
+- **AI-augmented hackers** — An emerging category using automated and AI-assisted tools to scale reconnaissance and attacks
 - **Authentication vs Authorization** — Authentication is the process of verifying the identity of a user, device, or service before granting access to protected digital resources. Authorization is the process of giving a verified user permission to access a physical location or digital information.
 - **Password Security & Creation** — Password policy is the most basic layer of access control, and it should be enforced at the point a user or account is created, not applied after the fact.
 - **Two-Factor Authentication (2FA)** — 2FA adds a second, independently generated credential on top of the known password. During registration the system collects an alternative contact point — typically a phone number or email address — and at login it sends a one-time code (commonly 4–8 digits) to that channel.

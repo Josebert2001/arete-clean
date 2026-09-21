@@ -29,6 +29,7 @@ const SignIn = lazy(() => import('./pages/SignIn'));
 const SetupProfile = lazy(() => import('./pages/SetupProfile'));
 const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
 const Welcome = lazy(() => import('./pages/Welcome'));
+const About = lazy(() => import('./pages/About'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
 
@@ -242,6 +243,11 @@ export default function App() {
             <Route path="/setup-profile" element={<SetupProfile />} />
             <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />
             <Route path="/welcome" element={<Welcome />} />
+            {/* Public, like /install and /courses — it is prerendered, listed
+                in the sitemap, and is the page the author entity in
+                index.html's structured data points at. Behind the gate it
+                would be a canonical URL that answers a crawler with /signin. */}
+            <Route path="/about" element={<About />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />

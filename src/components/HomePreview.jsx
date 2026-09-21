@@ -22,12 +22,13 @@ const LEVELS = [
 const INSIDE = [
   {
     icon: GraduationCap,
-    title: 'Every course, all four years, every department',
+    title: 'Foundation courses for every department, full catalogues for two',
     body:
-      'Topic outlines, recommended textbooks and exam tips for every course from 100 Level to ' +
-      'Final Year, plus transcribed lecture notes, flashcards and plain-English rewrites for a ' +
-      'growing set of them. The foundation courses taken across University of Uyo programmes are ' +
-      'covered for every student, whatever their department.',
+      'Topic outlines, recommended textbooks and exam tips, plus transcribed lecture notes, ' +
+      'flashcards and plain-English rewrites for a growing set of courses. The foundation ' +
+      'courses taken across University of Uyo programmes are covered for every student, whatever ' +
+      'their department; Cybersecurity and Data Science have their full catalogues authored on ' +
+      'top of that, 100 Level to Final Year.',
   },
   {
     icon: Code2,
@@ -67,9 +68,11 @@ export default function HomePreview() {
         <p className="text-coffee-800 leading-relaxed max-w-2xl mb-4">
           Areté is a free academic companion for University of Uyo undergraduates in Akwa Ibom
           State, Nigeria — for students in every department, not one. It carries the outline, the
-          recommended textbooks and the study tips for every course from 100 Level to Final Year,
-          transcribed lecture notes and past-paper practice for a growing set of courses,
-          interactive Java, Python and C tracks, and an AI tutor that has read the curriculum.
+          recommended textbooks and the study tips for the foundation courses taken across the
+          university&rsquo;s programmes and for the full Cybersecurity and Data Science catalogues,
+          100 Level to Final Year, with transcribed lecture notes and past-paper practice for a
+          growing set of those courses, interactive Java, Python and C tracks, and an AI tutor that
+          has read the curriculum.
         </p>
         {/* Said plainly, high on the page. The site is at aretecyb.tech and its
             first authored catalogue was Cybersecurity, so a student from any
@@ -89,6 +92,25 @@ export default function HomePreview() {
           <a href="/signin" className="btn-ghost text-sm">Sign in — free, no password</a>
         </div>
       </header>
+
+      {/* The disambiguation, said in prose and not only in the FAQ below. An
+          engine asked "is Areté the UniUyo LMS" needs a sentence it can lift;
+          without one it either guesses or leaves Areté out of the answer, and
+          the guess it would make is a claim Areté has no right to. Placed high
+          because a reader deciding whether this is their university's official
+          site decides it in the first screen. */}
+      <section className="mb-12 rounded-xl border border-coffee-200 bg-paper p-5">
+        <h2 className="display-heading text-xl text-ink mb-3">
+          Areté is independent, not the university&rsquo;s official platform
+        </h2>
+        <p className="text-sm text-coffee-700 leading-relaxed">
+          Areté is built by University of Uyo students and is not affiliated with or endorsed by
+          the university. The university runs its own official systems for registration, results
+          and lecturer-delivered course material; Areté sits beside them, with the course outlines,
+          transcribed lecture notes, past-paper practice and an AI tutor that a student actually
+          revises from. They answer different questions, and most students here use both.
+        </p>
+      </section>
 
       <section className="mb-12">
         <h2 className="display-heading text-2xl text-ink mb-5">The four years</h2>
@@ -139,6 +161,13 @@ export default function HomePreview() {
           Free for University of Uyo students — sign in with your email, no password.
         </p>
         <a href="/signin" className="btn-primary text-sm">Get started</a>
+        <p className="text-xs text-coffee-600 mt-4">
+          <a href="/about" className="hover:text-ember-500">Who builds Areté</a>
+          <span className="mx-2 opacity-50">·</span>
+          <a href="/courses" className="hover:text-ember-500">All course outlines</a>
+          <span className="mx-2 opacity-50">·</span>
+          <a href="/install" className="hover:text-ember-500">Set up Java, Python and C</a>
+        </p>
       </div>
     </div>
   );
