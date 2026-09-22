@@ -224,7 +224,24 @@ for (const { department, courses } of catalogues) {
         check(isNonEmptyString(opt), where(qi, `options[${oi}] empty`));
       });
       check(isNonEmptyString(q?.explanation), where(qi, 'explanation missing'));
+
+      // Optional revision unit. A bank authored chapter by chapter (ENT 221)
+      // tags every question with one, and CourseQuiz offers a chapter picker
+      // that narrows the pool the length buttons draw from. It is the pill's
+      // own label, so it must be a non-empty string when present.
+      check(q?.chapter === undefined || isNonEmptyString(q.chapter),
+            where(qi, 'chapter must be a non-empty string when present'));
     });
+
+    // Half-tagging a bank is the one failure the picker cannot show: the
+    // untagged questions belong to no pill, so they are unreachable from the
+    // chapter picker and only ever appear in an unnarrowed draw. Either the
+    // whole bank declares chapters or none of it does.
+    const chaptered = c.quiz.filter((q) => q?.chapter !== undefined).length;
+    check(chaptered === 0 || chaptered === c.quiz.length,
+          `[${department}] course ${c.code ?? c.slug}: ${chaptered}/${c.quiz.length} quiz questions ` +
+          'declare a chapter — tag all of them or none, or the untagged ones ' +
+          'are unreachable from the chapter picker');
 
     // See LENGTH_BALANCED_BANKS above for why this is a ratchet rather than a
     // flat rule. Only well-formed questions are measured — a malformed one has
