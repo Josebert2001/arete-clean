@@ -3,6 +3,9 @@ import { CheckCircle2, Loader2, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { getDeviceId } from '../utils/deviceId';
+import { getLocation } from '../utils/geolocation';
+
+const POLL_MS = 5000;
 
 /**
  * Student check-in. Shows the sessions open right now, lets the student pick
@@ -24,9 +27,12 @@ export default function CheckIn() {
   // Load the sessions that are open right now. RLS lets a student read a session
   // only once they've been marked in it, so for *discovery* of open sessions we
   // read from course_offerings + class_sessions the offerings anyone may read.
-  const loadOpen = useCallback(async () => {
+  // `silent` skips the full-page spinner and error state — used by the poll
+  // below, so a background refresh never yanks the form out from under a
+  // student mid-selection.
+  const loadOpen = useCallback(async ({ silent = false } = {}) => {
     if (!supabase || !user) { setStatus('ready'); return; }
-    setStatus('loading');
+    if (!silent) setStatus('loading');
 
     const nowIso = new Date().toISOString();
     const { data, error } = await supabase
@@ -36,33 +42,26 @@ export default function CheckIn() {
       .gt('closes_at', nowIso)
       .order('opened_at', { ascending: false });
 
-    if (error) { setStatus('error'); return; }
+    if (error) { if (!silent) setStatus('error'); return; }
     setSessions(data ?? []);
     // Functional update, not a `chosen` dependency: depending on `chosen` here
     // would recreate this callback (and re-fire the load effect) the moment
     // the first session auto-selects, costing a redundant round trip on every
     // load.
     if ((data ?? []).length) setChosen(prev => prev || data[0].id);
-    setStatus('ready');
+    if (!silent) setStatus('ready');
   }, [user]);
 
+  // Load on mount, then poll silently — a student who opens this page before
+  // the lecturer starts the class would otherwise see "no class is open"
+  // forever, with no way to know without manually reloading.
   useEffect(() => {
     if (authLoading) return;
-    (async () => { await loadOpen(); })();
+    let cancelled = false;
+    (async () => { if (!cancelled) await loadOpen(); })();
+    const poll = setInterval(() => { if (!cancelled) loadOpen({ silent: true }); }, POLL_MS);
+    return () => { cancelled = true; clearInterval(poll); };
   }, [authLoading, loadOpen]);
-
-  // Ask the browser for location — used only as a flag, never a block. If the
-  // student refuses or it times out, we check in without coordinates.
-  function getLocation() {
-    return new Promise(resolve => {
-      if (!navigator.geolocation) return resolve({ lat: null, lng: null });
-      navigator.geolocation.getCurrentPosition(
-        p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-        () => resolve({ lat: null, lng: null }),
-        { timeout: 5000, maximumAge: 60000 },
-      );
-    });
-  }
 
   async function submit() {
     if (!chosen || !code.trim()) return;

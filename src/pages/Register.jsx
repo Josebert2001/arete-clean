@@ -89,7 +89,18 @@ export default function Register() {
     return [...map.values()].sort((a, b) => new Date(b.marked_at) - new Date(a.marked_at));
   }, [detail]);
 
-  const deptLabel = (offering?.department || '').replace(/([a-z])([A-Z])/g, '$1 $2');
+  // Title-cased for both the printed page and the .xls export — the previous
+  // version relied on the screen's `uppercase` CSS class to look right, which
+  // has no effect on the raw text written into the spreadsheet ("dataScience"
+  // became "data Science" there, lowercase d and all).
+  const deptLabel = (offering?.department || '')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/\b\w/g, c => c.toUpperCase());
+
+  // Every row in one offering's summary carries the same threshold_pct — read
+  // it from the data instead of hardcoding 70, or a custom per-offering
+  // threshold (course_offerings.threshold_pct) silently has no effect here.
+  const thresholdPct = summary[0]?.threshold_pct ?? 70;
 
   // ── Real spreadsheet export (SpreadsheetML — Excel opens it natively) ───────
   function downloadXlsx() {
@@ -221,7 +232,7 @@ export default function Register() {
             <p><span className="font-semibold">Course:</span> {offering?.course_code}{offering?.course_title ? ` — ${offering.course_title}` : ''}</p>
             <p><span className="font-semibold">Level / Session:</span> {offering?.level} · {offering?.academic_session}</p>
             <p><span className="font-semibold">Classes held (closed sessions):</span> {totalHeld}</p>
-            <p><span className="font-semibold">Attendance requirement:</span> 70%</p>
+            <p><span className="font-semibold">Attendance requirement:</span> {thresholdPct}%</p>
             <p className="text-xs text-coffee-500">Generated {now.toLocaleDateString()} {now.toLocaleTimeString()}</p>
           </div>
 
@@ -246,7 +257,7 @@ export default function Register() {
               <tbody>
                 {summary.map((s, i) => {
                   const p = pct(Number(s.attended), Number(s.total_held));
-                  const below = Number(s.total_held) > 0 && p < 70;
+                  const below = Number(s.total_held) > 0 && p < (s.threshold_pct ?? 70);
                   return (
                     <tr key={s.student_id}>
                       <td className="border border-coffee-300 px-2 py-1 text-center">{i + 1}</td>

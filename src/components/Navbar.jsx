@@ -66,8 +66,11 @@ export default function Navbar() {
 
   // Attendance links depend on the signed-in user's role:
   //  - signed out        → none
-  //  - lecturer / admin  → Take Attendance + Register (never the student link)
-  //  - student           → Attendance (their own check-in + record)
+  //  - lecturer / admin  → Take Attendance + Register (never the student links)
+  //  - student           → Check In (the actual check-in form) + My Attendance
+  //    (their record/percentage) — a single link pointing at the read-only
+  //    history page left students with no discoverable way to reach /attendance
+  //    itself short of typing the URL.
   const roleLinks = !user
     ? []
     : isLecturer
@@ -75,7 +78,10 @@ export default function Navbar() {
           { to: '/teach', label: 'Take Attendance', also: ['/register'] },
           { to: '/register', label: 'Register' },
         ]
-      : [{ to: '/my-attendance', label: 'Attendance' }];
+      : [
+          { to: '/attendance', label: 'Check In' },
+          { to: '/my-attendance', label: 'My Attendance' },
+        ];
 
   const links = [...baseLinks, ...roleLinks];
 

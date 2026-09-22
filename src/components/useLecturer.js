@@ -60,7 +60,9 @@ export function useLecturer() {
 
   useEffect(() => {
     if (authLoading) return;   // wait for sign-in to settle, or we query as nobody
-    (async () => { await load(); })();
+    let cancelled = false;
+    (async () => { if (!cancelled) await load(); })();
+    return () => { cancelled = true; };
   }, [authLoading, load]);
 
   return {

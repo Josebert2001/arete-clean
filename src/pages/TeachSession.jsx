@@ -3,6 +3,7 @@ import { CalendarCheck, Loader2, Lock, Plus, RefreshCw, Users, X } from 'lucide-
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useLecturer } from '../components/useLecturer';
+import { getLocation } from '../utils/geolocation';
 
 // A short, easy-to-read code (no confusable 0/O/1/I). Shown on the board and
 // rotated every 30s so a forwarded screenshot is stale before it arrives.
@@ -56,34 +57,37 @@ export default function TeachSession() {
   }, []);
 
   // While a session is open: poll the check-in list every few seconds, and
-  // rotate the code every 30s.
+  // rotate the code every 30s. Depends on session?.id, not session itself —
+  // rotate_code's own setSession() replaces the session object every 30s, and
+  // depending on the whole object tore this effect down and rebuilt both
+  // intervals (plus an extra loadRecords call) on every single rotation.
   useEffect(() => {
-    if (!session) return;
-    (async () => { await loadRecords(session.id); })();
-    pollRef.current = setInterval(() => loadRecords(session.id), 4000);
+    const sessionId = session?.id;
+    if (!sessionId) return;
+    let cancelled = false;
+
+    (async () => {
+      const { data, error: e } = await supabase
+        .from('attendance_records')
+        .select('id, status, capture, full_name_snapshot, reg_number_snapshot, location_flagged, marked_at')
+        .eq('session_id', sessionId)
+        .order('marked_at', { ascending: false });
+      if (!cancelled && !e) setRecords(data ?? []);
+    })();
+
+    pollRef.current = setInterval(() => loadRecords(sessionId), 4000);
     rotateRef.current = setInterval(async () => {
       const next = makeCode();
-      const { error: e } = await supabase.rpc('rotate_code', { p_session_id: session.id, p_new_code: next });
-      if (!e) setSession(s => (s ? { ...s, checkin_code: next } : s));
+      const { error: e } = await supabase.rpc('rotate_code', { p_session_id: sessionId, p_new_code: next });
+      if (!e && !cancelled) setSession(s => (s ? { ...s, checkin_code: next } : s));
     }, ROTATE_MS);
+
     return () => {
+      cancelled = true;
       clearInterval(pollRef.current);
       clearInterval(rotateRef.current);
     };
-  }, [session, loadRecords]);
-
-  // Get the lecturer's current location (used as the class centre when the
-  // geofence hard block is on). Resolves to nulls if unavailable.
-  function getLocation() {
-    return new Promise(resolve => {
-      if (!navigator.geolocation) return resolve({ lat: null, lng: null });
-      navigator.geolocation.getCurrentPosition(
-        p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-        () => resolve({ lat: null, lng: null }),
-        { timeout: 8000, maximumAge: 60000 },
-      );
-    });
-  }
+  }, [session?.id, loadRecords]);
 
   async function openSession() {
     if (!offering) return;
@@ -96,7 +100,7 @@ export default function TeachSession() {
     // Geofence fields — only set when the lecturer turned the hard block on.
     let geoFields = {};
     if (geofence) {
-      const { lat, lng } = await getLocation();
+      const { lat, lng } = await getLocation({ timeout: 8000 });
       if (lat === null) {
         setError('Could not get your location to set the class area. Turn on location, or uncheck the hard block.');
         setBusy(false);
@@ -183,6 +187,17 @@ export default function TeachSession() {
         manual_reason:       'no network / no device',
         marked_by:           user.id,
       });
+
+    // Manual add bypasses check_in(), which is where an ordinary check-in
+    // also puts the student on the roster — do the same here, or a manually
+    // added student stays invisible on their own /my-attendance and on the
+    // register itself if their profile doesn't match the offering's dept/level.
+    if (!e) {
+      await supabase
+        .from('offering_students')
+        .upsert({ offering_id: session.offering_id, student_id: found.id }, { onConflict: 'offering_id,student_id' });
+    }
+
     setBusy(false);
     if (e) { setError('Could not add. This student may already be marked for this class.'); return; }
     setManualReg('');
