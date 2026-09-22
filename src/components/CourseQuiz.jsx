@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { GraduationCap, Play, Award, ArrowLeft } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import {
+  GraduationCap, Play, Award, ArrowLeft, ListFilter, CheckCircle2, Circle,
+} from 'lucide-react';
 import Quiz from './Quiz';
 import { useProgress } from './useProgress';
 import { quizItemId, REVIEW_STORAGE_KEY } from '../utils/reviewSchedule';
@@ -21,7 +23,10 @@ function sample(arr, n) {
 }
 
 export default function CourseQuiz({ course }) {
-  const bank = course.quiz || [];
+  // Memoised for the same reason CourseExamPrep memoises its own: the `|| []`
+  // fallback is a fresh array every render, and the chapter grouping below
+  // depends on it.
+  const bank = useMemo(() => course.quiz || [], [course.quiz]);
   const { progress, setQuizScore } = useProgress(STORAGE_KEY);
   // Review scheduling keeps its own record — see REVIEW_STORAGE_KEY. Two hook
   // instances rather than one, so the item map never bloats the quiz-score row
@@ -35,18 +40,76 @@ export default function CourseQuiz({ course }) {
   const [attempt, setAttempt] = useState(0);
   const [custom, setCustom] = useState('');
   const [error, setError] = useState('');
+  const [selected, setSelected] = useState([]);
+
+  // CourseDetail renders this at a fixed position and doesn't remount it on
+  // prev/next navigation between courses — `selected` would otherwise survive
+  // a slug change with labels from the old course's chapters. The next
+  // course's bank almost certainly doesn't share those labels, so the filter
+  // below would silently empty the pool (or, on a course with same-named
+  // chapters, draw from the wrong ones). Chapter selection is scoped to one
+  // course, so reset it during render on a slug change — the same pattern
+  // CourseDetail itself uses for its remembered tab — rather than in an
+  // effect, which would commit the stale selection's render first. `error`
+  // resets alongside it: its text names the previous pool's bounds ("Enter a
+  // number between 1 and 1"), which would otherwise sit under the new
+  // course's picker, unearned by anything typed there.
+  const [selectedFor, setSelectedFor] = useState(course.slug);
+  if (selectedFor !== course.slug) {
+    setSelectedFor(course.slug);
+    setSelected([]);
+    setError('');
+  }
+
+  // A bank authored chapter by chapter tags every question with the chapter it
+  // came from (ENT 221 — 367 questions over the workbook's 18 chapters). That
+  // tag is what makes the bank usable mid-semester: a student being taught
+  // chapter 9 this week wants chapter 9, not a random draw across a whole
+  // year's material. Selecting chapters narrows the *pool* rather than starting
+  // a set of its own, so the length picker below keeps working unchanged —
+  // "Quick · 5" on two selected chapters means five questions from those two.
+  // A bank with no `chapter` anywhere (every other shipped bank) yields no
+  // entries here, renders no pills, and behaves exactly as it always has.
+  const chapters = useMemo(() => {
+    const counts = new Map();
+    for (const q of bank) {
+      if (!q.chapter) continue;
+      counts.set(q.chapter, (counts.get(q.chapter) || 0) + 1);
+    }
+    return [...counts.entries()];
+  }, [bank]);
+
+  const pool = useMemo(
+    () => (selected.length ? bank.filter((q) => selected.includes(q.chapter)) : bank),
+    [bank, selected],
+  );
+
+  // The error names the pool size, so narrowing has to clear a stale one —
+  // "enter a number between 1 and 367" is wrong the moment a chapter is picked.
+  const toggleChapter = (label) => {
+    setSelected((prev) => (
+      prev.includes(label) ? prev.filter((c) => c !== label) : [...prev, label]
+    ));
+    setError('');
+  };
 
   const start = (count) => {
-    const n = Math.max(1, Math.min(count, bank.length));
-    setQuestions(sample(bank, n));
+    // Guards a pool of zero — reachable only for the one render where a stale
+    // `selected` from a just-left course doesn't match the new course's
+    // chapters yet, before the effect above clears it. Quiz indexes its first
+    // question unconditionally, so handing it an empty set crashes rather
+    // than showing nothing.
+    if (pool.length === 0) return;
+    const n = Math.max(1, Math.min(count, pool.length));
+    setQuestions(sample(pool, n));
     setAttempt((a) => a + 1);
     setError('');
   };
 
   const startCustom = () => {
     const n = parseInt(custom, 10);
-    if (!Number.isInteger(n) || n < 1 || n > bank.length) {
-      setError(`Enter a number between 1 and ${bank.length}.`);
+    if (!Number.isInteger(n) || n < 1 || n > pool.length) {
+      setError(`Enter a number between 1 and ${pool.length}.`);
       return;
     }
     start(n);
@@ -62,7 +125,7 @@ export default function CourseQuiz({ course }) {
           onClick={() => setQuestions(null)}
           className="btn-ghost mb-5 text-sm"
         >
-          <ArrowLeft size={15} /> Choose a different length
+          <ArrowLeft size={15} /> Back to the question picker
         </button>
         <Quiz
           key={attempt}
@@ -78,8 +141,8 @@ export default function CourseQuiz({ course }) {
   }
 
   // ── Length picker view ────────────────────────────────────────
-  // Presets only make sense below the bank size; "Full" always covers the rest.
-  const presets = [5, 10, 20].filter((n) => n < bank.length);
+  // Presets only make sense below the pool size; "Full" always covers the rest.
+  const presets = [5, 10, 20].filter((n) => n < pool.length);
   const lastPercent = last ? Math.round((last.score / last.total) * 100) : null;
 
   return (
@@ -91,8 +154,11 @@ export default function CourseQuiz({ course }) {
         <div>
           <h2 className="font-display font-bold text-xl text-ink mb-1">Practice Quiz</h2>
           <p className="text-sm text-coffee-700 leading-relaxed">
-            {bank.length} questions cover this course&apos;s lecture notes. Choose how many
-            you want — questions are drawn at random, so each attempt is different.
+            {bank.length} questions cover this course&apos;s lecture notes.
+            {chapters.length > 1
+              ? ' Pick the chapters you are revising, then choose how many questions you want'
+              : ' Choose how many you want'}
+            {' '}— they are drawn at random, so each attempt is different.
           </p>
         </div>
       </div>
@@ -106,6 +172,51 @@ export default function CourseQuiz({ course }) {
               {last.score} / {last.total} ({lastPercent}%)
             </span>
           </p>
+        </div>
+      )}
+
+      {chapters.length > 1 && (
+        <div className="mb-6">
+          <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-3 flex items-center gap-2">
+            <ListFilter size={14} /> Pick by chapter
+            <span className="font-sans normal-case tracking-normal text-coffee-500">
+              — optional
+            </span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {chapters.map(([label, count]) => {
+              const on = selected.includes(label);
+              return (
+                <button
+                  key={label}
+                  onClick={() => toggleChapter(label)}
+                  aria-pressed={on}
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 transition-all text-sm text-left ${
+                    on ? 'border-rust bg-rust/10 text-ink' : 'border-coffee-200 hover:border-coffee-500 text-coffee-700'
+                  }`}
+                >
+                  {on
+                    ? <CheckCircle2 size={14} className="text-rust shrink-0" />
+                    : <Circle size={14} className="text-coffee-300 shrink-0" />}
+                  {label}
+                  <span className="text-xs text-coffee-500">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+          {selected.length > 0 && (
+            <p className="text-sm text-coffee-700 mt-3">
+              Drawing from{' '}
+              <span className="font-bold text-ink">{pool.length} questions</span> in{' '}
+              {selected.length} chapter{selected.length === 1 ? '' : 's'}.{' '}
+              <button
+                onClick={() => { setSelected([]); setError(''); }}
+                className="text-coffee-600 hover:text-ink underline underline-offset-2"
+              >
+                Clear
+              </button>
+            </p>
+          )}
         </div>
       )}
 
@@ -124,11 +235,11 @@ export default function CourseQuiz({ course }) {
           </button>
         ))}
         <button
-          onClick={() => start(bank.length)}
+          onClick={() => start(pool.length)}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-ink bg-ink text-cream hover:bg-coffee-800 transition-all text-sm font-medium"
         >
           <Play size={13} />
-          Full · all {bank.length} questions
+          Full · all {pool.length} question{pool.length === 1 ? '' : 's'}
         </button>
       </div>
 
@@ -140,11 +251,11 @@ export default function CourseQuiz({ course }) {
           <input
             type="number"
             min="1"
-            max={bank.length}
+            max={pool.length}
             value={custom}
             onChange={(e) => setCustom(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && startCustom()}
-            placeholder={`1–${bank.length}`}
+            placeholder={`1–${pool.length}`}
             aria-label="Number of questions"
             className="w-28 px-3 py-2.5 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-none bg-paper text-ink text-sm"
           />
