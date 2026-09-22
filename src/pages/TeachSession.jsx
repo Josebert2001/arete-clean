@@ -37,13 +37,12 @@ export default function TeachSession() {
   const pollRef = useRef(null);
   const rotateRef = useRef(null);
 
-  useEffect(() => {
-    if (!offeringId && offerings.length) setOfferingId(offerings[0].id);
-  }, [offerings, offeringId]);
+  // Derived, not stateful — see the same pattern in Register.jsx for why.
+  const effectiveOfferingId = offeringId || offerings[0]?.id || '';
 
   const offering = useMemo(
-    () => offerings.find(o => o.id === offeringId) ?? null,
-    [offerings, offeringId],
+    () => offerings.find(o => o.id === effectiveOfferingId) ?? null,
+    [offerings, effectiveOfferingId],
   );
 
   // Load who has checked in, for the live list.
@@ -60,7 +59,7 @@ export default function TeachSession() {
   // rotate the code every 30s.
   useEffect(() => {
     if (!session) return;
-    loadRecords(session.id);
+    (async () => { await loadRecords(session.id); })();
     pollRef.current = setInterval(() => loadRecords(session.id), 4000);
     rotateRef.current = setInterval(async () => {
       const next = makeCode();
@@ -250,7 +249,7 @@ export default function TeachSession() {
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-ink">Course</span>
               <select
-                value={offeringId}
+                value={effectiveOfferingId}
                 onChange={e => setOfferingId(e.target.value)}
                 className="w-full rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-ink"
               >

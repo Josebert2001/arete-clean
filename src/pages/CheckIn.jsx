@@ -38,13 +38,17 @@ export default function CheckIn() {
 
     if (error) { setStatus('error'); return; }
     setSessions(data ?? []);
-    if ((data ?? []).length && !chosen) setChosen(data[0].id);
+    // Functional update, not a `chosen` dependency: depending on `chosen` here
+    // would recreate this callback (and re-fire the load effect) the moment
+    // the first session auto-selects, costing a redundant round trip on every
+    // load.
+    if ((data ?? []).length) setChosen(prev => prev || data[0].id);
     setStatus('ready');
-  }, [user, chosen]);
+  }, [user]);
 
   useEffect(() => {
     if (authLoading) return;
-    loadOpen();
+    (async () => { await loadOpen(); })();
   }, [authLoading, loadOpen]);
 
   // Ask the browser for location — used only as a flag, never a block. If the
