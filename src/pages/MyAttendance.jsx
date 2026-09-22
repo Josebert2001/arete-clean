@@ -11,14 +11,20 @@ const TONE = {
 
 /**
  * A student's own attendance, grouped by course, with a percentage per course
- * and a 70% flag. Read-only by design: attendance_records has no student write
- * path except the check_in() function, and the read policy returns only the
- * student's own rows. The nested class_sessions/course_offerings reads work
- * because a student may read sessions they were marked in.
+ * and a threshold flag.
+ *
+ * The percentage comes from my_attendance_summary() — attended vs. every
+ * CLOSED session held for a course, the same "total held" figure the
+ * lecturer's register uses. Reading straight off attendance_records instead
+ * (this student's own rows only) would always read 100%: a student has no
+ * row for a class they missed, only for ones they attended. The per-check-in
+ * list below is still read directly from attendance_records — RLS returns
+ * only the caller's own rows — since the summary RPC has no per-session detail.
  */
 export default function MyAttendance() {
   const { user, authLoading } = useAuth();
   const [status, setStatus]   = useState('loading'); // loading | ready | error
+  const [summary, setSummary] = useState([]);
   const [rows, setRows]       = useState([]);
 
   useEffect(() => {
@@ -26,44 +32,53 @@ export default function MyAttendance() {
     let cancelled = false;
 
     (async () => {
-      const { data, error } = await supabase
-        .from('attendance_records')
-        .select('id, status, marked_at, class_sessions(held_on, title, course_offerings(id, course_code, course_title, level, threshold_pct))')
-        .eq('student_id', user.id)
-        .order('marked_at', { ascending: false });
+      const [sumRes, recRes] = await Promise.all([
+        supabase.rpc('my_attendance_summary'),
+        supabase
+          .from('attendance_records')
+          .select('id, status, marked_at, class_sessions(held_on, title, course_offerings(id))')
+          .eq('student_id', user.id)
+          .order('marked_at', { ascending: false }),
+      ]);
 
       if (cancelled) return;
-      if (error) { setStatus('error'); return; }
-      setRows(data ?? []);
+      if (sumRes.error || recRes.error) { setStatus('error'); return; }
+      setSummary(sumRes.data ?? []);
+      setRows(recRes.data ?? []);
       setStatus('ready');
     })();
 
     return () => { cancelled = true; };
   }, [authLoading, user]);
 
-  // Group records by course offering, compute a percentage per course.
-  // Denominator here is the number of THIS student's records for the course.
-  // (The lecturer's register uses the stricter "all sessions opened" figure;
-  // for the student's own view, showing their marked classes is clear and
-  // honest — the authoritative percentage is on the lecturer's register.)
-  const courses = useMemo(() => {
+  // Per-check-in list, grouped by offering id, for the detail list under each
+  // course card — the summary RPC gives the honest percentage, this gives the
+  // dates.
+  const recordsByOffering = useMemo(() => {
     const map = new Map();
     for (const r of rows) {
-      const o = r.class_sessions?.course_offerings;
-      if (!o) continue;
-      if (!map.has(o.id)) {
-        map.set(o.id, { offering: o, records: [] });
-      }
-      map.get(o.id).records.push(r);
+      const offeringId = r.class_sessions?.course_offerings?.id;
+      if (!offeringId) continue;
+      if (!map.has(offeringId)) map.set(offeringId, []);
+      map.get(offeringId).push(r);
     }
-    return [...map.values()].map(group => {
-      const total = group.records.length;
-      const present = group.records.filter(r => r.status === 'present' || r.status === 'manual').length;
-      const pct = total ? Math.round((present / total) * 100) : 0;
-      const threshold = group.offering.threshold_pct ?? 70;
-      return { ...group, total, present, pct, threshold, below: pct < threshold };
-    });
+    return map;
   }, [rows]);
+
+  const courses = useMemo(() => {
+    return summary.map(s => {
+      const total = Number(s.total_held);
+      const present = Number(s.attended);
+      const pct = total ? Math.round((present / total) * 100) : 0;
+      const threshold = s.threshold_pct ?? 70;
+      return {
+        offering: s,
+        records: recordsByOffering.get(s.offering_id) ?? [],
+        total, present, pct, threshold,
+        below: total > 0 && pct < threshold,
+      };
+    });
+  }, [summary, recordsByOffering]);
 
   if (authLoading || status === 'loading') {
     return (
@@ -90,12 +105,12 @@ export default function MyAttendance() {
 
       {courses.length === 0 ? (
         <p className="rounded-2xl border border-coffee-200 bg-cream px-4 py-8 text-center text-coffee-700">
-          No attendance recorded yet. It appears here once you check into a class.
+          No courses on your roster yet. It appears here once your lecturer opens a class for your course.
         </p>
       ) : (
         <div className="space-y-6">
           {courses.map(c => (
-            <section key={c.offering.id} className="overflow-hidden rounded-2xl border border-coffee-200 bg-cream">
+            <section key={c.offering.offering_id} className="overflow-hidden rounded-2xl border border-coffee-200 bg-cream">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-coffee-200 px-4 py-3">
                 <div>
                   <p className="font-display text-lg font-bold text-ink">
@@ -118,19 +133,23 @@ export default function MyAttendance() {
                 </div>
               )}
 
-              <ul className="divide-y divide-coffee-200">
-                {c.records.map(r => (
-                  <li key={r.id} className="flex items-center justify-between px-4 py-2.5">
-                    <span className="text-sm text-coffee-700">
-                      {r.class_sessions?.held_on}
-                      {r.class_sessions?.title ? ` · ${r.class_sessions.title}` : ''}
-                    </span>
-                    <span className={`rounded-md px-2 py-0.5 text-xs font-medium capitalize ${TONE[r.status] ?? TONE.absent}`}>
-                      {r.status === 'manual' ? 'present' : r.status}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {c.records.length === 0 ? (
+                <p className="px-4 py-3 text-sm text-coffee-500">No check-ins recorded yet for this course.</p>
+              ) : (
+                <ul className="divide-y divide-coffee-200">
+                  {c.records.map(r => (
+                    <li key={r.id} className="flex items-center justify-between px-4 py-2.5">
+                      <span className="text-sm text-coffee-700">
+                        {r.class_sessions?.held_on}
+                        {r.class_sessions?.title ? ` · ${r.class_sessions.title}` : ''}
+                      </span>
+                      <span className={`rounded-md px-2 py-0.5 text-xs font-medium capitalize ${TONE[r.status] ?? TONE.absent}`}>
+                        {r.status === 'manual' ? 'present' : r.status}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           ))}
         </div>

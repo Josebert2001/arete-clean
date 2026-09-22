@@ -27,25 +27,31 @@ export default function Register() {
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState('');
 
-  useEffect(() => {
-    if (!offeringId && offerings.length) setOfferingId(offerings[0].id);
-  }, [offerings, offeringId]);
+  // Derived, not stateful: a plain `useState` + effect to seed the first
+  // offering once `offerings` arrives would call setState synchronously from
+  // an effect just to compute an initial value React already has on hand.
+  // `offeringId` stays real state only for what the student actually picks.
+  const effectiveOfferingId = offeringId || offerings[0]?.id || '';
 
   const offering = useMemo(
-    () => offerings.find(o => o.id === offeringId) ?? null,
-    [offerings, offeringId],
+    () => offerings.find(o => o.id === effectiveOfferingId) ?? null,
+    [offerings, effectiveOfferingId],
   );
 
   const load = useCallback(async () => {
-    if (!offeringId) return;
+    if (!effectiveOfferingId) return;
     setLoading(true);
     setError('');
 
-    const sumRes = await supabase.rpc('register_summary', { p_offering_id: offeringId });
+    // Keep the roster current before reading it — additive only, so this
+    // never drops a manually-added student, only adds newly-matching ones.
+    await supabase.rpc('sync_offering_roster', { p_offering_id: effectiveOfferingId });
+
+    const sumRes = await supabase.rpc('register_summary', { p_offering_id: effectiveOfferingId });
     const detRes = await supabase
       .from('attendance_records')
       .select('session_id, student_id, full_name_snapshot, reg_number_snapshot, status, capture, marked_at, class_sessions!inner(offering_id, held_on, title, status)')
-      .eq('class_sessions.offering_id', offeringId)
+      .eq('class_sessions.offering_id', effectiveOfferingId)
       .order('marked_at', { ascending: true });
 
     if (sumRes.error || detRes.error) {
@@ -57,9 +63,9 @@ export default function Register() {
     setTotalHeld((sumRes.data?.[0]?.total_held) ?? 0);
     setDetail(detRes.data ?? []);
     setLoading(false);
-  }, [offeringId]);
+  }, [effectiveOfferingId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { (async () => { await load(); })(); }, [load]);
 
   function pct(attended, total) {
     return total ? Math.round((attended / total) * 100) : 0;
@@ -178,7 +184,7 @@ export default function Register() {
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-ink">Course</span>
             <select
-              value={offeringId}
+              value={effectiveOfferingId}
               onChange={e => setOfferingId(e.target.value)}
               className="rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-ink"
             >
@@ -222,7 +228,7 @@ export default function Register() {
           {/* Formal summary table (header repeats each printed page) */}
           {summary.length === 0 ? (
             <p className="rounded-xl border border-coffee-200 bg-cream px-4 py-6 text-center text-coffee-700 no-print">
-              No attendance yet for this course. Close a session to build the register.
+              No students match this course's department and level yet.
             </p>
           ) : (
             <table className="reg-table w-full border-collapse text-sm">
@@ -240,7 +246,7 @@ export default function Register() {
               <tbody>
                 {summary.map((s, i) => {
                   const p = pct(Number(s.attended), Number(s.total_held));
-                  const below = p < 70;
+                  const below = Number(s.total_held) > 0 && p < 70;
                   return (
                     <tr key={s.student_id}>
                       <td className="border border-coffee-300 px-2 py-1 text-center">{i + 1}</td>
