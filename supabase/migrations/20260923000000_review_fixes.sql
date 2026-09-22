@@ -52,7 +52,10 @@ CREATE POLICY "lecturers manage their sessions" ON class_sessions
   WITH CHECK (is_lecturer_of(offering_id));
 
 -- ── 2. register_summary() now returns the offering's real threshold
-CREATE OR REPLACE FUNCTION register_summary(p_offering_id UUID)
+-- DROP first: CREATE OR REPLACE cannot change a function's OUT-parameter
+-- column set, only the body of an unchanged signature.
+DROP FUNCTION IF EXISTS register_summary(UUID);
+CREATE FUNCTION register_summary(p_offering_id UUID)
 RETURNS TABLE (
   student_id      UUID,
   full_name       TEXT,
