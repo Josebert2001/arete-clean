@@ -71,7 +71,14 @@ export default function TeachSession() {
 
     (async () => { await loadRecords(sessionId); })();
     pollRef.current = setInterval(() => loadRecords(sessionId), 4000);
+
+    // Guards against two overlapping rotate_code calls (a slow/reordered
+    // response): only the response to the MOST RECENT rotation may commit —
+    // otherwise an older request resolving after a newer one could overwrite
+    // the displayed code with a stale value the database no longer has.
+    let rotateToken = 0;
     rotateRef.current = setInterval(async () => {
+      const token = ++rotateToken;
       const next = makeCode();
       // rotate_code() returns FOUND — false when its UPDATE ... WHERE
       // status = 'open' matched no row (e.g. a co-lecturer closed the
@@ -79,7 +86,7 @@ export default function TeachSession() {
       // in that case, and the UI would display a code that was never
       // actually persisted.
       const { data, error: e } = await supabase.rpc('rotate_code', { p_session_id: sessionId, p_new_code: next });
-      if (cancelled) return;
+      if (cancelled || token !== rotateToken) return;
       if (e || !data) { setError('Could not rotate the code. The one on screen may be stale.'); return; }
       setSession(s => (s ? { ...s, checkin_code: next } : s));
     }, ROTATE_MS);
