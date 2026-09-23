@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FileSpreadsheet, Loader2, Lock, Printer } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useLecturer } from '../components/useLecturer';
+import { getDepartment } from '../data/departments';
 
 /**
  * Lecturer attendance register for one course (offering).
@@ -38,14 +39,28 @@ export default function Register() {
     [offerings, effectiveOfferingId],
   );
 
+  // `token` guards against two overlapping loads (switching the Course dropdown
+  // quickly fires a new load before the previous one resolves) — only the
+  // most recent call's response is allowed to commit state, or a fast switch
+  // A → B could have A's response land after B's and print/export A's data
+  // under B's heading.
+  const loadToken = useRef(0);
+
   const load = useCallback(async () => {
     if (!effectiveOfferingId) return;
+    const token = ++loadToken.current;
     setLoading(true);
     setError('');
 
     // Keep the roster current before reading it — additive only, so this
     // never drops a manually-added student, only adds newly-matching ones.
-    await supabase.rpc('sync_offering_roster', { p_offering_id: effectiveOfferingId });
+    const syncRes = await supabase.rpc('sync_offering_roster', { p_offering_id: effectiveOfferingId });
+    if (token !== loadToken.current) return;
+    if (syncRes.error) {
+      setError('Could not refresh the roster. Please try again.');
+      setLoading(false);
+      return;
+    }
 
     const sumRes = await supabase.rpc('register_summary', { p_offering_id: effectiveOfferingId });
     const detRes = await supabase
@@ -54,6 +69,7 @@ export default function Register() {
       .eq('class_sessions.offering_id', effectiveOfferingId)
       .order('marked_at', { ascending: true });
 
+    if (token !== loadToken.current) return;
     if (sumRes.error || detRes.error) {
       setError('Could not load the register. Please try again.');
       setLoading(false);
@@ -89,13 +105,11 @@ export default function Register() {
     return [...map.values()].sort((a, b) => new Date(b.marked_at) - new Date(a.marked_at));
   }, [detail]);
 
-  // Title-cased for both the printed page and the .xls export — the previous
-  // version relied on the screen's `uppercase` CSS class to look right, which
-  // has no effect on the raw text written into the spreadsheet ("dataScience"
-  // became "data Science" there, lowercase d and all).
-  const deptLabel = (offering?.department || '')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b\w/g, c => c.toUpperCase());
+  // The canonical display name from the department registry — matches
+  // Navbar.jsx, rather than reinventing "dataScience" → "Data Science" with a
+  // regex that stays correct only by coincidence and drifts from any future
+  // department slug that doesn't camelCase cleanly.
+  const deptLabel = offering?.department ? getDepartment(offering.department).name : '';
 
   // Every row in one offering's summary carries the same threshold_pct — read
   // it from the data instead of hardcoding 70, or a custom per-offering

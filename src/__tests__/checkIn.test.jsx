@@ -18,16 +18,11 @@ vi.mock('../context/AuthContext', () => ({
 
 vi.mock('../lib/supabase', () => ({
   supabase: {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          gt: () => ({
-            order: async () => ({ data: mocks.state.sessions, error: null }),
-          }),
-        }),
-      }),
-    }),
-    rpc: async (_name, _args) => mocks.state.rpcResult,
+    rpc: async (name) => {
+      if (name === 'discover_open_sessions') return { data: mocks.state.sessions, error: null };
+      if (name === 'check_in') return mocks.state.rpcResult;
+      return { data: null, error: null };
+    },
   },
 }));
 
@@ -37,7 +32,10 @@ const openSession = {
   held_on: '2026-09-22',
   closes_at: new Date(Date.now() + 60000).toISOString(),
   status: 'open',
-  course_offerings: { course_code: 'CYB 224', course_title: 'Cyber Law', level: '200L', department: 'cybersecurity' },
+  course_code: 'CYB 224',
+  course_title: 'Cyber Law',
+  level: '200L',
+  department: 'cybersecurity',
 };
 
 beforeEach(() => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Loader2, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -24,9 +24,17 @@ export default function CheckIn() {
   const [busy, setBusy]       = useState(false);
   const [result, setResult]   = useState(null); // { ok, message }
 
-  // Load the sessions that are open right now. RLS lets a student read a session
-  // only once they've been marked in it, so for *discovery* of open sessions we
-  // read from course_offerings + class_sessions the offerings anyone may read.
+  // True once check_in() has returned ok — stops the poll below, since a
+  // student who has already checked in has no reason to keep discovering
+  // newly-opened sessions every 5s for the rest of the class.
+  const checkedInRef = useRef(false);
+
+  // Load the sessions that are open right now, via discover_open_sessions()
+  // rather than a direct `class_sessions` select: that table's own "anyone
+  // sees open sessions" policy is row-level only and exposes checkin_code as
+  // a column to any signed-in reader, which would let a student read the
+  // live board code for a class without being in the room. The function
+  // returns only the columns a discovery list needs.
   // `silent` skips the full-page spinner and error state — used by the poll
   // below, so a background refresh never yanks the form out from under a
   // student mid-selection.
@@ -34,13 +42,7 @@ export default function CheckIn() {
     if (!supabase || !user) { setStatus('ready'); return; }
     if (!silent) setStatus('loading');
 
-    const nowIso = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('class_sessions')
-      .select('id, title, held_on, closes_at, status, course_offerings(course_code, course_title, level, department)')
-      .eq('status', 'open')
-      .gt('closes_at', nowIso)
-      .order('opened_at', { ascending: false });
+    const { data, error } = await supabase.rpc('discover_open_sessions');
 
     if (error) { if (!silent) setStatus('error'); return; }
     setSessions(data ?? []);
@@ -59,7 +61,9 @@ export default function CheckIn() {
     if (authLoading) return;
     let cancelled = false;
     (async () => { if (!cancelled) await loadOpen(); })();
-    const poll = setInterval(() => { if (!cancelled) loadOpen({ silent: true }); }, POLL_MS);
+    const poll = setInterval(() => {
+      if (!cancelled && !checkedInRef.current) loadOpen({ silent: true });
+    }, POLL_MS);
     return () => { cancelled = true; clearInterval(poll); };
   }, [authLoading, loadOpen]);
 
@@ -87,7 +91,10 @@ export default function CheckIn() {
     // check_in returns a single row: { ok, message, flagged }
     const row = Array.isArray(data) ? data[0] : data;
     setResult({ ok: row?.ok ?? false, message: row?.message ?? 'Unknown response.' });
-    if (row?.ok) setCode('');
+    if (row?.ok) {
+      setCode('');
+      checkedInRef.current = true;
+    }
     setBusy(false);
   }
 
@@ -136,14 +143,11 @@ export default function CheckIn() {
               onChange={e => setChosen(e.target.value)}
               className="w-full rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-ink"
             >
-              {sessions.map(s => {
-                const o = s.course_offerings;
-                return (
-                  <option key={s.id} value={s.id}>
-                    {o?.course_code} · {o?.level} {s.title ? `· ${s.title}` : ''}
-                  </option>
-                );
-              })}
+              {sessions.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.course_code} · {s.level} {s.title ? `· ${s.title}` : ''}
+                </option>
+              ))}
             </select>
           </label>
 

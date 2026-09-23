@@ -46,14 +46,17 @@ export default function TeachSession() {
     [offerings, effectiveOfferingId],
   );
 
-  // Load who has checked in, for the live list.
+  // Load who has checked in, for the live list. Shared by the mount effect,
+  // the poll, and the manual Refresh button, so an error surfaces the same
+  // way regardless of which one triggered it.
   const loadRecords = useCallback(async (sessionId) => {
     const { data, error: e } = await supabase
       .from('attendance_records')
       .select('id, status, capture, full_name_snapshot, reg_number_snapshot, location_flagged, marked_at')
       .eq('session_id', sessionId)
       .order('marked_at', { ascending: false });
-    if (!e) setRecords(data ?? []);
+    if (e) { setError('Could not load the check-in list. Please try again.'); return; }
+    setRecords(data ?? []);
   }, []);
 
   // While a session is open: poll the check-in list every few seconds, and
@@ -66,20 +69,14 @@ export default function TeachSession() {
     if (!sessionId) return;
     let cancelled = false;
 
-    (async () => {
-      const { data, error: e } = await supabase
-        .from('attendance_records')
-        .select('id, status, capture, full_name_snapshot, reg_number_snapshot, location_flagged, marked_at')
-        .eq('session_id', sessionId)
-        .order('marked_at', { ascending: false });
-      if (!cancelled && !e) setRecords(data ?? []);
-    })();
-
+    (async () => { await loadRecords(sessionId); })();
     pollRef.current = setInterval(() => loadRecords(sessionId), 4000);
     rotateRef.current = setInterval(async () => {
       const next = makeCode();
       const { error: e } = await supabase.rpc('rotate_code', { p_session_id: sessionId, p_new_code: next });
-      if (!e && !cancelled) setSession(s => (s ? { ...s, checkin_code: next } : s));
+      if (cancelled) return;
+      if (e) { setError('Could not rotate the code. The one on screen may be stale.'); return; }
+      setSession(s => (s ? { ...s, checkin_code: next } : s));
     }, ROTATE_MS);
 
     return () => {
