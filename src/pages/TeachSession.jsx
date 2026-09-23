@@ -46,6 +46,28 @@ export default function TeachSession() {
     [offerings, effectiveOfferingId],
   );
 
+  // Rehydrate an already-open session on mount. Without this, a reload mid-
+  // class (or the SPA remounting the page) reset `session` to null and fell
+  // back to the "Open session" form — which, now that the database enforces
+  // at most one open session per offering, just fails with "already open"
+  // and leaves the lecturer with no in-app way to see or close the session
+  // they themselves opened.
+  useEffect(() => {
+    if (!effectiveOfferingId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('class_sessions')
+        .select('*')
+        .eq('offering_id', effectiveOfferingId)
+        .eq('status', 'open')
+        .gt('closes_at', new Date().toISOString())
+        .maybeSingle();
+      if (!cancelled && data) setSession(data);
+    })();
+    return () => { cancelled = true; };
+  }, [effectiveOfferingId]);
+
   // Load who has checked in, for the live list. Shared by the mount effect,
   // the poll, and the manual Refresh button, so an error surfaces the same
   // way regardless of which one triggered it.
@@ -167,15 +189,17 @@ export default function TeachSession() {
     setBusy(true);
     setError('');
 
-    // Find the real student account by the reg number the lecturer typed.
-    // Lecturers may read profiles in their department (see RLS), so this
-    // lookup is allowed. Manual attendance must link to the STUDENT'S account
-    // (not the lecturer's) so it counts toward that student's own percentage.
-    const { data: found, error: findErr } = await supabase
-      .from('profiles')
-      .select('id, full_name, reg_number')
-      .eq('reg_number', manualReg.trim())
-      .maybeSingle();
+    // Find the real student account by the reg number the lecturer typed, via
+    // find_student_by_reg() rather than a direct `profiles` select — the
+    // "lecturers read department roster" RLS policy only covers the
+    // lecturer's own department, which would silently fail to find a
+    // legitimate cross-department elective student. Manual attendance must
+    // link to the STUDENT'S account (not the lecturer's) so it counts toward
+    // that student's own percentage.
+    const { data: rows, error: findErr } = await supabase.rpc('find_student_by_reg', {
+      p_reg_number: manualReg.trim(),
+    });
+    const found = rows?.[0];
 
     if (findErr) {
       setError('Could not look up that reg number. Try again.');
@@ -206,9 +230,16 @@ export default function TeachSession() {
     // added student stays invisible on their own /my-attendance and on the
     // register itself if their profile doesn't match the offering's dept/level.
     if (!e) {
-      await supabase
+      const { error: rosterErr } = await supabase
         .from('offering_students')
         .upsert({ offering_id: session.offering_id, student_id: found.id }, { onConflict: 'offering_id,student_id' });
+      if (rosterErr) {
+        setBusy(false);
+        setError('Marked present, but could not add them to the roster — they may not show on the register yet.');
+        setManualReg('');
+        loadRecords(session.id);
+        return;
+      }
     }
 
     setBusy(false);
