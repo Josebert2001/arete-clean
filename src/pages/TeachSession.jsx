@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarCheck, Loader2, Lock, Plus, RefreshCw, Users, X } from 'lucide-react';
+import { CalendarCheck, Clock, Loader2, Lock, Maximize, Plus, RefreshCw, UserPlus, Users, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useLecturer } from '../components/useLecturer';
 import { getLocation } from '../utils/geolocation';
 
-// A short, easy-to-read code (no confusable 0/O/1/I). Shown on the board and
-// rotated every 30s so a forwarded screenshot is stale before it arrives.
+// A short, easy-to-read code (no confusable 0/O/1/I). Shown on the projector
+// and rotated every 30s so a forwarded screenshot is stale before it arrives.
 function makeCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let c = '';
@@ -34,6 +34,13 @@ export default function TeachSession() {
   const [manualReg, setManualReg]   = useState('');
   const [resetReg, setResetReg]     = useState('');
   const [resetMsg, setResetMsg]     = useState('');
+  const [rosterReg, setRosterReg]   = useState('');
+  const [rosterMsg, setRosterMsg]   = useState('');
+
+  // Ticks every second while a session is open, for the countdown and so the
+  // screen notices when the check-in window has ended.
+  const [now, setNow] = useState(() => Date.now());
+  const codeRef = useRef(null);
 
   const pollRef = useRef(null);
   const rotateRef = useRef(null);
@@ -86,6 +93,19 @@ export default function TeachSession() {
   // rotate_code's own setSession() replaces the session object every 30s, and
   // depending on the whole object tore this effect down and rebuilt both
   // intervals (plus an extra loadRecords call) on every single rotation.
+  // Read by the rotation interval, so an extension applies without tearing
+  // the interval down.
+  const closesAtRef = useRef(0);
+  useEffect(() => {
+    closesAtRef.current = session ? new Date(session.closes_at).getTime() : 0;
+  }, [session]);
+
+  useEffect(() => {
+    if (!session?.id) return;
+    const tick = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(tick);
+  }, [session?.id]);
+
   useEffect(() => {
     const sessionId = session?.id;
     if (!sessionId) return;
@@ -100,6 +120,9 @@ export default function TeachSession() {
     // the displayed code with a stale value the database no longer has.
     let rotateToken = 0;
     rotateRef.current = setInterval(async () => {
+      // Past the window, check_in() refuses every code, so a rotating one on
+      // the projector would only mislead students into trying.
+      if (Date.now() > closesAtRef.current) return;
       const token = ++rotateToken;
       const next = makeCode();
       // rotate_code() returns FOUND — false when its UPDATE ... WHERE
@@ -248,6 +271,56 @@ export default function TeachSession() {
     loadRecords(session.id);
   }
 
+  // Reopens check-in for 5 more minutes after the window ended (a late
+  // start, a slow room). A fresh code too: the one on screen stopped rotating
+  // when the window closed, so check_in() would already reject it as stale.
+  async function extendSession() {
+    if (!session) return;
+    setBusy(true);
+    setError('');
+    const closesAt = new Date(Date.now() + 5 * 60000).toISOString();
+    const { error: e } = await supabase
+      .from('class_sessions')
+      .update({ closes_at: closesAt })
+      .eq('id', session.id)
+      .eq('status', 'open');
+    if (e) { setBusy(false); setError('Could not extend check-in.'); return; }
+    const next = makeCode();
+    const { data: rotated, error: rotErr } = await supabase.rpc('rotate_code', { p_session_id: session.id, p_new_code: next });
+    setBusy(false);
+    const codeOk = !rotErr && rotated;
+    setSession(s => (s ? { ...s, closes_at: closesAt, ...(codeOk ? { checkin_code: next } : {}) } : s));
+    setNow(Date.now());
+    if (!codeOk) setError('Check-in extended, but the code could not be refreshed. It will change within 30 seconds.');
+  }
+
+  // Puts a carryover / elective student on this course's list without marking
+  // them present. Until they're on it, a student whose profile department or
+  // level differs from the course never sees its sessions on their Check In
+  // page, and check_in() refuses them.
+  async function addToRoster() {
+    if (!offering || !rosterReg.trim()) return;
+    setBusy(true);
+    setRosterMsg('');
+    const { data: rows, error: findErr } = await supabase.rpc('find_student_by_reg', { p_reg_number: rosterReg.trim() });
+    const found = rows?.[0];
+    if (findErr) { setBusy(false); setRosterMsg('Could not look up that reg number. Try again.'); return; }
+    if (!found) { setBusy(false); setRosterMsg('No student found with that reg number.'); return; }
+    const { error: e } = await supabase
+      .from('offering_students')
+      .upsert({ offering_id: offering.id, student_id: found.id }, { onConflict: 'offering_id,student_id' });
+    setBusy(false);
+    if (e) { setRosterMsg('Could not add them. Please try again.'); return; }
+    setRosterMsg(`${found.full_name || found.reg_number} can now check in to ${offering.course_code}.`);
+    setRosterReg('');
+  }
+
+  function projectFullscreen() {
+    const el = codeRef.current;
+    if (!el?.requestFullscreen) return;
+    el.requestFullscreen().catch(() => setError('Full screen was blocked by the browser. Zoom in instead (Ctrl +).'));
+  }
+
   // Lecturer resets a student's bound device (changed / lost phone). The
   // student's next check-in binds their new device.
   async function resetDevice() {
@@ -295,6 +368,9 @@ export default function TeachSession() {
       </Centered>
     );
   }
+
+  const remainingMs = session ? new Date(session.closes_at).getTime() - now : 0;
+  const windowOpen = remainingMs > 0;
 
   const presentCount = records.filter(r => r.status === 'present' || r.status === 'manual').length;
 
@@ -393,6 +469,27 @@ export default function TeachSession() {
         </div>
 
         <div className="mt-6 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+          <p className="mb-1 text-sm font-medium text-ink">Add a student to {offering?.course_code ?? 'this course'}</p>
+          <p className="mb-3 text-xs text-coffee-500">
+            For carryover or elective students. Students whose department and level match
+            the course are already on it.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              id="roster-reg"
+              aria-label="Reg number of the student to add"
+              type="text" value={rosterReg} onChange={e => setRosterReg(e.target.value)}
+              placeholder="Reg number"
+              className="flex-1 rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-sm text-ink"
+            />
+            <button type="button" onClick={addToRoster} disabled={busy || !rosterReg.trim()} className="btn-ghost text-sm disabled:opacity-60">
+              <UserPlus className="mr-1.5 inline h-4 w-4" /> Add to course
+            </button>
+          </div>
+          {rosterMsg && <p className="mt-2 text-sm text-coffee-700">{rosterMsg}</p>}
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
           <p className="mb-1 text-sm font-medium text-ink">Reset a student's device</p>
           <p className="mb-3 text-xs text-coffee-500">
             Use this when a student changed or lost their phone. Their next check-in
@@ -413,12 +510,31 @@ export default function TeachSession() {
         </>
       ) : (
         <>
-          {/* The big code for the projector */}
-          <div className="mb-6 rounded-2xl border border-ember/30 bg-ember/5 p-6 text-center">
-            <p className="mb-2 text-sm font-medium text-coffee-700">Write this code on the board</p>
-            <p className="font-mono text-6xl font-bold tracking-[0.3em] text-ember">{session.checkin_code}</p>
-            <p className="mt-3 text-xs text-coffee-500">Changes every 30 seconds automatically.</p>
-          </div>
+          {/* The big code for the projector, or, once the window has ended, a
+              clear "closed" state instead of a code nobody can use. */}
+          {windowOpen ? (
+            <div ref={codeRef} className="mb-6 flex flex-col items-center justify-center rounded-2xl border border-ember/30 bg-ember/5 p-6 text-center [&:fullscreen]:bg-paper">
+              <p className="mb-2 text-sm font-medium text-coffee-700">Show this code on the projector</p>
+              <p className="font-mono text-6xl font-bold tracking-[0.3em] text-ember sm:text-8xl">{session.checkin_code}</p>
+              <p className="mt-3 text-xs text-coffee-500">
+                Changes every 30 seconds · check-in closes in {formatRemaining(remainingMs)}
+              </p>
+              <button type="button" onClick={projectFullscreen} className="btn-ghost mt-3 text-xs">
+                <Maximize className="mr-1.5 inline h-3.5 w-3.5" /> Full screen
+              </button>
+            </div>
+          ) : (
+            <div className="mb-6 rounded-2xl border border-coffee-300 bg-cream p-6 text-center">
+              <Clock className="mx-auto mb-2 h-5 w-5 text-coffee-500" />
+              <p className="font-medium text-ink">Check-in window has ended</p>
+              <p className="mt-1 text-sm text-coffee-700">
+                Students can no longer check in. Extend it for latecomers, or close the session.
+              </p>
+              <button type="button" onClick={extendSession} disabled={busy} className="btn-ghost mt-3 text-sm disabled:opacity-60">
+                Extend 5 minutes
+              </button>
+            </div>
+          )}
 
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm text-coffee-700">
@@ -479,6 +595,13 @@ export default function TeachSession() {
       )}
     </div>
   );
+}
+
+function formatRemaining(ms) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const m = Math.floor(total / 60);
+  const sec = String(total % 60).padStart(2, '0');
+  return `${m}:${sec}`;
 }
 
 function Centered({ children }) {

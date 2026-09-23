@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import CheckIn from '../pages/CheckIn';
 
 const mocks = vi.hoisted(() => ({
@@ -45,7 +46,7 @@ beforeEach(() => {
 
 describe('CheckIn', () => {
   it('shows the empty state when no class is open', async () => {
-    render(<CheckIn />);
+    render(<MemoryRouter><CheckIn /></MemoryRouter>);
     await waitFor(() =>
       expect(screen.getByText(/No class is open for check-in right now/)).toBeInTheDocument(),
     );
@@ -53,7 +54,7 @@ describe('CheckIn', () => {
 
   it('submits the code for the open session and shows the success message', async () => {
     mocks.state.sessions = [openSession];
-    render(<CheckIn />);
+    render(<MemoryRouter><CheckIn /></MemoryRouter>);
 
     await waitFor(() => expect(screen.getByPlaceholderText('e.g. 4827')).toBeInTheDocument());
 
@@ -68,7 +69,7 @@ describe('CheckIn', () => {
   it('shows the server message when check-in is rejected', async () => {
     mocks.state.sessions = [openSession];
     mocks.state.rpcResult = { data: [{ ok: false, message: 'That code is wrong or has changed. Read the current one and try again.', flagged: false }], error: null };
-    render(<CheckIn />);
+    render(<MemoryRouter><CheckIn /></MemoryRouter>);
 
     await waitFor(() => expect(screen.getByPlaceholderText('e.g. 4827')).toBeInTheDocument());
 

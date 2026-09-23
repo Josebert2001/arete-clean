@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CheckCircle2, Loader2, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -140,6 +141,11 @@ export default function CheckIn() {
         <p className="rounded-2xl border border-coffee-200 bg-cream px-4 py-8 text-center text-coffee-700">
           No class is open for check-in right now. It appears here the moment your
           lecturer opens one.
+          <span className="mt-3 block text-sm text-coffee-500">
+            Class already started but not listed? Check your department and level
+            on <Link to="/profile" className="underline">your profile</Link>. If you take this course as a
+            carryover or elective, ask your lecturer to add you to it.
+          </span>
         </p>
       ) : (
         <div className="rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
