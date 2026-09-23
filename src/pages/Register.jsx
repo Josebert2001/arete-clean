@@ -62,12 +62,17 @@ export default function Register() {
       return;
     }
 
-    const sumRes = await supabase.rpc('register_summary', { p_offering_id: effectiveOfferingId });
-    const detRes = await supabase
-      .from('attendance_records')
-      .select('session_id, student_id, full_name_snapshot, reg_number_snapshot, status, capture, marked_at, class_sessions!inner(offering_id, held_on, title, status)')
-      .eq('class_sessions.offering_id', effectiveOfferingId)
-      .order('marked_at', { ascending: true });
+    // Independent of each other, so run concurrently rather than paying both
+    // round trips serially (as MyAttendance.jsx already does for its
+    // equivalent two-query load).
+    const [sumRes, detRes] = await Promise.all([
+      supabase.rpc('register_summary', { p_offering_id: effectiveOfferingId }),
+      supabase
+        .from('attendance_records')
+        .select('session_id, student_id, full_name_snapshot, reg_number_snapshot, status, capture, marked_at, class_sessions!inner(offering_id, held_on, title, status)')
+        .eq('class_sessions.offering_id', effectiveOfferingId)
+        .order('marked_at', { ascending: true }),
+    ]);
 
     if (token !== loadToken.current) return;
     if (sumRes.error || detRes.error) {
@@ -118,7 +123,12 @@ export default function Register() {
 
   // ── Real spreadsheet export (SpreadsheetML — Excel opens it natively) ───────
   function downloadXlsx() {
-    const esc = v => String(v ?? '')
+    // full_name/reg_number are student-controlled (ProfileForm.jsx only
+    // trims). A value starting with = + - @ can be read as a formula by
+    // Excel/Sheets regardless of the declared cell type — a classic
+    // CSV/spreadsheet-injection vector. A leading apostrophe forces text.
+    const defuseFormula = v => /^[=+\-@]/.test(v) ? `'${v}` : v;
+    const esc = v => defuseFormula(String(v ?? ''))
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const cell = (v, type = 'String') => `<Cell><Data ss:Type="${type}">${esc(v)}</Data></Cell>`;
     const wideCols = widths => widths.map(w => `<Column ss:Width="${w}"/>`).join('');

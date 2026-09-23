@@ -73,9 +73,14 @@ export default function TeachSession() {
     pollRef.current = setInterval(() => loadRecords(sessionId), 4000);
     rotateRef.current = setInterval(async () => {
       const next = makeCode();
-      const { error: e } = await supabase.rpc('rotate_code', { p_session_id: sessionId, p_new_code: next });
+      // rotate_code() returns FOUND — false when its UPDATE ... WHERE
+      // status = 'open' matched no row (e.g. a co-lecturer closed the
+      // session from another tab). Checking only `error` would still be null
+      // in that case, and the UI would display a code that was never
+      // actually persisted.
+      const { data, error: e } = await supabase.rpc('rotate_code', { p_session_id: sessionId, p_new_code: next });
       if (cancelled) return;
-      if (e) { setError('Could not rotate the code. The one on screen may be stale.'); return; }
+      if (e || !data) { setError('Could not rotate the code. The one on screen may be stale.'); return; }
       setSession(s => (s ? { ...s, checkin_code: next } : s));
     }, ROTATE_MS);
 
