@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,8 +24,18 @@ export function useLecturer() {
   const [role, setRole]           = useState(null);
   const [offerings, setOfferings] = useState([]);
 
+  // Guards against a stale response landing after a newer call started —
+  // e.g. one user signs out and another signs in on a shared/kiosk browser
+  // before the first call's Promise.all resolves. Without this, that stale
+  // response can overwrite the new user's role/offerings with the previous
+  // user's.
+  const loadToken = useRef(0);
+
   const load = useCallback(async () => {
+    const token = ++loadToken.current;
+
     if (!supabase || !user) {
+      if (token !== loadToken.current) return;
       setRole(null);
       setOfferings([]);
       setStatus('ready');
@@ -43,6 +53,7 @@ export function useLecturer() {
         .eq('lecturer_id', user.id),
     ]);
 
+    if (token !== loadToken.current) return;
     if (roleRes.error || offerRes.error) {
       setStatus('error');
       return;
@@ -60,9 +71,7 @@ export function useLecturer() {
 
   useEffect(() => {
     if (authLoading) return;   // wait for sign-in to settle, or we query as nobody
-    let cancelled = false;
-    (async () => { if (!cancelled) await load(); })();
-    return () => { cancelled = true; };
+    (async () => { await load(); })();
   }, [authLoading, load]);
 
   return {

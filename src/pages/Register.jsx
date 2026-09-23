@@ -64,24 +64,28 @@ export default function Register() {
 
     // Independent of each other, so run concurrently rather than paying both
     // round trips serially (as MyAttendance.jsx already does for its
-    // equivalent two-query load).
-    const [sumRes, detRes] = await Promise.all([
+    // equivalent two-query load). heldRes is also independent of the roster:
+    // register_summary()'s rows come from offering_students, so an offering
+    // with real closed sessions but nobody on the roster yet would otherwise
+    // read totalHeld as 0 from an empty summary's first row.
+    const [sumRes, detRes, heldRes] = await Promise.all([
       supabase.rpc('register_summary', { p_offering_id: effectiveOfferingId }),
       supabase
         .from('attendance_records')
         .select('session_id, student_id, full_name_snapshot, reg_number_snapshot, status, capture, marked_at, class_sessions!inner(offering_id, held_on, title, status)')
         .eq('class_sessions.offering_id', effectiveOfferingId)
         .order('marked_at', { ascending: true }),
+      supabase.rpc('held_sessions_count', { p_offering_id: effectiveOfferingId }),
     ]);
 
     if (token !== loadToken.current) return;
-    if (sumRes.error || detRes.error) {
+    if (sumRes.error || detRes.error || heldRes.error) {
       setError('Could not load the register. Please try again.');
       setLoading(false);
       return;
     }
     setSummary(sumRes.data ?? []);
-    setTotalHeld((sumRes.data?.[0]?.total_held) ?? 0);
+    setTotalHeld(heldRes.data ?? 0);
     setDetail(detRes.data ?? []);
     setLoading(false);
   }, [effectiveOfferingId]);
@@ -179,6 +183,16 @@ export default function Register() {
 
   if (roleStatus === 'loading') {
     return <Centered><Loader2 className="h-5 w-5 animate-spin text-coffee-500" /></Centered>;
+  }
+  // A transient failure must not read as "you're not a lecturer" — role
+  // defaults to null on error, which would otherwise fall straight into the
+  // !isLecturer branch below and look identical to a real access denial.
+  if (roleStatus === 'error') {
+    return (
+      <Centered>
+        <p className="text-coffee-700">Could not check your access. Please reload the page.</p>
+      </Centered>
+    );
   }
   if (!isLecturer) {
     return (

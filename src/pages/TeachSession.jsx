@@ -137,7 +137,11 @@ export default function TeachSession() {
       .single();
 
     if (e) {
-      setError('Could not open the session. You may not be assigned to this course.');
+      // 23505 = unique_violation — the DB-enforced "at most one open session
+      // per offering" index, e.g. a co-lecturer already opened this class.
+      setError(e.code === '23505'
+        ? 'A session is already open for this course — check with your co-lecturer, or close it before opening a new one.'
+        : 'Could not open the session. You may not be assigned to this course.');
       setBusy(false);
       return;
     }
@@ -229,6 +233,16 @@ export default function TeachSession() {
 
   if (roleStatus === 'loading') {
     return <Centered><Loader2 className="h-5 w-5 animate-spin text-coffee-500" /></Centered>;
+  }
+  // A transient failure must not read as "you're not a lecturer" — role
+  // defaults to null on error, which would otherwise fall straight into the
+  // !isLecturer branch below and look identical to a real access denial.
+  if (roleStatus === 'error') {
+    return (
+      <Centered>
+        <p className="text-coffee-700">Could not check your access. Please reload the page.</p>
+      </Centered>
+    );
   }
   if (!isLecturer) {
     return (

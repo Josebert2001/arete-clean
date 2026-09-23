@@ -29,6 +29,12 @@ export default function CheckIn() {
   // newly-opened sessions every 5s for the rest of the class.
   const checkedInRef = useRef(false);
 
+  // Guards against a stale response landing after a newer call started (an
+  // in-flight poll response resolving after unmount, or after a second call
+  // was already issued) — without it, an out-of-order response could
+  // overwrite fresher state with older data.
+  const loadToken = useRef(0);
+
   // Load the sessions that are open right now, via discover_open_sessions()
   // rather than a direct `class_sessions` select: that table's own "anyone
   // sees open sessions" policy is row-level only and exposes checkin_code as
@@ -39,11 +45,13 @@ export default function CheckIn() {
   // below, so a background refresh never yanks the form out from under a
   // student mid-selection.
   const loadOpen = useCallback(async ({ silent = false } = {}) => {
-    if (!supabase || !user) { setStatus('ready'); return; }
+    const token = ++loadToken.current;
+    if (!supabase || !user) { if (token === loadToken.current) setStatus('ready'); return; }
     if (!silent) setStatus('loading');
 
     const { data, error } = await supabase.rpc('discover_open_sessions');
 
+    if (token !== loadToken.current) return;
     if (error) { if (!silent) setStatus('error'); return; }
     setSessions(data ?? []);
     // Functional update, not a `chosen` dependency: depending on `chosen` here
@@ -59,12 +67,11 @@ export default function CheckIn() {
   // forever, with no way to know without manually reloading.
   useEffect(() => {
     if (authLoading) return;
-    let cancelled = false;
-    (async () => { if (!cancelled) await loadOpen(); })();
+    (async () => { await loadOpen(); })();
     const poll = setInterval(() => {
-      if (!cancelled && !checkedInRef.current) loadOpen({ silent: true });
+      if (!checkedInRef.current) loadOpen({ silent: true });
     }, POLL_MS);
-    return () => { cancelled = true; clearInterval(poll); };
+    return () => clearInterval(poll);
   }, [authLoading, loadOpen]);
 
   async function submit() {
