@@ -40,7 +40,7 @@ export default function Navbar() {
   // hiding a link is never the only thing standing between a student and
   // lecturer data.
   const { user } = useAuth();
-  const { isLecturer, role } = useLecturer();
+  const { isLecturer, role, repScope } = useLecturer();
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +68,8 @@ export default function Navbar() {
   //  - signed out        → none
   //  - lecturer / admin  → Take Attendance + Register (never the student links),
   //                        plus Admin for an admin
-  //  - student           → Check In (the actual check-in form) + My Attendance
+  //  - student           → Check In (the actual check-in form) + My Attendance,
+  //                        plus Course Rep for a student appointed rep
   //    (their record/percentage) — a single link pointing at the read-only
   //    history page left students with no discoverable way to reach /attendance
   //    itself short of typing the URL.
@@ -83,6 +84,7 @@ export default function Navbar() {
       : [
           { to: '/attendance', label: 'Check In' },
           { to: '/my-attendance', label: 'My Attendance' },
+          ...(repScope ? [{ to: '/rep', label: 'Course Rep' }] : []),
         ];
 
   const links = [...baseLinks, ...roleLinks];
