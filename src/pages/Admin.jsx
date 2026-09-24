@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loader2, Lock, Plus, Search, X } from 'lucide-react';
+import { Loader2, Lock, Search, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useLecturer } from '../components/useLecturer';
-import { departments, getDepartment } from '../data/departments';
-import { currentAcademicSession, isAcademicSession } from '../utils/academicSession';
-
-const LEVELS = ['100L', '200L', '300L', '400L'];
-const DEPARTMENT_OPTIONS = Object.values(departments);
+import { getDepartment } from '../data/departments';
+import NewOfferingForm from '../components/NewOfferingForm';
 
 /**
  * Admin console for attendance: who is a lecturer, which course offerings
@@ -18,17 +15,26 @@ const DEPARTMENT_OPTIONS = Object.values(departments);
  * real boundary is in the database (migration 20260924000000): role changes
  * and user lookup go through admin-only SECURITY DEFINER functions, and the
  * offering tables carry admin-only write policies.
+ *
+ * Course reps (migration 20260925000000) are appointed here and then invite
+ * their own cohort's lecturers; the invite log below is the admin's view of
+ * everything they do.
  */
 export default function Admin() {
   const { status: roleStatus, role } = useLecturer();
   const [staff, setStaff]         = useState([]);
+  const [reps, setReps]           = useState([]);
   const [staffError, setStaffError] = useState('');
 
   const loadStaff = useCallback(async () => {
-    const { data, error } = await supabase.rpc('admin_list_staff');
-    if (error) { setStaffError('Could not load the staff list. Please reload.'); return; }
+    const [staffRes, repRes] = await Promise.all([
+      supabase.rpc('admin_list_staff'),
+      supabase.rpc('admin_list_course_reps'),
+    ]);
+    if (staffRes.error || repRes.error) { setStaffError('Could not load the staff list. Please reload.'); return; }
     setStaffError('');
-    setStaff(data ?? []);
+    setStaff(staffRes.data ?? []);
+    setReps(repRes.data ?? []);
   }, []);
 
   useEffect(() => {
@@ -58,21 +64,24 @@ export default function Admin() {
         <p className="mb-2 font-mono text-xs uppercase tracking-widest text-coffee-500">Admin</p>
         <h1 className="display-heading text-3xl text-ink sm:text-4xl">Attendance setup</h1>
         <p className="mt-2 text-coffee-700">
-          Make someone a lecturer, create the courses they teach, then assign them. They can
-          run attendance from Take Attendance straight away.
+          Make someone a lecturer, create the courses they teach, then assign them. Or appoint
+          a course rep to invite their class's lecturers, and review what they did below.
         </p>
       </header>
 
       {staffError && <Alert>{staffError}</Alert>}
 
-      <StaffPanel staff={staff} onChange={loadStaff} />
+      <StaffPanel staff={staff} reps={reps} onChange={loadStaff} />
+      <RepsPanel reps={reps} onChange={loadStaff} />
       <OfferingsPanel staff={staff} />
+      <InviteLog />
+      <AttendanceChanges />
     </div>
   );
 }
 
 // ── Lecturers ──────────────────────────────────────────────────────────────
-function StaffPanel({ staff, onChange }) {
+function StaffPanel({ staff, reps, onChange }) {
   const { user } = useAuth();
   const [query, setQuery]     = useState('');
   const [results, setResults] = useState(null);
@@ -109,8 +118,24 @@ function StaffPanel({ staff, onChange }) {
     }
   }
 
+  async function makeRep(person) {
+    setMessage(null);
+    setBusy(true);
+    const { data, error } = await supabase.rpc('admin_set_course_rep', {
+      p_user_id: person.id, p_department: person.department, p_level: person.level,
+    });
+    setBusy(false);
+    if (error) { setMessage({ ok: false, text: 'Could not appoint the course rep. Please try again.' }); return; }
+    const row = Array.isArray(data) ? data[0] : data;
+    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
+    if (row?.ok) onChange();
+  }
+
+  const repIds = new Set(reps.map(r => r.id));
+
   function roleButtons(person) {
     if (person.id === user?.id) return <span className="text-xs text-coffee-500">You</span>;
+    if (repIds.has(person.id)) return <span className="text-xs text-coffee-500">Course rep</span>;
     if (confirmRemove === person.id) {
       return (
         <div className="flex flex-wrap items-center gap-2">
@@ -128,6 +153,12 @@ function StaffPanel({ staff, onChange }) {
         {person.role !== 'admin' && (
           <button type="button" disabled={busy} onClick={() => setRole(person.id, 'admin')} className="btn-ghost text-xs">Make admin</button>
         )}
+        {/* A rep is scoped to the class on their own profile — no class, no button. */}
+        {!person.role && person.department && person.level && (
+          <button type="button" disabled={busy} onClick={() => makeRep(person)} className="btn-ghost text-xs">
+            Make course rep ({getDepartment(person.department).name} {person.level})
+          </button>
+        )}
         {person.role && (
           <button type="button" disabled={busy} onClick={() => setConfirmRemove(person.id)} className="btn-ghost text-xs text-rust">Remove role</button>
         )}
@@ -137,7 +168,7 @@ function StaffPanel({ staff, onChange }) {
 
   return (
     <section className="mb-10 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
-      <h2 className="font-display text-xl font-bold text-ink">Lecturers</h2>
+      <h2 className="font-display text-xl font-bold text-ink">Lecturers and course reps</h2>
       <p className="mb-4 text-sm text-coffee-700">
         The lecturer must have signed in to Areté once before you can find them.
       </p>
@@ -205,6 +236,234 @@ function PersonLabel({ person }) {
       </p>
     </div>
   );
+}
+
+// ── Course reps ────────────────────────────────────────────────────────────
+function RepsPanel({ reps, onChange }) {
+  const [busy, setBusy]       = useState(false);
+  const [message, setMessage] = useState(null);
+
+  async function remove(rep) {
+    setBusy(true);
+    setMessage(null);
+    const { data, error } = await supabase.rpc('admin_set_course_rep', {
+      p_user_id: rep.id, p_department: null, p_level: null,
+    });
+    setBusy(false);
+    if (error) { setMessage({ ok: false, text: 'Could not remove the course rep.' }); return; }
+    const row = Array.isArray(data) ? data[0] : data;
+    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
+    if (row?.ok) onChange();
+  }
+
+  return (
+    <section className="mb-10 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+      <h2 className="font-display text-xl font-bold text-ink">Course reps ({reps.length})</h2>
+      <p className="mb-4 text-sm text-coffee-700">
+        A rep can create courses and invite lecturers for their own class only. They stay a
+        student: they still check in, and cannot mark attendance. Removing a rep keeps the
+        lecturers they added; review those in the invite log.
+      </p>
+      {message && (
+        <p role="status" className={`mb-4 text-sm ${message.ok ? 'text-moss' : 'text-rust'}`}>{message.text}</p>
+      )}
+      {reps.length === 0 ? (
+        <p className="text-sm text-coffee-700">No course reps yet. Search for a student above and choose Make course rep.</p>
+      ) : (
+        <ul className="divide-y divide-coffee-200 rounded-xl border border-coffee-200 bg-paper">
+          {reps.map(r => (
+            <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-ink">{r.full_name || r.email}</p>
+                <p className="truncate text-xs text-coffee-500">
+                  {getDepartment(r.department).name} · {r.level} · {r.email}
+                </p>
+              </div>
+              <button type="button" disabled={busy} onClick={() => remove(r)} className="btn-ghost text-xs text-rust">
+                Remove as rep
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// ── Invite log ─────────────────────────────────────────────────────────────
+const INVITE_STATUS = {
+  pending:  { label: 'Pending',   className: 'bg-ember/15 text-ember' },
+  awaiting_approval: { label: 'Needs your approval', className: 'bg-rust/15 text-rust' },
+  accepted: { label: 'On course', className: 'bg-moss/15 text-moss' },
+  revoked:  { label: 'Cancelled', className: 'bg-coffee-100 text-coffee-600' },
+  removed:  { label: 'Removed',   className: 'bg-coffee-100 text-coffee-600' },
+};
+
+function InviteLog() {
+  const [status, setStatus]   = useState('loading');
+  const [invites, setInvites] = useState([]);
+  const [busy, setBusy]       = useState(false);
+  const [message, setMessage] = useState(null);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.rpc('admin_list_invites');
+    if (error) { setStatus('error'); return; }
+    setInvites(data ?? []);
+    setStatus('ready');
+  }, []);
+
+  useEffect(() => { (async () => { await load(); })(); }, [load]);
+
+  async function decide(invite, approve) {
+    setBusy(true);
+    setMessage(null);
+    const { data, error } = await supabase.rpc('admin_decide_invite', { p_invite_id: invite.id, p_approve: approve });
+    setBusy(false);
+    if (error) { setMessage({ ok: false, text: 'Could not update the invite.' }); return; }
+    const row = Array.isArray(data) ? data[0] : data;
+    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
+    load();
+  }
+
+  async function revoke(invite) {
+    setBusy(true);
+    setMessage(null);
+    const { data, error } = await supabase.rpc('revoke_lecturer_invite', { p_invite_id: invite.id });
+    setBusy(false);
+    if (error) { setMessage({ ok: false, text: 'Could not update the invite.' }); return; }
+    const row = Array.isArray(data) ? data[0] : data;
+    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
+    load();
+  }
+
+  return (
+    <section className="mt-10 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+      <h2 className="font-display text-xl font-bold text-ink">Invite log</h2>
+      <p className="mb-4 text-sm text-coffee-700">
+        Every lecturer invite sent by a course rep (or by you), newest first. Someone who
+        is not yet a lecturer only becomes one when you approve them here. Before
+        approving, check the account: a reg number means it belongs to a student.
+      </p>
+      {message && (
+        <p role="status" className={`mb-4 text-sm ${message.ok ? 'text-moss' : 'text-rust'}`}>{message.text}</p>
+      )}
+      {status === 'loading' && <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-coffee-500" /></div>}
+      {status === 'error' && <p className="text-sm text-rust">Could not load the invite log. Please reload the page.</p>}
+      {status === 'ready' && (
+        invites.length === 0 ? (
+          <p className="text-sm text-coffee-700">No invites yet.</p>
+        ) : (
+          <ul className="divide-y divide-coffee-200 rounded-xl border border-coffee-200 bg-paper">
+            {invites.map(i => {
+              const expired = i.status === 'pending' && new Date(i.expires_at) < new Date();
+              const badge = expired ? { label: 'Expired', className: 'bg-coffee-100 text-coffee-600' } : INVITE_STATUS[i.status];
+              return (
+                <li key={i.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-ink">
+                      {i.accepted_by_name || i.email}
+                      <span className={`ml-2 rounded-md px-1.5 py-0.5 align-middle text-xs font-medium ${badge.className}`}>{badge.label}</span>
+                    </p>
+                    <p className="truncate text-xs text-coffee-500">
+                      {i.course_code} · {getDepartment(i.department).name} {i.level} · {i.academic_session}
+                      {' · invited by '}{i.invited_by_name || 'unknown'} on {new Date(i.created_at).toLocaleDateString()}
+                    </p>
+                    {i.accepted_by_email && (
+                      <p className="truncate text-xs text-coffee-500">
+                        Accepted by {i.accepted_by_email}
+                        {i.accepted_by_reg
+                          ? <span className="font-medium text-rust"> · reg number {i.accepted_by_reg} (a student account)</span>
+                          : ' · no reg number'}
+                      </p>
+                    )}
+                  </div>
+                  {i.status === 'awaiting_approval' && (
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" disabled={busy} onClick={() => decide(i, true)} className="btn-primary text-xs">Approve</button>
+                      <button type="button" disabled={busy} onClick={() => decide(i, false)} className="btn-ghost text-xs text-rust">Reject</button>
+                    </div>
+                  )}
+                  {(i.status === 'accepted' || (i.status === 'pending' && !expired)) && (
+                    <button type="button" disabled={busy} onClick={() => revoke(i)} className="btn-ghost text-xs text-rust">
+                      {i.status === 'accepted' ? 'Remove from course' : 'Cancel invite'}
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )
+      )}
+    </section>
+  );
+}
+
+// ── Attendance changes (audit log) ─────────────────────────────────────────
+const ACTION_LABEL = { insert: 'Added', update: 'Changed', delete: 'Deleted' };
+
+function AttendanceChanges() {
+  const [status, setStatus]         = useState('loading');
+  const [changes, setChanges]       = useState([]);
+  const [flaggedOnly, setFlaggedOnly] = useState(true);
+
+  const load = useCallback(async () => {
+    setStatus('loading');
+    const { data, error } = await supabase.rpc('admin_list_attendance_changes', { p_flagged_only: flaggedOnly });
+    if (error) { setStatus('error'); return; }
+    setChanges(data ?? []);
+    setStatus('ready');
+  }, [flaggedOnly]);
+
+  useEffect(() => { (async () => { await load(); })(); }, [load]);
+
+  return (
+    <section className="mt-10 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+      <h2 className="font-display text-xl font-bold text-ink">Attendance changes</h2>
+      <p className="mb-4 text-sm text-coffee-700">
+        Every attendance mark a lecturer added, changed or deleted by hand. Flagged: the
+        student is a course rep, or the lecturer was brought in by a rep&apos;s invite. Both
+        together on one row is the pattern to check first.
+      </p>
+      <label className="mb-4 inline-flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" checked={flaggedOnly} onChange={e => setFlaggedOnly(e.target.checked)} />
+        Flagged only
+      </label>
+
+      {status === 'loading' && <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-coffee-500" /></div>}
+      {status === 'error' && <p className="text-sm text-rust">Could not load attendance changes. Please reload the page.</p>}
+      {status === 'ready' && (
+        changes.length === 0 ? (
+          <p className="text-sm text-coffee-700">{flaggedOnly ? 'Nothing flagged.' : 'No manual changes yet.'}</p>
+        ) : (
+          <ul className="divide-y divide-coffee-200 rounded-xl border border-coffee-200 bg-paper">
+            {changes.map(c => (
+              <li key={c.id} className="px-4 py-3">
+                <p className="font-medium text-ink">
+                  {ACTION_LABEL[c.action]} · {c.student_name || 'Unknown student'}
+                  {c.student_reg ? ` (${c.student_reg})` : ''}
+                  {c.student_is_rep && <Flag>Course rep</Flag>}
+                  {c.actor_invited_by_rep && <Flag>Lecturer via rep invite</Flag>}
+                </p>
+                <p className="text-xs text-coffee-500">
+                  {c.course_code ?? 'Deleted course'}{c.held_on ? ` · class of ${c.held_on}` : ''}
+                  {' · by '}{c.actor_name || 'unknown'} ({c.actor_role})
+                  {' · '}{new Date(c.changed_at).toLocaleString()}
+                </p>
+                <p className="text-xs text-coffee-700">
+                  {c.old_status && c.new_status ? `${c.old_status} → ${c.new_status}` : (c.new_status || c.old_status)}
+                  {c.reason ? ` · reason: ${c.reason}` : ''}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )
+      )}
+    </section>
+  );
+}
+
+function Flag({ children }) {
+  return <span className="ml-2 rounded-md bg-rust/15 px-1.5 py-0.5 align-middle text-xs font-medium text-rust">{children}</span>;
 }
 
 // ── Course offerings ───────────────────────────────────────────────────────
@@ -323,117 +582,6 @@ function OfferingsPanel({ staff }) {
         )
       )}
     </section>
-  );
-}
-
-function NewOfferingForm({ onCreated }) {
-  const [department, setDepartment] = useState('cybersecurity');
-  const [level, setLevel]           = useState('100L');
-  const [code, setCode]             = useState('');
-  const [title, setTitle]           = useState('');
-  const [session, setSession]       = useState(currentAcademicSession());
-  const [threshold, setThreshold]   = useState(70);
-  const [catalogue, setCatalogue]   = useState([]);
-  const [busy, setBusy]             = useState(false);
-  const [message, setMessage]       = useState(null);
-
-  // The department's catalogue feeds the course-code suggestions. A failed
-  // chunk load only loses the suggestions; the admin can still type a code.
-  useEffect(() => {
-    let cancelled = false;
-    getDepartment(department).loadCatalogue()
-      .then(c => { if (!cancelled) setCatalogue(c.courses); })
-      .catch(() => { if (!cancelled) setCatalogue([]); });
-    return () => { cancelled = true; };
-  }, [department]);
-
-  const suggestions = useMemo(
-    () => catalogue.filter(c => `${c.level}L` === level),
-    [catalogue, level],
-  );
-
-  function onCodeChange(value) {
-    setCode(value);
-    const match = catalogue.find(c => c.code.toLowerCase() === value.trim().toLowerCase());
-    if (match) {
-      setTitle(match.title);
-      setLevel(`${match.level}L`);
-    }
-  }
-
-  async function create(e) {
-    e.preventDefault();
-    setMessage(null);
-    if (!code.trim()) { setMessage({ ok: false, text: 'Enter a course code.' }); return; }
-    if (!isAcademicSession(session)) { setMessage({ ok: false, text: 'Write the session as two consecutive years, e.g. 2026/2027.' }); return; }
-
-    setBusy(true);
-    const { error } = await supabase.from('course_offerings').insert({
-      course_code:      code.trim().toUpperCase(),
-      course_title:     title.trim() || null,
-      department,
-      level,
-      academic_session: session.trim(),
-      threshold_pct:    Math.min(100, Math.max(1, Number(threshold) || 70)),
-    });
-    setBusy(false);
-    if (error) {
-      setMessage({ ok: false, text: error.code === '23505' ? 'That course already exists for this level and session.' : 'Could not create the course.' });
-      return;
-    }
-    setMessage({ ok: true, text: `${code.trim().toUpperCase()} created. Now assign a lecturer below.` });
-    setCode('');
-    setTitle('');
-    onCreated();
-  }
-
-  const field = 'w-full rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-sm text-ink';
-
-  return (
-    <form onSubmit={create} className="mb-6 rounded-xl border border-coffee-200 bg-paper p-4">
-      <p className="mb-3 text-sm font-medium text-ink">New course</p>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block" htmlFor="offering-department">
-          <span className="mb-1 block text-xs font-medium text-ink">Department</span>
-          <select id="offering-department" value={department} onChange={e => setDepartment(e.target.value)} className={field}>
-            {DEPARTMENT_OPTIONS.map(d => <option key={d.slug} value={d.slug}>{d.name}</option>)}
-          </select>
-        </label>
-        <label className="block" htmlFor="offering-level">
-          <span className="mb-1 block text-xs font-medium text-ink">Level</span>
-          <select id="offering-level" value={level} onChange={e => setLevel(e.target.value)} className={field}>
-            {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-          </select>
-        </label>
-        <label className="block" htmlFor="offering-code">
-          <span className="mb-1 block text-xs font-medium text-ink">Course code</span>
-          <input
-            id="offering-code" list="offering-code-options" value={code}
-            onChange={e => onCodeChange(e.target.value)}
-            placeholder="e.g. CYB 224" autoComplete="off" className={field}
-          />
-          <datalist id="offering-code-options">
-            {suggestions.map(c => <option key={c.slug} value={c.code}>{c.title}</option>)}
-          </datalist>
-        </label>
-        <label className="block" htmlFor="offering-title">
-          <span className="mb-1 block text-xs font-medium text-ink">Title <span className="text-coffee-500">(optional)</span></span>
-          <input id="offering-title" value={title} onChange={e => setTitle(e.target.value)} className={field} />
-        </label>
-        <label className="block" htmlFor="offering-session">
-          <span className="mb-1 block text-xs font-medium text-ink">Academic session</span>
-          <input id="offering-session" value={session} onChange={e => setSession(e.target.value)} placeholder="2026/2027" className={field} />
-        </label>
-        <label className="block" htmlFor="offering-threshold">
-          <span className="mb-1 block text-xs font-medium text-ink">Attendance required (%)</span>
-          <input id="offering-threshold" type="number" min={1} max={100} value={threshold} onChange={e => setThreshold(e.target.value)} className={field} />
-        </label>
-      </div>
-      <button type="submit" disabled={busy} className="btn-primary mt-4 inline-flex items-center gap-1.5 text-sm disabled:opacity-60">
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Create course
-      </button>
-      {message && <p role="status" className={`mt-3 text-sm ${message.ok ? 'text-moss' : 'text-rust'}`}>{message.text}</p>}
-    </form>
   );
 }
 

@@ -23,6 +23,7 @@ export function useLecturer() {
   const [status, setStatus]       = useState('loading');
   const [role, setRole]           = useState(null);
   const [offerings, setOfferings] = useState([]);
+  const [repScope, setRepScope]   = useState(null);
 
   // Guards against a stale response landing after a newer call started —
   // e.g. one user signs out and another signs in on a shared/kiosk browser
@@ -38,23 +39,30 @@ export function useLecturer() {
       if (token !== loadToken.current) return;
       setRole(null);
       setOfferings([]);
+      setRepScope(null);
       setStatus('ready');
       return;
     }
     setStatus('loading');
 
-    // Two reads at once: the user's role, and the offerings they're linked to
-    // (joined to the offering details the console needs to show).
-    const [roleRes, offerRes] = await Promise.all([
+    // Three reads at once: the user's role, the offerings they're linked to
+    // (joined to the offering details the console needs to show), and whether
+    // they are a course rep. Reps live in their own table, not user_roles — see
+    // migration 20260925000000 for why.
+    const [roleRes, offerRes, repRes] = await Promise.all([
       supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle(),
       supabase
         .from('offering_lecturers')
         .select('offering_id, course_offerings(id, course_code, course_title, department, level, academic_session)')
         .eq('lecturer_id', user.id),
+      supabase.from('course_reps').select('department, level').eq('user_id', user.id).maybeSingle(),
     ]);
 
     if (token !== loadToken.current) return;
-    if (roleRes.error || offerRes.error) {
+    // A database without the course-reps migration yet answers "table not
+    // found" — that means nobody is a rep, not that the page is broken.
+    const repTableMissing = repRes.error && ['42P01', 'PGRST205'].includes(repRes.error.code);
+    if (roleRes.error || offerRes.error || (repRes.error && !repTableMissing)) {
       setStatus('error');
       return;
     }
@@ -66,6 +74,7 @@ export function useLecturer() {
 
     setRole(roleRes.data?.role ?? null);
     setOfferings(list);
+    setRepScope(repRes.data ?? null);
     setStatus('ready');
   }, [user]);
 
@@ -79,6 +88,7 @@ export function useLecturer() {
     role,
     offerings,
     isLecturer: role === 'lecturer' || role === 'admin',
+    repScope,          // { department, level } for a course rep, else null
     reload: load,
   };
 }
