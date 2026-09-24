@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { getDepartment } from '../data/departments';
+import { rpcAction } from '../utils/rpcAction';
 
 /**
  * Where an invited lecturer accepts a course rep's invite. The invite is
@@ -35,12 +36,10 @@ export default function Invitations() {
   async function accept(id) {
     setBusy(true);
     setMessage(null);
-    const { data, error } = await supabase.rpc('accept_lecturer_invite', { p_invite_id: id });
+    const res = await rpcAction('accept_lecturer_invite', { p_invite_id: id }, 'Could not accept the invite. Please try again.');
     setBusy(false);
-    if (error) { setMessage({ ok: false, text: 'Could not accept the invite. Please try again.' }); return; }
-    const row = Array.isArray(data) ? data[0] : data;
-    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.', linked: !!row?.ok && !row?.pending_approval });
-    if (row?.ok) load();
+    setMessage({ ...res, linked: res.ok && !res.row?.pending_approval });
+    if (res.ok) load();
   }
 
   return (

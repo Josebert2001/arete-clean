@@ -1,6 +1,8 @@
 -- ─── Course reps: delegated lecturer assignment ─────────────────────────────
--- Run manually in the Supabase SQL editor. Idempotent: safe to re-run.
--- Requires 20260924000000_attendance_admin.sql (is_admin()).
+-- Run manually in the Supabase SQL editor. Requires 20260924000000 (is_admin()).
+-- Idempotent ONLY until 20260925010000 is applied: that file changes the
+-- return types of accept_lecturer_invite / admin_list_invites, so re-running
+-- this one afterwards fails. Once the later files are in, re-run those instead.
 --
 -- An admin appoints a student as the course rep for ONE cohort (department +
 -- level). The rep can then, for that cohort only:

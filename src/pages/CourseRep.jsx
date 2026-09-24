@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useLecturer } from '../components/useLecturer';
 import NewOfferingForm from '../components/NewOfferingForm';
 import { getDepartment } from '../data/departments';
+import { rpcAction } from '../utils/rpcAction';
 
 /**
  * Course-rep console: the rep's own class only. They create its courses,
@@ -57,7 +58,10 @@ function RepConsole({ scope }) {
     if (offRes.error || lecRes.error || invRes.error) { setStatus('error'); return; }
     setOfferings(offRes.data ?? []);
     setLecturers(lecRes.data ?? []);
-    setInvites(invRes.data ?? []);
+    // An unanswered invite past its expiry is dead — hide it, so the course
+    // shows "No lecturer yet" and the rep knows to invite again.
+    const now = new Date();
+    setInvites((invRes.data ?? []).filter(i => i.status === 'awaiting_approval' || new Date(i.expires_at) >= now));
     setStatus('ready');
   }, [scope.department, scope.level]);
 
@@ -66,23 +70,26 @@ function RepConsole({ scope }) {
   async function rpc(name, args) {
     setBusy(true);
     setMessage(null);
-    const { data, error } = await supabase.rpc(name, args);
+    const res = await rpcAction(name, args);
     setBusy(false);
-    if (error) { setMessage({ ok: false, text: 'Something went wrong. Please try again.' }); return false; }
-    const row = Array.isArray(data) ? data[0] : data;
-    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
-    if (row?.ok) load();
-    return !!row?.ok;
+    setMessage(res);
+    if (res.ok) load();
+    return res.ok;
   }
 
   async function removeLecturer(offeringId, lecturerId) {
     setBusy(true);
     setMessage(null);
-    const { error } = await supabase.from('offering_lecturers').delete()
-      .eq('offering_id', offeringId).eq('lecturer_id', lecturerId);
+    // .select() returns the deleted rows: a delete that RLS filters to nothing
+    // is not an error, so an empty list is the only sign nothing happened.
+    const { data, error } = await supabase.from('offering_lecturers').delete()
+      .eq('offering_id', offeringId).eq('lecturer_id', lecturerId)
+      .select('id');
     setBusy(false);
     if (error) { setMessage({ ok: false, text: 'Could not remove the lecturer.' }); return; }
-    setMessage({ ok: true, text: 'Lecturer removed from the course.' });
+    setMessage((data ?? []).length > 0
+      ? { ok: true, text: 'Lecturer removed from the course.' }
+      : { ok: false, text: 'Nothing was removed. The admin may have changed this course; reload to see it.' });
     load();
   }
 
@@ -158,14 +165,17 @@ function OfferingRow({ offering: o, lecturers, invites, busy, onInvite, onRevoke
         {lecturers.map(l => (
           <span key={l.lecturer_id} className="inline-flex items-center gap-1 rounded-md bg-coffee-100 px-2 py-0.5 text-xs text-coffee-700">
             {l.full_name || l.email}
-            <button
-              type="button" disabled={busy}
-              onClick={() => onRemove(l.lecturer_id)}
-              aria-label={`Remove ${l.full_name || l.email} from ${o.course_code}`}
-              className="text-coffee-500 hover:text-rust"
-            >
-              <X className="h-3 w-3" />
-            </button>
+            {/* Lecturers the admin assigned are the admin's to change. */}
+            {l.removable && (
+              <button
+                type="button" disabled={busy}
+                onClick={() => onRemove(l.lecturer_id)}
+                aria-label={`Remove ${l.full_name || l.email} from ${o.course_code}`}
+                className="text-coffee-500 hover:text-rust"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </span>
         ))}
         {invites.map(i => (

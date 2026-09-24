@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLecturer } from '../components/useLecturer';
 import { getDepartment } from '../data/departments';
 import NewOfferingForm from '../components/NewOfferingForm';
+import { rpcAction } from '../utils/rpcAction';
 
 /**
  * Admin console for attendance: who is a lecturer, which course offerings
@@ -106,13 +107,11 @@ function StaffPanel({ staff, reps, onChange }) {
   async function setRole(userId, nextRole) {
     setBusy(true);
     setMessage(null);
-    const { data, error } = await supabase.rpc('admin_set_role', { p_user_id: userId, p_role: nextRole });
+    const res = await rpcAction('admin_set_role', { p_user_id: userId, p_role: nextRole }, 'Could not change the role. Please try again.');
     setBusy(false);
     setConfirmRemove(null);
-    if (error) { setMessage({ ok: false, text: 'Could not change the role. Please try again.' }); return; }
-    const row = Array.isArray(data) ? data[0] : data;
-    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
-    if (row?.ok) {
+    setMessage(res);
+    if (res.ok) {
       setResults(rs => rs?.map(r => (r.id === userId ? { ...r, role: nextRole } : r)) ?? rs);
       onChange();
     }
@@ -121,14 +120,12 @@ function StaffPanel({ staff, reps, onChange }) {
   async function makeRep(person) {
     setMessage(null);
     setBusy(true);
-    const { data, error } = await supabase.rpc('admin_set_course_rep', {
+    const res = await rpcAction('admin_set_course_rep', {
       p_user_id: person.id, p_department: person.department, p_level: person.level,
-    });
+    }, 'Could not appoint the course rep. Please try again.');
     setBusy(false);
-    if (error) { setMessage({ ok: false, text: 'Could not appoint the course rep. Please try again.' }); return; }
-    const row = Array.isArray(data) ? data[0] : data;
-    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
-    if (row?.ok) onChange();
+    setMessage(res);
+    if (res.ok) onChange();
   }
 
   const repIds = new Set(reps.map(r => r.id));
@@ -246,14 +243,12 @@ function RepsPanel({ reps, onChange }) {
   async function remove(rep) {
     setBusy(true);
     setMessage(null);
-    const { data, error } = await supabase.rpc('admin_set_course_rep', {
+    const res = await rpcAction('admin_set_course_rep', {
       p_user_id: rep.id, p_department: null, p_level: null,
-    });
+    }, 'Could not remove the course rep.');
     setBusy(false);
-    if (error) { setMessage({ ok: false, text: 'Could not remove the course rep.' }); return; }
-    const row = Array.isArray(data) ? data[0] : data;
-    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
-    if (row?.ok) onChange();
+    setMessage(res);
+    if (res.ok) onChange();
   }
 
   return (
@@ -308,7 +303,13 @@ function InviteLog() {
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('admin_list_invites');
     if (error) { setStatus('error'); return; }
-    setInvites(data ?? []);
+    const now = Date.now();
+    setInvites((data ?? []).map(i => ({
+      ...i,
+      account_age_days: i.accepted_by_joined_at
+        ? Math.floor((now - new Date(i.accepted_by_joined_at).getTime()) / 86400000)
+        : null,
+    })));
     setStatus('ready');
   }, []);
 
@@ -317,23 +318,19 @@ function InviteLog() {
   async function decide(invite, approve) {
     setBusy(true);
     setMessage(null);
-    const { data, error } = await supabase.rpc('admin_decide_invite', { p_invite_id: invite.id, p_approve: approve });
+    const res = await rpcAction('admin_decide_invite', { p_invite_id: invite.id, p_approve: approve }, 'Could not update the invite.');
     setBusy(false);
-    if (error) { setMessage({ ok: false, text: 'Could not update the invite.' }); return; }
-    const row = Array.isArray(data) ? data[0] : data;
-    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
-    load();
+    setMessage(res);
+    if (res.ok) load();
   }
 
   async function revoke(invite) {
     setBusy(true);
     setMessage(null);
-    const { data, error } = await supabase.rpc('revoke_lecturer_invite', { p_invite_id: invite.id });
+    const res = await rpcAction('revoke_lecturer_invite', { p_invite_id: invite.id }, 'Could not update the invite.');
     setBusy(false);
-    if (error) { setMessage({ ok: false, text: 'Could not update the invite.' }); return; }
-    const row = Array.isArray(data) ? data[0] : data;
-    setMessage({ ok: !!row?.ok, text: row?.message ?? 'Done.' });
-    load();
+    setMessage(res);
+    if (res.ok) load();
   }
 
   return (
@@ -342,7 +339,8 @@ function InviteLog() {
       <p className="mb-4 text-sm text-coffee-700">
         Every lecturer invite sent by a course rep (or by you), newest first. Someone who
         is not yet a lecturer only becomes one when you approve them here. Before
-        approving, check the account: a reg number means it belongs to a student.
+        approving, check the account: a new account, a reg number, or any classes
+        attended as a student all point to a student&apos;s second account.
       </p>
       {message && (
         <p role="status" className={`mb-4 text-sm ${message.ok ? 'text-moss' : 'text-rust'}`}>{message.text}</p>
@@ -368,14 +366,7 @@ function InviteLog() {
                       {i.course_code} · {getDepartment(i.department).name} {i.level} · {i.academic_session}
                       {' · invited by '}{i.invited_by_name || 'unknown'} on {new Date(i.created_at).toLocaleDateString()}
                     </p>
-                    {i.accepted_by_email && (
-                      <p className="truncate text-xs text-coffee-500">
-                        Accepted by {i.accepted_by_email}
-                        {i.accepted_by_reg
-                          ? <span className="font-medium text-rust"> · reg number {i.accepted_by_reg} (a student account)</span>
-                          : ' · no reg number'}
-                      </p>
-                    )}
+                    {i.accepted_by_email && <AccountEvidence invite={i} />}
                   </div>
                   {i.status === 'awaiting_approval' && (
                     <div className="flex flex-wrap gap-2">
@@ -395,6 +386,27 @@ function InviteLog() {
         )
       )}
     </section>
+  );
+}
+
+// What the admin needs to judge a would-be lecturer. Reg number alone isn't
+// enough — it's optional, and a fresh second account has none.
+function AccountEvidence({ invite: i }) {
+  const ageDays = i.account_age_days;
+  const attended = Number(i.accepted_by_classes_attended ?? 0);
+  const warn = 'font-medium text-rust';
+  return (
+    <p className="text-xs text-coffee-500">
+      Accepted by {i.accepted_by_email}
+      {' · '}
+      {ageDays === null ? 'account age unknown'
+        : <span className={ageDays < 14 ? warn : undefined}>account {ageDays === 0 ? 'created today' : `${ageDays} days old`}</span>}
+      {' · '}
+      <span className={attended > 0 ? warn : undefined}>
+        {attended > 0 ? `checked in to ${attended} class${attended === 1 ? '' : 'es'} as a student` : 'no classes attended as a student'}
+      </span>
+      {i.accepted_by_reg && <span className={warn}> · reg number {i.accepted_by_reg} (a student account)</span>}
+    </p>
   );
 }
 

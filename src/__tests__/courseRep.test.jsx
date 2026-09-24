@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     repScope: { department: 'cybersecurity', level: '200L' },
     rpcCalls: [],
     fromCalls: [],
+    lecturers: [],
     offerings: [{ id: 'o1', course_code: 'CYB 224', course_title: 'Cyber Law', department: 'cybersecurity', level: '200L', academic_session: '2026/2027', threshold_pct: 70 }],
   },
 }));
@@ -34,7 +35,7 @@ vi.mock('../lib/supabase', () => ({
     from: (table) => query(table),
     rpc: async (name, args) => {
       mocks.state.rpcCalls.push({ name, args });
-      if (name === 'rep_cohort_lecturers') return { data: [], error: null };
+      if (name === 'rep_cohort_lecturers') return { data: mocks.state.lecturers, error: null };
       if (name === 'invite_lecturer') return { data: [{ ok: true, message: 'Invite sent.' }], error: null };
       return { data: null, error: null };
     },
@@ -45,6 +46,7 @@ beforeEach(() => {
   mocks.state.repScope = { department: 'cybersecurity', level: '200L' };
   mocks.state.rpcCalls = [];
   mocks.state.fromCalls = [];
+  mocks.state.lecturers = [];
 });
 
 describe('Course rep page', () => {
@@ -74,5 +76,16 @@ describe('Course rep page', () => {
       name: 'invite_lecturer',
       args: { p_offering_id: 'o1', p_email: 'dr.ada@uniuyo.edu.ng' },
     });
+  });
+
+  it('offers removal only for lecturers that came in through an invite', async () => {
+    mocks.state.lecturers = [
+      { offering_id: 'o1', lecturer_id: 'l1', full_name: 'Dr Admin-Assigned', email: 'a@x', removable: false },
+      { offering_id: 'o1', lecturer_id: 'l2', full_name: 'Dr Invited', email: 'b@x', removable: true },
+    ];
+    render(<CourseRep />);
+    expect(await screen.findByText('Dr Admin-Assigned')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Remove Dr Admin-Assigned from CYB 224')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Remove Dr Invited from CYB 224')).toBeInTheDocument();
   });
 });

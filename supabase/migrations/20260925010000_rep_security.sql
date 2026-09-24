@@ -1,6 +1,7 @@
 -- ─── Course reps: admin approval + attendance audit log ─────────────────────
--- Run manually in the Supabase SQL editor. Idempotent: safe to re-run.
--- Requires 20260925000000_course_reps.sql.
+-- Run manually in the Supabase SQL editor. Requires 20260925000000.
+-- Re-runnable, but running it after 20260925020000 puts back older versions
+-- of several functions — re-run 20260925020000 after it if you do.
 --
 -- Closes the gap that migration left open: a rep could invite a second email
 -- of their own, accept it, and — as a "lecturer" — mark themselves present.
