@@ -16,12 +16,12 @@ import { rpcAction } from '../utils/rpcAction';
  * admin sees everything a rep does in the invite log on /admin.
  */
 export default function CourseRep() {
-  const { status: roleStatus, repScope } = useLecturer();
+  const { status: roleStatus, repScope, repError } = useLecturer();
 
   if (roleStatus === 'loading') {
     return <Centered><Loader2 className="h-5 w-5 animate-spin text-coffee-500" /></Centered>;
   }
-  if (roleStatus === 'error') {
+  if (roleStatus === 'error' || repError) {
     return <Centered><p className="text-coffee-700">Could not check your access. Please reload the page.</p></Centered>;
   }
   if (!repScope) {

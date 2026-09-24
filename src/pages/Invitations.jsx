@@ -21,15 +21,14 @@ export default function Invitations() {
   const [message, setMessage] = useState(null);
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('lecturer_invites')
-      .select('id, status, expires_at, course_offerings(course_code, course_title, department, level, academic_session)')
-      .eq('email', (user?.email ?? '').toLowerCase())
-      .in('status', ['pending', 'awaiting_approval']);
+    // The function, not a table read: it also says why an invite can't be
+    // accepted (sender no longer rep, you're in that class, …), which the
+    // browser can't work out under RLS.
+    const { data, error } = await supabase.rpc('my_lecturer_invites');
     if (error) { setStatus('error'); return; }
-    setInvites((data ?? []).filter(i => i.status === 'awaiting_approval' || new Date(i.expires_at) >= new Date()));
+    setInvites(data ?? []);
     setStatus('ready');
-  }, [user?.email]);
+  }, []);
 
   useEffect(() => { (async () => { await load(); })(); }, [load]);
 
@@ -73,20 +72,20 @@ export default function Invitations() {
         ) : (
           <ul className="divide-y divide-coffee-200 rounded-xl border border-coffee-200 bg-paper">
             {invites.map(i => {
-              const o = i.course_offerings;
               return (
                 <li key={i.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                   <div className="min-w-0">
                     <p className="font-medium text-ink">
-                      {o?.course_code}{o?.course_title ? ` · ${o.course_title}` : ''}
+                      {i.course_code}{i.course_title ? ` · ${i.course_title}` : ''}
                     </p>
                     <p className="text-xs text-coffee-500">
-                      {o && getDepartment(o.department).name} · {o?.level} · {o?.academic_session}
+                      {getDepartment(i.department).name} · {i.level} · {i.academic_session}
                     </p>
+                    {i.blocked_reason && <p className="mt-1 text-xs text-rust">{i.blocked_reason}</p>}
                   </div>
                   {i.status === 'awaiting_approval' ? (
                     <span className="text-sm text-coffee-700">Waiting for admin approval</span>
-                  ) : (
+                  ) : i.blocked_reason ? null : (
                     <button type="button" disabled={busy} onClick={() => accept(i.id)} className="btn-primary text-sm">
                       Accept
                     </button>

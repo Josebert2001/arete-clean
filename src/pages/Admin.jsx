@@ -49,6 +49,16 @@ export default function Admin() {
     (async () => { await loadStaff(); })();
   }, [role, loadStaff]);
 
+  // Most actions touch more than one panel (approving an invite adds a
+  // lecturer AND a course link; removing a rep cancels their invites), so any
+  // change reloads the staff list and bumps `version`, which the other panels
+  // reload on.
+  const [version, setVersion] = useState(0);
+  const changed = useCallback(() => {
+    loadStaff();
+    setVersion(v => v + 1);
+  }, [loadStaff]);
+
   if (roleStatus === 'loading') {
     return <Centered><Loader2 className="h-5 w-5 animate-spin text-coffee-500" /></Centered>;
   }
@@ -78,10 +88,10 @@ export default function Admin() {
 
       {staffError && <Alert>{staffError}</Alert>}
 
-      <StaffPanel staff={staff} reps={reps} onChange={loadStaff} />
-      <RepsPanel reps={reps} onChange={loadStaff} />
-      <OfferingsPanel staff={staff} />
-      <InviteLog />
+      <StaffPanel staff={staff} reps={reps} onChange={changed} />
+      <RepsPanel reps={reps} onChange={changed} />
+      <OfferingsPanel staff={staff} version={version} />
+      <InviteLog version={version} onChange={changed} />
       <AttendanceChanges />
     </div>
   );
@@ -246,10 +256,12 @@ function PersonLabel({ person }) {
 function RepsPanel({ reps, onChange }) {
   const [busy, setBusy]       = useState(false);
   const [message, setMessage] = useState(null);
+  const [confirmId, setConfirmId] = useState(null);
 
   async function remove(rep) {
     setBusy(true);
     setMessage(null);
+    setConfirmId(null);
     const res = await rpcAction('admin_set_course_rep', {
       p_user_id: rep.id, p_department: null, p_level: null,
     }, 'Could not remove the course rep.');
@@ -281,9 +293,17 @@ function RepsPanel({ reps, onChange }) {
                   {getDepartment(r.department).name} · {r.level} · {r.email}
                 </p>
               </div>
-              <button type="button" disabled={busy} onClick={() => remove(r)} className="btn-ghost text-xs text-rust">
-                Remove as rep
-              </button>
+              {confirmId === r.id ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-rust">Also cancels every open invite they sent.</span>
+                  <button type="button" disabled={busy} onClick={() => remove(r)} className="btn-primary text-xs">Confirm remove</button>
+                  <button type="button" onClick={() => setConfirmId(null)} className="btn-ghost text-xs">Cancel</button>
+                </div>
+              ) : (
+                <button type="button" disabled={busy} onClick={() => setConfirmId(r.id)} className="btn-ghost text-xs text-rust">
+                  Remove as rep
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -301,7 +321,7 @@ const INVITE_STATUS = {
   removed:  { label: 'Removed',   className: 'bg-coffee-100 text-coffee-600' },
 };
 
-function InviteLog() {
+function InviteLog({ version, onChange }) {
   const [status, setStatus]   = useState('loading');
   const [invites, setInvites] = useState([]);
   const [busy, setBusy]       = useState(false);
@@ -320,7 +340,7 @@ function InviteLog() {
     setStatus('ready');
   }, []);
 
-  useEffect(() => { (async () => { await load(); })(); }, [load]);
+  useEffect(() => { (async () => { await load(); })(); }, [load, version]);
 
   async function decide(invite, approve) {
     setBusy(true);
@@ -328,7 +348,7 @@ function InviteLog() {
     const res = await rpcAction('admin_decide_invite', { p_invite_id: invite.id, p_approve: approve }, 'Could not update the invite.');
     setBusy(false);
     setMessage(res);
-    if (res.ok) load();
+    if (res.ok) onChange();
   }
 
   async function revoke(invite) {
@@ -337,7 +357,7 @@ function InviteLog() {
     const res = await rpcAction('revoke_lecturer_invite', { p_invite_id: invite.id }, 'Could not update the invite.');
     setBusy(false);
     setMessage(res);
-    if (res.ok) load();
+    if (res.ok) onChange();
   }
 
   return (
@@ -491,7 +511,7 @@ function Flag({ children }) {
 }
 
 // ── Course offerings ───────────────────────────────────────────────────────
-function OfferingsPanel({ staff }) {
+function OfferingsPanel({ staff, version }) {
   const [status, setStatus]       = useState('loading');
   const [offerings, setOfferings] = useState([]);
   const [links, setLinks]         = useState([]);
@@ -511,7 +531,7 @@ function OfferingsPanel({ staff }) {
     setStatus('ready');
   }, []);
 
-  useEffect(() => { (async () => { await load(); })(); }, [load]);
+  useEffect(() => { (async () => { await load(); })(); }, [load, version]);
 
   const staffById = useMemo(() => new Map(staff.map(s => [s.id, s])), [staff]);
 

@@ -29,6 +29,12 @@
 --      deleting an account: they go NULL instead.
 --   9. A rep is appointed for a real department, not the 'general'
 --      foundation pool, which spans many programmes.
+--  10. Deleting a whole class session cascades its attendance rows after the
+--      session row is gone, so the audit trigger lost the course (and the
+--      flag). The session's course is now handed to the trigger first.
+--  11. "Lecturer via rep invite" only counts invites a non-admin sent.
+--  12. my_lecturer_invites() tells the invitee up front why an invite can't
+--      be accepted, instead of offering a button that is then refused.
 
 
 -- ═══ Shared: is this account a student of that cohort? ═════════════════════
@@ -216,6 +222,10 @@ BEGIN
     RETURN QUERY SELECT TRUE, 'Rejected. They were not made a lecturer.'; RETURN;
   END IF;
 
+  IF v_inv.accepted_by IS NULL THEN
+    RETURN QUERY SELECT FALSE, 'The account that accepted this has been deleted. Reject it.'; RETURN;
+  END IF;
+
   SELECT * INTO v_off FROM course_offerings WHERE id = v_inv.offering_id;
   IF NOT inviter_still_valid(v_inv.invited_by, v_inv.offering_id) THEN
     RETURN QUERY SELECT FALSE, 'The rep who sent this invite has since been removed. Reject it, or assign the lecturer yourself.'; RETURN;
@@ -388,7 +398,8 @@ BEGIN
       student_was_rep = EXISTS (SELECT 1 FROM course_reps r WHERE r.user_id = au.student_id),
       actor_via_rep_invite = EXISTS (SELECT 1 FROM lecturer_invites li
                                      WHERE li.accepted_by = au.changed_by AND li.offering_id = au.offering_id
-                                       AND li.status IN ('accepted','removed'));
+                                       AND li.status IN ('accepted','removed')
+                                       AND li.invited_by IS NOT NULL AND NOT is_admin_user(li.invited_by));
   END IF;
 END $$;
 
@@ -414,6 +425,11 @@ BEGIN
   END IF;
 
   SELECT offering_id INTO v_offering FROM class_sessions WHERE id = v_row.session_id;
+  -- Session already gone: this delete is a cascade from deleting the session.
+  -- stash_deleted_session_offering() left its course for us.
+  IF v_offering IS NULL THEN
+    v_offering := nullif(current_setting('arete.deleted_session_' || replace(v_row.session_id::TEXT, '-', '_'), TRUE), '')::UUID;
+  END IF;
 
   INSERT INTO attendance_audit (
     action, record_id, session_id, offering_id, student_id, old_row, new_row, changed_by,
@@ -426,11 +442,31 @@ BEGIN
     EXISTS (SELECT 1 FROM course_reps WHERE user_id = v_row.student_id),
     EXISTS (SELECT 1 FROM lecturer_invites
             WHERE accepted_by = auth.uid() AND offering_id = v_offering
-              AND status IN ('accepted','removed'))
+              AND status IN ('accepted','removed')
+              AND invited_by IS NOT NULL AND NOT is_admin_user(invited_by))
   );
   RETURN v_row;
 END;
 $$;
+
+-- Runs before a session row is deleted, so the cascaded attendance deletes
+-- that follow in the same transaction can still name the course.
+CREATE OR REPLACE FUNCTION stash_deleted_session_offering()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  PERFORM set_config('arete.deleted_session_' || replace(OLD.id::TEXT, '-', '_'), OLD.offering_id::TEXT, TRUE);
+  RETURN OLD;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS stash_deleted_session_offering ON class_sessions;
+CREATE TRIGGER stash_deleted_session_offering
+  BEFORE DELETE ON class_sessions
+  FOR EACH ROW EXECUTE FUNCTION stash_deleted_session_offering();
 
 CREATE OR REPLACE FUNCTION admin_list_attendance_changes(p_flagged_only BOOLEAN DEFAULT FALSE)
 RETURNS TABLE (
@@ -550,6 +586,47 @@ ALTER TABLE course_offerings ADD  CONSTRAINT course_offerings_created_by_fkey
 ALTER TABLE offering_lecturers DROP CONSTRAINT IF EXISTS offering_lecturers_created_by_fkey;
 ALTER TABLE offering_lecturers ADD  CONSTRAINT offering_lecturers_created_by_fkey
   FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+
+
+-- ═══ 12. The invitee's list, with why an invite can't be accepted ═══════════
+CREATE OR REPLACE FUNCTION my_lecturer_invites()
+RETURNS TABLE (
+  id UUID, status TEXT, expires_at TIMESTAMPTZ,
+  course_code TEXT, course_title TEXT, department TEXT, level TEXT, academic_session TEXT,
+  blocked_reason TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_email TEXT;
+BEGIN
+  SELECT lower(u.email) INTO v_email FROM auth.users u WHERE u.id = auth.uid();
+  RETURN QUERY
+    SELECT i.id, i.status, i.expires_at,
+           co.course_code, co.course_title, co.department, co.level, co.academic_session,
+           CASE
+             WHEN i.status = 'awaiting_approval' THEN NULL
+             WHEN EXISTS (SELECT 1 FROM course_reps r WHERE r.user_id = auth.uid())
+               THEN 'You are a course rep, and a rep cannot also be a lecturer.'
+             WHEN NOT inviter_still_valid(i.invited_by, i.offering_id)
+               THEN 'Whoever sent this is no longer the course rep. Ask the current rep for a new invite.'
+             WHEN is_student_of_cohort(auth.uid(), co.department, co.level)
+               THEN 'You are a student in this class, so you cannot be its lecturer.'
+             ELSE NULL
+           END
+    FROM lecturer_invites i
+    JOIN course_offerings co ON co.id = i.offering_id
+    WHERE i.email = v_email
+      AND (i.status = 'awaiting_approval' OR (i.status = 'pending' AND i.expires_at >= NOW()))
+    ORDER BY i.created_at DESC;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION my_lecturer_invites() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION my_lecturer_invites() TO authenticated;
 
 
 NOTIFY pgrst, 'reload schema';

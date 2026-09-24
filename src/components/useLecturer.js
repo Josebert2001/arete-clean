@@ -24,6 +24,7 @@ export function useLecturer() {
   const [role, setRole]           = useState(null);
   const [offerings, setOfferings] = useState([]);
   const [repScope, setRepScope]   = useState(null);
+  const [repError, setRepError]   = useState(false);
 
   // Guards against a stale response landing after a newer call started —
   // e.g. one user signs out and another signs in on a shared/kiosk browser
@@ -40,6 +41,7 @@ export function useLecturer() {
       setRole(null);
       setOfferings([]);
       setRepScope(null);
+      setRepError(false);
       setStatus('ready');
       return;
     }
@@ -59,10 +61,12 @@ export function useLecturer() {
     ]);
 
     if (token !== loadToken.current) return;
-    // A database without the course-reps migration yet answers "table not
-    // found" — that means nobody is a rep, not that the page is broken.
+    // The rep lookup is optional for everyone but a rep, so its failure must
+    // not put lecturers and admins behind "could not check your access". A
+    // missing table (migration not run yet) just means nobody is a rep; any
+    // other failure is surfaced as repError, which only /rep reads.
     const repTableMissing = repRes.error && ['42P01', 'PGRST205'].includes(repRes.error.code);
-    if (roleRes.error || offerRes.error || (repRes.error && !repTableMissing)) {
+    if (roleRes.error || offerRes.error) {
       setStatus('error');
       return;
     }
@@ -74,7 +78,8 @@ export function useLecturer() {
 
     setRole(roleRes.data?.role ?? null);
     setOfferings(list);
-    setRepScope(repRes.data ?? null);
+    setRepScope(repRes.error ? null : (repRes.data ?? null));
+    setRepError(!!repRes.error && !repTableMissing);
     setStatus('ready');
   }, [user]);
 
@@ -89,6 +94,7 @@ export function useLecturer() {
     offerings,
     isLecturer: role === 'lecturer' || role === 'admin',
     repScope,          // { department, level } for a course rep, else null
+    repError,          // the rep lookup itself failed (not "not a rep")
     reload: load,
   };
 }
