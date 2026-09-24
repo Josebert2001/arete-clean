@@ -23,6 +23,12 @@
 --   6. The audit flags were computed live on every row of the log at read
 --      time, and the "course rep" flag vanished once a rep was removed. Both
 --      flags are now stamped on the row when the change happens.
+--   7. An invite only works while its sender is still the rep for that class
+--      (or an admin); removing or moving a rep cancels their open invites.
+--   8. The new audit columns (invited_by, created_by, …) no longer block
+--      deleting an account: they go NULL instead.
+--   9. A rep is appointed for a real department, not the 'general'
+--      foundation pool, which spans many programmes.
 
 
 -- ═══ Shared: is this account a student of that cohort? ═════════════════════
@@ -50,6 +56,40 @@ $$;
 REVOKE ALL ON FUNCTION is_student_of_cohort(UUID, TEXT, TEXT) FROM PUBLIC;
 -- Called only from the SECURITY DEFINER functions below; no client grant.
 
+-- Is THAT user an admin? SECURITY DEFINER because a plain subquery on
+-- user_roles inside a policy runs under the caller's RLS ("read own role"),
+-- where a rep can never see an admin's row — so the check was always false.
+CREATE OR REPLACE FUNCTION is_admin_user(p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL
+SECURITY DEFINER
+STABLE
+SET search_path = public, pg_temp
+AS $$
+  SELECT EXISTS (SELECT 1 FROM user_roles WHERE user_id = p_user_id AND role = 'admin');
+$$;
+
+REVOKE ALL ON FUNCTION is_admin_user(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION is_admin_user(UUID) TO authenticated;
+
+-- Is this invite's sender still entitled to send it? An admin, or the rep for
+-- the offering's cohort right now.
+CREATE OR REPLACE FUNCTION inviter_still_valid(p_inviter UUID, p_offering_id UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL
+SECURITY DEFINER
+STABLE
+SET search_path = public, pg_temp
+AS $$
+  SELECT is_admin_user(p_inviter) OR EXISTS (
+    SELECT 1 FROM course_offerings co
+    JOIN course_reps r ON r.department = co.department AND r.level = co.level
+    WHERE co.id = p_offering_id AND r.user_id = p_inviter
+  );
+$$;
+
+REVOKE ALL ON FUNCTION inviter_still_valid(UUID, UUID) FROM PUBLIC;
+
 
 -- ═══ 1. revoke: locked, status-guarded ══════════════════════════════════════
 CREATE OR REPLACE FUNCTION revoke_lecturer_invite(p_invite_id UUID)
@@ -73,8 +113,15 @@ BEGIN
   END IF;
 
   IF v_inv.status = 'accepted' THEN
+    -- Only the link this invite made. If the lecturer was already on the
+    -- course through the admin, accept kept the admin's row (ON CONFLICT DO
+    -- NOTHING) — a rep must not be able to remove that one by this route.
     DELETE FROM offering_lecturers
-     WHERE offering_id = v_inv.offering_id AND lecturer_id = v_inv.accepted_by;
+     WHERE offering_id = v_inv.offering_id AND lecturer_id = v_inv.accepted_by
+       AND (is_admin() OR (created_by IS NOT NULL AND NOT is_admin_user(created_by)));
+    IF NOT FOUND THEN
+      RETURN QUERY SELECT FALSE, 'This lecturer was assigned by the admin; only the admin can remove them.'; RETURN;
+    END IF;
     RETURN QUERY SELECT TRUE, 'Lecturer removed from the course.'; RETURN;
   END IF;
 
@@ -110,6 +157,9 @@ BEGIN
   END IF;
   IF EXISTS (SELECT 1 FROM course_reps WHERE user_id = auth.uid()) THEN
     RETURN QUERY SELECT FALSE, 'A course rep cannot be a lecturer.', FALSE; RETURN;
+  END IF;
+  IF NOT inviter_still_valid(v_inv.invited_by, v_inv.offering_id) THEN
+    RETURN QUERY SELECT FALSE, 'Whoever sent this invite is no longer the course rep. Ask the current rep for a new one.', FALSE; RETURN;
   END IF;
 
   SELECT * INTO v_off FROM course_offerings WHERE id = v_inv.offering_id;
@@ -167,6 +217,9 @@ BEGIN
   END IF;
 
   SELECT * INTO v_off FROM course_offerings WHERE id = v_inv.offering_id;
+  IF NOT inviter_still_valid(v_inv.invited_by, v_inv.offering_id) THEN
+    RETURN QUERY SELECT FALSE, 'The rep who sent this invite has since been removed. Reject it, or assign the lecturer yourself.'; RETURN;
+  END IF;
   IF EXISTS (SELECT 1 FROM course_reps WHERE user_id = v_inv.accepted_by) THEN
     RETURN QUERY SELECT FALSE, 'This person is a course rep and cannot be a lecturer.'; RETURN;
   END IF;
@@ -199,7 +252,7 @@ CREATE POLICY "reps remove cohort links" ON offering_lecturers
   FOR DELETE USING (
     is_rep_of_offering(offering_id)
     AND created_by IS NOT NULL
-    AND NOT EXISTS (SELECT 1 FROM user_roles ur WHERE ur.user_id = offering_lecturers.created_by AND ur.role = 'admin')
+    AND NOT is_admin_user(created_by)
   );
 
 -- The rep page needs to know which links it may remove.
@@ -215,7 +268,7 @@ BEGIN
   RETURN QUERY
     SELECT ol.offering_id, ol.lecturer_id, p.full_name, u.email::TEXT,
            (ol.created_by IS NOT NULL
-            AND NOT EXISTS (SELECT 1 FROM user_roles ur WHERE ur.user_id = ol.created_by AND ur.role = 'admin'))
+            AND NOT is_admin_user(ol.created_by))
     FROM offering_lecturers ol
     JOIN course_offerings co ON co.id = ol.offering_id
     JOIN course_reps r ON r.department = co.department AND r.level = co.level AND r.user_id = auth.uid()
@@ -295,6 +348,14 @@ BEGIN
     RETURN QUERY SELECT FALSE, 'You cannot invite yourself.'; RETURN;
   END IF;
 
+  -- Not a leak: the rep already sees who teaches their cohort's courses.
+  -- Without it, re-inviting an admin-assigned lecturer produced an 'accepted'
+  -- invite over the admin's link that revoke could then use to delete it.
+  IF EXISTS (SELECT 1 FROM offering_lecturers ol JOIN auth.users u ON u.id = ol.lecturer_id
+             WHERE ol.offering_id = p_offering_id AND lower(u.email) = v_email) THEN
+    RETURN QUERY SELECT FALSE, 'That lecturer is already on this course.'; RETURN;
+  END IF;
+
   UPDATE lecturer_invites SET status = 'revoked', revoked_at = NOW()
    WHERE offering_id = p_offering_id AND email = v_email
      AND status = 'pending' AND expires_at < NOW();
@@ -312,19 +373,28 @@ $$;
 
 
 -- ═══ 6. Audit flags stamped at write time ═══════════════════════════════════
-ALTER TABLE attendance_audit ADD COLUMN IF NOT EXISTS student_was_rep      BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE attendance_audit ADD COLUMN IF NOT EXISTS actor_via_rep_invite BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- Add the columns and stamp rows already logged — ONCE. On a re-run the
+-- columns exist and this is skipped, so write-time stamps are never
+-- overwritten from the current state (which would erase a removed rep's flags).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_schema = 'public' AND table_name = 'attendance_audit'
+                   AND column_name = 'student_was_rep') THEN
+    ALTER TABLE attendance_audit ADD COLUMN student_was_rep      BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE attendance_audit ADD COLUMN actor_via_rep_invite BOOLEAN NOT NULL DEFAULT FALSE;
+    UPDATE attendance_audit au SET
+      student_was_rep = EXISTS (SELECT 1 FROM course_reps r WHERE r.user_id = au.student_id),
+      actor_via_rep_invite = EXISTS (SELECT 1 FROM lecturer_invites li
+                                     WHERE li.accepted_by = au.changed_by AND li.offering_id = au.offering_id
+                                       AND li.status IN ('accepted','removed'));
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS lecturer_invites_accepted_idx ON lecturer_invites (accepted_by, offering_id);
 CREATE INDEX IF NOT EXISTS attendance_audit_flagged_idx
   ON attendance_audit (changed_at DESC) WHERE student_was_rep OR actor_via_rep_invite;
-
--- Stamp any rows already logged, from the current state.
-UPDATE attendance_audit au SET
-  student_was_rep = EXISTS (SELECT 1 FROM course_reps r WHERE r.user_id = au.student_id),
-  actor_via_rep_invite = EXISTS (SELECT 1 FROM lecturer_invites li
-                                 WHERE li.accepted_by = au.changed_by AND li.offering_id = au.offering_id
-                                   AND li.status IN ('accepted','removed'));
 
 CREATE OR REPLACE FUNCTION log_attendance_change()
 RETURNS TRIGGER
@@ -406,6 +476,80 @@ BEGIN
     ORDER BY a.changed_at DESC;
 END;
 $$;
+
+
+-- ═══ 7 + 9. admin_set_course_rep: real departments; moving a rep cancels ═══
+CREATE OR REPLACE FUNCTION admin_set_course_rep(p_user_id UUID, p_department TEXT, p_level TEXT)
+RETURNS TABLE (ok BOOLEAN, message TEXT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RETURN QUERY SELECT FALSE, 'Only an admin can appoint course reps.'; RETURN;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = p_user_id) THEN
+    RETURN QUERY SELECT FALSE, 'No such account.'; RETURN;
+  END IF;
+
+  -- Leaving (or changing) a class ends the invites sent for the old one.
+  UPDATE lecturer_invites li SET status = 'revoked', revoked_by = auth.uid(), revoked_at = NOW()
+   WHERE li.invited_by = p_user_id AND li.status IN ('pending','awaiting_approval')
+     AND (p_department IS NULL OR p_level IS NULL OR NOT EXISTS (
+           SELECT 1 FROM course_offerings co
+           WHERE co.id = li.offering_id AND co.department = p_department AND co.level = p_level));
+
+  IF p_department IS NULL OR p_level IS NULL THEN
+    DELETE FROM course_reps WHERE user_id = p_user_id;
+    RETURN QUERY SELECT TRUE, 'No longer a course rep. Their open invites were cancelled.'; RETURN;
+  END IF;
+
+  IF p_level NOT IN ('100L','200L','300L','400L') THEN
+    RETURN QUERY SELECT FALSE, 'Unknown level.'; RETURN;
+  END IF;
+  -- 'general' is the foundation pool: students of many programmes, not one class.
+  IF p_department = 'general' OR p_department !~ '^[a-zA-Z]+$' THEN
+    RETURN QUERY SELECT FALSE, 'A course rep needs a real department on their profile, not foundation mode.'; RETURN;
+  END IF;
+  IF EXISTS (SELECT 1 FROM user_roles WHERE user_id = p_user_id) THEN
+    RETURN QUERY SELECT FALSE, 'Lecturers and admins cannot be course reps. Remove their role first.'; RETURN;
+  END IF;
+
+  INSERT INTO course_reps (user_id, department, level, appointed_by)
+  VALUES (p_user_id, p_department, p_level, auth.uid())
+  ON CONFLICT (user_id) DO UPDATE
+    SET department = EXCLUDED.department, level = EXCLUDED.level,
+        appointed_by = EXCLUDED.appointed_by, appointed_at = NOW();
+  RETURN QUERY SELECT TRUE, 'Now a course rep.';
+END;
+$$;
+
+
+-- ═══ 8. Audit columns don't block account deletion ══════════════════════════
+ALTER TABLE lecturer_invites ALTER COLUMN invited_by DROP NOT NULL;
+
+ALTER TABLE lecturer_invites DROP CONSTRAINT IF EXISTS lecturer_invites_invited_by_fkey;
+ALTER TABLE lecturer_invites ADD  CONSTRAINT lecturer_invites_invited_by_fkey
+  FOREIGN KEY (invited_by)  REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE lecturer_invites DROP CONSTRAINT IF EXISTS lecturer_invites_accepted_by_fkey;
+ALTER TABLE lecturer_invites ADD  CONSTRAINT lecturer_invites_accepted_by_fkey
+  FOREIGN KEY (accepted_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE lecturer_invites DROP CONSTRAINT IF EXISTS lecturer_invites_revoked_by_fkey;
+ALTER TABLE lecturer_invites ADD  CONSTRAINT lecturer_invites_revoked_by_fkey
+  FOREIGN KEY (revoked_by)  REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE lecturer_invites DROP CONSTRAINT IF EXISTS lecturer_invites_approved_by_fkey;
+ALTER TABLE lecturer_invites ADD  CONSTRAINT lecturer_invites_approved_by_fkey
+  FOREIGN KEY (approved_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE course_reps DROP CONSTRAINT IF EXISTS course_reps_appointed_by_fkey;
+ALTER TABLE course_reps ADD  CONSTRAINT course_reps_appointed_by_fkey
+  FOREIGN KEY (appointed_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE course_offerings DROP CONSTRAINT IF EXISTS course_offerings_created_by_fkey;
+ALTER TABLE course_offerings ADD  CONSTRAINT course_offerings_created_by_fkey
+  FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE offering_lecturers DROP CONSTRAINT IF EXISTS offering_lecturers_created_by_fkey;
+ALTER TABLE offering_lecturers ADD  CONSTRAINT offering_lecturers_created_by_fkey
+  FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL;
 
 
 NOTIFY pgrst, 'reload schema';

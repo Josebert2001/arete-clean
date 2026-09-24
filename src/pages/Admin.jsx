@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, Lock, Search, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -32,10 +32,16 @@ export default function Admin() {
       supabase.rpc('admin_list_staff'),
       supabase.rpc('admin_list_course_reps'),
     ]);
-    if (staffRes.error || repRes.error) { setStaffError('Could not load the staff list. Please reload.'); return; }
-    setStaffError('');
-    setStaff(staffRes.data ?? []);
-    setReps(repRes.data ?? []);
+    // Handled separately: the staff list feeds the lecturer picker, and must
+    // not go blank just because the course-reps function is missing (the
+    // frontend can deploy before its migration is run by hand).
+    if (!staffRes.error) setStaff(staffRes.data ?? []);
+    if (!repRes.error) setReps(repRes.data ?? []);
+    setStaffError(
+      staffRes.error ? 'Could not load the staff list. Please reload.'
+        : repRes.error ? 'Could not load course reps. Please reload.'
+          : '',
+    );
   }, []);
 
   useEffect(() => {
@@ -151,7 +157,8 @@ function StaffPanel({ staff, reps, onChange }) {
           <button type="button" disabled={busy} onClick={() => setRole(person.id, 'admin')} className="btn-ghost text-xs">Make admin</button>
         )}
         {/* A rep is scoped to the class on their own profile — no class, no button. */}
-        {!person.role && person.department && person.level && (
+        {/* 'general' is foundation mode — many programmes, not one class. */}
+        {!person.role && person.department && person.department !== 'general' && person.level && (
           <button type="button" disabled={busy} onClick={() => makeRep(person)} className="btn-ghost text-xs">
             Make course rep ({getDepartment(person.department).name} {person.level})
           </button>
@@ -417,10 +424,15 @@ function AttendanceChanges() {
   const [status, setStatus]         = useState('loading');
   const [changes, setChanges]       = useState([]);
   const [flaggedOnly, setFlaggedOnly] = useState(true);
+  // Toggling the filter fast can leave an older (slower, unfiltered) reply
+  // landing last; only the newest request may write state.
+  const loadToken = useRef(0);
 
   const load = useCallback(async () => {
+    const token = ++loadToken.current;
     setStatus('loading');
     const { data, error } = await supabase.rpc('admin_list_attendance_changes', { p_flagged_only: flaggedOnly });
+    if (token !== loadToken.current) return;
     if (error) { setStatus('error'); return; }
     setChanges(data ?? []);
     setStatus('ready');
