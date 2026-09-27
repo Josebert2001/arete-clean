@@ -3,12 +3,14 @@
 > ἀρετή (ar-eh-TAY). A free study companion for University of Uyo undergraduates in Akwa Ibom State, Nigeria: the outline, recommended textbooks and study tips for all 95 courses from 100 Level to Final Year, transcribed lecture notes and past-paper practice for a growing set of them, interactive Java, Python and C tracks, a capture-the-flag security track, and an AI tutor that has read the curriculum.
 
 - Site: https://www.aretecyb.tech
+- Full corpus in one file (every course's outline, textbooks, study tips and glossary): https://www.aretecyb.tech/llms-full.txt
 - Institution: University of Uyo (https://www.uniuyo.edu.ng/, https://www.wikidata.org/wiki/Q7896523)
 - Audience: 100 Level – 400 Level undergraduates
+- Not affiliated with the University of Uyo. Areté is an independent study companion built by students of the university, not its official learning platform or student portal.
 - Scope: the whole university, not one department. 29 of the 95 courses below are foundation courses taken across University of Uyo programmes rather than owned by any one department (a programme takes either GST 211/311 or GST 212/312, for instance, but every programme takes some of these): GST 111, MTH 111, PHY 111, PHY 117, COS 111, STA 111, UUY-CSC 111, UUY-CSC 112, GST 121, COS 121, MTH 121, PHY 121, PHY 128, GST 212, COS 211, ENT 221, COS 221, INS 224, GST 312, CSC 319, COS 411, ENT 321, GST 211, MTH 211, MTH 212, MTH 223, CSC 223, GST 311, INS 411. They are marked "foundation course" in the listing.
 - Departments with a fully authored catalogue: Cybersecurity, Data Science. A student in any other department signs up in foundation mode and gets those shared courses plus all four programming tracks; more catalogues are authored as students from those departments sign up.
 - Access: course outlines, textbooks and study tips are public. Lecture notes, question banks, the AI tutor and progress tracking need a free account (email code, no password).
-- Last generated: 2026-09-09
+- Last generated: 2026-09-11
 
 ## Courses
 
@@ -128,4 +130,6 @@
 - AI Tutor: answers scoped to a student's year, department and course outline (account only).
 - Code Explainer: line-by-line plain-English walkthroughs of Java, Python, C and C++ listings.
 - Study Planner: weekly timetables exported to .ics or synced to Google Calendar.
+- [About Areté](https://www.aretecyb.tech/about): who builds it, where the course outlines and transcribed
+  lecture notes come from, and what is free.
 - [Privacy policy](https://www.aretecyb.tech/privacy) · [Terms](https://www.aretecyb.tech/terms)

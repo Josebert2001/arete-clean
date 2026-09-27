@@ -70,6 +70,26 @@ function sectionBody(section) {
 // better than one whose definitions read as broken markup.
 const hasMath = (s) => /\$[^$]+\$/.test(String(s ?? ''));
 
+// A method signature is not a concept. COS 221's notes annotate a listing with
+// `inputdetails()` — "for storing information in the instance variables." — and
+// as a DefinedTerm, quoted without the class it belongs to, that is noise
+// attributed to Areté by whichever engine picked it up.
+//
+// Deliberately narrow. The obvious rule — drop anything containing brackets —
+// takes 50 of the 340 terms with it, including "Object-Oriented Programming
+// (OOP)", "MAC (Media Access Control) address", "IP (Internet Protocol)
+// address" and "The National Youth Service Corps (NYSC)": an expanded acronym
+// in brackets is the single most common shape a real glossary term has here.
+// This matches an identifier immediately followed by its argument list and
+// nothing else — `abs()`, `sqrt()`, `pow(x, y)`, `inputdetails()`,
+// `calculate()`, which is exactly the five that are code.
+const isCodeSignature = (term) => /^[a-z_][A-Za-z0-9_]*\([^)]*\)$/.test(term);
+
+// Only the first character, and only when it is a lower-case letter: a
+// definition opening on "eXtensible Markup Language" or "pH" must survive
+// untouched, and every other character in the sentence is the lecturer's.
+const capitalise = (s) => (/^[a-z]/.test(s) ? s[0].toUpperCase() + s.slice(1) : s);
+
 // Note headings double as structure ("2.2.1 Differentiability") and as terms.
 // A DefinedTerm named "2.1 Introduction" is noise in a knowledge graph, so the
 // numbering comes off and the purely structural headings are dropped.
@@ -163,6 +183,7 @@ function glossaryFrom(notes) {
 
         const name = cleanTerm(term);
         if (!name) continue;
+        if (isCodeSignature(name)) continue;
 
         const body = String(def).replace(/\s+/g, ' ').trim();
         if (body.length < MIN_DEF_CHARS) continue;
@@ -173,7 +194,13 @@ function glossaryFrom(notes) {
 
         out.push({
           term: name,
-          definition: clip(body, GLOSSARY_DEF_CHARS),
+          // The notes write a definition as the continuation of its own
+          // heading — "Organisational Data: data produced by businesses…" — so
+          // 34 of these start mid-sentence in lower case. On the page the
+          // heading is right there; in a DefinedTerm, or in an engine's quote
+          // of one, it is a fragment. Capitalising the first letter is the
+          // whole fix: the rest of the sentence is the lecturer's.
+          definition: clip(capitalise(body), GLOSSARY_DEF_CHARS),
           source: topic.title,
         });
         if (out.length >= GLOSSARY_MAX) return out;
