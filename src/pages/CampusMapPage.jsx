@@ -23,18 +23,24 @@ export default function CampusMapPage() {
         </div>
       </div>
 
-      {/* The pins are placeholders sketched around 5.65N 7.93E, not surveyed
-          positions — see campus-map-prototype.md. Until someone walks the campus
-          and records real coordinates, a student must not be able to mistake
-          this for directions they can follow. Delete this banner in the same
-          commit that lands the real data. */}
+      {/* The old warning said the positions were invented placeholders around
+          5.65N 7.93E. That is no longer true — the geometry is now real,
+          generated from the OpenStreetMap survey of the campus. What is still
+          missing is the *naming*: OSM outlines 34 buildings here and names one
+          of them, so most pins read "Unnamed building N" until someone walks the
+          campus. Overstating the problem is as bad as understating it, so this
+          banner now says exactly which half is unfinished.
+
+          Narrow this as campusOverrides.js fills up; delete it when the
+          destinations are named and the inferred bridges are surveyed. */}
       <div className="px-4 sm:px-6 py-2 bg-rust/10 border-b border-rust/25 flex-shrink-0">
         <p className="max-w-6xl mx-auto flex items-start gap-2 text-xs text-rust">
           <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
           <span>
-            <strong className="font-semibold">Preview — do not navigate by this yet.</strong>{' '}
-            The building positions are approximate placeholders while the real campus
-            locations are being surveyed, so routes and walking times are illustrative only.
+            <strong className="font-semibold">Being surveyed.</strong>{' '}
+            Building outlines and paths come from OpenStreetMap and are real, but most
+            buildings are not named yet and a few connecting paths are estimated — so
+            check the map against what you can see before relying on it.
           </span>
         </p>
       </div>

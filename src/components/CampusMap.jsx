@@ -18,12 +18,27 @@ import {
   Flag,
   Search,
   Footprints,
+  Layers,
 } from 'lucide-react';
-import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
-import { buildRoute, routeProgress } from '../utils/campusRoute';
-import { escapeHtml, safeGeoPoint, isWithinBounds } from '../utils/locationSafety';
+import { pins as rawPins, edges as rawEdges, CAMPUS_CENTER, CAMPUS_ZOOM, MAP_BOUNDS, CORE_BOUNDS, CATEGORIES, categoryColor, cssPalette } from '../data/campusMap';
+import { buildRoute, routeProgress, routeFromPoint } from '../utils/campusRoute';
+import { searchDestinations } from '../utils/campusSearch';
+import { safeGeoPoint, isWithinBounds } from '../utils/locationSafety';
 
 const WALK_SPEED = 80; // meters per minute
+
+// Sentinel used as a "From" value. Not a pin id — it means "wherever the GPS
+// says I am", which is resolved at route time rather than picked off a list.
+const MY_LOCATION = '__my-location';
+
+// When the mapped route is this much longer than the straight line, and the
+// straight line is more than trivially short, the map says so instead of
+// presenting the walking time as fact. Measured on the real graph: a 176 m
+// crossing routes as 1,655 m — 9.4x — because the only mapped connection is the
+// ring road. 2.5x is comfortably above the honest detours a real path network
+// produces and well below that.
+const DETOUR_WARN_RATIO = 2.5;
+const DETOUR_WARN_MIN_M = 60;
 
 // How far outside MAP_BOUNDS a GPS fix may sit and still be treated as "on
 // campus" (degrees — roughly 550 m here). Generous enough to cover a poor fix
@@ -31,6 +46,13 @@ const WALK_SPEED = 80; // meters per minute
 const OFF_CAMPUS_MARGIN = 0.005;
 
 const CARTO_KEY = import.meta.env.VITE_CARTO_API_KEY?.trim();
+
+// ?graph=1 draws the raw routing graph — every waypoint node, not just the named
+// destinations. A surveying aid, not a user-facing feature: it is the only way to
+// see which node a building's connector attached to, or where an inferred bridge
+// crosses open ground.
+const showGraph =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('graph') === '1';
 
 // CARTO's raster basemaps watermark every request without a key. With a key we
 // get the pretty Voyager / Dark Matter tiles; without one we fall back to the
@@ -68,6 +90,32 @@ const TILE_CONFIG = CARTO_KEY
 // can never zoom into a level that returns nothing.
 const MAX_ZOOM = TILE_CONFIG.maxZoom;
 
+// Esri World Imagery — free, no key, and the only satellite layer whose terms
+// explicitly grant the right to trace features from it, which is how the campus
+// footpaths will eventually get mapped.
+//
+// Note the {z}/{y}/{x} order. Esri addresses tiles row-then-column, the reverse
+// of Leaflet's default {z}/{x}/{y}; getting it wrong does not error, it silently
+// serves a different part of the planet.
+//
+// SATELLITE_MAX_ZOOM is 18 and that is not a style choice. Measured over the
+// campus core: z16-z18 return real imagery (8.7 kB, 7.3 kB, 5.8 kB) while z19
+// and z20 both return an identical 2,521-byte grey placeholder reading "Map data
+// not yet available". Without the cap the very first thing a student does after
+// switching to satellite — zoom in to find a door — lands them on a blank grey
+// square, and the sidebar's fly-to button used to go straight to z19.
+//
+// Deliberately NOT precached by the service worker: Esri's terms allow offline
+// export only through their own ArcGIS applications, which is also why the
+// offline basemap work went to self-hosted OpenStreetMap tiles instead.
+const SATELLITE_MAX_ZOOM = 18;
+const SATELLITE_TILES = {
+  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  maxZoom: SATELLITE_MAX_ZOOM,
+  attribution:
+    'Imagery &copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics',
+};
+
 // Vector styles are resolved against the palette at call time (categoryColor /
 // cssPalette hand back concrete rgb() values, not `var()` tokens — see the note
 // in src/data/campusMap.js). That makes them a snapshot of the current theme,
@@ -84,7 +132,17 @@ const destinationStyle = (cat) => ({
 const routeCasingStyle = () => ({ color: cssPalette('paper') });
 const routeLineStyle = () => ({ color: cssPalette('ember') });
 
-function createTileLayer(theme) {
+function createTileLayer(theme, basemap) {
+  if (basemap === 'satellite') {
+    return L.tileLayer(SATELLITE_TILES.url, {
+      attribution: SATELLITE_TILES.attribution,
+      maxZoom: SATELLITE_TILES.maxZoom,
+      // No {r}: Esri has no @2x tiles, and detectRetina would request one zoom
+      // deeper than it displays — straight past the imagery ceiling into the
+      // grey placeholder on exactly the high-DPI phones students carry.
+      detectRetina: false,
+    });
+  }
   return L.tileLayer(TILE_CONFIG[theme] || TILE_CONFIG.light, {
     attribution: TILE_CONFIG.attribution,
     maxZoom: TILE_CONFIG.maxZoom,
@@ -92,6 +150,13 @@ function createTileLayer(theme) {
     detectRetina: TILE_CONFIG.detectRetina,
   });
 }
+
+// Vector styling has to change over imagery. The graph is drawn in coffee and
+// cream, which read well on a pale street map and disappear against dark aerial
+// photography — and in dark theme the marker stroke is `paper`, i.e. black on
+// near-black. Over satellite everything gets a white stroke and more opacity.
+const satelliteEdgeStyle = () => ({ color: '#ffffff', opacity: 0.75 });
+const satelliteStrokeStyle = () => ({ color: '#ffffff' });
 
 function formatDistance(meters) {
   if (meters < 1000) return `${Math.round(meters)} m`;
@@ -128,6 +193,7 @@ export default function CampusMap() {
   const mapInstance = useRef(null);
   const tileLayerRef = useRef(null);
   const tileThemeRef = useRef(theme);
+  const basemapRef = useRef('map');
   const themeRef = useRef(theme);
   const markersRef = useRef([]);
   const edgeLinesRef = useRef([]);
@@ -136,6 +202,8 @@ export default function CampusMap() {
   const userDotRef = useRef(null);
   const userAccuracyRef = useRef(null);
   const watchIdRef = useRef(null);
+  const firstFixRef = useRef(null);
+  const directionsRef = useRef(null);
   const routeRef = useRef(null);
   const followRef = useRef(true);
 
@@ -150,21 +218,40 @@ export default function CampusMap() {
   const [userPos, setUserPos] = useState(null);
   const [geoError, setGeoError] = useState('');
   const [routeError, setRouteError] = useState('');
+  // 'map' | 'satellite'. Street map by default: it is the one that shows the
+  // campus graph clearly, and the one that works offline.
+  const [basemap, setBasemap] = useState('map');
 
-  const pinById = (id) => rawPins.find((p) => p.id === id);
+  const pinIndex = useMemo(() => new Map(rawPins.map((p) => [p.id, p])), []);
+  const pinById = (id) => pinIndex.get(id);
+  const getPinName = (id) => (id === MY_LOCATION ? 'My location' : pinById(id)?.name || '');
+
+  // Resolves ids for a route that may have been built from a live GPS fix. Such
+  // a route contains two pins the shipped list does not — the walker, and the
+  // point where they join the path — so drawing or measuring it through the
+  // plain lookup returns undefined and throws on .lat.
+  const routePinById = (r) => {
+    if (!r?.pins) return pinById;
+    const live = new Map(r.pins.map((p) => [p.id, p]));
+    return (id) => live.get(id) ?? pinById(id);
+  };
 
   const destinations = useMemo(
     () => rawPins.filter((p) => p.type === 'destination'),
     []
   );
 
-  const filteredDestinations = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return destinations;
-    return destinations.filter((d) => d.name.toLowerCase().includes(q));
-  }, [destinations, searchQuery]);
+  // Ranked, alias-aware search — see src/utils/campusSearch.js. The old filter
+  // matched a lowercased substring of the official name only, so the map could
+  // be searched only by people who already knew what each building was called.
+  const filteredDestinations = useMemo(
+    () => searchDestinations(searchQuery, destinations, CATEGORIES),
+    [destinations, searchQuery],
+  );
 
-  const progress = route && userPos ? routeProgress(userPos, route, pinById) : null;
+  // routeProgress walks route.path, which on a live route includes ids that are
+  // not in the shipped pin list — resolve through the route's own pins.
+  const progress = route && userPos ? routeProgress(userPos, route, routePinById(route)) : null;
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -176,74 +263,184 @@ export default function CampusMap() {
     markersRef.current = [];
     edgeLinesRef.current = [];
 
+    // The permanent site is ~2.8 km x 1.8 km. A desktop viewport at zoom 16 spans
+    // more than 3 km, i.e. WIDER than the campus — and a maxBounds narrower than
+    // the viewport is the one configuration Leaflet cannot satisfy. With
+    // viscosity pinned at 1.0 it re-centres on every corrective pan, corrects
+    // again, and locks the main thread; the tab renders a skeleton and then stops
+    // responding to input entirely.
+    //
+    // Two defences, because either alone still breaks on some screen size:
+    //   · the pan clamp is padded well beyond the campus, so it can always
+    //     contain the viewport, and viscosity is elastic rather than absolute;
+    //   · the opening view comes from fitBounds(), not a hard-coded zoom, so it
+    //     frames the whole campus on a phone and a monitor alike.
+    const PAN_PAD = 0.02; // ~2.2 km of slack around the campus
     const map = L.map(mapRef.current, {
       center: CAMPUS_CENTER,
       zoom: CAMPUS_ZOOM,
       maxZoom: MAX_ZOOM,
-      minZoom: 15,
+      minZoom: 13,
       maxBounds: [
-        [MAP_BOUNDS.south - 0.002, MAP_BOUNDS.west - 0.002],
-        [MAP_BOUNDS.north + 0.002, MAP_BOUNDS.east + 0.002],
+        [MAP_BOUNDS.south - PAN_PAD, MAP_BOUNDS.west - PAN_PAD],
+        [MAP_BOUNDS.north + PAN_PAD, MAP_BOUNDS.east + PAN_PAD],
       ],
-      maxBoundsViscosity: 1.0,
+      maxBoundsViscosity: 0.7,
       zoomControl: false,
     });
 
+    map.fitBounds(
+      [
+        [CORE_BOUNDS.south, CORE_BOUNDS.west],
+        [CORE_BOUNDS.north, CORE_BOUNDS.east],
+      ],
+      { padding: [24, 24], animate: false },
+    );
+
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    const tileLayer = createTileLayer(themeRef.current).addTo(map);
+    const tileLayer = createTileLayer(themeRef.current, basemapRef.current).addTo(map);
     tileLayerRef.current = tileLayer;
     tileThemeRef.current = themeRef.current;
 
-    // Render edge lines
+    // Resolve every colour ONCE, up front.
+    //
+    // cssPalette() calls getComputedStyle(), which forces a synchronous style
+    // recalculation. Calling it inside the layer loops meant one forced recalc
+    // per layer, interleaved with inserting that layer into a steadily growing
+    // SVG tree — textbook layout thrashing. On the prototype's invented 40-pin
+    // graph it was survivable. On the real OSM graph (264 pins, 271 edges → 535
+    // layers, ~1,000 getComputedStyle calls) it locked the main thread hard
+    // enough that the tab stopped responding to input and never painted the map.
+    const palette = {
+      edge: edgeLineStyle(),
+      waypoint: waypointStyle(),
+      muted: cssPalette('coffee-500'),
+      destination: Object.fromEntries(
+        Object.entries(CATEGORIES).map(([k, cat]) => [k, destinationStyle(cat)]),
+      ),
+    };
+
+    // O(1) endpoint lookup. The previous rawPins.find() per edge was O(E × P) —
+    // fine at 45 edges, 70k comparisons at 271.
+    const pinIndex = new Map(rawPins.map((p) => [p.id, p]));
+
+    // Build into layer groups and attach each in one go, so the map performs a
+    // single insertion rather than one per feature.
+    const edgeLayer = L.layerGroup();
+    const markerLayer = L.layerGroup();
+
     rawEdges.forEach((e) => {
-      const pa = rawPins.find((p) => p.id === e.a);
-      const pb = rawPins.find((p) => p.id === e.b);
-      if (pa && pb) {
-        const line = L.polyline(
-          [
-            [pa.lat, pa.lng],
-            [pb.lat, pb.lng],
-          ],
-          { ...edgeLineStyle(), weight: 1.5, dashArray: '3 6', opacity: 0.45 }
-        ).addTo(map);
-        edgeLinesRef.current.push(line);
-      }
+      const pa = pinIndex.get(e.a);
+      const pb = pinIndex.get(e.b);
+      if (!pa || !pb) return;
+      const line = L.polyline(
+        [
+          [pa.lat, pa.lng],
+          [pb.lat, pb.lng],
+        ],
+        { ...palette.edge, weight: 1.5, dashArray: '3 6', opacity: 0.45 },
+      );
+      edgeLayer.addLayer(line);
+      edgeLinesRef.current.push(line);
     });
 
-    // Render pins
     rawPins.forEach((pin) => {
       if (pin.type === 'waypoint') {
+        // Waypoints are route-shaping geometry, not places — they have no name
+        // and nothing to tell you. The prototype drew them because its invented
+        // graph had twenty; the real one derived from OSM has 229, and drawing
+        // them buried all 35 searchable destinations under a field of identical
+        // brown dots. The dashed edge lines already show where the paths run.
+        //
+        // Kept behind ?graph=1 because it is genuinely useful while surveying —
+        // it is the only way to see which node a connector attached to.
+        if (!showGraph) return;
         const marker = L.circleMarker([pin.lat, pin.lng], {
           radius: 3.5,
-          ...waypointStyle(),
+          ...palette.waypoint,
           fillOpacity: 0.8,
           weight: 1.5,
-        }).addTo(map);
+        });
+        markerLayer.addLayer(marker);
         markersRef.current.push({ id: pin.id, marker, pin });
       } else {
         const cat = CATEGORIES[pin.category] || CATEGORIES.building;
         const marker = L.circleMarker([pin.lat, pin.lng], {
           radius: 8,
-          ...destinationStyle(cat),
+          ...(palette.destination[pin.category] ?? palette.destination.building),
           fillOpacity: 0.95,
           weight: 3,
-        }).addTo(map);
-        marker.bindPopup(
-          `<div style="font-family:Inter,sans-serif">
-            <strong style="font-size:14px">${escapeHtml(pin.name)}</strong>
-            <br/><span style="font-size:11px;color:${cssPalette('coffee-500')}">${escapeHtml(cat.label)}</span>
-          </div>`
-        );
+        });
+
+        // Built as DOM rather than an HTML string, for two reasons.
+        //
+        // The popup needs a real button — tapping a pin and getting directions
+        // is the whole interaction, and it cannot be a link because the target
+        // is React state, not a URL. And building it as nodes means the name
+        // goes in through textContent, so a building called `<img onerror=...>`
+        // is inert by construction instead of relying on remembering to call
+        // escapeHtml at every interpolation.
+        const card = document.createElement('div');
+        card.className = 'campus-popup';
+
+        const title = document.createElement('strong');
+        title.textContent = pin.name;
+        card.appendChild(title);
+
+        const sub = document.createElement('span');
+        sub.textContent = pin.source ? cat.label : `${cat.label} · name not surveyed yet`;
+        card.appendChild(sub);
+
+        // An unnamed building shows its OpenStreetMap id, because that is the
+        // key campusOverrides.js is written against. Without it, naming a
+        // building means finding its id somewhere else entirely — which is
+        // enough friction that the 33 unnamed ones stay unnamed.
+        if (!pin.source && pin.osmId) {
+          const ref = document.createElement('code');
+          ref.className = 'campus-popup__ref';
+          ref.textContent = `OSM ${pin.osmId}`;
+          ref.title = 'Use this id as the key in src/data/campusOverrides.js';
+          card.appendChild(ref);
+        }
+
+        const go = document.createElement('button');
+        go.type = 'button';
+        go.className = 'campus-popup__go';
+        go.textContent = 'Directions';
+        // Through a ref, not a direct closure. Markers are created once, in the
+        // mount effect, so a handler captured here would hold the very first
+        // render's state forever — it would route from whatever `userPos` was
+        // when the map loaded, which is `null`. The ref is reassigned every
+        // render, so the button always reaches the current one.
+        go.addEventListener('click', () => directionsRef.current?.(pin.id));
+        card.appendChild(go);
+
+        marker.bindPopup(card);
+        markerLayer.addLayer(marker);
         markersRef.current.push({ id: pin.id, marker, pin });
       }
     });
 
+    edgeLayer.addTo(map);
+    markerLayer.addTo(map);
+
     mapInstance.current = map;
 
     // The map may mount inside a container whose size isn't settled yet
-    // (lazy chunk, SSR) — force Leaflet to re-measure after first paint.
-    const sizeTimer = setTimeout(() => map.invalidateSize(), 0);
+    // (lazy chunk, SSR) — force Leaflet to re-measure after first paint, then
+    // re-frame, since the fitBounds above was computed against the pre-layout
+    // size and would otherwise leave the campus half off-screen.
+    const sizeTimer = setTimeout(() => {
+      map.invalidateSize();
+      map.fitBounds(
+        [
+          [CORE_BOUNDS.south, CORE_BOUNDS.west],
+          [CORE_BOUNDS.north, CORE_BOUNDS.east],
+        ],
+        { padding: [24, 24], animate: false },
+      );
+    }, 0);
 
     return () => {
       if (watchIdRef.current !== null) {
@@ -263,40 +460,63 @@ export default function CampusMap() {
     };
   }, []);
 
-  // Follow the site theme: swap the tile layer, and restyle every vector drawn
-  // from the palette. The colors were resolved to concrete rgb() values when the
-  // layers were created, so without this second half the pins and route keep
-  // their light-theme colors over dark tiles.
+  // Follow the site theme AND the chosen basemap: swap the tile layer, and
+  // restyle every vector drawn from the palette. The colours were resolved to
+  // concrete rgb() values when the layers were created, so without this second
+  // half the pins and route keep their light-theme colours over dark tiles — and
+  // their street-map colours over satellite imagery, where coffee-on-cream is
+  // close to invisible.
   useEffect(() => {
     themeRef.current = theme;
     const map = mapInstance.current;
-    if (!map || tileThemeRef.current === theme) return;
+    if (!map) return;
+    if (tileThemeRef.current === theme && basemapRef.current === basemap) return;
+
+    const satellite = basemap === 'satellite';
 
     if (tileLayerRef.current) {
       map.removeLayer(tileLayerRef.current);
-      tileLayerRef.current = createTileLayer(theme).addTo(map);
+      tileLayerRef.current = createTileLayer(theme, basemap).addTo(map);
     }
 
-    edgeLinesRef.current.forEach((line) => line.setStyle(edgeLineStyle()));
+    // Clamp the map's own ceiling to whatever the active imagery actually has.
+    // setMaxZoom() also pulls the view back if it is currently deeper, so a
+    // student sitting at z19 on the street map does not land on Esri's grey
+    // "Map data not yet available" tile the instant they switch.
+    map.setMaxZoom(satellite ? SATELLITE_MAX_ZOOM : MAX_ZOOM);
+
+    // Same one-shot palette resolution as the initial render, and for the same
+    // reason: a getComputedStyle() per layer here would re-run the layout thrash
+    // across every layer on each toggle.
+    const edgeStyle = satellite ? satelliteEdgeStyle() : edgeLineStyle();
+    const wpStyle = satellite
+      ? { ...waypointStyle(), ...satelliteStrokeStyle() }
+      : waypointStyle();
+    const destStyles = Object.fromEntries(
+      Object.entries(CATEGORIES).map(([k, cat]) => [
+        k,
+        satellite ? { ...destinationStyle(cat), ...satelliteStrokeStyle() } : destinationStyle(cat),
+      ]),
+    );
+
+    edgeLinesRef.current.forEach((line) => line.setStyle(edgeStyle));
     markersRef.current.forEach(({ marker, pin }) => {
       if (!pin) return;
       marker.setStyle(
-        pin.type === 'waypoint'
-          ? waypointStyle()
-          : destinationStyle(CATEGORIES[pin.category] || CATEGORIES.building)
+        pin.type === 'waypoint' ? wpStyle : destStyles[pin.category] ?? destStyles.building,
       );
     });
-    routeCasingRef.current?.setStyle(routeCasingStyle());
+    routeCasingRef.current?.setStyle(
+      satellite ? satelliteStrokeStyle() : routeCasingStyle(),
+    );
     routeLineRef.current?.setStyle(routeLineStyle());
 
     tileThemeRef.current = theme;
-  }, [theme]);
+    basemapRef.current = basemap;
+  }, [theme, basemap]);
 
   // Keep the latest route + follow flag readable from the geolocation callback.
-  useEffect(() => {
-    routeRef.current = route;
-    followRef.current = follow;
-  }, [route, follow]);
+
 
   const clearRouteLayers = () => {
     if (!mapInstance.current) return;
@@ -310,7 +530,7 @@ export default function CampusMap() {
     }
   };
 
-  const drawRoute = (startId, endId) => {
+  const drawRoute = (startId, endId, posOverride) => {
     if (!mapInstance.current) return;
     clearRouteLayers();
     setRoute(null);
@@ -324,19 +544,49 @@ export default function CampusMap() {
       return;
     }
 
-    const result = buildRoute(startId, endId, rawPins, rawEdges);
-    if (!result) {
-      // Every destination is reachable in the shipped graph, so this means the
-      // data has drifted (a pin added without edges). Say so rather than
-      // clearing the route and leaving the student wondering what they did.
-      setRouteError(
-        `No walking route is mapped between ${getPinName(startId)} and ${getPinName(endId)} yet.`
-      );
-      return;
+    // Routing from the live GPS fix rather than a pin the student picked off a
+    // list. `posOverride` exists because this is called straight out of the
+    // click handler that turns tracking on, before the first fix has landed in
+    // React state.
+    const live = startId === MY_LOCATION;
+    const here = posOverride ?? userPos;
+    let result;
+
+    if (live) {
+      if (!here) {
+        setRouteError('Waiting for your location — allow location access, then try again.');
+        return;
+      }
+      result = routeFromPoint(here, endId, rawPins, rawEdges);
+      if (!result) {
+        // Deliberately not snapped to the nearest road anyway: a walker this far
+        // from anything mapped would be shown a route and a walking time bearing
+        // no relation to the walk they actually face.
+        setRouteError(
+          'You are too far from any mapped path for directions. Move towards a road or walkway and try again.',
+        );
+        return;
+      }
+    } else {
+      result = buildRoute(startId, endId, rawPins, rawEdges);
+      if (!result) {
+        // Every destination is reachable in the shipped graph and the prebuild
+        // validator enforces it, so this means the data has drifted (a pin added
+        // without edges). Say so rather than clearing the route and leaving the
+        // student wondering what they did wrong.
+        setRouteError(
+          `No walking route is mapped between ${getPinName(startId)} and ${getPinName(endId)} yet.`
+        );
+        return;
+      }
     }
 
+    // A live route references two ids the shipped pin list does not contain
+    // (the walker, and the point where they join the path), so it carries its
+    // own pins and everything downstream has to resolve through those.
+    const resolve = routePinById(result);
     const coords = result.path.map((id) => {
-      const p = pinById(id);
+      const p = resolve(id);
       return [p.lat, p.lng];
     });
 
@@ -366,6 +616,22 @@ export default function CampusMap() {
     setRouteError('');
     clearRouteLayers();
     setRoute(null);
+  };
+
+  // Picking "Use my location" as the start. Tracking is switched on if it is
+  // not already, and the route is drawn from the first fix that lands — the
+  // startTracking callback passes it straight through, because React state has
+  // not caught up by the time this returns.
+  const useMyLocationAsStart = () => {
+    setFromId(MY_LOCATION);
+    setShowFromList(false);
+    setSearchQuery('');
+    if (userPos) {
+      drawRoute(MY_LOCATION, toId, userPos);
+      return;
+    }
+    setRouteError('');
+    startTracking((firstFix) => drawRoute(MY_LOCATION, toId, firstFix));
   };
 
   const selectDestination = (id, field) => {
@@ -444,11 +710,25 @@ export default function CampusMap() {
 
     setGeoError('');
     const accuracy = pos.accuracy ?? 30;
-    setUserPos({ lat: pos.lat, lng: pos.lng, accuracy });
-    updateUserLayer({ lat: pos.lat, lng: pos.lng, accuracy });
+    const fix = { lat: pos.lat, lng: pos.lng, accuracy };
+    setUserPos(fix);
+    updateUserLayer(fix);
+
+    // Deliberately fired only for a fix that passed the on-campus check above:
+    // routing from a rejected reading would draw a route from another town.
+    if (firstFixRef.current) {
+      const fn = firstFixRef.current;
+      firstFixRef.current = null;
+      fn(fix);
+    }
   };
 
-  const startTracking = () => {
+  // `onFirstFix` fires once, on the next usable position. "Use my location"
+  // needs it because the fix arrives asynchronously and React state has not
+  // updated by the time the click handler returns — without it, the first tap
+  // reliably did nothing and the second one worked.
+  const startTracking = (onFirstFix) => {
+    if (typeof onFirstFix === 'function') firstFixRef.current = onFirstFix;
     if (!navigator.geolocation) {
       setGeoError('Geolocation is not available in this browser.');
       return;
@@ -488,6 +768,7 @@ export default function CampusMap() {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+    firstFixRef.current = null;
     setTracking(false);
     setUserPos(null);
     clearUserLayer();
@@ -507,7 +788,40 @@ export default function CampusMap() {
     }
   };
 
-  const getPinName = (id) => pinById(id)?.name || '';
+  // Tapping a pin and asking for directions — the core interaction of the map.
+  //
+  // A function declaration, not a const arrow: it is referenced by the effect
+  // above, and everything it calls (drawRoute, startTracking) is defined below.
+  // Hoisting is what lets the wiring read top-down without the handler having to
+  // be split away from the code it belongs next to.
+  function handleDirectionsTo(id) {
+    setToId(id);
+    mapInstance.current?.closePopup();
+    // Already tracking, or already have a start: go straight to a route. The
+    // live position is the better default when it is available, since the pin
+    // the student tapped is where they want to END up.
+    if (userPos) {
+      setFromId(MY_LOCATION);
+      drawRoute(MY_LOCATION, id, userPos);
+    } else if (fromId && fromId !== id) {
+      drawRoute(fromId, id);
+    } else {
+      setFromId(MY_LOCATION);
+      setRouteError('');
+      startTracking((firstFix) => drawRoute(MY_LOCATION, id, firstFix));
+    }
+  }
+
+  // Keeps the latest route, follow flag and popup handler reachable from
+  // callbacks that were registered once — the geolocation watcher and the
+  // marker popups, both created at mount. No dependency array on purpose: these
+  // must track every render, and assigning a ref during render is not allowed.
+  useEffect(() => {
+    routeRef.current = route;
+    followRef.current = follow;
+    directionsRef.current = handleDirectionsTo;
+  });
+
 
   return (
     <div className="flex flex-col lg:flex-row flex-1 min-h-0 relative">
@@ -552,6 +866,21 @@ export default function CampusMap() {
                     />
                   </div>
                   <div className="max-h-48 overflow-y-auto">
+                    {/* First, and always offered: the campus is 2.2 km end to
+                        end, and asking someone standing in the sun to identify
+                        their own position on a list of 35 buildings — 33 of them
+                        still called "Unnamed building N" — is the worst thing
+                        this map used to do. Hidden while searching, since it is
+                        not a search result. */}
+                    {!searchQuery.trim() && (
+                      <button
+                        onClick={useMyLocationAsStart}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-paper transition-colors flex items-center gap-2 border-b border-coffee-200 font-medium text-ink"
+                      >
+                        <Crosshair size={13} className="text-ember-500 flex-shrink-0" />
+                        Use my location
+                      </button>
+                    )}
                     {/* Exclude whatever is already the destination, mirroring the
                         To list below — otherwise picking it here builds a
                         start === end route that can only be refused. */}
@@ -684,6 +1013,22 @@ export default function CampusMap() {
                     {' '}&middot; {formatTime(route.distance)} &middot; arrive {etaAt(route.distance)}
                   </p>
 
+                  {/* The mapped walk is far longer than the direct line, which
+                      on this campus almost always means a real shortcut exists
+                      that nobody has surveyed yet — OSM has the roads here and
+                      not one footpath. Saying so is the difference between a map
+                      that is wrong and a map that knows what it does not know. */}
+                  {route.detour >= DETOUR_WARN_RATIO && route.direct >= DETOUR_WARN_MIN_M && (
+                    <p className="mt-1 rounded-lg bg-coffee-100 px-2.5 py-2 text-[11px] text-coffee-700 leading-relaxed">
+                      <span className="font-semibold text-ink">
+                        {route.to} is only {formatDistance(route.direct)} away in a straight line.
+                      </span>{' '}
+                      This route follows the paths we have mapped, which go the long way round.
+                      There is probably a shortcut that has not been surveyed yet — trust what you
+                      can see on the ground.
+                    </p>
+                  )}
+
                   {progress ? (
                     <div className={`mt-1 rounded-lg px-2.5 py-2 text-xs ${progress.arrived ? 'bg-moss/15 text-moss' : progress.offRoute ? 'bg-rust/15 text-rust' : 'bg-paper'}`}>
                       {progress.arrived ? (
@@ -758,7 +1103,13 @@ export default function CampusMap() {
                     key={d.id}
                     onClick={() => {
                       if (mapInstance.current) {
-                        mapInstance.current.setView([d.lat, d.lng], 19);
+                        // Clamped to the tile source's ceiling. Hard-coding 19
+                        // works only by luck on OSM and breaks the moment a layer
+                        // with a lower maximum is added — Esri's imagery over
+                        // UNIUYO stops at z18 and serves a grey "Map data not yet
+                        // available" tile above it, so this button would land the
+                        // student on a blank square.
+                        mapInstance.current.setView([d.lat, d.lng], Math.min(18, MAX_ZOOM));
                         const entry = markersRef.current.find((m) => m.id === d.id);
                         if (entry) entry.marker.openPopup();
                       }
@@ -834,6 +1185,27 @@ export default function CampusMap() {
               <span className="hidden sm:inline">{follow ? 'Following' : 'Follow'}</span>
             </button>
           )}
+
+          {/* Satellite is genuinely useful here: the campus is criss-crossed with
+              worn dirt tracks that exist on the ground and in no map, and the
+              imagery is the only way to see them. It is also how the missing
+              footpaths get traced — Esri's terms explicitly permit tracing. */}
+          <button
+            onClick={() => setBasemap((b) => (b === 'satellite' ? 'map' : 'satellite'))}
+            aria-pressed={basemap === 'satellite'}
+            aria-label={basemap === 'satellite' ? 'Switch to street map' : 'Switch to satellite view'}
+            title={basemap === 'satellite' ? 'Street map' : 'Satellite'}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-2.5 text-xs font-semibold shadow-lg ring-1 transition-colors ${
+              basemap === 'satellite'
+                ? 'bg-ink text-cream ring-coffee-600'
+                : 'bg-cream text-ink ring-coffee-200 hover:bg-paper'
+            }`}
+          >
+            <Layers size={15} />
+            <span className="hidden sm:inline">
+              {basemap === 'satellite' ? 'Street map' : 'Satellite'}
+            </span>
+          </button>
         </div>
       </div>
 
