@@ -829,6 +829,14 @@ export const courses = [
     title: 'Introduction to Software Engineering',
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'sen',
+    notesKey: 'sen211',
+    // Topic 1 covers outline item 1; topics 2–3 (SDLC, process models + CMMI)
+    // cover part of item 2 — process metrics are not transcribed yet.
+    noteCoverage: {
+      1: { covers: [1] },
+      2: { partial: [2] },
+      3: { partial: [2] },
+    },
     description: 'The principles and practices of building software systematically: software development lifecycle models, requirements engineering, system design, testing, and project management. Context for how secure software is planned and built.',
     topics: [
       'Software engineering concepts, principles, and its place as a computing discipline',

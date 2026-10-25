@@ -30,6 +30,7 @@ export const noteLoaders = {
   gst121: () => import('./gst121.js').then((m) => m.gst121LectureNotes),
   mth121: () => import('./mth121.js').then((m) => m.mth121LectureNotes),
   phy128: () => import('./phy128.js').then((m) => m.phy128LectureNotes),
+  sen211: () => import('./sen211.js').then((m) => m.sen211LectureNotes),
 };
 
 export const NOTE_KEYS = Object.keys(noteLoaders);
@@ -54,6 +55,7 @@ export const NOTE_TOPIC_COUNTS = {
   gst121: 2,
   mth121: 6,
   phy128: 4,
+  sen211: 3,
 };
 
 // Topic count for a course, synchronously. Keyed courses read the map above;
