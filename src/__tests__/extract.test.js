@@ -35,6 +35,9 @@ let ip = 0;
 let insert;
 let profile;
 let rpc;
+let info;
+let download;
+let storageFrom;
 
 function request(overrides = {}) {
   ip += 1;
@@ -68,7 +71,7 @@ async function call(req = request()) {
 
 function bytes(value) {
   const buffer = Buffer.from(value);
-  return { ok: true, arrayBuffer: async () => buffer };
+  return { arrayBuffer: async () => buffer };
 }
 
 beforeEach(() => {
@@ -76,13 +79,16 @@ beforeEach(() => {
   insert = vi.fn(() => ({ select: () => ({ single: async () => ({ data: { id: 'material-1' }, error: null }) }) }));
   profile = vi.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { department: 'dataScience' } }) }) }) }));
   rpc = vi.fn(async () => ({ data: [{ allowed: true, remaining: 19, reset_at: new Date(Date.now() + 600_000).toISOString() }], error: null }));
-  mocks.getStudent.mockResolvedValue({ user: { id: 'verified-user' }, db: { from: profile, rpc } });
+  info = vi.fn(async () => ({ data: { name: 'owned-object' }, error: null }));
+  download = vi.fn(async () => ({ data: bytes('Real downloaded text'), error: null }));
+  storageFrom = vi.fn(() => ({ info, download }));
+  mocks.getStudent.mockResolvedValue({ user: { id: 'verified-user' }, db: { from: profile, rpc, storage: { from: storageFrom } } });
   mocks.configured.mockReturnValue(true);
   mocks.serviceClient.mockReturnValue({ from: vi.fn(() => ({ insert })) });
   mocks.findCourse.mockReturnValue({ code: 'DSC 111', slug: 'known-course', materialsDepartment: 'general' });
   mocks.pdfParse.mockResolvedValue({ text: 'PDF text' });
   mocks.mammothExtract.mockResolvedValue({ value: 'Word text' });
-  vi.stubGlobal('fetch', vi.fn(async () => bytes('Real downloaded text')));
+  vi.stubGlobal('fetch', vi.fn());
 });
 
 afterEach(() => {
@@ -159,7 +165,10 @@ describe('POST /api/extract', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ material: { id: 'material-1' }, extracted: true });
     expect(mocks.findCourse).toHaveBeenCalledWith('known-course', 'dataScience');
-    expect(globalThis.fetch).toHaveBeenCalledWith(expect.stringContaining(`/course-materials/${req.body.filePath}`));
+    expect(storageFrom).toHaveBeenCalledWith('course-materials');
+    expect(info).toHaveBeenCalledWith(req.body.filePath);
+    expect(download).toHaveBeenCalledWith(req.body.filePath);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(insert).toHaveBeenCalledWith({
       course_code: 'DSC 111', course_slug: 'known-course', department: 'general',
       display_name: 'Week 1', file_path: req.body.filePath, file_size: 14,
@@ -186,7 +195,8 @@ describe('POST /api/extract', () => {
     req.body = { ...req.body, ...body };
     const res = await call(req);
     expect(res.statusCode).toBe(400);
-    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(info).not.toHaveBeenCalled();
+    expect(download).not.toHaveBeenCalled();
     expect(insert).not.toHaveBeenCalled();
   });
 
@@ -194,20 +204,21 @@ describe('POST /api/extract', () => {
     ['txt', 'Raw   text\nfrom storage', 'Raw text from storage'],
     ['docx', 'document bytes', 'Word text'],
     ['pdf', 'PDF bytes', 'PDF text'],
-  ])('extracts .%s from fetched bytes', async (ext, content, expected) => {
-    globalThis.fetch.mockResolvedValue(bytes(content));
+  ])('extracts .%s from caller-scoped bytes', async (ext, content, expected) => {
+    download.mockResolvedValue({ data: bytes(content), error: null });
     const req = request();
     req.body.filePath = req.body.filePath.replace(/\.txt$/, `.${ext}`);
     req.body.fileType = ext;
     const res = await call(req);
     expect(res.statusCode).toBe(200);
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ extracted_text: expected }));
+    expect(globalThis.fetch).not.toHaveBeenCalled();
     if (ext === 'docx') expect(mocks.mammothExtract).toHaveBeenCalledWith({ buffer: Buffer.from(content) });
     if (ext === 'pdf') expect(mocks.pdfParse).toHaveBeenCalledWith(Buffer.from(content));
   });
 
   it('caps extracted text at 50,000 characters and stores a non-extractable allowed type with null text', async () => {
-    globalThis.fetch.mockResolvedValue(bytes('x'.repeat(50_001)));
+    download.mockResolvedValue({ data: bytes('x'.repeat(50_001)), error: null });
     await call();
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ extracted_text: 'x'.repeat(50_000) }));
     insert.mockClear();
@@ -216,27 +227,70 @@ describe('POST /api/extract', () => {
     req.body.fileType = 'png';
     const res = await call(req);
     expect(res.statusCode).toBe(200);
+    expect(info).toHaveBeenCalledWith(req.body.filePath);
+    expect(download).toHaveBeenCalledTimes(1);
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ file_type: 'png', extracted_text: null }));
   });
 
-  // The current path has only a course slug and timestamp. A student who knows
-  // another student's fresh public object path can register that object as theirs.
-  it.fails('rejects a fresh course object uploaded by another student', async () => {
+  it('rejects a fresh course object uploaded by another student', async () => {
     const req = request();
     req.body.filePath = `known-course/${Date.now()}-otherstudentsfile.txt`;
-    globalThis.fetch.mockResolvedValue(bytes('Other student notes'));
+    info.mockResolvedValue({ data: null, error: { status: 404, message: 'Object not found' } });
     const res = await call(req);
+    expect(res.statusCode).toBe(403);
+    expect(res.body.error).toMatch(/not found or does not belong/);
+    expect(info).toHaveBeenCalledWith(req.body.filePath);
+    expect(download).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 for a missing object and never inserts', async () => {
+    info.mockResolvedValue({ data: null, error: { status: 404, message: 'Object not found' } });
+    const res = await call();
     expect(res.statusCode).toBe(403);
     expect(insert).not.toHaveBeenCalled();
   });
 
-  // By design (see the header of api/extract.js) the file is already in
-  // storage, so a failed download or parser still registers the material,
-  // just without tutor text. The caller learns this from `extracted: false`
-  // and nothing half-parsed reaches the tutor context.
-  it('registers the material with null text and extracted: false when extraction throws', async () => {
-    globalThis.fetch.mockRejectedValue(new Error('storage unavailable'));
+  // storage-api has reported a hidden/missing object as HTTP 400 with the real
+  // code in the body. That must still read as "not yours", not "try again".
+  it('treats HTTP 400 with a 404 body statusCode as not owned', async () => {
+    info.mockResolvedValue({ data: null, error: { status: 400, statusCode: '404', message: 'Object not found' } });
     const res = await call();
+    expect(res.statusCode).toBe(403);
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('treats a bare HTTP 400 as a storage fault, not as ownership', async () => {
+    info.mockResolvedValue({ data: null, error: { status: 400, statusCode: '400', message: 'Bad request' } });
+    const res = await call();
+    expect(res.statusCode).toBe(503);
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('returns 503 when the storage ownership check fails', async () => {
+    info.mockResolvedValue({ data: null, error: { status: 503, message: 'Storage unavailable' } });
+    const res = await call();
+    expect(res.statusCode).toBe(503);
+    expect(res.body.error).toMatch(/Could not verify/);
+    expect(download).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalled();
+  });
+
+  it('returns 503 when the caller-scoped download fails', async () => {
+    download.mockResolvedValue({ data: null, error: { status: 503, message: 'Storage unavailable' } });
+    const res = await call();
+    expect(res.statusCode).toBe(503);
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  // Parser failures still register the verified material without tutor text.
+  it('registers the material with null text and extracted: false when extraction throws', async () => {
+    const req = request();
+    req.body.filePath = req.body.filePath.replace(/\.txt$/, '.pdf');
+    req.body.fileType = 'pdf';
+    mocks.pdfParse.mockRejectedValue(new Error('corrupt PDF'));
+    const res = await call(req);
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ material: { id: 'material-1' }, extracted: false });
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ extracted_text: null }));

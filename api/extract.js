@@ -20,8 +20,16 @@
 //  Now every security-relevant field is derived here and none is trusted from
 //  the body: `uploaded_by` from the verified token, `course_code` and
 //  `department` from the catalogue via the uploader's own profile, and
-//  `extracted_text` from the bytes actually in storage. The matching migration
-//  (20260827010000_materials_server_insert.sql) revokes INSERT from
+//  `extracted_text` from the bytes actually in storage.
+//
+//  OWNERSHIP: before the service-role insert, the object is looked up through
+//  the CALLER's own client (student.db), where the "Owners read own course
+//  materials" storage policy hides every object the caller did not upload. The
+//  public URL and the service-role client both see every object, so neither can
+//  prove who uploaded it. The same caller-scoped client downloads the bytes for
+//  extraction, so the tutor only ever ingests the caller's own file.
+//
+//  The matching migration (20260827010000_materials_server_insert.sql) revokes INSERT from
 //  `authenticated`, so the browser cannot write the row at all any more.
 // ============================================================================
 
@@ -56,11 +64,19 @@ const ALLOWED_EXT = new Set([
 ]);
 
 // Material paths are "<courseSlug>/<uploadedAtMs>-<rand>.<ext>" (see CourseMaterials.jsx).
-// Requiring sign-in plus a fresh timestamp keeps this endpoint scoped to a file the
-// caller just uploaded, instead of letting any signed-in user register any path
-// in the (public-read) bucket on demand.
+// The fresh timestamp limits registration age; ownership is separately checked
+// against Storage SELECT RLS before the row is inserted.
 const FILE_PATH_RE = /^([^/]+)\/(\d+)-[a-z0-9]+\.([a-z0-9]+)$/i;
 const MAX_UPLOAD_AGE_MS = 10 * 60 * 1000;
+
+// Storage answers "not yours" and "not there" the same way, because the owner-only
+// SELECT policy hides the object entirely. It does not always say so with the HTTP
+// status: storage-api has returned HTTP 400 with `statusCode: "404"` in the body
+// for a missing object, so read both. Anything else is a storage fault (503).
+function isMissingOrNotOwned(error) {
+  return [403, 404].includes(Number(error?.status))
+    || ['403', '404', 'not_found'].includes(String(error?.statusCode ?? ''));
+}
 
 const MAX_DISPLAY_NAME = 200;
 const MAX_DESCRIPTION = 200;
@@ -161,26 +177,63 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'That course is not in your programme’s catalogue.' });
   }
 
+  let storage;
+  let objectInfo;
+  try {
+    storage = student.db.storage.from(BUCKET);
+    objectInfo = await storage.info(filePath);
+  } catch (err) {
+    console.error('extract: storage ownership check failed:', err);
+    return res.status(503).json({ error: 'Could not verify your upload. Please try again.' });
+  }
+  if (objectInfo?.error) {
+    if (isMissingOrNotOwned(objectInfo.error)) {
+      logRequest(req, 'extract', { denied: 'file_not_owned_or_missing', filePath });
+      return res.status(403).json({ error: 'This upload was not found or does not belong to you.' });
+    }
+    console.error('extract: storage ownership check failed:', objectInfo.error);
+    return res.status(503).json({ error: 'Could not verify your upload. Please try again.' });
+  }
+  if (!objectInfo?.data) {
+    console.error('extract: storage ownership check returned no object');
+    return res.status(503).json({ error: 'Could not verify your upload. Please try again.' });
+  }
+
   // Extraction is best-effort: a corrupt PDF or an unreadable .docx must still
   // leave the student with a material row pointing at their file.
   let text = null;
   if (EXTRACTABLE.has(pathExt)) {
+    let buffer;
     try {
-      const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(filePath).replace(/%2F/g, '/')}`;
-      const response = await fetch(fileUrl);
-      if (response.ok) {
-        const buffer = Buffer.from(await response.arrayBuffer());
-        if (pathExt === 'txt') {
-          text = buffer.toString('utf-8');
-        } else if (pathExt === 'docx') {
-          // Imported here rather than at module scope: mammoth measures ~630ms to
-          // load, and the txt and pdf branches never touch it. pdf-parse stays
-          // eager above — it measures ~5ms, so deferring it would buy nothing.
-          const { default: mammoth } = await import('mammoth');
-          text = (await mammoth.extractRawText({ buffer })).value;
-        } else if (pathExt === 'pdf') {
-          text = (await pdfParse(buffer)).text;
+      const { data, error } = await storage.download(filePath);
+      if (error) {
+        if (isMissingOrNotOwned(error)) {
+          logRequest(req, 'extract', { denied: 'file_not_owned_or_missing', filePath });
+          return res.status(403).json({ error: 'This upload was not found or does not belong to you.' });
         }
+        console.error('extract: storage download failed:', error);
+        return res.status(503).json({ error: 'Could not read your upload. Please try again.' });
+      }
+      if (!data) {
+        console.error('extract: storage download returned no object');
+        return res.status(503).json({ error: 'Could not read your upload. Please try again.' });
+      }
+      buffer = Buffer.from(await data.arrayBuffer());
+    } catch (err) {
+      console.error('extract: storage download failed:', err);
+      return res.status(503).json({ error: 'Could not read your upload. Please try again.' });
+    }
+    try {
+      if (pathExt === 'txt') {
+        text = buffer.toString('utf-8');
+      } else if (pathExt === 'docx') {
+        // Imported here rather than at module scope: mammoth measures ~630ms to
+        // load, and the txt and pdf branches never touch it. pdf-parse stays
+        // eager above — it measures ~5ms, so deferring it would buy nothing.
+        const { default: mammoth } = await import('mammoth');
+        text = (await mammoth.extractRawText({ buffer })).value;
+      } else if (pathExt === 'pdf') {
+        text = (await pdfParse(buffer)).text;
       }
     } catch (err) {
       console.error('extract: text extraction failed:', err);
