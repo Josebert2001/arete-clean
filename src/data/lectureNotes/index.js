@@ -21,10 +21,13 @@
 // resolves the same file (see the note on shared notes in CLAUDE.md).
 export const noteLoaders = {
   cos121: () => import('./cos121.js').then((m) => m.cos121LectureNotes),
+  cos211: () => import('./cos211.js').then((m) => m.cos211LectureNotes),
   cos221: () => import('./cos221.js').then((m) => m.cos221LectureNotes),
   cyb121: () => import('./cyb121.js').then((m) => m.cyb121LectureNotes),
   cyb122: () => import('./cyb122.js').then((m) => m.cyb122LectureNotes),
   cyb123: () => import('./cyb123.js').then((m) => m.cyb123LectureNotes),
+  cyb211: () => import('./cyb211.js').then((m) => m.cyb211LectureNotes),
+  cyb213: () => import('./cyb213.js').then((m) => m.cyb213LectureNotes),
   cyb221: () => import('./cyb221.js').then((m) => m.cyb221LectureNotes),
   ent221: () => import('./ent221.js').then((m) => m.ent221LectureNotes),
   gst121: () => import('./gst121.js').then((m) => m.gst121LectureNotes),
@@ -46,10 +49,13 @@ export const NOTE_KEYS = Object.keys(noteLoaders);
 // fails if any count here has drifted, so it cannot go quietly stale.
 export const NOTE_TOPIC_COUNTS = {
   cos121: 9,
+  cos211: 12,
   cos221: 12,
   cyb121: 7,
   cyb122: 12,
   cyb123: 20,
+  cyb211: 2,
+  cyb213: 12,
   cyb221: 21,
   ent221: 18,
   gst121: 2,

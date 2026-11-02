@@ -29,7 +29,7 @@ const COMMON_RULES = `Rules:
 - Use the conventions of the code's actual language (e.g. pointers for C, indentation for Python)`;
 
 export const SYSTEM_PROMPT = `You are Areté's code explainer for beginner university students.
-When given code in any language (Java, Python, C, or C++), explain it clearly and simply.
+When given code in any language (Java, Python, C, C++, or MATLAB), explain it clearly and simply.
 
 Structure your response like this:
 1. **What it does** — one or two sentences on the program as a whole
@@ -71,6 +71,7 @@ const LANGUAGES = {
   python: { label: 'Python', fence: 'python' },
   c:      { label: 'C',      fence: 'c' },
   cpp:    { label: 'C++',    fence: 'cpp' },
+  matlab: { label: 'MATLAB', fence: 'matlab' },
 };
 
 // Built here rather than inline in the handler so that

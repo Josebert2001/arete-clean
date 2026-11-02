@@ -10,9 +10,9 @@ export const trackMeta = {
   java: {
     slug: 'java',
     label: 'Java',
-    fullName: 'Java (COS 211)',
-    tagline: 'Computer Programming I — OOP from foundations to GUI',
-    description: 'The complete COS 211 track: 13 modules covering Java fundamentals, OOP, collections, file I/O, JDBC, and Swing GUI. Also supports COS 221 (Computer Programming II).',
+    fullName: 'Java (COS 221)',
+    tagline: 'Computer Programming II — OOP from foundations to GUI',
+    description: 'The complete Java track for COS 221 (Computer Programming II): 13 modules covering Java fundamentals, OOP, collections, file I/O, JDBC, and Swing GUI.',
     storageKey: 'cos222-progress-v1',
     listPath: '/tracks/java',
     detailPath: (id) => `/tracks/java/${id}`,
@@ -21,7 +21,7 @@ export const trackMeta = {
     accentText: 'text-cream',
     accentLight: 'bg-coffee-100 text-coffee-800',
     dotColor: 'bg-ember-500',
-    courseCode: 'COS 211',
+    courseCode: 'COS 221',
     moduleIndex: [
       { id: 'foundations', number: 1, title: 'Java Foundations' },
       { id: 'control-flow', number: 2, title: 'Control Flow' },

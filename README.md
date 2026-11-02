@@ -25,7 +25,7 @@ The course hub covers the complete B.Sc. Cybersecurity programme: **57 courses**
 
 | Track    | Modules | Course        | Format |
 | -------- | ------- | ------------- | ------ |
-| Java     | 13      | COS 211 / 221 | Theory + code + playground + quiz + project |
+| Java     | 13      | COS 221       | Theory + code + playground + quiz + project |
 | Python   | 12      | COS 121       | Theory + code + playground + quiz + project |
 | C        | 12      | —             | Theory + code + playground + quiz + project |
 | Security | 12      | CYB           | Theory + quiz + **capture-the-flag challenge** |
