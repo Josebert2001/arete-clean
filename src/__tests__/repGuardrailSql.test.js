@@ -101,6 +101,9 @@ describe('rep migration guards', () => {
     expect(trigger).toMatch(/UPDATE course_offerings SET first_class_at = NEW\.opened_at[\s\S]*?first_class_at IS NULL/);
     expect(removals).toMatch(/CREATE TRIGGER record_offering_first_class\s+AFTER INSERT ON class_sessions/);
     expect(removals).toMatch(/SET first_class_at = sessions\.first_opened_at[\s\S]*?MIN\(opened_at\)[\s\S]*?co\.first_class_at IS NULL/);
+    const auditBackfill = removals.match(/UPDATE course_offerings co SET first_class_at = audit\.first_changed_at[\s\S]*?;/)?.[0];
+    expect(auditBackfill).toMatch(/FROM \(SELECT offering_id, MIN\(changed_at\) AS first_changed_at\s+FROM attendance_audit GROUP BY offering_id\) audit/);
+    expect(auditBackfill).toMatch(/WHERE co\.id = audit\.offering_id AND co\.first_class_at IS NULL;/);
     const helper = definition(removals, 'offering_has_class_sessions');
     expect(helper).toContain('first_class_at IS NOT NULL');
     expect(helper).toContain('EXISTS (SELECT 1 FROM class_sessions WHERE offering_id = p_offering_id)');

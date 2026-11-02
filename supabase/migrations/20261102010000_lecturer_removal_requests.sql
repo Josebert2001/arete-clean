@@ -302,6 +302,12 @@ FROM (SELECT offering_id, MIN(opened_at) AS first_opened_at
       FROM class_sessions GROUP BY offering_id) sessions
 WHERE co.id = sessions.offering_id AND co.first_class_at IS NULL;
 
+-- Audit time is a proxy that a class was held; deleted sessions without logged attendance cannot be recovered.
+UPDATE course_offerings co SET first_class_at = audit.first_changed_at
+FROM (SELECT offering_id, MIN(changed_at) AS first_changed_at
+      FROM attendance_audit GROUP BY offering_id) audit
+WHERE co.id = audit.offering_id AND co.first_class_at IS NULL;
+
 -- The admin's existing DELETE policy remains separate. This only narrows the
 -- rep's policy, including direct table deletes from an older frontend.
 -- A SECURITY DEFINER helper is necessary: a rep's class_sessions SELECT
