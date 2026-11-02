@@ -35,9 +35,9 @@ let ip = 0;
 let insert;
 let profile;
 let rpc;
-let info;
 let download;
 let storageFrom;
+let ownedObject;
 
 function request(overrides = {}) {
   ip += 1;
@@ -78,13 +78,15 @@ beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
   insert = vi.fn(() => ({ select: () => ({ single: async () => ({ data: { id: 'material-1' }, error: null }) }) }));
   profile = vi.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { department: 'dataScience' } }) }) }) }));
-  rpc = vi.fn(async () => ({ data: [{ allowed: true, remaining: 19, reset_at: new Date(Date.now() + 600_000).toISOString() }], error: null }));
-  info = vi.fn(async () => ({ data: { name: 'owned-object' }, error: null }));
+  ownedObject = { object_id: 'object-1', created_at: new Date().toISOString(), size: 2048 };
+  rpc = vi.fn(async (name) => name === 'consume_rate_limit'
+    ? { data: [{ allowed: true, remaining: 19, reset_at: new Date(Date.now() + 600_000).toISOString() }], error: null }
+    : { data: [ownedObject], error: null });
   download = vi.fn(async () => ({ data: bytes('Real downloaded text'), error: null }));
-  storageFrom = vi.fn(() => ({ info, download }));
-  mocks.getStudent.mockResolvedValue({ user: { id: 'verified-user' }, db: { from: profile, rpc, storage: { from: storageFrom } } });
+  storageFrom = vi.fn(() => ({ download }));
+  mocks.getStudent.mockResolvedValue({ user: { id: 'verified-user' }, db: { from: profile, rpc } });
   mocks.configured.mockReturnValue(true);
-  mocks.serviceClient.mockReturnValue({ from: vi.fn(() => ({ insert })) });
+  mocks.serviceClient.mockReturnValue({ from: vi.fn(() => ({ insert })), storage: { from: storageFrom } });
   mocks.findCourse.mockReturnValue({ code: 'DSC 111', slug: 'known-course', materialsDepartment: 'general' });
   mocks.pdfParse.mockResolvedValue({ text: 'PDF text' });
   mocks.mammothExtract.mockResolvedValue({ value: 'Word text' });
@@ -147,7 +149,9 @@ describe('POST /api/extract', () => {
   });
 
   it('enforces the per-user RPC budget before reading the request body', async () => {
-    rpc.mockResolvedValue({ data: [{ allowed: false, remaining: 0, reset_at: new Date(Date.now() + 120_000).toISOString() }], error: null });
+    rpc.mockImplementation(async (name) => name === 'consume_rate_limit'
+      ? { data: [{ allowed: false, remaining: 0, reset_at: new Date(Date.now() + 120_000).toISOString() }], error: null }
+      : { data: [ownedObject], error: null });
     const res = await call();
     expect(res.statusCode).toBe(429);
     expect(res.body.kind).toBe('rate_limited');
@@ -166,12 +170,13 @@ describe('POST /api/extract', () => {
     expect(res.body).toEqual({ material: { id: 'material-1' }, extracted: true });
     expect(mocks.findCourse).toHaveBeenCalledWith('known-course', 'dataScience');
     expect(storageFrom).toHaveBeenCalledWith('course-materials');
-    expect(info).toHaveBeenCalledWith(req.body.filePath);
+    expect(rpc).toHaveBeenCalledWith('my_course_material_object', { p_path: req.body.filePath });
+    expect(rpc.mock.calls.filter(([name]) => name === 'my_course_material_object')).toHaveLength(2);
     expect(download).toHaveBeenCalledWith(req.body.filePath);
     expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(insert).toHaveBeenCalledWith({
       course_code: 'DSC 111', course_slug: 'known-course', department: 'general',
-      display_name: 'Week 1', file_path: req.body.filePath, file_size: 14,
+      display_name: 'Week 1', file_path: req.body.filePath, file_size: 2048,
       file_type: 'txt', description: 'Lecture notes', uploaded_by: 'verified-user',
       extracted_text: 'Real downloaded text',
     });
@@ -190,12 +195,13 @@ describe('POST /api/extract', () => {
     ['a mismatched course path', { courseSlug: 'other-course' }],
     ['path traversal', { filePath: '../known-course/file.txt' }],
     ['an expired upload path', { filePath: `known-course/${Date.now() - 600_001}-abc.txt` }],
+    ['a future upload path', { filePath: `known-course/${Date.now() + 180_000}-abc.txt` }],
   ])('rejects %s before downloading or inserting', async (_label, body) => {
     const req = request();
     req.body = { ...req.body, ...body };
     const res = await call(req);
     expect(res.statusCode).toBe(400);
-    expect(info).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalledWith('my_course_material_object', expect.anything());
     expect(download).not.toHaveBeenCalled();
     expect(insert).not.toHaveBeenCalled();
   });
@@ -204,7 +210,7 @@ describe('POST /api/extract', () => {
     ['txt', 'Raw   text\nfrom storage', 'Raw text from storage'],
     ['docx', 'document bytes', 'Word text'],
     ['pdf', 'PDF bytes', 'PDF text'],
-  ])('extracts .%s from caller-scoped bytes', async (ext, content, expected) => {
+  ])('extracts .%s from verified storage bytes', async (ext, content, expected) => {
     download.mockResolvedValue({ data: bytes(content), error: null });
     const req = request();
     req.body.filePath = req.body.filePath.replace(/\.txt$/, `.${ext}`);
@@ -227,7 +233,8 @@ describe('POST /api/extract', () => {
     req.body.fileType = 'png';
     const res = await call(req);
     expect(res.statusCode).toBe(200);
-    expect(info).toHaveBeenCalledWith(req.body.filePath);
+    expect(rpc).toHaveBeenCalledWith('my_course_material_object', { p_path: req.body.filePath });
+    // Ownership is still proven for an image, but its bytes are never read.
     expect(download).toHaveBeenCalledTimes(1);
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ file_type: 'png', extracted_text: null }));
   });
@@ -235,61 +242,110 @@ describe('POST /api/extract', () => {
   it('rejects a fresh course object uploaded by another student', async () => {
     const req = request();
     req.body.filePath = `known-course/${Date.now()}-otherstudentsfile.txt`;
-    info.mockResolvedValue({ data: null, error: { status: 404, message: 'Object not found' } });
+    rpc.mockImplementation(async (name) => name === 'my_course_material_object'
+      ? { data: [], error: null }
+      : { data: [{ allowed: true }], error: null });
     const res = await call(req);
     expect(res.statusCode).toBe(403);
     expect(res.body.error).toMatch(/not found or does not belong/);
-    expect(info).toHaveBeenCalledWith(req.body.filePath);
+    expect(rpc).toHaveBeenCalledWith('my_course_material_object', { p_path: req.body.filePath });
     expect(download).not.toHaveBeenCalled();
     expect(insert).not.toHaveBeenCalled();
   });
 
-  it('returns 403 for a missing object and never inserts', async () => {
-    info.mockResolvedValue({ data: null, error: { status: 404, message: 'Object not found' } });
+  it('rejects an object older than ten minutes using database created_at', async () => {
+    ownedObject.created_at = new Date(Date.now() - 600_001).toISOString();
     const res = await call();
-    expect(res.statusCode).toBe(403);
+    expect(res.statusCode).toBe(400);
+    expect(download).not.toHaveBeenCalled();
     expect(insert).not.toHaveBeenCalled();
   });
 
-  // storage-api has reported a hidden/missing object as HTTP 400 with the real
-  // code in the body. That must still read as "not yours", not "try again".
-  it('treats HTTP 400 with a 404 body statusCode as not owned', async () => {
-    info.mockResolvedValue({ data: null, error: { status: 400, statusCode: '404', message: 'Object not found' } });
+  it.each([
+    ['database fault', { code: 'XX000', message: 'Database unavailable' }],
+    ['missing migration', { code: 'PGRST202', message: 'Could not find function' }],
+  ])('fails closed on %s', async (_label, error) => {
+    rpc.mockImplementation(async (name) => name === 'my_course_material_object'
+      ? { data: null, error }
+      : { data: [{ allowed: true }], error: null });
     const res = await call();
-    expect(res.statusCode).toBe(403);
+    expect(res.statusCode).toBe(503);
+    expect(res.body.error).toMatch(/temporarily unavailable/);
+    expect(download).not.toHaveBeenCalled();
     expect(insert).not.toHaveBeenCalled();
   });
 
-  it('records the size storage reports, not the size the client claims', async () => {
-    info.mockResolvedValue({ data: { name: 'owned-object', size: 2048 }, error: null });
+  it('records the database size, never the client size', async () => {
     const req = request();
     req.body.fileSize = 999_999_999;
     await call(req);
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ file_size: 2048 }));
   });
 
-  it('treats a bare HTTP 400 as a storage fault, not as ownership', async () => {
-    info.mockResolvedValue({ data: null, error: { status: 400, statusCode: '400', message: 'Bad request' } });
-    const res = await call();
-    expect(res.statusCode).toBe(503);
-    expect(insert).not.toHaveBeenCalled();
+  it.each([null, 'invalid'])('stores null size for missing or invalid database size (%s)', async (size) => {
+    ownedObject.size = size;
+    const req = request();
+    req.body.fileSize = 999_999_999;
+    expect((await call(req)).statusCode).toBe(200);
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ file_size: null }));
   });
 
-  it('returns 503 when the storage ownership check fails', async () => {
-    info.mockResolvedValue({ data: null, error: { status: 503, message: 'Storage unavailable' } });
-    const res = await call();
-    expect(res.statusCode).toBe(503);
-    expect(res.body.error).toMatch(/Could not verify/);
-    expect(download).not.toHaveBeenCalled();
-    expect(insert).not.toHaveBeenCalled();
-    expect(console.error).toHaveBeenCalled();
-  });
-
-  it('returns 503 when the caller-scoped download fails', async () => {
+  // Ownership is proven before the download, so a storage hiccup only costs
+  // the tutor text: the row is still registered, and the caller is told.
+  it('registers with null text and extracted: false when the download fails', async () => {
     download.mockResolvedValue({ data: null, error: { status: 503, message: 'Storage unavailable' } });
     const res = await call();
-    expect(res.statusCode).toBe(503);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.extracted).toBe(false);
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ extracted_text: null }));
+  });
+
+  it('still refuses a non-owner even when the download would fail', async () => {
+    rpc.mockImplementation(async (name) => (name === 'my_course_material_object'
+      ? { data: [], error: null }
+      : { data: [{ allowed: true, remaining: 19, reset_at: new Date(Date.now() + 600_000).toISOString() }], error: null }));
+    download.mockResolvedValue({ data: null, error: { status: 503, message: 'Storage unavailable' } });
+    const res = await call();
+    expect(res.statusCode).toBe(403);
     expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('rejects an object replaced between download and registration', async () => {
+    let checks = 0;
+    rpc.mockImplementation(async (name) => name === 'my_course_material_object'
+      ? { data: [{ ...ownedObject, object_id: ++checks === 1 ? 'object-1' : 'object-2' }], error: null }
+      : { data: [{ allowed: true }], error: null });
+    const res = await call();
+    expect(res.statusCode).toBe(409);
+    expect(download).toHaveBeenCalledTimes(1);
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('rejects an object removed after download', async () => {
+    let checks = 0;
+    rpc.mockImplementation(async (name) => name === 'my_course_material_object'
+      ? { data: ++checks === 1 ? [ownedObject] : [], error: null }
+      : { data: [{ allowed: true }], error: null });
+    expect((await call()).statusCode).toBe(403);
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('fails closed if the ownership recheck errors', async () => {
+    let checks = 0;
+    rpc.mockImplementation(async (name) => name === 'my_course_material_object'
+      ? (++checks === 1
+        ? { data: [ownedObject], error: null }
+        : { data: null, error: { code: 'XX000', message: 'Database unavailable' } })
+      : { data: [{ allowed: true }], error: null });
+    expect((await call()).statusCode).toBe(503);
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('rejects replay when the unique file path index reports a conflict', async () => {
+    insert.mockReturnValue({ select: () => ({ single: async () => ({ data: null, error: { code: '23505' } }) }) });
+    const res = await call();
+    expect(res.statusCode).toBe(409);
+    expect(res.body.error).toBe('This file is already registered.');
   });
 
   // Parser failures still register the verified material without tutor text.
