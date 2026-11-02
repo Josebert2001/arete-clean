@@ -8,7 +8,7 @@
 - Scope: the whole university, not one department. 29 of the 95 courses below are foundation courses taken across University of Uyo programmes rather than owned by any one department (a programme takes either GST 211/311 or GST 212/312, for instance, but every programme takes some of these): GST 111, MTH 111, PHY 111, PHY 117, COS 111, STA 111, UUY-CSC 111, UUY-CSC 112, GST 121, COS 121, MTH 121, PHY 121, PHY 128, GST 212, COS 211, ENT 221, COS 221, INS 224, GST 312, CSC 319, COS 411, ENT 321, GST 211, MTH 211, MTH 212, MTH 223, CSC 223, GST 311, INS 411. They are marked "foundation course" in the listing.
 - Departments with a fully authored catalogue: Cybersecurity, Data Science. A student in any other department signs up in foundation mode and gets those shared courses plus all four programming tracks; more catalogues are authored as students from those departments sign up.
 - Access: course outlines, textbooks and study tips are public. Lecture notes, question banks, the AI tutor and progress tracking need a free account (email code, no password).
-- Last generated: 2026-09-09
+- Last generated: 2026-11-02
 
 
 ## 100 Level
@@ -887,34 +887,82 @@ How organisations create, move, store and govern information, and how ICT infras
 - 3 units · 200 Level · First Semester
 - Taken by: undergraduates across University of Uyo programmes (foundation course, not departmental)
 
-Object-oriented programming in Java: from variables and control flow through full OOP, collections, exception handling, file I/O, and GUI development with Swing. The primary programming course of the degree and the subject most likely to determine your programming competence throughout your career.
+An introduction to scientific programming in MATLAB. You learn to solve a problem on paper first — identifying it, designing an algorithm, writing pseudocode and drawing a flowchart — and then to code it: variables and data types, operators and precedence, decisions and loops, matrices, functions, plotting and object-oriented programming. Taught from the lab manual Problem Solving and Programming with MATLAB.
 
 **Outline**
 
-1. Programming paradigms: functional, declarative, logic, and object-oriented
-2. Java syntax: variables, data types, expressions, operators
-3. Control flow: if/else, switch, loops; arrays (1D and 2D)
-4. Methods: parameters, return types, overloading
-5. Classes and objects; abstraction, constructors and encapsulation
-6. Inheritance, polymorphism, and abstract classes; interfaces
-7. Exception handling: try, catch, finally, custom exceptions
-8. Collections API: ArrayList, HashMap, HashSet, Stack, Queue, iterators/enumerators
-9. Strings and string processing; searching, sorting, and recursive algorithms
-10. Event-driven programming: event-handling methods and event propagation
-11. File I/O: reading and writing text files; GUI programming with Java Swing
-12. Basic JDBC: connecting Java to a database
+1. Scientific problem solving: identifying the problem, designing an algorithm, implementing, testing and validating
+2. Programming fundamentals: data, data types, variables and keywords; syntax, logical and run-time errors
+3. Algorithms: characteristics and properties, designing an algorithm, poorly vs well-structured algorithms, pseudocode
+4. Flowcharts: the standard symbols, flowcharting rules, and worked examples with decisions and loops
+5. Programming paradigms: imperative (procedural, object-oriented), declarative, functional and data-driven
+6. MATLAB variables and data types: naming rules; numeric, logical, character/string and complex types; type conversion
+7. Operator precedence and evaluating expressions in MATLAB
+8. Relational and logical operators; element-wise vs short-circuit logic
+9. Flow control: if/elseif/else, switch, for and while loops, break and continue
+10. Arrays and matrices: indexing, matrix operations and functions (det, inv, eig, transpose); structures, cell arrays and tables
+11. User-defined functions; plotting and visualisation (plot, histogram, bar)
+12. Object-oriented programming in MATLAB: classdef, properties, methods and inheritance
+13. Generative AI for programmers: prompt engineering and the limits of AI-written code
 
 **Recommended textbooks**
 
-- Introduction to Java Programming and Data Structures — Y. Daniel Liang
-- Head First Java — Kathy Sierra & Bert Bates
+- MATLAB: A Practical Introduction to Programming and Problem Solving — Stormy Attaway
+- Essential MATLAB for Engineers and Scientists — Brian H. Hahn & Daniel T. Valentine
 
 **How to pass**
 
-- Areté has 13 full interactive modules for this course with live playgrounds and quizzes — use them every day
-- Type every code example yourself; copying and pasting prevents your brain from building muscle memory
-- Java OOP is the most exam-critical section — understand inheritance diagrams and method overriding
-- The AI Tutor on this app can explain any Java concept or debug your code any time
+- No MATLAB licence? GNU Octave is free and runs almost every listing in these notes unchanged — practise on it daily
+- Draw the flowchart before you write the code: the lab practicals ask for both, and the symbols and flowcharting rules are examined directly
+- Learn the confusable pairs cold — = vs ==, ^ vs .^, & vs && — the manual's "Common Errors to Avoid" table is exam material
+- Trace every loop by hand, writing down the loop variable and the running total on each pass, as the notes do for the factorial and series examples
+- Use the AI Tutor and "Explain this code" freely, but run and test what they tell you — the course's own lecture on generative AI makes exactly that point
+
+**Lecture notes** (12 transcribed topics; full text needs a free account)
+
+1. Introduction to Scientific Programming
+2. Programming Paradigms, Variables and Data Types
+3. Control Structures: The if Statement
+4. Arrays and Loops
+5. Generative Coding and Prompt Engineering
+6. Factorials, Fibonacci, Visualisation, Functions and Matrices
+7. Lab Manual Module 1: Introduction to Algorithms and Flowcharts
+8. Lab Manual Module 2: Variables and Data Types
+9. Lab Manual Module 3: Logic and Relational Operators
+10. Lab Manual Module 4: Flow Control in MATLAB
+11. Lab Manual Module 5: Matrix
+12. Lab Manual Module 6: Object-Oriented Programming
+
+**Key concepts**
+
+- **Data** — Values that will be used in programming for computation. Data can be numeric, text, sign and image.
+- **Data type** — The format in which a value is represented or exists in programming. Data types are classified as primitive and non-primitive.
+- **Variable** — A data identifier, a placeholder, or a container whose value is subject to change during program execution.
+- **Error** — A mistake that occurs during programming as a result of a violation of the rules and regulations that govern a particular programming language, use of wrong logic, or wrong input supplied.
+- **Keywords** — Reserved library functions with pre-defined meaning. They are not used as variables.
+- **Syntax or compilation error** — The code does not follow the rules of programming. Wrong spelling of words also causes a syntax error.
+- **Logical or semantic error** — The program runs but the output is incorrect.
+- **Run-time error** — The program encounters wrong input while running. Division by zero also causes a run-time error, as does going past an index boundary.
+- **Algorithms** — An algorithm is a step-by-step procedure or set of rules to solve a particular problem. It is a recipe.
+- **Flowchart** — A graphical or pictorial representation of the algorithm (below).
+- **Pseudocode** — Annotations and informative text written in plain English, similar to code but with no syntax of any programming language.
+- **Programming code** — The actual representation in a programming language.
+- **Introduction to Programming Paradigms** — A paradigm is a method to solve a problem. A programming paradigm is a method of solving a problem using a specific programming language.
+- **Looping** — Looping is the process of repeating an action over and over again. It is also called iteration.
+- **break** — Immediately terminates the execution of the entire loop.
+- **continue** — Skips the remaining statements in the current iteration and proceeds to the next iteration of the loop.
+- **Generative Coding** — Generative AI (Gen AI) refers to AI systems that can create new content such as text, images, audio, etc.
+- **Prompt Engineering** — Prompt engineering is the process of designing clear instructions to guide AI output. It is similar to having a human in the loop.
+- **Hallucination** — It may use incorrect syntax, and may refer to fake libraries.
+- **Logic errors** — Code may run without errors yet produce incorrect results.
+- **Overconfidence** — AI states wrong answers as confidently as right ones.
+- **Matrix definition** — Matrices can be defined using square brackets [ ], with elements separated by spaces or commas.
+- **Matrix functions** — MATLAB provides various functions for creating matrices, such as zeros(), ones(), eye() and rand().
+- **Basic operations** — MATLAB supports basic matrix operations like addition (+), subtraction (-), multiplication (*) and division (/).
+- **Element-wise operations** — Performed using operators like .*, ./ and .^
+- **Matrix transpose** — Obtained using the ' operator or the transpose() function.
+- **Indexing** — Matrix elements can be accessed and modified using indexing, which allows for efficient manipulation of matrix data.
+- **Reshaping** — Matrices can be reshaped using the reshape() function, which changes the dimensions of the matrix without altering its elements.
 
 ### CYB 211 — Introduction to Cybersecurity and Strategy
 
@@ -948,6 +996,32 @@ A strategic overview of the cybersecurity landscape: basic concepts (confidentia
 - Nigeria's National Cybersecurity Policy is public and freely available — read the executive summary
 - Link strategic concepts back to technical mechanisms from UUY-CYB 122 to build integrated understanding
 
+**Lecture notes** (2 transcribed topics; full text needs a free account)
+
+1. International Law and Regulation
+2. Cryptography and the RSA Algorithm
+
+**Key concepts**
+
+- **General Regulations in Cyber Security** — General regulations refer to the laws, rules and standards established to govern the secure use, protection and management of information systems and data.
+- **International Law for Cybercrime** — International law for cybercrime addresses criminal activities conducted through or against computer systems across national borders.
+- **National Cyber Security Policy** — A national cyber security policy is a government-led framework designed to protect the country's cyberspace, digital infrastructure and citizens.
+- **GDPR — General Data Protection Regulation** — The GDPR is an EU-wide data privacy law that aims to strengthen individuals' fundamental rights in the digital age relating to the protection of their personal data and privacy. Even though the GDPR is enacted and effective in Europe, its reach goes beyond the EU, to companies offering goods and services to EU…
+- **Cryptography** — Cryptography is the science of designing techniques to secure communication and data from unauthorised access. It involves transforming readable data into an unreadable format to protect its confidentiality, integrity and authenticity.
+- **Confidentiality** — Keeping information secret from unauthorised parties.
+- **Integrity** — Detecting unauthorised modification of data. It ensures that your data has not been altered during transmission.
+- **Authenticity** — Confirming the identities of the parties involved.
+- **Non-repudiation** — Preventing parties from denying their involvement in a transaction.
+- **Encryption** — The process of converting plaintext to ciphertext using an algorithm and keys.
+- **Decryption** — The process of converting ciphertext back to plaintext.
+- **Key** — A secret or public value used in the encryption and decryption processes to control the transformation.
+- **Cryptosystem** — The combination of algorithms, keys and protocols used for secure communication.
+- **Substitution cipher** — Replaces each element of the plaintext with another element based on a fixed system, e.g. the Caesar cipher, which shifts each letter by a fixed number.
+- **Transposition cipher** — Rearranges the positions of characters in the plaintext without changing the characters themselves.
+- **Symmetric key cryptography** — Uses the same secret key for both encryption and decryption.
+- **Asymmetric key cryptography** — Uses a pair of keys: a public key and a private key. Public key — encryption. Private key — decryption.
+- **Hash Function** — A hash function transforms data into a fixed-size hash value. It is used for data integrity verification, e.g. SHA-256 produces a 256-bit hash.
+
 ### CYB 213 — Cybercrime, Law and Countermeasures
 
 - URL: https://www.aretecyb.tech/courses/cyb-213
@@ -979,6 +1053,52 @@ The legal and regulatory landscape of cybercrime: Nigerian cybercrime law, inter
 - Case studies of Nigerian cybercrime prosecution are in EFCC press releases — use them in exam answers
 - Distinguish clearly between cybercrime as a tool, as a target, and as an environment
 - Link every legal concept to a technical mechanism: knowing both sides earns the best marks
+
+**Lecture notes** (12 transcribed topics; full text needs a free account)
+
+1. Cybercrime: Definitions, Causes and Types
+2. Cyber Defences: Defence in Depth
+3. Cybercrime as a Threat to National Critical Infrastructure
+4. Investigation Process of Cybercrime
+5. Cybercrime Mode of Operation: Phishing and Malware
+6. Countermeasures and Prevention Strategies
+7. Online Social Networks in Cybercrime Investigation
+8. Cyber Terrorism
+9. Computer Crime Investigation and Forensics
+10. Digital Evidence
+11. Cyber Law
+12. The Cyber Law Framework in Nigeria: Challenges and Opportunities
+
+**Key concepts**
+
+- **Cybercrime** — Cybercrime is any illegal activity that involves a computer, a computer network or digital devices.
+- **Cyber Defence in Depth** — Cyber defence in depth is a strategy that uses multiple security measures to safeguard all of an organisation's assets.
+- **Endpoint security solutions** — Such as antivirus software and Endpoint Detection and Response (EDR) tools, to defend against threats.
+- **Patch management tools** — Used to ensure that endpoint operating systems and applications are kept up to date, and to address Common Vulnerabilities and Exposures (CVEs).
+- **Network security solutions** — Including firewalls, VPNs, VLANs, etc., used to protect traditional enterprise networks and on-premises IT systems.
+- **Intrusion detection/prevention (IDS/IPS) tools** — Used to detect malicious activity and prevent attacks in traditional on-premises IT infrastructure.
+- **Protect privileged access** — Using privileged access management solutions to monitor and secure access to privileged accounts — local and domain administrator accounts, and application administrative accounts — by both human and non-human identities such as applications, scripts and bots.
+- **Lock down critical endpoints** — Using advanced endpoint privilege management solutions to restrict privilege across all endpoints, prevent lateral movement, and defend against ransomware and other malware.
+- **Adaptive multi-factor authentication** — Using contextual information like location, time of day, IP address and device type, along with business rules, to decide which authentication factors to apply to a specific user in a particular situation.
+- **Secure developer tools** — Using secret management solutions to protect, manage, rotate and monitor secrets and other credentials used by applications, automation scripts and other non-human identities.
+- **National Critical Infrastructure (NCI)** — National Critical Infrastructure includes the essential systems, facilities and networks that are crucial for a country and its economy to function properly — for example water, the energy sector and telecommunication networks.
+- **Defence industrial base** — Manufacturing and supply chain for defence equipment.
+- **Energy** — Power generation, transmission and distribution.
+- **Transportation** — Roads, bridges, airports, railways and ports.
+- **Government facilities** — Federal, state and local government buildings and operations.
+- **Healthcare and public health** — Hospitals, clinics and public health systems.
+- **Dams** — Hydropower generation and flood control.
+- **Food and agriculture** — Production, processing and distribution.
+- **Nuclear reactors, materials and waste** — Nuclear power plants and related facilities.
+- **Chemical** — Manufacturing, storage and transportation of chemicals.
+- **Communications** — Telecommunications, internet and broadcasting.
+- **Commercial facilities** — Large commercial buildings and complexes.
+- **Safeguarding NCI** — Ghosting or the Gold Standard (GS) approach: backing up the data of an infected hard drive, transferring the data onto a new hard drive, and reinstalling all user applications and settings.
+- **Computer Cybercrime Investigation** — Investigating computer crimes involves finding and stopping illegal activities that occur on computers and digital devices. The process requires special tools and methods to analyse crimes such as hacking, phishing, malware, data breaches and identity theft.
+- **Cyber terrorists** — Individuals or groups who carry out attacks over the internet for various reasons.
+- **Insider attackers** — Employees or part-time workers who exploit their access to company data or networks to steal, damage property or commit other illegal activities.
+- **Cyber crackers/hackers** — Individuals skilled in computers who break into systems without authorisation to steal information or cause damage.
+- **State-sponsored attackers** — Some nations attack the computer systems of other countries to gain secret information, disrupt operations or gain a competitive advantage.
 
 ### DTS 211 — Introduction to R Programming
 
@@ -1202,6 +1322,43 @@ The principles and practices of building software systematically: software devel
 - UML diagrams appear heavily in exams: practise class and sequence diagrams until they are fast to draw
 - Relate SDLC models to the projects you build in COS 211 — theory becomes concrete immediately
 - The Secure SDLC section links directly to your cybersecurity courses — connect them explicitly
+
+**Lecture notes** (3 transcribed topics; full text needs a free account)
+
+1. Software Engineering Concepts and Principles
+2. Software Development Process and the SDLC
+3. Software Process Models and CMMI
+
+**Key concepts**
+
+- **Software Engineering** — The application of engineering principles to software development in a methodical way. It encompasses the entire software life cycle, from requirements gathering to design, implementation, testing, and maintenance.
+- **Software Development Life Cycle (SDLC)** — Includes phases such as planning, analysis, design, implementation, testing, deployment, and maintenance. Each phase has specific deliverables and activities that contribute to the overall success of the software project.
+- **Methodologies** — Various methodologies guide software development: Agile, Waterfall and DevOps (below).
+- **Agile** — Focuses on iterative development, customer collaboration, and flexibility to change.
+- **Waterfall** — A linear approach where each phase must be completed before the next phase begins.
+- **DevOps** — Integrates development and operations to improve collaboration and productivity by automating workflows.
+- **Modularity** — Breaking down software into smaller, manageable components that can be developed and tested independently; this enhances manageability and reusability.
+- **Abstraction** — Hiding complex implementation details and exposing only the necessary parts of a component to simplify interactions.
+- **Encapsulation** — Bundling data and methods that operate on data within a single unit, protecting the internal state from external interference.
+- **Reusability** — Designing components that can be reused across different projects, saving time and resources.
+- **Testing** — Ensuring that software meets its requirements and is free of defects through various testing methods, including unit testing, integration testing, and system testing.
+- **Continuous Integration and Deployment (CI/CD)** — Practices that encourage frequent integration of code changes and automated deployment to improve software quality and delivery speed.
+- **Quality Assurance** — Adhering to software engineering principles in order to minimize defects, improve reliability, and ensure that the software meets user expectations.
+- **Efficiency and Productivity** — Best practices streamline development processes, reducing waste and accelerating delivery.
+- **Collaboration** — Clear guidelines foster effective teamwork, enhancing communication and problem-solving.
+- **Maintainability and Scalability** — Well-structured code and documentation make it easier to modify and scale software as requirements evolve.
+- **What is Software Engineering?** — The systematic application of engineering approaches to software development. It involves requirement analysis, design, coding, testing, and maintenance.
+- **Goal** — To produce high-quality software that meets user needs, is cost-effective, and can evolve over time.
+- **Software Development Process** — A structured set of activities used to design, build, test, and deploy a software system. Its goal is to deliver high-quality software that meets user requirements, time, and budget.
+- **Functional Requirements** — What the system should do (e.g., user login).
+- **Non-Functional Requirements** — How the system performs (e.g., performance, security, scalability, usability).
+- **High-Level Design (HLD)** — Involves system architecture, technology stack, and database design.
+- **Low-Level Design (LLD)** — Involves API specifications, class diagrams, database schema, algorithms, and data structures.
+- **Software Design Document (SDD)** — Designing the system architecture and documenting it.
+- **UML (Unified Modeling Language) Diagrams** — Class, Sequence, and Architecture diagrams.
+- **Regression Testing** — Ensuring new changes do not break existing functionality.
+- **Adaptive Maintenance** — Updating software to work in new or changing environments.
+- **Perfective Maintenance** — Improving performance or adding new features.
 
 ### UUY-CYB 212 — Ethical Hacking Fundamentals
 

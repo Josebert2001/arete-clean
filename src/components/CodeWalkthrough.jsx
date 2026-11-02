@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Terminal, ChevronDown, PenLine, Sparkles, AlertTriangle } from 'lucide-react';
 import CodeBlock from './CodeBlock';
 import ExplainCode from './ExplainCode';
+import RevealGate from './RevealGate';
 import RichText from './RichText';
 import MathText from './MathText';
 import { topicsWithCode } from '../utils/explainCode';
@@ -130,13 +131,18 @@ function Practical({ topic, index, isOpen, onToggle, explainReady, explanations,
                       {section.heading}
                     </h4>
                   )}
-                  <CodeBlock code={section.code} language={language} />
-                  <Walkthrough
-                    code={section.code}
-                    language={language}
-                    explainReady={explainReady}
-                    explanations={explanations}
-                  />
+                  <RevealGate reveal={section.reveal}>
+                    <CodeBlock code={section.code} language={language} />
+                    <Walkthrough
+                      code={section.code}
+                      language={language}
+                      explainReady={explainReady}
+                      explanations={explanations}
+                    />
+                    {section.reveal?.note && (
+                      <p className="mt-2 text-reading text-coffee-700"><MathText text={section.reveal.note} /></p>
+                    )}
+                  </RevealGate>
                 </div>
               );
             }

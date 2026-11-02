@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 
-// Lightweight syntax highlighter for Java, Python, C, and C++.
+// Lightweight syntax highlighter for Java, Python, C, C++ and MATLAB.
 
 const JAVA_KEYWORDS = [
   'public', 'private', 'protected', 'static', 'final', 'abstract',
@@ -44,11 +44,19 @@ const C_KEYWORDS = [
 
 const C_TYPES = ['FILE', 'size_t', 'Point', 'Student', 'string', 'cout', 'cin', 'endl', 'std'];
 
+const MATLAB_KEYWORDS = [
+  'if', 'elseif', 'else', 'end', 'for', 'while', 'switch', 'case', 'otherwise',
+  'break', 'continue', 'return', 'function', 'classdef', 'properties', 'methods',
+  'events', 'enumeration', 'try', 'catch', 'global', 'persistent', 'true', 'false',
+];
+
 const LANG_CONFIG = {
   java:   { label: 'JAVA',   keywords: JAVA_KEYWORDS,   types: JAVA_TYPES, lineComment: '//', hashIsPreproc: false },
   python: { label: 'PYTHON', keywords: PYTHON_KEYWORDS, types: [],         lineComment: '#',  hashIsPreproc: false },
   c:      { label: 'C',      keywords: C_KEYWORDS,      types: C_TYPES,    lineComment: '//', hashIsPreproc: true },
   cpp:    { label: 'C++',    keywords: C_KEYWORDS,      types: C_TYPES,    lineComment: '//', hashIsPreproc: true },
+  // In MATLAB ' is both the char-array quote and the transpose operator (A').
+  matlab: { label: 'MATLAB', keywords: MATLAB_KEYWORDS, types: [],         lineComment: '%',  hashIsPreproc: false, quoteTransposes: true },
 };
 
 // Unknown languages (bash, sql, plain output...) get no keyword colouring —
@@ -92,6 +100,13 @@ function tokenize(code, lang) {
         }
         tokens.push({ type: 'str', value: line.slice(i, end + 1) });
         i = end + 1;
+        continue;
+      }
+      // MATLAB transpose: a quote directly after a value (A', x(1)', B.') is
+      // an operator, not the start of a char array.
+      if (cfg.quoteTransposes && line[i] === "'" && i > 0 && /[\w)\]}.']/.test(line[i - 1])) {
+        tokens.push({ type: 'plain', value: "'" });
+        i++;
         continue;
       }
       // Char literal / Python single-quoted string

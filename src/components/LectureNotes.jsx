@@ -3,6 +3,7 @@ import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, Circle, XCircle, Chev
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
 import ExplainCode from './ExplainCode';
+import RevealGate from './RevealGate';
 import TopicLinks from './TopicLinks';
 import { useExplanations } from './useExplanations';
 import { loadSimplified } from '../data/lectureNotes/simplified';
@@ -510,7 +511,7 @@ function Section({ section, speaking = false, simplifyReady, explainReady, expla
               {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
               {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} maxWidth={section.maxWidth} />}
               {section.type === 'code' && (
-                <>
+                <RevealGate reveal={section.reveal}>
                   <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />
                   {/* Program listings only. A `language: 'output'` block is the run
                       transcript, not code, and the explainer would try to read it
@@ -523,7 +524,8 @@ function Section({ section, speaking = false, simplifyReady, explainReady, expla
                       {...(explanations ?? {})}
                     />
                   )}
-                </>
+                  {section.reveal?.note && <NoteBox text={section.reveal.note} />}
+                </RevealGate>
               )}
               {section.type === 'mosca' && <MoscaCalculator />}
               {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}

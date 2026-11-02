@@ -1,4 +1,4 @@
-// All Java track module content (COS 211 / 221)
+// All Java track module content (COS 221)
 // Each module: id, number, title, summary, theory[], codeExamples[], practiceQuestions[], miniProject, difficulty
 
 export const modules = [

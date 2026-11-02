@@ -33,7 +33,7 @@ const INSIDE = [
     icon: Code2,
     title: '37 interactive programming modules',
     body:
-      'Java (COS 211 / COS 221), Python (COS 121) and C — theory, annotated code, an in-browser ' +
+      'Java (COS 221), Python (COS 121) and C — theory, annotated code, an in-browser ' +
       'playground, quizzes and a mini project in each module.',
   },
   {

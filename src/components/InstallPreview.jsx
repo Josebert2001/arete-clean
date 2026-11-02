@@ -31,7 +31,7 @@ export default function InstallPreview() {
         </h1>
         <p className="text-coffee-800 leading-relaxed">
           The three toolchains University of Uyo computing courses use: JDK 17 with Apache NetBeans
-          for the COS 211 and COS 221 Java labs, Anaconda with JupyterLab for Python, and GCC via
+          for the COS 221 Java labs, Anaconda with JupyterLab for Python, and GCC via
           MSYS2 for C. Each guide is three steps, ends with a program you run to prove the setup
           works, and lists the errors that actually come up.
         </p>

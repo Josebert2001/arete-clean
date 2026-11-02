@@ -33,7 +33,7 @@ export const tracks = [
       },
       {
         title: 'Download & Install NetBeans IDE',
-        body: 'NetBeans is the IDE used in COS 211 / 221 labs. It has a drag-and-drop GUI designer you will use later.',
+        body: 'NetBeans is the IDE used in the COS 221 labs. It has a drag-and-drop GUI designer you will use later.',
         actions: [
           { label: 'Go to netbeans.apache.org/front/main/download', url: 'https://netbeans.apache.org/front/main/download/' },
         ],
