@@ -1522,10 +1522,10 @@ avg = mean(data);
 result = data(data > avg);
 fprintf('Values above average: ');
 disp(result);`,
-      },
-      {
-        type: 'note',
-        text: 'Use > to select values above the mean, and print the label separately from the numeric array — adding a char label to a numeric array with + does arithmetic on the character codes instead of joining text.',
+        reveal: {
+          label: 'Show the corrected code',
+          note: 'Use > to select values above the mean, and print the label separately from the numeric array — adding a char label to a numeric array with + does arithmetic on the character codes instead of joining text.',
+        },
       },
       {
         type: 'code',
@@ -1563,10 +1563,10 @@ for i = 1:numel(nums)
     end
 end
 disp(squares);`,
-      },
-      {
-        type: 'note',
-        text: 'Use == in the condition, and append only the selected squares with squares(end+1) — writing to squares(i) leaves zeros in the odd positions.',
+        reveal: {
+          label: 'Show the corrected code',
+          note: 'Use == in the condition, and append only the selected squares with squares(end+1) — writing to squares(i) leaves zeros in the odd positions.',
+        },
       },
       {
         type: 'code',
@@ -1637,10 +1637,10 @@ function grades = gradeStudents(scoreList)
         end
     end
 end`,
-      },
-      {
-        type: 'note',
-        text: 'Save as processScores.m and call processScores. MATLAB indices start at 1, so a loop from 0 fails on the first pass; invalid scores are excluded from the mean; and the grade bands are tested from the top down, matching the grading example in Module 4.',
+        reveal: {
+          label: 'Show the corrected code',
+          note: 'Save as processScores.m and call processScores. MATLAB indices start at 1, so a loop from 0 fails on the first pass; invalid scores are excluded from the mean; and the grade bands are tested from the top down, matching the grading example in Module 4.',
+        },
       },
     ],
   },
