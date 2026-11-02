@@ -72,11 +72,24 @@ describe('rep migration guards', () => {
     expect(logger).toContain('SECURITY DEFINER');
     expect(logger).toContain('SET search_path = public, pg_temp');
     expect(logger).toMatch(/VALUES \(OLD\.offering_id, OLD\.lecturer_id, auth\.uid\(\), OLD\.created_by\)/);
-    expect(logger).toMatch(/EXCEPTION WHEN OTHERS THEN[\s\S]*?RETURN OLD/);
+    expect(logger).not.toMatch(/\bEXCEPTION\b/i);
+    expect(logger).toMatch(/VALUES \(OLD\.offering_id, OLD\.lecturer_id, auth\.uid\(\), OLD\.created_by\);\s*RETURN OLD;\s*END;/);
     expect(removals).toMatch(/CREATE TRIGGER log_offering_lecturer_removal\s+AFTER DELETE ON offering_lecturers\s+FOR EACH ROW EXECUTE FUNCTION log_offering_lecturer_removal\(\)/);
     expect(removals).toMatch(/FROM lecturer_invites[\s\S]*?WHERE status = 'removed' AND accepted_by IS NOT NULL[\s\S]*?FROM lecturer_removal_requests[\s\S]*?WHERE status = 'approved'/);
     expect(removals).toMatch(/WHERE NOT EXISTS \(\s*SELECT 1 FROM offering_lecturer_removals logged/);
     expect(removals).toContain("NOTIFY pgrst, 'reload schema';");
+  });
+
+  it('backfills unlinked lecturers from class and attendance evidence only once', () => {
+    const evidence = removals.match(/-- Direct admin assignments removed before this trigger[\s\S]*?\n\);/)?.[0];
+    expect(evidence).toBeDefined();
+    expect(evidence).toMatch(/cs\.created_by AS lecturer_id, cs\.opened_at AS evidence_at\s+FROM class_sessions cs\s+UNION ALL/);
+    expect(evidence).toMatch(/ar\.marked_by AS lecturer_id, ar\.marked_at AS evidence_at\s+FROM attendance_records ar\s+JOIN class_sessions cs ON cs\.id = ar\.session_id/);
+    expect(evidence).toMatch(/WHERE ar\.marked_by <> ar\.student_id/);
+    expect(evidence).toMatch(/MAX\(activity\.evidence_at\) AS latest_at[\s\S]*?GROUP BY activity\.offering_id, activity\.lecturer_id/);
+    expect(evidence).toMatch(/SELECT evidence\.offering_id, evidence\.lecturer_id, NULL::UUID,\s*evidence\.latest_at, NULL::UUID/);
+    expect(evidence).toMatch(/NOT EXISTS \(\s*SELECT 1 FROM offering_lecturers current_link\s+WHERE current_link\.offering_id = evidence\.offering_id\s+AND current_link\.lecturer_id = evidence\.lecturer_id/);
+    expect(evidence).toMatch(/NOT EXISTS \(\s*SELECT 1 FROM offering_lecturer_removals logged\s+WHERE logged\.offering_id = evidence\.offering_id\s+AND logged\.lecturer_id = evidence\.lecturer_id/);
   });
 
   it('keeps the first class recorded after its sessions are deleted', () => {

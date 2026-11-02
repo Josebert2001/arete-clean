@@ -11,6 +11,9 @@
 -- The removal log records every deleted offering link, including direct admin
 -- removals that leave no invite behind. It has no foreign keys so cascades from
 -- deleted offerings or accounts cannot block deletion or erase this history.
+-- The backfill also recovers removed lecturers who opened or marked a class.
+-- A lecturer assigned directly and removed without ever opening or marking a
+-- class leaves no evidence and cannot be recovered; tell the admin about this gap.
 
 CREATE TABLE IF NOT EXISTS lecturer_removal_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -62,13 +65,10 @@ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 BEGIN
+  -- Fail closed: a missing log entry must abort the link deletion.
   INSERT INTO offering_lecturer_removals
     (offering_id, lecturer_id, removed_by, link_created_by)
   VALUES (OLD.offering_id, OLD.lecturer_id, auth.uid(), OLD.created_by);
-  RETURN OLD;
-EXCEPTION WHEN OTHERS THEN
-  -- A logging failure must not block a link deletion or a parent cascade.
-  RAISE WARNING 'Could not log lecturer link removal: %', SQLERRM;
   RETURN OLD;
 END;
 $$;
@@ -108,6 +108,38 @@ WHERE NOT EXISTS (
   SELECT 1 FROM offering_lecturer_removals logged
   WHERE logged.offering_id = history.offering_id
     AND logged.lecturer_id = history.lecturer_id
+);
+
+-- Direct admin assignments removed before this trigger had no invite history.
+-- Opening a class or marking another student's attendance is evidence of a
+-- former link. The latest evidence time is a proxy, not the removal time.
+INSERT INTO offering_lecturer_removals
+  (offering_id, lecturer_id, removed_by, removed_at, link_created_by)
+SELECT evidence.offering_id, evidence.lecturer_id, NULL::UUID,
+       evidence.latest_at, NULL::UUID
+FROM (
+  SELECT activity.offering_id, activity.lecturer_id,
+         MAX(activity.evidence_at) AS latest_at
+  FROM (
+    SELECT cs.offering_id, cs.created_by AS lecturer_id, cs.opened_at AS evidence_at
+    FROM class_sessions cs
+    UNION ALL
+    SELECT cs.offering_id, ar.marked_by AS lecturer_id, ar.marked_at AS evidence_at
+    FROM attendance_records ar
+    JOIN class_sessions cs ON cs.id = ar.session_id
+    WHERE ar.marked_by <> ar.student_id
+  ) activity
+  GROUP BY activity.offering_id, activity.lecturer_id
+) evidence
+WHERE NOT EXISTS (
+  SELECT 1 FROM offering_lecturers current_link
+  WHERE current_link.offering_id = evidence.offering_id
+    AND current_link.lecturer_id = evidence.lecturer_id
+)
+AND NOT EXISTS (
+  SELECT 1 FROM offering_lecturer_removals logged
+  WHERE logged.offering_id = evidence.offering_id
+    AND logged.lecturer_id = evidence.lecturer_id
 );
 
 -- Based on the latest acceptance definition in 20260925020000. A lecturer
