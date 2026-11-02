@@ -260,6 +260,14 @@ describe('POST /api/extract', () => {
     expect(insert).not.toHaveBeenCalled();
   });
 
+  it('records the size storage reports, not the size the client claims', async () => {
+    info.mockResolvedValue({ data: { name: 'owned-object', size: 2048 }, error: null });
+    const req = request();
+    req.body.fileSize = 999_999_999;
+    await call(req);
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ file_size: 2048 }));
+  });
+
   it('treats a bare HTTP 400 as a storage fault, not as ownership', async () => {
     info.mockResolvedValue({ data: null, error: { status: 400, statusCode: '400', message: 'Bad request' } });
     const res = await call();

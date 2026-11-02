@@ -247,7 +247,11 @@ export default async function handler(req, res) {
 
   const name = cleanLabel(displayName, MAX_DISPLAY_NAME) || `Material.${pathExt}`;
   const desc = cleanLabel(description, MAX_DESCRIPTION) || null;
-  const size = Number.isFinite(fileSize) && fileSize > 0 ? Math.floor(fileSize) : null;
+  // Storage's own record of the object's size wins; the client's figure is only
+  // a fallback for a storage response that omits it.
+  const storedSize = Number(objectInfo.data.size);
+  const size = Number.isFinite(storedSize) && storedSize > 0 ? Math.floor(storedSize)
+    : Number.isFinite(fileSize) && fileSize > 0 ? Math.floor(fileSize) : null;
 
   // Service-role, because `authenticated` no longer has INSERT on this table —
   // that revocation is the whole point. Every value below is either derived here
