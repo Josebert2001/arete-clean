@@ -91,9 +91,71 @@ export default function Admin() {
       <StaffPanel staff={staff} reps={reps} onChange={changed} />
       <RepsPanel reps={reps} onChange={changed} />
       <OfferingsPanel staff={staff} version={version} />
+      <RemovalRequests version={version} onChange={changed} />
       <InviteLog version={version} onChange={changed} />
       <AttendanceChanges />
     </div>
+  );
+}
+
+function RemovalRequests({ version, onChange }) {
+  const [requests, setRequests] = useState([]);
+  const [status, setStatus] = useState('loading');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState(null);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.rpc('admin_list_removal_requests', { p_pending_only: true });
+    if (error) {
+      // The frontend may arrive before the migration is applied by hand.
+      setStatus(error.code === 'PGRST202' || error.code === '42883' ? 'missing' : 'error');
+      return;
+    }
+    setRequests(data ?? []);
+    setStatus('ready');
+  }, []);
+
+  useEffect(() => { (async () => { await load(); })(); }, [load, version]);
+
+  async function decide(requestId, approve) {
+    setBusy(true);
+    setMessage(null);
+    const res = await rpcAction('admin_decide_removal', {
+      p_request_id: requestId, p_approve: approve,
+    }, 'Could not decide the removal request. Please try again.');
+    setBusy(false);
+    setMessage(res);
+    if (res.ok) onChange();
+  }
+
+  if (status === 'missing') return null;
+
+  return (
+    <section className="mt-10 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+      <h2 className="font-display text-xl font-bold text-ink">Lecturer removal requests</h2>
+      <p className="mb-4 text-sm text-coffee-700">Review the rep&apos;s reason and course history before removing a lecturer.</p>
+      {message && <p role="status" className={`mb-4 text-sm ${message.ok ? 'text-moss' : 'text-rust'}`}>{message.text}</p>}
+      {status === 'loading' && <Loader2 className="h-5 w-5 animate-spin text-coffee-500" />}
+      {status === 'error' && <p className="text-sm text-rust">Could not load removal requests. Please reload the page.</p>}
+      {status === 'ready' && (requests.length === 0
+        ? <p className="text-sm text-coffee-700">No pending lecturer removal requests.</p>
+        : <ul className="divide-y divide-coffee-200 rounded-xl border border-coffee-200 bg-paper">
+          {requests.map(r => (
+            <li key={r.id} className="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
+              <div className="min-w-0 text-sm text-ink">
+                <p className="font-medium">{r.lecturer_name || r.lecturer_email || 'Unknown lecturer'} · {r.course_code}</p>
+                <p className="text-xs text-coffee-500">{r.lecturer_email} · {getDepartment(r.department).name} {r.level} · {r.academic_session}</p>
+                <p className="text-xs text-coffee-500">Requested by {r.requester_name || 'unknown'} on {new Date(r.created_at).toLocaleDateString()} · {r.classes_held} class{Number(r.classes_held) === 1 ? '' : 'es'} held</p>
+                <p className="mt-2 whitespace-pre-wrap">{r.reason}</p>
+              </div>
+              <div className="flex gap-2">
+                <button type="button" disabled={busy} onClick={() => decide(r.id, true)} className="btn-primary text-xs">Approve removal</button>
+                <button type="button" disabled={busy} onClick={() => decide(r.id, false)} className="btn-ghost text-xs text-rust">Reject removal</button>
+              </div>
+            </li>
+          ))}
+        </ul>)}
+    </section>
   );
 }
 
@@ -270,6 +332,17 @@ function RepsPanel({ reps, onChange }) {
     if (res.ok) onChange();
   }
 
+  async function renew(rep, nextLevel) {
+    setBusy(true);
+    setMessage(null);
+    const res = await rpcAction('admin_renew_course_rep', {
+      p_user_id: rep.id, p_next_level: nextLevel,
+    }, 'Could not renew the course rep. The terms migration may not be installed yet.');
+    setBusy(false);
+    setMessage(res);
+    if (res.ok) onChange();
+  }
+
   return (
     <section className="mb-10 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
       <h2 className="font-display text-xl font-bold text-ink">Course reps ({reps.length})</h2>
@@ -291,8 +364,16 @@ function RepsPanel({ reps, onChange }) {
                 <p className="truncate font-medium text-ink">{r.full_name || r.email}</p>
                 <p className="truncate text-xs text-coffee-500">
                   {getDepartment(r.department).name} · {r.level} · {r.email}
+                  {r.academic_session && ` · ${r.academic_session}`}
                 </p>
+                {r.active === false && <span className="text-xs font-medium text-rust">Expired</span>}
               </div>
+              {r.active === false && (
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" disabled={busy} onClick={() => renew(r, false)} className="btn-ghost text-xs">Renew (same level)</button>
+                  {r.level !== '400L' && <button type="button" disabled={busy} onClick={() => renew(r, true)} className="btn-ghost text-xs">Renew at {`${Number.parseInt(r.level, 10) + 100}L`}</button>}
+                </div>
+              )}
               {confirmId === r.id ? (
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs text-rust">Also cancels every open invite they sent.</span>
