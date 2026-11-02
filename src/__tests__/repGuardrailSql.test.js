@@ -31,21 +31,52 @@ describe('rep migration guards', () => {
 
   it('requires admin approval for a previously removed lecturer without losing acceptance guards', () => {
     const accept = definition(removals, 'accept_lecturer_invite');
+    expect(accept).toMatch(/FROM offering_lecturer_removals logged\s+WHERE logged\.offering_id = v_inv\.offering_id AND logged\.lecturer_id = auth\.uid\(\)/);
     expect(accept).toMatch(/old_inv\.offering_id = v_inv\.offering_id AND old_inv\.accepted_by = auth\.uid\(\)[\s\S]*?old_inv\.status = 'removed'/);
     expect(accept).toMatch(/rr\.offering_id = v_inv\.offering_id AND rr\.lecturer_id = auth\.uid\(\)[\s\S]*?rr\.status = 'approved'/);
     expect(accept).toMatch(/IF v_role IS NULL OR v_removed THEN[\s\S]*?status = 'awaiting_approval'/);
-    expect(accept).toContain('v_inv.email IS DISTINCT FROM v_email');
-    expect(accept).toContain('v_inv.expires_at < NOW()');
-    expect(accept).toContain('inviter_still_valid(v_inv.invited_by, v_inv.offering_id)');
-    expect(accept).toContain('is_student_of_cohort(auth.uid(), v_off.department, v_off.level)');
+    const priorAccept = definition(review, 'accept_lecturer_invite');
+    for (const guard of [
+      'v_inv.id IS NULL OR v_inv.email IS DISTINCT FROM v_email',
+      "v_inv.status <> 'pending'",
+      'v_inv.expires_at < NOW()',
+      'EXISTS (SELECT 1 FROM course_reps WHERE user_id = auth.uid())',
+      'NOT inviter_still_valid(v_inv.invited_by, v_inv.offering_id)',
+      'is_student_of_cohort(auth.uid(), v_off.department, v_off.level)',
+    ]) {
+      expect(priorAccept).toContain(guard);
+      expect(accept).toContain(guard);
+    }
     const adminList = definition(removals, 'admin_list_invites');
     expect(adminList).toContain('is_reinstatement BOOLEAN');
+    expect(adminList).toMatch(/FROM offering_lecturer_removals logged\s+WHERE logged\.offering_id = i\.offering_id AND logged\.lecturer_id = i\.accepted_by/);
     expect(adminList).toContain("old_inv.status = 'removed'");
     expect(adminList).toContain("rr.status = 'approved'");
 
     const approve = definition(review, 'admin_decide_invite');
     expect(approve).toMatch(/INSERT INTO user_roles[\s\S]*?ON CONFLICT \(user_id\) DO NOTHING/);
     expect(approve).toMatch(/INSERT INTO offering_lecturers[\s\S]*?ON CONFLICT \(offering_id, lecturer_id\) DO NOTHING/);
+  });
+
+  it('logs every deleted link without foreign keys or client writes', () => {
+    const table = removals.match(/CREATE TABLE IF NOT EXISTS offering_lecturer_removals\s*\([\s\S]*?\);/)?.[0];
+    expect(table).toBeDefined();
+    expect(table).not.toMatch(/REFERENCES\b/i);
+    expect(table).toMatch(/offering_id UUID NOT NULL/);
+    expect(table).toMatch(/lecturer_id UUID NOT NULL/);
+    expect(removals).toMatch(/CREATE INDEX IF NOT EXISTS offering_lecturer_removals_pair_idx\s+ON offering_lecturer_removals \(offering_id, lecturer_id\)/);
+    expect(removals).toMatch(/CREATE POLICY "admins read lecturer removals" ON offering_lecturer_removals\s+FOR SELECT USING \(is_admin\(\)\)/);
+    expect(removals).toContain('REVOKE ALL ON offering_lecturer_removals FROM anon, authenticated');
+    expect(removals).toContain('GRANT SELECT ON offering_lecturer_removals TO authenticated');
+    const logger = definition(removals, 'log_offering_lecturer_removal');
+    expect(logger).toContain('SECURITY DEFINER');
+    expect(logger).toContain('SET search_path = public, pg_temp');
+    expect(logger).toMatch(/VALUES \(OLD\.offering_id, OLD\.lecturer_id, auth\.uid\(\), OLD\.created_by\)/);
+    expect(logger).toMatch(/EXCEPTION WHEN OTHERS THEN[\s\S]*?RETURN OLD/);
+    expect(removals).toMatch(/CREATE TRIGGER log_offering_lecturer_removal\s+AFTER DELETE ON offering_lecturers\s+FOR EACH ROW EXECUTE FUNCTION log_offering_lecturer_removal\(\)/);
+    expect(removals).toMatch(/FROM lecturer_invites[\s\S]*?WHERE status = 'removed' AND accepted_by IS NOT NULL[\s\S]*?FROM lecturer_removal_requests[\s\S]*?WHERE status = 'approved'/);
+    expect(removals).toMatch(/WHERE NOT EXISTS \(\s*SELECT 1 FROM offering_lecturer_removals logged/);
+    expect(removals).toContain("NOTIFY pgrst, 'reload schema';");
   });
 
   it('keeps the first class recorded after its sessions are deleted', () => {

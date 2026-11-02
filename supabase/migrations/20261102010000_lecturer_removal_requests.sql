@@ -8,6 +8,9 @@
 -- are blocked; the rep must give a reason and an admin decides. Before the
 -- first class, the existing direct-removal path stays available. A previously
 -- removed lecturer's next accepted invite waits for admin reinstatement.
+-- The removal log records every deleted offering link, including direct admin
+-- removals that leave no invite behind. It has no foreign keys so cascades from
+-- deleted offerings or accounts cannot block deletion or erase this history.
 
 CREATE TABLE IF NOT EXISTS lecturer_removal_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -32,6 +35,80 @@ CREATE POLICY "admins and reps read removal requests" ON lecturer_removal_reques
   FOR SELECT USING (is_admin() OR is_rep_of_offering(offering_id));
 REVOKE ALL ON lecturer_removal_requests FROM anon, authenticated;
 GRANT SELECT ON lecturer_removal_requests TO authenticated;
+
+-- Like attendance_audit, this history outlives the offering and account. An
+-- AFTER DELETE trigger must also be able to write during their cascades.
+CREATE TABLE IF NOT EXISTS offering_lecturer_removals (
+  id BIGSERIAL PRIMARY KEY,
+  offering_id UUID NOT NULL,
+  lecturer_id UUID NOT NULL,
+  removed_by UUID,
+  removed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  link_created_by UUID
+);
+CREATE INDEX IF NOT EXISTS offering_lecturer_removals_pair_idx
+  ON offering_lecturer_removals (offering_id, lecturer_id);
+
+ALTER TABLE offering_lecturer_removals ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "admins read lecturer removals" ON offering_lecturer_removals;
+CREATE POLICY "admins read lecturer removals" ON offering_lecturer_removals
+  FOR SELECT USING (is_admin());
+REVOKE ALL ON offering_lecturer_removals FROM anon, authenticated;
+GRANT SELECT ON offering_lecturer_removals TO authenticated;
+
+CREATE OR REPLACE FUNCTION log_offering_lecturer_removal()
+RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  INSERT INTO offering_lecturer_removals
+    (offering_id, lecturer_id, removed_by, link_created_by)
+  VALUES (OLD.offering_id, OLD.lecturer_id, auth.uid(), OLD.created_by);
+  RETURN OLD;
+EXCEPTION WHEN OTHERS THEN
+  -- A logging failure must not block a link deletion or a parent cascade.
+  RAISE WARNING 'Could not log lecturer link removal: %', SQLERRM;
+  RETURN OLD;
+END;
+$$;
+REVOKE ALL ON FUNCTION log_offering_lecturer_removal() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION log_offering_lecturer_removal() TO authenticated;
+
+DROP TRIGGER IF EXISTS log_offering_lecturer_removal ON offering_lecturers;
+CREATE TRIGGER log_offering_lecturer_removal
+  AFTER DELETE ON offering_lecturers
+  FOR EACH ROW EXECUTE FUNCTION log_offering_lecturer_removal();
+
+-- One historical marker per offering and lecturer is enough to require review.
+-- Existing log rows also make this safe to re-run after the trigger is active.
+INSERT INTO offering_lecturer_removals
+  (offering_id, lecturer_id, removed_by, removed_at, link_created_by)
+SELECT history.offering_id, history.lecturer_id, history.removed_by,
+       history.removed_at, history.link_created_by
+FROM (
+  SELECT DISTINCT ON (offering_id, lecturer_id)
+         offering_id, lecturer_id, removed_by, removed_at, link_created_by
+  FROM (
+    SELECT offering_id, accepted_by AS lecturer_id, revoked_by AS removed_by,
+           coalesce(revoked_at, accepted_at, created_at) AS removed_at,
+           invited_by AS link_created_by
+    FROM lecturer_invites
+    WHERE status = 'removed' AND accepted_by IS NOT NULL
+    UNION ALL
+    SELECT offering_id, lecturer_id, decided_by AS removed_by,
+           coalesce(decided_at, created_at) AS removed_at,
+           NULL::UUID AS link_created_by
+    FROM lecturer_removal_requests
+    WHERE status = 'approved'
+  ) prior
+  ORDER BY offering_id, lecturer_id, removed_at DESC
+) history
+WHERE NOT EXISTS (
+  SELECT 1 FROM offering_lecturer_removals logged
+  WHERE logged.offering_id = history.offering_id
+    AND logged.lecturer_id = history.lecturer_id
+);
 
 -- Based on the latest acceptance definition in 20260925020000. A lecturer
 -- removed from this offering needs admin approval even if they kept their role.
@@ -74,6 +151,9 @@ BEGIN
   END IF;
 
   SELECT EXISTS (
+    SELECT 1 FROM offering_lecturer_removals logged
+    WHERE logged.offering_id = v_inv.offering_id AND logged.lecturer_id = auth.uid()
+  ) OR EXISTS (
     SELECT 1 FROM lecturer_invites old_inv
     WHERE old_inv.offering_id = v_inv.offering_id AND old_inv.accepted_by = auth.uid()
       AND old_inv.status = 'removed'
@@ -136,7 +216,9 @@ BEGIN
            CASE WHEN i.accepted_by IS NULL THEN NULL
                 ELSE (SELECT count(*) FROM attendance_records ar WHERE ar.student_id = i.accepted_by) END,
            i.accepted_by IS NOT NULL AND (
-             EXISTS (SELECT 1 FROM lecturer_invites old_inv
+             EXISTS (SELECT 1 FROM offering_lecturer_removals logged
+               WHERE logged.offering_id = i.offering_id AND logged.lecturer_id = i.accepted_by)
+             OR EXISTS (SELECT 1 FROM lecturer_invites old_inv
                WHERE old_inv.id <> i.id AND old_inv.offering_id = i.offering_id
                  AND old_inv.accepted_by = i.accepted_by AND old_inv.status = 'removed')
              OR EXISTS (SELECT 1 FROM lecturer_removal_requests rr
