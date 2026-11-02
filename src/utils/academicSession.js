@@ -5,8 +5,12 @@
 // Keep the September boundary in sync with current_academic_session() in
 // supabase/migrations/20261102020000_rep_terms.sql.
 export function currentAcademicSession(date = new Date()) {
-  const y = date.getFullYear();
-  const start = date.getMonth() >= 8 ? y : y - 1;
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos', year: 'numeric', month: 'numeric',
+  }).formatToParts(date);
+  const y = Number(parts.find(part => part.type === 'year').value);
+  const month = Number(parts.find(part => part.type === 'month').value);
+  const start = month >= 9 ? y : y - 1;
   return `${start}/${start + 1}`;
 }
 

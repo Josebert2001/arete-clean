@@ -191,7 +191,7 @@ function OfferingRow({ offering: o, lecturers, invites, busy, onInvite, onRevoke
                 Request removal
               </button>
             )}
-            {l.removable && !l.pending_request_id && !l.removal_requires_request && (
+            {l.removable && !l.pending_request_id && l.removal_requires_request === false && (
               <button
                 type="button" disabled={busy}
                 onClick={() => onRemove(l.lecturer_id)}
@@ -200,6 +200,9 @@ function OfferingRow({ offering: o, lecturers, invites, busy, onInvite, onRevoke
               >
                 <X className="h-3 w-3" />
               </button>
+            )}
+            {l.removable && !l.pending_request_id && l.removal_requires_request == null && (
+              <span>Removal is handled by the admin for now.</span>
             )}
             {requestFor === l.lecturer_id && l.removal_requires_request && !l.pending_request_id && (
               <form className="w-full" onSubmit={async e => {

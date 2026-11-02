@@ -4,7 +4,7 @@
 -- admin, course-rep and security migrations) to be applied first.
 --
 -- A rep could silently remove an invite-made lecturer mid-semester. Once any
--- class_sessions row exists, direct rep deletion and accepted-invite revocation
+-- class has ever been opened, direct rep deletion and accepted-invite revocation
 -- are blocked; the rep must give a reason and an admin decides. Before the
 -- first class, the existing direct-removal path stays available. A previously
 -- removed lecturer's next accepted invite waits for admin reinstatement.
@@ -156,6 +156,38 @@ $$;
 REVOKE ALL ON FUNCTION admin_list_invites() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION admin_list_invites() TO authenticated;
 
+-- Preserve the first class even when a linked lecturer deletes every session.
+-- opened_at is the class start timestamp (held_on is only a date).
+ALTER TABLE course_offerings ADD COLUMN IF NOT EXISTS first_class_at TIMESTAMPTZ;
+
+CREATE OR REPLACE FUNCTION record_offering_first_class()
+RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  -- Repeat the insert authorization because this trigger writes as its owner.
+  IF auth.uid() IS NOT NULL AND NOT (is_admin() OR is_lecturer_of(NEW.offering_id)) THEN
+    RAISE EXCEPTION 'Only a linked lecturer or admin can start this class.';
+  END IF;
+  UPDATE course_offerings SET first_class_at = NEW.opened_at
+    WHERE id = NEW.offering_id AND first_class_at IS NULL;
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION record_offering_first_class() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION record_offering_first_class() TO authenticated;
+
+DROP TRIGGER IF EXISTS record_offering_first_class ON class_sessions;
+CREATE TRIGGER record_offering_first_class
+  AFTER INSERT ON class_sessions
+  FOR EACH ROW EXECUTE FUNCTION record_offering_first_class();
+
+UPDATE course_offerings co SET first_class_at = sessions.first_opened_at
+FROM (SELECT offering_id, MIN(opened_at) AS first_opened_at
+      FROM class_sessions GROUP BY offering_id) sessions
+WHERE co.id = sessions.offering_id AND co.first_class_at IS NULL;
+
 -- The admin's existing DELETE policy remains separate. This only narrows the
 -- rep's policy, including direct table deletes from an older frontend.
 -- A SECURITY DEFINER helper is necessary: a rep's class_sessions SELECT
@@ -165,7 +197,9 @@ RETURNS BOOLEAN
 LANGUAGE SQL SECURITY DEFINER STABLE
 SET search_path = public, pg_temp
 AS $$
-  SELECT EXISTS (SELECT 1 FROM class_sessions WHERE offering_id = p_offering_id);
+  SELECT EXISTS (SELECT 1 FROM course_offerings
+                 WHERE id = p_offering_id AND first_class_at IS NOT NULL)
+      OR EXISTS (SELECT 1 FROM class_sessions WHERE offering_id = p_offering_id);
 $$;
 REVOKE ALL ON FUNCTION offering_has_class_sessions(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION offering_has_class_sessions(UUID) TO authenticated;
@@ -372,7 +406,7 @@ BEGIN
       RETURN QUERY SELECT FALSE, 'This lecturer is now admin-assigned. Reject the request.'; RETURN;
     END IF;
     IF NOT offering_has_class_sessions(v_request.offering_id) THEN
-      RETURN QUERY SELECT FALSE, 'This course has no classes now. Reject the request.'; RETURN;
+      RETURN QUERY SELECT FALSE, 'No class has started. Reject the request.'; RETURN;
     END IF;
     DELETE FROM offering_lecturers
       WHERE offering_id = v_request.offering_id AND lecturer_id = v_request.lecturer_id;

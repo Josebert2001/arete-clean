@@ -119,12 +119,20 @@ describe('Course rep page', () => {
   it('offers removal only for lecturers that came in through an invite', async () => {
     mocks.state.lecturers = [
       { offering_id: 'o1', lecturer_id: 'l1', full_name: 'Dr Admin-Assigned', email: 'a@x', removable: false },
-      { offering_id: 'o1', lecturer_id: 'l2', full_name: 'Dr Invited', email: 'b@x', removable: true },
+      { offering_id: 'o1', lecturer_id: 'l2', full_name: 'Dr Invited', email: 'b@x', removable: true, removal_requires_request: false },
     ];
     render(<CourseRep />);
     expect(await screen.findByText('Dr Admin-Assigned')).toBeInTheDocument();
     expect(screen.queryByLabelText('Remove Dr Admin-Assigned from CYB 224')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Remove Dr Invited from CYB 224')).toBeInTheDocument();
+  });
+
+  it('hides direct removal when the old RPC omits the removal guard', async () => {
+    mocks.state.lecturers = [{ offering_id: 'o1', lecturer_id: 'l2', full_name: 'Dr Invited', removable: true }];
+    render(<CourseRep />);
+    expect(await screen.findByText('Removal is handled by the admin for now.')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Remove Dr Invited from CYB 224')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Request removal' })).not.toBeInTheDocument();
   });
 
   it('still removes an invite-made lecturer directly before the first class', async () => {

@@ -47,4 +47,23 @@ describe('rep migration guards', () => {
     expect(approve).toMatch(/INSERT INTO user_roles[\s\S]*?ON CONFLICT \(user_id\) DO NOTHING/);
     expect(approve).toMatch(/INSERT INTO offering_lecturers[\s\S]*?ON CONFLICT \(offering_id, lecturer_id\) DO NOTHING/);
   });
+
+  it('keeps the first class recorded after its sessions are deleted', () => {
+    expect(removals).toContain('ADD COLUMN IF NOT EXISTS first_class_at TIMESTAMPTZ');
+    const trigger = definition(removals, 'record_offering_first_class');
+    expect(trigger).toContain('SECURITY DEFINER');
+    expect(trigger).toContain('SET search_path = public, pg_temp');
+    expect(trigger).toContain('is_admin() OR is_lecturer_of(NEW.offering_id)');
+    expect(trigger).toMatch(/UPDATE course_offerings SET first_class_at = NEW\.opened_at[\s\S]*?first_class_at IS NULL/);
+    expect(removals).toMatch(/CREATE TRIGGER record_offering_first_class\s+AFTER INSERT ON class_sessions/);
+    expect(removals).toMatch(/SET first_class_at = sessions\.first_opened_at[\s\S]*?MIN\(opened_at\)[\s\S]*?co\.first_class_at IS NULL/);
+    const helper = definition(removals, 'offering_has_class_sessions');
+    expect(helper).toContain('first_class_at IS NOT NULL');
+    expect(helper).toContain('EXISTS (SELECT 1 FROM class_sessions WHERE offering_id = p_offering_id)');
+    expect(removals).toContain('NOT offering_has_class_sessions(offering_id)');
+    expect(definition(removals, 'revoke_lecturer_invite')).toContain('offering_has_class_sessions(v_inv.offering_id)');
+    expect(definition(removals, 'rep_request_lecturer_removal')).toContain('offering_has_class_sessions(p_offering_id)');
+    expect(definition(terms, 'admin_decide_removal')).toContain('offering_has_class_sessions(v_request.offering_id)');
+    expect(definition(terms, 'rep_cohort_lecturers')).toContain('offering_has_class_sessions(ol.offering_id)');
+  });
 });

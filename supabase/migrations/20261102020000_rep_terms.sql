@@ -253,7 +253,7 @@ BEGIN
       RETURN QUERY SELECT FALSE, 'This lecturer is now admin-assigned. Reject the request.'; RETURN;
     END IF;
     IF NOT offering_has_class_sessions(v_request.offering_id) THEN
-      RETURN QUERY SELECT FALSE, 'This course has no classes now. Reject the request.'; RETURN;
+      RETURN QUERY SELECT FALSE, 'No class has started. Reject the request.'; RETURN;
     END IF;
     DELETE FROM offering_lecturers
       WHERE offering_id = v_request.offering_id AND lecturer_id = v_request.lecturer_id;
