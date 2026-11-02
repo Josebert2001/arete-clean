@@ -1,52 +1,106 @@
-import { lazy, Suspense } from 'react';
+import { useMemo, useState } from 'react';
 import { usePageTitle } from '../utils/usePageTitle';
-import { MapPin, AlertTriangle } from 'lucide-react';
+import { MapPin, Search, Navigation, ExternalLink } from 'lucide-react';
+import { places, PLACE_CATEGORIES } from '../data/campusPlaces';
+import { placeLink, filterPlaces } from '../utils/placeLinks';
 
-const CampusMap = lazy(() => import('../components/CampusMap'));
-
+// Campus Places — a searchable list of University of Uyo locations, each handing
+// off to Google Maps for the actual map, GPS and walking directions. Replaced an
+// in-app Leaflet map whose positions were placeholders (see campus-map-prototype.md).
 export default function CampusMapPage() {
-  usePageTitle('Campus Map');
+  usePageTitle('Campus Places');
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('all');
+
+  const visible = useMemo(() => filterPlaces(places, query, category), [query, category]);
 
   return (
-    <div className="h-[calc(100dvh-4rem)] sm:h-[calc(100dvh-4.5rem)] flex flex-col min-h-0">
-      <div className="px-4 sm:px-6 py-3 bg-cream border-b border-coffee-200 flex-shrink-0">
-        <div className="max-w-6xl mx-auto flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-ink text-cream flex items-center justify-center">
-            <MapPin size={18} />
-          </div>
-          <div>
-            <h1 className="font-display font-bold text-ink text-lg leading-tight">Campus Map</h1>
-            <p className="text-xs text-coffee-600">
-              Find your way around University of Uyo
-            </p>
-          </div>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+      <header className="flex items-start gap-3 mb-6">
+        <div className="w-10 h-10 rounded-lg bg-ink text-cream flex items-center justify-center flex-shrink-0">
+          <MapPin size={20} />
         </div>
+        <div>
+          <h1 className="font-display font-bold text-ink text-2xl leading-tight">Campus Places</h1>
+          <p className="text-sm text-coffee-600 mt-1">
+            Find your way around University of Uyo. Tap a place to open it in Google Maps,
+            which gives you walking directions from wherever you are.
+          </p>
+        </div>
+      </header>
+
+      <div className="flex items-center gap-2 px-3 py-2.5 mb-3 border border-coffee-300 rounded-lg bg-cream focus-within:border-coffee-500">
+        <Search size={16} className="text-coffee-400 flex-shrink-0" />
+        <input
+          type="search"
+          value={query}
+          maxLength={80}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search places…"
+          aria-label="Search campus places"
+          className="w-full bg-transparent text-sm text-ink placeholder:text-coffee-400 outline-none"
+        />
       </div>
 
-      {/* The pins are placeholders sketched around 5.65N 7.93E, not surveyed
-          positions — see campus-map-prototype.md. Until someone walks the campus
-          and records real coordinates, a student must not be able to mistake
-          this for directions they can follow. Delete this banner in the same
-          commit that lands the real data. */}
-      <div className="px-4 sm:px-6 py-2 bg-rust/10 border-b border-rust/25 flex-shrink-0">
-        <p className="max-w-6xl mx-auto flex items-start gap-2 text-xs text-rust">
-          <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
-          <span>
-            <strong className="font-semibold">Preview — do not navigate by this yet.</strong>{' '}
-            The building positions are approximate placeholders while the real campus
-            locations are being surveyed, so routes and walking times are illustrative only.
-          </span>
-        </p>
+      <div className="flex flex-wrap gap-2 mb-5" role="group" aria-label="Filter by category">
+        {[['all', 'All'], ...Object.entries(PLACE_CATEGORIES).map(([k, v]) => [k, v.label])].map(
+          ([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setCategory(key)}
+              aria-pressed={category === key}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                category === key
+                  ? 'bg-ink text-cream border-ink'
+                  : 'bg-cream text-coffee-600 border-coffee-300 hover:bg-paper'
+              }`}
+            >
+              {label}
+            </button>
+          )
+        )}
       </div>
-      <Suspense
-        fallback={
-          <div className="flex-1 flex items-center justify-center animate-pulse">
-            <p className="text-sm text-coffee-500">Loading campus map…</p>
-          </div>
-        }
-      >
-        <CampusMap />
-      </Suspense>
+
+      {visible.length === 0 ? (
+        <p className="text-sm text-coffee-500 italic">No places match “{query}”.</p>
+      ) : (
+        <ul className="space-y-2">
+          {visible.map((place) => {
+            const cat = PLACE_CATEGORIES[place.category] || PLACE_CATEGORIES.building;
+            const link = placeLink(place);
+            const isDirections = link.kind === 'directions';
+            return (
+              <li key={place.id}>
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-4 py-3 bg-cream border border-coffee-200 rounded-xl hover:border-coffee-400 hover:bg-paper transition-colors"
+                >
+                  <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cat.color}`} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium text-ink truncate">{place.name}</span>
+                    <span className="block text-[11px] uppercase tracking-wide text-coffee-400">
+                      {cat.label}
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-ember flex-shrink-0">
+                    {isDirections ? <Navigation size={14} /> : <ExternalLink size={14} />}
+                    {isDirections ? 'Directions' : 'Find on map'}
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <p className="mt-6 text-xs text-coffee-500 leading-relaxed">
+        Opens Google Maps in a new tab. Places marked <strong>Find on map</strong> don’t have an
+        exact position recorded yet, so Google searches for them by name — if it lands on the
+        wrong spot, ask at the gate.
+      </p>
     </div>
   );
 }

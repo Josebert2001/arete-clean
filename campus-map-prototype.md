@@ -1,5 +1,7 @@
 # Campus Map — Prototype Hand-off
 
+> **Superseded (2026-11-02).** `/campus-map` now renders **Campus Places** (`src/pages/CampusMapPage.jsx`): a searchable list that hands each place off to Google Maps for the map, GPS and walking directions — no API key, no CSP change. Data lives in `src/data/campusPlaces.js`; links in `src/utils/placeLinks.js`. The Leaflet prototype below was retired because its pins were invented positions ~68 km north of Uyo, so "Track me" told every student on campus they were off campus. Its files (`CampusMap.jsx`, `campusMap.js`, `campusRoute.js`) and the `leaflet` dependency have since been deleted; this document is kept as history only.
+
 > Status: **working prototype** · Route: `/campus-map` · Built into the Areté app for University of Uyo
 
 ## 1. What this is

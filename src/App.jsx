@@ -5,7 +5,6 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import FeedbackPrompt from './components/FeedbackPrompt';
-import CampusMapFloatingButton from './components/CampusMapFloatingButton';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -266,7 +265,8 @@ export default function App() {
       {!isChatPage && <Footer />}
       {!isChatPage && <FloatingHelp />}
       {!isChatPage && <FeedbackPrompt />}
-      {!isChatPage && <CampusMapFloatingButton />}
+      {/* Campus Places launcher (CampusMapFloatingButton) is paused until the
+          places have real coordinates — re-add the import and this line then. */}
       <PWAUpdatePrompt />
     </div>
     </StudyDaysProvider>

@@ -61,7 +61,7 @@ export default function Navbar() {
     { to: '/courses', label: 'Courses' },
     { to: '/lab', label: 'Code Lab', also: ['/tracks', '/install', '/explainer', '/cheatsheet'] },
     { to: '/tutor', label: 'AI Tutor' },
-    { to: '/campus-map', label: 'Campus Map' },
+    { to: '/campus-map', label: 'Campus Places' },
   ];
 
   // Attendance links depend on the signed-in user's role:
