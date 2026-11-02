@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Upload, FileText, Image as ImageIcon, Download,
   X, CheckCircle2, AlertCircle, Loader2, Paperclip, Trash2,
@@ -71,16 +71,10 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
   const [deletingId, setDeletingId] = useState(null);
   const fileRef = useRef();
 
-  useEffect(() => {
-    if (!isConfigured) return;
-    load();
-  }, [courseSlug, department]);
-
   // A failed fetch must not fall through to the "No materials yet" empty
   // state: that reads as "nothing has been shared", and a student who
   // believes it re-uploads a file that is already there.
-  async function load() {
-    setLoadError('');
+  const load = useCallback(async () => {
     // uploaded_by is not selectable — the column grant was revoked in
     // 20260827010000_materials_server_insert.sql so an upload can't be
     // correlated to a student. "Is this mine?" is answered by uploaded_by_me,
@@ -91,12 +85,15 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
       .eq('course_slug', courseSlug)
       .eq('department', department)
       .order('uploaded_at', { ascending: false });
-    if (fetchError) {
-      setLoadError('Could not load shared materials. Check your connection and try again.');
-    }
+    setLoadError(fetchError ? 'Could not load shared materials. Check your connection and try again.' : '');
     setMaterials(data ?? []);
     setFetching(false);
-  }
+  }, [courseSlug, department]);
+
+  useEffect(() => {
+    if (!isConfigured) return;
+    void Promise.resolve().then(load);
+  }, [load]);
 
   function handleFilePick(e) {
     const f = e.target.files?.[0];

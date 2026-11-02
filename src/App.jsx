@@ -38,7 +38,7 @@ const Admin = lazy(() => import('./pages/Admin'));
 const CourseRep = lazy(() => import('./pages/CourseRep'));
 const Invitations = lazy(() => import('./pages/Invitations'));
 
-class ErrorBoundary extends Component {
+export class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false };
@@ -54,6 +54,12 @@ class ErrorBoundary extends Component {
     Sentry.captureException(error, {
       contexts: { react: { componentStack: info?.componentStack } },
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.pathname !== this.props.pathname && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
   }
 
   render() {
@@ -225,7 +231,7 @@ export default function App() {
       <AuthStateWatcher />
       <Navbar />
       <main id="main" className="flex-1 relative z-10">
-        <ErrorBoundary>
+        <ErrorBoundary pathname={pathname}>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
