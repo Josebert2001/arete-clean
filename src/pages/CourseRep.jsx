@@ -5,6 +5,7 @@ import { useLecturer } from '../components/useLecturer';
 import NewOfferingForm from '../components/NewOfferingForm';
 import { getDepartment } from '../data/departments';
 import { rpcAction } from '../utils/rpcAction';
+import { currentAcademicSession } from '../utils/academicSession';
 
 /**
  * Course-rep console: the rep's own class only. They create its courses,
@@ -53,6 +54,7 @@ function RepConsole({ scope }) {
     const [offRes, lecRes, invRes] = await Promise.all([
       supabase.from('course_offerings').select('*')
         .eq('department', scope.department).eq('level', scope.level)
+        .eq('academic_session', scope.academic_session ?? currentAcademicSession())
         .order('academic_session', { ascending: false })
         .order('course_code'),
       supabase.rpc('rep_cohort_lecturers'),
@@ -67,7 +69,7 @@ function RepConsole({ scope }) {
     const now = new Date();
     setInvites((invRes.data ?? []).filter(i => i.status === 'awaiting_approval' || new Date(i.expires_at) >= now));
     setStatus('ready');
-  }, [scope.department, scope.level]);
+  }, [scope.department, scope.level, scope.academic_session]);
 
   useEffect(() => { (async () => { await load(); })(); }, [load]);
 
@@ -110,8 +112,10 @@ function RepConsole({ scope }) {
           Add your class&apos;s courses, then invite each lecturer by email. They become the
           course&apos;s lecturer once they sign in with that email and accept at{' '}
           <span className="font-mono text-sm text-ink">{inviteLink}</span>. Send them that link.
-          Someone new to Areté as a lecturer is also confirmed by the admin first.
+          Someone new to Areté as a lecturer, or previously removed from this course,
+          is confirmed by the admin first.
         </p>
+        <p className="mt-2 text-sm text-coffee-700">Older sessions are managed by the admin.</p>
       </header>
 
       <NewOfferingForm scope={scope} onCreated={load} />

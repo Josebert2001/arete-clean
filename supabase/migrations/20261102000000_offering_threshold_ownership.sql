@@ -7,6 +7,8 @@
 -- offering, while linked lecturers could not change it. Force rep inserts to
 -- the existing 70% default, then let only admins or linked lecturers set a
 -- new 1–100% value through an audited SECURITY DEFINER function.
+-- The later rep-terms migration restricts rep inserts to its current session;
+-- this trigger only owns the threshold and keeps its cohort check independent.
 
 ALTER TABLE course_offerings
   ADD COLUMN IF NOT EXISTS threshold_set_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,

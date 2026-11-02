@@ -474,6 +474,7 @@ function InviteLog({ version, onChange }) {
                       {i.course_code} · {getDepartment(i.department).name} {i.level} · {i.academic_session}
                       {' · invited by '}{i.invited_by_name || 'unknown'} on {new Date(i.created_at).toLocaleDateString()}
                     </p>
+                    {i.is_reinstatement && <p className="text-xs font-medium text-rust">Reinstatement after removal — review before approving</p>}
                     {i.accepted_by_email && <AccountEvidence invite={i} />}
                   </div>
                   {i.status === 'awaiting_approval' && (

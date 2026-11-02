@@ -10,9 +10,8 @@ const DEPARTMENT_OPTIONS = Object.values(departments);
 /**
  * "New course" form, shared by the admin page and the course-rep page.
  *
- * Pass `scope` ({ department, level }) to lock the form to one cohort — a
- * course rep can only create offerings for their own class, and the database
- * policy rejects anything else, so the form shouldn't offer it.
+ * Pass `scope` ({ department, level, academic_session }) to lock the form to
+ * the rep's current cohort and session.
  */
 export default function NewOfferingForm({ onCreated, scope = null }) {
   const [department, setDepartment] = useState(scope?.department ?? 'cybersecurity');
@@ -24,6 +23,7 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
   const [catalogue, setCatalogue]   = useState([]);
   const [busy, setBusy]             = useState(false);
   const [message, setMessage]       = useState(null);
+  const offeringSession = scope ? currentAcademicSession() : session;
 
   // The department's catalogue feeds the course-code suggestions. A failed
   // chunk load only loses the suggestions; the user can still type a code.
@@ -53,7 +53,7 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
     e.preventDefault();
     setMessage(null);
     if (!code.trim()) { setMessage({ ok: false, text: 'Enter a course code.' }); return; }
-    if (!isAcademicSession(session)) { setMessage({ ok: false, text: 'Write the session as two consecutive years, e.g. 2026/2027.' }); return; }
+    if (!isAcademicSession(offeringSession)) { setMessage({ ok: false, text: 'Write the session as two consecutive years, e.g. 2026/2027.' }); return; }
 
     setBusy(true);
     const values = {
@@ -61,7 +61,7 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
       course_title:     title.trim() || null,
       department,
       level,
-      academic_session: session.trim(),
+      academic_session: offeringSession.trim(),
       ...(!scope ? { threshold_pct: Math.min(100, Math.max(1, Number(threshold) || 70)) } : {}),
     };
     const { error } = await supabase.from('course_offerings').insert(values);
@@ -119,7 +119,7 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
         </label>
         <label className="block" htmlFor="offering-session">
           <span className="mb-1 block text-xs font-medium text-ink">Academic session</span>
-          <input id="offering-session" value={session} onChange={e => setSession(e.target.value)} placeholder="2026/2027" className={field} />
+          <input id="offering-session" value={offeringSession} onChange={scope ? undefined : e => setSession(e.target.value)} readOnly={!!scope} placeholder="2026/2027" className={field} />
         </label>
         {scope ? (
           <p className="text-sm text-coffee-700 sm:col-span-2">The lecturer sets the attendance requirement.</p>

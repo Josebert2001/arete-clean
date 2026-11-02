@@ -5,7 +5,8 @@
 --
 -- A rep used to keep control of a department and level after their class moved
 -- on. Stamp each appointment with a session and require the current term for
--- every rep permission. Existing appointments are current for this backfill.
+-- every rep permission, including matching the offering's session. Rep-created
+-- offerings must use the current session. Existing appointments are current for this backfill.
 
 -- Keep the September boundary in sync with src/utils/academicSession.js.
 CREATE OR REPLACE FUNCTION current_academic_session()
@@ -49,6 +50,7 @@ SET search_path = public, pg_temp
 AS $$
   SELECT EXISTS (SELECT 1 FROM course_offerings co
     JOIN course_reps r ON r.department = co.department AND r.level = co.level
+      AND co.academic_session = r.academic_session
     WHERE co.id = p_offering_id AND r.user_id = auth.uid()
       AND r.academic_session = current_academic_session());
 $$;
@@ -62,6 +64,7 @@ AS $$
   SELECT is_admin_user(p_inviter) OR EXISTS (
     SELECT 1 FROM course_offerings co
     JOIN course_reps r ON r.department = co.department AND r.level = co.level
+      AND co.academic_session = r.academic_session
     WHERE co.id = p_offering_id AND r.user_id = p_inviter
       AND r.academic_session = current_academic_session());
 $$;
@@ -88,6 +91,7 @@ BEGIN
     FROM offering_lecturers ol
     JOIN course_offerings co ON co.id = ol.offering_id
     JOIN course_reps r ON r.department = co.department AND r.level = co.level
+      AND co.academic_session = r.academic_session
       AND r.user_id = auth.uid() AND r.academic_session = current_academic_session()
     LEFT JOIN auth.users u ON u.id = ol.lecturer_id
     LEFT JOIN profiles p ON p.id = ol.lecturer_id;
@@ -95,6 +99,14 @@ END;
 $$;
 REVOKE ALL ON FUNCTION rep_cohort_lecturers() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION rep_cohort_lecturers() TO authenticated;
+
+DROP POLICY IF EXISTS "reps create cohort offerings" ON course_offerings;
+CREATE POLICY "reps create cohort offerings" ON course_offerings
+  FOR INSERT WITH CHECK (
+    is_rep_for(department, level)
+    AND academic_session = current_academic_session()
+    AND created_by = auth.uid()
+  );
 
 -- Preserve the review migration's account, department and invite guards.
 CREATE OR REPLACE FUNCTION admin_set_course_rep(p_user_id UUID, p_department TEXT, p_level TEXT)
@@ -129,7 +141,8 @@ BEGIN
   UPDATE lecturer_invites li SET status = 'revoked', revoked_by = auth.uid(), revoked_at = NOW()
    WHERE li.invited_by = p_user_id AND li.status IN ('pending','awaiting_approval')
      AND NOT EXISTS (SELECT 1 FROM course_offerings co
-       WHERE co.id = li.offering_id AND co.department = p_department AND co.level = p_level);
+       WHERE co.id = li.offering_id AND co.department = p_department AND co.level = p_level
+         AND co.academic_session = current_academic_session());
 
   INSERT INTO course_reps (user_id, department, level, academic_session, appointed_by)
   VALUES (p_user_id, p_department, p_level, current_academic_session(), auth.uid())
@@ -225,6 +238,7 @@ BEGIN
     IF v_request.requested_by IS NULL OR NOT EXISTS (
       SELECT 1 FROM course_offerings co
       JOIN course_reps r ON r.department = co.department AND r.level = co.level
+        AND co.academic_session = r.academic_session
       WHERE co.id = v_request.offering_id AND r.user_id = v_request.requested_by
         AND r.academic_session = current_academic_session()
     ) THEN

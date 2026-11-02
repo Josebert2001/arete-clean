@@ -78,6 +78,7 @@ beforeEach(() => {
   mocks.state.removalRequests = [];
   mocks.state.removalListError = null;
   mocks.state.reps = [];
+  mocks.state.invites[0].is_reinstatement = false;
 });
 
 describe('Admin page', () => {
@@ -155,6 +156,16 @@ describe('Admin page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
     await waitFor(() => expect(screen.getByText('Approved.')).toBeInTheDocument());
     expect(mocks.state.rpcCalls).toContainEqual({ name: 'admin_decide_invite', args: { p_invite_id: 'i1', p_approve: true } });
+  });
+
+  it('marks an invite from a previously removed lecturer for reinstatement review', async () => {
+    mocks.state.invites = [{ ...mocks.state.invites[0], is_reinstatement: true }];
+    render(<Admin />);
+    expect(await screen.findByText('Reinstatement after removal — review before approving')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+    await waitFor(() => expect(mocks.state.rpcCalls).toContainEqual({
+      name: 'admin_decide_invite', args: { p_invite_id: 'i1', p_approve: true },
+    }));
   });
 
   it('lists flagged attendance changes by default', async () => {

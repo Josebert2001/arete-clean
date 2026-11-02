@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CourseRep from '../pages/CourseRep';
+import { currentAcademicSession } from '../utils/academicSession';
 
 const mocks = vi.hoisted(() => ({
   state: {
@@ -47,7 +48,7 @@ vi.mock('../lib/supabase', () => ({
 }));
 
 beforeEach(() => {
-  mocks.state.repScope = { department: 'cybersecurity', level: '200L' };
+  mocks.state.repScope = { department: 'cybersecurity', level: '200L', academic_session: currentAcademicSession(), active: true };
   mocks.state.rpcCalls = [];
   mocks.state.fromCalls = [];
   mocks.state.inserts = [];
@@ -81,7 +82,8 @@ describe('Course rep page', () => {
     render(<CourseRep />);
     expect(await screen.findByText(/CYB 224 · Cyber Law/)).toBeInTheDocument();
     const offeringQuery = mocks.state.fromCalls.find(c => c.table === 'course_offerings');
-    expect(offeringQuery.filters).toEqual([['department', 'cybersecurity'], ['level', '200L']]);
+    expect(offeringQuery.filters).toEqual([['department', 'cybersecurity'], ['level', '200L'], ['academic_session', currentAcademicSession()]]);
+    expect(screen.getByText('Older sessions are managed by the admin.')).toBeInTheDocument();
     expect(screen.queryByLabelText('Department')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Level')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Attendance required (%)')).not.toBeInTheDocument();
@@ -90,10 +92,16 @@ describe('Course rep page', () => {
 
   it('omits the threshold when a rep creates an offering', async () => {
     render(<CourseRep />);
+    const session = screen.getByLabelText('Academic session');
+    expect(session).toHaveValue(currentAcademicSession());
+    expect(session).toHaveAttribute('readonly');
+    fireEvent.change(session, { target: { value: '2025/2026' } });
+    expect(session).toHaveValue(currentAcademicSession());
     fireEvent.change(screen.getByLabelText('Course code'), { target: { value: 'CYB 225' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create course' }));
     await waitFor(() => expect(mocks.state.inserts).toHaveLength(1));
     expect(mocks.state.inserts[0]).not.toHaveProperty('threshold_pct');
+    expect(mocks.state.inserts[0].academic_session).toBe(currentAcademicSession());
   });
 
   it('invites a lecturer by email', async () => {

@@ -6,7 +6,8 @@
 -- A rep could silently remove an invite-made lecturer mid-semester. Once any
 -- class_sessions row exists, direct rep deletion and accepted-invite revocation
 -- are blocked; the rep must give a reason and an admin decides. Before the
--- first class, the existing direct-removal path stays available.
+-- first class, the existing direct-removal path stays available. A previously
+-- removed lecturer's next accepted invite waits for admin reinstatement.
 
 CREATE TABLE IF NOT EXISTS lecturer_removal_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -31,6 +32,129 @@ CREATE POLICY "admins and reps read removal requests" ON lecturer_removal_reques
   FOR SELECT USING (is_admin() OR is_rep_of_offering(offering_id));
 REVOKE ALL ON lecturer_removal_requests FROM anon, authenticated;
 GRANT SELECT ON lecturer_removal_requests TO authenticated;
+
+-- Based on the latest acceptance definition in 20260925020000. A lecturer
+-- removed from this offering needs admin approval even if they kept their role.
+CREATE OR REPLACE FUNCTION accept_lecturer_invite(p_invite_id UUID)
+RETURNS TABLE (ok BOOLEAN, message TEXT, pending_approval BOOLEAN)
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_inv   lecturer_invites%ROWTYPE;
+  v_off   course_offerings%ROWTYPE;
+  v_email TEXT;
+  v_role  TEXT;
+  v_removed BOOLEAN;
+BEGIN
+  SELECT lower(email) INTO v_email FROM auth.users WHERE id = auth.uid();
+  SELECT * INTO v_inv FROM lecturer_invites WHERE id = p_invite_id FOR UPDATE;
+
+  IF v_inv.id IS NULL OR v_inv.email IS DISTINCT FROM v_email THEN
+    RETURN QUERY SELECT FALSE, 'Invite not found for this account.', FALSE; RETURN;
+  END IF;
+  IF v_inv.status <> 'pending' THEN
+    RETURN QUERY SELECT FALSE, 'This invite is no longer open.', FALSE; RETURN;
+  END IF;
+  IF v_inv.expires_at < NOW() THEN
+    RETURN QUERY SELECT FALSE, 'This invite has expired. Ask the course rep to send a new one.', FALSE; RETURN;
+  END IF;
+  IF EXISTS (SELECT 1 FROM course_reps WHERE user_id = auth.uid()) THEN
+    RETURN QUERY SELECT FALSE, 'A course rep cannot be a lecturer.', FALSE; RETURN;
+  END IF;
+  IF NOT inviter_still_valid(v_inv.invited_by, v_inv.offering_id) THEN
+    RETURN QUERY SELECT FALSE, 'Whoever sent this invite is no longer the course rep. Ask the current rep for a new one.', FALSE; RETURN;
+  END IF;
+
+  SELECT * INTO v_off FROM course_offerings WHERE id = v_inv.offering_id;
+  SELECT role INTO v_role FROM user_roles WHERE user_id = auth.uid();
+
+  IF is_student_of_cohort(auth.uid(), v_off.department, v_off.level) THEN
+    RETURN QUERY SELECT FALSE, 'Students in this class cannot accept a lecturer invite for it.', FALSE; RETURN;
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1 FROM lecturer_invites old_inv
+    WHERE old_inv.offering_id = v_inv.offering_id AND old_inv.accepted_by = auth.uid()
+      AND old_inv.status = 'removed'
+  ) OR EXISTS (
+    SELECT 1 FROM lecturer_removal_requests rr
+    WHERE rr.offering_id = v_inv.offering_id AND rr.lecturer_id = auth.uid()
+      AND rr.status = 'approved'
+  ) INTO v_removed;
+
+  IF v_role IS NULL OR v_removed THEN
+    UPDATE lecturer_invites
+       SET status = 'awaiting_approval', accepted_by = auth.uid(), accepted_at = NOW()
+     WHERE id = p_invite_id;
+    RETURN QUERY SELECT TRUE,
+      CASE WHEN v_removed
+        THEN 'Accepted. An admin must approve your reinstatement to ' || v_off.course_code || '.'
+        ELSE 'Accepted. An admin will confirm you as a lecturer, then ' || v_off.course_code || ' will appear under Take Attendance.' END,
+      TRUE;
+    RETURN;
+  END IF;
+
+  INSERT INTO offering_lecturers (offering_id, lecturer_id, created_by)
+  VALUES (v_inv.offering_id, auth.uid(), v_inv.invited_by)
+  ON CONFLICT (offering_id, lecturer_id) DO NOTHING;
+
+  UPDATE lecturer_invites
+     SET status = 'accepted', accepted_by = auth.uid(), accepted_at = NOW()
+   WHERE id = p_invite_id;
+
+  RETURN QUERY SELECT TRUE, 'You now teach ' || v_off.course_code || '. Open Take Attendance to start a class.', FALSE;
+END;
+$$;
+REVOKE ALL ON FUNCTION accept_lecturer_invite(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION accept_lecturer_invite(UUID) TO authenticated;
+
+-- admin_decide_invite() from 20260925020000 already keeps an existing lecturer
+-- role (ON CONFLICT DO NOTHING) and adds the offering link on approval.
+
+-- Match the review migration's return columns and add reinstatement evidence.
+DROP FUNCTION IF EXISTS admin_list_invites();
+CREATE FUNCTION admin_list_invites()
+RETURNS TABLE (
+  id UUID, email TEXT, status TEXT, created_at TIMESTAMPTZ, expires_at TIMESTAMPTZ,
+  accepted_at TIMESTAMPTZ, revoked_at TIMESTAMPTZ,
+  course_code TEXT, department TEXT, level TEXT, academic_session TEXT,
+  invited_by_name TEXT, accepted_by_name TEXT, accepted_by_email TEXT, accepted_by_reg TEXT,
+  accepted_by_joined_at TIMESTAMPTZ, accepted_by_classes_attended BIGINT,
+  is_reinstatement BOOLEAN
+)
+LANGUAGE plpgsql SECURITY DEFINER STABLE
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  IF NOT is_admin() THEN RETURN; END IF;
+  RETURN QUERY
+    SELECT i.id, i.email, i.status, i.created_at, i.expires_at, i.accepted_at, i.revoked_at,
+           co.course_code, co.department, co.level, co.academic_session,
+           coalesce(pi.full_name, ui.email::TEXT),
+           coalesce(pa.full_name, ua.email::TEXT), ua.email::TEXT, pa.reg_number, ua.created_at,
+           CASE WHEN i.accepted_by IS NULL THEN NULL
+                ELSE (SELECT count(*) FROM attendance_records ar WHERE ar.student_id = i.accepted_by) END,
+           i.accepted_by IS NOT NULL AND (
+             EXISTS (SELECT 1 FROM lecturer_invites old_inv
+               WHERE old_inv.id <> i.id AND old_inv.offering_id = i.offering_id
+                 AND old_inv.accepted_by = i.accepted_by AND old_inv.status = 'removed')
+             OR EXISTS (SELECT 1 FROM lecturer_removal_requests rr
+               WHERE rr.offering_id = i.offering_id AND rr.lecturer_id = i.accepted_by
+                 AND rr.status = 'approved')
+           )
+    FROM lecturer_invites i
+    JOIN course_offerings co ON co.id = i.offering_id
+    LEFT JOIN auth.users ui ON ui.id = i.invited_by
+    LEFT JOIN profiles pi ON pi.id = i.invited_by
+    LEFT JOIN auth.users ua ON ua.id = i.accepted_by
+    LEFT JOIN profiles pa ON pa.id = i.accepted_by
+    ORDER BY (i.status = 'awaiting_approval') DESC, i.created_at DESC
+    LIMIT 200;
+END;
+$$;
+REVOKE ALL ON FUNCTION admin_list_invites() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION admin_list_invites() TO authenticated;
 
 -- The admin's existing DELETE policy remains separate. This only narrows the
 -- rep's policy, including direct table deletes from an older frontend.
