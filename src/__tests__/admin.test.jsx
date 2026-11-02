@@ -26,6 +26,9 @@ const mocks = vi.hoisted(() => ({
       old_status: null, new_status: 'manual', reason: 'Phone died',
       student_is_rep: true, actor_invited_by_rep: true,
     }],
+    removalRequests: [],
+    removalListError: null,
+    reps: [],
   },
 }));
 
@@ -56,10 +59,13 @@ vi.mock('../lib/supabase', () => ({
       if (name === 'admin_find_users') return { data: mocks.state.found, error: null };
       if (name === 'admin_set_role') return { data: [{ ok: true, message: 'Now a lecturer.' }], error: null };
       if (name === 'admin_set_course_rep') return { data: [{ ok: true, message: 'Now a course rep.' }], error: null };
-      if (name === 'admin_list_course_reps') return { data: [], error: null };
+      if (name === 'admin_list_course_reps') return { data: mocks.state.reps, error: null };
+      if (name === 'admin_renew_course_rep') return { data: [{ ok: true, message: 'Now a course rep.' }], error: null };
       if (name === 'admin_list_invites') return { data: mocks.state.invites, error: null };
       if (name === 'admin_decide_invite') return { data: [{ ok: true, message: 'Approved.' }], error: null };
       if (name === 'admin_list_attendance_changes') return { data: mocks.state.changes, error: null };
+      if (name === 'admin_list_removal_requests') return { data: mocks.state.removalRequests, error: mocks.state.removalListError };
+      if (name === 'admin_decide_removal') return { data: [{ ok: true, message: args.p_approve ? 'Approved. Lecturer removed from the course.' : 'Removal request rejected.' }], error: null };
       return { data: null, error: null };
     },
   },
@@ -69,6 +75,9 @@ beforeEach(() => {
   mocks.state.role = 'admin';
   mocks.state.rpcCalls = [];
   mocks.state.inserts = [];
+  mocks.state.removalRequests = [];
+  mocks.state.removalListError = null;
+  mocks.state.reps = [];
 });
 
 describe('Admin page', () => {
@@ -122,6 +131,24 @@ describe('Admin page', () => {
     });
   });
 
+  it('shows expired terms and renews at the same or next level', async () => {
+    mocks.state.reps = [{ id: 'r1', email: 'rep@uniuyo.edu.ng', department: 'cybersecurity', level: '200L', academic_session: '2025/2026', active: false }];
+    render(<Admin />);
+    expect(await screen.findByText('Expired')).toBeInTheDocument();
+    expect(screen.getByText(/2025\/2026/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Renew (same level)' }));
+    await waitFor(() => expect(mocks.state.rpcCalls).toContainEqual({ name: 'admin_renew_course_rep', args: { p_user_id: 'r1', p_next_level: false } }));
+    fireEvent.click(screen.getByRole('button', { name: 'Renew at 300L' }));
+    await waitFor(() => expect(mocks.state.rpcCalls).toContainEqual({ name: 'admin_renew_course_rep', args: { p_user_id: 'r1', p_next_level: true } }));
+  });
+
+  it('does not offer a level beyond 400L', async () => {
+    mocks.state.reps = [{ id: 'r1', email: 'rep@uniuyo.edu.ng', department: 'cybersecurity', level: '400L', academic_session: '2025/2026', active: false }];
+    render(<Admin />);
+    expect(await screen.findByText('Expired')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Renew at/ })).not.toBeInTheDocument();
+  });
+
   it('shows who accepted an invite, warns on a student account, and approves', async () => {
     render(<Admin />);
     expect(await screen.findByText(/reg number 22\/CY\/009 \(a student account\)/)).toBeInTheDocument();
@@ -134,5 +161,29 @@ describe('Admin page', () => {
     render(<Admin />);
     expect(await screen.findByText('Lecturer via rep invite')).toBeInTheDocument();
     expect(mocks.state.rpcCalls).toContainEqual({ name: 'admin_list_attendance_changes', args: { p_flagged_only: true } });
+  });
+
+  it('shows pending removal evidence and approves or rejects via the admin RPC', async () => {
+    mocks.state.removalRequests = [{
+      id: 'r1', course_code: 'CYB 224', department: 'cybersecurity', level: '200L',
+      academic_session: '2026/2027', lecturer_name: 'Dr Invited', lecturer_email: 'invited@uniuyo.edu.ng',
+      requester_name: 'Ini Rep', reason: 'Lecturer missed multiple scheduled classes.',
+      created_at: '2026-10-01T10:00:00Z', classes_held: 3,
+    }];
+    render(<Admin />);
+    expect(await screen.findByText('Lecturer missed multiple scheduled classes.')).toBeInTheDocument();
+    expect(screen.getByText(/3 classes held/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Reject removal' }));
+    await waitFor(() => expect(mocks.state.rpcCalls).toContainEqual({ name: 'admin_decide_removal', args: { p_request_id: 'r1', p_approve: false } }));
+    fireEvent.click(screen.getByRole('button', { name: 'Approve removal' }));
+    await waitFor(() => expect(mocks.state.rpcCalls).toContainEqual({ name: 'admin_decide_removal', args: { p_request_id: 'r1', p_approve: true } }));
+  });
+
+  it('hides the removal panel when its RPC is not installed', async () => {
+    mocks.state.removalListError = { code: 'PGRST202' };
+    render(<Admin />);
+    await waitFor(() => expect(screen.queryByText('Lecturer removal requests')).not.toBeInTheDocument());
+    expect(await screen.findByText('Dr Ada')).toBeInTheDocument();
+    expect(screen.getByText('Invite log')).toBeInTheDocument();
   });
 });

@@ -2,6 +2,8 @@
 // A session starts in September, so January–August belong to the session that
 // began the previous year. Used as the default on the admin page's new-offering
 // form; the admin can still type another.
+// Keep the September boundary in sync with current_academic_session() in
+// supabase/migrations/20261102020000_rep_terms.sql.
 export function currentAcademicSession(date = new Date()) {
   const y = date.getFullYear();
   const start = date.getMonth() >= 8 ? y : y - 1;

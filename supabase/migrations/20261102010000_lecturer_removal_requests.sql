@@ -1,0 +1,267 @@
+-- --- Lecturer removal approval after classes begin --------------------------
+-- Run manually in the Supabase SQL editor. Idempotent: safe to re-run.
+-- Requires 20260925020000_rep_review_fixes.sql (and its earlier attendance,
+-- admin, course-rep and security migrations) to be applied first.
+--
+-- A rep could silently remove an invite-made lecturer mid-semester. Once any
+-- class_sessions row exists, direct rep deletion and accepted-invite revocation
+-- are blocked; the rep must give a reason and an admin decides. Before the
+-- first class, the existing direct-removal path stays available.
+
+CREATE TABLE IF NOT EXISTS lecturer_removal_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  offering_id UUID NOT NULL REFERENCES course_offerings(id) ON DELETE CASCADE,
+  lecturer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  requested_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  reason TEXT NOT NULL CHECK (length(trim(reason)) BETWEEN 10 AND 500 AND reason = trim(reason)),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  decided_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  decided_at TIMESTAMPTZ
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS lecturer_removal_one_pending
+  ON lecturer_removal_requests (offering_id, lecturer_id) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS lecturer_removal_requests_status_created_idx
+  ON lecturer_removal_requests (status, created_at DESC);
+
+ALTER TABLE lecturer_removal_requests ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "admins and reps read removal requests" ON lecturer_removal_requests;
+CREATE POLICY "admins and reps read removal requests" ON lecturer_removal_requests
+  FOR SELECT USING (is_admin() OR is_rep_of_offering(offering_id));
+REVOKE ALL ON lecturer_removal_requests FROM anon, authenticated;
+GRANT SELECT ON lecturer_removal_requests TO authenticated;
+
+-- The admin's existing DELETE policy remains separate. This only narrows the
+-- rep's policy, including direct table deletes from an older frontend.
+-- A SECURITY DEFINER helper is necessary: a rep's class_sessions SELECT
+-- policy may hide a session, so a subquery in the DELETE policy is unsafe.
+CREATE OR REPLACE FUNCTION offering_has_class_sessions(p_offering_id UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL SECURITY DEFINER STABLE
+SET search_path = public, pg_temp
+AS $$
+  SELECT EXISTS (SELECT 1 FROM class_sessions WHERE offering_id = p_offering_id);
+$$;
+REVOKE ALL ON FUNCTION offering_has_class_sessions(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION offering_has_class_sessions(UUID) TO authenticated;
+
+DROP POLICY IF EXISTS "reps remove cohort links" ON offering_lecturers;
+CREATE POLICY "reps remove cohort links" ON offering_lecturers
+  FOR DELETE USING (
+    is_rep_of_offering(offering_id)
+    AND created_by IS NOT NULL
+    AND NOT is_admin_user(created_by)
+    AND NOT offering_has_class_sessions(offering_id)
+  );
+
+CREATE OR REPLACE FUNCTION revoke_lecturer_invite(p_invite_id UUID)
+RETURNS TABLE (ok BOOLEAN, message TEXT)
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_inv lecturer_invites%ROWTYPE;
+BEGIN
+  SELECT * INTO v_inv FROM lecturer_invites WHERE id = p_invite_id FOR UPDATE;
+  IF v_inv.id IS NULL OR NOT (is_admin() OR is_rep_of_offering(v_inv.offering_id)) THEN
+    RETURN QUERY SELECT FALSE, 'Invite not found.'; RETURN;
+  END IF;
+
+  IF v_inv.status IN ('pending', 'awaiting_approval') THEN
+    UPDATE lecturer_invites SET status = 'revoked', revoked_by = auth.uid(), revoked_at = NOW()
+     WHERE id = p_invite_id AND status = v_inv.status;
+    RETURN QUERY SELECT TRUE, 'Invite cancelled.'; RETURN;
+  END IF;
+
+  IF v_inv.status = 'accepted' THEN
+    IF NOT is_admin() AND offering_has_class_sessions(v_inv.offering_id) THEN
+      RETURN QUERY SELECT FALSE, 'Classes have started. Request lecturer removal for admin approval.'; RETURN;
+    END IF;
+    DELETE FROM offering_lecturers
+     WHERE offering_id = v_inv.offering_id AND lecturer_id = v_inv.accepted_by
+       AND (is_admin() OR (created_by IS NOT NULL AND NOT is_admin_user(created_by)));
+    IF NOT FOUND THEN
+      RETURN QUERY SELECT FALSE, 'This lecturer was assigned by the admin; only the admin can remove them.'; RETURN;
+    END IF;
+    RETURN QUERY SELECT TRUE, 'Lecturer removed from the course.'; RETURN;
+  END IF;
+
+  RETURN QUERY SELECT FALSE, 'This invite is already closed.';
+END;
+$$;
+REVOKE ALL ON FUNCTION revoke_lecturer_invite(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION revoke_lecturer_invite(UUID) TO authenticated;
+
+CREATE OR REPLACE FUNCTION rep_request_lecturer_removal(p_offering_id UUID, p_lecturer_id UUID, p_reason TEXT)
+RETURNS TABLE (ok BOOLEAN, message TEXT)
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_reason TEXT := trim(coalesce(p_reason, ''));
+BEGIN
+  IF NOT is_rep_of_offering(p_offering_id) THEN
+    RETURN QUERY SELECT FALSE, 'Only this course rep can request removal.'; RETURN;
+  END IF;
+  IF length(v_reason) NOT BETWEEN 10 AND 500 THEN
+    RETURN QUERY SELECT FALSE, 'Give a reason between 10 and 500 characters.'; RETURN;
+  END IF;
+  PERFORM 1 FROM offering_lecturers ol
+    WHERE ol.offering_id = p_offering_id AND ol.lecturer_id = p_lecturer_id
+      AND ol.created_by IS NOT NULL AND NOT is_admin_user(ol.created_by)
+    FOR UPDATE;
+  IF NOT FOUND THEN
+    RETURN QUERY SELECT FALSE, 'This lecturer cannot be removed by a course rep.'; RETURN;
+  END IF;
+  IF NOT offering_has_class_sessions(p_offering_id) THEN
+    RETURN QUERY SELECT FALSE, 'No class has started; remove this lecturer directly.'; RETURN;
+  END IF;
+  BEGIN
+    INSERT INTO lecturer_removal_requests (offering_id, lecturer_id, requested_by, reason)
+    VALUES (p_offering_id, p_lecturer_id, auth.uid(), v_reason);
+  EXCEPTION WHEN unique_violation THEN
+    RETURN QUERY SELECT FALSE, 'A removal request is already pending.'; RETURN;
+  END;
+  RETURN QUERY SELECT TRUE, 'Removal requested. An admin will review it.';
+END;
+$$;
+REVOKE ALL ON FUNCTION rep_request_lecturer_removal(UUID, UUID, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION rep_request_lecturer_removal(UUID, UUID, TEXT) TO authenticated;
+
+CREATE OR REPLACE FUNCTION rep_cancel_removal_request(p_request_id UUID)
+RETURNS TABLE (ok BOOLEAN, message TEXT)
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_request lecturer_removal_requests%ROWTYPE;
+BEGIN
+  SELECT * INTO v_request FROM lecturer_removal_requests WHERE id = p_request_id FOR UPDATE;
+  IF v_request.id IS NULL OR NOT is_rep_of_offering(v_request.offering_id) THEN
+    RETURN QUERY SELECT FALSE, 'Removal request not found.'; RETURN;
+  END IF;
+  IF v_request.status <> 'pending' THEN
+    RETURN QUERY SELECT FALSE, 'This request has already been decided.'; RETURN;
+  END IF;
+  UPDATE lecturer_removal_requests
+    SET status = 'cancelled', decided_by = auth.uid(), decided_at = NOW()
+    WHERE id = p_request_id;
+  RETURN QUERY SELECT TRUE, 'Removal request cancelled.';
+END;
+$$;
+REVOKE ALL ON FUNCTION rep_cancel_removal_request(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION rep_cancel_removal_request(UUID) TO authenticated;
+
+DROP FUNCTION IF EXISTS rep_cohort_lecturers();
+CREATE FUNCTION rep_cohort_lecturers()
+RETURNS TABLE (
+  offering_id UUID, lecturer_id UUID, full_name TEXT, email TEXT,
+  removable BOOLEAN, removal_requires_request BOOLEAN, pending_request_id UUID
+)
+LANGUAGE plpgsql SECURITY DEFINER STABLE
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  RETURN QUERY
+    SELECT ol.offering_id, ol.lecturer_id, p.full_name, u.email::TEXT,
+           (ol.created_by IS NOT NULL AND NOT is_admin_user(ol.created_by)),
+           offering_has_class_sessions(ol.offering_id),
+           (SELECT rr.id FROM lecturer_removal_requests rr
+             WHERE rr.offering_id = ol.offering_id AND rr.lecturer_id = ol.lecturer_id
+               AND rr.status = 'pending')
+    FROM offering_lecturers ol
+    JOIN course_offerings co ON co.id = ol.offering_id
+    JOIN course_reps r ON r.department = co.department AND r.level = co.level AND r.user_id = auth.uid()
+    LEFT JOIN auth.users u ON u.id = ol.lecturer_id
+    LEFT JOIN profiles p ON p.id = ol.lecturer_id;
+END;
+$$;
+REVOKE ALL ON FUNCTION rep_cohort_lecturers() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION rep_cohort_lecturers() TO authenticated;
+
+CREATE OR REPLACE FUNCTION admin_list_removal_requests(p_pending_only BOOLEAN DEFAULT TRUE)
+RETURNS TABLE (
+  id UUID, offering_id UUID, lecturer_id UUID, course_code TEXT, department TEXT,
+  level TEXT, academic_session TEXT, lecturer_name TEXT, lecturer_email TEXT,
+  requester_name TEXT, reason TEXT, status TEXT, created_at TIMESTAMPTZ,
+  decided_at TIMESTAMPTZ, classes_held BIGINT
+)
+LANGUAGE plpgsql SECURITY DEFINER STABLE
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  IF NOT is_admin() THEN RETURN; END IF;
+  RETURN QUERY
+    SELECT rr.id, rr.offering_id, rr.lecturer_id, co.course_code, co.department,
+           co.level, co.academic_session, lp.full_name, lu.email::TEXT,
+           coalesce(rp.full_name, ru.email::TEXT), rr.reason, rr.status,
+           rr.created_at, rr.decided_at,
+           (SELECT count(*) FROM class_sessions cs WHERE cs.offering_id = rr.offering_id)
+    FROM lecturer_removal_requests rr
+    JOIN course_offerings co ON co.id = rr.offering_id
+    LEFT JOIN auth.users lu ON lu.id = rr.lecturer_id
+    LEFT JOIN profiles lp ON lp.id = rr.lecturer_id
+    LEFT JOIN auth.users ru ON ru.id = rr.requested_by
+    LEFT JOIN profiles rp ON rp.id = rr.requested_by
+    WHERE NOT coalesce(p_pending_only, TRUE) OR rr.status = 'pending'
+    ORDER BY rr.created_at DESC
+    LIMIT 200;
+END;
+$$;
+REVOKE ALL ON FUNCTION admin_list_removal_requests(BOOLEAN) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION admin_list_removal_requests(BOOLEAN) TO authenticated;
+
+CREATE OR REPLACE FUNCTION admin_decide_removal(p_request_id UUID, p_approve BOOLEAN)
+RETURNS TABLE (ok BOOLEAN, message TEXT)
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_request lecturer_removal_requests%ROWTYPE;
+  v_link offering_lecturers%ROWTYPE;
+BEGIN
+  IF NOT is_admin() THEN
+    RETURN QUERY SELECT FALSE, 'Only an admin can decide removal requests.'; RETURN;
+  END IF;
+  IF p_approve IS NULL THEN
+    RETURN QUERY SELECT FALSE, 'Choose approve or reject.'; RETURN;
+  END IF;
+  SELECT * INTO v_request FROM lecturer_removal_requests WHERE id = p_request_id FOR UPDATE;
+  IF v_request.id IS NULL OR v_request.status <> 'pending' THEN
+    RETURN QUERY SELECT FALSE, 'This request is no longer pending.'; RETURN;
+  END IF;
+  IF p_approve THEN
+    IF v_request.requested_by IS NULL OR NOT EXISTS (
+      SELECT 1 FROM course_offerings co
+      JOIN course_reps r ON r.department = co.department AND r.level = co.level
+      WHERE co.id = v_request.offering_id AND r.user_id = v_request.requested_by
+    ) THEN
+      RETURN QUERY SELECT FALSE, 'The requester is no longer this course rep. Reject the request.'; RETURN;
+    END IF;
+    SELECT * INTO v_link FROM offering_lecturers
+      WHERE offering_id = v_request.offering_id AND lecturer_id = v_request.lecturer_id FOR UPDATE;
+    IF v_link.id IS NULL THEN
+      RETURN QUERY SELECT FALSE, 'The lecturer is no longer on this course. Reject the request.'; RETURN;
+    END IF;
+    IF v_link.created_by IS NULL OR is_admin_user(v_link.created_by) THEN
+      RETURN QUERY SELECT FALSE, 'This lecturer is now admin-assigned. Reject the request.'; RETURN;
+    END IF;
+    IF NOT offering_has_class_sessions(v_request.offering_id) THEN
+      RETURN QUERY SELECT FALSE, 'This course has no classes now. Reject the request.'; RETURN;
+    END IF;
+    DELETE FROM offering_lecturers
+      WHERE offering_id = v_request.offering_id AND lecturer_id = v_request.lecturer_id;
+  END IF;
+  UPDATE lecturer_removal_requests
+    SET status = CASE WHEN p_approve THEN 'approved' ELSE 'rejected' END,
+        decided_by = auth.uid(), decided_at = NOW()
+    WHERE id = p_request_id;
+  RETURN QUERY SELECT TRUE, CASE WHEN p_approve
+    THEN 'Approved. Lecturer removed from the course.' ELSE 'Removal request rejected.' END;
+END;
+$$;
+REVOKE ALL ON FUNCTION admin_decide_removal(UUID, BOOLEAN) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION admin_decide_removal(UUID, BOOLEAN) TO authenticated;
+
+NOTIFY pgrst, 'reload schema';
