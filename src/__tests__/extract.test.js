@@ -182,6 +182,26 @@ describe('POST /api/extract', () => {
     });
   });
 
+  it('returns 503 without checking ownership or inserting when the profile lookup fails', async () => {
+    const error = { message: 'boom' };
+    profile.mockReturnValue({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error }) }) }) });
+    const res = await call();
+    expect(res.statusCode).toBe(503);
+    expect(res.body).toEqual({ error: 'Could not confirm your programme. Please try again.' });
+    expect(console.error).toHaveBeenCalledWith('extract: profile lookup failed:', error);
+    expect(rpc).not.toHaveBeenCalledWith('my_course_material_object', expect.anything());
+    expect(download).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('uses the cybersecurity catalogue when the profile is genuinely absent', async () => {
+    profile.mockReturnValue({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) });
+    const res = await call();
+    expect(res.statusCode).toBe(200);
+    expect(mocks.findCourse).toHaveBeenCalledWith('known-course', 'cybersecurity');
+    expect(insert).toHaveBeenCalledTimes(1);
+  });
+
   it('rejects a slug outside the uploader profile catalogue', async () => {
     mocks.findCourse.mockReturnValue(null);
     const res = await call();

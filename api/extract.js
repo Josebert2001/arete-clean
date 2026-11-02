@@ -152,11 +152,15 @@ export default async function handler(req, res) {
   // profile under their own RLS, never from the request body.
   let departmentSlug = 'cybersecurity';
   try {
-    const { data } = await student.db
+    const { data, error } = await student.db
       .from('profiles')
       .select('department')
       .eq('id', student.user.id)
       .maybeSingle();
+    if (error) {
+      console.error('extract: profile lookup failed:', error);
+      return res.status(503).json({ error: 'Could not confirm your programme. Please try again.' });
+    }
     if (data?.department) departmentSlug = data.department;
   } catch (err) {
     console.error('extract: profile lookup failed:', err);
