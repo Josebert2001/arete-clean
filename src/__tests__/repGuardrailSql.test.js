@@ -5,6 +5,7 @@ const migration = name => readFileSync(`supabase/migrations/${name}.sql`, 'utf8'
 const terms = migration('20261102020000_rep_terms');
 const removals = migration('20261102010000_lecturer_removal_requests');
 const threshold = migration('20261102000000_offering_threshold_ownership');
+const courseCodes = migration('20261102040000_offering_course_codes');
 const review = migration('20260925020000_rep_review_fixes');
 
 function definition(sql, name) {
@@ -14,6 +15,17 @@ function definition(sql, name) {
 }
 
 describe('rep migration guards', () => {
+  it('normalizes and validates codes on both inserts and code updates, after the threshold trigger', () => {
+    expect(courseCodes).toMatch(/CREATE TRIGGER normalize_offering_course_code\s+BEFORE INSERT OR UPDATE OF course_code ON course_offerings\s+FOR EACH ROW EXECUTE FUNCTION normalize_offering_course_code_trigger\(\)/);
+    const trigger = definition(courseCodes, 'normalize_offering_course_code_trigger');
+    expect(trigger).toContain('NEW.course_code := normalize_offering_course_code(NEW.course_code)');
+    expect(trigger).toMatch(/NEW\.course_code !~ '\^\(\[A-Z\]\{3\}\|\(UUY\|UNIUYO\)-\[A-Z\]\{3\}\) \[0-9\]\{3\}\$'/);
+    expect(trigger).toContain('RAISE EXCEPTION');
+    expect(courseCodes).toContain('DROP TRIGGER IF EXISTS normalize_offering_course_code ON course_offerings');
+    expect(courseCodes).toContain('other.group_label IS NOT DISTINCT FROM c.group_label');
+    expect(courseCodes).toContain('RAISE NOTICE');
+    expect(courseCodes).toContain("NOTIFY pgrst, 'reload schema';");
+  });
   it('matches the offering session in every current-term rep authority join', () => {
     for (const name of ['is_rep_of_offering', 'inviter_still_valid', 'rep_cohort_lecturers', 'admin_decide_removal']) {
       const sql = definition(terms, name);

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CourseRep from '../pages/CourseRep';
+import NewOfferingForm from '../components/NewOfferingForm';
 import { currentAcademicSession } from '../utils/academicSession';
 
 const mocks = vi.hoisted(() => ({
@@ -57,6 +58,17 @@ beforeEach(() => {
 });
 
 describe('Course rep page', () => {
+  it('shows admins the normalized free-text code before saving it', async () => {
+    const onCreated = vi.fn();
+    render(<NewOfferingForm onCreated={onCreated} />);
+    fireEvent.change(screen.getByLabelText('Course code'), { target: { value: '  cyb  224 ' } });
+    expect(screen.getByText('Code to save: CYB 224')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Create course' }));
+    await waitFor(() => expect(mocks.state.inserts).toHaveLength(1));
+    expect(mocks.state.inserts[0].course_code).toBe('CYB 224');
+    expect(onCreated).toHaveBeenCalledOnce();
+  });
+
   it('blocks anyone who is not a course rep', () => {
     mocks.state.repScope = null;
     render(<CourseRep />);
@@ -90,18 +102,35 @@ describe('Course rep page', () => {
     expect(screen.getByText('The lecturer sets the attendance requirement.')).toBeInTheDocument();
   });
 
-  it('omits the threshold when a rep creates an offering', async () => {
+  it('uses a catalogue code and title and omits the threshold when a rep creates an offering', async () => {
     render(<CourseRep />);
+    const code = screen.getByLabelText('Course code');
+    await screen.findByRole('option', { name: /CYB 224/ }, { timeout: 5000 });
     const session = screen.getByLabelText('Academic session');
     expect(session).toHaveValue(currentAcademicSession());
     expect(session).toHaveAttribute('readonly');
     fireEvent.change(session, { target: { value: '2025/2026' } });
     expect(session).toHaveValue(currentAcademicSession());
-    fireEvent.change(screen.getByLabelText('Course code'), { target: { value: 'CYB 225' } });
+    fireEvent.change(code, { target: { value: 'CYB 224' } });
+    expect(screen.getByLabelText(/Title/)).toHaveValue('Information and Big Data Security');
+    expect(screen.getByLabelText(/Title/)).toHaveAttribute('readonly');
     fireEvent.click(screen.getByRole('button', { name: 'Create course' }));
     await waitFor(() => expect(mocks.state.inserts).toHaveLength(1));
     expect(mocks.state.inserts[0]).not.toHaveProperty('threshold_pct');
+    expect(mocks.state.inserts[0]).toMatchObject({ course_code: 'CYB 224', course_title: 'Information and Big Data Security' });
     expect(mocks.state.inserts[0].academic_session).toBe(currentAcademicSession());
+  });
+
+  it('refuses an arbitrary course code even if the select receives one', async () => {
+    render(<CourseRep />);
+    const code = screen.getByLabelText('Course code');
+    await screen.findByRole('option', { name: /CYB 224/ }, { timeout: 5000 });
+    expect(code.tagName).toBe('SELECT');
+    expect(code.querySelector('option[value="CYB 225"]')).toBeNull();
+    fireEvent.change(code, { target: { value: 'CYB 225' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create course' }));
+    expect(mocks.state.inserts).toHaveLength(0);
+    expect(screen.getByRole('status')).toHaveTextContent('Enter a valid course code');
   });
 
   it('invites a lecturer by email', async () => {
