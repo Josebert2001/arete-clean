@@ -56,14 +56,15 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
     if (!isAcademicSession(session)) { setMessage({ ok: false, text: 'Write the session as two consecutive years, e.g. 2026/2027.' }); return; }
 
     setBusy(true);
-    const { error } = await supabase.from('course_offerings').insert({
+    const values = {
       course_code:      code.trim().toUpperCase(),
       course_title:     title.trim() || null,
       department,
       level,
       academic_session: session.trim(),
-      threshold_pct:    Math.min(100, Math.max(1, Number(threshold) || 70)),
-    });
+      ...(!scope ? { threshold_pct: Math.min(100, Math.max(1, Number(threshold) || 70)) } : {}),
+    };
+    const { error } = await supabase.from('course_offerings').insert(values);
     setBusy(false);
     if (error) {
       setMessage({ ok: false, text: error.code === '23505' ? 'That course already exists for this level and session.' : 'Could not create the course.' });
@@ -120,10 +121,14 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
           <span className="mb-1 block text-xs font-medium text-ink">Academic session</span>
           <input id="offering-session" value={session} onChange={e => setSession(e.target.value)} placeholder="2026/2027" className={field} />
         </label>
-        <label className="block" htmlFor="offering-threshold">
-          <span className="mb-1 block text-xs font-medium text-ink">Attendance required (%)</span>
-          <input id="offering-threshold" type="number" min={1} max={100} value={threshold} onChange={e => setThreshold(e.target.value)} className={field} />
-        </label>
+        {scope ? (
+          <p className="text-sm text-coffee-700 sm:col-span-2">The lecturer sets the attendance requirement.</p>
+        ) : (
+          <label className="block" htmlFor="offering-threshold">
+            <span className="mb-1 block text-xs font-medium text-ink">Attendance required (%)</span>
+            <input id="offering-threshold" type="number" min={1} max={100} value={threshold} onChange={e => setThreshold(e.target.value)} className={field} />
+          </label>
+        )}
       </div>
       <button type="submit" disabled={busy} className="btn-primary mt-4 inline-flex items-center gap-1.5 text-sm disabled:opacity-60">
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Create course

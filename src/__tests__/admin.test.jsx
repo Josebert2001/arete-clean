@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     role: 'admin',
     user: { id: 'me' },
     rpcCalls: [],
+    inserts: [],
     staff: [{ id: 'l1', email: 'ada@uniuyo.edu.ng', full_name: 'Dr Ada', role: 'lecturer' }],
     found: [
       { id: 'u2', email: 'bassey@uniuyo.edu.ng', full_name: 'Bassey Etim', reg_number: null, role: null },
@@ -40,7 +41,7 @@ vi.mock('../components/useLecturer', () => ({
 function query() {
   const q = {
     select: () => q, order: () => q, eq: () => q, delete: () => q,
-    insert: async () => ({ error: null }),
+    insert: async (values) => { mocks.state.inserts.push(values); return { error: null }; },
     then: (resolve) => resolve({ data: [], error: null }),
   };
   return q;
@@ -67,6 +68,7 @@ vi.mock('../lib/supabase', () => ({
 beforeEach(() => {
   mocks.state.role = 'admin';
   mocks.state.rpcCalls = [];
+  mocks.state.inserts = [];
 });
 
 describe('Admin page', () => {
@@ -80,6 +82,16 @@ describe('Admin page', () => {
   it('lists current staff', async () => {
     render(<Admin />);
     expect(await screen.findByText('Dr Ada')).toBeInTheDocument();
+  });
+
+  it('keeps the threshold field for admin offering creation', async () => {
+    render(<Admin />);
+    const threshold = await screen.findByLabelText('Attendance required (%)');
+    fireEvent.change(threshold, { target: { value: '85' } });
+    fireEvent.change(screen.getByLabelText('Course code'), { target: { value: 'CYB 225' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create course' }));
+    await waitFor(() => expect(mocks.state.inserts).toHaveLength(1));
+    expect(mocks.state.inserts[0].threshold_pct).toBe(85);
   });
 
   it('finds a user and makes them a lecturer', async () => {

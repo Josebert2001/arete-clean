@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     repScope: { department: 'cybersecurity', level: '200L' },
     rpcCalls: [],
     fromCalls: [],
+    inserts: [],
     lecturers: [],
     offerings: [{ id: 'o1', course_code: 'CYB 224', course_title: 'Cyber Law', department: 'cybersecurity', level: '200L', academic_session: '2026/2027', threshold_pct: 70 }],
   },
@@ -24,7 +25,7 @@ function query(table) {
   const q = {
     select: () => q, order: () => q, delete: () => q, in: () => q,
     eq: (col, val) => { call.filters.push([col, val]); return q; },
-    insert: async () => ({ error: null }),
+    insert: async (values) => { mocks.state.inserts.push(values); return { error: null }; },
     then: (resolve) => resolve({ data: table === 'course_offerings' ? mocks.state.offerings : [], error: null }),
   };
   return q;
@@ -46,6 +47,7 @@ beforeEach(() => {
   mocks.state.repScope = { department: 'cybersecurity', level: '200L' };
   mocks.state.rpcCalls = [];
   mocks.state.fromCalls = [];
+  mocks.state.inserts = [];
   mocks.state.lecturers = [];
 });
 
@@ -64,6 +66,16 @@ describe('Course rep page', () => {
     expect(offeringQuery.filters).toEqual([['department', 'cybersecurity'], ['level', '200L']]);
     expect(screen.queryByLabelText('Department')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Level')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Attendance required (%)')).not.toBeInTheDocument();
+    expect(screen.getByText('The lecturer sets the attendance requirement.')).toBeInTheDocument();
+  });
+
+  it('omits the threshold when a rep creates an offering', async () => {
+    render(<CourseRep />);
+    fireEvent.change(screen.getByLabelText('Course code'), { target: { value: 'CYB 225' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create course' }));
+    await waitFor(() => expect(mocks.state.inserts).toHaveLength(1));
+    expect(mocks.state.inserts[0]).not.toHaveProperty('threshold_pct');
   });
 
   it('invites a lecturer by email', async () => {
