@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect, useMemo, useId } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, useId, Fragment } from 'react';
 import { BookOpen, Lightbulb, AlertTriangle, CheckCircle2, Circle, XCircle, ChevronDown, Layers, List, Sparkles, FileDown, ExternalLink, ListChecks } from 'lucide-react';
 import MoscaCalculator from './MoscaCalculator';
 import CodeBlock from './CodeBlock';
 import ExplainCode from './ExplainCode';
+import RevealGate from './RevealGate';
 import TopicLinks from './TopicLinks';
 import { useExplanations } from './useExplanations';
 import { loadSimplified } from '../data/lectureNotes/simplified';
@@ -24,6 +25,7 @@ import {
   requestSummary,
 } from '../utils/summarizeTopic';
 import { useAutoMarkRead } from './useReadingProgress';
+import ListenToTopic from './ListenToTopic';
 
 function DefinitionBox({ text }) {
   return (
@@ -312,7 +314,45 @@ function FiveVs({ items }) {
 // heads — supplied by TopicAccordion, which is the only level that knows which
 // sections belong under which heading. Sections that don't head a group (and the
 // `resource` cards, which have nothing to rewrite) get none and show no button.
-function Section({ section, simplifyReady, explainReady, explanations, simplifyText, bundledSimplified, plainEnglishMode, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
+// The read-along strip: the chunk actually being spoken, with the exact word
+// the engine just reported lit up. Rendered above the section being read — in
+// the text flow, where the student's eyes already are — rather than in the
+// player bar, which sits screens above the voice on a long topic.
+//
+// It reads useSpeech's own utterance text, not the note on screen: the same
+// words, but letter-spaced acronyms and converted maths included, exactly as
+// heard. That is what keeps it perfectly in sync with no mapping back to the
+// rendered note to maintain — the section-level wash already marks *where* in
+// the notes the voice is; this says exactly *what* it is saying right now.
+// `caption.start === -1` is a chunk that has started but has not had its
+// first word boundary yet (always true on Safari, which fires none at all) —
+// shown plain, with nothing picked out. Hidden from assistive tech: the same
+// words are already in the document as the actual note text, so a screen
+// reader repeating this every few hundred milliseconds would just be noise.
+// `data-read-along` is the hook the follow scroll and the tests use to find it.
+function ReadAlongStrip({ caption }) {
+  if (!caption) return null;
+  return (
+    <div data-read-along="true" aria-hidden="true" className="mb-4 rounded-lg border border-coffee-200 bg-coffee-50 px-3 py-2">
+      <p className="mb-1 text-[11px] font-mono font-bold uppercase tracking-widest text-coffee-500">
+        Listening — read along
+      </p>
+      <p className="text-sm leading-relaxed text-coffee-600">
+        {caption.start >= 0 ? (
+          <>
+            {caption.text.slice(0, caption.start)}
+            <span className="rounded bg-ember-500/20 px-0.5 font-semibold text-ink">
+              {caption.text.slice(caption.start, caption.end)}
+            </span>
+            {caption.text.slice(caption.end)}
+          </>
+        ) : caption.text}
+      </p>
+    </div>
+  );
+}
+
+function Section({ section, speaking = false, simplifyReady, explainReady, explanations, simplifyText, bundledSimplified, plainEnglishMode, context, collapsible = false, isOpen = true, onToggle, anchorId }) {
   const [simplify, setSimplify] = useState({ status: 'idle', text: '', error: '' });
   const [showOriginal, setShowOriginal] = useState(false);
   const abortRef = useRef(null);
@@ -359,7 +399,26 @@ function Section({ section, simplifyReady, explainReady, explanations, simplifyT
   };
 
   return (
-    <div className={open ? 'mb-6' : 'mb-1'}>
+    // The wash marks the section the voice is reading: a tint and a left rule
+    // rather than a full border.
+    //
+    // EVERY box-affecting class is present in both states and only the colours
+    // change, because the alternative reflows the page. Adding the padding and
+    // the rule only while speaking grew the section by their own size and shoved
+    // everything below it down each time the voice moved on — under the eyes of
+    // someone reading along, which is worse than having no highlight at all.
+    // Hence the transparent border and the horizontal-only padding, cancelled by
+    // the negative margin so the text keeps the same measure as the rest.
+    <div
+      // What the follow-the-voice scroll in TopicAccordion aims at. An attribute
+      // rather than a ref per section: the sections are rendered from three
+      // different branches below, and threading a ref through all of them to
+      // find the one element that is already marked would be work for nothing.
+      data-speaking={speaking ? 'true' : undefined}
+      className={`${open ? 'mb-6' : 'mb-1'} -mx-3 px-3 scroll-mt-24 rounded-lg border-l-2 transition-colors ${
+        speaking ? 'border-ember-500 bg-ember-500/10' : 'border-transparent'
+      }`}
+    >
       {section.heading && (
         <h4
           id={anchorId}
@@ -452,7 +511,7 @@ function Section({ section, simplifyReady, explainReady, explanations, simplifyT
               {section.type === 'note' && <NoteBox text={section.text} items={section.items} />}
               {section.type === 'image' && <Figure src={section.src} alt={section.alt} caption={section.caption} width={section.width} height={section.height} maxWidth={section.maxWidth} />}
               {section.type === 'code' && (
-                <>
+                <RevealGate reveal={section.reveal}>
                   <CodeBlock code={section.code} language={section.language || 'python'} showLineNumbers={false} />
                   {/* Program listings only. A `language: 'output'` block is the run
                       transcript, not code, and the explainer would try to read it
@@ -465,7 +524,8 @@ function Section({ section, simplifyReady, explainReady, explanations, simplifyT
                       {...(explanations ?? {})}
                     />
                   )}
-                </>
+                  {section.reveal?.note && <NoteBox text={section.reveal.note} />}
+                </RevealGate>
               )}
               {section.type === 'mosca' && <MoscaCalculator />}
               {section.type === 'resource' && <ResourceLink href={section.href} label={section.label} filename={section.filename} meta={section.meta} />}
@@ -551,6 +611,26 @@ function KeyPoints({ topic, plain, context }) {
   );
 }
 
+// ── Following the voice down the page ────────────────────────────────────────
+// §4.10 of docs/audio-playback-plan.md said no auto-scroll — "the wash is cheap
+// to find, worth revisiting only if the phone passes say otherwise". They said
+// otherwise: on a phone the section being read is usually a screen and a half
+// below the player by the time the voice reaches it, so following along meant
+// scrolling by hand every time it moved on.
+//
+// So it follows, but only when it has to. Nothing moves while the section is
+// already in the band a reader is looking at, which is the whole of the
+// read-along case, and a wheel or touch gesture holds it off for long enough
+// that it never pulls the page out from under someone reading something else.
+const FOLLOW_BAND_TOP = 88;      // clears the sticky navbar
+const FOLLOW_BAND_BOTTOM = 0.6;  // of the viewport height
+const FOLLOW_PAUSE_MS = 8000;
+// How long after our own scrollIntoView a `scroll` event is still ours. Chrome's
+// smooth scroll settles well inside this for any distance the follow covers;
+// overrunning it only costs one skipped follow, whereas too short a window would
+// have the page read its own scrolling as the student taking over.
+const SELF_SCROLL_MS = 1200;
+
 function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplifiedMap, explainReady, explanations, summarizeReady, context, tracksReading, isRead, onSetRead, mapEntry, mapPart, onJumpToTopic, headingLevel = 3 }) {
   const panelId = `lecture-panel-${index}`;
   const buttonId = `lecture-header-${index}`;
@@ -569,7 +649,117 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
     onRead: () => onSetRead(true),
   });
 
+  // Hearing a topic out is a read signal, and a stronger one than the dwell
+  // timer beside it: the dwell timer infers attention from a visible panel,
+  // whereas finishing the audio is elapsed time the student actually spent on
+  // this material. `clean` is false when they skipped, so pressing next to the
+  // end does not count — which is the same reason "Expand all" plus a fast
+  // scroll marks nothing (see useAutoMarkRead). Both run in parallel; whichever
+  // happens first marks the topic, and setRead is idempotent.
+  const onListenFinished = useCallback((clean) => {
+    if (clean && tracksReading && !isRead) onSetRead(true);
+  }, [tracksReading, isRead, onSetRead]);
+
   const items = useMemo(() => buildOutline(topic.sections), [topic.sections]);
+  const headedIndices = items.reduce((acc, it, ii) => (it.head ? [...acc, ii] : acc), []);
+  // Sub-sections collapse only when there are enough of them to feel like a
+  // wall of text; the first one starts open so the topic never looks empty.
+  const collapsibleSections = headedIndices.length >= 2;
+
+  // Outline index per section object, for placing the read-along strip. Only
+  // the flat branch below needs this — it renders raw sections and looks each
+  // one up here; the grouped branch (the common case) already knows its index
+  // from the loop, so skip building the map for it.
+  const outlineIndexBySection = useMemo(() => {
+    const bySection = new Map();
+    if (collapsibleSections) return bySection;
+    items.forEach((it, ii) => {
+      for (const s of it.head ? [it.head, ...(it.tail ?? [])] : [it.standalone]) bySection.set(s, ii);
+    });
+    return bySection;
+  }, [items, collapsibleSections]);
+
+  // Which outline item the voice is currently reading, or null when nothing is
+  // playing. `items` here and the units ListenToTopic speaks come from the SAME
+  // buildOutline call over the same sections, so the index means the same thing
+  // on both sides — see topicToSpeechUnits' outlineIndex.
+  const [speakingIdx, setSpeakingIdx] = useState(null);
+  const [following, setFollowing] = useState(true);
+  // Latched on the first section the voice reaches, and never cleared until the
+  // topic unmounts — NOT gated on `speakingIdx`, which goes back to null the
+  // moment the player is paused. Pausing to scroll up and re-read something is
+  // exactly the case this suppression exists for, and listeners that were off
+  // during the pause left nothing to suppress: resuming yanked the page
+  // straight back down.
+  const [followArmed, setFollowArmed] = useState(false);
+  // The read-along strip: the caption useSpeech is voicing, and the outline
+  // item it belongs to. Reported by ListenToTopic and rendered below, above
+  // the section being read, so the student reads along in the text flow
+  // rather than in the player bar.
+  //
+  // Latched per report like followArmed above, not gated on speakingIdx:
+  // pausing freezes the caption on the sentence the voice stopped at, so the
+  // strip stays where the student left it instead of vanishing mid-re-read.
+  const [readAlong, setReadAlong] = useState(null);
+  const onReadAlong = (caption, outlineIndex) => {
+    setReadAlong(
+      caption && outlineIndex !== null && outlineIndex !== undefined
+        ? { caption, outlineIndex }
+        : null,
+    );
+  };
+  // When the student last moved the page themselves, and the window in which a
+  // scroll is ours rather than theirs.
+  const userScrolledAt = useRef(0);
+  const selfScrollUntil = useRef(0);
+
+  useEffect(() => {
+    if (!followArmed) return undefined;
+    const seen = () => { userScrolledAt.current = Date.now(); };
+    // `wheel` and `touchmove` are unambiguous — a programmatic scroll fires
+    // neither — and they land before the page has even moved.
+    //
+    // But they are not every way a page gets scrolled: PageDown, Space, the
+    // arrow keys, dragging the scrollbar and find-in-page all move it without
+    // either, and a student reading ahead that way was being pulled back to the
+    // voice. `scroll` catches all of those — at the cost of also firing for our
+    // own smooth scroll, which is what `selfScrollUntil` exists to discount.
+    const onScroll = () => { if (Date.now() >= selfScrollUntil.current) seen(); };
+    window.addEventListener('wheel', seen, { passive: true });
+    window.addEventListener('touchmove', seen, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', seen);
+      window.removeEventListener('touchmove', seen);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [followArmed]);
+
+  useEffect(() => {
+    if (!following || speakingIdx === null) return;
+    if (Date.now() - userScrolledAt.current < FOLLOW_PAUSE_MS) return;
+    // The element the wash is on, whichever branch below rendered it.
+    const el = panelRef.current?.querySelector('[data-speaking="true"]');
+    if (!el?.scrollIntoView) return; // jsdom, and any browser that lacks it
+    const { top } = el.getBoundingClientRect();
+    const bottom = (window.innerHeight || 0) * FOLLOW_BAND_BOTTOM;
+    if (top >= FOLLOW_BAND_TOP && top <= bottom) return; // already where they are reading
+    // Claim the scrolls this is about to cause, so the listener above does not
+    // read our own smooth scroll as the student taking over.
+    selfScrollUntil.current = Date.now() + SELF_SCROLL_MS;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [speakingIdx, following, panelRef]);
+
+  // The sections that outline item covers, as a Set of the section objects
+  // themselves. Matching on identity rather than on an index because the two
+  // render branches below index differently — the grouped one by outline item,
+  // the flat one by section — and because a group's tail sections are being read
+  // just as much as its heading is.
+  const speakingSections = useMemo(() => {
+    const item = speakingIdx === null ? null : items[speakingIdx];
+    if (!item) return null;
+    return new Set(item.head ? [item.head, ...(item.tail ?? [])] : [item.standalone]);
+  }, [items, speakingIdx]);
 
   // Simplify text per heading group, keyed by the heading section itself so
   // either render branch below can look it up. Built here because buildOutline
@@ -607,10 +797,6 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
   const [plainEnglish, setPlainEnglish] = useState(false);
 
   const firstGroupIdx = items.findIndex((it) => it.head);
-  const headedIndices = items.reduce((acc, it, ii) => (it.head ? [...acc, ii] : acc), []);
-  // Sub-sections collapse only when there are enough of them to feel like a
-  // wall of text; the first one starts open so the topic never looks empty.
-  const collapsibleSections = headedIndices.length >= 2;
   const [openSections, setOpenSections] = useState(() => new Set(firstGroupIdx >= 0 ? [firstGroupIdx] : []));
   const allSectionsOpen = headedIndices.every((ii) => openSections.has(ii));
 
@@ -635,6 +821,28 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
       return next;
     });
 
+  // Told by ListenToTopic which outline item the voice has reached, and whether
+  // the student wants the page to follow it.
+  //
+  // Opening the group here rather than in an effect on `speakingIdx`: the voice
+  // reads straight through a topic including the groups the student has
+  // collapsed — and only one is open by default — so without this the highlight
+  // spends most of a listen inside a closed panel, which is the same as not
+  // having it. Opening is deliberately one-way; nothing re-collapses behind the
+  // voice, so a student who opened something to read along keeps it open.
+  const onSpeakingOutlineIndex = (idx, opts) => {
+    setFollowing(opts?.follow !== false);
+    setSpeakingIdx(idx);
+    if (idx === null) return;
+    setFollowArmed(true);
+    setOpenSections((prev) => {
+      if (prev.has(idx)) return prev;
+      const next = new Set(prev);
+      next.add(idx);
+      return next;
+    });
+  };
+
   const toggleAllSections = () =>
     setOpenSections(allSectionsOpen ? new Set() : new Set(headedIndices));
 
@@ -645,6 +853,15 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
 
   const lead = firstGroupIdx === -1 ? items : items.slice(0, firstGroupIdx);
   const rest = firstGroupIdx === -1 ? [] : items.slice(firstGroupIdx);
+
+  // The strip above an outline item's block, when the voice is (or was just)
+  // there. One strip per topic: a group that produces no speech is skipped by
+  // the player, so its index can never arrive here.
+  const readAlongFor = (outlineIndex) => (
+    readAlong && readAlong.outlineIndex === outlineIndex
+      ? <ReadAlongStrip caption={readAlong.caption} />
+      : null
+  );
 
   return (
     <div className="border border-coffee-200 rounded-xl bg-paper overflow-hidden">
@@ -719,12 +936,20 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
             </div>
           )}
 
+          {/* Renders nothing without the Web Speech API, or on a topic that is
+              listings with a sentence of glue — see canNarrate. No availability
+              probe: the voice is on the device, so there is no endpoint to ask. */}
+          <ListenToTopic topic={topic} onFinished={onListenFinished} onSpeakingOutlineIndex={onSpeakingOutlineIndex} onReadAlong={onReadAlong} />
+
           {showKeyPoints && <KeyPoints topic={topic} plain={plain} context={context} />}
 
           {collapsibleSections ? (
             <>
               {lead.map((it, ii) => (
-                <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
+                <Fragment key={ii}>
+                  {readAlongFor(ii)}
+                  <Section section={it.standalone} speaking={Boolean(speakingSections?.has(it.standalone))} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
+                </Fragment>
               ))}
 
               {headedIndices.length >= 4 && (
@@ -763,45 +988,66 @@ function TopicAccordion({ topic, index, isOpen, onToggle, simplifyReady, simplif
                 const ii = firstGroupIdx + i;
                 if (it.standalone) {
                   return (
-                    <Section key={ii} section={it.standalone} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
+                    <Fragment key={ii}>
+                      {readAlongFor(ii)}
+                      <Section section={it.standalone} speaking={Boolean(speakingSections?.has(it.standalone))} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
+                    </Fragment>
                   );
                 }
                 const openG = openSections.has(ii);
                 return (
-                  <div key={ii}>
-                    <Section
-                      section={it.head}
-                      simplifyReady={simplifyReady}
-                      explainReady={explainReady} explanations={explanations}
-                      simplifyText={groupText.get(it.head)}
-                      bundledSimplified={simplifiedForGroup.get(it.head)}
-                      plainEnglishMode={plainEnglish}
-                      context={sectionContext}
-                      collapsible
-                      isOpen={openG}
-                      onToggle={() => toggleSection(ii)}
-                      anchorId={`${panelId}-sec-${ii}`}
-                    />
-                    {openG && it.tail.map((s, si) => (
-                      <Section key={si} section={s} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
-                    ))}
-                  </div>
+                  <Fragment key={ii}>
+                    {/* Opening is one-way (see onSpeakingOutlineIndex), but a
+                        student can still collapse a group the voice is reading
+                        back down by hand — the strip would then be quoting
+                        tail text that is no longer on screen. */}
+                    {openG && readAlongFor(ii)}
+                    <div>
+                      <Section
+                        section={it.head}
+                        speaking={Boolean(speakingSections?.has(it.head))}
+                        simplifyReady={simplifyReady}
+                        explainReady={explainReady} explanations={explanations}
+                        simplifyText={groupText.get(it.head)}
+                        bundledSimplified={simplifiedForGroup.get(it.head)}
+                        plainEnglishMode={plainEnglish}
+                        context={sectionContext}
+                        collapsible
+                        isOpen={openG}
+                        onToggle={() => toggleSection(ii)}
+                        anchorId={`${panelId}-sec-${ii}`}
+                      />
+                      {openG && it.tail.map((s, si) => (
+                        <Section key={si} section={s} speaking={Boolean(speakingSections?.has(s))} simplifyReady={simplifyReady} explainReady={explainReady} explanations={explanations} context={sectionContext} />
+                      ))}
+                    </div>
+                  </Fragment>
                 );
               })}
             </>
           ) : (
-            topic.sections.map((section, si) => (
-              <Section
-                key={si}
-                section={section}
-                simplifyReady={simplifyReady}
-                explainReady={explainReady} explanations={explanations}
-                simplifyText={groupText.get(section)}
-                bundledSimplified={simplifiedForGroup.get(section)}
-                plainEnglishMode={plainEnglish}
-                context={sectionContext}
-              />
-            ))
+            topic.sections.map((section, si) => {
+              // Several flat sections can share one outline item (a head with
+              // its tail), but the strip belongs above the group — so only the
+              // first section of it takes the strip.
+              const outlineIndex = outlineIndexBySection.get(section);
+              const firstOfGroup = si === 0 || outlineIndexBySection.get(topic.sections[si - 1]) !== outlineIndex;
+              return (
+                <Fragment key={si}>
+                  {firstOfGroup && readAlongFor(outlineIndex)}
+                  <Section
+                    section={section}
+                    speaking={Boolean(speakingSections?.has(section))}
+                    simplifyReady={simplifyReady}
+                    explainReady={explainReady} explanations={explanations}
+                    simplifyText={groupText.get(section)}
+                    bundledSimplified={simplifiedForGroup.get(section)}
+                    plainEnglishMode={plainEnglish}
+                    context={sectionContext}
+                  />
+                </Fragment>
+              );
+            })
           )}
 
           {/* End of topic. The sentinel is what tells useAutoMarkRead the student

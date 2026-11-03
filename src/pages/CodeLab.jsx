@@ -49,7 +49,7 @@ function SecurityMark() {
 const trackExtras = {
   java: {
     Mark: JavaMark,
-    why: 'COS 211 / 221 · Required for your degree. Deep interactive track with full module content, quizzes, and a live Java playground.',
+    why: 'COS 221 · Required for your degree. Deep interactive track with full module content, quizzes, and a live Java playground.',
     bullets: ['13 full modules', 'Live code playground', 'Practice quizzes', 'Mini projects'],
   },
   python: {

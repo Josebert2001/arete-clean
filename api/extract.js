@@ -25,16 +25,13 @@
 //  `authenticated`, so the browser cannot write the row at all any more.
 // ============================================================================
 
-import { createRequire } from 'module';
+// pdf-parse is CJS; import its internal module directly to skip the package
+// entry point's test-file auto-detection.
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { serviceRoleClient, serviceRoleConfigured } from './_lib/serviceRole.js';
 import { findCourseBySlug } from './_lib/courseData.js';
-
-// pdf-parse is CJS-only; createRequire lets us use it safely in ESM.
-// We import the internal module directly to skip its test-file auto-detection.
-const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse/lib/pdf-parse.js');
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const BUCKET = 'course-materials';

@@ -3,10 +3,12 @@ import { collectCourseSignals } from '../utils/planSignals';
 import { trackMeta } from '../data/trackMeta';
 
 const COURSE = { slug: 'ent-221', code: 'ENT 221' };
-// Matches the java track by courseCode; interactiveTrackPath match is the
-// COS 221 case (a second course reusing the same track).
-const JAVA_COURSE = { slug: 'cos-211', code: 'COS 211' };
-const JAVA_REUSE = { slug: 'cos-221', code: 'COS 221', interactiveTrackPath: '/tracks/java' };
+// Matches the java track by courseCode; JAVA_REUSE matches by
+// interactiveTrackPath alone (a second course reusing the same track).
+const JAVA_COURSE = { slug: 'cos-221', code: 'COS 221' };
+const JAVA_REUSE = { slug: 'csc-999', code: 'CSC 999', interactiveTrackPath: '/tracks/java' };
+// COS 211 is taught in MATLAB: it must not pick up Java-track progress.
+const MATLAB_COURSE = { slug: 'cos-211', code: 'COS 211' };
 
 const javaTrack = trackMeta.java;
 const javaModuleIds = javaTrack.moduleIndex.map(m => m.id);
@@ -38,19 +40,20 @@ describe('collectCourseSignals', () => {
       completedModules: javaModuleIds.slice(0, 12), // 12/13 ≈ 92%
       quizScores: { [javaModuleIds[0]]: { score: 9, total: 10 } },
     }));
-    const signals = collectCourseSignals([JAVA_COURSE, JAVA_REUSE]);
-    expect(signals['cos-211']).toEqual({ quizPercent: 90, trackPercent: 92, trackLabel: 'Java' });
+    const signals = collectCourseSignals([JAVA_COURSE, JAVA_REUSE, MATLAB_COURSE]);
     expect(signals['cos-221']).toEqual({ quizPercent: 90, trackPercent: 92, trackLabel: 'Java' });
+    expect(signals['csc-999']).toEqual({ quizPercent: 90, trackPercent: 92, trackLabel: 'Java' });
+    expect(signals['cos-211']).toBeUndefined();
   });
 
   it('prefers the course quiz over the linked track quiz average', () => {
     localStorage.setItem('course-quizzes-v1', JSON.stringify({
-      quizScores: { 'cos-211': { score: 4, total: 10 } },
+      quizScores: { 'cos-221': { score: 4, total: 10 } },
     }));
     localStorage.setItem(javaTrack.storageKey, JSON.stringify({
       completedModules: javaModuleIds.slice(0, 2),
       quizScores: { [javaModuleIds[0]]: { score: 10, total: 10 } },
     }));
-    expect(collectCourseSignals([JAVA_COURSE])['cos-211'].quizPercent).toBe(40);
+    expect(collectCourseSignals([JAVA_COURSE])['cos-221'].quizPercent).toBe(40);
   });
 });

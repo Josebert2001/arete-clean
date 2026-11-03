@@ -90,10 +90,10 @@ GST 212 | Philosophy, Logic and Human Existence | 2 units
 Skills: propositional logic (truth tables, connectives), argument validity, fallacies, epistemology, ethics (utilitarianism, deontology, virtue ethics), philosophy of mind, bioethics, cyberethics.
 Tips: Truth tables come up in COS 211 boolean logic. Apply ethical frameworks to technology case studies in exam essays.
 
-COS 211 | Computer Programming I — Java | 3 units
-Skills: Java OOP (classes, objects, constructors, encapsulation, inheritance, polymorphism, abstraction, interfaces), exception handling, Java Collections Framework (ArrayList, HashSet, HashMap), file I/O (FileReader, FileWriter, BufferedWriter), JDBC and database connectivity, Swing GUI programming, event handling.
-Textbooks: "Head First Java" (Sierra & Bates, 3rd ed); "Java: The Complete Reference" (Herbert Schildt).
-Tips: Use the Java interactive track on Areté (13 modules) — it covers COS 211 completely. Do not memorise syntax; understand the concepts. Build the mini projects for every module.
+COS 211 | Computer Programming I — Scientific Programming with MATLAB | 3 units
+Skills: scientific problem solving (problem identification, algorithm design, implementation, testing), algorithms and their properties, pseudocode, flowchart symbols and rules, error types (syntax, logical, run-time), programming paradigms; MATLAB variables and data types, operator precedence, relational and logical operators (element-wise vs short-circuit), if/elseif/switch, for and while loops, arrays and matrices (det, inv, eig, transpose), structures, cell arrays and tables, functions, plotting (plot, histogram, bar), OOP with classdef; generative AI and prompt engineering for programmers.
+Textbooks: "MATLAB: A Practical Introduction to Programming and Problem Solving" (Stormy Attaway); "Essential MATLAB for Engineers and Scientists" (Hahn & Valentine).
+Tips: Taught in MATLAB from the lab manual "Problem Solving and Programming with MATLAB" — the Java track belongs to COS 221, not this course. GNU Octave is a free way to run the listings. Draw the flowchart before coding; know = vs ==, ^ vs .^, & vs &&.
 
 CYB 211 | Introduction to Cybersecurity and Strategy | 2 units
 Skills: threat landscape (malware types, social engineering, phishing, ransomware), attack lifecycle, NIST Cybersecurity Framework (Identify, Protect, Detect, Respond, Recover), cybersecurity governance, national and international cybersecurity strategies, zero-trust architecture introduction.
@@ -272,7 +272,7 @@ Tips: Draw the SIP call-setup flow from memory. Understand why NAT breaks VoIP b
 export const MODULE_KNOWLEDGE = `
 === INTERACTIVE PROGRAMMING TRACKS — FULL MODULE CATALOGUE ===
 
-── JAVA TRACK (COS 211 / COS 221) — 13 modules ──────────────────────────────
+── JAVA TRACK (COS 221) — 13 modules ────────────────────────────────────────
 
 Module 01 | Java Foundations — Variables, Data Types & Hello World
 Theory: What is Java | JVM and "Write Once Run Anywhere" | Structure of a Java program (class, main method) | Primitive data types (int, double, String, boolean, char) | Variable declaration and initialisation | Taking user input with Scanner

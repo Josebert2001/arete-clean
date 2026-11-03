@@ -43,7 +43,7 @@ node scripts/validate-modules.mjs  # validate module data structure
 ## Architecture
 ```
 Browser → React SPA (Vite)
-           ├── React Router (15 routes in App.jsx)
+           ├── React Router (30 routes in App.jsx)
            ├── AuthContext (Supabase OTP auth, profile state)
            ├── useProgress hook (localStorage + Supabase dual sync, 1s debounce)
            └── /api/* (Vercel serverless)
@@ -60,7 +60,21 @@ Browser → React SPA (Vite)
 ## Key Files Map
 | File | Purpose |
 |------|---------|
-| `src/App.jsx` | Root router — all 15 routes, Error Boundary, auth watcher |
+| `src/App.jsx` | Root router — all 30 routes, Error Boundary, auth watcher |
+| `src/pages/CheckIn.jsx` | Student check-in: discovers open classes, sends the board code, browser device ID, and available coordinates to `check_in()` |
+| `src/pages/MyAttendance.jsx` | Student's own course attendance percentages and check-in history |
+| `src/pages/TeachSession.jsx` | Assigned lecturer's class sessions, rotating codes, optional geofence, manual marks, roster adds, and device resets |
+| `src/pages/Register.jsx` | Lecturer's course roster and attendance summary, with register export |
+| `src/pages/Admin.jsx` | Admin console for staff roles, course reps, offerings, lecturer assignments, invite approvals, and manual-attendance audit |
+| `src/pages/CourseRep.jsx` | Rep's own cohort offerings and lecturer invitations; reps do not mark attendance |
+| `src/pages/Invitations.jsx` | Invitee's lecturer invitations and acceptance flow; first-time lecturers await admin approval |
+| `src/utils/deviceId.js` | Browser-stored random ID sent at check-in for device binding; the database stores the ID as sent |
+| `src/utils/geolocation.js` | Requests browser coordinates; returns null coordinates if unavailable or denied |
+| `src/utils/locationSafety.js` | Finite-number and bounds checks for campus place links |
+| `src/utils/rpcAction.js` | Flattens attendance action RPC replies into a status and raw row |
+| `src/utils/academicSession.js` | Defaults and validates academic-session strings for the admin offering form |
+| `src/components/useLecturer.js` | Loads the signed-in user's role, linked offerings, and course-rep scope; database RLS enforces access |
+| `src/components/useLevelGate.js` | Prompts signed-out users to sign in after choosing a study level and stores that choice for the return visit |
 | `src/context/AuthContext.jsx` | Supabase auth state, signInWithEmail, signOut, refreshProfile |
 | `src/components/useProgress.js` | Progress tracking hook — localStorage + Supabase sync |
 | `src/lib/supabase.js` | Supabase client + token helpers |
@@ -94,7 +108,7 @@ Browser → React SPA (Vite)
 | `src/data/lectureNotes/index.js` | Lazy note registry + `NOTE_TOPIC_COUNTS` / `noteTopicCount()` — topic counts *without* loading a chunk, so the 57 course cards can size their progress bars. `validate-modules.mjs` fails the build if the map drifts from the real files |
 | `src/components/CourseQuiz.jsx` \| `Quiz.jsx` | MCQ practice off `course.quiz` — student picks a length, questions sampled at random, options shuffled per attempt. Scores land in `quizScores[course.slug]` under the `course-quizzes-v1` key |
 | `src/components/CourseExamPrep.jsx` | Written-exam practice off `course.examPrep`, for courses examined on paper rather than by CBT. Generic over any course carrying a bank; see "Adding a question bank" below for why it is a sibling field and not more question types on `quiz` |
-| `src/data/lectureNotes/*Quiz.js` \| `*ExamPrep.js` | The question banks. **7 MCQ (`quiz`)** — UUY-CYB 121, UUY-CYB 123, ENT 221, CYB 224, CYB 222, UUY-CYB 221, UUY-CYB 222 — and **6 written (`examPrep`)** — UUY-CYB 122, COS 221, CYB 224, CYB 222, UUY-CYB 221, UUY-CYB 222. `ent221Quiz.js` is the shared one, imported by both catalogues' ENT 221 entries; the rest sit on their course. These counts feed `courseOfferings()`, so they are quoted verbatim in every public course description and meta tag — a bank added without a rebuild leaves the indexed page understating the course |
+| `src/data/lectureNotes/*Quiz.js` \| `*ExamPrep.js` | The question banks. **7 MCQ (`quiz`)** — UUY-CYB 121, UUY-CYB 123, ENT 221, CYB 224, CYB 222, UUY-CYB 221, UUY-CYB 222 — and **7 written (`examPrep`)** — UUY-CYB 122, COS 221, INS 224, CYB 224, CYB 222, UUY-CYB 221, UUY-CYB 222. `ent221Quiz.js` and `cos221ExamPrep.js` are the shared ones, imported by both catalogues' entries for those courses; the rest sit on their own course. `courseOfferings()` counts the arrays themselves at run time, so a public course description and its meta tags always quote the live figure — but those pages are prerendered, so a bank added without a rebuild leaves the indexed page understating the course |
 | `api/_lib/supabase.js` | Server-side Supabase client using Bearer token from request |
 | `api/_lib/serviceRole.js` | **The only file allowed to read `SUPABASE_SERVICE_ROLE_KEY`.** That key bypasses RLS entirely, so every use of it is a place where the database's protections do not apply and the calling code alone is responsible for scoping — keeping the read in one module keeps that list greppable (`serviceRoleClient(`). Two callers today: `googleAuth.js` and `extract.js`. Any new one must scope by an already-verified user id, and should prefer the caller's own `student.db` unless the server must write something the user must not be able to forge |
 | `api/_lib/googleAuth.js` | Google OAuth2 client, signed `state` (CSRF), refresh-token storage via `serviceRole.js`. Refresh tokens are **encrypted at rest** (AES-256-GCM) — the column GRANTs govern who may SELECT the value, but a leaked service-role key or a database dump would otherwise hand over every token in plaintext. The key is HKDF-derived from `GOOGLE_CLIENT_SECRET` rather than being a new env var, so it lives in Vercel and never in the database; a dump alone is useless. Legacy plaintext rows are read as-is and re-encrypted lazily on first use, so nothing needs backfilling and nobody reconnects. Rotating `GOOGLE_CLIENT_SECRET` makes existing ciphertexts unreadable — acceptable, since rotating it invalidates the OAuth client anyway |
@@ -107,6 +121,7 @@ Browser → React SPA (Vite)
 | `supabase/migrations/20260728*` | Multi-department columns: `profiles.department/department_other/selected_courses`, `course_materials.department` (applied). Every migration must end with `NOTIFY pgrst, 'reload schema';` or the API rejects the new columns with PGRST204 |
 | `supabase/migrations/20260801000000_materials_department_backfill.sql` | Sorts existing `course_materials` rows into their pool ('general' for shared courses) + indexes both lookup pairs. **Run manually in the Supabase SQL editor** |
 | `supabase/migrations/20260802000000_reg_number_optional.sql` | Drops `NOT NULL` from `profiles.reg_number`. **Run manually before deploying the optional-reg-number frontend**, or every signup that leaves the field blank fails |
+| `supabase/migrations/20260917*`–`20260925*` | Attendance sessions, device and location checks, rosters, admin roles, course reps, lecturer invitations and approval, and manual-attendance audit. Apply manually in the Supabase SQL editor, in order, like the other migrations |
 | `vercel.json` | CSP, HSTS, CORS headers, SPA rewrite rule. HSTS is `max-age=63072000; includeSubDomains` — Vercel sends the max-age by default and this restates it with subdomain coverage. `preload` is deliberately omitted: it ships inside browser releases and takes months to reverse, which is not a commitment worth making here |
 | `scripts/validate-modules.mjs` | Pre-build module structure validator — also validates every catalogue's `course.quiz` and `course.examPrep` banks |
 | `src/data/publicCatalogue.js` | **The publicly readable slice of the catalogue** — which courses have a public page, and each page's title, description, canonical URL and schema.org `Course` block. One module because two very different callers must agree: the browser (a signed-out visitor opening a course) and `scripts/prerender.mjs` (build time). If they disagreed, the indexed page and the live page would drift. Only `status: 'full'` departments are listed; foundation mode is a filtered view of `courses.js`, so listing it too would publish duplicates of the same slug |
@@ -167,7 +182,7 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 ## Testing — Important Context
 The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-library/react` available for component tests.
 - Config: `vitest.config.js` · setup file: `src/__tests__/setup.js` (imports `@testing-library/jest-dom`)
-- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 26 suites, ~290 tests.
+- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 66 suites, ~945 tests.
 - Run with `npm test` (single run) or `npm run test:watch`. CI runs `npm test` on every push.
 - When writing new logic, add or extend a test if the function is testable in isolation. Coverage is uneven — data/util logic is reasonably covered, most page-level components are not.
 - **Component tests use `fireEvent` from `@testing-library/react`** (see `profileForm.test.jsx`, `courseExamPrep.test.jsx`). `@testing-library/user-event` is *not* a dependency — do not import it.
@@ -201,7 +216,9 @@ The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-
 
   **Mark scheme lines must end with their mark value in parentheses** — `'Due care defined (2)'`. `CourseExamPrep.jsx` parses that trailing value to compute the student's self-marked score, and `validate-modules.mjs` asserts the per-point values sum to the question's `marks`; an unbalanced scheme would otherwise make full marks silently unreachable. Recall drills score a mark per item, so `items.length` must equal `marks`.
 
-  A bank shared between catalogues (like `ent221Quiz`) lives in `src/data/lectureNotes/` beside the notes it tests and is imported by each catalogue's course entry. Run `node scripts/validate-modules.mjs` after editing either kind.
+  **Tag every `examPrep` question with a `chapter`** — a label string such as `'Chapter 2 · Feasibility Study'`, not a number. `CourseExamPrep.jsx` groups its "Or pick by…" pills on `chapter` when *any* question in the bank declares one, and falls back to the `Topic N` prefix of `source` otherwise, so the older untagged banks are unaffected. Chapter means the **textbook chapter**, not the lecture-note topic: INS 224's 27 topics are seven chapters, and grouping it by topic offered 27 pills where a student revising for that paper thinks in chapters. `source` stays the finer "what to re-read" pointer on the question itself. `ins224ExamPrep.js` is the worked example — 111 questions over seven chapters, built from the lecturer's own Review Questions block at the end of each one.
+
+  A bank shared between catalogues (like `ent221Quiz` or `cos221ExamPrep`) lives in `src/data/lectureNotes/` beside the notes it tests and is imported by each catalogue's course entry. Run `node scripts/validate-modules.mjs` after editing either kind.
 - **Adding a department:** Query demand first (`SELECT lower(trim(department_other)), count(*) FROM profiles WHERE department_other IS NOT NULL GROUP BY 1 ORDER BY 2 DESC`). Then, three steps:
   1. Author `src/data/<dept>Courses.js` — **self-contained**, exporting `courses`, `LEVELS` and `levelMeta` (same shape as `courses.js`; copy `dataScienceCourses.js` as the model). Re-author the shared courses with your department's framing rather than importing another catalogue; do import the shared `./lectureNotes/*.js` for any course that has them, or students lose the transcribed workbook content. **When you import shared notes, write your own `noteCoverage` for that course** — a map of note number → `{ covers: [n], partial: [n] }`, where the indices are 1-based positions in *your* `topics` array. The note files carry no indices of their own precisely because they are shared; without it the Course Hub's outline badges point at whatever the other department's outline happened to say (`departments.test.js` asserts this). Mark SIWES courses `subject: 'siwes'` — the Course Hub keys its SIWES section off that, not off the level.
   2. Register it in `departments.js` with `status: 'full'` and a `loadCatalogue()` importing it. `SELECTABLE_DEPARTMENTS` and the SetupProfile/ProfileSettings pickers pick it up automatically.

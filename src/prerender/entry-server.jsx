@@ -252,8 +252,8 @@ export async function collectLlmsTxt({ buildDate } = {}) {
   const tools = [
     '## Guides and tools',
     '',
-    `- [Install Java, Python and C](${SITE_URL}/install): JDK 17 + Apache NetBeans for the COS 211`,
-    '  and COS 221 labs, Anaconda + JupyterLab for Python, GCC via MSYS2 for C.',
+    `- [Install Java, Python and C](${SITE_URL}/install): JDK 17 + Apache NetBeans for the COS 221`,
+    '  Java labs, Anaconda + JupyterLab for Python, GCC via MSYS2 for C.',
     '- AI Tutor: answers scoped to a student\'s year, department and course outline (account only).',
     '- Code Explainer: line-by-line plain-English walkthroughs of Java, Python, C and C++ listings.',
     '- Study Planner: weekly timetables exported to .ics or synced to Google Calendar.',

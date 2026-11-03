@@ -4,6 +4,7 @@
 //  redirects their browser to it, and lands back on api/google/callback.js.
 // ============================================================================
 
+import crypto from 'crypto';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
 import { createOAuth2Client, googleConfigured, signState, GOOGLE_SCOPES } from '../_lib/googleAuth.js';
@@ -63,7 +64,9 @@ export default async function handler(req, res) {
   }
 
   const returnTo = typeof req.body?.returnTo === 'string' ? req.body.returnTo.slice(0, 200) : '/planner';
-  const state = signState({ uid: student.user.id, returnTo });
+  const nonce = crypto.randomBytes(32).toString('base64url');
+  const nonceHash = crypto.createHash('sha256').update(nonce).digest('hex');
+  const state = signState({ uid: student.user.id, returnTo, nonceHash });
   if (!state) {
     return res.status(200).json({ notConfigured: true, error: 'Google isn’t connected yet on this deployment.' });
   }
@@ -79,5 +82,6 @@ export default async function handler(req, res) {
     state,
   });
 
+  res.setHeader('Set-Cookie', `arete_google_oauth=${nonce}; HttpOnly; Secure; SameSite=Lax; Path=/api/google; Max-Age=600`);
   return res.status(200).json({ url });
 }

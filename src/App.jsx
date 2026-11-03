@@ -4,8 +4,7 @@ import * as Sentry from '@sentry/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
-import FeedbackTab from './components/FeedbackTab';
-import CampusMapFloatingButton from './components/CampusMapFloatingButton';
+import FeedbackPrompt from './components/FeedbackPrompt';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -32,11 +31,25 @@ const Welcome = lazy(() => import('./pages/Welcome'));
 const About = lazy(() => import('./pages/About'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
+const CheckIn = lazy(() => import('./pages/CheckIn'));
+const MyAttendance = lazy(() => import('./pages/MyAttendance'));
+const TeachSession = lazy(() => import('./pages/TeachSession'));
+const Register = lazy(() => import('./pages/Register'));
+const Admin = lazy(() => import('./pages/Admin'));
+const CourseRep = lazy(() => import('./pages/CourseRep'));
+const Invitations = lazy(() => import('./pages/Invitations'));
 
-class ErrorBoundary extends Component {
+export class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, locationKey: props.locationKey };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.locationKey !== state.locationKey) {
+      return { hasError: false, locationKey: props.locationKey };
+    }
+    return null;
   }
 
   static getDerivedStateFromError() {
@@ -201,7 +214,7 @@ function RouteLoading() {
 export default function App() {
   // The tutor chat owns the full viewport below the navbar — the footer and
   // floating help chip would sit under (or overlap) its pinned composer.
-  const { pathname } = useLocation();
+  const { pathname, key: locationKey } = useLocation();
   const isChatPage = pathname === '/tutor';
 
   return (
@@ -220,7 +233,7 @@ export default function App() {
       <AuthStateWatcher />
       <Navbar />
       <main id="main" className="flex-1 relative z-10">
-        <ErrorBoundary>
+        <ErrorBoundary locationKey={locationKey}>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -242,6 +255,13 @@ export default function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/setup-profile" element={<SetupProfile />} />
             <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />
+            <Route path="/attendance" element={<RequireAuth><CheckIn /></RequireAuth>} />
+            <Route path="/my-attendance" element={<RequireAuth><MyAttendance /></RequireAuth>} />
+            <Route path="/teach" element={<RequireAuth><TeachSession /></RequireAuth>} />
+            <Route path="/register" element={<RequireAuth><Register /></RequireAuth>} />
+            <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
+            <Route path="/rep" element={<RequireAuth><CourseRep /></RequireAuth>} />
+            <Route path="/invitations" element={<RequireAuth><Invitations /></RequireAuth>} />
             <Route path="/welcome" element={<Welcome />} />
             {/* Public, like /install and /courses — it is prerendered, listed
                 in the sitemap, and is the page the author entity in
@@ -257,8 +277,9 @@ export default function App() {
       </main>
       {!isChatPage && <Footer />}
       {!isChatPage && <FloatingHelp />}
-      {!isChatPage && <FeedbackTab />}
-      {!isChatPage && <CampusMapFloatingButton />}
+      {!isChatPage && <FeedbackPrompt />}
+      {/* Campus Places launcher (CampusMapFloatingButton) is paused until the
+          places have real coordinates — re-add the import and this line then. */}
       <PWAUpdatePrompt />
     </div>
     </StudyDaysProvider>

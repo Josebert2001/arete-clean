@@ -64,8 +64,8 @@ describe('findCourseEntry — lecture-note grounding', () => {
   });
 
   it('omits the lecture-notes block for a course that has none', async () => {
-    // CYB 211 has a catalogue entry but no lectureNotes in courses.js.
-    const { outline } = await findCourseEntry('CYB 211');
+    // GST 212 has a catalogue entry but no lecture notes.
+    const { outline } = await findCourseEntry('GST 212');
     expect(outline).not.toContain('LECTURE NOTES');
   });
 });

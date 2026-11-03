@@ -1,0 +1,613 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CalendarCheck, Clock, Loader2, Lock, Maximize, Plus, RefreshCw, UserPlus, Users, X } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
+import { useLecturer } from '../components/useLecturer';
+import { getLocation } from '../utils/geolocation';
+
+// A short, easy-to-read code (no confusable 0/O/1/I). Shown on the projector
+// and rotated every 30s so a forwarded screenshot is stale before it arrives.
+function makeCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c = '';
+  for (let i = 0; i < 4; i++) c += chars[Math.floor(Math.random() * chars.length)];
+  return c;
+}
+
+const ROTATE_MS = 30000;
+
+export default function TeachSession() {
+  const { user } = useAuth();
+  const { status: roleStatus, isLecturer, offerings } = useLecturer();
+
+  const [offeringId, setOfferingId] = useState('');
+  const [windowMin, setWindowMin]   = useState(5);
+  const [geofence, setGeofence]     = useState(false);
+  const [radius, setRadius]         = useState(100);
+  const [title, setTitle]           = useState('');
+  const [session, setSession]       = useState(null);
+  const [records, setRecords]       = useState([]);
+  const [busy, setBusy]             = useState(false);
+  const [error, setError]           = useState('');
+
+  // Manual add
+  const [manualReg, setManualReg]   = useState('');
+  const [resetReg, setResetReg]     = useState('');
+  const [resetMsg, setResetMsg]     = useState('');
+  const [rosterReg, setRosterReg]   = useState('');
+  const [rosterMsg, setRosterMsg]   = useState('');
+
+  // Ticks every second while a session is open, for the countdown and so the
+  // screen notices when the check-in window has ended.
+  const [now, setNow] = useState(() => Date.now());
+  const codeRef = useRef(null);
+
+  const pollRef = useRef(null);
+  const rotateRef = useRef(null);
+
+  // Derived, not stateful — see the same pattern in Register.jsx for why.
+  const effectiveOfferingId = offeringId || offerings[0]?.id || '';
+
+  const offering = useMemo(
+    () => offerings.find(o => o.id === effectiveOfferingId) ?? null,
+    [offerings, effectiveOfferingId],
+  );
+
+  // Rehydrate an already-open session on mount. Without this, a reload mid-
+  // class (or the SPA remounting the page) reset `session` to null and fell
+  // back to the "Open session" form — which, now that the database enforces
+  // at most one open session per offering, just fails with "already open"
+  // and leaves the lecturer with no in-app way to see or close the session
+  // they themselves opened.
+  useEffect(() => {
+    if (!effectiveOfferingId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('class_sessions')
+        .select('*')
+        .eq('offering_id', effectiveOfferingId)
+        .eq('status', 'open')
+        .gt('closes_at', new Date().toISOString())
+        .maybeSingle();
+      if (!cancelled && data) setSession(data);
+    })();
+    return () => { cancelled = true; };
+  }, [effectiveOfferingId]);
+
+  // Load who has checked in, for the live list. Shared by the mount effect,
+  // the poll, and the manual Refresh button, so an error surfaces the same
+  // way regardless of which one triggered it.
+  const loadRecords = useCallback(async (sessionId) => {
+    const { data, error: e } = await supabase
+      .from('attendance_records')
+      .select('id, status, capture, full_name_snapshot, reg_number_snapshot, location_flagged, marked_at')
+      .eq('session_id', sessionId)
+      .order('marked_at', { ascending: false });
+    if (e) { setError('Could not load the check-in list. Please try again.'); return; }
+    setRecords(data ?? []);
+  }, []);
+
+  // While a session is open: poll the check-in list every few seconds, and
+  // rotate the code every 30s. Depends on session?.id, not session itself —
+  // rotate_code's own setSession() replaces the session object every 30s, and
+  // depending on the whole object tore this effect down and rebuilt both
+  // intervals (plus an extra loadRecords call) on every single rotation.
+  // Read by the rotation interval, so an extension applies without tearing
+  // the interval down.
+  const closesAtRef = useRef(0);
+  useEffect(() => {
+    closesAtRef.current = session ? new Date(session.closes_at).getTime() : 0;
+  }, [session]);
+
+  useEffect(() => {
+    if (!session?.id) return;
+    const tick = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(tick);
+  }, [session?.id]);
+
+  useEffect(() => {
+    const sessionId = session?.id;
+    if (!sessionId) return;
+    let cancelled = false;
+
+    (async () => { await loadRecords(sessionId); })();
+    pollRef.current = setInterval(() => loadRecords(sessionId), 4000);
+
+    // Guards against two overlapping rotate_code calls (a slow/reordered
+    // response): only the response to the MOST RECENT rotation may commit —
+    // otherwise an older request resolving after a newer one could overwrite
+    // the displayed code with a stale value the database no longer has.
+    let rotateToken = 0;
+    rotateRef.current = setInterval(async () => {
+      // Past the window, check_in() refuses every code, so a rotating one on
+      // the projector would only mislead students into trying.
+      if (Date.now() > closesAtRef.current) return;
+      const token = ++rotateToken;
+      const next = makeCode();
+      // rotate_code() returns FOUND — false when its UPDATE ... WHERE
+      // status = 'open' matched no row (e.g. a co-lecturer closed the
+      // session from another tab). Checking only `error` would still be null
+      // in that case, and the UI would display a code that was never
+      // actually persisted.
+      const { data, error: e } = await supabase.rpc('rotate_code', { p_session_id: sessionId, p_new_code: next });
+      if (cancelled || token !== rotateToken) return;
+      if (e || !data) { setError('Could not rotate the code. The one on screen may be stale.'); return; }
+      setSession(s => (s ? { ...s, checkin_code: next } : s));
+    }, ROTATE_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(pollRef.current);
+      clearInterval(rotateRef.current);
+    };
+  }, [session?.id, loadRecords]);
+
+  async function openSession() {
+    if (!offering) return;
+    setBusy(true);
+    setError('');
+
+    const code = makeCode();
+    const closesAt = new Date(Date.now() + windowMin * 60000).toISOString();
+
+    // Geofence fields — only set when the lecturer turned the hard block on.
+    let geoFields = {};
+    if (geofence) {
+      const { lat, lng } = await getLocation({ timeout: 8000 });
+      if (lat === null) {
+        setError('Could not get your location to set the class area. Turn on location, or uncheck the hard block.');
+        setBusy(false);
+        return;
+      }
+      geoFields = {
+        perimeter_lat: lat,
+        perimeter_lng: lng,
+        perimeter_radius_m: radius,
+        enforce_geofence: true,
+      };
+    }
+
+    const { data, error: e } = await supabase
+      .from('class_sessions')
+      .insert({
+        offering_id:  offering.id,
+        title:        title.trim() || null,
+        closes_at:    closesAt,
+        checkin_code: code,
+        created_by:   user.id,
+        ...geoFields,
+      })
+      .select()
+      .single();
+
+    if (e) {
+      // 23505 = unique_violation — the DB-enforced "at most one open session
+      // per offering" index, e.g. a co-lecturer already opened this class.
+      setError(e.code === '23505'
+        ? 'A session is already open for this course — check with your co-lecturer, or close it before opening a new one.'
+        : 'Could not open the session. You may not be assigned to this course.');
+      setBusy(false);
+      return;
+    }
+    setSession(data);
+    setBusy(false);
+  }
+
+  async function closeSession() {
+    if (!session) return;
+    setBusy(true);
+    const { error: e } = await supabase
+      .from('class_sessions')
+      .update({ status: 'closed' })
+      .eq('id', session.id);
+    setBusy(false);
+    if (e) { setError('Could not close the session.'); return; }
+    setSession(null);
+    setRecords([]);
+  }
+
+  async function addManual() {
+    if (!session || !manualReg.trim()) return;
+    setBusy(true);
+    setError('');
+
+    // Find the real student account by the reg number the lecturer typed, via
+    // find_student_by_reg() rather than a direct `profiles` select — the
+    // "lecturers read department roster" RLS policy only covers the
+    // lecturer's own department, which would silently fail to find a
+    // legitimate cross-department elective student. Manual attendance must
+    // link to the STUDENT'S account (not the lecturer's) so it counts toward
+    // that student's own percentage.
+    const { data: rows, error: findErr } = await supabase.rpc('find_student_by_reg', {
+      p_reg_number: manualReg.trim(),
+    });
+    const found = rows?.[0];
+
+    if (findErr) {
+      setError('Could not look up that reg number. Try again.');
+      setBusy(false);
+      return;
+    }
+    if (!found) {
+      setError('No student found with that reg number. Check it and try again.');
+      setBusy(false);
+      return;
+    }
+
+    const { error: e } = await supabase
+      .from('attendance_records')
+      .insert({
+        session_id:          session.id,
+        student_id:          found.id,             // the real student's account
+        status:              'manual',
+        capture:             'manual',
+        full_name_snapshot:  found.full_name,
+        reg_number_snapshot: found.reg_number,
+        manual_reason:       'no network / no device',
+        marked_by:           user.id,
+      });
+
+    // Manual add bypasses check_in(), which is where an ordinary check-in
+    // also puts the student on the roster — do the same here, or a manually
+    // added student stays invisible on their own /my-attendance and on the
+    // register itself if their profile doesn't match the offering's dept/level.
+    if (!e) {
+      const { error: rosterErr } = await supabase
+        .from('offering_students')
+        .upsert({ offering_id: session.offering_id, student_id: found.id }, { onConflict: 'offering_id,student_id' });
+      if (rosterErr) {
+        setBusy(false);
+        setError('Marked present, but could not add them to the roster — they may not show on the register yet.');
+        setManualReg('');
+        loadRecords(session.id);
+        return;
+      }
+    }
+
+    setBusy(false);
+    if (e) { setError('Could not add. This student may already be marked for this class.'); return; }
+    setManualReg('');
+    loadRecords(session.id);
+  }
+
+  // Reopens check-in for 5 more minutes after the window ended (a late
+  // start, a slow room). A fresh code too: the one on screen stopped rotating
+  // when the window closed, so check_in() would already reject it as stale.
+  async function extendSession() {
+    if (!session) return;
+    setBusy(true);
+    setError('');
+    const closesAt = new Date(Date.now() + 5 * 60000).toISOString();
+    const { error: e } = await supabase
+      .from('class_sessions')
+      .update({ closes_at: closesAt })
+      .eq('id', session.id)
+      .eq('status', 'open');
+    if (e) { setBusy(false); setError('Could not extend check-in.'); return; }
+    const next = makeCode();
+    const { data: rotated, error: rotErr } = await supabase.rpc('rotate_code', { p_session_id: session.id, p_new_code: next });
+    setBusy(false);
+    const codeOk = !rotErr && rotated;
+    setSession(s => (s ? { ...s, closes_at: closesAt, ...(codeOk ? { checkin_code: next } : {}) } : s));
+    setNow(Date.now());
+    if (!codeOk) setError('Check-in extended, but the code could not be refreshed. It will change within 30 seconds.');
+  }
+
+  // Puts a carryover / elective student on this course's list without marking
+  // them present. Until they're on it, a student whose profile department or
+  // level differs from the course never sees its sessions on their Check In
+  // page, and check_in() refuses them.
+  async function addToRoster() {
+    if (!offering || !rosterReg.trim()) return;
+    setBusy(true);
+    setRosterMsg('');
+    const { data: rows, error: findErr } = await supabase.rpc('find_student_by_reg', { p_reg_number: rosterReg.trim() });
+    const found = rows?.[0];
+    if (findErr) { setBusy(false); setRosterMsg('Could not look up that reg number. Try again.'); return; }
+    if (!found) { setBusy(false); setRosterMsg('No student found with that reg number.'); return; }
+    const { error: e } = await supabase
+      .from('offering_students')
+      .upsert({ offering_id: offering.id, student_id: found.id }, { onConflict: 'offering_id,student_id' });
+    setBusy(false);
+    if (e) { setRosterMsg('Could not add them. Please try again.'); return; }
+    setRosterMsg(`${found.full_name || found.reg_number} can now check in to ${offering.course_code}.`);
+    setRosterReg('');
+  }
+
+  function projectFullscreen() {
+    const el = codeRef.current;
+    if (!el?.requestFullscreen) return;
+    el.requestFullscreen().catch(() => setError('Full screen was blocked by the browser. Zoom in instead (Ctrl +).'));
+  }
+
+  // Lecturer resets a student's bound device (changed / lost phone). The
+  // student's next check-in binds their new device.
+  async function resetDevice() {
+    if (!resetReg.trim()) return;
+    setBusy(true);
+    setResetMsg('');
+    const { data, error: e } = await supabase.rpc('reset_student_device', { p_reg_number: resetReg.trim() });
+    setBusy(false);
+    if (e) { setResetMsg('Could not reset. Please try again.'); return; }
+    const row = Array.isArray(data) ? data[0] : data;
+    setResetMsg(row?.message ?? 'Done.');
+    if (row?.ok) setResetReg('');
+  }
+
+  if (roleStatus === 'loading') {
+    return <Centered><Loader2 className="h-5 w-5 animate-spin text-coffee-500" /></Centered>;
+  }
+  // A transient failure must not read as "you're not a lecturer" — role
+  // defaults to null on error, which would otherwise fall straight into the
+  // !isLecturer branch below and look identical to a real access denial.
+  if (roleStatus === 'error') {
+    return (
+      <Centered>
+        <p className="text-coffee-700">Could not check your access. Please reload the page.</p>
+      </Centered>
+    );
+  }
+  if (!isLecturer) {
+    return (
+      <Centered>
+        <Lock className="mb-3 h-6 w-6 text-coffee-400" />
+        <h1 className="display-heading mb-2 text-2xl text-ink">Lecturers only</h1>
+        <p className="text-coffee-700">This page is for staff running class attendance.</p>
+      </Centered>
+    );
+  }
+  if (!offerings.length) {
+    return (
+      <Centered>
+        <h1 className="display-heading mb-2 text-2xl text-ink">No courses assigned</h1>
+        <p className="text-coffee-700">
+          Your account is a lecturer account, but no courses are linked to it yet.
+          Ask the department admin to link your courses.
+        </p>
+      </Centered>
+    );
+  }
+
+  const remainingMs = session ? new Date(session.closes_at).getTime() - now : 0;
+  const windowOpen = remainingMs > 0;
+
+  const presentCount = records.filter(r => r.status === 'present' || r.status === 'manual').length;
+
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+      <header className="mb-8">
+        <p className="mb-2 font-mono text-xs uppercase tracking-widest text-coffee-500">Lecturer</p>
+        <h1 className="display-heading text-3xl text-ink sm:text-4xl">Run a class</h1>
+      </header>
+
+      {error && (
+        <div role="alert" className="mb-6 rounded-xl border border-rust/30 bg-rust/10 px-4 py-3 text-sm text-rust">
+          {error}
+        </div>
+      )}
+
+      {!session ? (
+        <>
+        <div className="rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-ink">Course</span>
+              <select
+                value={effectiveOfferingId}
+                onChange={e => setOfferingId(e.target.value)}
+                className="w-full rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-ink"
+              >
+                {offerings.map(o => (
+                  <option key={o.id} value={o.id}>
+                    {o.course_code} · {o.level} · {o.academic_session}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-ink">Check-in open for (minutes)</span>
+              <input
+                type="number" min={1} max={60}
+                value={windowMin}
+                onChange={e => setWindowMin(Number(e.target.value) || 5)}
+                className="w-full rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-ink"
+              />
+            </label>
+
+            <label className="block sm:col-span-2">
+              <span className="mb-1.5 block text-sm font-medium text-ink">Topic <span className="text-coffee-500">(optional)</span></span>
+              <input
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="e.g. Week 3 — Access control"
+                className="w-full rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-ink"
+              />
+            </label>
+
+            <div className="sm:col-span-2 rounded-lg border border-coffee-200 bg-paper p-3">
+              <label className="flex items-start gap-2 text-sm text-ink">
+                <input
+                  type="checkbox"
+                  checked={geofence}
+                  onChange={e => setGeofence(e.target.checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  Block check-ins outside the class location
+                  <span className="block text-xs text-coffee-500">
+                    Uses your current location as the class centre. Leave off unless
+                    you have a strong signal — GPS can wrongly block students indoors.
+                  </span>
+                </span>
+              </label>
+              {geofence && (
+                <label className="mt-3 block">
+                  <span className="mb-1 block text-xs font-medium text-ink">Allowed distance (metres)</span>
+                  <input
+                    type="number" min={20} max={1000}
+                    value={radius}
+                    onChange={e => setRadius(Number(e.target.value) || 100)}
+                    className="w-40 rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-sm text-ink"
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={openSession}
+            disabled={busy}
+            className="btn-primary mt-5 inline-flex items-center gap-2 text-sm disabled:opacity-60"
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarCheck className="h-4 w-4" />}
+            Open session
+          </button>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+          <p className="mb-1 text-sm font-medium text-ink">Add a student to {offering?.course_code ?? 'this course'}</p>
+          <p className="mb-3 text-xs text-coffee-500">
+            For carryover or elective students. Students whose department and level match
+            the course are already on it.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              id="roster-reg"
+              aria-label="Reg number of the student to add"
+              type="text" value={rosterReg} onChange={e => setRosterReg(e.target.value)}
+              placeholder="Reg number"
+              className="flex-1 rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-sm text-ink"
+            />
+            <button type="button" onClick={addToRoster} disabled={busy || !rosterReg.trim()} className="btn-ghost text-sm disabled:opacity-60">
+              <UserPlus className="mr-1.5 inline h-4 w-4" /> Add to course
+            </button>
+          </div>
+          {rosterMsg && <p className="mt-2 text-sm text-coffee-700">{rosterMsg}</p>}
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+          <p className="mb-1 text-sm font-medium text-ink">Reset a student's device</p>
+          <p className="mb-3 text-xs text-coffee-500">
+            Use this when a student changed or lost their phone. Their next check-in
+            registers the new device.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              type="text" value={resetReg} onChange={e => setResetReg(e.target.value)}
+              placeholder="Reg number"
+              className="flex-1 rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-sm text-ink"
+            />
+            <button type="button" onClick={resetDevice} disabled={busy || !resetReg.trim()} className="btn-ghost text-sm disabled:opacity-60">
+              Reset device
+            </button>
+          </div>
+          {resetMsg && <p className="mt-2 text-sm text-coffee-700">{resetMsg}</p>}
+        </div>
+        </>
+      ) : (
+        <>
+          {/* The big code for the projector, or, once the window has ended, a
+              clear "closed" state instead of a code nobody can use. */}
+          {windowOpen ? (
+            <div ref={codeRef} className="mb-6 flex flex-col items-center justify-center rounded-2xl border border-ember/30 bg-ember/5 p-6 text-center [&:fullscreen]:bg-paper">
+              <p className="mb-2 text-sm font-medium text-coffee-700">Show this code on the projector</p>
+              <p className="font-mono text-6xl font-bold tracking-[0.3em] text-ember sm:text-8xl">{session.checkin_code}</p>
+              <p className="mt-3 text-xs text-coffee-500">
+                Changes every 30 seconds · check-in closes in {formatRemaining(remainingMs)}
+              </p>
+              <button type="button" onClick={projectFullscreen} className="btn-ghost mt-3 text-xs">
+                <Maximize className="mr-1.5 inline h-3.5 w-3.5" /> Full screen
+              </button>
+            </div>
+          ) : (
+            <div className="mb-6 rounded-2xl border border-coffee-300 bg-cream p-6 text-center">
+              <Clock className="mx-auto mb-2 h-5 w-5 text-coffee-500" />
+              <p className="font-medium text-ink">Check-in window has ended</p>
+              <p className="mt-1 text-sm text-coffee-700">
+                Students can no longer check in. Extend it for latecomers, or close the session.
+              </p>
+              <button type="button" onClick={extendSession} disabled={busy} className="btn-ghost mt-3 text-sm disabled:opacity-60">
+                Extend 5 minutes
+              </button>
+            </div>
+          )}
+
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm text-coffee-700">
+              <Users className="h-4 w-4" /> {presentCount} checked in
+            </div>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => loadRecords(session.id)} className="btn-ghost text-sm">
+                <RefreshCw className="mr-1.5 inline h-4 w-4" /> Refresh
+              </button>
+              <button type="button" onClick={closeSession} disabled={busy} className="btn-primary text-sm disabled:opacity-60">
+                <X className="mr-1.5 inline h-4 w-4" /> Close session
+              </button>
+            </div>
+          </div>
+
+          {/* Manual add */}
+          <div className="mb-6 rounded-xl border border-coffee-200 bg-cream p-4">
+            <p className="mb-2 text-sm font-medium text-ink">Add a student manually (no network / no phone)</p>
+            <div className="flex flex-wrap gap-2">
+              <input
+                type="text" value={manualReg} onChange={e => setManualReg(e.target.value)}
+                placeholder="Reg number"
+                className="flex-1 rounded-lg border border-coffee-300 bg-paper px-3 py-2 text-sm text-ink"
+              />
+              <button type="button" onClick={addManual} disabled={busy || !manualReg.trim()} className="btn-ghost text-sm disabled:opacity-60">
+                <Plus className="mr-1.5 inline h-4 w-4" /> Add
+              </button>
+            </div>
+          </div>
+
+          {/* Live list */}
+          {records.length === 0 ? (
+            <p className="rounded-xl border border-coffee-200 bg-cream px-4 py-6 text-center text-coffee-700">
+              No check-ins yet. Students appear here as they enter the code.
+            </p>
+          ) : (
+            <ul className="divide-y divide-coffee-200 overflow-hidden rounded-2xl border border-coffee-200 bg-cream">
+              {records.map(r => (
+                <li key={r.id} className="flex items-center justify-between px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-ink">{r.full_name_snapshot || '(no name)'}</p>
+                    <p className="font-mono text-xs text-coffee-500">{r.reg_number_snapshot || '—'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {r.location_flagged && (
+                      <span className="rounded-md bg-ember/15 px-2 py-0.5 text-xs font-medium text-ember">⚠ location</span>
+                    )}
+                    {r.capture === 'manual' && (
+                      <span className="rounded-md bg-coffee-100 px-2 py-0.5 text-xs font-medium text-coffee-700">manual</span>
+                    )}
+                    <span className="rounded-md bg-moss/15 px-2 py-0.5 text-xs font-medium capitalize text-moss">present</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function formatRemaining(ms) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const m = Math.floor(total / 60);
+  const sec = String(total % 60).padStart(2, '0');
+  return `${m}:${sec}`;
+}
+
+function Centered({ children }) {
+  return (
+    <div className="mx-auto flex max-w-2xl flex-col items-center px-6 py-24 text-center">
+      {children}
+    </div>
+  );
+}

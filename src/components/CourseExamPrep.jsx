@@ -451,15 +451,29 @@ export default function CourseExamPrep({ course }) {
     return m ? m[1] : source;
   };
 
+  // A bank may declare a coarser revision unit than the topic: INS 224's notes
+  // are seven textbook chapters spread over 27 topics, and grouping that bank
+  // on "Topic N" would offer 27 pills where the student thinks in chapters.
+  // Where a question carries `chapter`, that string is the unit and the topic
+  // prefix is ignored; `source` stays the finer "what to re-read" pointer on
+  // each question. A bank with no `chapter` anywhere groups by topic exactly
+  // as before. Mixed banks are not a case worth handling — a bank either
+  // divides into chapters or it does not — so one declared chapter switches
+  // the whole picker over, and any question missing one falls back to its
+  // topic key rather than vanishing from the pills.
+  const groupsAreChapters = useMemo(() => bank.some((q) => q.chapter), [bank]);
+  const groupKeyOf = (q) => (groupsAreChapters && q.chapter) || topicKeyOf(q.source);
+
   const topics = useMemo(() => {
     const byTopic = new Map();
     for (const q of bank) {
-      const key = topicKeyOf(q.source);
+      const key = groupKeyOf(q);
       if (!byTopic.has(key)) byTopic.set(key, []);
       byTopic.get(key).push(q);
     }
     return [...byTopic.entries()];
-  }, [bank]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bank, groupsAreChapters]);
 
   const toggleTopic = (key) => {
     setSelectedTopics((prev) => (
@@ -696,7 +710,7 @@ export default function CourseExamPrep({ course }) {
       {topics.length > 1 && (
         <div className="mt-7">
           <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-3 flex items-center gap-2">
-            <ListFilter size={14} /> Or pick by topic
+            <ListFilter size={14} /> Or pick by {groupsAreChapters ? 'chapter' : 'topic'}
           </p>
           <div className="flex flex-wrap gap-2 mb-3">
             {topics.map(([source, qs]) => {
@@ -721,16 +735,19 @@ export default function CourseExamPrep({ course }) {
           </div>
           <button
             onClick={() => {
-              const picked = bank.filter((q) => selectedTopics.includes(topicKeyOf(q.source)));
+              const picked = bank.filter((q) => selectedTopics.includes(groupKeyOf(q)));
               start(shuffled(picked, picked.length));
             }}
             disabled={selectedTopics.length === 0}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-coffee-200 hover:border-rust hover:bg-rust/5 transition-all text-sm font-medium text-ink disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-coffee-200 disabled:hover:bg-transparent"
           >
             <Play size={13} className="text-rust" />
-            {selectedTopics.length === 0
-              ? 'Select one or more topics above'
-              : `Start · ${bank.filter((q) => selectedTopics.includes(topicKeyOf(q.source))).length} question${bank.filter((q) => selectedTopics.includes(topicKeyOf(q.source))).length === 1 ? '' : 's'} from ${selectedTopics.length} topic${selectedTopics.length === 1 ? '' : 's'}`}
+            {(() => {
+              const unit = groupsAreChapters ? 'chapter' : 'topic';
+              if (selectedTopics.length === 0) return `Select one or more ${unit}s above`;
+              const n = bank.filter((q) => selectedTopics.includes(groupKeyOf(q))).length;
+              return `Start · ${n} question${n === 1 ? '' : 's'} from ${selectedTopics.length} ${unit}${selectedTopics.length === 1 ? '' : 's'}`;
+            })()}
           </button>
         </div>
       )}

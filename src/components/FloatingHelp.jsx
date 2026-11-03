@@ -169,7 +169,7 @@ export default function FloatingHelp() {
   };
 
   return (
-    <div ref={panelRef} className="fixed bottom-3 right-3 z-50 print:hidden sm:bottom-5 sm:right-5">
+    <div ref={panelRef} className="floating-dock-item fixed bottom-3 right-3 z-50 print:hidden sm:bottom-5 sm:right-5">
       {open && (
         <div className="mb-3 w-[min(22rem,calc(100vw-1.5rem))] bg-paper border border-coffee-200 rounded-xl shadow-xl overflow-hidden">
 

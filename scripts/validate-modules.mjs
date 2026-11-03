@@ -49,7 +49,11 @@ const check = (cond, msg) => { if (!cond) errors.push(msg); };
 // banks listed below are held to the threshold and fail the build if they drift
 // back; every other bank reports a warning, so the remaining work stays visible
 // instead of being forgotten. Add a course code here once its bank is balanced.
-const LENGTH_BALANCED_BANKS = new Set(['UUY-CYB 222']);
+const LENGTH_BALANCED_BANKS = new Set([
+  'UUY-CYB 222',
+  'UUY-CYB 121', 'UUY-CYB 123', 'UUY-CYB 221',
+  'ENT 221', 'CYB 224', 'CYB 222',
+]);
 
 // Chance is 1/options. 0.40 leaves real headroom above the 0.25 four-option
 // baseline: this exists to catch a bank sliding back, not to police the noise in
@@ -224,7 +228,24 @@ for (const { department, courses } of catalogues) {
         check(isNonEmptyString(opt), where(qi, `options[${oi}] empty`));
       });
       check(isNonEmptyString(q?.explanation), where(qi, 'explanation missing'));
+
+      // Optional revision unit. A bank authored chapter by chapter (ENT 221)
+      // tags every question with one, and CourseQuiz offers a chapter picker
+      // that narrows the pool the length buttons draw from. It is the pill's
+      // own label, so it must be a non-empty string when present.
+      check(q?.chapter === undefined || isNonEmptyString(q.chapter),
+            where(qi, 'chapter must be a non-empty string when present'));
     });
+
+    // Half-tagging a bank is the one failure the picker cannot show: the
+    // untagged questions belong to no pill, so they are unreachable from the
+    // chapter picker and only ever appear in an unnarrowed draw. Either the
+    // whole bank declares chapters or none of it does.
+    const chaptered = c.quiz.filter((q) => q?.chapter !== undefined).length;
+    check(chaptered === 0 || chaptered === c.quiz.length,
+          `[${department}] course ${c.code ?? c.slug}: ${chaptered}/${c.quiz.length} quiz questions ` +
+          'declare a chapter — tag all of them or none, or the untagged ones ' +
+          'are unreachable from the chapter picker');
 
     // See LENGTH_BALANCED_BANKS above for why this is a ratchet rather than a
     // flat rule. Only well-formed questions are measured — a malformed one has
@@ -283,6 +304,13 @@ for (const { department, courses } of catalogues) {
       check(isNonEmptyString(q?.question), where(qi, 'question missing'));
       check(isNonEmptyString(q?.source), where(qi, 'source missing — students need the section to re-read'));
       check(typeof q?.marks === 'number' && q.marks > 0, where(qi, 'marks must be a positive number'));
+
+      // Optional coarser revision unit. A bank whose notes divide into textbook
+      // chapters (INS 224) tags every question with one, and CourseExamPrep
+      // groups the picker on it instead of on the "Topic N" prefix of `source`.
+      // It is the pill's own label, so it must be a non-empty string when present.
+      check(q?.chapter === undefined || isNonEmptyString(q.chapter),
+            where(qi, 'chapter must be a non-empty string when present'));
 
       // A code question prints a listing with the stem (`code`) or answers with
       // one (`modelCode`). `language` is mandatory alongside either, and not

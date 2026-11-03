@@ -221,7 +221,7 @@ export function installTitle() {
 export function installDescription() {
   return (
     `Step-by-step setup guides for ${INSTITUTION} students: JDK 17 and Apache NetBeans for the ` +
-    `COS 211/221 Java labs, Anaconda and JupyterLab for Python, and GCC via MSYS2 for C — with ` +
+    `COS 221 Java labs, Anaconda and JupyterLab for Python, and GCC via MSYS2 for C — with ` +
     `verification steps and the errors that actually come up.`
   );
 }
@@ -410,7 +410,7 @@ export const SITE_FAQS = [
   {
     q: 'What programming languages does Areté teach?',
     a:
-      `Java (13 modules, matching the COS 211 and COS 221 NetBeans labs), Python (12 modules), ` +
+      `Java (13 modules, matching the COS 221 NetBeans labs), Python (12 modules), ` +
       `and C (12 modules) — each with theory, annotated code, an in-browser playground, quizzes ` +
       `and a mini project. A twelve-room security track teaches capture-the-flag skills: the CIA ` +
       `triad, cryptography, SQL injection, the Linux command line, digital forensics and network ` +

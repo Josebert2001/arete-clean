@@ -206,7 +206,7 @@ export default function Home() {
         <div className="border-t border-coffee-200">
           {[
             { num: '01', title: 'All 4 Years', body: 'Every course from 100L to 400L — topic outlines, recommended textbooks, exam tips, and full lecture notes for a growing set of courses, with flashcards and plain-English rewrites built in.' },
-            { num: '02', title: '37 Modules', body: 'Java (COS 211), Python (COS 121), and C — full interactive tracks with theory, annotated code, live playgrounds, quizzes, and mini projects.' },
+            { num: '02', title: '37 Modules', body: 'Java (COS 221), Python (COS 121), and C — full interactive tracks with theory, annotated code, live playgrounds, quizzes, and mini projects.' },
             { num: '03', title: '12 CTF Rooms', body: 'A hands-on Security track of capture-the-flag challenges with escalating hints — practice real attack-and-defend thinking right in the browser, no setup needed.' },
             { num: '04', title: 'AI Tutor', body: 'Ask any question about any course in the programme. Knows the full curriculum from 100L to 400L and explains concepts at the right level for your year.' },
             { num: '05', title: 'Code Explainer', body: "Paste Java, Python, C, or C++ code and get a plain-English breakdown. Useful when a lecturer's example isn't clicking or you're debugging your own code." },
