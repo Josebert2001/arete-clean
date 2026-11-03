@@ -20,8 +20,14 @@
 //  Now every security-relevant field is derived here and none is trusted from
 //  the body: `uploaded_by` from the verified token, `course_code` and
 //  `department` from the catalogue via the uploader's own profile, and
-//  `extracted_text` from the bytes actually in storage. The matching migration
-//  (20260827010000_materials_server_insert.sql) revokes INSERT from
+//  `extracted_text` from the bytes actually in storage.
+//
+//  OWNERSHIP: a caller-scoped database RPC checks storage.objects.owner before
+//  and after the service-role download. Storage API reads of public buckets use
+//  a superuser and bypass the owner SELECT policy, so info()/download() cannot
+//  prove ownership. Only the verified object's bytes enter tutor context.
+//
+//  The matching migration (20260827010000_materials_server_insert.sql) revokes INSERT from
 //  `authenticated`, so the browser cannot write the row at all any more.
 // ============================================================================
 
@@ -56,11 +62,10 @@ const ALLOWED_EXT = new Set([
 ]);
 
 // Material paths are "<courseSlug>/<uploadedAtMs>-<rand>.<ext>" (see CourseMaterials.jsx).
-// Requiring sign-in plus a fresh timestamp keeps this endpoint scoped to a file the
-// caller just uploaded, instead of letting any signed-in user register any path
-// in the (public-read) bucket on demand.
+// The path timestamp limits future skew; actual age comes from storage.objects.
 const FILE_PATH_RE = /^([^/]+)\/(\d+)-[a-z0-9]+\.([a-z0-9]+)$/i;
 const MAX_UPLOAD_AGE_MS = 10 * 60 * 1000;
+const MAX_FUTURE_SKEW_MS = 2 * 60 * 1000;
 
 const MAX_DISPLAY_NAME = 200;
 const MAX_DESCRIPTION = 200;
@@ -103,7 +108,7 @@ export default async function handler(req, res) {
     message: 'You have uploaded a lot of materials just now. Please wait a few minutes and try again.',
   })) return;
 
-  const { filePath, fileType, courseSlug, displayName, description, fileSize } = req.body || {};
+  const { filePath, fileType, courseSlug, displayName, description } = req.body || {};
 
   if (!filePath || typeof filePath !== 'string') {
     return res.status(400).json({ error: 'filePath required.' });
@@ -112,7 +117,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid file path.' });
   }
   const pathMatch = filePath.match(FILE_PATH_RE);
-  if (!pathMatch || Date.now() - Number(pathMatch[2]) > MAX_UPLOAD_AGE_MS) {
+  const pathTimestamp = Number(pathMatch?.[2]);
+  if (!pathMatch || !Number.isSafeInteger(pathTimestamp)
+    || Date.now() - pathTimestamp > MAX_UPLOAD_AGE_MS
+    || pathTimestamp - Date.now() > MAX_FUTURE_SKEW_MS) {
     return res.status(400).json({ error: 'File path is missing or no longer fresh — register right after upload.' });
   }
 
@@ -144,11 +152,15 @@ export default async function handler(req, res) {
   // profile under their own RLS, never from the request body.
   let departmentSlug = 'cybersecurity';
   try {
-    const { data } = await student.db
+    const { data, error } = await student.db
       .from('profiles')
       .select('department')
       .eq('id', student.user.id)
       .maybeSingle();
+    if (error) {
+      console.error('extract: profile lookup failed:', error);
+      return res.status(503).json({ error: 'Could not confirm your programme. Please try again.' });
+    }
     if (data?.department) departmentSlug = data.department;
   } catch (err) {
     console.error('extract: profile lookup failed:', err);
@@ -161,29 +173,63 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'That course is not in your programme’s catalogue.' });
   }
 
-  // Extraction is best-effort: a corrupt PDF or an unreadable .docx must still
-  // leave the student with a material row pointing at their file.
+  let objectInfo;
+  try {
+    objectInfo = await student.db.rpc('my_course_material_object', { p_path: filePath });
+  } catch (err) {
+    console.error('extract: ownership RPC failed:', err);
+    return res.status(503).json({ error: 'Uploads are temporarily unavailable. Please try again later.' });
+  }
+  if (objectInfo?.error) {
+    console.error('extract: ownership RPC failed:', objectInfo.error);
+    return res.status(503).json({ error: 'Uploads are temporarily unavailable. Please try again later.' });
+  }
+  const ownedObject = objectInfo?.data?.[0];
+  if (Array.isArray(objectInfo?.data) && !ownedObject) {
+    logRequest(req, 'extract', { denied: 'file_not_owned_or_missing', filePath });
+    return res.status(403).json({ error: 'This upload was not found or does not belong to you.' });
+  }
+  if (!ownedObject?.object_id || !ownedObject.created_at) {
+    console.error('extract: ownership RPC returned invalid object');
+    return res.status(503).json({ error: 'Uploads are temporarily unavailable. Please try again later.' });
+  }
+  const createdAt = Date.parse(ownedObject.created_at);
+  if (!Number.isFinite(createdAt)) {
+    console.error('extract: ownership RPC returned invalid creation time');
+    return res.status(503).json({ error: 'Uploads are temporarily unavailable. Please try again later.' });
+  }
+  if (Date.now() - createdAt > MAX_UPLOAD_AGE_MS) {
+    return res.status(400).json({ error: 'File path is missing or no longer fresh — register right after upload.' });
+  }
+
+  const db = serviceRoleClient();
+
+  // Extraction is best-effort: ownership is already proven above, so a storage
+  // hiccup, a corrupt PDF or an unreadable .docx must still leave the student
+  // with a material row pointing at their file, just without tutor text. Only
+  // the extractable types are downloaded at all: an image or a 20 MB zip would
+  // be read into memory for nothing. The bytes come through the service-role
+  // client because the bucket is public anyway; which object they belong to is
+  // pinned by the object_id re-check below.
   let text = null;
   if (EXTRACTABLE.has(pathExt)) {
     try {
-      const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(filePath).replace(/%2F/g, '/')}`;
-      const response = await fetch(fileUrl);
-      if (response.ok) {
-        const buffer = Buffer.from(await response.arrayBuffer());
-        if (pathExt === 'txt') {
-          text = buffer.toString('utf-8');
-        } else if (pathExt === 'docx') {
-          // Imported here rather than at module scope: mammoth measures ~630ms to
-          // load, and the txt and pdf branches never touch it. pdf-parse stays
-          // eager above — it measures ~5ms, so deferring it would buy nothing.
-          const { default: mammoth } = await import('mammoth');
-          text = (await mammoth.extractRawText({ buffer })).value;
-        } else if (pathExt === 'pdf') {
-          text = (await pdfParse(buffer)).text;
-        }
+      const { data, error } = await db.storage.from(BUCKET).download(filePath);
+      if (error || !data) throw error || new Error('storage returned no object');
+      const buffer = Buffer.from(await data.arrayBuffer());
+      if (pathExt === 'txt') {
+        text = buffer.toString('utf-8');
+      } else if (pathExt === 'docx') {
+        // Imported here rather than at module scope: mammoth measures ~630ms to
+        // load, and the txt and pdf branches never touch it. pdf-parse stays
+        // eager above — it measures ~5ms, so deferring it would buy nothing.
+        const { default: mammoth } = await import('mammoth');
+        text = (await mammoth.extractRawText({ buffer })).value;
+      } else if (pathExt === 'pdf') {
+        text = (await pdfParse(buffer)).text;
       }
     } catch (err) {
-      console.error('extract: text extraction failed:', err);
+      console.error('extract: download or text extraction failed:', err);
       text = null;
     }
   }
@@ -194,12 +240,34 @@ export default async function handler(req, res) {
 
   const name = cleanLabel(displayName, MAX_DISPLAY_NAME) || `Material.${pathExt}`;
   const desc = cleanLabel(description, MAX_DESCRIPTION) || null;
-  const size = Number.isFinite(fileSize) && fileSize > 0 ? Math.floor(fileSize) : null;
+  const storedSize = ownedObject.size;
+  const size = (typeof storedSize === 'number' || typeof storedSize === 'string')
+    && storedSize !== '' && Number.isSafeInteger(Number(storedSize)) && Number(storedSize) >= 0
+    ? Number(storedSize) : null;
+
+  let rechecked;
+  try {
+    rechecked = await student.db.rpc('my_course_material_object', { p_path: filePath });
+  } catch (err) {
+    console.error('extract: ownership recheck failed:', err);
+    return res.status(503).json({ error: 'Uploads are temporarily unavailable. Please try again later.' });
+  }
+  if (rechecked?.error || !Array.isArray(rechecked?.data)) {
+    console.error('extract: ownership recheck failed:', rechecked?.error || 'invalid response');
+    return res.status(503).json({ error: 'Uploads are temporarily unavailable. Please try again later.' });
+  }
+  if (!rechecked.data[0]) {
+    logRequest(req, 'extract', { denied: 'file_not_owned_or_missing_after_download', filePath });
+    return res.status(403).json({ error: 'This upload was not found or does not belong to you.' });
+  }
+  if (rechecked.data[0].object_id !== ownedObject.object_id) {
+    logRequest(req, 'extract', { denied: 'file_changed_after_download', filePath });
+    return res.status(409).json({ error: 'This upload changed while it was being registered. Please upload it again.' });
+  }
 
   // Service-role, because `authenticated` no longer has INSERT on this table —
   // that revocation is the whole point. Every value below is either derived here
   // or already sanitised; nothing is passed through from the body untouched.
-  const db = serviceRoleClient();
   const { data: inserted, error: insertError } = await db
     .from('course_materials')
     .insert({
@@ -218,6 +286,9 @@ export default async function handler(req, res) {
     .single();
 
   if (insertError) {
+    if (insertError.code === '23505') {
+      return res.status(409).json({ error: 'This file is already registered.' });
+    }
     console.error('extract: course_materials insert failed:', insertError);
     return res.status(500).json({ error: 'Could not save the material. Please try again.' });
   }
