@@ -5,13 +5,26 @@
 -- collide, or have an invalid code, remain untouched for manual review so their
 -- sessions, rosters, and registers are never silently merged or deleted.
 -- Re-running this migration is safe; the final SELECT shows remaining rows.
--- Accepted risk: the database checks code shape, not catalogue membership;
--- the catalogue lives in JavaScript. A rep calling PostgREST directly can
--- create a well-formed non-catalogue code for their own class only. RLS still
--- limits them to their department, level, and current session. Admins can see
--- and remove these offerings. Membership enforcement would need a generated
--- catalogue table kept in sync and would block legitimate courses missing
--- from the catalogue; the owner accepted this risk.
+-- Rep inserts must match the seeded class catalogue; their supplied title is
+-- replaced by its canonical title. Admin and trusted inserts keep free text.
+-- Deploy order: apply this migration, then run
+-- supabase/seed/catalogue_courses.sql in the Supabase SQL editor. Until seeded,
+-- the empty catalogue refuses every rep insert (admin inserts still work).
+
+CREATE TABLE IF NOT EXISTS public.catalogue_courses (
+  department TEXT NOT NULL,
+  level TEXT NOT NULL CHECK (level IN ('100L', '200L', '300L', '400L')),
+  course_code TEXT NOT NULL,
+  course_title TEXT NOT NULL,
+  PRIMARY KEY (department, level, course_code)
+);
+
+ALTER TABLE public.catalogue_courses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "authenticated read catalogue courses" ON public.catalogue_courses;
+CREATE POLICY "authenticated read catalogue courses" ON public.catalogue_courses
+  FOR SELECT TO authenticated USING (true);
+REVOKE ALL ON TABLE public.catalogue_courses FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON TABLE public.catalogue_courses TO authenticated;
 
 CREATE OR REPLACE FUNCTION normalize_offering_course_code(p_code TEXT)
 RETURNS TEXT
@@ -35,10 +48,23 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 SET search_path = public, pg_temp
 AS $$
+DECLARE
+  v_catalogue_title TEXT;
 BEGIN
   NEW.course_code := normalize_offering_course_code(NEW.course_code);
   IF NEW.course_code IS NULL OR NEW.course_code !~ '^([A-Z]{3}|(UUY|UNIUYO)-[A-Z]{3}) [0-9]{3}$' THEN
     RAISE EXCEPTION 'Invalid course code. Use ABC 123, UUY-ABC 123, or UNIUYO-ABC 123.';
+  END IF;
+  IF TG_OP = 'INSERT' AND auth.uid() IS NOT NULL AND NOT is_admin() THEN
+    SELECT course_title INTO v_catalogue_title
+      FROM public.catalogue_courses
+     WHERE department = NEW.department
+       AND level = NEW.level
+       AND course_code = NEW.course_code;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'That course is not in your class catalogue. Ask the admin to add it.';
+    END IF;
+    NEW.course_title := v_catalogue_title;
   END IF;
   RETURN NEW;
 END;
@@ -54,7 +80,7 @@ CREATE TRIGGER normalize_offering_course_code
 
 -- PostgreSQL fires same-kind triggers alphabetically. On INSERT,
 -- enforce_offering_insert_threshold runs first and checks rep ownership; this
--- trigger then changes only course_code. Neither trigger depends on the other.
+-- trigger then normalizes the code and checks the rep catalogue title.
 DO $$
 DECLARE
   v_non_normal BIGINT;

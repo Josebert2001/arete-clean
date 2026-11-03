@@ -11,6 +11,8 @@ import { trackMeta } from '../src/data/trackMeta.js';
 import { courses as cybersecurityCourses } from '../src/data/courses.js';
 import { courses as dataScienceCourses } from '../src/data/dataScienceCourses.js';
 import { noteLoaders, NOTE_TOPIC_COUNTS } from '../src/data/lectureNotes/index.js';
+import { readFile } from 'node:fs/promises';
+import { generateCatalogueSeed } from './gen-catalogue-seed.mjs';
 
 // Every department catalogue, so the course checks below cover all of them.
 // A new department must be added here too — otherwise its courses are silently
@@ -34,6 +36,15 @@ const errors = [];
 const warnings = [];
 const isNonEmptyString = (v) => typeof v === 'string' && v.trim().length > 0;
 const check = (cond, msg) => { if (!cond) errors.push(msg); };
+
+const seedPath = new URL('../supabase/seed/catalogue_courses.sql', import.meta.url);
+try {
+  const committedSeed = await readFile(seedPath, 'utf8');
+  check(committedSeed === generateCatalogueSeed(),
+    'catalogue_courses.sql is stale; run npm run gen:catalogue-seed');
+} catch (error) {
+  errors.push(`Cannot check catalogue_courses.sql: ${error.message}; run npm run gen:catalogue-seed`);
+}
 
 // ── The "longest option is the answer" tell ──────────────────────────────────
 // An MCQ bank is worthless if the correct option can be picked by length alone,
