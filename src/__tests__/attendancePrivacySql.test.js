@@ -7,6 +7,21 @@ const backfill = sql.slice(sql.indexOf('DO $$'), sql.indexOf('-- Owner choice on
 const privacy = readFileSync('src/pages/Privacy.jsx', 'utf8');
 
 describe('attendance privacy migration', () => {
+  it('locks check-in writers and rejects active or recent sessions before the backfill', () => {
+    const transaction = sql.slice(sql.indexOf('BEGIN;'));
+    const lock = transaction.match(/^BEGIN;\s*LOCK TABLE class_sessions, student_devices, session_devices, attendance_records\s+IN SHARE ROW EXCLUSIVE MODE;/);
+    expect(lock).not.toBeNull();
+
+    const guard = transaction.match(/DO \$\$\s*BEGIN\s*IF EXISTS \(\s*SELECT 1 FROM class_sessions\s*WHERE status = 'open' OR closes_at > now\(\) - interval '5 minutes'\s*\) THEN\s*RAISE EXCEPTION 'Close every class session and wait 5 minutes, then apply this migration';\s*END IF;\s*END;\s*\$\$;/);
+    expect(guard).not.toBeNull();
+
+    const firstBackfill = transaction.indexOf('UPDATE student_devices');
+    expect(firstBackfill).toBeGreaterThan(0);
+    expect(transaction.indexOf('LOCK TABLE')).toBeLessThan(firstBackfill);
+    expect(guard.index).toBeGreaterThan(transaction.indexOf('LOCK TABLE'));
+    expect(guard.index).toBeLessThan(firstBackfill);
+  });
+
   it('stores coordinates only when the same geofence switch used for blocking is on', () => {
     expect(checkIn).toMatch(/IF v_session\.enforce_geofence THEN[\s\S]*?IF p_lat IS NULL OR p_lng IS NULL THEN/);
     const attendanceInsert = checkIn.match(/INSERT INTO attendance_records \([\s\S]*?ON CONFLICT \(session_id, student_id\) DO NOTHING;/)?.[0];

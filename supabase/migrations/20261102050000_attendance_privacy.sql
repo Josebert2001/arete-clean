@@ -1,7 +1,25 @@
 -- Attendance data minimisation. Run after attendance migrations through
--- 20260925020000. Idempotent; the browser still sends its raw random ID.
--- Hash existing IDs before replacing check_in() so old bindings still match.
+-- 20260925020000, outside class time: close every class and wait 5 minutes.
+-- Lock all check-in write tables before the backfill so an in-flight call of
+-- the old check_in() cannot insert a raw ID after its table has been hashed.
+-- The guard rejects open or recently closed sessions; its exception rolls
+-- back the transaction, leaving the database unchanged. Idempotent; the
+-- browser still sends its raw random ID.
 BEGIN;
+
+LOCK TABLE class_sessions, student_devices, session_devices, attendance_records
+  IN SHARE ROW EXCLUSIVE MODE;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM class_sessions
+    WHERE status = 'open' OR closes_at > now() - interval '5 minutes'
+  ) THEN
+    RAISE EXCEPTION 'Close every class session and wait 5 minutes, then apply this migration';
+  END IF;
+END;
+$$;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
