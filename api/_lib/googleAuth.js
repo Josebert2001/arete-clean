@@ -156,7 +156,7 @@ export function verifyState(token) {
 // by anything the client supplies directly.
 export async function getRefreshTokenForUser(userId) {
   const db = serviceRoleClient();
-  if (!db) return null;
+  if (!db) throw new GoogleConnectionReadError();
   const { data, error } = await db
     .from('google_connections')
     .select('refresh_token')

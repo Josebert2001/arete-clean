@@ -70,6 +70,12 @@ describe('api/run', () => {
     expect((await call()).body.kind).toBe('rate_limited');
     expect(fetch).not.toHaveBeenCalled();
   });
+  it('uses the configured run budget for both device and signed-in user limits', async () => {
+    await call();
+    const budget = { namespace: 'run', limit: 10, windowMs: 600000 };
+    expect(mocks.ipLimit).toHaveBeenCalledWith(expect.any(Object), budget);
+    expect(mocks.userLimit).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Object), budget, expect.any(Object));
+  });
   it('requires sign-in', async () => {
     mocks.student.mockResolvedValueOnce(null);
     expect((await call()).code).toBe(401);

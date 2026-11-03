@@ -123,17 +123,49 @@ describe('Google connection routes', () => {
     expect(auth.verifyState(state).nonceHash).toBe((await import('crypto')).default.createHash('sha256').update(nonce).digest('hex'));
     expect(res.body.url).toContain(encodeURIComponent(state));
   });
-  it('callback rejects missing, tampered, and expired state before exchanging code', async () => {
-    const valid = auth.signState({ uid: 'student-1', returnTo: '/planner', nonceHash: 'a'.repeat(64) });
-    const [payload, signature] = valid.split('.');
-    const tampered = `${payload}.${signature[0] === 'A' ? 'B' : 'A'}${signature.slice(1)}`;
-    const realNow = Date.now();
-    for (const state of [undefined, tampered]) {
-      expect((await call(callback, { method: 'GET', query: { code: 'oauth-code', state } })).location).toBe('/planner?google=error');
-    }
-    vi.spyOn(Date, 'now').mockReturnValue(realNow + 11 * 60 * 1000);
-    expect((await call(callback, { method: 'GET', query: { code: 'oauth-code', state: valid } })).location).toBe('/planner?google=error');
+  it('callback rejects missing state before exchanging code', async () => {
+    expect((await call(callback, { method: 'GET', query: { code: 'oauth-code' } })).location).toBe('/planner?google=error');
     expect(mocks.getToken).not.toHaveBeenCalled();
+  });
+  it('callback rejects a tampered signature with the matching OAuth cookie and saves nothing', async () => {
+    const started = await call(connect);
+    const state = mocks.authUrl.mock.calls[0][1].state;
+    const cookie = started.headers['Set-Cookie'].split(';')[0];
+    const headers = { cookie };
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    mocks.service.mockReturnValue({ from: () => ({ upsert }) });
+    expect((await call(callback, { method: 'GET', query: { code: 'oauth-code', state }, headers })).location).toBe('/planner?google=connected');
+    expect(upsert).toHaveBeenCalledTimes(1);
+
+    mocks.getToken.mockClear();
+    upsert.mockClear();
+    const [payload, signature] = state.split('.');
+    const tampered = `${payload}.${signature[0] === 'A' ? 'B' : 'A'}${signature.slice(1)}`;
+    expect((await call(callback, { method: 'GET', query: { code: 'oauth-code', state: tampered }, headers })).location).toBe('/planner?google=error');
+    expect(mocks.getToken).not.toHaveBeenCalled();
+    expect(upsert).not.toHaveBeenCalled();
+  });
+  it('callback rejects expired state with the matching OAuth cookie and saves nothing', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date('2026-11-03T12:00:00Z'));
+      const started = await call(connect);
+      const state = mocks.authUrl.mock.calls[0][1].state;
+      const headers = { cookie: started.headers['Set-Cookie'].split(';')[0] };
+      const upsert = vi.fn().mockResolvedValue({ error: null });
+      mocks.service.mockReturnValue({ from: () => ({ upsert }) });
+      expect((await call(callback, { method: 'GET', query: { code: 'oauth-code', state }, headers })).location).toBe('/planner?google=connected');
+      expect(upsert).toHaveBeenCalledTimes(1);
+
+      mocks.getToken.mockClear();
+      upsert.mockClear();
+      vi.advanceTimersByTime(11 * 60 * 1000);
+      expect((await call(callback, { method: 'GET', query: { code: 'oauth-code', state }, headers })).location).toBe('/planner?google=error');
+      expect(mocks.getToken).not.toHaveBeenCalled();
+      expect(upsert).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
   it('rejects a signed state in another browser without the matching cookie and saves nothing', async () => {
     const started = await call(connect);
@@ -193,9 +225,17 @@ describe('Google connection routes', () => {
     expect(res.body).toEqual({ success: true });
   });
   it('disconnect reports a failed row deletion', async () => {
-    mocks.service.mockReturnValue(null);
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) }) });
     mocks.student.mockResolvedValue({ user: { id: 'student-1' }, db: dbWith({ error: { message: 'denied' } }) });
     expect((await call(disconnect)).code).toBe(500);
+  });
+  it('disconnect leaves the row untouched when the service-role client is unavailable', async () => {
+    const db = dbWith();
+    mocks.student.mockResolvedValue({ user: { id: 'student-1' }, db });
+    mocks.service.mockReturnValue(null);
+    expect(await call(disconnect)).toMatchObject({ code: 500, body: { error: 'Could not read your Google connection' } });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(db.chain.delete).not.toHaveBeenCalled();
   });
   it('disconnect does not revoke or delete when token lookup returns an error', async () => {
     const db = dbWith();
@@ -219,8 +259,13 @@ describe('Google Calendar sync', () => {
     }
     expect(mocks.service).not.toHaveBeenCalled();
   });
-  it('requires an existing connection', async () => {
+  it('reports unavailable service-role access as a connection read error', async () => {
     mocks.service.mockReturnValue(null);
+    expect(await call(sync, { body: { events: [EVENT] } })).toMatchObject({ code: 500, body: { error: 'Could not read your Google connection' } });
+    expect(mocks.calendar).not.toHaveBeenCalled();
+  });
+  it('requires an existing connection when the token row is absent', async () => {
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) }) });
     expect(await call(sync, { body: { events: [EVENT] } })).toMatchObject({ code: 409, body: { kind: 'not_connected' } });
   });
   it('re-sync replaces a matching secondary calendar and inserts each event once', async () => {
@@ -244,6 +289,50 @@ describe('Google Calendar sync', () => {
       reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 15 }] },
     } });
     expect(res.body).toMatchObject({ success: true, eventCount: 1, calendarId: 'new' });
+  });
+  it('deletes every matching secondary calendar on one page', async () => {
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
+    const list = vi.fn().mockResolvedValue({ data: { items: [
+      { id: 'old-1', summary: 'Areté — Study Plan', primary: false },
+      { id: 'primary', summary: 'Areté — Study Plan', primary: true },
+      { id: 'other', summary: 'Other', primary: false },
+      { id: 'old-2', summary: 'Areté — Study Plan', primary: false },
+    ] } });
+    const remove = vi.fn().mockResolvedValue({});
+    const insert = vi.fn().mockResolvedValue({ data: { id: 'new' } });
+    mocks.calendar.mockReturnValue({ calendarList: { list }, calendars: { delete: remove, insert }, events: { insert: vi.fn() } });
+    expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(200);
+    expect(remove.mock.calls.map(([args]) => args.calendarId)).toEqual(['old-1', 'old-2']);
+    expect(insert).toHaveBeenCalledTimes(1);
+  });
+  it('finds a matching secondary calendar on the second calendarList page', async () => {
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
+    const list = vi.fn()
+      .mockResolvedValueOnce({ data: { items: [{ id: 'other', summary: 'Other' }], nextPageToken: 'next-page' } })
+      .mockResolvedValueOnce({ data: { items: [{ id: 'old-2', summary: 'Areté — Study Plan', primary: false }] } });
+    const remove = vi.fn().mockResolvedValue({});
+    const insert = vi.fn().mockResolvedValue({ data: { id: 'new' } });
+    mocks.calendar.mockReturnValue({ calendarList: { list }, calendars: { delete: remove, insert }, events: { insert: vi.fn() } });
+    expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(200);
+    expect(list).toHaveBeenNthCalledWith(1, { maxResults: 250 });
+    expect(list).toHaveBeenNthCalledWith(2, { maxResults: 250, pageToken: 'next-page' });
+    expect(remove).toHaveBeenCalledExactlyOnceWith({ calendarId: 'old-2' });
+    expect(insert).toHaveBeenCalledTimes(1);
+  });
+  it('stops before creating a replacement when the second stale-calendar delete fails', async () => {
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
+    const remove = vi.fn().mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('delete failed'));
+    const insert = vi.fn();
+    mocks.calendar.mockReturnValue({
+      calendarList: { list: vi.fn().mockResolvedValue({ data: { items: [
+        { id: 'old-1', summary: 'Areté — Study Plan', primary: false },
+        { id: 'old-2', summary: 'Areté — Study Plan', primary: false },
+      ] } }) },
+      calendars: { delete: remove, insert },
+    });
+    expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(500);
+    expect(remove.mock.calls.map(([args]) => args.calendarId)).toEqual(['old-1', 'old-2']);
+    expect(insert).not.toHaveBeenCalled();
   });
   it('handles Google API errors explicitly', async () => {
     mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });

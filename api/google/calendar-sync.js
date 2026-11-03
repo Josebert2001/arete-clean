@@ -83,12 +83,19 @@ export default async function handler(req, res) {
   const summary = `Areté — ${name}`;
 
   try {
-    // Idempotent re-sync: drop a prior calendar with the same summary before
-    // creating a fresh one, rather than appending events into it forever.
-    const existing = await calendar.calendarList.list({ maxResults: 250 });
-    const stale = (existing.data.items || []).find((c) => c.summary === summary && !c.primary);
-    if (stale) {
-      await calendar.calendars.delete({ calendarId: stale.id });
+    // Remove every prior secondary calendar with this summary, across all pages.
+    // Finish listing before deleting so a changing list cannot skip a page.
+    const staleIds = [];
+    let pageToken;
+    do {
+      const existing = await calendar.calendarList.list({ maxResults: 250, ...(pageToken ? { pageToken } : {}) });
+      for (const item of existing.data.items || []) {
+        if (item.summary === summary && !item.primary) staleIds.push(item.id);
+      }
+      pageToken = existing.data.nextPageToken;
+    } while (pageToken);
+    for (const calendarId of staleIds) {
+      await calendar.calendars.delete({ calendarId });
     }
 
     const created = await calendar.calendars.insert({
