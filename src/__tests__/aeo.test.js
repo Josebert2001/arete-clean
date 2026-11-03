@@ -11,10 +11,13 @@ import {
   courseJsonLd,
   courseBreadcrumbJsonLd,
   courseDescription,
+  courseTitle,
   homeTitle,
   homeDescription,
   installTitle,
   installDescription,
+  aboutTitle,
+  aboutDescription,
   SITE_FAQS,
   SITE_URL,
 } from '../data/publicCatalogue';
@@ -238,6 +241,125 @@ describe('head text for the prerendered pages', () => {
   it('names the institution on the home page, which is what students search', () => {
     expect(homeTitle()).toContain('University of Uyo');
     expect(homeDescription()).toContain('University of Uyo');
+  });
+});
+
+describe('the shell head', () => {
+  const shell = readFileSync(path.resolve('index.html'), 'utf8');
+
+  it('grants a large image preview, which is the one directive that changes anything', () => {
+    // Google's default for max-image-preview is `standard`; an absent
+    // max-snippet already means "Google chooses". So this line earns its place
+    // on the first directive and keeps the other two as an explicit grant to
+    // the engines that are not Google.
+    expect(shell).toMatch(/<meta name="robots" content="[^"]*max-image-preview:large/);
+  });
+
+  it('does not carry "index, follow", which is documented as a no-op', () => {
+    expect(shell).not.toMatch(/<meta name="robots" content="[^"]*index,\s*follow/);
+  });
+
+  it('points at llms.txt with describedby, not as this page\'s markdown alternate', () => {
+    // llms.txt v2: `describedby` = "the llms.txt covering this page".
+    // `alternate` + text/markdown = "this page, in markdown", which /llms.txt
+    // is not — it is a site manifest, and claiming otherwise sends an agent
+    // looking for the markdown of whatever page it is on.
+    expect(shell).toMatch(/<link rel="describedby" href="\/llms\.txt"/);
+    expect(shell).not.toMatch(/rel="alternate"[^>]*href="\/llms\.txt"/);
+  });
+
+  it('resolves the author entity to a page that describes it', () => {
+    expect(shell).toContain('"url": "https://www.aretecyb.tech/about"');
+  });
+});
+
+describe('coverage claims', () => {
+  // Areté covers the foundation courses for every department plus two full
+  // departmental catalogues. It does not cover every course the university
+  // teaches, and said so correctly in its body copy while claiming otherwise in
+  // the headline and the meta description — which is the half a search engine
+  // quotes. A student from a department with no catalogue arrives on the
+  // strength of that sentence and finds their 300 Level courses missing.
+  const OVERCLAIM = /(every|all) (course|courses) (from|at|in|on) 100 Level/i;
+
+  it('never claims every course in the university', () => {
+    expect(homeDescription()).not.toMatch(OVERCLAIM);
+    for (const { a } of SITE_FAQS) expect(a).not.toMatch(OVERCLAIM);
+  });
+
+  it('names what is actually covered, in the description an engine quotes', () => {
+    const desc = homeDescription();
+    expect(desc).toMatch(/foundation courses/i);
+    expect(desc).toMatch(/Cybersecurity/);
+    expect(desc).toMatch(/Data Science/);
+  });
+
+  it('keeps the whole-university framing it replaced the overclaim with', () => {
+    // The fix must not swing the other way: a description that named only the
+    // two authored catalogues would tell every other department to leave.
+    const answers = SITE_FAQS.map((f) => f.a).join(' ');
+    expect(answers).toMatch(/every department|all of them|whatever their department/i);
+  });
+
+  it('never says every programme takes a given course, anywhere in the site FAQ', () => {
+    // Same rule the per-course copy is already held to: GST 211 and GST 212
+    // are alternatives, so the universal claim is checkably false.
+    for (const { a } of SITE_FAQS) {
+      expect(a).not.toMatch(/every (undergraduate )?programme (at|in) the/i);
+      expect(a).not.toMatch(/every programme takes/i);
+    }
+  });
+});
+
+describe('what Areté is not', () => {
+  // The highest-value fact an answer engine can hold about Areté, and the one
+  // it cannot infer: this is not the university's official platform. Without
+  // the sentence an engine either guesses — and the guess is a claim Areté has
+  // no right to make — or omits Areté from the answer entirely.
+  it('disclaims official status in the site FAQ', () => {
+    const faq = SITE_FAQS.find((f) => /official/i.test(f.q));
+    expect(faq).toBeTruthy();
+    expect(faq.a).toMatch(/^No\./);
+    expect(faq.a).toMatch(/not affiliated with or endorsed by/i);
+  });
+
+  it('says who builds it and where the notes come from', () => {
+    const faq = SITE_FAQS.find((f) => /who built/i.test(f.q));
+    expect(faq).toBeTruthy();
+    expect(faq.a).toMatch(/transcribed/i);
+    expect(faq.a).toContain(`${SITE_URL}/about`);
+  });
+
+  it('gives the about page head text an engine can use', () => {
+    expect(aboutTitle().length).toBeLessThanOrEqual(75);
+    expect(aboutDescription().length).toBeGreaterThan(80);
+    expect(aboutDescription().length).toBeLessThanOrEqual(320);
+    expect(aboutDescription()).toMatch(/not affiliated/i);
+  });
+});
+
+describe('course titles', () => {
+  it('front-loads the code and always names the institution', () => {
+    for (const { course } of entries) {
+      const title = courseTitle(course);
+      expect(title.startsWith(course.code), course.code).toBe(true);
+      expect(title, course.code).toContain(course.title);
+      // One form or the other — never neither. "UniUyo" is not a fallback for
+      // want of space so much as the token students actually type.
+      expect(title, course.code).toMatch(/· (University of Uyo|UniUyo)$/);
+    }
+  });
+
+  it('shortens the institution only when the full form would not be displayed', () => {
+    for (const { course } of entries) {
+      const title = courseTitle(course);
+      const full = `${course.code} — ${course.title} · University of Uyo`;
+      if (full.length <= 65) {
+        expect(title, course.code).toBe(full);
+      } else {
+        expect(title, course.code).toMatch(/· UniUyo$/);
+      }
+    }
   });
 });
 

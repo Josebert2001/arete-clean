@@ -164,6 +164,38 @@ describe('the glossary', () => {
     }
   });
 
+  it('drops method signatures, which are code and not concepts', () => {
+    // COS 221 annotates a listing with `inputdetails()` — "for storing
+    // information in the instance variables." Quoted as a DefinedTerm, without
+    // the class it belongs to, that is noise attributed to Areté.
+    for (const { course, notes } of noted) {
+      for (const { term } of notes.glossary) {
+        expect(term, course.code).not.toMatch(/^[a-z_][A-Za-z0-9_]*\([^)]*\)$/);
+      }
+    }
+  });
+
+  it('keeps terms whose brackets hold an expansion, not an argument list', () => {
+    // The obvious filter — drop anything with brackets — costs 50 of 340
+    // terms, and they are the good ones: an acronym expanded in brackets is
+    // the commonest shape a real glossary term has here. This asserts the
+    // filter stayed narrow.
+    const all = noted.flatMap(({ notes }) => notes.glossary.map((g) => g.term));
+    const bracketed = all.filter((t) => /\(.+\)/.test(t));
+    expect(bracketed.length).toBeGreaterThan(10);
+  });
+
+  it('starts every definition as a sentence', () => {
+    // The notes write a definition as the continuation of its own heading, so
+    // 34 of these began mid-sentence in lower case. On the page the heading is
+    // right above it; in an engine's quote of a DefinedTerm there is nothing.
+    for (const { course, notes } of noted) {
+      for (const { term, definition } of notes.glossary) {
+        expect(definition[0], `${course.code}: ${term}`).not.toMatch(/[a-z]/);
+      }
+    }
+  });
+
   it('never repeats a term within one course', () => {
     for (const { course, notes } of noted) {
       const terms = notes.glossary.map((g) => g.term.toLowerCase());
