@@ -9,6 +9,10 @@ describe('currentAcademicSession', () => {
     expect(currentAcademicSession(new Date(2027, 0, 15))).toBe('2026/2027');
     expect(currentAcademicSession(new Date(2026, 7, 31))).toBe('2025/2026');
   });
+  it('uses Lagos time at the September boundary', () => {
+    expect(currentAcademicSession(new Date('2026-08-31T23:30:00Z'))).toBe('2026/2027');
+    expect(currentAcademicSession(new Date('2026-08-31T22:30:00Z'))).toBe('2025/2026');
+  });
 });
 
 describe('isAcademicSession', () => {

@@ -27,6 +27,12 @@ export default function Register() {
   const [totalHeld, setTotalHeld]   = useState(0);
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState('');
+  const [thresholdValue, setThresholdValue] = useState(null);
+  const [canEditThreshold, setCanEditThreshold] = useState(false);
+  const [editingThreshold, setEditingThreshold] = useState(false);
+  const [thresholdDraft, setThresholdDraft] = useState('');
+  const [savingThreshold, setSavingThreshold] = useState(false);
+  const [thresholdMessage, setThresholdMessage] = useState('');
 
   // Derived, not stateful: a plain `useState` + effect to seed the first
   // offering once `offerings` arrives would call setState synchronously from
@@ -51,6 +57,10 @@ export default function Register() {
     const token = ++loadToken.current;
     setLoading(true);
     setError('');
+    setCanEditThreshold(false);
+    setThresholdValue(null);
+    setEditingThreshold(false);
+    setThresholdMessage('');
 
     // Keep the roster current before reading it — additive only, so this
     // never drops a manually-added student, only adds newly-matching ones.
@@ -68,7 +78,7 @@ export default function Register() {
     // register_summary()'s rows come from offering_students, so an offering
     // with real closed sessions but nobody on the roster yet would otherwise
     // read totalHeld as 0 from an empty summary's first row.
-    const [sumRes, detRes, heldRes] = await Promise.all([
+    const [sumRes, detRes, heldRes, thresholdRes] = await Promise.all([
       supabase.rpc('register_summary', { p_offering_id: effectiveOfferingId }),
       supabase
         .from('attendance_records')
@@ -76,6 +86,10 @@ export default function Register() {
         .eq('class_sessions.offering_id', effectiveOfferingId)
         .order('marked_at', { ascending: true }),
       supabase.rpc('held_sessions_count', { p_offering_id: effectiveOfferingId }),
+      supabase.from('course_offerings')
+        .select('threshold_pct, threshold_set_at')
+        .eq('id', effectiveOfferingId)
+        .maybeSingle(),
     ]);
 
     if (token !== loadToken.current) return;
@@ -87,6 +101,16 @@ export default function Register() {
     setSummary(sumRes.data ?? []);
     setTotalHeld(heldRes.data ?? 0);
     setDetail(detRes.data ?? []);
+    if (thresholdRes.error) {
+      // The column is absent until the owner applies the migration. The
+      // existing summary still supplies the displayed value.
+      if (!['42703', 'PGRST204'].includes(thresholdRes.error.code)) {
+        setThresholdMessage('Could not check whether editing is available.');
+      }
+    } else if (thresholdRes.data) {
+      setThresholdValue(thresholdRes.data.threshold_pct);
+      setCanEditThreshold(true);
+    }
     setLoading(false);
   }, [effectiveOfferingId]);
 
@@ -123,7 +147,38 @@ export default function Register() {
   // Every row in one offering's summary carries the same threshold_pct — read
   // it from the data instead of hardcoding 70, or a custom per-offering
   // threshold (course_offerings.threshold_pct) silently has no effect here.
-  const thresholdPct = summary[0]?.threshold_pct ?? 70;
+  const thresholdPct = thresholdValue ?? summary[0]?.threshold_pct ?? 70;
+
+  async function saveThreshold(e) {
+    e.preventDefault();
+    const pctValue = Number(thresholdDraft);
+    if (!Number.isInteger(pctValue) || pctValue < 1 || pctValue > 100) {
+      setThresholdMessage('Enter a whole percentage from 1 to 100.');
+      return;
+    }
+    setSavingThreshold(true);
+    setThresholdMessage('');
+    const { data, error: rpcError } = await supabase.rpc('set_offering_threshold', {
+      p_offering_id: effectiveOfferingId,
+      p_pct: pctValue,
+    });
+    setSavingThreshold(false);
+    if (rpcError) {
+      if (['42883', 'PGRST202'].includes(rpcError.code)) {
+        setCanEditThreshold(false);
+        setEditingThreshold(false);
+        return;
+      }
+      setThresholdMessage('Could not update the attendance requirement. Please try again.');
+      return;
+    }
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result?.ok) {
+      setThresholdMessage(result?.message ?? 'Could not update the attendance requirement.');
+      return;
+    }
+    await load();
+  }
 
   // ── Real spreadsheet export (SpreadsheetML — Excel opens it natively) ───────
   function downloadXlsx() {
@@ -271,6 +326,25 @@ export default function Register() {
             <p><span className="font-semibold">Level / Session:</span> {offering?.level} · {offering?.academic_session}</p>
             <p><span className="font-semibold">Classes held (closed sessions):</span> {totalHeld}</p>
             <p><span className="font-semibold">Attendance requirement:</span> {thresholdPct}%</p>
+            {canEditThreshold && (
+              <div className="no-print mt-1">
+                {editingThreshold ? (
+                  <form onSubmit={saveThreshold} className="flex flex-wrap items-end gap-2">
+                    <label htmlFor="register-threshold" className="text-xs text-coffee-700">
+                      New requirement (%)
+                      <input id="register-threshold" type="number" min={1} max={100} step={1}
+                        value={thresholdDraft} onChange={e => setThresholdDraft(e.target.value)}
+                        className="ml-2 w-20 rounded-lg border border-coffee-300 bg-paper px-2 py-1 text-ink" />
+                    </label>
+                    <button type="submit" disabled={savingThreshold} className="btn-primary text-xs disabled:opacity-60">Save</button>
+                    <button type="button" onClick={() => { setEditingThreshold(false); setThresholdMessage(''); }} className="btn-ghost text-xs">Cancel</button>
+                  </form>
+                ) : (
+                  <button type="button" onClick={() => { setThresholdDraft(String(thresholdPct)); setEditingThreshold(true); setThresholdMessage(''); }} className="text-xs font-medium text-ember underline">Edit requirement</button>
+                )}
+              </div>
+            )}
+            {thresholdMessage && <p role="status" className="no-print text-xs text-rust">{thresholdMessage}</p>}
             <p className="text-xs text-coffee-500">Generated {now.toLocaleDateString()} {now.toLocaleTimeString()}</p>
           </div>
 
