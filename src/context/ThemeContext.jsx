@@ -68,6 +68,7 @@ export function ThemeProvider({ children }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Hook and context are co-located; Fast Refresh reloads this file fully.
 export function useTheme() {
   return useContext(ThemeContext);
 }

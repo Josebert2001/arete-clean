@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { currentAcademicSession } from '../utils/academicSession';
 
 /**
  * Answers "is the signed-in user a lecturer, and which courses do they teach?"
@@ -57,7 +58,7 @@ export function useLecturer() {
         .from('offering_lecturers')
         .select('offering_id, course_offerings(id, course_code, course_title, department, level, academic_session)')
         .eq('lecturer_id', user.id),
-      supabase.from('course_reps').select('department, level').eq('user_id', user.id).maybeSingle(),
+      supabase.from('course_reps').select('department, level, academic_session').eq('user_id', user.id).maybeSingle(),
     ]);
 
     if (token !== loadToken.current) return;
@@ -66,6 +67,15 @@ export function useLecturer() {
     // missing table (migration not run yet) just means nobody is a rep; any
     // other failure is surfaced as repError, which only /rep reads.
     const repTableMissing = repRes.error && ['42P01', 'PGRST205'].includes(repRes.error.code);
+    let scope = repRes.data ?? null;
+    let repLookupError = repRes.error;
+    if (repRes.error?.code === '42703' || repRes.error?.code === 'PGRST204') {
+      // The frontend may arrive before the hand-applied terms migration.
+      const legacy = await supabase.from('course_reps').select('department, level').eq('user_id', user.id).maybeSingle();
+      if (token !== loadToken.current) return;
+      scope = legacy.data ?? null;
+      repLookupError = legacy.error;
+    }
     if (roleRes.error || offerRes.error) {
       setStatus('error');
       return;
@@ -78,8 +88,11 @@ export function useLecturer() {
 
     setRole(roleRes.data?.role ?? null);
     setOfferings(list);
-    setRepScope(repRes.error ? null : (repRes.data ?? null));
-    setRepError(!!repRes.error && !repTableMissing);
+    setRepScope(repLookupError ? null : scope && {
+      ...scope,
+      active: !scope.academic_session || scope.academic_session === currentAcademicSession(),
+    });
+    setRepError(!!repLookupError && !repTableMissing);
     setStatus('ready');
   }, [user]);
 
@@ -93,7 +106,7 @@ export function useLecturer() {
     role,
     offerings,
     isLecturer: role === 'lecturer' || role === 'admin',
-    repScope,          // { department, level } for a course rep, else null
+    repScope,          // { department, level, academic_session?, active } or null
     repError,          // the rep lookup itself failed (not "not a rep")
     reload: load,
   };

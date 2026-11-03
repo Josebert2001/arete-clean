@@ -5,7 +5,7 @@ import { useGoogleConnection } from './useGoogleConnection';
 // Small reusable "Connect Google" / "Google connected" control, shared by the
 // Planner (Calendar sync) and Course Materials (Drive import) entry points.
 export default function GoogleConnectButton({ returnTo, className = '' }) {
-  const { connected, configured, loading, statusError, connect, disconnect } = useGoogleConnection();
+  const { connected, configured, loading, statusError, connect, disconnect, refresh } = useGoogleConnection();
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState('');
   // An action's own failure is the more urgent message; otherwise explain why
@@ -19,6 +19,15 @@ export default function GoogleConnectButton({ returnTo, className = '' }) {
       <span className={`inline-flex items-center gap-1.5 text-xs text-coffee-500 ${className}`}>
         <Loader2 size={12} className="animate-spin" /> Checking Google connection…
       </span>
+    );
+  }
+
+  if (connected === null) {
+    return (
+      <div className={`inline-flex items-center gap-2 ${className}`}>
+        <span className="text-xs text-rust">{error || 'Could not check your Google connection.'}</span>
+        <button type="button" onClick={refresh} className="text-xs text-coffee-700 hover:text-ink">Retry</button>
+      </div>
     );
   }
 

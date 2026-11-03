@@ -142,6 +142,7 @@ export default function Planner() {
 
   const handleSync = async () => {
     if (!plan?.events.length) return;
+    if (google.connected === null) { google.refresh(); return; }
     setSyncResult(null);
 
     if (!google.connected) {
@@ -309,12 +310,12 @@ export default function Planner() {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={handleSync}
-                    disabled={syncing || !user}
+                    disabled={syncing || !user || google.connected === null}
                     title={!user ? 'Sign in to sync with Google Calendar' : undefined}
                     className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-coffee-200 text-ink text-sm font-semibold hover:border-coffee-400 transition-colors disabled:opacity-50"
                   >
                     {syncing ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
-                    {google.connected ? 'Sync to Google' : 'Connect & sync'}
+                    {google.connected === null ? 'Checking Google…' : google.connected ? 'Sync to Google' : 'Connect & sync'}
                   </button>
                   <button
                     onClick={handleDownload}

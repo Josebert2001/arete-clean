@@ -38,10 +38,17 @@ const Admin = lazy(() => import('./pages/Admin'));
 const CourseRep = lazy(() => import('./pages/CourseRep'));
 const Invitations = lazy(() => import('./pages/Invitations'));
 
-class ErrorBoundary extends Component {
+export class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, locationKey: props.locationKey };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.locationKey !== state.locationKey) {
+      return { hasError: false, locationKey: props.locationKey };
+    }
+    return null;
   }
 
   static getDerivedStateFromError() {
@@ -206,7 +213,7 @@ function RouteLoading() {
 export default function App() {
   // The tutor chat owns the full viewport below the navbar — the footer and
   // floating help chip would sit under (or overlap) its pinned composer.
-  const { pathname } = useLocation();
+  const { pathname, key: locationKey } = useLocation();
   const isChatPage = pathname === '/tutor';
 
   return (
@@ -225,7 +232,7 @@ export default function App() {
       <AuthStateWatcher />
       <Navbar />
       <main id="main" className="flex-1 relative z-10">
-        <ErrorBoundary>
+        <ErrorBoundary locationKey={locationKey}>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
