@@ -3,6 +3,7 @@ import { Loader2, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { departments, getDepartment } from '../data/departments';
 import { currentAcademicSession, isAcademicSession } from '../utils/academicSession';
+import { normalizeCourseCode } from '../utils/courseCode';
 
 const LEVELS = ['100L', '200L', '300L', '400L'];
 const DEPARTMENT_OPTIONS = Object.values(departments);
@@ -21,17 +22,16 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
   const [session, setSession]       = useState(currentAcademicSession());
   const [threshold, setThreshold]   = useState(70);
   const [catalogue, setCatalogue]   = useState([]);
+  const [catalogueError, setCatalogueError] = useState(false);
   const [busy, setBusy]             = useState(false);
   const [message, setMessage]       = useState(null);
   const offeringSession = scope ? currentAcademicSession() : session;
 
-  // The department's catalogue feeds the course-code suggestions. A failed
-  // chunk load only loses the suggestions; the user can still type a code.
   useEffect(() => {
     let cancelled = false;
     getDepartment(department).loadCatalogue()
-      .then(c => { if (!cancelled) setCatalogue(c.courses); })
-      .catch(() => { if (!cancelled) setCatalogue([]); });
+      .then(c => { if (!cancelled) { setCatalogue(c.courses); setCatalogueError(false); } })
+      .catch(() => { if (!cancelled) { setCatalogue([]); setCatalogueError(true); } });
     return () => { cancelled = true; };
   }, [department]);
 
@@ -42,7 +42,8 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
 
   function onCodeChange(value) {
     setCode(value);
-    const match = catalogue.find(c => c.code.toLowerCase() === value.trim().toLowerCase());
+    const normalized = normalizeCourseCode(value);
+    const match = catalogue.find(c => c.code === normalized);
     if (match) {
       setTitle(match.title);
       if (!scope) setLevel(`${match.level}L`);
@@ -52,25 +53,33 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
   async function create(e) {
     e.preventDefault();
     setMessage(null);
-    if (!code.trim()) { setMessage({ ok: false, text: 'Enter a course code.' }); return; }
+    const normalizedCode = normalizeCourseCode(code);
+    if (!normalizedCode) { setMessage({ ok: false, text: 'Enter a valid course code, such as CYB 224.' }); return; }
+    const selectedCourse = suggestions.find(c => c.code === normalizedCode);
+    if (scope && !selectedCourse) { setMessage({ ok: false, text: 'Choose a course from your class catalogue.' }); return; }
     if (!isAcademicSession(offeringSession)) { setMessage({ ok: false, text: 'Write the session as two consecutive years, e.g. 2026/2027.' }); return; }
 
     setBusy(true);
     const values = {
-      course_code:      code.trim().toUpperCase(),
-      course_title:     title.trim() || null,
+      course_code:      normalizedCode,
+      course_title:     scope ? selectedCourse.title : title.trim() || null,
       department,
       level,
       academic_session: offeringSession.trim(),
       ...(!scope ? { threshold_pct: Math.min(100, Math.max(1, Number(threshold) || 70)) } : {}),
     };
-    const { error } = await supabase.from('course_offerings').insert(values);
+    let error;
+    try {
+      ({ error } = await supabase.from('course_offerings').insert(values));
+    } catch {
+      error = { message: 'Network error' };
+    }
     setBusy(false);
     if (error) {
       setMessage({ ok: false, text: error.code === '23505' ? 'That course already exists for this level and session.' : 'Could not create the course.' });
       return;
     }
-    setMessage({ ok: true, text: `${code.trim().toUpperCase()} created. Now add its lecturer below.` });
+    setMessage({ ok: true, text: `${normalizedCode} created. Now add its lecturer below.` });
     setCode('');
     setTitle('');
     onCreated();
@@ -104,18 +113,27 @@ export default function NewOfferingForm({ onCreated, scope = null }) {
         )}
         <label className="block" htmlFor="offering-code">
           <span className="mb-1 block text-xs font-medium text-ink">Course code</span>
-          <input
-            id="offering-code" list="offering-code-options" value={code}
-            onChange={e => onCodeChange(e.target.value)}
-            placeholder="e.g. CYB 224" autoComplete="off" className={field}
-          />
-          <datalist id="offering-code-options">
-            {suggestions.map(c => <option key={c.slug} value={c.code}>{c.title}</option>)}
-          </datalist>
+          {scope ? (
+            <select id="offering-code" value={code} onChange={e => onCodeChange(e.target.value)} className={field}>
+              <option value="">Choose a course</option>
+              {suggestions.map(c => <option key={c.slug} value={c.code}>{c.code} · {c.title}</option>)}
+            </select>
+          ) : (
+            <>
+              <input id="offering-code" list="offering-code-options" value={code}
+                onChange={e => onCodeChange(e.target.value)}
+                placeholder="e.g. CYB 224" autoComplete="off" className={field} />
+              <datalist id="offering-code-options">
+                {suggestions.map(c => <option key={c.slug} value={c.code}>{c.title}</option>)}
+              </datalist>
+              {code && <p className="mt-1 text-xs text-coffee-700">Code to save: {normalizeCourseCode(code) ?? 'Invalid course code'}</p>}
+            </>
+          )}
         </label>
+        {scope && catalogueError && <p role="status" className="text-sm text-rust sm:col-span-2">Could not load your course catalogue. Try again later.</p>}
         <label className="block" htmlFor="offering-title">
           <span className="mb-1 block text-xs font-medium text-ink">Title <span className="text-coffee-500">(optional)</span></span>
-          <input id="offering-title" value={title} onChange={e => setTitle(e.target.value)} className={field} />
+          <input id="offering-title" value={title} onChange={scope ? undefined : e => setTitle(e.target.value)} readOnly={!!scope} className={field} />
         </label>
         <label className="block" htmlFor="offering-session">
           <span className="mb-1 block text-xs font-medium text-ink">Academic session</span>
