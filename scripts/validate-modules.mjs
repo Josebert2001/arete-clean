@@ -49,7 +49,11 @@ const check = (cond, msg) => { if (!cond) errors.push(msg); };
 // banks listed below are held to the threshold and fail the build if they drift
 // back; every other bank reports a warning, so the remaining work stays visible
 // instead of being forgotten. Add a course code here once its bank is balanced.
-const LENGTH_BALANCED_BANKS = new Set(['UUY-CYB 222']);
+const LENGTH_BALANCED_BANKS = new Set([
+  'UUY-CYB 222',
+  'UUY-CYB 121', 'UUY-CYB 123', 'UUY-CYB 221',
+  'ENT 221', 'CYB 224', 'CYB 222',
+]);
 
 // Chance is 1/options. 0.40 leaves real headroom above the 0.25 four-option
 // baseline: this exists to catch a bank sliding back, not to police the noise in
