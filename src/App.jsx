@@ -41,7 +41,14 @@ const Invitations = lazy(() => import('./pages/Invitations'));
 export class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, locationKey: props.locationKey };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.locationKey !== state.locationKey) {
+      return { hasError: false, locationKey: props.locationKey };
+    }
+    return null;
   }
 
   static getDerivedStateFromError() {
@@ -54,12 +61,6 @@ export class ErrorBoundary extends Component {
     Sentry.captureException(error, {
       contexts: { react: { componentStack: info?.componentStack } },
     });
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.pathname !== this.props.pathname && this.state.hasError) {
-      this.setState({ hasError: false });
-    }
   }
 
   render() {
@@ -212,7 +213,7 @@ function RouteLoading() {
 export default function App() {
   // The tutor chat owns the full viewport below the navbar — the footer and
   // floating help chip would sit under (or overlap) its pinned composer.
-  const { pathname } = useLocation();
+  const { pathname, key: locationKey } = useLocation();
   const isChatPage = pathname === '/tutor';
 
   return (
@@ -231,7 +232,7 @@ export default function App() {
       <AuthStateWatcher />
       <Navbar />
       <main id="main" className="flex-1 relative z-10">
-        <ErrorBoundary pathname={pathname}>
+        <ErrorBoundary locationKey={locationKey}>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />

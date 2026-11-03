@@ -70,29 +70,46 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
   const [confirmId, setConfirmId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const fileRef = useRef();
+  const requestGeneration = useRef(0);
 
   // A failed fetch must not fall through to the "No materials yet" empty
   // state: that reads as "nothing has been shared", and a student who
   // believes it re-uploads a file that is already there.
   const load = useCallback(async () => {
+    const generation = ++requestGeneration.current;
+    setLoadError('');
+    setFetching(true);
     // uploaded_by is not selectable — the column grant was revoked in
     // 20260827010000_materials_server_insert.sql so an upload can't be
     // correlated to a student. "Is this mine?" is answered by uploaded_by_me,
     // a boolean the view computes against auth.uid() without exposing the id.
-    const { data, error: fetchError } = await supabase
-      .from('course_materials_visible')
-      .select('id, display_name, file_path, file_size, file_type, description, uploaded_at, uploaded_by_me')
-      .eq('course_slug', courseSlug)
-      .eq('department', department)
-      .order('uploaded_at', { ascending: false });
-    setLoadError(fetchError ? 'Could not load shared materials. Check your connection and try again.' : '');
-    setMaterials(data ?? []);
-    setFetching(false);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('course_materials_visible')
+        .select('id, display_name, file_path, file_size, file_type, description, uploaded_at, uploaded_by_me')
+        .eq('course_slug', courseSlug)
+        .eq('department', department)
+        .order('uploaded_at', { ascending: false });
+      if (generation !== requestGeneration.current) return;
+      setLoadError(fetchError ? 'Could not load shared materials. Check your connection and try again.' : '');
+      setMaterials(data ?? []);
+    } catch {
+      if (generation !== requestGeneration.current) return;
+      setLoadError('Could not load shared materials. Check your connection and try again.');
+      setMaterials([]);
+    } finally {
+      if (generation === requestGeneration.current) setFetching(false);
+    }
   }, [courseSlug, department]);
 
   useEffect(() => {
     if (!isConfigured) return;
-    void Promise.resolve().then(load);
+    let active = true;
+    void Promise.resolve().then(() => { if (active) load(); });
+    return () => {
+      active = false;
+      requestGeneration.current += 1;
+    };
   }, [load]);
 
   function handleFilePick(e) {
@@ -185,6 +202,8 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
         .eq('id', material.id);
       if (rowErr) throw rowErr;
 
+      requestGeneration.current += 1;
+      setFetching(false);
       await supabase.storage.from(BUCKET).remove([material.file_path]);
 
       setConfirmId(null);
@@ -392,7 +411,7 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
           <p className="font-display font-bold text-ink mb-1">Couldn&apos;t load materials</p>
           <p className="text-sm text-coffee-600 mb-5">{loadError}</p>
           <button
-            onClick={() => { setFetching(true); load(); }}
+            onClick={load}
             className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 border border-coffee-300 rounded-lg text-coffee-700 hover:border-ink hover:text-ink transition-colors"
           >
             Try again
