@@ -18,6 +18,7 @@ import {
 
 const StudyDaysContext = createContext({ days: [], recordToday: () => {} });
 
+// eslint-disable-next-line react-refresh/only-export-components -- Hook and context are co-located; Fast Refresh reloads this file fully.
 export function useStudyDays() {
   return useContext(StudyDaysContext);
 }
