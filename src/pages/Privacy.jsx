@@ -45,7 +45,7 @@ export default function Privacy() {
           <li><span className="font-medium text-ink">Device binding</span> — the browser keeps a randomly generated device identifier in local storage and sends it at check-in. Despite the database field's name, the identifier is stored as sent, not hashed. It is linked to your account and successful check-ins so later check-ins require the same identifier and one identifier cannot check in twice for the same class. A lecturer for your course can reset your account's device binding if you change devices.</li>
           <li><span className="font-medium text-ink">Course reps, lecturers, and invitations</span> — the system records staff roles, course-rep appointments, course assignments, and invitation email addresses, senders, recipients, decisions, and dates. Reps can manage offerings and lecturer invitations for their own department and level; they cannot see or mark attendance as lecturers. Invitees can see invitations addressed to their email. Admins can search accounts, appoint reps and staff, review invitations, and approve a first-time lecturer before that person gets lecturer access. Admins can also review a log of manual attendance additions, changes, and deletions, including the affected student's name, registration number, and attendance details.</li>
           <li><span className="font-medium text-ink">In-app feedback</span> — if you send a rating, we store its value, your optional message, the page you were on, your account ID, and the submission time. Feedback is reviewed by people with Supabase dashboard access; other students, lecturers, and course reps cannot read submissions through the app. The prompt also keeps per-account visit and dismissal state in your browser.</li>
-          <li><span className="font-medium text-ink">Uploaded course materials</span> — files you add to a course page. These are visible to other signed-in students viewing that course, and their extracted text may be used to give the AI Tutor context.</li>
+          <li><span className="font-medium text-ink">Uploaded course materials</span> — files you add to a course page. The list of files is shown to signed-in students viewing that course, but anyone with a file's link can download it without signing in. Do not upload anything you would not want shared. Extracted text from these files may be used to give the AI Tutor context.</li>
           <li><span className="font-medium text-ink">AI Tutor / Code Explainer / Explain-this / Simplify-this content</span> — messages, code, and text you submit to these features are sent to our AI providers to generate a response. We don't use this content to train our own models; our AI providers' own policies govern what they do with it (see below).</li>
           <li><span className="font-medium text-ink">Code Playground submissions</span> — code you run is sent to JDoodle to execute and return output.</li>
           <li><span className="font-medium text-ink">Google Calendar connection (optional)</span> — if you connect your Google account from the Study Planner, we store a Google-issued refresh token so we can create calendar events on your behalf. We never see your Google password. Disconnecting at any time deletes this token and revokes our access.</li>
@@ -78,9 +78,11 @@ export default function Privacy() {
         <p>
           We have not set a published retention period for account, attendance, invitation, or feedback data.
           To request deletion of your account or associated data, email us using the address below. There is
-          no in-app deletion control. Removing an account cascades to its feedback, roster, attendance, and
-          device-binding rows. The admin audit log of manual attendance changes is separate and can retain
-          copies of changed or deleted attendance rows, so include it in any deletion request.
+          no in-app deletion control. Deleting your account removes feedback, roster, attendance, and
+          device-binding rows linked to you as a student. If you have marked attendance for other students,
+          those records prevent account deletion until they are dealt with, so we handle such requests manually.
+          The admin audit log of manual attendance changes is separate and can retain copies of changed or
+          deleted attendance rows, so include it in any deletion request.
         </p>
       </Section>
 
