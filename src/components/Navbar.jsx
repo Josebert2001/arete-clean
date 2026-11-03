@@ -84,7 +84,7 @@ export default function Navbar() {
       : [
           { to: '/attendance', label: 'Check In' },
           { to: '/my-attendance', label: 'My Attendance' },
-          ...(repScope ? [{ to: '/rep', label: 'Course Rep' }] : []),
+          ...(repScope?.active !== false && repScope ? [{ to: '/rep', label: 'Course Rep' }] : []),
         ];
 
   const links = [...baseLinks, ...roleLinks];
