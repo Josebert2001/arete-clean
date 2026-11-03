@@ -36,6 +36,16 @@ describe('rep migration guards', () => {
     expect(courseCodes).toContain('RAISE NOTICE');
     expect(courseCodes).toContain("NOTIFY pgrst, 'reload schema';");
   });
+
+  it('lists legacy rows for manual review only after the backfill', () => {
+    const audit = courseCodes.indexOf("RAISE NOTICE 'Course offerings outside normal form:");
+    const backfill = courseCodes.indexOf('UPDATE course_offerings co SET course_code = safe.normal_code');
+    const inspection = courseCodes.indexOf('SELECT c.id, c.course_code, c.normal_code');
+    expect(audit).toBeGreaterThan(-1);
+    expect(backfill).toBeGreaterThan(audit);
+    expect(inspection).toBeGreaterThan(backfill);
+    expect(courseCodes.slice(backfill, inspection)).toContain('FROM safe WHERE co.id = safe.id;');
+  });
   it('matches the offering session in every current-term rep authority join', () => {
     for (const name of ['is_rep_of_offering', 'inviter_still_valid', 'rep_cohort_lecturers', 'admin_decide_removal']) {
       const sql = definition(terms, name);

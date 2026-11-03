@@ -121,16 +121,21 @@ describe('Course rep page', () => {
     expect(mocks.state.inserts[0].academic_session).toBe(currentAcademicSession());
   });
 
-  it('refuses an arbitrary course code even if the select receives one', async () => {
+  it('rejects a valid code from another level when a rep submits it', async () => {
     render(<CourseRep />);
     const code = screen.getByLabelText('Course code');
     await screen.findByRole('option', { name: /CYB 224/ }, { timeout: 5000 });
     expect(code.tagName).toBe('SELECT');
-    expect(code.querySelector('option[value="CYB 225"]')).toBeNull();
-    fireEvent.change(code, { target: { value: 'CYB 225' } });
+    expect(code.querySelector('option[value="CYB 311"]')).toBeNull();
+    const otherLevelOption = document.createElement('option');
+    otherLevelOption.value = 'CYB 311';
+    otherLevelOption.textContent = 'CYB 311';
+    code.append(otherLevelOption);
+    fireEvent.change(code, { target: { value: 'CYB 311' } });
+    expect(code).toHaveValue('CYB 311');
     fireEvent.click(screen.getByRole('button', { name: 'Create course' }));
     expect(mocks.state.inserts).toHaveLength(0);
-    expect(screen.getByRole('status')).toHaveTextContent('Enter a valid course code');
+    expect(screen.getByRole('status')).toHaveTextContent('Choose a course from your class catalogue.');
   });
 
   it('invites a lecturer by email', async () => {

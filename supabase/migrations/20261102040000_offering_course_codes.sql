@@ -1,9 +1,10 @@
 -- Course offering codes: apply manually after 20261102020000_rep_terms.sql.
--- Existing rows are audited before the backfill. Only valid non-normal rows
+-- Existing rows are audited before the backfill, then remaining rows are
+-- listed for manual review. Only valid non-normal rows
 -- without another offering in the same unique key are updated. Rows that would
 -- collide, or have an invalid code, remain untouched for manual review so their
 -- sessions, rosters, and registers are never silently merged or deleted.
--- Re-running this migration is safe; the SELECT below shows remaining rows.
+-- Re-running this migration is safe; the final SELECT shows remaining rows.
 -- Accepted risk: the database checks code shape, not catalogue membership;
 -- the catalogue lives in JavaScript. A rep calling PostgREST directly can
 -- create a well-formed non-catalogue code for their own class only. RLS still
@@ -84,27 +85,6 @@ BEGIN
 END;
 $$;
 
--- Inspect any remaining legacy rows, including invalid codes and collisions.
-WITH candidates AS (
-  SELECT co.id, co.course_code, co.department, co.level, co.academic_session,
-         co.group_label, normalize_offering_course_code(co.course_code) AS normal_code
-  FROM course_offerings co
-)
-SELECT c.id, c.course_code, c.normal_code, c.department, c.level,
-       c.academic_session, c.group_label,
-       c.normal_code !~ '^([A-Z]{3}|(UUY|UNIUYO)-[A-Z]{3}) [0-9]{3}$' AS invalid_format,
-       EXISTS (
-         SELECT 1 FROM candidates other
-         WHERE other.id <> c.id AND other.normal_code = c.normal_code
-           AND other.department = c.department AND other.level = c.level
-           AND other.academic_session = c.academic_session
-           AND other.group_label IS NOT DISTINCT FROM c.group_label
-       ) AS would_collide
-FROM candidates c
-WHERE c.course_code IS DISTINCT FROM c.normal_code
-   OR c.normal_code !~ '^([A-Z]{3}|(UUY|UNIUYO)-[A-Z]{3}) [0-9]{3}$'
-ORDER BY c.department, c.level, c.academic_session, c.course_code;
-
 -- Keep every member of a collision group unchanged, including its normal row.
 WITH candidates AS (
   SELECT co.id, co.course_code, co.department, co.level, co.academic_session,
@@ -124,5 +104,27 @@ WITH candidates AS (
 )
 UPDATE course_offerings co SET course_code = safe.normal_code
 FROM safe WHERE co.id = safe.id;
+
+-- Inspect rows still needing manual review after the backfill: collisions
+-- and invalid codes. The audit NOTICE above counts pre-backfill rows.
+WITH candidates AS (
+  SELECT co.id, co.course_code, co.department, co.level, co.academic_session,
+         co.group_label, normalize_offering_course_code(co.course_code) AS normal_code
+  FROM course_offerings co
+)
+SELECT c.id, c.course_code, c.normal_code, c.department, c.level,
+       c.academic_session, c.group_label,
+       c.normal_code !~ '^([A-Z]{3}|(UUY|UNIUYO)-[A-Z]{3}) [0-9]{3}$' AS invalid_format,
+       EXISTS (
+         SELECT 1 FROM candidates other
+         WHERE other.id <> c.id AND other.normal_code = c.normal_code
+           AND other.department = c.department AND other.level = c.level
+           AND other.academic_session = c.academic_session
+           AND other.group_label IS NOT DISTINCT FROM c.group_label
+       ) AS would_collide
+FROM candidates c
+WHERE c.course_code IS DISTINCT FROM c.normal_code
+   OR c.normal_code !~ '^([A-Z]{3}|(UUY|UNIUYO)-[A-Z]{3}) [0-9]{3}$'
+ORDER BY c.department, c.level, c.academic_session, c.course_code;
 
 NOTIFY pgrst, 'reload schema';
