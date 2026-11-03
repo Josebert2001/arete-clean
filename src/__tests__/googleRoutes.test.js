@@ -27,6 +27,7 @@ vi.mock('../../api/_lib/request-policy.js', () => ({
 
 let connect, callback, status, disconnect, sync, auth;
 const EVENT = { title: 'Study', byday: 'MO', start: '09:00', end: '10:00', firstDate: '2026-11-02', untilDate: '2026-12-02' };
+const CALENDAR_DESCRIPTION = 'Created by Areté study planner. Re-syncing replaces this calendar.';
 
 function response() {
   return {
@@ -200,6 +201,23 @@ describe('Google connection routes', () => {
     expect(stored.refresh_token).not.toContain('plain-refresh-token');
     expect(auth.decryptRefreshToken(stored.refresh_token)).toBe('plain-refresh-token');
   });
+  it.each([
+    [[], '/planner?google=error'],
+    [[{ user_id: 'student-1' }], '/planner?google=connected'],
+  ])('callback without a refresh token redirects based on updated rows', async (rows, location) => {
+    const started = await call(connect);
+    const state = mocks.authUrl.mock.calls[0][1].state;
+    const headers = { cookie: started.headers['Set-Cookie'].split(';')[0] };
+    mocks.getToken.mockResolvedValue({ tokens: { access_token: 'short-lived' } });
+    const select = vi.fn().mockResolvedValue({ data: rows, error: null });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    mocks.service.mockReturnValue({ from: () => ({ update }) });
+    expect((await call(callback, { method: 'GET', query: { code: 'oauth-code', state }, headers })).location).toBe(location);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(eq).toHaveBeenCalledWith('user_id', 'student-1');
+    expect(select).toHaveBeenCalledWith('user_id');
+  });
   it('status reports the scoped connection without exposing its refresh token', async () => {
     const db = dbWith({ data: { scope: 'calendar.events', connected_at: '2026-11-02', refresh_token: 'secret' }, error: null });
     mocks.student.mockResolvedValue({ user: { id: 'student-1' }, db });
@@ -270,7 +288,7 @@ describe('Google Calendar sync', () => {
   });
   it('re-sync replaces a matching secondary calendar and inserts each event once', async () => {
     mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
-    const list = vi.fn().mockResolvedValue({ data: { items: [{ id: 'old', summary: 'Areté — Study Plan', primary: false }] } });
+    const list = vi.fn().mockResolvedValue({ data: { items: [{ id: 'old', summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, primary: false }] } });
     const remove = vi.fn().mockResolvedValue({});
     const insertCalendar = vi.fn().mockResolvedValue({ data: { id: 'new' } });
     const insertEvent = vi.fn().mockResolvedValue({});
@@ -279,6 +297,9 @@ describe('Google Calendar sync', () => {
     const res = await call(sync, { body: { events: [event] } });
     expect(remove).toHaveBeenCalledWith({ calendarId: 'old' });
     expect(insertCalendar).toHaveBeenCalledTimes(1);
+    expect(insertCalendar).toHaveBeenCalledWith({ requestBody: {
+      summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, timeZone: 'Africa/Lagos',
+    } });
     expect(insertEvent).toHaveBeenCalledTimes(1);
     expect(insertEvent).toHaveBeenCalledWith({ calendarId: 'new', requestBody: {
       summary: 'Midnight study',
@@ -290,13 +311,30 @@ describe('Google Calendar sync', () => {
     } });
     expect(res.body).toMatchObject({ success: true, eventCount: 1, calendarId: 'new' });
   });
+  it('leaves same-named calendars without the exact ownership marker alone', async () => {
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
+    const remove = vi.fn();
+    const insert = vi.fn().mockResolvedValue({ data: { id: 'new' } });
+    mocks.calendar.mockReturnValue({
+      calendarList: { list: vi.fn().mockResolvedValue({ data: { items: [
+        { id: 'student-calendar', summary: 'Areté — Study Plan', primary: false },
+        { id: 'different-description', summary: 'Areté — Study Plan', description: 'Student notes', primary: false },
+      ] } }) },
+      calendars: { delete: remove, insert }, events: { insert: vi.fn() },
+    });
+    expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(200);
+    expect(remove).not.toHaveBeenCalled();
+    expect(insert).toHaveBeenCalledWith({ requestBody: {
+      summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, timeZone: 'Africa/Lagos',
+    } });
+  });
   it('deletes every matching secondary calendar on one page', async () => {
     mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
     const list = vi.fn().mockResolvedValue({ data: { items: [
-      { id: 'old-1', summary: 'Areté — Study Plan', primary: false },
+      { id: 'old-1', summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, primary: false },
       { id: 'primary', summary: 'Areté — Study Plan', primary: true },
       { id: 'other', summary: 'Other', primary: false },
-      { id: 'old-2', summary: 'Areté — Study Plan', primary: false },
+      { id: 'old-2', summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, primary: false },
     ] } });
     const remove = vi.fn().mockResolvedValue({});
     const insert = vi.fn().mockResolvedValue({ data: { id: 'new' } });
@@ -309,7 +347,7 @@ describe('Google Calendar sync', () => {
     mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
     const list = vi.fn()
       .mockResolvedValueOnce({ data: { items: [{ id: 'other', summary: 'Other' }], nextPageToken: 'next-page' } })
-      .mockResolvedValueOnce({ data: { items: [{ id: 'old-2', summary: 'Areté — Study Plan', primary: false }] } });
+      .mockResolvedValueOnce({ data: { items: [{ id: 'old-2', summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, primary: false }] } });
     const remove = vi.fn().mockResolvedValue({});
     const insert = vi.fn().mockResolvedValue({ data: { id: 'new' } });
     mocks.calendar.mockReturnValue({ calendarList: { list }, calendars: { delete: remove, insert }, events: { insert: vi.fn() } });
@@ -325,8 +363,8 @@ describe('Google Calendar sync', () => {
     const insert = vi.fn();
     mocks.calendar.mockReturnValue({
       calendarList: { list: vi.fn().mockResolvedValue({ data: { items: [
-        { id: 'old-1', summary: 'Areté — Study Plan', primary: false },
-        { id: 'old-2', summary: 'Areté — Study Plan', primary: false },
+        { id: 'old-1', summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, primary: false },
+        { id: 'old-2', summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, primary: false },
       ] } }) },
       calendars: { delete: remove, insert },
     });
@@ -344,7 +382,7 @@ describe('Google Calendar sync', () => {
     mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
     const insert = vi.fn();
     mocks.calendar.mockReturnValue({
-      calendarList: { list: vi.fn().mockResolvedValue({ data: { items: [{ id: 'old', summary: 'Areté — Study Plan', primary: false }] } }) },
+      calendarList: { list: vi.fn().mockResolvedValue({ data: { items: [{ id: 'old', summary: 'Areté — Study Plan', description: CALENDAR_DESCRIPTION, primary: false }] } }) },
       calendars: { delete: vi.fn().mockRejectedValue(new Error('delete failed')), insert },
     });
     expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(500);

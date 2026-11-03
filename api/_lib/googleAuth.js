@@ -211,11 +211,12 @@ export async function saveGoogleConnection(userId, tokens) {
     return !error;
   }
 
-  const { error } = await db
+  const { data, error } = await db
     .from('google_connections')
     .update({ scope: tokens.scope || GOOGLE_SCOPES.join(' '), updated_at: new Date().toISOString() })
-    .eq('user_id', userId);
-  return !error;
+    .eq('user_id', userId)
+    .select('user_id');
+  return !error && Array.isArray(data) && data.length > 0;
 }
 
 // Best-effort revoke + row delete. Called with the server-role client since

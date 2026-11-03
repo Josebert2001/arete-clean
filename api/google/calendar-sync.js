@@ -19,6 +19,7 @@ const RATE_LIMIT = {
 };
 
 const MAX_EVENTS = 60;
+const CALENDAR_DESCRIPTION = 'Created by Areté study planner. Re-syncing replaces this calendar.';
 const BYDAY_RE = /^(MO|TU|WE|TH|FR|SA|SU)$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -83,14 +84,15 @@ export default async function handler(req, res) {
   const summary = `Areté — ${name}`;
 
   try {
-    // Remove every prior secondary calendar with this summary, across all pages.
+    // Only replace calendars marked as ours. Older Areté calendars have no marker,
+    // so a student may see one old duplicate after their first re-sync.
     // Finish listing before deleting so a changing list cannot skip a page.
     const staleIds = [];
     let pageToken;
     do {
       const existing = await calendar.calendarList.list({ maxResults: 250, ...(pageToken ? { pageToken } : {}) });
       for (const item of existing.data.items || []) {
-        if (item.summary === summary && !item.primary) staleIds.push(item.id);
+        if (item.summary === summary && item.description === CALENDAR_DESCRIPTION && !item.primary) staleIds.push(item.id);
       }
       pageToken = existing.data.nextPageToken;
     } while (pageToken);
@@ -99,7 +101,7 @@ export default async function handler(req, res) {
     }
 
     const created = await calendar.calendars.insert({
-      requestBody: { summary, timeZone: 'Africa/Lagos' },
+      requestBody: { summary, description: CALENDAR_DESCRIPTION, timeZone: 'Africa/Lagos' },
     });
     const calendarId = created.data.id;
 
