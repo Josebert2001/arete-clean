@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import {
   Upload, FileText, Image as ImageIcon, Download,
   X, CheckCircle2, AlertCircle, Loader2, Paperclip, Trash2,
@@ -71,6 +71,15 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
   const [deletingId, setDeletingId] = useState(null);
   const fileRef = useRef();
   const requestGeneration = useRef(0);
+  const currentCourse = useRef({ courseSlug, department });
+
+  useLayoutEffect(() => {
+    currentCourse.current = { courseSlug, department };
+  }, [courseSlug, department]);
+
+  const isCurrentCourse = useCallback((slug, pool) => (
+    currentCourse.current.courseSlug === slug && currentCourse.current.department === pool
+  ), []);
 
   // A failed fetch must not fall through to the "No materials yet" empty
   // state: that reads as "nothing has been shared", and a student who
@@ -90,17 +99,17 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
         .eq('course_slug', courseSlug)
         .eq('department', department)
         .order('uploaded_at', { ascending: false });
-      if (generation !== requestGeneration.current) return;
+      if (generation !== requestGeneration.current || !isCurrentCourse(courseSlug, department)) return;
       setLoadError(fetchError ? 'Could not load shared materials. Check your connection and try again.' : '');
       setMaterials(data ?? []);
     } catch {
-      if (generation !== requestGeneration.current) return;
+      if (generation !== requestGeneration.current || !isCurrentCourse(courseSlug, department)) return;
       setLoadError('Could not load shared materials. Check your connection and try again.');
       setMaterials([]);
     } finally {
-      if (generation === requestGeneration.current) setFetching(false);
+      if (generation === requestGeneration.current && isCurrentCourse(courseSlug, department)) setFetching(false);
     }
-  }, [courseSlug, department]);
+  }, [courseSlug, department, isCurrentCourse]);
 
   useEffect(() => {
     if (!isConfigured) return;
@@ -132,6 +141,8 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
     e.preventDefault();
     if (!user) { setError('Please sign in to upload.'); return; }
     if (!file) { setError('Please select a file.'); return; }
+    const uploadCourseSlug = courseSlug;
+    const uploadDepartment = department;
     setUploading(true);
     setError('');
 
@@ -173,14 +184,18 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
         throw new Error(payload.error || 'Could not save the material. Please try again.');
       }
 
-      setDone(true);
-      setFile(null);
-      setDesc('');
-      setShowForm(false);
-      setTimeout(() => setDone(false), 5000);
-      load();
+      if (isCurrentCourse(uploadCourseSlug, uploadDepartment)) {
+        setDone(true);
+        setFile(null);
+        setDesc('');
+        setShowForm(false);
+        setTimeout(() => setDone(false), 5000);
+        load();
+      }
     } catch (err) {
-      setError(err?.message ?? 'Upload failed. Please try again.');
+      if (isCurrentCourse(uploadCourseSlug, uploadDepartment)) {
+        setError(err?.message ?? 'Upload failed. Please try again.');
+      }
     } finally {
       setUploading(false);
     }
@@ -193,6 +208,8 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
   // is therefore not surfaced as an error: the material is already gone from
   // every listing, which is what the student asked for.
   async function handleDelete(material) {
+    const deleteCourseSlug = courseSlug;
+    const deleteDepartment = department;
     setDeletingId(material.id);
     setError('');
     try {
@@ -202,14 +219,17 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
         .eq('id', material.id);
       if (rowErr) throw rowErr;
 
-      requestGeneration.current += 1;
-      setFetching(false);
       await supabase.storage.from(BUCKET).remove([material.file_path]);
 
-      setConfirmId(null);
-      setMaterials(prev => prev.filter(m => m.id !== material.id));
+      if (isCurrentCourse(deleteCourseSlug, deleteDepartment)) {
+        setConfirmId(null);
+        setMaterials(prev => prev.filter(m => m.id !== material.id));
+        load();
+      }
     } catch (err) {
-      setError(err?.message ?? 'Could not remove that material. Please try again.');
+      if (isCurrentCourse(deleteCourseSlug, deleteDepartment)) {
+        setError(err?.message ?? 'Could not remove that material. Please try again.');
+      }
     } finally {
       setDeletingId(null);
     }
