@@ -89,10 +89,60 @@ describe('CourseMaterials loads', () => {
     await waitFor(() => expect(mocks.requests).toHaveLength(2));
     await act(async () => mocks.uploads[0]({ error: null }));
     expect(mocks.requests).toHaveLength(2);
+    expect(screen.queryByRole('heading', { name: 'Upload a Material' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
+    expect(screen.queryByText('a.pdf')).not.toBeInTheDocument();
+    expect(view.container.querySelector('input[type="file"]').value).toBe('');
+    expect(screen.getByRole('button', { name: 'Upload to CSC 101' })).toBeDisabled();
 
     await act(async () => mocks.requests[1]({ data: [material(2, 'Course B.pdf')], error: null }));
     expect(screen.getByText('Course B.pdf')).toBeInTheDocument();
     expect(screen.queryByText('Course A.pdf')).not.toBeInTheDocument();
+  });
+
+  it('clears a selected file and description when the materials pool changes without an upload', async () => {
+    const view = render(<CourseMaterials {...props} />);
+    await waitFor(() => expect(mocks.requests).toHaveLength(1));
+    await act(async () => mocks.requests[0]({ data: [], error: null }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
+    fireEvent.change(view.container.querySelector('input[type="file"]'), {
+      target: { files: [new File(['notes'], 'a.pdf', { type: 'application/pdf' })] },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/Week 5 lecture notes/), {
+      target: { value: 'Course A notes' },
+    });
+    expect(screen.getByText('a.pdf')).toBeInTheDocument();
+    fireEvent.change(view.container.querySelector('input[type="file"]'), {
+      target: { files: [new File(['notes'], 'wrong.exe')] },
+    });
+    expect(screen.getByText(/File type .exe is not allowed/)).toBeInTheDocument();
+
+    view.rerender(<CourseMaterials {...props} department="cybersecurity" />);
+    expect(screen.queryByRole('heading', { name: 'Upload a Material' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
+    expect(screen.queryByText('a.pdf')).not.toBeInTheDocument();
+    expect(view.container.querySelector('input[type="file"]').value).toBe('');
+    expect(screen.getByPlaceholderText(/Week 5 lecture notes/)).toHaveValue('');
+    expect(screen.queryByText(/File type .exe is not allowed/)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Upload to CSC 101' })).toBeDisabled();
+  });
+
+  it('clears the previous course success message when the course changes', async () => {
+    const view = render(<CourseMaterials {...props} />);
+    await waitFor(() => expect(mocks.requests).toHaveLength(1));
+    await act(async () => mocks.requests[0]({ data: [], error: null }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
+    fireEvent.change(view.container.querySelector('input[type="file"]'), {
+      target: { files: [new File(['notes'], 'a.pdf', { type: 'application/pdf' })] },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Upload to CSC 101' }));
+    await waitFor(() => expect(screen.getByText(/Material uploaded and now visible/)).toBeInTheDocument());
+
+    view.rerender(<CourseMaterials {...props} courseSlug="csc-102" />);
+    expect(screen.queryByText(/Material uploaded and now visible/)).not.toBeInTheDocument();
   });
 
   it('loads newly uploaded files after a delete wins over an in-flight upload refresh', async () => {

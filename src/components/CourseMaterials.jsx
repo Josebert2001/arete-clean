@@ -74,6 +74,14 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
   const currentCourse = useRef({ courseSlug, department });
 
   useLayoutEffect(() => {
+    if (currentCourse.current.courseSlug !== courseSlug || currentCourse.current.department !== department) {
+      setFile(null);
+      setDesc('');
+      setShowForm(false);
+      setDone(false);
+      setError('');
+      if (fileRef.current) fileRef.current.value = '';
+    }
     currentCourse.current = { courseSlug, department };
   }, [courseSlug, department]);
 
