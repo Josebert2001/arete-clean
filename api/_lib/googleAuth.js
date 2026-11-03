@@ -122,9 +122,9 @@ const STATE_TTL_MS = 10 * 60 * 1000;
 // OAuth `state` param — verified on callback so a forged redirect can't graft
 // tokens onto someone else's account. Keyed off GOOGLE_CLIENT_SECRET so no
 // extra secret needs provisioning.
-export function signState({ uid, returnTo }) {
+export function signState({ uid, returnTo, nonceHash }) {
   if (!GOOGLE_CLIENT_SECRET) return null;
-  const payload = JSON.stringify({ uid, returnTo, exp: Date.now() + STATE_TTL_MS });
+  const payload = JSON.stringify({ uid, returnTo, nonceHash, exp: Date.now() + STATE_TTL_MS });
   const b64 = Buffer.from(payload, 'utf-8').toString('base64url');
   const sig = crypto.createHmac('sha256', GOOGLE_CLIENT_SECRET).update(b64).digest('base64url');
   return `${b64}.${sig}`;
@@ -145,7 +145,8 @@ export function verifyState(token) {
     const payload = JSON.parse(Buffer.from(b64, 'base64url').toString('utf-8'));
     if (typeof payload.exp !== 'number' || Date.now() > payload.exp) return null;
     if (typeof payload.uid !== 'string' || !payload.uid) return null;
-    return { uid: payload.uid, returnTo: typeof payload.returnTo === 'string' ? payload.returnTo : '/planner' };
+    if (typeof payload.nonceHash !== 'string' || !/^[a-f0-9]{64}$/.test(payload.nonceHash)) return null;
+    return { uid: payload.uid, returnTo: typeof payload.returnTo === 'string' ? payload.returnTo : '/planner', nonceHash: payload.nonceHash };
   } catch {
     return null;
   }
@@ -156,11 +157,12 @@ export function verifyState(token) {
 export async function getRefreshTokenForUser(userId) {
   const db = serviceRoleClient();
   if (!db) return null;
-  const { data } = await db
+  const { data, error } = await db
     .from('google_connections')
     .select('refresh_token')
     .eq('user_id', userId)
     .maybeSingle();
+  if (error) throw new GoogleConnectionReadError();
 
   const stored = data?.refresh_token ?? null;
   if (!stored) return null;
@@ -181,6 +183,13 @@ export async function getRefreshTokenForUser(userId) {
   }
 
   return plain;
+}
+
+export class GoogleConnectionReadError extends Error {
+  constructor() {
+    super('Could not read your Google connection');
+    this.name = 'GoogleConnectionReadError';
+  }
 }
 
 // Upserts the connection row after a successful token exchange. Only

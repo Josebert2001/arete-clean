@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  student: vi.fn(), ipLimit: vi.fn(), userLimit: vi.fn(), capture: vi.fn(),
+  student: vi.fn(), ipLimit: vi.fn(), userLimit: vi.fn(), capture: vi.fn(), log: vi.fn(),
   authUrl: vi.fn(), getToken: vi.fn(), service: vi.fn(), calendar: vi.fn(),
 }));
 vi.mock('../../api/_lib/supabase.js', () => ({ getStudentFromRequest: mocks.student }));
@@ -22,7 +22,7 @@ vi.mock('../../api/_lib/request-policy.js', () => ({
   applyApiHeaders: (res) => res.setHeader('Cache-Control', 'no-store'),
   enforceRateLimit: mocks.ipLimit,
   setRateLimitHeaders: (res, value) => res.setHeader('X-RateLimit-Remaining', String(value.remaining)),
-  logRequest: vi.fn(), denyIfUserRateLimited: mocks.userLimit,
+  logRequest: mocks.log, denyIfUserRateLimited: mocks.userLimit,
 }));
 
 let connect, callback, status, disconnect, sync, auth;
@@ -39,9 +39,9 @@ function response() {
     redirect(code, location) { this.code = code; this.location = location; return this; },
   };
 }
-async function call(handler, { method = 'POST', body = {}, query = {} } = {}) {
+async function call(handler, { method = 'POST', body = {}, query = {}, headers = {} } = {}) {
   const res = response();
-  await handler({ method, body, query, headers: {} }, res);
+  await handler({ method, body, query, headers }, res);
   return res;
 }
 function dbWith(result = { data: null, error: null }) {
@@ -79,6 +79,27 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.clearAllMocks(); });
 
 describe('Google connection routes', () => {
+  it('uses the configured IP and user budgets for every route', async () => {
+    mocks.service.mockReturnValue(null);
+    for (const [handler, name, limit, options] of [
+      [connect, 'google-connect', 6, {}],
+      [callback, 'google-callback', 20, { method: 'GET' }],
+      [status, 'google-status', 30, {}],
+      [disconnect, 'google-disconnect', 6, {}],
+      [sync, 'google-calendar-sync', 6, {}],
+    ]) {
+      mocks.ipLimit.mockClear();
+      mocks.userLimit.mockClear();
+      await call(handler, options);
+      const budget = { namespace: name, limit, windowMs: 600000 };
+      expect(mocks.ipLimit).toHaveBeenCalledWith(expect.any(Object), budget);
+      if (handler !== callback) expect(mocks.userLimit).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Object), budget, expect.any(Object));
+      else expect(mocks.userLimit).not.toHaveBeenCalled();
+    }
+    mocks.ipLimit.mockClear();
+    await call(connect, { body: { probe: true } });
+    expect(mocks.ipLimit).toHaveBeenCalledWith(expect.any(Object), { namespace: 'probe', limit: 60, windowMs: 600000 });
+  });
   it('requires sign-in for connect, status, disconnect, and sync', async () => {
     mocks.student.mockResolvedValue(null);
     for (const handler of [connect, status, disconnect, sync]) {
@@ -95,11 +116,15 @@ describe('Google connection routes', () => {
     );
     expect(auth.GOOGLE_SCOPES).toEqual(['https://www.googleapis.com/auth/calendar.events']);
     const state = mocks.authUrl.mock.calls[0][1].state;
-    expect(auth.verifyState(state)).toEqual({ uid: 'student-1', returnTo: '/planner' });
+    const nonce = res.headers['Set-Cookie'].match(/^arete_google_oauth=([^;]+)/)?.[1];
+    expect(nonce).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect(res.headers['Set-Cookie']).toContain('HttpOnly; Secure; SameSite=Lax; Path=/api/google; Max-Age=600');
+    expect(auth.verifyState(state)).toEqual({ uid: 'student-1', returnTo: '/planner', nonceHash: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    expect(auth.verifyState(state).nonceHash).toBe((await import('crypto')).default.createHash('sha256').update(nonce).digest('hex'));
     expect(res.body.url).toContain(encodeURIComponent(state));
   });
   it('callback rejects missing, tampered, and expired state before exchanging code', async () => {
-    const valid = auth.signState({ uid: 'student-1', returnTo: '/planner' });
+    const valid = auth.signState({ uid: 'student-1', returnTo: '/planner', nonceHash: 'a'.repeat(64) });
     const [payload, signature] = valid.split('.');
     const tampered = `${payload}.${signature[0] === 'A' ? 'B' : 'A'}${signature.slice(1)}`;
     const realNow = Date.now();
@@ -110,13 +135,31 @@ describe('Google connection routes', () => {
     expect((await call(callback, { method: 'GET', query: { code: 'oauth-code', state: valid } })).location).toBe('/planner?google=error');
     expect(mocks.getToken).not.toHaveBeenCalled();
   });
+  it('rejects a signed state in another browser without the matching cookie and saves nothing', async () => {
+    const started = await call(connect);
+    const state = mocks.authUrl.mock.calls[0][1].state;
+    const wrong = await call(callback, { method: 'GET', query: { code: 'oauth-code', state }, headers: { cookie: 'arete_google_oauth=another-browser' } });
+    expect(wrong.location).toBe('/planner?google=error');
+    expect(wrong.headers['Set-Cookie']).toContain('Max-Age=0');
+    expect(mocks.log).toHaveBeenCalledWith(expect.any(Object), 'google-callback', { denied: 'state_not_bound' });
+    expect(mocks.getToken).not.toHaveBeenCalled();
+    expect(mocks.service).not.toHaveBeenCalled();
+    const missing = await call(callback, { method: 'GET', query: { code: 'oauth-code', state } });
+    expect(missing.location).toBe('/planner?google=error');
+    expect(mocks.service).not.toHaveBeenCalled();
+    expect(started.headers['Set-Cookie']).toContain('Max-Age=600');
+  });
   it('callback handles Google denial and stores a refresh token encrypted for the signed state user', async () => {
-    const state = auth.signState({ uid: 'student-2', returnTo: '/planner' });
-    expect((await call(callback, { method: 'GET', query: { state, error: 'access_denied' } })).location).toBe('/planner?google=denied');
+    const nonce = 'matching-browser-nonce';
+    const nonceHash = (await import('crypto')).default.createHash('sha256').update(nonce).digest('hex');
+    const state = auth.signState({ uid: 'student-2', returnTo: '/planner', nonceHash });
+    const headers = { cookie: `arete_google_oauth=${nonce}` };
+    expect((await call(callback, { method: 'GET', query: { state, error: 'access_denied' }, headers })).location).toBe('/planner?google=denied');
     expect(mocks.getToken).not.toHaveBeenCalled();
     const upsert = vi.fn().mockResolvedValue({ error: null });
     mocks.service.mockReturnValue({ from: () => ({ upsert }) });
-    const res = await call(callback, { method: 'GET', query: { state, code: 'oauth-code' } });
+    const res = await call(callback, { method: 'GET', query: { state, code: 'oauth-code' }, headers });
+    expect(res.headers['Set-Cookie']).toBe('arete_google_oauth=; HttpOnly; Secure; SameSite=Lax; Path=/api/google; Max-Age=0');
     expect(mocks.getToken).toHaveBeenCalledWith('oauth-code');
     expect(res.location).toBe('/planner?google=connected');
     const stored = upsert.mock.calls[0][0];
@@ -154,9 +197,22 @@ describe('Google connection routes', () => {
     mocks.student.mockResolvedValue({ user: { id: 'student-1' }, db: dbWith({ error: { message: 'denied' } }) });
     expect((await call(disconnect)).code).toBe(500);
   });
+  it('disconnect does not revoke or delete when token lookup returns an error', async () => {
+    const db = dbWith();
+    mocks.student.mockResolvedValue({ user: { id: 'student-1' }, db });
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: { message: 'unavailable' } }) }) }) }) });
+    expect(await call(disconnect)).toMatchObject({ code: 500, body: { error: 'Could not read your Google connection' } });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(db.chain.delete).not.toHaveBeenCalled();
+  });
 });
 
 describe('Google Calendar sync', () => {
+  it('returns 500 when the connection lookup returns an error', async () => {
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: { message: 'unavailable' } }) }) }) }) });
+    expect(await call(sync, { body: { events: [EVENT] } })).toMatchObject({ code: 500, body: { error: 'Could not read your Google connection' } });
+    expect(mocks.calendar).not.toHaveBeenCalled();
+  });
   it('rejects empty, oversized, and malformed plans before connecting', async () => {
     for (const events of [[], Array(61).fill(EVENT), [{ ...EVENT, byday: 'XX' }], [{ ...EVENT, start: '25:00' }]]) {
       expect((await call(sync, { body: { events } })).code).toBe(400);
@@ -174,11 +230,19 @@ describe('Google Calendar sync', () => {
     const insertCalendar = vi.fn().mockResolvedValue({ data: { id: 'new' } });
     const insertEvent = vi.fn().mockResolvedValue({});
     mocks.calendar.mockReturnValue({ calendarList: { list }, calendars: { delete: remove, insert: insertCalendar }, events: { insert: insertEvent } });
-    const res = await call(sync, { body: { events: [EVENT] } });
+    const event = { ...EVENT, title: 'Midnight study', start: '00:15', end: '01:15', firstDate: '2026-11-03', untilDate: '2026-12-02', location: 'Library', description: 'Read chapter 2', alarmMinutes: 15 };
+    const res = await call(sync, { body: { events: [event] } });
     expect(remove).toHaveBeenCalledWith({ calendarId: 'old' });
     expect(insertCalendar).toHaveBeenCalledTimes(1);
     expect(insertEvent).toHaveBeenCalledTimes(1);
-    expect(insertEvent).toHaveBeenCalledWith({ calendarId: 'new', requestBody: expect.objectContaining({ summary: 'Study' }) });
+    expect(insertEvent).toHaveBeenCalledWith({ calendarId: 'new', requestBody: {
+      summary: 'Midnight study',
+      start: { dateTime: '2026-11-09T00:15:00', timeZone: 'Africa/Lagos' },
+      end: { dateTime: '2026-11-09T01:15:00', timeZone: 'Africa/Lagos' },
+      recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261202T225900Z'],
+      location: 'Library', description: 'Read chapter 2',
+      reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 15 }] },
+    } });
     expect(res.body).toMatchObject({ success: true, eventCount: 1, calendarId: 'new' });
   });
   it('handles Google API errors explicitly', async () => {
@@ -186,5 +250,23 @@ describe('Google Calendar sync', () => {
     mocks.calendar.mockReturnValue({ calendarList: { list: vi.fn().mockRejectedValue(new Error('Google unavailable')) } });
     expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(500);
     expect(mocks.capture).toHaveBeenCalledWith(expect.any(Error), { route: 'google-calendar-sync' });
+  });
+  it('stops before creating a duplicate if deleting the stale calendar fails', async () => {
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) }) }) });
+    const insert = vi.fn();
+    mocks.calendar.mockReturnValue({
+      calendarList: { list: vi.fn().mockResolvedValue({ data: { items: [{ id: 'old', summary: 'Areté — Study Plan', primary: false }] } }) },
+      calendars: { delete: vi.fn().mockRejectedValue(new Error('delete failed')), insert },
+    });
+    expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(500);
+    expect(insert).not.toHaveBeenCalled();
+  });
+  it('returns 500 if invalid_grant cleanup fails', async () => {
+    const select = () => ({ eq: () => ({ maybeSingle: async () => ({ data: { refresh_token: auth.encryptRefreshToken('refresh-token') } }) }) });
+    const remove = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: { message: 'delete failed' } }) });
+    mocks.service.mockReturnValue({ from: () => ({ select, delete: remove }) });
+    mocks.calendar.mockReturnValue({ calendarList: { list: vi.fn().mockRejectedValue(new Error('invalid_grant')) } });
+    expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(500);
+    expect(remove).toHaveBeenCalled();
   });
 });

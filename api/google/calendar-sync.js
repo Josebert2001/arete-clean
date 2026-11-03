@@ -9,7 +9,7 @@ import { google } from 'googleapis';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
 import { captureApiError } from '../_lib/sentry.js';
-import { clientForUser, deleteGoogleConnection } from '../_lib/googleAuth.js';
+import { clientForUser, deleteGoogleConnection, GoogleConnectionReadError } from '../_lib/googleAuth.js';
 import { buildGoogleEventResource } from '../_lib/googleEvents.js';
 
 const RATE_LIMIT = {
@@ -65,7 +65,16 @@ export default async function handler(req, res) {
   }
   const name = (typeof calendarName === 'string' && calendarName.trim().slice(0, 100)) || 'Study Plan';
 
-  const oauth2Client = await clientForUser(student.user.id);
+  let oauth2Client;
+  try {
+    oauth2Client = await clientForUser(student.user.id);
+  } catch (err) {
+    if (err instanceof GoogleConnectionReadError) {
+      console.error('google connection lookup failed:', err);
+      return res.status(500).json({ error: 'Could not read your Google connection' });
+    }
+    throw err;
+  }
   if (!oauth2Client) {
     return res.status(409).json({ error: 'Connect Google first.', kind: 'not_connected' });
   }
@@ -79,7 +88,7 @@ export default async function handler(req, res) {
     const existing = await calendar.calendarList.list({ maxResults: 250 });
     const stale = (existing.data.items || []).find((c) => c.summary === summary && !c.primary);
     if (stale) {
-      await calendar.calendars.delete({ calendarId: stale.id }).catch(() => {});
+      await calendar.calendars.delete({ calendarId: stale.id });
     }
 
     const created = await calendar.calendars.insert({
@@ -103,7 +112,11 @@ export default async function handler(req, res) {
   } catch (err) {
     const reason = err?.response?.data?.error || err?.message || '';
     if (String(reason).includes('invalid_grant')) {
-      await deleteGoogleConnection(student.user.id);
+      const deleted = await deleteGoogleConnection(student.user.id);
+      if (!deleted) {
+        console.error('google connection delete failed after invalid_grant');
+        return res.status(500).json({ error: 'Could not update your Google connection. Please try again.' });
+      }
       return res.status(409).json({ error: 'Your Google connection expired. Please reconnect.', kind: 'reconnect_required' });
     }
     console.error('google calendar sync error:', err);
