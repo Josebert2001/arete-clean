@@ -1,19 +1,71 @@
 -- Attendance data minimisation. Run after attendance migrations through
 -- 20260925020000. Idempotent; the browser still sends its raw random ID.
 -- Hash existing IDs before replacing check_in() so old bindings still match.
+BEGIN;
+
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
-UPDATE student_devices
-   SET device_hash = encode(extensions.digest(device_hash, 'sha256'), 'hex')
- WHERE device_hash !~ '^[0-9a-f]{64}$';
+CREATE TABLE IF NOT EXISTS privacy_migrations (
+  name TEXT PRIMARY KEY,
+  applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE privacy_migrations ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE privacy_migrations FROM PUBLIC, anon, authenticated;
 
-UPDATE session_devices
-   SET device_hash = encode(extensions.digest(device_hash, 'sha256'), 'hex')
- WHERE device_hash !~ '^[0-9a-f]{64}$';
+-- Resolve digest from either supported pgcrypto schema. Keep temporary objects last.
+SET LOCAL search_path = public, extensions, pg_temp;
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM privacy_migrations WHERE name = 'device_hash_sha256') THEN
+    UPDATE student_devices
+       SET device_hash = encode(digest(device_hash, 'sha256'), 'hex')
+     WHERE device_hash IS NOT NULL;
 
-UPDATE attendance_records
-   SET device_hash = encode(extensions.digest(device_hash, 'sha256'), 'hex')
- WHERE device_hash IS NOT NULL AND device_hash !~ '^[0-9a-f]{64}$';
+    -- session_devices' PRIMARY KEY (session_id, device_hash) is checked row by
+    -- row during an UPDATE, so hashing in place can abort on a deliberate
+    -- collision: one student checks in with id A and another, in the same
+    -- class, with the literal SHA-256 of A. Rewrite the table instead: copy
+    -- it hashed (a crafted pair merges into its earliest row), empty it, and
+    -- insert the copy back. Three plain statements, no snapshot subtleties.
+    CREATE TEMP TABLE session_devices_hashed ON COMMIT DROP AS
+      SELECT DISTINCT ON (session_id, hashed)
+             session_id, hashed AS device_hash, student_id, created_at
+        FROM (SELECT session_id, encode(digest(device_hash, 'sha256'), 'hex') AS hashed,
+                     student_id, created_at
+                FROM session_devices) h
+       ORDER BY session_id, hashed, created_at;
+    DELETE FROM session_devices;
+    INSERT INTO session_devices (session_id, device_hash, student_id, created_at)
+      SELECT session_id, device_hash, student_id, created_at FROM session_devices_hashed;
+
+    -- The UPDATE trigger copies OLD and NEW rows, including raw IDs and coordinates.
+    EXECUTE 'ALTER TABLE attendance_records DISABLE TRIGGER log_attendance_change';
+    BEGIN
+      UPDATE attendance_records
+         SET device_hash = encode(digest(device_hash, 'sha256'), 'hex')
+       WHERE device_hash IS NOT NULL;
+      EXECUTE 'ALTER TABLE attendance_records ENABLE TRIGGER log_attendance_change';
+    EXCEPTION WHEN OTHERS THEN
+      EXECUTE 'ALTER TABLE attendance_records ENABLE TRIGGER log_attendance_change';
+      RAISE;
+    END;
+
+    UPDATE attendance_audit
+       SET old_row = CASE
+             WHEN old_row ? 'device_hash' AND old_row -> 'device_hash' <> 'null'::jsonb
+             THEN jsonb_set(old_row, '{device_hash}', to_jsonb(encode(digest(old_row ->> 'device_hash', 'sha256'), 'hex')))
+             ELSE old_row END,
+           new_row = CASE
+             WHEN new_row ? 'device_hash' AND new_row -> 'device_hash' <> 'null'::jsonb
+             THEN jsonb_set(new_row, '{device_hash}', to_jsonb(encode(digest(new_row ->> 'device_hash', 'sha256'), 'hex')))
+             ELSE new_row END
+     WHERE (old_row ? 'device_hash' AND old_row -> 'device_hash' <> 'null'::jsonb)
+        OR (new_row ? 'device_hash' AND new_row -> 'device_hash' <> 'null'::jsonb);
+
+    INSERT INTO privacy_migrations (name) VALUES ('device_hash_sha256');
+  END IF;
+END;
+$$;
 
 -- Owner choice only: removing historical coordinates is irreversible.
 -- To purge coordinates from past check-ins without an enforced geofence,
@@ -22,6 +74,11 @@ UPDATE attendance_records
 --    SET checkin_lat = NULL, checkin_lng = NULL
 --   FROM class_sessions cs
 --  WHERE ar.session_id = cs.id AND NOT cs.enforce_geofence;
+-- UPDATE attendance_audit au
+--    SET old_row = old_row - 'checkin_lat' - 'checkin_lng',
+--        new_row = new_row - 'checkin_lat' - 'checkin_lng'
+--   FROM class_sessions cs
+--  WHERE au.session_id = cs.id AND NOT cs.enforce_geofence;
 
 CREATE OR REPLACE FUNCTION check_in(
   p_session_id  UUID,
@@ -33,7 +90,7 @@ CREATE OR REPLACE FUNCTION check_in(
 RETURNS TABLE (ok BOOLEAN, message TEXT, flagged BOOLEAN)
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_temp
+SET search_path = public, extensions, pg_temp
 AS $$
 DECLARE
   v_uid       UUID := auth.uid();
@@ -52,7 +109,7 @@ BEGIN
   IF p_device_hash IS NULL OR length(p_device_hash) < 8 THEN
     RETURN QUERY SELECT FALSE, 'This device could not be identified.', FALSE; RETURN;
   END IF;
-  v_device_hash := encode(extensions.digest(p_device_hash, 'sha256'), 'hex');
+  v_device_hash := encode(digest(p_device_hash, 'sha256'), 'hex');
 
   SELECT * INTO v_session FROM class_sessions WHERE id = p_session_id;
   IF NOT FOUND THEN
@@ -169,5 +226,7 @@ $$;
 
 REVOKE ALL ON FUNCTION check_in(UUID, TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION check_in(UUID, TEXT, TEXT, DOUBLE PRECISION, DOUBLE PRECISION) TO authenticated;
+
+COMMIT;
 
 NOTIFY pgrst, 'reload schema';
