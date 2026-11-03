@@ -4,6 +4,13 @@
 -- collide, or have an invalid code, remain untouched for manual review so their
 -- sessions, rosters, and registers are never silently merged or deleted.
 -- Re-running this migration is safe; the SELECT below shows remaining rows.
+-- Accepted risk: the database checks code shape, not catalogue membership;
+-- the catalogue lives in JavaScript. A rep calling PostgREST directly can
+-- create a well-formed non-catalogue code for their own class only. RLS still
+-- limits them to their department, level, and current session. Admins can see
+-- and remove these offerings. Membership enforcement would need a generated
+-- catalogue table kept in sync and would block legitimate courses missing
+-- from the catalogue; the owner accepted this risk.
 
 CREATE OR REPLACE FUNCTION normalize_offering_course_code(p_code TEXT)
 RETURNS TEXT
@@ -11,7 +18,10 @@ LANGUAGE sql
 IMMUTABLE
 AS $$
   SELECT regexp_replace(
-    btrim(regexp_replace(upper(p_code), '[[:space:]]+', ' ', 'g')),
+    regexp_replace(
+      regexp_replace(upper(p_code), '^[ \t\n\v\f\r\u00A0\uFEFF\u2000-\u200B\u202F\u205F\u3000]+|[ \t\n\v\f\r\u00A0\uFEFF\u2000-\u200B\u202F\u205F\u3000]+$', '', 'g'),
+      '[ \t\n\v\f\r\u00A0\uFEFF\u2000-\u200B\u202F\u205F\u3000]+', ' ', 'g'
+    ),
     '([A-Z])([0-9]{3})$', '\1 \2'
   );
 $$;

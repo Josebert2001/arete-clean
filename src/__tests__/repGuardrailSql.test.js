@@ -6,6 +6,7 @@ const terms = migration('20261102020000_rep_terms');
 const removals = migration('20261102010000_lecturer_removal_requests');
 const threshold = migration('20261102000000_offering_threshold_ownership');
 const courseCodes = migration('20261102040000_offering_course_codes');
+const courseCodeJs = readFileSync('src/utils/courseCode.js', 'utf8');
 const review = migration('20260925020000_rep_review_fixes');
 
 function definition(sql, name) {
@@ -15,6 +16,15 @@ function definition(sql, name) {
 }
 
 describe('rep migration guards', () => {
+  it('uses the exact JavaScript whitespace class for SQL edge trimming and collapsing', () => {
+    const whitespaceClass = courseCodeJs.match(/WHITESPACE_CLASS = String\.raw`([^`]+)`/)?.[1];
+    expect(whitespaceClass).toBeDefined();
+    const normalizer = definition(courseCodes, 'normalize_offering_course_code');
+    expect(normalizer).toContain(`^${whitespaceClass}+|${whitespaceClass}+$`);
+    expect(normalizer).toContain(`'${whitespaceClass}+', ' ', 'g'`);
+    expect(normalizer).not.toMatch(/\bbtrim\(|\[\[:space:\]\]/);
+  });
+
   it('normalizes and validates codes on both inserts and code updates, after the threshold trigger', () => {
     expect(courseCodes).toMatch(/CREATE TRIGGER normalize_offering_course_code\s+BEFORE INSERT OR UPDATE OF course_code ON course_offerings\s+FOR EACH ROW EXECUTE FUNCTION normalize_offering_course_code_trigger\(\)/);
     const trigger = definition(courseCodes, 'normalize_offering_course_code_trigger');
