@@ -43,7 +43,7 @@ node scripts/validate-modules.mjs  # validate module data structure
 ## Architecture
 ```
 Browser → React SPA (Vite)
-           ├── React Router (15 routes in App.jsx)
+           ├── React Router (30 routes in App.jsx)
            ├── AuthContext (Supabase OTP auth, profile state)
            ├── useProgress hook (localStorage + Supabase dual sync, 1s debounce)
            └── /api/* (Vercel serverless)
@@ -60,7 +60,21 @@ Browser → React SPA (Vite)
 ## Key Files Map
 | File | Purpose |
 |------|---------|
-| `src/App.jsx` | Root router — all 15 routes, Error Boundary, auth watcher |
+| `src/App.jsx` | Root router — all 30 routes, Error Boundary, auth watcher |
+| `src/pages/CheckIn.jsx` | Student check-in: discovers open classes, sends the board code, browser device ID, and available coordinates to `check_in()` |
+| `src/pages/MyAttendance.jsx` | Student's own course attendance percentages and check-in history |
+| `src/pages/TeachSession.jsx` | Assigned lecturer's class sessions, rotating codes, optional geofence, manual marks, roster adds, and device resets |
+| `src/pages/Register.jsx` | Lecturer's course roster and attendance summary, with register export |
+| `src/pages/Admin.jsx` | Admin console for staff roles, course reps, offerings, lecturer assignments, invite approvals, and manual-attendance audit |
+| `src/pages/CourseRep.jsx` | Rep's own cohort offerings and lecturer invitations; reps do not mark attendance |
+| `src/pages/Invitations.jsx` | Invitee's lecturer invitations and acceptance flow; first-time lecturers await admin approval |
+| `src/utils/deviceId.js` | Browser-stored random ID sent at check-in for device binding; the database stores the ID as sent |
+| `src/utils/geolocation.js` | Requests browser coordinates; returns null coordinates if unavailable or denied |
+| `src/utils/locationSafety.js` | Finite-number and bounds checks for campus place links |
+| `src/utils/rpcAction.js` | Flattens attendance action RPC replies into a status and raw row |
+| `src/utils/academicSession.js` | Defaults and validates academic-session strings for the admin offering form |
+| `src/components/useLecturer.js` | Loads the signed-in user's role, linked offerings, and course-rep scope; database RLS enforces access |
+| `src/components/useLevelGate.js` | Prompts signed-out users to sign in after choosing a study level and stores that choice for the return visit |
 | `src/context/AuthContext.jsx` | Supabase auth state, signInWithEmail, signOut, refreshProfile |
 | `src/components/useProgress.js` | Progress tracking hook — localStorage + Supabase sync |
 | `src/lib/supabase.js` | Supabase client + token helpers |
@@ -108,6 +122,7 @@ Browser → React SPA (Vite)
 | `supabase/migrations/20260728*` | Multi-department columns: `profiles.department/department_other/selected_courses`, `course_materials.department` (applied). Every migration must end with `NOTIFY pgrst, 'reload schema';` or the API rejects the new columns with PGRST204 |
 | `supabase/migrations/20260801000000_materials_department_backfill.sql` | Sorts existing `course_materials` rows into their pool ('general' for shared courses) + indexes both lookup pairs. **Run manually in the Supabase SQL editor** |
 | `supabase/migrations/20260802000000_reg_number_optional.sql` | Drops `NOT NULL` from `profiles.reg_number`. **Run manually before deploying the optional-reg-number frontend**, or every signup that leaves the field blank fails |
+| `supabase/migrations/20260917*`–`20260925*` | Attendance sessions, device and location checks, rosters, admin roles, course reps, lecturer invitations and approval, and manual-attendance audit. Apply manually in the Supabase SQL editor, in order, like the other migrations |
 | `vercel.json` | CSP, HSTS, CORS headers, SPA rewrite rule. HSTS is `max-age=63072000; includeSubDomains` — Vercel sends the max-age by default and this restates it with subdomain coverage. `preload` is deliberately omitted: it ships inside browser releases and takes months to reverse, which is not a commitment worth making here |
 | `scripts/validate-modules.mjs` | Pre-build module structure validator — also validates every catalogue's `course.quiz` and `course.examPrep` banks |
 | `src/data/publicCatalogue.js` | **The publicly readable slice of the catalogue** — which courses have a public page, and each page's title, description, canonical URL and schema.org `Course` block. One module because two very different callers must agree: the browser (a signed-out visitor opening a course) and `scripts/prerender.mjs` (build time). If they disagreed, the indexed page and the live page would drift. Only `status: 'full'` departments are listed; foundation mode is a filtered view of `courses.js`, so listing it too would publish duplicates of the same slug |
@@ -167,7 +182,7 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 ## Testing — Important Context
 The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-library/react` available for component tests.
 - Config: `vitest.config.js` · setup file: `src/__tests__/setup.js` (imports `@testing-library/jest-dom`)
-- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 26 suites, ~290 tests.
+- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 66 suites, ~945 tests.
 - Run with `npm test` (single run) or `npm run test:watch`. CI runs `npm test` on every push.
 - When writing new logic, add or extend a test if the function is testable in isolation. Coverage is uneven — data/util logic is reasonably covered, most page-level components are not.
 - **Component tests use `fireEvent` from `@testing-library/react`** (see `profileForm.test.jsx`, `courseExamPrep.test.jsx`). `@testing-library/user-event` is *not* a dependency — do not import it.

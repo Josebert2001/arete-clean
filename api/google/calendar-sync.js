@@ -9,7 +9,7 @@ import { google } from 'googleapis';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
 import { captureApiError } from '../_lib/sentry.js';
-import { clientForUser, deleteGoogleConnection } from '../_lib/googleAuth.js';
+import { clientForUser, deleteGoogleConnection, GoogleConnectionReadError } from '../_lib/googleAuth.js';
 import { buildGoogleEventResource } from '../_lib/googleEvents.js';
 
 const RATE_LIMIT = {
@@ -19,6 +19,7 @@ const RATE_LIMIT = {
 };
 
 const MAX_EVENTS = 60;
+const CALENDAR_DESCRIPTION = 'Created by Areté study planner. Re-syncing replaces this calendar.';
 const BYDAY_RE = /^(MO|TU|WE|TH|FR|SA|SU)$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -65,7 +66,16 @@ export default async function handler(req, res) {
   }
   const name = (typeof calendarName === 'string' && calendarName.trim().slice(0, 100)) || 'Study Plan';
 
-  const oauth2Client = await clientForUser(student.user.id);
+  let oauth2Client;
+  try {
+    oauth2Client = await clientForUser(student.user.id);
+  } catch (err) {
+    if (err instanceof GoogleConnectionReadError) {
+      console.error('google connection lookup failed:', err);
+      return res.status(500).json({ error: 'Could not read your Google connection' });
+    }
+    throw err;
+  }
   if (!oauth2Client) {
     return res.status(409).json({ error: 'Connect Google first.', kind: 'not_connected' });
   }
@@ -74,16 +84,24 @@ export default async function handler(req, res) {
   const summary = `Areté — ${name}`;
 
   try {
-    // Idempotent re-sync: drop a prior calendar with the same summary before
-    // creating a fresh one, rather than appending events into it forever.
-    const existing = await calendar.calendarList.list({ maxResults: 250 });
-    const stale = (existing.data.items || []).find((c) => c.summary === summary && !c.primary);
-    if (stale) {
-      await calendar.calendars.delete({ calendarId: stale.id }).catch(() => {});
+    // Only replace calendars marked as ours. Older Areté calendars have no marker,
+    // so a student may see one old duplicate after their first re-sync.
+    // Finish listing before deleting so a changing list cannot skip a page.
+    const staleIds = [];
+    let pageToken;
+    do {
+      const existing = await calendar.calendarList.list({ maxResults: 250, ...(pageToken ? { pageToken } : {}) });
+      for (const item of existing.data.items || []) {
+        if (item.summary === summary && item.description === CALENDAR_DESCRIPTION && !item.primary) staleIds.push(item.id);
+      }
+      pageToken = existing.data.nextPageToken;
+    } while (pageToken);
+    for (const calendarId of staleIds) {
+      await calendar.calendars.delete({ calendarId });
     }
 
     const created = await calendar.calendars.insert({
-      requestBody: { summary, timeZone: 'Africa/Lagos' },
+      requestBody: { summary, description: CALENDAR_DESCRIPTION, timeZone: 'Africa/Lagos' },
     });
     const calendarId = created.data.id;
 
@@ -103,7 +121,11 @@ export default async function handler(req, res) {
   } catch (err) {
     const reason = err?.response?.data?.error || err?.message || '';
     if (String(reason).includes('invalid_grant')) {
-      await deleteGoogleConnection(student.user.id);
+      const deleted = await deleteGoogleConnection(student.user.id);
+      if (!deleted) {
+        console.error('google connection delete failed after invalid_grant');
+        return res.status(500).json({ error: 'Could not update your Google connection. Please try again.' });
+      }
       return res.status(409).json({ error: 'Your Google connection expired. Please reconnect.', kind: 'reconnect_required' });
     }
     console.error('google calendar sync error:', err);

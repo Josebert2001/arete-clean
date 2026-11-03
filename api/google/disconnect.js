@@ -7,7 +7,7 @@
 
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from '../_lib/request-policy.js';
 import { getStudentFromRequest } from '../_lib/supabase.js';
-import { getRefreshTokenForUser } from '../_lib/googleAuth.js';
+import { getRefreshTokenForUser, GoogleConnectionReadError } from '../_lib/googleAuth.js';
 
 const RATE_LIMIT = {
   namespace: 'google-disconnect',
@@ -39,7 +39,16 @@ export default async function handler(req, res) {
     message: 'You have disconnected Google a lot just now. Please wait a few minutes and try again.',
   })) return;
 
-  const refreshToken = await getRefreshTokenForUser(student.user.id);
+  let refreshToken;
+  try {
+    refreshToken = await getRefreshTokenForUser(student.user.id);
+  } catch (err) {
+    if (err instanceof GoogleConnectionReadError) {
+      console.error('google connection lookup failed:', err);
+      return res.status(500).json({ error: 'Could not read your Google connection' });
+    }
+    throw err;
+  }
   if (refreshToken) {
     try {
       await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(refreshToken)}`, {
