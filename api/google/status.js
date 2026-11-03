@@ -45,11 +45,17 @@ export default async function handler(req, res) {
     return res.status(200).json({ configured: false, connected: false });
   }
 
-  const { data } = await student.db
+  const { data, error } = await student.db
     .from('google_connections')
     .select('scope, connected_at, updated_at')
     .eq('user_id', student.user.id)
     .maybeSingle();
+  // supabase-js returns a failed query as { error } rather than throwing.
+  // Reporting it as "not connected" would offer Connect to a student who is.
+  if (error) {
+    console.error('google/status: connection lookup failed:', error);
+    return res.status(500).json({ error: 'Could not check your Google connection. Please try again.' });
+  }
 
   return res.status(200).json({
     configured: true,

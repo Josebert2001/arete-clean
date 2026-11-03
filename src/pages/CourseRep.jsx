@@ -5,6 +5,7 @@ import { useLecturer } from '../components/useLecturer';
 import NewOfferingForm from '../components/NewOfferingForm';
 import { getDepartment } from '../data/departments';
 import { rpcAction } from '../utils/rpcAction';
+import { currentAcademicSession } from '../utils/academicSession';
 
 /**
  * Course-rep console: the rep's own class only. They create its courses,
@@ -34,6 +35,10 @@ export default function CourseRep() {
     );
   }
 
+  if (repScope.active === false) {
+    return <Centered><p className="text-coffee-700">Your course rep term for {repScope.academic_session} has ended. Ask the admin to renew it.</p></Centered>;
+  }
+
   return <RepConsole scope={repScope} />;
 }
 
@@ -49,6 +54,7 @@ function RepConsole({ scope }) {
     const [offRes, lecRes, invRes] = await Promise.all([
       supabase.from('course_offerings').select('*')
         .eq('department', scope.department).eq('level', scope.level)
+        .eq('academic_session', scope.academic_session ?? currentAcademicSession())
         .order('academic_session', { ascending: false })
         .order('course_code'),
       supabase.rpc('rep_cohort_lecturers'),
@@ -63,7 +69,7 @@ function RepConsole({ scope }) {
     const now = new Date();
     setInvites((invRes.data ?? []).filter(i => i.status === 'awaiting_approval' || new Date(i.expires_at) >= now));
     setStatus('ready');
-  }, [scope.department, scope.level]);
+  }, [scope.department, scope.level, scope.academic_session]);
 
   useEffect(() => { (async () => { await load(); })(); }, [load]);
 
@@ -106,8 +112,10 @@ function RepConsole({ scope }) {
           Add your class&apos;s courses, then invite each lecturer by email. They become the
           course&apos;s lecturer once they sign in with that email and accept at{' '}
           <span className="font-mono text-sm text-ink">{inviteLink}</span>. Send them that link.
-          Someone new to Areté as a lecturer is also confirmed by the admin first.
+          Someone new to Areté as a lecturer, or previously removed from this course,
+          is confirmed by the admin first.
         </p>
+        <p className="mt-2 text-sm text-coffee-700">Older sessions are managed by the admin.</p>
       </header>
 
       <NewOfferingForm scope={scope} onCreated={load} />
@@ -133,6 +141,8 @@ function RepConsole({ scope }) {
                 onInvite={email => rpc('invite_lecturer', { p_offering_id: o.id, p_email: email })}
                 onRevoke={id => rpc('revoke_lecturer_invite', { p_invite_id: id })}
                 onRemove={lecturerId => removeLecturer(o.id, lecturerId)}
+                onRequest={(lecturerId, reason) => rpc('rep_request_lecturer_removal', { p_offering_id: o.id, p_lecturer_id: lecturerId, p_reason: reason })}
+                onCancelRequest={id => rpc('rep_cancel_removal_request', { p_request_id: id })}
               />
             ))}
           </ul>
@@ -142,8 +152,10 @@ function RepConsole({ scope }) {
   );
 }
 
-function OfferingRow({ offering: o, lecturers, invites, busy, onInvite, onRevoke, onRemove }) {
+function OfferingRow({ offering: o, lecturers, invites, busy, onInvite, onRevoke, onRemove, onRequest, onCancelRequest }) {
   const [email, setEmail] = useState('');
+  const [requestFor, setRequestFor] = useState(null);
+  const [reason, setReason] = useState('');
 
   async function submit(e) {
     e.preventDefault();
@@ -163,10 +175,23 @@ function OfferingRow({ offering: o, lecturers, invites, busy, onInvite, onRevoke
           <span className="text-xs text-rust">No lecturer yet</span>
         )}
         {lecturers.map(l => (
-          <span key={l.lecturer_id} className="inline-flex items-center gap-1 rounded-md bg-coffee-100 px-2 py-0.5 text-xs text-coffee-700">
+          <div key={l.lecturer_id} className="inline-flex flex-wrap items-center gap-1 rounded-md bg-coffee-100 px-2 py-0.5 text-xs text-coffee-700">
             {l.full_name || l.email}
             {/* Lecturers the admin assigned are the admin's to change. */}
-            {l.removable && (
+            {l.removable && l.pending_request_id && (
+              <>
+                <span>removal requested</span>
+                <button type="button" disabled={busy} onClick={() => onCancelRequest(l.pending_request_id)} className="text-rust">
+                  Cancel request
+                </button>
+              </>
+            )}
+            {l.removable && !l.pending_request_id && l.removal_requires_request && (
+              <button type="button" disabled={busy} onClick={() => { setRequestFor(l.lecturer_id); setReason(''); }} className="text-rust">
+                Request removal
+              </button>
+            )}
+            {l.removable && !l.pending_request_id && l.removal_requires_request === false && (
               <button
                 type="button" disabled={busy}
                 onClick={() => onRemove(l.lecturer_id)}
@@ -176,7 +201,25 @@ function OfferingRow({ offering: o, lecturers, invites, busy, onInvite, onRevoke
                 <X className="h-3 w-3" />
               </button>
             )}
-          </span>
+            {l.removable && !l.pending_request_id && l.removal_requires_request == null && (
+              <span>Removal is handled by the admin for now.</span>
+            )}
+            {requestFor === l.lecturer_id && l.removal_requires_request && !l.pending_request_id && (
+              <form className="w-full" onSubmit={async e => {
+                e.preventDefault();
+                if (await onRequest(l.lecturer_id, reason.trim())) { setRequestFor(null); setReason(''); }
+              }}>
+                <label htmlFor={`removal-reason-${l.lecturer_id}`} className="block">Reason for removing {l.full_name || l.email}</label>
+                <textarea id={`removal-reason-${l.lecturer_id}`} value={reason} onChange={e => setReason(e.target.value)}
+                  minLength={10} maxLength={500} required rows={2}
+                  className="mt-1 w-full rounded-lg border border-coffee-300 bg-paper p-2 text-ink" />
+                <div className="mt-1 flex gap-2">
+                  <button type="submit" disabled={busy || reason.trim().length < 10 || reason.trim().length > 500} className="btn-primary text-xs">Send request</button>
+                  <button type="button" onClick={() => setRequestFor(null)} className="btn-ghost text-xs">Cancel</button>
+                </div>
+              </form>
+            )}
+          </div>
         ))}
         {invites.map(i => (
           <span key={i.id} className="inline-flex items-center gap-1 rounded-md bg-ember/15 px-2 py-0.5 text-xs text-ember">

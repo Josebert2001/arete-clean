@@ -7,7 +7,7 @@ import { connectGoogle, disconnectGoogle, getGoogleStatus } from '../utils/googl
 // sign-in — this is a feature-level grant, not a login method.
 export function useGoogleConnection() {
   const { user } = useAuth();
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(null);
   const [configured, setConfigured] = useState(true);
   const [loading, setLoading] = useState(true);
   // Set when the last check could not reach a verdict (rate limited, offline,
