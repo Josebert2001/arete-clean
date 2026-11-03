@@ -12,6 +12,7 @@
     "prerender": "vite build --config vite.ssr.config.js && node scripts/prerender.mjs",
     "preview": "vite preview",
     "validate": "node scripts/validate-modules.mjs",
+    "gen:catalogue-seed": "node scripts/gen-catalogue-seed.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest"

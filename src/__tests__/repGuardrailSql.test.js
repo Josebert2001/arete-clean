@@ -5,6 +5,8 @@ const migration = name => readFileSync(`supabase/migrations/${name}.sql`, 'utf8'
 const terms = migration('20261102020000_rep_terms');
 const removals = migration('20261102010000_lecturer_removal_requests');
 const threshold = migration('20261102000000_offering_threshold_ownership');
+const courseCodes = migration('20261102040000_offering_course_codes');
+const courseCodeJs = readFileSync('src/utils/courseCode.js', 'utf8');
 const review = migration('20260925020000_rep_review_fixes');
 
 function definition(sql, name) {
@@ -14,6 +16,36 @@ function definition(sql, name) {
 }
 
 describe('rep migration guards', () => {
+  it('uses the exact JavaScript whitespace class for SQL edge trimming and collapsing', () => {
+    const whitespaceClass = courseCodeJs.match(/WHITESPACE_CLASS = String\.raw`([^`]+)`/)?.[1];
+    expect(whitespaceClass).toBeDefined();
+    const normalizer = definition(courseCodes, 'normalize_offering_course_code');
+    expect(normalizer).toContain(`^${whitespaceClass}+|${whitespaceClass}+$`);
+    expect(normalizer).toContain(`'${whitespaceClass}+', ' ', 'g'`);
+    expect(normalizer).not.toMatch(/\bbtrim\(|\[\[:space:\]\]/);
+  });
+
+  it('normalizes and validates codes on both inserts and code updates, after the threshold trigger', () => {
+    expect(courseCodes).toMatch(/CREATE TRIGGER normalize_offering_course_code\s+BEFORE INSERT OR UPDATE OF course_code ON course_offerings\s+FOR EACH ROW EXECUTE FUNCTION normalize_offering_course_code_trigger\(\)/);
+    const trigger = definition(courseCodes, 'normalize_offering_course_code_trigger');
+    expect(trigger).toContain('NEW.course_code := normalize_offering_course_code(NEW.course_code)');
+    expect(trigger).toMatch(/NEW\.course_code !~ '\^\(\[A-Z\]\{3\}\|\(UUY\|UNIUYO\)-\[A-Z\]\{3\}\) \[0-9\]\{3\}\$'/);
+    expect(trigger).toContain('RAISE EXCEPTION');
+    expect(courseCodes).toContain('DROP TRIGGER IF EXISTS normalize_offering_course_code ON course_offerings');
+    expect(courseCodes).toContain('other.group_label IS NOT DISTINCT FROM c.group_label');
+    expect(courseCodes).toContain('RAISE NOTICE');
+    expect(courseCodes).toContain("NOTIFY pgrst, 'reload schema';");
+  });
+
+  it('lists legacy rows for manual review only after the backfill', () => {
+    const audit = courseCodes.indexOf("RAISE NOTICE 'Course offerings outside normal form:");
+    const backfill = courseCodes.indexOf('UPDATE course_offerings co SET course_code = safe.normal_code');
+    const inspection = courseCodes.indexOf('SELECT c.id, c.course_code, c.normal_code');
+    expect(audit).toBeGreaterThan(-1);
+    expect(backfill).toBeGreaterThan(audit);
+    expect(inspection).toBeGreaterThan(backfill);
+    expect(courseCodes.slice(backfill, inspection)).toContain('FROM safe WHERE co.id = safe.id;');
+  });
   it('matches the offering session in every current-term rep authority join', () => {
     for (const name of ['is_rep_of_offering', 'inviter_still_valid', 'rep_cohort_lecturers', 'admin_decide_removal']) {
       const sql = definition(terms, name);
