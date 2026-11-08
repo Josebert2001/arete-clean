@@ -85,16 +85,17 @@ export function formatNaira(kobo) {
 // page cannot advertise a number the code does not enforce.
 export function planComparison() {
   const L = FREE_DAILY_LIMITS;
+  const P = PREMIUM_DAILY_LIMITS;
   return [
     { feature: 'Course outlines, lecture notes, flashcards', free: 'Unlimited', premium: 'Unlimited' },
     { feature: 'Pre-written code walkthroughs', free: 'Unlimited', premium: 'Unlimited' },
-    { feature: 'AI Tutor', free: `${L.tutor} messages a day`, premium: 'Unlimited (fair use)' },
-    { feature: 'Live code explanations', free: `${L.explainer} a day`, premium: 'Unlimited (fair use)' },
-    { feature: 'Simplify / Key points', free: `${L.simplify} / ${L.summarize} a day`, premium: 'Unlimited (fair use)' },
-    { feature: 'Explain-this web lookups', free: `${L.research} a day`, premium: 'Unlimited (fair use)' },
+    { feature: 'AI Tutor', free: `${L.tutor} messages a day`, premium: `${P.tutor} messages a day` },
+    { feature: 'Live code explanations', free: `${L.explainer} a day`, premium: `${P.explainer} a day` },
+    { feature: 'Simplify / Key points', free: `${L.simplify} / ${L.summarize} a day`, premium: `${P.simplify} / ${P.summarize} a day` },
+    { feature: 'Explain-this web lookups', free: `${L.research} a day`, premium: `${P.research} a day` },
     { feature: 'Practice quizzes (MCQ)', free: `${L.quiz} a day`, premium: 'Unlimited' },
     { feature: 'Written exam prep', free: `${L.examPrep} sessions a day`, premium: 'Unlimited' },
     { feature: 'Security CTF challenges', free: `First ${FREE_CTF_ROOMS} rooms`, premium: 'All 12 rooms' },
-    { feature: 'Code playground runs', free: `${L.run} a day`, premium: 'Unlimited (fair use)*' },
+    { feature: 'Code playground runs', free: `${L.run} a day`, premium: `${P.run} a day*` },
   ];
 }

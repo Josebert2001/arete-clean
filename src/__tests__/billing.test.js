@@ -23,7 +23,7 @@ vi.mock('../../api/_lib/sentry.js', () => ({ captureApiError: mocks.capture }));
 import { isValidWebhookSignature, verifyTransaction } from '../../api/_lib/paystack.js';
 import { settlePayment, revokePayment, createCheckout, newReference, REFERENCE_PATTERN } from '../../api/_lib/billing.js';
 import { PREMIUM_DAILY_LIMITS } from '../data/plans';
-import { denyIfOverDailyQuota, getPlan } from '../../api/_lib/plan.js';
+import { denyIfOverDailyQuota, getPlan, quotaMessage, fairUseMessage } from '../../api/_lib/plan.js';
 import billingHandler from '../../api/billing.js';
 import webhookHandler from '../../api/paystack-webhook.js';
 
@@ -436,5 +436,13 @@ describe('daily quota', () => {
   it('leaves unmetered features alone', async () => {
     const student = freeStudent({ allowed: false, remaining: 0, reset_at: later() });
     expect(await denyIfOverDailyQuota({ headers: {} }, response(), student, 'extract')).toBe(false);
+  });
+});
+
+describe('limit messages', () => {
+  it('says "1 hour", not "1 hours", on both tiers', () => {
+    expect(fairUseMessage('tutor', 150, 60)).toMatch(/resets in about 1 hour./);
+    expect(quotaMessage('tutor', 10, 3000)).toMatch(/refills in about 1 hour —/);
+    expect(fairUseMessage('run', 40, 5 * 3600)).toMatch(/about 5 hours/);
   });
 });

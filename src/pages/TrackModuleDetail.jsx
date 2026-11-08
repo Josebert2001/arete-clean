@@ -174,7 +174,7 @@ export default function TrackModuleDetail() {
         {tab === 'challenge' && mod.challenge && challengeLocked && (
           <UpgradePrompt title={`Room ${currentIndex + 1}'s challenge is part of Premium`}>
             The theory and practice questions for this room are free. Capturing the flag in rooms
-            {' '}{FREE_CTF_ROOMS + 1}–{track.modules.length} comes with Premium, along with unlimited AI help.
+            {' '}{FREE_CTF_ROOMS + 1}–{track.modules.length} comes with Premium, along with higher daily AI allowances.
           </UpgradePrompt>
         )}
 

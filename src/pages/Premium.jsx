@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePlan } from '../context/PlanContext';
 import { usePageTitle } from '../utils/usePageTitle';
 import { startCheckout, verifyPayment, referenceFromSearch } from '../utils/billingApi';
-import { formatNaira, planComparison, PREMIUM_DAILY_LIMITS, FEATURE_LABELS } from '../data/plans';
+import { formatNaira, planComparison } from '../data/plans';
 import Breadcrumbs from '../components/Breadcrumbs';
 
 function formatDate(iso) {
@@ -182,9 +182,7 @@ export default function Premium() {
         </table>
       </div>
       <p className="text-xs text-coffee-500 mb-10">
-        Premium daily fair-use limits: {Object.entries(PREMIUM_DAILY_LIMITS).map(([feature, limit]) =>
-          `${limit} ${FEATURE_LABELS[feature]}`
-        ).join('; ')}. Allowances refill every 24 hours.{' '}
+        Daily allowances on both plans refill every 24 hours.{' '}
         * Code runs go through a shared execution service with a daily budget for the whole platform.
         Runs can still pause when that shared budget is used up.
       </p>

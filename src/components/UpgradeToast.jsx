@@ -36,7 +36,7 @@ export default function UpgradeToast() {
             onClick={() => setNotice(null)}
             className="mt-2 inline-flex text-sm font-semibold text-ember hover:text-ink underline underline-offset-2"
           >
-            Go unlimited — {formatNaira(pass.priceKobo)} per semester
+            Get more with Premium — {formatNaira(pass.priceKobo)} per semester
           </Link>
         </div>
         <button

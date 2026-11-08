@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { usePlan } from '../context/PlanContext';
-import { FEATURE_LABELS, formatNaira } from '../data/plans';
+import { FEATURE_LABELS, PREMIUM_DAILY_LIMITS, formatNaira } from '../data/plans';
 
 // Shown in place of a gated action once the free allowance is spent (or, for a
 // locked CTF room, instead of the challenge). Says what ran out, when it comes
@@ -25,8 +25,10 @@ export default function UpgradePrompt({ feature, limit, title, children, compact
           <p className="font-display font-bold text-ink">{heading}</p>
           <div className="mt-1 text-sm text-coffee-700 leading-relaxed">
             {children || (label && limit
-              ? 'Your free allowance refills tomorrow. Premium removes the daily limit.'
-              : 'Premium unlocks it, along with unlimited AI help and practice.')}
+              ? `Your free allowance refills tomorrow. ${PREMIUM_DAILY_LIMITS[feature]
+                ? `Premium raises it to ${PREMIUM_DAILY_LIMITS[feature]} a day.`
+                : 'Premium removes the daily limit.'}`
+              : 'Premium unlocks it, along with higher daily AI allowances and unlimited practice.')}
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <Link to="/premium" className="btn-primary text-sm">

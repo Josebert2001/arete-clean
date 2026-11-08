@@ -341,7 +341,7 @@ export const SITE_FAQS = [
     a:
       `Course outlines, lecture notes and flashcards are free. Sign in with a one-time email ` +
       `code, with no password. An optional Premium Semester Pass costs ${formatNaira(PREMIUM_PASS.priceKobo)} ` +
-      `and removes the free daily limits on AI tools and practice.`,
+      `and raises the daily limits on AI tools, with unlimited quizzes and exam practice.`,
   },
   {
     q: 'Do I need an account to read a course outline?',

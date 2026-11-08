@@ -28,10 +28,13 @@ describe('plans config', () => {
     }
   });
 
-  it('advertises fair use for every server-metered Premium row', () => {
+  it('quotes the real Premium cap on every server-metered row, never "Unlimited"', () => {
     const rows = Object.fromEntries(planComparison().map((r) => [r.feature, r.premium]));
-    for (const feature of ['AI Tutor', 'Live code explanations', 'Simplify / Key points', 'Explain-this web lookups', 'Code playground runs']) {
-      expect(rows[feature], feature).toMatch(/fair use/i);
+    const P = PREMIUM_DAILY_LIMITS;
+    const metered = { 'AI Tutor': [P.tutor], 'Live code explanations': [P.explainer], 'Simplify / Key points': [P.simplify, P.summarize], 'Explain-this web lookups': [P.research], 'Code playground runs': [P.run] };
+    for (const [feature, caps] of Object.entries(metered)) {
+      expect(rows[feature], feature).not.toMatch(/unlimited/i);
+      for (const cap of caps) expect(rows[feature], feature).toContain(String(cap));
     }
     for (const feature of ['Course outlines, lecture notes, flashcards', 'Pre-written code walkthroughs', 'Practice quizzes (MCQ)', 'Written exam prep']) {
       expect(rows[feature], feature).toBe('Unlimited');

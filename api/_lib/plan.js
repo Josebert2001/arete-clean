@@ -54,10 +54,19 @@ export async function getPlan(student) {
   }
 }
 
+function aboutHours(retryAfterSeconds) {
+  const hours = Math.max(1, Math.ceil((Number(retryAfterSeconds) || 0) / 3600));
+  return `about ${hours} hour${hours === 1 ? '' : 's'}`;
+}
+
 export function quotaMessage(feature, limit, retryAfterSeconds) {
   const label = FEATURE_LABELS[feature] || 'free uses';
-  const hours = Math.max(1, Math.ceil((Number(retryAfterSeconds) || 0) / 3600));
-  return `You've used today's ${limit} free ${label}. Your allowance refills in about ${hours} hour${hours === 1 ? '' : 's'} — or get Premium for higher daily allowances.`;
+  return `You've used today's ${limit} free ${label}. Your allowance refills in ${aboutHours(retryAfterSeconds)} — or get Premium for higher daily allowances.`;
+}
+
+export function fairUseMessage(feature, limit, retryAfterSeconds) {
+  const label = FEATURE_LABELS[feature] || 'uses';
+  return `You've reached today's fair-use limit of ${limit} ${label}. It resets in ${aboutHours(retryAfterSeconds)}.`;
 }
 
 // Returns true when the handler should stop (it has already written the 429).
@@ -85,7 +94,7 @@ export async function denyIfOverDailyQuota(req, res, student, feature) {
   res.setHeader('Retry-After', String(verdict.retryAfterSeconds));
   res.status(429).json({
     error: plan.premium
-      ? `You've reached today's fair-use limit of ${limit} ${FEATURE_LABELS[feature]}. It resets in about ${Math.max(1, Math.ceil(verdict.retryAfterSeconds / 3600))} hours.`
+      ? fairUseMessage(feature, limit, verdict.retryAfterSeconds)
       : quotaMessage(feature, limit, verdict.retryAfterSeconds),
     kind: plan.premium ? 'fair_use' : 'quota_exceeded',
     feature,
