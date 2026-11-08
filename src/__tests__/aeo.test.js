@@ -19,6 +19,7 @@ import {
   SITE_URL,
 } from '../data/publicCatalogue';
 import { tracks, installHowToJsonLd } from '../data/installGuides';
+import { PREMIUM_PASS, formatNaira } from '../data/plans';
 
 // The answer-engine surface. None of this shows up as a broken screen when it
 // regresses — it shows up as a course that stops being cited, or as Google
@@ -139,6 +140,16 @@ describe('descriptions', () => {
 });
 
 describe('FAQ', () => {
+  it('explains the free materials and optional paid pass in the visible and structured answer', () => {
+    const answer = SITE_FAQS.find((f) => f.q === 'Is Areté free?').a;
+    expect(answer).toMatch(/outlines, lecture notes and flashcards are free/);
+    expect(answer).toMatch(/one-time email/);
+    expect(answer).toMatch(/optional Premium/);
+    expect(answer).toContain(formatNaira(PREMIUM_PASS.priceKobo));
+    expect(answer).not.toMatch(/no payment|completely free/i);
+    expect(siteFaqJsonLd().mainEntity.find((f) => f.name === 'Is Areté free?').acceptedAnswer.text).toBe(answer);
+  });
+
   it('gives every course at least a what-is and a how-to-pass answer', () => {
     for (const { course } of entries) {
       const faqs = courseFaqs(course);

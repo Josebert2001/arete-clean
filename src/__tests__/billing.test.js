@@ -21,7 +21,8 @@ vi.mock('../../api/_lib/supabase.js', () => ({ getStudentFromRequest: mocks.stud
 vi.mock('../../api/_lib/sentry.js', () => ({ captureApiError: mocks.capture }));
 
 import { isValidWebhookSignature, verifyTransaction } from '../../api/_lib/paystack.js';
-import { settlePayment, createCheckout, newReference, REFERENCE_PATTERN } from '../../api/_lib/billing.js';
+import { settlePayment, revokePayment, createCheckout, newReference, REFERENCE_PATTERN } from '../../api/_lib/billing.js';
+import { PREMIUM_DAILY_LIMITS } from '../data/plans';
 import { denyIfOverDailyQuota, getPlan } from '../../api/_lib/plan.js';
 import billingHandler from '../../api/billing.js';
 import webhookHandler from '../../api/paystack-webhook.js';
@@ -156,6 +157,13 @@ describe('settlePayment', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it('returns refunded without asking Paystack or granting again', async () => {
+    mocks.serviceClient = serviceDb({ billing_payments: [{ data: { ...pending, status: 'refunded' }, error: null }] });
+    expect(await settlePayment(REF, { expectedUserId: 'u1' })).toEqual({ status: 'refunded' });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(mocks.serviceClient.rpc).not.toHaveBeenCalled();
+  });
+
   it('grants once Paystack confirms the full amount', async () => {
     mocks.serviceClient = serviceDb({ billing_payments: [{ data: pending, error: null }] });
     fetch.mockResolvedValueOnce(paystackOk({ status: 'success', reference: REF, amount: 250000, currency: 'NGN', id: 7 }));
@@ -197,6 +205,32 @@ describe('settlePayment', () => {
   });
 });
 
+describe('revokePayment', () => {
+  it('ignores invalid and unknown references', async () => {
+    expect(await revokePayment('foreign')).toEqual({ status: 'unknown' });
+    expect(mocks.serviceClient.from).not.toHaveBeenCalled();
+    expect(await revokePayment(REF)).toEqual({ status: 'unknown' });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(mocks.serviceClient.rpc).not.toHaveBeenCalled();
+  });
+
+  it.each(['success', 'pending', 'failed'])('leaves %s transactions for manual review', async (status) => {
+    mocks.serviceClient = serviceDb({ billing_payments: [{ data: { reference: REF }, error: null }] });
+    fetch.mockResolvedValueOnce(paystackOk({ status, reference: REF }));
+    expect(await revokePayment(REF)).toEqual({ status: 'not_reversed' });
+    expect(mocks.serviceClient.rpc).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalled();
+    expect(mocks.capture).toHaveBeenCalled();
+  });
+
+  it('refuses a reversal for a different reference', async () => {
+    mocks.serviceClient = serviceDb({ billing_payments: [{ data: { reference: REF }, error: null }] });
+    fetch.mockResolvedValueOnce(paystackOk({ status: 'reversed', reference: 'other' }));
+    expect(await revokePayment(REF)).toEqual({ status: 'not_reversed' });
+    expect(mocks.serviceClient.rpc).not.toHaveBeenCalled();
+  });
+});
+
 describe('api/paystack-webhook', () => {
   const sign = (body) => crypto.createHmac('sha512', SECRET).update(body).digest('hex');
   const call = async (event, signature) => {
@@ -224,6 +258,61 @@ describe('api/paystack-webhook', () => {
     const res = await call({ event: 'charge.success', data: { reference: REF, amount: 1 } });
     expect(res.code).toBe(200);
     expect(res.body.status).toBe('granted');
+  });
+
+  it.each([
+    { transaction_reference: REF, transaction: { reference: 'other' }, reference: 'refund-id' },
+    { transaction: { reference: REF }, reference: 'refund-id' },
+    { reference: REF },
+  ])('revokes a signed refund after verifying the original transaction: %j', async (data) => {
+    mocks.serviceClient = serviceDb({ billing_payments: [{ data: { reference: REF }, error: null }] }, { data: 'revoked', error: null });
+    fetch.mockResolvedValueOnce(paystackOk({ status: 'reversed', reference: REF }));
+    const res = await call({ event: 'refund.processed', data });
+    expect(res.code).toBe(200);
+    expect(res.body.status).toBe('revoked');
+    expect(fetch.mock.calls[0][0]).toContain('/transaction/verify/' + REF);
+    expect(mocks.serviceClient.rpc).toHaveBeenCalledWith('revoke_premium_pass', { p_reference: REF });
+    expect(fetch.mock.invocationCallOrder[0]).toBeLessThan(mocks.serviceClient.rpc.mock.invocationCallOrder[0]);
+  });
+
+  it('does not revoke a refund whose transaction is not reversed', async () => {
+    mocks.serviceClient = serviceDb({ billing_payments: [{ data: { reference: REF }, error: null }] });
+    fetch.mockResolvedValueOnce(paystackOk({ status: 'success', reference: REF }));
+    const res = await call({ event: 'refund.processed', data: { transaction_reference: REF } });
+    expect(res.code).toBe(200);
+    expect(res.body.status).toBe('not_reversed');
+    expect(mocks.serviceClient.rpc).not.toHaveBeenCalled();
+    expect(mocks.capture).toHaveBeenCalled();
+  });
+
+  it('rejects forged refunds', async () => {
+    const res = await call({ event: 'refund.processed', data: { transaction_reference: REF } }, 'f'.repeat(128));
+    expect(res.code).toBe(401);
+    expect(fetch).not.toHaveBeenCalled();
+    expect(mocks.serviceClient.rpc).not.toHaveBeenCalled();
+  });
+
+  it('ignores refunds without an app reference', async () => {
+    const res = await call({ event: 'refund.processed', data: { transaction_reference: 'foreign' } });
+    expect(res.body.ignored).toBe(true);
+    expect(mocks.serviceClient.from).not.toHaveBeenCalled();
+  });
+
+  it('does not re-grant a refunded payment on a replayed charge.success', async () => {
+    mocks.serviceClient = serviceDb({ billing_payments: [{ data: { reference: REF, user_id: 'u1', status: 'refunded' }, error: null }] });
+    const res = await call({ event: 'charge.success', data: { reference: REF } });
+    expect(res.code).toBe(200);
+    expect(res.body.status).toBe('refunded');
+    expect(fetch).not.toHaveBeenCalled();
+    expect(mocks.serviceClient.rpc).not.toHaveBeenCalled();
+  });
+
+  it.each(['database', 'provider', 'revoke'])('retries refunds on %s infrastructure failure', async (failure) => {
+    mocks.serviceClient = serviceDb({ billing_payments: [{ data: { reference: REF }, error: failure === 'database' ? { message: 'db down' } : null }] }, { data: null, error: { message: 'rpc down' } });
+    if (failure === 'provider') fetch.mockRejectedValueOnce(new Error('provider down'));
+    else fetch.mockResolvedValueOnce(paystackOk({ status: 'reversed', reference: REF }));
+    const res = await call({ event: 'refund.processed', data: { transaction_reference: REF } });
+    expect(res.code).toBe(500);
   });
 
   it('answers 500 on an infrastructure failure so Paystack retries', async () => {
@@ -295,9 +384,29 @@ describe('daily quota', () => {
     expect(student.db.rpc).not.toHaveBeenCalled();
   });
 
-  it('never charges a Premium student', async () => {
+  it.each(Object.entries(PREMIUM_DAILY_LIMITS))('allows Premium under the %s fair-use cap on the shared daily namespace', async (feature, limit) => {
+    const student = freeStudent({ allowed: true, remaining: 1, reset_at: later() }, [{ ends_at: later() }]);
+    const res = response();
+    expect(await denyIfOverDailyQuota({ headers: {} }, res, student, feature)).toBe(false);
+    expect(student.db.rpc).toHaveBeenCalledWith('consume_rate_limit', { p_namespace: 'daily:' + feature, p_limit: limit, p_window_seconds: 86400 });
+    expect(res.headers['X-Quota-Remaining']).toBe('1');
+  });
+
+  it.each(Object.entries(PREMIUM_DAILY_LIMITS))('answers fair_use without an upgrade path over the Premium %s cap', async (feature, limit) => {
     const student = freeStudent({ allowed: false, remaining: 0, reset_at: later() }, [{ ends_at: later() }]);
-    expect(await denyIfOverDailyQuota({ headers: {} }, response(), student, 'tutor')).toBe(false);
+    const res = response();
+    expect(await denyIfOverDailyQuota({ headers: {} }, res, student, feature)).toBe(true);
+    expect(res.code).toBe(429);
+    expect(res.body).toMatchObject({ kind: 'fair_use', feature, limit });
+    expect(res.body.upgradePath).toBeUndefined();
+    expect(res.body.error).toContain("today's fair-use limit of " + limit);
+    expect(res.body.error).toMatch(/resets in about 5 hours/);
+    expect(res.headers['Retry-After']).toBeDefined();
+  });
+
+  it.each(['quiz', 'examPrep'])('never meters Premium %s practice', async (feature) => {
+    const student = freeStudent({ allowed: false, remaining: 0, reset_at: later() }, [{ ends_at: later() }]);
+    expect(await denyIfOverDailyQuota({ headers: {} }, response(), student, feature)).toBe(false);
     expect(student.db.rpc).not.toHaveBeenCalled();
   });
 

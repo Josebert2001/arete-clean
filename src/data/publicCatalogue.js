@@ -18,6 +18,7 @@ import { departments, DEFAULT_DEPARTMENT, YEAR_LEVELS } from './departments';
 import { noteTopicCount } from './lectureNotes/index.js';
 import { SITE_URL, SITE_NAME, INSTITUTION, homeTitle, homeDescription } from './siteMeta';
 import { clip } from '../utils/text.js';
+import { PREMIUM_PASS, formatNaira } from './plans.js';
 
 // Re-exported so every existing caller keeps importing them from here. They are
 // defined in siteMeta.js, a leaf module, so usePageTitle can read the home
@@ -338,8 +339,9 @@ export const SITE_FAQS = [
   {
     q: 'Is Areté free?',
     a:
-      `Yes. Areté is free for ${INSTITUTION} students. Sign in with your university or personal ` +
-      `email — a one-time code is sent to you, there is no password and no payment.`,
+      `Course outlines, lecture notes and flashcards are free. Sign in with a one-time email ` +
+      `code, with no password. An optional Premium Semester Pass costs ${formatNaira(PREMIUM_PASS.priceKobo)} ` +
+      `and removes the free daily limits on AI tools and practice.`,
   },
   {
     q: 'Do I need an account to read a course outline?',

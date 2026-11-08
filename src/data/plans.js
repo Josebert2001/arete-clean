@@ -1,4 +1,4 @@
-// Areté Premium — the one place prices and free-tier limits live.
+// Areté Premium — the one place prices and daily limits live.
 //
 // Read by BOTH sides: the browser (pricing page, client-side gates on quizzes,
 // exam prep and CTF rooms) and the Vercel functions (api/_lib/plan.js charges
@@ -27,8 +27,8 @@ export const PREMIUM_PASS = Object.freeze({
 });
 
 // Free-tier allowance per 24 hours. A feature missing from this map is not
-// metered. Premium has no daily cap; the short per-10-minute limits in each
-// endpoint still apply to everyone and are what bound abuse.
+// metered. Premium has higher fair-use caps on server-metered features; the
+// short per-10-minute limits in each endpoint still apply to everyone.
 //
 // Server-enforced (cannot be bypassed from the browser): tutor, explainer,
 // simplify, summarize, research, run.
@@ -44,6 +44,17 @@ export const FREE_DAILY_LIMITS = Object.freeze({
   run: 5,
   quiz: 3,
   examPrep: 3,
+});
+
+// Premium fair-use allowance per 24 hours, on the same daily counters as Free.
+// Practice quizzes and written exam prep remain unlimited for Premium.
+export const PREMIUM_DAILY_LIMITS = Object.freeze({
+  tutor: 150,
+  explainer: 60,
+  simplify: 100,
+  summarize: 60,
+  research: 30,
+  run: 40,
 });
 
 // Phrased to finish "You've used today's 3 free …".
@@ -77,13 +88,13 @@ export function planComparison() {
   return [
     { feature: 'Course outlines, lecture notes, flashcards', free: 'Unlimited', premium: 'Unlimited' },
     { feature: 'Pre-written code walkthroughs', free: 'Unlimited', premium: 'Unlimited' },
-    { feature: 'AI Tutor', free: `${L.tutor} messages a day`, premium: 'Unlimited' },
-    { feature: 'Live code explanations', free: `${L.explainer} a day`, premium: 'Unlimited' },
-    { feature: 'Simplify / Key points', free: `${L.simplify} / ${L.summarize} a day`, premium: 'Unlimited' },
-    { feature: 'Explain-this web lookups', free: `${L.research} a day`, premium: 'Unlimited' },
+    { feature: 'AI Tutor', free: `${L.tutor} messages a day`, premium: 'Unlimited (fair use)' },
+    { feature: 'Live code explanations', free: `${L.explainer} a day`, premium: 'Unlimited (fair use)' },
+    { feature: 'Simplify / Key points', free: `${L.simplify} / ${L.summarize} a day`, premium: 'Unlimited (fair use)' },
+    { feature: 'Explain-this web lookups', free: `${L.research} a day`, premium: 'Unlimited (fair use)' },
     { feature: 'Practice quizzes (MCQ)', free: `${L.quiz} a day`, premium: 'Unlimited' },
     { feature: 'Written exam prep', free: `${L.examPrep} sessions a day`, premium: 'Unlimited' },
     { feature: 'Security CTF challenges', free: `First ${FREE_CTF_ROOMS} rooms`, premium: 'All 12 rooms' },
-    { feature: 'Code playground runs', free: `${L.run} a day`, premium: 'Unlimited*' },
+    { feature: 'Code playground runs', free: `${L.run} a day`, premium: 'Unlimited (fair use)*' },
   ];
 }

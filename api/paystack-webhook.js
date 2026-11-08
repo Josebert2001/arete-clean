@@ -25,7 +25,7 @@
 // ============================================================================
 
 import { isValidWebhookSignature, paystackConfigured } from './_lib/paystack.js';
-import { settlePayment, REFERENCE_PATTERN } from './_lib/billing.js';
+import { settlePayment, revokePayment, REFERENCE_PATTERN } from './_lib/billing.js';
 import { captureApiError } from './_lib/sentry.js';
 
 function rawBodyOf(req) {
@@ -55,23 +55,26 @@ export default async function handler(req, res) {
   }
 
   const event = parsedBodyOf(req);
-  const reference = event?.data?.reference;
+  const refund = event?.event === 'refund.processed';
+  const reference = refund
+    ? (event?.data?.transaction_reference ?? event?.data?.transaction?.reference ?? event?.data?.reference)
+    : event?.data?.reference;
 
   // Acknowledge everything we do not act on, or Paystack keeps retrying it.
-  if (event?.event !== 'charge.success' || typeof reference !== 'string' || !REFERENCE_PATTERN.test(reference)) {
+  if ((event?.event !== 'charge.success' && !refund) || typeof reference !== 'string' || !REFERENCE_PATTERN.test(reference)) {
     return res.status(200).json({ received: true, ignored: true });
   }
 
   try {
-    const outcome = await settlePayment(reference);
-    if (outcome.status !== 'granted') {
+    const outcome = await (refund ? revokePayment(reference) : settlePayment(reference));
+    if (!['granted', 'revoked', 'already', 'refunded'].includes(outcome.status)) {
       console.error(JSON.stringify({ route: 'paystack-webhook', reference, outcome: outcome.status }));
     }
     return res.status(200).json({ received: true, status: outcome.status });
   } catch (err) {
     // 500 makes Paystack retry later, which is what we want when the database
     // or Paystack's verify API was briefly unreachable.
-    console.error('paystack-webhook: settle failed:', err);
+    console.error('paystack-webhook: processing failed:', err);
     await captureApiError(err, { route: 'paystack-webhook' });
     return res.status(500).json({ error: 'Could not process event.' });
   }
