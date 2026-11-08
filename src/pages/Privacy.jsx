@@ -28,7 +28,7 @@ export default function Privacy() {
         Legal
       </span>
       <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-2">Privacy Policy</h1>
-      <p className="text-xs text-coffee-500 mb-10">Last updated: 2 November 2026</p>
+      <p className="text-xs text-coffee-500 mb-10">Last updated: 3 November 2026</p>
 
       <p className="text-sm text-coffee-700 leading-relaxed mb-8">
         Areté is a student-built academic platform for University of Uyo students.
@@ -41,11 +41,11 @@ export default function Privacy() {
           <li><span className="font-medium text-ink">Account info</span> — your email address, and once you complete setup, your full name, registration number, and level (100L–400L), used to identify your profile.</li>
           <li><span className="font-medium text-ink">Progress data</span> — which modules and quizzes you've completed, and your scores, so progress syncs across devices.</li>
           <li><span className="font-medium text-ink">Attendance and rosters</span> — your department and level can place you on a course roster. Check-ins record the class, time, attendance status, and your name and registration number at the time, when present. Lecturers can also mark a student manually and record a reason. Lecturers assigned to that course can see its roster and register, add, change, or delete attendance, and download the register. You can see your own attendance and course percentages.</li>
-          <li><span className="font-medium text-ink">Check-in location</span> — when you check in, the browser requests your coordinates and sends them to the attendance system. If a lecturer enabled a location boundary, the system uses them to block an out-of-area check-in. Successful check-ins store the precise latitude and longitude supplied by your browser in the attendance record, even when no boundary is set. Lecturers assigned to the class can access those records. A lecturer's location and chosen radius are stored with the class when they enable a boundary. If your browser does not provide a location, the coordinates are null; a class with an enforced boundary will reject the check-in.</li>
+          <li><span className="font-medium text-ink">Check-in location</span> — the browser requests your coordinates when you check in because the class discovery list does not say whether a boundary is enforced. If a lecturer enabled a location boundary, the system uses them to block an out-of-area check-in and stores the precise coordinates on a successful check-in. With no enforced boundary, the attendance record stores no coordinates. Lecturers assigned to the class can access its records. A lecturer's location and chosen radius are stored with the class when they enable a boundary. If your browser does not provide a location, a class with an enforced boundary will reject the check-in.</li>
           <li><span className="font-medium text-ink">Device binding</span> — the browser keeps a randomly generated device identifier in local storage and sends it at check-in. Despite the database field's name, the identifier is stored as sent, not hashed. It is linked to your account and successful check-ins so later check-ins require the same identifier and one identifier cannot check in twice for the same class. A lecturer for your course can reset your account's device binding if you change devices.</li>
           <li><span className="font-medium text-ink">Course reps, lecturers, and invitations</span> — the system records staff roles, course-rep appointments, course assignments, and invitation email addresses, senders, recipients, decisions, and dates. Reps can manage offerings and lecturer invitations for their own department and level; they cannot see or mark attendance as lecturers. Invitees can see invitations addressed to their email. Admins can search accounts, appoint reps and staff, review invitations, and approve a first-time lecturer before that person gets lecturer access. Admins can also review a log of manual attendance additions, changes, and deletions, including the affected student's name, registration number, and attendance details.</li>
           <li><span className="font-medium text-ink">In-app feedback</span> — if you send a rating, we store its value, your optional message, the page you were on, your account ID, and the submission time. Feedback is reviewed by people with Supabase dashboard access; other students, lecturers, and course reps cannot read submissions through the app. The prompt also keeps per-account visit and dismissal state in your browser.</li>
-          <li><span className="font-medium text-ink">Uploaded course materials</span> — files you add to a course page. The list of files is shown to signed-in students viewing that course, but anyone with a file's link can download it without signing in. Do not upload anything you would not want shared. Extracted text from these files may be used to give the AI Tutor context.</li>
+          <li><span className="font-medium text-ink">Uploaded course materials and reports</span> — files you add to a course page. The list of files is shown to signed-in students viewing that course, but anyone with a file's link can download it without signing in. Do not upload anything you would not want shared. Extracted text from these files may be used to give the AI Tutor context. Students can report a file; we store the reporter's account ID, reason, optional details, and review outcome. Admins can hide or remove reported files. A hidden file's public link may remain usable until it is removed from storage.</li>
           <li><span className="font-medium text-ink">AI Tutor / Code Explainer / Explain-this / Simplify-this content</span> — messages, code, and text you submit to these features are sent to our AI providers to generate a response. We don't use this content to train our own models; our AI providers' own policies govern what they do with it (see below).</li>
           <li><span className="font-medium text-ink">Code Playground submissions</span> — code you run is sent to JDoodle to execute and return output.</li>
           <li><span className="font-medium text-ink">Google Calendar connection (optional)</span> — if you connect your Google account from the Study Planner, we store a Google-issued refresh token so we can create calendar events on your behalf. We never see your Google password. Disconnecting at any time deletes this token and revokes our access.</li>
@@ -76,13 +76,13 @@ export default function Privacy() {
 
       <Section title="4. How long we keep your data">
         <p>
-          We have not set a published retention period for account, attendance, invitation, or feedback data.
-          To request deletion of your account or associated data, email us using the address below. There is
-          no in-app deletion control. Deleting your account removes feedback, roster, attendance, and
-          device-binding rows linked to you as a student. If you have marked attendance for other students,
-          those records prevent account deletion until they are dealt with, so we handle such requests manually.
-          The admin audit log of manual attendance changes is separate and can retain copies of changed or
-          deleted attendance rows, so include it in any deletion request.
+          Our proposed retention defaults are: rate-limit counters for 7 days; feedback for 2 years;
+          attendance and course rosters for the academic session plus 2 years; and resolved material
+          reports for 1 year. The automatic cleanup is not active until the owner approves and schedules it.
+          For accounts inactive for 3 years, we plan to notify the owner before deletion; inactivity-based
+          deletion is not automatic. You can download your readable data or request deletion from Profile
+          settings. Staff, lecturers, and course reps must contact an admin first. A student account deletion
+          also removes its attendance records and related audit snapshots.
         </p>
       </Section>
 
@@ -106,6 +106,7 @@ export default function Privacy() {
 
       <Section title="8. Contact">
         <p>Questions about this policy: <a href="mailto:robertsunday333@gmail.com" className="font-medium text-ink underline hover:text-ember">robertsunday333@gmail.com</a></p>
+        <p>To report a security issue privately, read our <a href="https://github.com/Josebert2001/arete-clean/security/policy" className="font-medium text-ink underline hover:text-ember">security policy</a>.</p>
       </Section>
     </div>
   );

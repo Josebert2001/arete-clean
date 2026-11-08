@@ -10,6 +10,7 @@ import { useExplanations } from '../components/useExplanations';
 import { useApiAvailability } from '../utils/apiClient';
 import { topicsWithCode } from '../utils/explainCode';
 import { useLectureNotes } from '../components/useLectureNotes';
+import { noteTopicCount } from '../data/lectureNotes/index.js';
 import { useReadingProgress } from '../components/useReadingProgress';
 import CourseQuiz from '../components/CourseQuiz';
 import CourseExamPrep from '../components/CourseExamPrep';
@@ -34,7 +35,7 @@ function getStoredTabMap() {
 
 function getStoredTab(slug, course) {
   const stored = getStoredTabMap()[slug];
-  const hasNotes = Boolean(course?.notesKey) || course?.lectureNotes?.length > 0;
+  const hasNotes = noteTopicCount(course) > 0;
   const hasQuiz = course?.quiz?.length > 0;
   const hasExamPrep = course?.examPrep?.length > 0;
   if (stored === 'notes' && hasNotes) return 'notes';
@@ -216,6 +217,7 @@ export default function CourseDetail() {
           {course.title}
         </h1>
         <p className="text-lg text-coffee-700 max-w-3xl leading-relaxed">{course.description}</p>
+        {course.contentReview && <p className="mt-2 text-xs text-coffee-600">Maintained by {course.contentReview.owner} · last reviewed {course.contentReview.reviewed}</p>}
       </div>
 
       {/* Interactive track banner */}

@@ -1,10 +1,10 @@
-# Areté — Academic Companion for the Department of Cybersecurity
+# Areté — Student-built Academic Companion for University of Uyo
 
 > ἀρετή (ar-eh-TAY) · Greek · "excellence achieved through practice"
 
-A full academic aid for B.Sc. Cybersecurity students at the **University of Uyo**. Every course from 100L to 400L, four interactive tracks (Java, Python, C, and a hands-on Security/CTF track), an AI tutor that knows the whole curriculum, a code explainer, cloud accounts with synced progress, and a study-plan calendar export.
+A student-built academic aid for University of Uyo students across supported departments. It includes course catalogues, four interactive tracks (Java, Python, C, and a Security/CTF track), an AI tutor, a code explainer, synced progress, and a study-plan calendar export.
 
-Built by the **Department of Cybersecurity**, University of Uyo. Live at **https://www.aretecyb.tech**.
+Independent of the University of Uyo and its departments; this is not an official university service. Live at **https://www.aretecyb.tech**.
 
 ---
 
@@ -138,10 +138,15 @@ OPENROUTER_API_KEY=           # optional — best-effort last resort via openrou
 # --- Code playground ---
 JDOODLE_CLIENT_ID=
 JDOODLE_CLIENT_SECRET=
+RUNNER_PROVIDER=jdoodle        # default; set judge0 for a self-hosted runner
+JUDGE0_URL=                   # base URL of self-hosted Judge0 when selected
+JUDGE0_AUTH_TOKEN=            # optional Judge0 X-Auth-Token
+CRON_SECRET=                  # required by the 03:00 UTC material orphan sweep
 
 # --- Auth + database + storage ---
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=    # server only: material registration and orphan sweep
 
 # --- CORS ---
 ALLOWED_ORIGIN=https://www.aretecyb.tech   # the one origin allowed to read /api/* cross-origin; unset = none (fail closed)
@@ -151,9 +156,11 @@ VITE_SENTRY_DSN=               # frontend
 SENTRY_DSN=                    # /api/* functions
 ```
 
-Server-side-only secrets (`JDOODLE_*`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `SENTRY_DSN`) never reach the browser bundle. `VITE_`-prefixed vars are intentionally public (Supabase anon key is safe to expose — access is enforced by Row Level Security).
+Server-side-only secrets (`JDOODLE_*`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `SENTRY_DSN`, `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `JUDGE0_AUTH_TOKEN`) never reach the browser bundle. `VITE_`-prefixed vars are intentionally public (Supabase anon key is safe to expose — access is enforced by Row Level Security).
 
 For the one-time Supabase setup script (`setup-supabase.mjs`) you additionally need `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_PAT` in a separate `.env.setup` file — never commit it, never use the service role key in frontend code.
+
+Material uploads are limited to 30 registered files and 150 MB per student. The daily Vercel cron removes unregistered storage objects older than 24 hours. Set `CRON_SECRET` and the runtime `SUPABASE_SERVICE_ROLE_KEY` in Vercel before enabling uploads in production.
 
 ---
 
@@ -166,7 +173,7 @@ The **Try It** playground (Java/Python/C tracks) calls `api/run.js`, a serverles
 3. Copy your **Client ID** and **Client Secret** from the API dashboard
 4. Add `JDOODLE_CLIENT_ID` / `JDOODLE_CLIENT_SECRET` to your environment and redeploy
 
-Fine for development; not enough for a full department. When you outgrow it, self-host Judge0 (DigitalOcean/Oracle Cloud both have free tiers) and swap the inside of `api/run.js` — the frontend stays unchanged.
+Fine for development; not enough for a full department. To use a self-hosted Judge0, set `RUNNER_PROVIDER=judge0` and `JUDGE0_URL` to the instance base URL. Set `JUDGE0_AUTH_TOKEN` if the instance requires its `X-Auth-Token` header. Check that the instance enables Java (62), C (50), C++ (54), and Python (71) in `/languages`; these are the Judge0 CE IDs used by the adapter. The frontend and its response shape stay the same. If Judge0 is unavailable, the runner shows a temporary error.
 
 ## Wiring up the AI features
 
@@ -215,4 +222,4 @@ Test files live in `src/__tests__/`. Coverage is still thin — see `CLAUDE.md` 
 
 ---
 
-© 2026 Areté · Department of Cybersecurity, University of Uyo.
+© 2026 Areté · Independent student-built companion for University of Uyo students.

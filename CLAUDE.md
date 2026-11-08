@@ -12,7 +12,7 @@ It is multi-department. Two departments have fully-authored catalogues — **Cyb
 - **Backend:** Vercel serverless functions in `api/` (Node.js ESM)
 - **Auth + DB:** Supabase (email OTP, PostgreSQL — profiles + user_progress + course_materials tables)
 - **AI:** Groq API via Vercel AI SDK (`openai/gpt-oss-120b`), streaming responses
-- **Code execution:** JDoodle API (proxied through `api/run.js`)
+- **Code execution:** JDoodle by default, self-hosted Judge0 when configured (proxied through `api/run.js`)
 - **Language:** JavaScript/JSX throughout — no TypeScript
 - **Icons:** lucide-react | **Fonts:** Fraunces (display), Inter (body), JetBrains Mono (code)
 
@@ -84,7 +84,7 @@ Browser → React SPA (Vite)
 | `src/data/cModules.js` | 12 C modules |
 | `src/data/securityModules.js` | 12 Security "rooms" (theory + quiz + an embedded CTF `challenge`); flags stored as SHA-256 hashes |
 | `src/components/FlagChallenge.jsx` | Renders a module's CTF challenge; validates the flag client-side via Web Crypto SHA-256 (no backend); escalating hints, marks the module complete on solve |
-| `src/data/courses.js` | ~8200 lines — all Cybersecurity courses (100L–400L), topics, textbooks, exam tips; the 22 foundation courses carry `crossDepartmental: true`, and CYB 211 carries `sharedMaterials: true` (see below) |
+| `src/data/courses.js` | ~2,400 lines — Cybersecurity course metadata (100L–400L); notes and banks live in `lectureNotes/`. The 22 foundation courses carry `crossDepartmental: true`, and CYB 211 carries `sharedMaterials: true` (see below) |
 | `src/data/departments.js` | Department registry (cybersecurity + dataScience = full, general = foundation) + lazy catalogue loaders + `YEAR_LEVELS` (the lightweight level list — import this, not courses.js, when a page only needs to validate/render a level) + `materialsDepartmentFor()` (which `course_materials.department` pool a course's uploads belong to) + `findDepartmentByName()` (matches a foundation student's typed `department_other` against the authored departments, so Welcome and the dashboard can offer them the switch) |
 | `src/data/useCatalogue.js` | Hook resolving the signed-in student's department catalogue; status `loading \| ready \| error` — always handle `error` or the page hangs on a failed chunk load. Stays `loading` until auth/profile settle, so a student never sees another department's catalogue flash first |
 | `src/data/dataScienceCourses.js` | ~2000 lines — the full B.Sc. Data Science catalogue (structure transcribed from the Students' Information Handbook Ch.4 §4.1). Standalone: imports only `lectureNotes/*` |
@@ -99,7 +99,21 @@ Browser → React SPA (Vite)
 | `src/components/CodeWalkthrough.jsx` | "Code Walkthrough" tab on `CourseDetail`, shown only for courses whose notes carry program listings (`topicsWithCode()`). The practicals in order, listing + inline walkthrough (from the bundle above; falls back to the live button where nothing is generated) + verified output + a "Watch out for" panel built from the note's own `note` blocks + a jump to the matching exam-prep questions (matched by the bank's `source` string, e.g. `"Topic 14 · Practical 5"` — no separate authoring needed). Built for revising the night before a paper: the reading-order notes tab is organized to teach the course, this one is organized to drill the practicals |
 | `api/research.js` | Explain-this — `groq/compound-mini` web search over a highlighted passage; signed-in only, returns explanation + sources |
 | `src/components/ExplainSelection.jsx` | Wraps readable content; shows "Explain this" on text selection, renders inline explanation card |
-| `api/run.js` | JDoodle proxy — runs Java/C/C++/Python code |
+| `api/run.js` | JDoodle (default) or self-hosted Judge0 adapter — runs Java/C/C++/Python code |
+| `api/cron/sweep-materials.js` | `CRON_SECRET`-authenticated daily sweep of course-materials storage objects older than 24 h with no registration row; bounded to 200 objects per run |
+| `api/account/delete.js` | Signed-in student account deletion after typed confirmation; removes uploads, Google connection, attendance and audit copies before deleting the auth user. Staff and course reps are refused |
+| `src/utils/materialQuota.js` | Shared upload caps: 30 registered files and 150 MB per student |
+| `src/utils/rateLimitMessage.js` | User-facing 429 messages shared by AI and upload surfaces |
+| `src/utils/userDataExport.js` | Pure assembler for the JSON export on Profile settings; excludes file bytes and Google tokens |
+| `src/data/lectureNotes/{ins224,cyb224,cyb222,uuyCyb222}.js` | Four formerly inline lecture-note arrays, loaded by `notesKey` |
+| `src/data/lectureNotes/{cyb224,cyb222,uuyCyb222}Quiz.js` | Three formerly inline MCQ banks, kept in separate build chunks |
+| `supabase/migrations/20261103010000_material_reports.sql` | Report/review/hide/remove workflow for student uploads |
+| `supabase/migrations/20261103020000_material_upload_quota.sql` | 40-object storage cap and own upload count RPC |
+| `supabase/migrations/20261103030000_checkin_coordinate_minimization.sql` | Only store check-in coordinates when geofencing is enforced |
+| `supabase/migrations/20261103040000_retention_schedule.sql` | Commented retention function awaiting owner approval |
+| `docs/browser-test-plan.md` | Proposed Playwright/axe flows and CI gate; no dependencies installed |
+| `SECURITY.md` | Current deployment security scope, private reporting channels, response targets and good-faith research policy |
+| `src/__tests__/{sweepMaterials,accountDelete,rateLimitMessage,userDataExport}.test.js` | Tests for the new cron, account deletion, limit copy and data export |
 | `api/extract.js` | **Registers** a freshly uploaded course material: downloads the object the browser just stored, extracts its text (.txt/.docx/.pdf via mammoth + pdf-parse) and writes the `course_materials` row itself on the service-role client. The browser cannot insert that row any more — `authenticated` has no INSERT grant (migration `20260827010000`). Every security-relevant field is derived here, never taken from the body: `uploaded_by` from the verified token, `course_code`/`department` from the catalogue via `findCourseBySlug()` and the uploader's own profile, `extracted_text` from the real bytes. This is why it matters: that text is injected into every student's tutor context for that course, and the lookup takes the two most *recent* rows, so a forged row displaced the genuine notes. Signed-in only; answers 503 when `SUPABASE_SERVICE_ROLE_KEY` is unset |
 | `api/simplify.js` | "Simplify this" — Groq rewrite of a dense lecture-note section in plain English; client caches results in localStorage |
 | `api/summarize.js` \| `src/utils/summarizeTopic.js` | "Key points" — exam-ready recap of a **whole topic**, for a student who has already read it. Deliberately separate from Simplify (one *section*, for a student who is stuck): different scope, prompt, cap (32k vs 4k chars) and rate bucket. Skips topics whose title is already a hand-written summary (`/exam focus\|key takeaways/i`) |
@@ -110,7 +124,7 @@ Browser → React SPA (Vite)
 | `src/components/CourseExamPrep.jsx` | Written-exam practice off `course.examPrep`, for courses examined on paper rather than by CBT. Generic over any course carrying a bank; see "Adding a question bank" below for why it is a sibling field and not more question types on `quiz` |
 | `src/data/lectureNotes/*Quiz.js` \| `*ExamPrep.js` | The question banks. **7 MCQ (`quiz`)** — UUY-CYB 121, UUY-CYB 123, ENT 221, CYB 224, CYB 222, UUY-CYB 221, UUY-CYB 222 — and **7 written (`examPrep`)** — UUY-CYB 122, COS 221, INS 224, CYB 224, CYB 222, UUY-CYB 221, UUY-CYB 222. `ent221Quiz.js` and `cos221ExamPrep.js` are the shared ones, imported by both catalogues' entries for those courses; the rest sit on their own course. `courseOfferings()` counts the arrays themselves at run time, so a public course description and its meta tags always quote the live figure — but those pages are prerendered, so a bank added without a rebuild leaves the indexed page understating the course |
 | `api/_lib/supabase.js` | Server-side Supabase client using Bearer token from request |
-| `api/_lib/serviceRole.js` | **The only file allowed to read `SUPABASE_SERVICE_ROLE_KEY`.** That key bypasses RLS entirely, so every use of it is a place where the database's protections do not apply and the calling code alone is responsible for scoping — keeping the read in one module keeps that list greppable (`serviceRoleClient(`). Two callers today: `googleAuth.js` and `extract.js`. Any new one must scope by an already-verified user id, and should prefer the caller's own `student.db` unless the server must write something the user must not be able to forge |
+| `api/_lib/serviceRole.js` | **The only file allowed to read `SUPABASE_SERVICE_ROLE_KEY`.** That key bypasses RLS entirely. Callers: `googleAuth.js`, `extract.js`, and the `CRON_SECRET`-authenticated `api/cron/sweep-materials.js`. User-facing calls scope by an already-verified user id; the cron examines only the course-materials bucket and registration paths. |
 | `api/_lib/googleAuth.js` | Google OAuth2 client, signed `state` (CSRF), refresh-token storage via `serviceRole.js`. Refresh tokens are **encrypted at rest** (AES-256-GCM) — the column GRANTs govern who may SELECT the value, but a leaked service-role key or a database dump would otherwise hand over every token in plaintext. The key is HKDF-derived from `GOOGLE_CLIENT_SECRET` rather than being a new env var, so it lives in Vercel and never in the database; a dump alone is useless. Legacy plaintext rows are read as-is and re-encrypted lazily on first use, so nothing needs backfilling and nobody reconnects. Rotating `GOOGLE_CLIENT_SECRET` makes existing ciphertexts unreadable — acceptable, since rotating it invalidates the OAuth client anyway |
 | `api/_lib/request-policy.js` | CORS/cache headers, and the two-layer rate limit. `enforceRateLimit` is per-IP and in-memory (per-lambda-instance, wiped by cold starts) — a cheap guard on the *pre-auth* path only. `enforceUserRateLimit`/`denyIfUserRateLimited` are the budget that actually binds: per-student, via the `consume_rate_limit()` Postgres function (migration `20260827000000`), so the count is shared across every instance. It **fails open** by design — migrations here are applied by hand, so deployed code can legitimately meet a database without the function yet. A hard *spend* cap is deliberately not implemented in app code; set it at the provider (Google Cloud quotas, Groq limits) where the app cannot reach it |
 | `api/_lib/googleEvents.js` | PlanEvent → Google Calendar event resource (duplicates `src/utils/ics.js`'s date/RRULE math for the Node context — keep both in sync by hand) |
@@ -147,6 +161,10 @@ GOOGLE_CLIENT_ID          # Google OAuth (Calendar sync + Drive import) — api/
 GOOGLE_CLIENT_SECRET      # Google OAuth — also keys the signed `state` HMAC, never expose to the browser
 GOOGLE_REDIRECT_URI       # Must exactly match a redirect URI registered on the Google OAuth client
 SUPABASE_SERVICE_ROLE_KEY # Live runtime secret, read only by api/_lib/serviceRole.js (Google token storage + course-material inserts). Uploads answer 503 without it
+CRON_SECRET              # Vercel daily material orphan sweep; required with the service-role key
+RUNNER_PROVIDER          # optional: jdoodle (default) or judge0
+JUDGE0_URL               # Judge0 base URL when RUNNER_PROVIDER=judge0
+JUDGE0_AUTH_TOKEN        # optional Judge0 X-Auth-Token
 ```
 For Vercel deployment, set all of the above in the Vercel dashboard — not in code.
 For Supabase setup script only: also need `SUPABASE_PAT`.
@@ -168,7 +186,7 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 - Never install new dependencies without asking first
 - Handle errors explicitly — no silent failures, no empty catch blocks
 - Make the smallest change that solves the problem
-- `src/data/courses.js` is very large (~8200 lines) — read only the relevant section before editing
+- `src/data/courses.js` is ~2,400 lines; read only the relevant section before editing
 - AI features gracefully degrade when keys are missing — preserve this behavior
 - Rate limiting in `/api/*` is IP-based in-memory — do not remove or weaken it
 
@@ -181,7 +199,7 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 ## Testing — Important Context
 The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-library/react` available for component tests.
 - Config: `vitest.config.js` · setup file: `src/__tests__/setup.js` (imports `@testing-library/jest-dom`)
-- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 66 suites, ~945 tests.
+- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 78 suites, 1,038 passing tests plus one expected failure as of 3 November 2026.
 - Run with `npm test` (single run) or `npm run test:watch`. CI runs `npm test` on every push.
 - When writing new logic, add or extend a test if the function is testable in isolation. Coverage is uneven — data/util logic is reasonably covered, most page-level components are not.
 - **Component tests use `fireEvent` from `@testing-library/react`** (see `profileForm.test.jsx`, `courseExamPrep.test.jsx`). `@testing-library/user-event` is *not* a dependency — do not import it.

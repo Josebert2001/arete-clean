@@ -147,6 +147,7 @@ export default function CoursePreview({ course, department, siblings = [], notes
             takes — naming one department there tells every other student the
             page is not for them. */}
         <p className="text-sm text-coffee-600 mb-4">{courseAudience(course, department)}</p>
+        {course.contentReview && <p className="mb-4 text-xs text-coffee-600">Maintained by {course.contentReview.owner} · last reviewed {course.contentReview.reviewed}</p>}
         {/* Definitional lead. The page used to open with prose written for a
             student who already knows what the course is; an answer engine
             extracts the first factual sentence, so this states the facts —

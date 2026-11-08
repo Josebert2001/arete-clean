@@ -49,6 +49,7 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="hover:text-ink transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-ink transition-colors">Terms of Service</Link>
+            <a href="https://github.com/Josebert2001/arete-clean/security/policy" className="hover:text-ink transition-colors">Security policy</a>
           </div>
         </div>
       </div>

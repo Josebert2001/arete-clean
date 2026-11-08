@@ -27,7 +27,7 @@ export default function Terms() {
 
       <Section title="1. What Areté is">
         <p>
-          Areté is an independent, student-built academic companion for B.Sc. Cybersecurity students at the
+          Areté is an independent, student-built academic companion for students across supported departments at the
           University of Uyo — a curriculum browser, programming tracks, an AI tutor, and study tools. It is not an
           official University of Uyo service and isn't endorsed by the university's administration.
         </p>
@@ -55,6 +55,7 @@ export default function Terms() {
           and display that content to other signed-in students viewing the same course. You're responsible for
           having the right to share whatever you upload.
         </p>
+        <p>Other students can report a material. Admins may hide or permanently remove uploads after review, including material that is inaccurate, harmful, or shared without permission. Reports record the reporter, reason, optional details, and review outcome.</p>
       </Section>
 
       <Section title="5. AI-generated content">
