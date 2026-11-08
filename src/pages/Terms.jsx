@@ -18,7 +18,7 @@ export default function Terms() {
         Legal
       </span>
       <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-2">Terms of Service</h1>
-      <p className="text-xs text-coffee-500 mb-10">Last updated: 19 July 2026</p>
+      <p className="text-xs text-coffee-500 mb-10">Last updated: 8 November 2026</p>
 
       <p className="text-sm text-coffee-700 leading-relaxed mb-8">
         By using Areté, you agree to these terms. Please read them — if something here doesn't work for you, contact
@@ -69,16 +69,31 @@ export default function Terms() {
       <Section title="6. Third-party services">
         <p>
           Some features rely on external services — code execution (JDoodle), AI providers (Groq, Google Gemini,
-          OpenRouter), and, if you connect it, Google Calendar. Your use of those features is also subject to
+          OpenRouter), payments (Paystack), and, if you connect it, Google Calendar. Your use of those features is also subject to
           those providers' own terms. See our <Link to="/privacy" className="font-medium text-ink underline hover:text-ember">Privacy Policy</Link> for the full list.
         </p>
       </Section>
 
-      <Section title="7. Free service, provided as-is">
+      <Section title="7. Free plan, Premium, and availability">
         <p>
-          Areté is provided free of charge, on a best-effort basis, with no uptime guarantee. Some features have
-          usage limits (for example, the Code Playground shares a pool of 20 free executions/day across all
-          students) and may be temporarily unavailable if a limit is reached or a provider is down.
+          Lecture notes, course outlines and flashcards are free. On the free plan, the AI tools, practice quizzes,
+          written exam prep, code runs and some Security challenges have daily allowances, listed
+          on the <Link to="/premium" className="font-medium text-ink underline hover:text-ember">Premium page</Link>.
+        </p>
+        <p>
+          Premium is an optional one-time payment, processed by Paystack, that lifts those daily allowances for the
+          period shown at checkout. It does not renew automatically. Buying again while Premium adds a new period
+          after the current one ends. Premium belongs to your account and cannot be transferred. Deleting your
+          account ends any remaining Premium time.
+        </p>
+        <p>
+          If you were charged but Premium did not switch on, or you were charged twice for the same purchase,
+          contact us with your payment reference and we will activate Premium or refund the duplicate charge.
+        </p>
+        <p>
+          The service is provided on a best-effort basis with no uptime guarantee, on every plan. Some limits apply
+          to everyone (for example, the Code Playground shares a daily pool of executions across all students), and
+          features may be temporarily unavailable when a provider is down.
         </p>
       </Section>
 

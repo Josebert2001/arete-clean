@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { rateLimitMessage } from './rateLimitMessage.js';
+import { isQuotaExceeded, announceQuotaExceeded } from './quotaEvents.js';
 
 // Probes an AI endpoint on mount so pages can show the unconfigured state
 // immediately instead of after the user has composed a message.
@@ -53,6 +54,13 @@ export async function fetchJsonWithFallback(url, options, fallbackError) {
   }
 
   const data = await res.json().catch(() => ({}));
+  // A spent free-tier allowance keeps the server's own message, which names the
+  // allowance and says when it refills; rateLimitMessage() would call it a
+  // generic "try again in N minutes".
+  if (isQuotaExceeded(res.status, data)) {
+    announceQuotaExceeded(data);
+    return { ...data, responseStatus: 429, quotaExceeded: true };
+  }
   if (res.status === 429) return { ...data, error: rateLimitMessage(url, res.headers.get('Retry-After')), responseStatus: 429 };
   return { ...data, responseStatus: res.status };
 }

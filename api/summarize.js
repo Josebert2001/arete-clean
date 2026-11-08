@@ -17,6 +17,7 @@
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
+import { denyIfOverDailyQuota } from './_lib/plan.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 const SYSTEM_PROMPT = `You are Areté's lecture-note summariser for University of Uyo students in Nigeria. You will be given the full text of one lecture-note topic. The student has already read it — produce the revision recap they would want the night before the exam.
@@ -98,6 +99,10 @@ export default async function handler(req, res) {
     route: 'summarize',
     message: 'You have used your Key points allowance for now. Please wait a few minutes and try again.',
   })) return;
+
+  // Free-tier daily allowance — lifted by Premium, inert until billing is on.
+  // See api/_lib/plan.js.
+  if (await denyIfOverDailyQuota(req, res, student, 'summarize')) return;
 
   // Strong tier, unlike simplify's light one: the input is several times larger
   // and the job is to decide what matters, which is where a light model starts

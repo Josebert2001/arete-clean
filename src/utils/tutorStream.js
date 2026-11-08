@@ -1,5 +1,6 @@
 import { getAccessToken } from '../lib/supabase';
 import { rateLimitMessage } from './rateLimitMessage.js';
+import { isQuotaExceeded, announceQuotaExceeded } from './quotaEvents.js';
 
 // Sentinel the tutor API appends to a text stream when the model/connection
 // fails mid-response (see api/tutor.js). It is only ever written on the error
@@ -57,6 +58,10 @@ export async function streamTutor({ messages, moduleContext, signal, onChunk, on
   // JSON responses carry errors, rate limits, or the unconfigured flag.
   if (contentType.includes('application/json')) {
     const data = await res.json().catch(() => ({}));
+    if (isQuotaExceeded(res.status, data)) {
+      announceQuotaExceeded(data);
+      return { ...data, responseStatus: 429, quotaExceeded: true };
+    }
     if (res.status === 429) return { ...data, error: rateLimitMessage('tutor', res.headers.get('Retry-After')), responseStatus: 429 };
     return { ...data, responseStatus: res.status };
   }

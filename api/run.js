@@ -39,6 +39,7 @@ const JUDGE0_LANGUAGES = { java: 62, c: 50, cpp: 54, python: 71 };
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
+import { denyIfOverDailyQuota } from './_lib/plan.js';
 
 const RATE_LIMIT = {
   namespace: 'run',
@@ -90,6 +91,10 @@ export default async function handler(req, res) {
     route: 'run',
     message: 'You have used your code-run allowance for now. Please wait a few minutes and try again.',
   })) return;
+
+  // Free-tier daily allowance — lifted by Premium, inert until billing is on.
+  // See api/_lib/plan.js.
+  if (await denyIfOverDailyQuota(req, res, student, 'run')) return;
 
   const provider = process.env.RUNNER_PROVIDER || 'jdoodle';
   if (provider !== 'jdoodle' && provider !== 'judge0') {

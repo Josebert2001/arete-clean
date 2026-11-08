@@ -7,6 +7,9 @@ import MathText from './MathText';
 import CodeBlock from './CodeBlock';
 import ExplainCode from './ExplainCode';
 import { useProgress } from './useProgress';
+import { Link } from 'react-router-dom';
+import UpgradePrompt from './UpgradePrompt';
+import { useUsageGate } from './useUsageGate';
 import { useApiAvailability } from '../utils/apiClient';
 import { useExplanations } from './useExplanations';
 import { explainedKeyFor } from '../data/lectureNotes/explained';
@@ -428,6 +431,9 @@ export default function CourseExamPrep({ course }) {
   // rate limit, and it works with no network at all.
   const explanations = useExplanations(explainedKeyFor(course));
   const last = progress.quizScores?.[course.slug];
+  // Free tier: a few exam-prep sets a day across all courses (data/plans.js).
+  // Inert for Premium and whenever billing is off.
+  const gate = useUsageGate('examPrep');
 
   const [questions, setQuestions] = useState(null);
   const [current, setCurrent] = useState(0);
@@ -482,6 +488,7 @@ export default function CourseExamPrep({ course }) {
   };
 
   const start = (list) => {
+    if (!gate.consume()) return;
     setQuestions(list);
     setCurrent(0);
     setAwards({});
@@ -665,6 +672,17 @@ export default function CourseExamPrep({ course }) {
         </ul>
       </div>
 
+      {gate.active && !gate.blocked && (
+        <p className="text-xs text-coffee-600 mb-4">
+          {gate.remaining} of {gate.limit} free exam-prep sets left today ·{' '}
+          <Link to="/premium" className="underline underline-offset-2 hover:text-ink">Go unlimited</Link>
+        </p>
+      )}
+
+      {gate.blocked ? (
+        <UpgradePrompt feature="examPrep" limit={gate.limit} />
+      ) : (
+      <>
       <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-3">
         Pick a set
       </p>
@@ -750,6 +768,8 @@ export default function CourseExamPrep({ course }) {
             })()}
           </button>
         </div>
+      )}
+      </>
       )}
     </div>
   );

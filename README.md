@@ -141,6 +141,8 @@ JDOODLE_CLIENT_SECRET=
 RUNNER_PROVIDER=jdoodle        # default; set judge0 for a self-hosted runner
 JUDGE0_URL=                   # base URL of self-hosted Judge0 when selected
 JUDGE0_AUTH_TOKEN=            # optional Judge0 X-Auth-Token
+PAYSTACK_SECRET_KEY=          # Premium payments; unset = billing off (no checkout, no free-tier caps)
+PAYSTACK_CALLBACK_URL=        # optional; defaults to https://www.aretecyb.tech/premium
 CRON_SECRET=                  # required by the 03:00 UTC material orphan sweep
 
 # --- Auth + database + storage ---
@@ -156,7 +158,7 @@ VITE_SENTRY_DSN=               # frontend
 SENTRY_DSN=                    # /api/* functions
 ```
 
-Server-side-only secrets (`JDOODLE_*`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `SENTRY_DSN`, `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `JUDGE0_AUTH_TOKEN`) never reach the browser bundle. `VITE_`-prefixed vars are intentionally public (Supabase anon key is safe to expose — access is enforced by Row Level Security).
+Server-side-only secrets (`JDOODLE_*`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `SENTRY_DSN`, `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `JUDGE0_AUTH_TOKEN`, `PAYSTACK_SECRET_KEY`) never reach the browser bundle. `VITE_`-prefixed vars are intentionally public (Supabase anon key is safe to expose — access is enforced by Row Level Security).
 
 For the one-time Supabase setup script (`setup-supabase.mjs`) you additionally need `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_PAT` in a separate `.env.setup` file — never commit it, never use the service role key in frontend code.
 

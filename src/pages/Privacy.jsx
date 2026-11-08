@@ -16,6 +16,7 @@ const THIRD_PARTIES = [
   { name: 'OpenRouter', role: 'AI Tutor fallback provider', url: 'https://openrouter.ai/privacy' },
   { name: 'JDoodle', role: 'runs code submitted in the Code Playground', url: 'https://www.jdoodle.com/privacy-policy' },
   { name: 'Brevo', role: 'delivers sign-in emails', url: 'https://www.brevo.com/legal/privacypolicy/' },
+  { name: 'Paystack', role: 'processes Premium payments — card, bank and USSD details go to Paystack, never to Areté', url: 'https://paystack.com/privacy' },
   { name: 'Sentry', role: 'error monitoring (optional, technical data only)', url: 'https://sentry.io/privacy/' },
   { name: 'Google Calendar API', role: 'only if you connect your Google account from the Study Planner', url: 'https://policies.google.com/privacy' },
 ];
@@ -28,7 +29,7 @@ export default function Privacy() {
         Legal
       </span>
       <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-2">Privacy Policy</h1>
-      <p className="text-xs text-coffee-500 mb-10">Last updated: 3 November 2026</p>
+      <p className="text-xs text-coffee-500 mb-10">Last updated: 8 November 2026</p>
 
       <p className="text-sm text-coffee-700 leading-relaxed mb-8">
         Areté is a student-built academic platform for University of Uyo students.
@@ -49,6 +50,8 @@ export default function Privacy() {
           <li><span className="font-medium text-ink">AI Tutor / Code Explainer / Explain-this / Simplify-this content</span> — messages, code, and text you submit to these features are sent to our AI providers to generate a response. We don't use this content to train our own models; our AI providers' own policies govern what they do with it (see below).</li>
           <li><span className="font-medium text-ink">Code Playground submissions</span> — code you run is sent to JDoodle to execute and return output.</li>
           <li><span className="font-medium text-ink">Google Calendar connection (optional)</span> — if you connect your Google account from the Study Planner, we store a Google-issued refresh token so we can create calendar events on your behalf. We never see your Google password. Disconnecting at any time deletes this token and revokes our access.</li>
+          <li><span className="font-medium text-ink">Premium payments (optional)</span> — if you buy Premium, we store a payment reference, the amount, currency, status and dates, and the start and end of your Premium period. Your email is sent to Paystack for the receipt. Paystack collects your card, bank or USSD details on its own page; Areté never receives them. If you delete your account, your Premium periods are deleted and the payment record keeps only the reference, amount and dates, with no link to you.</li>
+          <li><span className="font-medium text-ink">Daily usage counts</span> — to apply free-plan allowances, we count how many times your account used each AI feature or code runs in the past 24 hours. Quiz and exam-prep counts are kept in your browser only.</li>
           <li><span className="font-medium text-ink">Technical/error data</span> — if something breaks, error details (not your personal messages) may be sent to Sentry to help us fix bugs.</li>
           <li><span className="font-medium text-ink">Local device storage</span> — study progress and a few preferences are cached in your browser so the app loads faster; this stays on your device except for what syncs to your account as described above.</li>
         </ul>

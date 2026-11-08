@@ -13,6 +13,7 @@
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
+import { denyIfOverDailyQuota } from './_lib/plan.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 // Exported so scripts/pregenerate-simplify.mjs rewrites with the exact prompt
@@ -99,6 +100,10 @@ export default async function handler(req, res) {
     route: 'simplify',
     message: 'You have used your Simplify allowance for now. Please wait a few minutes and try again.',
   })) return;
+
+  // Free-tier daily allowance — lifted by Premium, inert until billing is on.
+  // See api/_lib/plan.js.
+  if (await denyIfOverDailyQuota(req, res, student, 'simplify')) return;
 
   // Light tier (flash-lite) — cheaper and faster. This endpoint briefly moved
   // to the strong model because gemini-3.1-flash-lite dropped points from the

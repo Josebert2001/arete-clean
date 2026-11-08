@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Sparkles } from 'lucide-react';
 import { supabase, getAccessToken } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
@@ -9,6 +9,42 @@ import ProfileForm from '../components/ProfileForm';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { getGoogleStatus } from '../utils/googleApi';
 import { assembleUserData } from '../utils/userDataExport';
+import { usePlan } from '../context/PlanContext';
+import { formatNaira } from '../data/plans';
+
+// Billing rows are optional in the export: the tables arrive with a migration
+// that is applied by hand, and a missing table must not block a student from
+// downloading everything else.
+async function loadBilling(userId) {
+  const [passes, payments] = await Promise.all([
+    supabase.from('premium_passes').select('source, reference, starts_at, ends_at, created_at').eq('user_id', userId),
+    supabase.from('billing_payments').select('reference, plan, amount_kobo, currency, duration_days, provider, status, created_at, paid_at').eq('user_id', userId),
+  ]);
+  if (passes.error || payments.error) {
+    console.error('ProfileSettings: billing records unavailable for export:', passes.error?.message || payments.error?.message);
+    return null;
+  }
+  return { passes: passes.data ?? [], payments: payments.data ?? [] };
+}
+
+function PlanSection() {
+  const plan = usePlan();
+  if (plan.status !== 'ready' || !plan.enabled) return null;
+  const until = plan.premiumUntil
+    ? new Date(plan.premiumUntil).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '';
+  return (
+    <section className="mt-10 rounded-xl border border-ember/40 bg-cream p-5">
+      <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2"><Sparkles size={16} className="text-ember" /> Your plan</h2>
+      {plan.isPremium ? (
+        <p className="mt-1 text-sm text-coffee-700">Premium until <span className="font-medium text-ink">{until}</span>. Every daily limit is lifted.</p>
+      ) : (
+        <p className="mt-1 text-sm text-coffee-700">Free plan — notes are unlimited; AI help, quizzes and exam prep have daily allowances. Premium is {formatNaira(plan.pass.priceKobo)} per semester.</p>
+      )}
+      <Link to="/premium" className="btn-ghost mt-3 text-sm">{plan.isPremium ? 'Extend Premium' : 'See Premium'}</Link>
+    </section>
+  );
+}
 
 export default function ProfileSettings() {
   usePageTitle('Profile Settings');
@@ -40,14 +76,15 @@ export default function ProfileSettings() {
     setExporting(true);
     setDataError('');
     try {
-      const [progress, attendance, materials, google] = await Promise.all([
+      const [progress, attendance, materials, google, billing] = await Promise.all([
         supabase.from('user_progress').select('*').eq('user_id', user.id),
         supabase.from('attendance_records').select('*').eq('student_id', user.id),
         supabase.from('course_materials_visible').select('id, course_code, course_slug, department, display_name, file_size, file_type, description, uploaded_at, uploaded_by_me').eq('uploaded_by_me', true),
         getGoogleStatus(),
+        loadBilling(user.id),
       ]);
       if (progress.error || attendance.error || materials.error || google.error) throw new Error('Could not load all your data. Please try again.');
-      const data = assembleUserData({ profile, progress: progress.data ?? [], attendance: attendance.data ?? [], materials: materials.data ?? [], google });
+      const data = assembleUserData({ profile, progress: progress.data ?? [], attendance: attendance.data ?? [], materials: materials.data ?? [], google, billing });
       const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
       const link = document.createElement('a');
       link.href = url;
@@ -137,9 +174,10 @@ export default function ProfileSettings() {
         savingLabel="Saving…"
         onSave={async (values) => { setSaved(false); return save(values); }}
       />
+      <PlanSection />
       <section className="mt-10 rounded-xl border border-coffee-200 bg-cream p-5">
         <h2 className="font-display text-lg font-bold text-ink">Your data</h2>
-        <p className="mt-1 text-sm text-coffee-700">Download a JSON copy of your profile, progress, attendance, visible uploads, and Google connection status. Feedback is excluded because it is not readable from your account.</p>
+        <p className="mt-1 text-sm text-coffee-700">Download a JSON copy of your profile, progress, attendance, visible uploads, Google connection status, and any Premium payments. Feedback is excluded because it is not readable from your account.</p>
         <button type="button" onClick={downloadData} disabled={exporting} className="btn-ghost mt-3 text-sm">{exporting ? 'Preparing…' : 'Download my data'}</button>
         {dataError && <p role="alert" className="mt-2 text-sm text-rust">{dataError}</p>}
       </section>

@@ -10,6 +10,9 @@ import Quiz from '../components/Quiz';
 import Diagram from '../components/Diagram';
 import ExplainSelection from '../components/ExplainSelection';
 import Breadcrumbs from '../components/Breadcrumbs';
+import UpgradePrompt from '../components/UpgradePrompt';
+import { usePlan } from '../context/PlanContext';
+import { FREE_CTF_ROOMS } from '../data/plans';
 import { usePageTitle } from '../utils/usePageTitle';
 
 export default function TrackModuleDetail() {
@@ -20,6 +23,7 @@ export default function TrackModuleDetail() {
   const mod = useMemo(() => track?.getModuleById(id), [track, id]);
   const { isComplete, markComplete, markIncomplete, setQuizScore } = useProgress(track?.storageKey);
   const [justCompleted, setJustCompleted] = useState(false);
+  const { gatesActive } = usePlan();
 
   // Reset tab to 'theory' on route change — render-time pattern (cheaper than
   // a setState-in-effect bounce, per the React docs).
@@ -61,6 +65,10 @@ export default function TrackModuleDetail() {
   const prev = track.modules[currentIndex - 1];
   const next = track.modules[currentIndex + 1];
   const done = isComplete(mod.id);
+  // Free tier: the first FREE_CTF_ROOMS rooms keep their flag challenge; later
+  // rooms keep theory and practice but the challenge needs Premium. A room the
+  // student already solved stays open — they earned it before the lock.
+  const challengeLocked = Boolean(mod.challenge) && gatesActive && currentIndex >= FREE_CTF_ROOMS && !done;
 
   // Tabs vary by track: the Security track ships a hands-on flag Challenge and
   // no live JDoodle playground, so those tabs are conditional on the module's
@@ -163,7 +171,14 @@ export default function TrackModuleDetail() {
           </ExplainSelection>
         )}
 
-        {tab === 'challenge' && mod.challenge && (
+        {tab === 'challenge' && mod.challenge && challengeLocked && (
+          <UpgradePrompt title={`Room ${currentIndex + 1}'s challenge is part of Premium`}>
+            The theory and practice questions for this room are free. Capturing the flag in rooms
+            {' '}{FREE_CTF_ROOMS + 1}–{track.modules.length} comes with Premium, along with unlimited AI help.
+          </UpgradePrompt>
+        )}
+
+        {tab === 'challenge' && mod.challenge && !challengeLocked && (
           <FlagChallenge
             challenge={mod.challenge}
             moduleId={mod.id}

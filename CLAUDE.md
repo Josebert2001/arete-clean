@@ -43,7 +43,8 @@ node scripts/validate-modules.mjs  # validate module data structure
 ## Architecture
 ```
 Browser → React SPA (Vite)
-           ├── React Router (30 routes in App.jsx)
+           ├── React Router (31 routes in App.jsx)
+           ├── PlanContext (Premium status + whether billing is on; drives the client gates)
            ├── AuthContext (Supabase OTP auth, profile state)
            ├── useProgress hook (localStorage + Supabase dual sync, 1s debounce)
            └── /api/* (Vercel serverless)
@@ -54,13 +55,21 @@ Browser → React SPA (Vite)
                 ├── api/simplify.js → Groq plain-English rewrite of lecture-note sections (rate: 8/10min/IP)
                 ├── api/summarize.js → exam-ready recap of a whole lecture-note topic (rate: 10/10min/IP)
                 ├── api/run.js     → JDoodle (code execution, 20 runs/day free)
+                ├── api/billing.js → Premium status / Paystack checkout / verify (one function, `action` field)
+                ├── api/paystack-webhook.js → Paystack charge.success → settles the same way as verify
                 └── api/google/*   → Google OAuth (Calendar sync + Drive import); see api/_lib/googleAuth.js
 ```
 
 ## Key Files Map
 | File | Purpose |
 |------|---------|
-| `src/App.jsx` | Root router — all 30 routes, Error Boundary, auth watcher |
+| `src/App.jsx` | Root router — all 31 routes, Error Boundary, auth watcher |
+| `src/data/plans.js` | **Premium price and every free-tier limit, in one leaf module read by both the browser and `api/`.** ₦2,500 Semester Pass (180 days, one-time, no auto-renew — most students pay by transfer/USSD with no card to keep on file). `FREE_DAILY_LIMITS` per feature, `FREE_CTF_ROOMS`, and `planComparison()` — the pricing page renders that, so it cannot advertise a number the code does not enforce. Lecture notes are never metered (`plans.test.js` asserts it) |
+| `api/_lib/plan.js` | `billingEnabled()` (Paystack key **and** service-role key set), `getPlan(student)` (reads `premium_passes` on the student's own RLS client) and `denyIfOverDailyQuota(req, res, student, feature)`, called in tutor/explainer/simplify/summarize/research/run right after the existing per-10-min limit. Reuses `consume_rate_limit()` with a 24 h window and a `daily:<feature>` namespace — no new counter table. **Inert until billing is on**, so nobody is capped before they can pay to lift the cap. Fails open when the plan lookup errors: charging a paying student is the worse mistake. Answers 429 `kind: 'quota_exceeded'`, which `apiClient`/`tutorStream` turn into an app-wide event that `<UpgradeToast>` shows |
+| `api/_lib/paystack.js` \| `api/_lib/billing.js` | The only file that talks to Paystack / reads `PAYSTACK_SECRET_KEY` (plain fetch, hosted-page redirect, so no CSP change), and the checkout + `settlePayment()` logic shared by `api/billing.js` and the webhook. Nothing is granted from a redirect or webhook body: both only trigger `verifyTransaction()`, then `grant_premium_pass()` re-checks amount and currency, locks the row, and stacks a renewal after the current pass. Idempotent: a pass is UNIQUE on its reference. Swapping gateway means rewriting `paystack.js` only |
+| `supabase/migrations/20261108000000_premium_billing.sql` | `billing_payments` + `premium_passes` (read-own, **no write grant for `authenticated`** — Premium deliberately does not live on `profiles`, which students can update) and the service-role-only `grant_premium_pass()`. Ends with the manual-grant SQL for transfers/sponsors. **Apply before setting `PAYSTACK_SECRET_KEY`** |
+| `src/context/PlanContext.jsx` \| `src/components/useUsageGate.js` \| `src/utils/dailyUsage.js` | Client gates. `gatesActive` is true only when the server said billing is on and the student is not Premium — loading, offline and API-missing all leave it false. Quiz and exam-prep starts are counted in localStorage per account per local day: those banks ship in the bundle, so a server count would add a network dependency (the PWA works offline) without making the gate harder to get round. CTF rooms past `FREE_CTF_ROOMS` lock only the flag challenge, never theory or practice, and never a room already solved |
+| `src/pages/Premium.jsx` | `/premium` — public pricing page, checkout button, and the Paystack return trip (`?reference=` → verify, retried while pending, then the query is stripped) |
 | `src/pages/CheckIn.jsx` | Student check-in: discovers open classes, sends the board code, browser device ID, and available coordinates to `check_in()` |
 | `src/pages/MyAttendance.jsx` | Student's own course attendance percentages and check-in history |
 | `src/pages/TeachSession.jsx` | Assigned lecturer's class sessions, rotating codes, optional geofence, manual marks, roster adds, and device resets |
@@ -165,6 +174,8 @@ CRON_SECRET              # Vercel daily material orphan sweep; required with the
 RUNNER_PROVIDER          # optional: jdoodle (default) or judge0
 JUDGE0_URL               # Judge0 base URL when RUNNER_PROVIDER=judge0
 JUDGE0_AUTH_TOKEN        # optional Judge0 X-Auth-Token
+PAYSTACK_SECRET_KEY      # Premium payments (sk_test_… / sk_live_…). Unset = billing off: no checkout, no free-tier caps
+PAYSTACK_CALLBACK_URL    # optional; defaults to SITE_URL/premium. Set for preview deployments and `vercel dev`
 ```
 For Vercel deployment, set all of the above in the Vercel dashboard — not in code.
 For Supabase setup script only: also need `SUPABASE_PAT`.
@@ -199,7 +210,7 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 ## Testing — Important Context
 The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-library/react` available for component tests.
 - Config: `vitest.config.js` · setup file: `src/__tests__/setup.js` (imports `@testing-library/jest-dom`)
-- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 78 suites, 1,038 passing tests plus one expected failure as of 3 November 2026.
+- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 81 suites, 1,077 passing tests plus one expected failure as of 8 November 2026.
 - Run with `npm test` (single run) or `npm run test:watch`. CI runs `npm test` on every push.
 - When writing new logic, add or extend a test if the function is testable in isolation. Coverage is uneven — data/util logic is reasonably covered, most page-level components are not.
 - **Component tests use `fireEvent` from `@testing-library/react`** (see `profileForm.test.jsx`, `courseExamPrep.test.jsx`). `@testing-library/user-event` is *not* a dependency — do not import it.

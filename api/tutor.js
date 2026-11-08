@@ -19,6 +19,7 @@ import { stepCountIs } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
+import { denyIfOverDailyQuota } from './_lib/plan.js';
 import { getCourseIndexForDepartment, MODULE_INDEX } from './_lib/courseData.js';
 import { buildTutorTools } from './_lib/tutorTools.js';
 import { buildModelChain, hasAnyProvider, streamTextWithFallback } from './_lib/model.js';
@@ -294,6 +295,10 @@ export default async function handler(req, res) {
     route: 'tutor',
     message: 'You have used your tutor allowance for now. Please wait a few minutes and try again.',
   })) return;
+
+  // Free-tier daily allowance — lifted by Premium, inert until billing is on.
+  // See api/_lib/plan.js.
+  if (await denyIfOverDailyQuota(req, res, student, 'tutor')) return;
 
   if (!hasAnyProvider()) {
     return res.status(200).json({

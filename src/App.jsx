@@ -6,9 +6,11 @@ import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import FeedbackPrompt from './components/FeedbackPrompt';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
+import UpgradeToast from './components/UpgradeToast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { StudyDaysProvider, useStudyDays } from './context/StudyDaysContext';
+import { PlanProvider } from './context/PlanContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
@@ -37,6 +39,7 @@ const Register = lazy(() => import('./pages/Register'));
 const Admin = lazy(() => import('./pages/Admin'));
 const CourseRep = lazy(() => import('./pages/CourseRep'));
 const Invitations = lazy(() => import('./pages/Invitations'));
+const Premium = lazy(() => import('./pages/Premium'));
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -219,6 +222,7 @@ export default function App() {
   return (
     <ThemeProvider>
     <AuthProvider>
+    <PlanProvider>
     <StudyDaysProvider>
     <div className="min-h-screen flex flex-col paper-texture">
       <a
@@ -264,6 +268,8 @@ export default function App() {
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            {/* Public so a signed-out student can see the price; checkout itself needs sign-in. */}
+            <Route path="/premium" element={<Premium />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
@@ -275,8 +281,10 @@ export default function App() {
       {/* Campus Places launcher (CampusMapFloatingButton) is paused until the
           places have real coordinates — re-add the import and this line then. */}
       <PWAUpdatePrompt />
+      <UpgradeToast />
     </div>
     </StudyDaysProvider>
+    </PlanProvider>
     </AuthProvider>
     </ThemeProvider>
   );

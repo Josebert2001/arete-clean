@@ -11,6 +11,7 @@
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
+import { denyIfOverDailyQuota } from './_lib/plan.js';
 import { buildModelChain, hasAnyProvider, generateTextWithFallback } from './_lib/model.js';
 
 // Shared by both modes. The students these listings are set for were handed a
@@ -142,6 +143,10 @@ export default async function handler(req, res) {
     route: 'explainer',
     message: 'You have used your code-explanation allowance for now. Please wait a few minutes and try again.',
   })) return;
+
+  // Free-tier daily allowance — lifted by Premium, inert until billing is on.
+  // See api/_lib/plan.js.
+  if (await denyIfOverDailyQuota(req, res, student, 'explainer')) return;
 
   // Code explanation benefits from the strong model.
   const chain = buildModelChain('strong');
