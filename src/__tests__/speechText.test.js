@@ -20,7 +20,6 @@ import {
   MIN_NARRATE_CHARS,
 } from '../utils/speechText.js';
 import { noteLoaders } from '../data/lectureNotes/index.js';
-import { departments } from '../data/departments.js';
 
 // Anything a synthesiser would read as punctuation-soup rather than words.
 const RESIDUE = /[\\{}$^|]|```/;
@@ -456,24 +455,12 @@ describe('skippedSummary', () => {
 // of inline $...$ maths went unnoticed until the corpus was run through.
 
 describe('the real corpus', () => {
-  // Every topic the player can actually reach, from BOTH places notes live.
-  // Walking only `noteLoaders` missed the courses that still hold their notes
-  // inline on the course object (loadNotesFor returns `course.lectureNotes`
-  // directly for those) — and the Listen button is wired to them too, so the
-  // guard below was not covering production data it claimed to cover.
+  // Every topic the player can actually reach now lives in noteLoaders.
   async function everyTopic() {
     const out = [];
 
     for (const [key, load] of Object.entries(noteLoaders)) {
       for (const topic of (await load()) ?? []) out.push([key, topic]);
-    }
-
-    for (const name of ['cybersecurity', 'dataScience']) {
-      const { courses } = await departments[name].loadCatalogue();
-      for (const course of courses) {
-        if (course.notesKey || !course.lectureNotes?.length) continue; // keyed ones counted above
-        for (const topic of course.lectureNotes) out.push([`${name}:${course.slug}`, topic]);
-      }
     }
 
     return out;
@@ -496,23 +483,19 @@ describe('the real corpus', () => {
     const topics = await everyTopic();
     const refused = topics.filter(([, topic]) => !canNarrate(topic)).map(([key, t]) => `${key} — ${t.title}`);
 
-    // 189 today — 111 keyed, 78 inline. The inline half was invisible to this
-    // guard until it started walking the catalogues, which is also how the three
-    // CYB 224 practicals below went unnoticed.
+    // The full corpus, including the four formerly inline courses.
     expect(topics.length).toBeGreaterThan(150);
 
     // Every refusal is a practical that is listings with a sentence of glue:
-    // five COS 121 ones, and three CYB 224 ones whose notes live inline on the
+    // five COS 121 ones, and three CYB 224 ones whose notes are keyed in the
     // course (the smallest carries 26 speakable characters). A name appearing
     // here from anywhere else means the floor or the prose count has drifted.
     expect(refused.length).toBeLessThanOrEqual(8);
-    expect(refused.every((r) => r.startsWith('cos121') || r.includes('cyb-224'))).toBe(true);
+    expect(refused.every((r) => r.startsWith('cos121') || r.includes('cyb224'))).toBe(true);
   }, 60_000);
 
-  it('covers the inline lecture notes as well as the keyed ones', async () => {
-    // The reason everyTopic exists — a guard that silently skips half the data
-    // is worse than no guard, because it reads as coverage.
+  it('covers all four courses moved from inline notes', async () => {
     const keys = new Set((await everyTopic()).map(([key]) => key));
-    expect([...keys].some((k) => k.includes(':'))).toBe(true);
+    expect([...keys]).toEqual(expect.arrayContaining(['ins224', 'cyb224', 'cyb222', 'uuyCyb222']));
   }, 60_000);
 });

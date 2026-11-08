@@ -4,7 +4,7 @@ import {
   materialsDepartmentFor, findDepartmentByName,
 } from '../data/departments';
 import { getCrossDepartmentalCourses, LEVELS as CATALOGUE_LEVELS } from '../data/courses';
-import { loadNotesFor } from '../data/lectureNotes/index.js';
+import { loadNotesFor, noteTopicCount } from '../data/lectureNotes/index.js';
 
 describe('department registry', () => {
   it('defaults to cybersecurity', () => {
@@ -247,7 +247,7 @@ describe('shared courses carry the same lecture notes in every catalogue', () =>
         if (!notesByCode.has(code)) notesByCode.set(code, new Map());
         // A code can repeat within a catalogue (CYB 311 is both Cryptography and
         // SIWES I); the copy that has notes is the one that matters here.
-        const count = course.lectureNotes?.length ?? 0;
+        const count = noteTopicCount(course);
         notesByCode.get(code).set(slug, Math.max(count, notesByCode.get(code).get(slug) ?? 0));
       }
     }

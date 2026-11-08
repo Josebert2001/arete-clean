@@ -9,7 +9,7 @@
 // A course now names its notes with `notesKey` instead of holding the array,
 // and the content is fetched on demand. Rolldown emits one chunk per entry
 // below, so a student downloads only the notes for courses they actually open,
-// and the 44 of 57 Cybersecurity courses (50 of 55 in Data Science) that have
+// and the 39 of 57 Cybersecurity courses (50 of 55 in Data Science) that have
 // no notes download none.
 //
 // This does not weaken offline support: the chunks are same-origin /assets/*.js
@@ -30,6 +30,10 @@ export const noteLoaders = {
   cyb213: () => import('./cyb213.js').then((m) => m.cyb213LectureNotes),
   cyb221: () => import('./cyb221.js').then((m) => m.cyb221LectureNotes),
   ent221: () => import('./ent221.js').then((m) => m.ent221LectureNotes),
+  ins224: () => import('./ins224.js').then((m) => m.ins224LectureNotes),
+  cyb224: () => import('./cyb224.js').then((m) => m.cyb224LectureNotes),
+  cyb222: () => import('./cyb222.js').then((m) => m.cyb222LectureNotes),
+  uuyCyb222: () => import('./uuyCyb222.js').then((m) => m.uuyCyb222LectureNotes),
   gst121: () => import('./gst121.js').then((m) => m.gst121LectureNotes),
   mth121: () => import('./mth121.js').then((m) => m.mth121LectureNotes),
   phy128: () => import('./phy128.js').then((m) => m.phy128LectureNotes),
@@ -58,6 +62,10 @@ export const NOTE_TOPIC_COUNTS = {
   cyb213: 12,
   cyb221: 21,
   ent221: 18,
+  ins224: 27,
+  cyb224: 26,
+  cyb222: 12,
+  uuyCyb222: 13,
   gst121: 2,
   mth121: 6,
   phy128: 4,
@@ -65,8 +73,7 @@ export const NOTE_TOPIC_COUNTS = {
 };
 
 // Topic count for a course, synchronously. Keyed courses read the map above;
-// the handful that still hold their notes inline (UUY-CYB 222 among them)
-// already have the array to hand.
+// the optional inline fallback remains for custom course objects in tests.
 export function noteTopicCount(course) {
   if (course?.notesKey) return NOTE_TOPIC_COUNTS[course.notesKey] ?? 0;
   return course?.lectureNotes?.length ?? 0;

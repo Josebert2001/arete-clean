@@ -33,7 +33,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { noteLoaders } from '../src/data/lectureNotes/index.js';
+import { loadNotesFor } from '../src/data/lectureNotes/index.js';
 import { courses } from '../src/data/courses.js';
 import { courses as dataScienceCourses } from '../src/data/dataScienceCourses.js';
 import { listingsInTopic, listingsInExamPrep } from '../src/utils/explainCode.js';
@@ -71,9 +71,7 @@ async function collectSources() {
 
   for (const course of [...courses, ...dataScienceCourses]) {
     const key = course.notesKey || course.slug;
-    const topics = course.notesKey
-      ? (await noteLoaders[course.notesKey]?.()) ?? []
-      : course.lectureNotes ?? [];
+    const topics = await loadNotesFor(course);
     for (const topic of topics) add(key, listingsInTopic(topic));
     add(key, listingsInExamPrep(course.examPrep));
   }

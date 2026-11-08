@@ -331,6 +331,7 @@ export const courses = [
   {
     code: 'GST 121',
     slug: 'gst-121',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-05' },
     title: 'Nigerian Peoples and Culture',
     units: 2, level: 100, semester: 2, lh: 15, ph: 45,
     subject: 'gst',
@@ -379,6 +380,7 @@ export const courses = [
   {
     code: 'MTH 121',
     slug: 'mth-121',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-02' },
     title: 'General Mathematics II',
     units: 2, level: 100, semester: 2, lh: 30, ph: 0,
     subject: 'math',
@@ -462,6 +464,7 @@ export const courses = [
   {
     code: 'PHY 128',
     slug: 'phy-128',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-08' },
     title: 'General Practical Physics II',
     units: 1, level: 100, semester: 2, lh: 0, ph: 45,
     subject: 'phy',
@@ -511,6 +514,7 @@ export const courses = [
   {
     code: 'COS 121',
     slug: 'cos-121',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-01' },
     title: 'Problem Solving',
     units: 2, level: 100, semester: 2, lh: 30, ph: 45,
     subject: 'cs',
@@ -736,6 +740,7 @@ export const courses = [
   {
     code: 'COS 211',
     slug: 'cos-211',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-11-02' },
     title: 'Computer Programming I',
     units: 3, level: 200, semester: 1, lh: 30, ph: 45,
     subject: 'cs',
@@ -796,6 +801,7 @@ export const courses = [
   {
     code: 'CYB 211',
     slug: 'cyb-211',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-11-02' },
     title: 'Introduction to Cybersecurity and Strategy',
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'cyb',
@@ -954,6 +960,7 @@ export const courses = [
   {
     code: 'ENT 221',
     slug: 'ent-221',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-11-03' },
     title: 'Entrepreneurship and Innovation',
     units: 2, level: 200, semester: 2, lh: 30, ph: 0,
     subject: 'ent',
@@ -1091,6 +1098,7 @@ export const courses = [
   {
     code: 'COS 221',
     slug: 'cos-221',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-22' },
     title: 'Computer Programming II',
     units: 3, level: 200, semester: 2, lh: 30, ph: 45,
     subject: 'cs',

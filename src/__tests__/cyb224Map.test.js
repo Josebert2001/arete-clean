@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { cyb224Map } from '../data/lectureNotes/cyb224Map.js';
 import { courses } from '../data/courses';
+import { cyb224LectureNotes } from '../data/lectureNotes/cyb224.js';
 
 // The note map is pure cross-reference data: every entry points at another
 // note by number. Nothing in the app fails loudly when one of those numbers is
@@ -9,7 +10,7 @@ import { courses } from '../data/courses';
 // that fails instead.
 
 const course = courses.find((c) => c.code === 'CYB 224');
-const NOTE_NUMBERS = course.lectureNotes.map((n) => String(n.number));
+const NOTE_NUMBERS = cyb224LectureNotes.map((n) => String(n.number));
 
 const RELATIONS = ['buildsOn', 'continuesIn', 'alsoSee'];
 const linksOf = (entry) => RELATIONS.flatMap((r) => (entry?.[r] || []).map((l) => ({ ...l, r })));

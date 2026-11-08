@@ -31,7 +31,6 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { noteLoaders } from '../src/data/lectureNotes/index.js';
-import { courses } from '../src/data/courses.js';
 // noteText, not simplifySection: the latter pulls in apiClient (and therefore
 // React), which has no business in a build script.
 import { simplifiableGroups } from '../src/utils/noteText.js';
@@ -52,18 +51,11 @@ const dry = args.includes('--dry');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Every source of notes, as { key, topics }. Keyed courses share one file per
-// notesKey (the notes themselves are shared between departments); the four
-// courses that still hold their notes inline are keyed by slug, matching
-// simplifiedKeyFor() in src/data/lectureNotes/simplified.js.
+// notesKey (the notes themselves are shared between departments).
 async function collectSources() {
   const sources = [];
   for (const [key, load] of Object.entries(noteLoaders)) {
     sources.push({ key, topics: (await load()) ?? [] });
-  }
-  for (const course of courses) {
-    if (!course.notesKey && course.lectureNotes?.length) {
-      sources.push({ key: course.slug, topics: course.lectureNotes });
-    }
   }
   return only ? sources.filter((s) => s.key === only) : sources;
 }

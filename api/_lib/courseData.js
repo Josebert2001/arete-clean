@@ -2,7 +2,7 @@
 // Consumed only by api/tutor.js — not bundled into the frontend.
 
 import { courses, getCrossDepartmentalCourses } from '../../src/data/courses.js';
-import { loadNotesFor } from '../../src/data/lectureNotes/index.js';
+import { loadNotesFor, noteTopicCount } from '../../src/data/lectureNotes/index.js';
 import { courses as dataScienceCourses } from '../../src/data/dataScienceCourses.js';
 
 export const COURSE_KNOWLEDGE = `
@@ -694,7 +694,7 @@ function buildNoteIndex(courseList) {
     const existing = byCode.get(key);
     // `notesKey` names a lazily-loaded note file; a few courses still hold their
     // notes inline. Either counts as "has notes" when breaking a code collision.
-    const has = (x) => Boolean(x?.notesKey) || Boolean(x?.lectureNotes?.length);
+    const has = (x) => noteTopicCount(x) > 0;
     if (!existing || (!has(existing) && has(c))) {
       byCode.set(key, c);
     }
