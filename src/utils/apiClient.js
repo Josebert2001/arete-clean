@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { rateLimitMessage } from './rateLimitMessage.js';
 
 // Probes an AI endpoint on mount so pages can show the unconfigured state
 // immediately instead of after the user has composed a message.
@@ -52,5 +53,6 @@ export async function fetchJsonWithFallback(url, options, fallbackError) {
   }
 
   const data = await res.json().catch(() => ({}));
+  if (res.status === 429) return { ...data, error: rateLimitMessage(url, res.headers.get('Retry-After')), responseStatus: 429 };
   return { ...data, responseStatus: res.status };
 }

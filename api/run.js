@@ -1,6 +1,6 @@
 // ============================================================================
 //  Arete — Code Execution Serverless Function (Vercel)
-//  Runs student Java/C code via the JDoodle Compiler API.
+//  Runs student Java/C/C++/Python code via JDoodle or self-hosted Judge0.
 // ============================================================================
 //
 //  SETUP (Josebert — do this once before the playground works):
@@ -20,10 +20,9 @@
 //  No keys set? The function returns a friendly "not configured yet" message
 //  so the app never crashes -- it just tells the user the runner is coming soon.
 //
-//  NOTE ON LIMITS: The free plan is 20 executions per day total (across all
-//  users). Good for testing and small demos. Before announcing to the whole
-//  department, move to a self-hosted Judge0 (DigitalOcean/Oracle Cloud) and
-//  swap this file back -- the frontend does not need to change.
+//  NOTE ON LIMITS: JDoodle's free plan is 20 executions per day total (across
+//  all users). Set RUNNER_PROVIDER=judge0 and JUDGE0_URL to use a self-hosted
+//  runner without changing the frontend.
 // ============================================================================
 
 // JDoodle language codes + latest version index (verified 2026-03-26).
@@ -33,6 +32,9 @@ const LANGUAGES = {
   cpp:    { language: 'cpp17',   versionIndex: '3' },
   python: { language: 'python3', versionIndex: '6' },
 };
+// Judge0 CE language IDs; self-hosted deployments may change their enabled
+// language set, so verify /languages on the chosen instance before switching.
+const JUDGE0_LANGUAGES = { java: 62, c: 50, cpp: 54, python: 71 };
 
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
@@ -89,11 +91,18 @@ export default async function handler(req, res) {
     message: 'You have used your code-run allowance for now. Please wait a few minutes and try again.',
   })) return;
 
+  const provider = process.env.RUNNER_PROVIDER || 'jdoodle';
+  if (provider !== 'jdoodle' && provider !== 'judge0') {
+    return res.status(503).json({ error: 'Code runner provider is not configured correctly.' });
+  }
   const CLIENT_ID = process.env.JDOODLE_CLIENT_ID;
   const CLIENT_SECRET = process.env.JDOODLE_CLIENT_SECRET;
 
   // Graceful fallback if not configured yet
-  if (!CLIENT_ID || !CLIENT_SECRET) {
+  if (provider === 'judge0' && !process.env.JUDGE0_URL) {
+    return res.status(200).json({ notConfigured: true, output: 'The code runner is not connected yet. Please try again later.' });
+  }
+  if (provider === 'jdoodle' && (!CLIENT_ID || !CLIENT_SECRET)) {
     return res.status(200).json({
       notConfigured: true,
       output: "The code runner isn't connected yet.\n\nOnce the JDoodle API keys are added (see api/run.js setup instructions), you'll be able to compile and run your code right here.",
@@ -117,6 +126,10 @@ export default async function handler(req, res) {
     }
 
     const lang = Object.hasOwn(LANGUAGES, language) ? LANGUAGES[language] : LANGUAGES.java;
+    if (provider === 'judge0') {
+      const result = await runJudge0(source_code, language, stdin);
+      return res.status(200).json(result);
+    }
 
     const [jdoodleRes, creditRes] = await Promise.all([
       fetch('https://api.jdoodle.com/v1/execute', {
@@ -195,4 +208,45 @@ export default async function handler(req, res) {
     await captureApiError(err, { route: 'run' });
     return res.status(500).json({ error: 'Internal error running code. Please try again.' });
   }
+}
+
+async function runJudge0(sourceCode, language, stdin) {
+  const base = new URL(process.env.JUDGE0_URL);
+  if (!['http:', 'https:'].includes(base.protocol)) throw new Error('Invalid Judge0 URL');
+  const endpoint = new URL('submissions?base64_encoded=true', `${base.href.replace(/\/$/, '')}/`);
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(process.env.JUDGE0_AUTH_TOKEN ? { 'X-Auth-Token': process.env.JUDGE0_AUTH_TOKEN } : {}),
+  };
+  const encode = value => Buffer.from(value, 'utf8').toString('base64');
+  const submitted = await fetch(endpoint, {
+    method: 'POST', headers,
+    body: JSON.stringify({ language_id: JUDGE0_LANGUAGES[language] ?? JUDGE0_LANGUAGES.java,
+      source_code: encode(sourceCode), stdin: encode(stdin) }),
+  });
+  if (!submitted.ok) throw new Error(`Judge0 submission failed: ${submitted.status}`);
+  const { token } = await submitted.json();
+  if (!token || !/^[a-zA-Z0-9-]+$/.test(token)) throw new Error('Judge0 returned no valid submission token');
+  let result;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    if (attempt) await new Promise(resolve => setTimeout(resolve, 650));
+    const resultUrl = new URL(`submissions/${token}?base64_encoded=true&fields=stdout,stderr,compile_output,status,time,memory`, `${base.href.replace(/\/$/, '')}/`);
+    const response = await fetch(resultUrl, { headers });
+    if (!response.ok) throw new Error(`Judge0 result failed: ${response.status}`);
+    result = await response.json();
+    if (Number(result.status?.id) > 2) break;
+  }
+  if (Number(result?.status?.id) <= 2) {
+    return { output: 'Code execution is still queued. Please try again shortly.', kind: 'runtime_error', status: 'Runner busy', creditsUsed: null, creditsRemaining: null };
+  }
+  const decode = value => value ? Buffer.from(value, 'base64').toString('utf8') : '';
+  const output = [decode(result.compile_output), decode(result.stdout), decode(result.stderr)].filter(Boolean).join('\n').trim();
+  const statusId = Number(result.status?.id);
+  const kind = statusId === 6 ? 'compile_error' : statusId !== 3 ? 'runtime_error' : output ? 'success' : 'empty';
+  return {
+    output: output || '(no output)', kind,
+    status: kind === 'success' ? 'Success' : kind === 'compile_error' ? 'Compilation Error' : kind === 'empty' ? 'No output' : 'Error',
+    time: result.time, memory: result.memory,
+    creditsUsed: null, creditsRemaining: null,
+  };
 }
