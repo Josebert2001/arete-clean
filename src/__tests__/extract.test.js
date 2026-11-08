@@ -35,6 +35,8 @@ let ip = 0;
 let insert;
 let profile;
 let rpc;
+let ownedRows;
+let removeObject;
 
 function request(overrides = {}) {
   ip += 1;
@@ -74,11 +76,16 @@ function bytes(value) {
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
   insert = vi.fn(() => ({ select: () => ({ single: async () => ({ data: { id: 'material-1' }, error: null }) }) }));
+  ownedRows = [];
+  removeObject = vi.fn(async () => ({ error: null }));
   profile = vi.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { department: 'dataScience' } }) }) }) }));
   rpc = vi.fn(async () => ({ data: [{ allowed: true, remaining: 19, reset_at: new Date(Date.now() + 600_000).toISOString() }], error: null }));
   mocks.getStudent.mockResolvedValue({ user: { id: 'verified-user' }, db: { from: profile, rpc } });
   mocks.configured.mockReturnValue(true);
-  mocks.serviceClient.mockReturnValue({ from: vi.fn(() => ({ insert })) });
+  mocks.serviceClient.mockReturnValue({
+    from: vi.fn(() => ({ insert, select: () => ({ eq: async () => ({ data: ownedRows, error: null }) }) })),
+    storage: { from: () => ({ remove: removeObject }) },
+  });
   mocks.findCourse.mockReturnValue({ code: 'DSC 111', slug: 'known-course', materialsDepartment: 'general' });
   mocks.pdfParse.mockResolvedValue({ text: 'PDF text' });
   mocks.mammothExtract.mockResolvedValue({ value: 'Word text' });
@@ -94,6 +101,15 @@ afterEach(() => {
 });
 
 describe('POST /api/extract', () => {
+  it('rejects a student over the 30-file quota and removes the fresh object', async () => {
+    ownedRows = Array.from({ length: 30 }, () => ({ file_size: 100 }));
+    const req = request();
+    const res = await call(req);
+    expect(res.statusCode).toBe(413);
+    expect(res.body.error).toMatch(/30 files or 150 MB/);
+    expect(removeObject).toHaveBeenCalledWith([req.body.filePath]);
+    expect(insert).not.toHaveBeenCalled();
+  });
   it('sets CORS and cache headers for OPTIONS, then ends without authentication', async () => {
     const res = await call(request({ method: 'OPTIONS' }));
     expect(res.statusCode).toBe(200);
@@ -162,7 +178,7 @@ describe('POST /api/extract', () => {
     expect(globalThis.fetch).toHaveBeenCalledWith(expect.stringContaining(`/course-materials/${req.body.filePath}`));
     expect(insert).toHaveBeenCalledWith({
       course_code: 'DSC 111', course_slug: 'known-course', department: 'general',
-      display_name: 'Week 1', file_path: req.body.filePath, file_size: 14,
+      display_name: 'Week 1', file_path: req.body.filePath, file_size: Buffer.byteLength('Real downloaded text'),
       file_type: 'txt', description: 'Lecture notes', uploaded_by: 'verified-user',
       extracted_text: 'Real downloaded text',
     });
@@ -230,15 +246,21 @@ describe('POST /api/extract', () => {
     expect(insert).not.toHaveBeenCalled();
   });
 
-  // By design (see the header of api/extract.js) the file is already in
-  // storage, so a failed download or parser still registers the material,
-  // just without tutor text. The caller learns this from `extracted: false`
-  // and nothing half-parsed reaches the tutor context.
-  it('registers the material with null text and extracted: false when extraction throws', async () => {
-    globalThis.fetch.mockRejectedValue(new Error('storage unavailable'));
-    const res = await call();
+  it('registers the material without tutor text when parsing throws', async () => {
+    mocks.pdfParse.mockRejectedValue(new Error('corrupt PDF'));
+    const req = request();
+    req.body.filePath = req.body.filePath.replace(/\.txt$/, '.pdf');
+    req.body.fileType = 'pdf';
+    const res = await call(req);
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ material: { id: 'material-1' }, extracted: false });
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ extracted_text: null }));
+  });
+
+  it('refuses registration when the uploaded object cannot be read', async () => {
+    globalThis.fetch.mockRejectedValue(new Error('storage unavailable'));
+    const res = await call();
+    expect(res.statusCode).toBe(503);
+    expect(insert).not.toHaveBeenCalled();
   });
 });

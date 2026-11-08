@@ -32,6 +32,7 @@ import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, den
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { serviceRoleClient, serviceRoleConfigured } from './_lib/serviceRole.js';
 import { findCourseBySlug } from './_lib/courseData.js';
+import { MATERIAL_QUOTA } from '../src/utils/materialQuota.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const BUCKET = 'course-materials';
@@ -103,7 +104,7 @@ export default async function handler(req, res) {
     message: 'You have uploaded a lot of materials just now. Please wait a few minutes and try again.',
   })) return;
 
-  const { filePath, fileType, courseSlug, displayName, description, fileSize } = req.body || {};
+  const { filePath, fileType, courseSlug, displayName, description } = req.body || {};
 
   if (!filePath || typeof filePath !== 'string') {
     return res.status(400).json({ error: 'filePath required.' });
@@ -161,26 +162,39 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'That course is not in your programme’s catalogue.' });
   }
 
-  // Extraction is best-effort: a corrupt PDF or an unreadable .docx must still
-  // leave the student with a material row pointing at their file.
+  // Read the real object once, including its byte length. A caller-controlled
+  // fileSize must never decide the 150 MB quota.
+  const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(filePath).replace(/%2F/g, '/')}`;
+  let buffer;
+  try {
+    const response = await fetch(fileUrl);
+    if (!response.ok) throw new Error(`Storage returned ${response.status}`);
+    buffer = Buffer.from(await response.arrayBuffer());
+  } catch (err) {
+    console.error('extract: uploaded object download failed:', err);
+    return res.status(503).json({ error: 'Could not read the uploaded file. Please try again.' });
+  }
+  if (buffer.length > 20 * 1024 * 1024) {
+    const { error: removeError } = await serviceRoleClient().storage.from(BUCKET).remove([filePath]);
+    if (removeError) console.error('extract: oversized object cleanup failed:', removeError);
+    return res.status(413).json({ error: 'File is too large. Maximum is 20 MB.' });
+  }
+
+  // Parsing is best-effort: a corrupt PDF or unreadable .docx still gets a
+  // material row, with no tutor text.
   let text = null;
   if (EXTRACTABLE.has(pathExt)) {
     try {
-      const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(filePath).replace(/%2F/g, '/')}`;
-      const response = await fetch(fileUrl);
-      if (response.ok) {
-        const buffer = Buffer.from(await response.arrayBuffer());
-        if (pathExt === 'txt') {
-          text = buffer.toString('utf-8');
-        } else if (pathExt === 'docx') {
-          // Imported here rather than at module scope: mammoth measures ~630ms to
-          // load, and the txt and pdf branches never touch it. pdf-parse stays
-          // eager above — it measures ~5ms, so deferring it would buy nothing.
-          const { default: mammoth } = await import('mammoth');
-          text = (await mammoth.extractRawText({ buffer })).value;
-        } else if (pathExt === 'pdf') {
-          text = (await pdfParse(buffer)).text;
-        }
+      if (pathExt === 'txt') {
+        text = buffer.toString('utf-8');
+      } else if (pathExt === 'docx') {
+        // Imported here rather than at module scope: mammoth measures ~630ms to
+        // load, and the txt and pdf branches never touch it. pdf-parse stays
+        // eager above — it measures ~5ms, so deferring it would buy nothing.
+        const { default: mammoth } = await import('mammoth');
+        text = (await mammoth.extractRawText({ buffer })).value;
+      } else if (pathExt === 'pdf') {
+        text = (await pdfParse(buffer)).text;
       }
     } catch (err) {
       console.error('extract: text extraction failed:', err);
@@ -194,12 +208,24 @@ export default async function handler(req, res) {
 
   const name = cleanLabel(displayName, MAX_DISPLAY_NAME) || `Material.${pathExt}`;
   const desc = cleanLabel(description, MAX_DESCRIPTION) || null;
-  const size = Number.isFinite(fileSize) && fileSize > 0 ? Math.floor(fileSize) : null;
+  const size = buffer.length;
 
   // Service-role, because `authenticated` no longer has INSERT on this table —
   // that revocation is the whole point. Every value below is either derived here
   // or already sanitised; nothing is passed through from the body untouched.
   const db = serviceRoleClient();
+  const { data: owned, error: quotaError } = await db.from('course_materials')
+    .select('file_size').eq('uploaded_by', student.user.id);
+  if (quotaError) {
+    console.error('extract: quota lookup failed:', quotaError);
+    return res.status(503).json({ error: 'Could not check your upload quota. Please try again.' });
+  }
+  const usedBytes = (owned ?? []).reduce((sum, row) => sum + (Number(row.file_size) || 0), 0);
+  if ((owned ?? []).length >= MATERIAL_QUOTA.maxFiles || usedBytes + (size || 0) > MATERIAL_QUOTA.maxBytes) {
+    const { error: removeError } = await db.storage.from(BUCKET).remove([filePath]);
+    if (removeError) console.error('extract: quota-rejected object cleanup failed:', removeError);
+    return res.status(413).json({ error: `Upload quota reached: ${MATERIAL_QUOTA.maxFiles} files or 150 MB per student. Remove an older file before uploading again.` });
+  }
   const { data: inserted, error: insertError } = await db
     .from('course_materials')
     .insert({
