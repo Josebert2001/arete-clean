@@ -94,8 +94,61 @@ export default function Admin() {
       <RemovalRequests version={version} onChange={changed} />
       <InviteLog version={version} onChange={changed} />
       <AttendanceChanges />
+      <ReportedMaterials />
     </div>
   );
+}
+
+function ReportedMaterials() {
+  const [items, setItems] = useState([]);
+  const [status, setStatus] = useState('loading');
+  const [message, setMessage] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.rpc('admin_material_reports');
+    if (error) { setStatus(error.code === 'PGRST202' || error.code === '42883' ? 'missing' : 'error'); return; }
+    setItems(data ?? []);
+    setStatus('ready');
+  }, []);
+  useEffect(() => { (async () => { await load(); })(); }, [load]);
+
+  async function decide(item, action) {
+    setBusy(true);
+    setMessage(null);
+    if (action === 'delete') {
+      const { error: rowError } = await supabase.from('course_materials').delete().eq('id', item.material_id);
+      if (rowError) setMessage({ ok: false, text: 'Could not delete the material row.' });
+      else {
+        const { error: objectError } = await supabase.storage.from('course-materials').remove([item.file_path]);
+        setMessage(objectError
+          ? { ok: false, text: 'The row was removed, but the file could not be removed from storage. Contact the storage administrator.' }
+          : { ok: true, text: 'Material permanently deleted.' });
+      }
+    } else {
+      setMessage(await rpcAction('moderate_material', { p_material_id: item.material_id, p_action: action, p_note: null }, 'Could not review this material.'));
+    }
+    setBusy(false);
+    await load();
+  }
+
+  if (status === 'missing') return null;
+  return <section className="mt-10 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+    <h2 className="font-display text-xl font-bold text-ink">Reported materials</h2>
+    <p className="mb-4 text-sm text-coffee-700">Open reports grouped by file.</p>
+    {message && <p role="status" className={`mb-3 text-sm ${message.ok ? 'text-moss' : 'text-rust'}`}>{message.text}</p>}
+    {status === 'loading' && <Loader2 className="h-5 w-5 animate-spin text-coffee-500" />}
+    {status === 'error' && <p className="text-sm text-rust">Could not load reports.</p>}
+    {status === 'ready' && (items.length === 0 ? <p className="text-sm text-coffee-700">No open reports.</p> :
+      <ul className="divide-y divide-coffee-200 rounded-xl border border-coffee-200 bg-paper">
+        {items.map(item => <li key={item.material_id} className="px-4 py-3">
+          <p className="text-sm font-medium text-ink">{item.course_code} · {item.display_name}</p>
+          <p className="text-xs text-coffee-600">{item.report_count} report{Number(item.report_count) === 1 ? '' : 's'} · {item.reasons} · {item.moderation_status}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {['hide', 'restore', 'dismiss', 'delete'].map(action => <button key={action} type="button" disabled={busy} onClick={() => decide(item, action)} className="text-xs font-medium text-coffee-700 underline hover:text-rust">{action === 'delete' ? 'Delete permanently' : action[0].toUpperCase() + action.slice(1)}</button>)}
+          </div>
+        </li>)}
+      </ul>)}
+  </section>;
 }
 
 function RemovalRequests({ version, onChange }) {

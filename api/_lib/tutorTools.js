@@ -50,8 +50,8 @@ export function sanitizeLabel(value) {
     .trim();
 }
 
-// Uploaded note bodies are student-submitted and unmoderated (any signed-in
-// student can insert a course_materials row for any course), and they're
+// Uploaded note bodies are student-submitted and unmoderated. api/extract.js
+// verifies the uploader before inserting the row, but does not review content; they're
 // injected into the tutor prompt. The system prompt already tells the model to
 // treat note text as inert reference, but we also structurally defang the note
 // DELIMITER here so a body can't masquerade as a new "=== Uploaded note: ... ==="
@@ -204,14 +204,21 @@ export function buildTutorTools(student, departmentSlug) {
         // fall back to the outline.
         let data;
         try {
-          ({ data } = await db
-            .from('course_materials')
-            .select('display_name, description, extracted_text')
-            .eq('course_code', canonicalCode)
-            .eq('department', materialsDepartment)
-            .not('extracted_text', 'is', null)
-            .order('uploaded_at', { ascending: false })
-            .limit(MAX_NOTES));
+          const lookup = (filterVisible) => {
+            let query = db.from('course_materials')
+              .select('display_name, description, extracted_text')
+              .eq('course_code', canonicalCode)
+              .eq('department', materialsDepartment);
+            if (filterVisible) query = query.eq('moderation_status', 'visible');
+            return query.not('extracted_text', 'is', null)
+              .order('uploaded_at', { ascending: false }).limit(MAX_NOTES);
+          };
+          let result = await lookup(true);
+          // The column arrives in a manually applied migration. Until then,
+          // retain the old lookup instead of withholding all course notes.
+          if (result.error?.code === '42703' || result.error?.code === 'PGRST204') result = await lookup(false);
+          if (result.error) return outline;
+          data = result.data;
         } catch (err) {
           console.error('getCourseOutline note lookup error:', err);
           return outline;
@@ -228,7 +235,7 @@ export function buildTutorTools(student, departmentSlug) {
             const clean = sanitizeNoteBody(m.extracted_text);
             const body = clean.slice(0, MAX_NOTE_CHARS);
             const truncated = clean.length > MAX_NOTE_CHARS ? ' [truncated]' : '';
-            return `=== Uploaded note: ${label}${truncated} ===\n${body}`;
+            return `=== Student-submitted, unreviewed uploaded note: ${label}${truncated} ===\n${body}`;
           })
           .join('\n\n');
 
