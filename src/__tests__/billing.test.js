@@ -5,6 +5,7 @@
 // a paying student being charged quota.
 
 import crypto from 'node:crypto';
+import { Readable } from 'node:stream';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -239,6 +240,51 @@ describe('api/paystack-webhook', () => {
     await webhookHandler({ method: 'POST', body: event, headers: { 'x-paystack-signature': signature ?? sign(raw) } }, res);
     return res;
   };
+
+  const callStream = async (raw, signature = sign(raw)) => {
+    const req = Readable.from([raw.subarray(0, 7), raw.subarray(7)]);
+    req.method = 'POST';
+    req.headers = { 'x-paystack-signature': signature };
+    Object.defineProperty(req, 'body', { get() { throw new Error('req.body touched before reading raw bytes'); } });
+    const res = response();
+    await webhookHandler(req, res);
+    return res;
+  };
+
+  it.each([false, true])('verifies the stream before the lazy body getter (extra spaces: %s)', async (spaced) => {
+    const event = { event: 'charge.success', data: { reference: REF, note: 'Areté' } };
+    const raw = Buffer.from(JSON.stringify(event, null, spaced ? 2 : undefined));
+    if (spaced) expect(raw.toString()).not.toBe(JSON.stringify(JSON.parse(raw)));
+    mocks.serviceClient = serviceDb({ billing_payments: [{ data: { reference: REF, status: 'refunded' }, error: null }] });
+    const res = await callStream(raw);
+    expect(res.code).toBe(200);
+    expect(res.body.status).toBe('refunded');
+  });
+
+  it('rejects a stream signed for different bytes', async () => {
+    const raw = Buffer.from('{ "event": "transfer.success" }');
+    const res = await callStream(raw, sign(JSON.stringify(JSON.parse(raw))));
+    expect(res.code).toBe(401);
+    expect(mocks.serviceClient.from).not.toHaveBeenCalled();
+  });
+
+  it('rejects an oversized stream before processing', async () => {
+    const res = await callStream(Buffer.alloc(1024 * 1024 + 1, ' '));
+    expect(res.code).toBe(413);
+    expect(mocks.serviceClient.from).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('falls back to a parsed object after the stream was consumed', async () => {
+    const body = { event: 'transfer.success' };
+    const req = Readable.from([Buffer.from(JSON.stringify(body))]);
+    for await (const _chunk of req) { /* The runtime already consumed the body. */ }
+    Object.assign(req, { method: 'POST', body, headers: { 'x-paystack-signature': sign(JSON.stringify(body)) } });
+    const res = response();
+    await webhookHandler(req, res);
+    expect(res.code).toBe(200);
+    expect(res.body.ignored).toBe(true);
+  });
 
   it('rejects a forged event', async () => {
     const res = await call({ event: 'charge.success', data: { reference: REF } }, 'f'.repeat(128));

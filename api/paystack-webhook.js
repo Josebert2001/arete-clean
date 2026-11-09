@@ -16,31 +16,50 @@
 //  or reordered event cannot buy more than was paid for.
 //
 //  RAW BODY
-//  The HMAC is over the exact bytes Paystack sent. Vercel's Node runtime parses
-//  JSON bodies before the handler runs; when it hands us a string or Buffer we
-//  sign that, and otherwise we re-serialise — which is what Paystack's own Node
-//  example does, and matches because Paystack sends compact JSON. If that ever
-//  stops matching, the webhook answers 401 and payments still settle through
-//  the browser path; the failure is logged so it gets noticed.
+//  The HMAC is over the exact bytes Paystack sent. Vercel's Node req.body is a
+//  lazy getter: read the stream BEFORE touching it, capped at 1 MB, then verify
+//  those bytes before parsing JSON. If the stream was already consumed (or a
+//  test supplies only req.body), keep the string/Buffer as-is and re-serialise
+//  only a parsed object. That fallback cannot recover the original formatting.
 // ============================================================================
 
 import { isValidWebhookSignature, paystackConfigured } from './_lib/paystack.js';
 import { settlePayment, revokePayment, REFERENCE_PATTERN } from './_lib/billing.js';
 import { captureApiError } from './_lib/sentry.js';
 
-function rawBodyOf(req) {
+const MAX_BODY_BYTES = 1024 * 1024;
+
+async function rawBodyOf(req) {
+  if (typeof req[Symbol.asyncIterator] === 'function' && !req.readableEnded) {
+    const chunks = [];
+    let size = 0;
+    // Keep the socket open on an early exit so the 413 can reach Paystack.
+    const stream = typeof req.iterator === 'function' ? req.iterator({ destroyOnReturn: false }) : req;
+    for await (const chunk of stream) {
+      const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      size += bytes.length;
+      if (size > MAX_BODY_BYTES) {
+        req.resume?.();
+        const err = new Error('Webhook body too large.');
+        err.statusCode = 413;
+        throw err;
+      }
+      chunks.push(bytes);
+    }
+    if (size) return Buffer.concat(chunks);
+  }
   const body = req.body;
-  if (typeof body === 'string') return body;
-  if (Buffer.isBuffer(body)) return body.toString('utf8');
-  return JSON.stringify(body ?? {});
+  const bytes = Buffer.isBuffer(body) ? body : Buffer.from(typeof body === 'string' ? body : JSON.stringify(body ?? {}));
+  if (bytes.length > MAX_BODY_BYTES) {
+    const err = new Error('Webhook body too large.');
+    err.statusCode = 413;
+    throw err;
+  }
+  return bytes;
 }
 
-function parsedBodyOf(req) {
-  const body = req.body;
-  if (typeof body === 'string' || Buffer.isBuffer(body)) {
-    try { return JSON.parse(String(body)); } catch { return null; }
-  }
-  return body ?? null;
+function parsedBodyOf(raw) {
+  try { return JSON.parse(raw.toString('utf8')); } catch { return null; }
 }
 
 export default async function handler(req, res) {
@@ -49,12 +68,20 @@ export default async function handler(req, res) {
   if (!paystackConfigured()) return res.status(503).json({ error: 'Billing is not configured.' });
 
   const signature = req.headers?.['x-paystack-signature'];
-  if (!isValidWebhookSignature(rawBodyOf(req), signature)) {
+  let raw;
+  try {
+    raw = await rawBodyOf(req);
+  } catch (err) {
+    if (err.statusCode === 413) return res.status(413).json({ error: 'Webhook body too large.' });
+    console.error('paystack-webhook: reading body failed:', err);
+    return res.status(500).json({ error: 'Could not read event.' });
+  }
+  if (!isValidWebhookSignature(raw, signature)) {
     console.error(JSON.stringify({ route: 'paystack-webhook', denied: 'bad_signature', hasSignature: Boolean(signature) }));
     return res.status(401).json({ error: 'Invalid signature.' });
   }
 
-  const event = parsedBodyOf(req);
+  const event = parsedBodyOf(raw);
   const refund = event?.event === 'refund.processed';
   const reference = refund
     ? (event?.data?.transaction_reference ?? event?.data?.transaction?.reference ?? event?.data?.reference)

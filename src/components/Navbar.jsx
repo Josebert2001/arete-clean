@@ -5,6 +5,7 @@ import AuthButton from './AuthButton';
 import InstallAppButton from './InstallAppButton';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../context/AuthContext';
+import { usePlan } from '../context/PlanContext';
 import { useLecturer } from './useLecturer';
 import { getDepartment } from '../data/departments';
 
@@ -41,6 +42,7 @@ export default function Navbar() {
   // lecturer data.
   const { user } = useAuth();
   const { isLecturer, role, repScope } = useLecturer();
+  const plan = usePlan();
 
   useEffect(() => {
     if (!open) return;
@@ -62,6 +64,8 @@ export default function Navbar() {
     { to: '/lab', label: 'Code Lab', also: ['/tracks', '/install', '/explainer', '/cheatsheet'] },
     { to: '/tutor', label: 'AI Tutor' },
     { to: '/campus-map', label: 'Campus Places' },
+    ...(plan.status === 'ready' && plan.enabled === true && !plan.isPremium
+      ? [{ to: '/premium', label: 'Premium' }] : []),
   ];
 
   // Attendance links depend on the signed-in user's role:
