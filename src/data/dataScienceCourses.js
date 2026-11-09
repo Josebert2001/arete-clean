@@ -1,3 +1,6 @@
+import { gst121Quiz } from './lectureNotes/gst121Quiz.js';
+import { cyb211Quiz } from './lectureNotes/cyb211Quiz.js';
+import { cos121Quiz } from './lectureNotes/cos121Quiz.js';
 // B.Sc. Data Science — University of Uyo, Faculty of Computing.
 //
 // Course structure (codes, titles, units, LH/PH, level, semester) is transcribed
@@ -365,6 +368,8 @@ export const courses = [
       'Do not leave this course to the last week; it is easy marks that many students throw away',
     ],
     notesKey: 'gst121',
+    // Shared practice bank for both catalogues.
+    quiz: gst121Quiz,
     // Chapters 1–2 are the only ones transcribed so far. Chapter 1's item 8 is
     // `partial` rather than `covers`: the chapter's reorientation strategies are
     // the 3Rs, indigenization and the NYSC, not the MAMSER/WAI/EFCC/ICPC ones
@@ -553,6 +558,8 @@ export const courses = [
       'Solve at least one small coding problem daily; consistency beats cramming for programming',
     ],
     notesKey: 'cos121',
+    // Shared practice bank for both catalogues.
+    quiz: cos121Quiz,
   },
   {
     code: 'UUY-DTS 121',
@@ -812,6 +819,8 @@ export const courses = [
     // pool-agreement test in departments.test.js).
     sharedMaterials: true,
     notesKey: 'cyb211',
+    // Shared practice bank for both catalogues.
+    quiz: cyb211Quiz,
     // Indices are positions in THIS outline. Note 1 (law, regulation, national
     // policy, GDPR) reaches items 8 and 9; note 2 (cryptography, RSA) covers
     // item 5 except digital signatures, and the CIA goals of item 1.
