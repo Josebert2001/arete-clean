@@ -18,13 +18,13 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.143",
-    "@ai-sdk/groq": "^3.0.82",
-    "@openrouter/ai-sdk-provider": "^2.10.0",
+    "@ai-sdk/google": "^4.0.114",
+    "@ai-sdk/groq": "^4.0.78",
+    "@openrouter/ai-sdk-provider": "^3.1.0",
     "@sentry/node": "^11.11.0",
     "@sentry/react": "^11.11.0",
     "@supabase/supabase-js": "^2.119.0",
-    "ai": "^6.0.326",
+    "ai": "^7.0.166",
     "google-auth-library": "^11.3.4",
     "googleapis": "^189.0.0",
     "katex": "^0.19.1",
