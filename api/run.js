@@ -130,7 +130,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'stdin exceeds the 1,000 character limit.' });
     }
 
-    const lang = Object.hasOwn(LANGUAGES, language) ? LANGUAGES[language] : LANGUAGES.java;
+    // An unknown language used to run silently as Java, so a Python program
+    // came back as a Java error and still spent a shared JDoodle credit.
+    if (typeof language !== 'string' || !Object.hasOwn(LANGUAGES, language)) {
+      return res.status(400).json({ error: 'Unsupported language. Use java, python, c or cpp.' });
+    }
+    const lang = LANGUAGES[language];
     if (provider === 'judge0') {
       const result = await runJudge0(source_code, language, stdin);
       return res.status(200).json(result);
@@ -226,7 +231,7 @@ async function runJudge0(sourceCode, language, stdin) {
   const encode = value => Buffer.from(value, 'utf8').toString('base64');
   const submitted = await fetch(endpoint, {
     method: 'POST', headers,
-    body: JSON.stringify({ language_id: JUDGE0_LANGUAGES[language] ?? JUDGE0_LANGUAGES.java,
+    body: JSON.stringify({ language_id: JUDGE0_LANGUAGES[language],
       source_code: encode(sourceCode), stdin: encode(stdin) }),
   });
   if (!submitted.ok) throw new Error(`Judge0 submission failed: ${submitted.status}`);

@@ -100,8 +100,12 @@ describe('api/run', () => {
     expect(await call(body)).toMatchObject({ code: 400, body: { error } });
     expect(fetch).not.toHaveBeenCalled();
   });
-  it('sends credentials only to JDoodle and defaults unknown languages to Java', async () => {
-    const res = await call({ source_code: 'hello', language: 'not-allowed' });
+  it.each(['not-allowed', 'python3', 'constructor', 42])('rejects unsupported language %s without calling the runner', async (language) => {
+    expect(await call({ source_code: 'print(1)', language })).toMatchObject({ code: 400, body: { error: 'Unsupported language. Use java, python, c or cpp.' } });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it('sends credentials only to JDoodle and defaults a missing language to Java', async () => {
+    const res = await call({ source_code: 'hello' });
     expect(res.body).toMatchObject({ output: '1\n', kind: 'success', creditsUsed: 3, creditsRemaining: 17 });
     expect(fetch).toHaveBeenCalledTimes(2);
     const [url, options] = fetch.mock.calls[0];
