@@ -35,6 +35,10 @@ const LANGUAGES = {
 // Judge0 CE language IDs; self-hosted deployments may change their enabled
 // language set, so verify /languages on the chosen instance before switching.
 const JUDGE0_LANGUAGES = { java: 62, c: 50, cpp: 54, python: 71 };
+// A hung runner must not hold a function instance (and the student's spinner)
+// for the platform's whole timeout. Generous: a compile-and-run takes seconds.
+const RUNNER_TIMEOUT_MS = 20000;
+const runnerSignal = () => AbortSignal.timeout(RUNNER_TIMEOUT_MS);
 
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { captureApiError } from './_lib/sentry.js';
@@ -145,6 +149,7 @@ export default async function handler(req, res) {
       fetch('https://api.jdoodle.com/v1/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: runnerSignal(),
         body: JSON.stringify({
           clientId: CLIENT_ID,
           clientSecret: CLIENT_SECRET,
@@ -157,6 +162,7 @@ export default async function handler(req, res) {
       fetch('https://api.jdoodle.com/v1/credit-spent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: runnerSignal(),
         body: JSON.stringify({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET }),
       }),
     ]);
@@ -214,6 +220,14 @@ export default async function handler(req, res) {
       creditsRemaining: creditsUsed !== null ? Math.max(0, DAILY_LIMIT - creditsUsed) : null,
     });
   } catch (err) {
+    if (err?.name === 'TimeoutError') {
+      console.error('Code runner timed out');
+      return res.status(504).json({
+        error: 'The code runner took too long to respond. Please try again in a moment.',
+        kind: 'runtime_error',
+        status: 'Runner timed out',
+      });
+    }
     console.error('Code runner error:', err);
     await captureApiError(err, { route: 'run' });
     return res.status(500).json({ error: 'Internal error running code. Please try again.' });
@@ -230,7 +244,7 @@ async function runJudge0(sourceCode, language, stdin) {
   };
   const encode = value => Buffer.from(value, 'utf8').toString('base64');
   const submitted = await fetch(endpoint, {
-    method: 'POST', headers,
+    method: 'POST', headers, signal: runnerSignal(),
     body: JSON.stringify({ language_id: JUDGE0_LANGUAGES[language],
       source_code: encode(sourceCode), stdin: encode(stdin) }),
   });
@@ -241,7 +255,7 @@ async function runJudge0(sourceCode, language, stdin) {
   for (let attempt = 0; attempt < 8; attempt += 1) {
     if (attempt) await new Promise(resolve => setTimeout(resolve, 650));
     const resultUrl = new URL(`submissions/${token}?base64_encoded=true&fields=stdout,stderr,compile_output,status,time,memory`, `${base.href.replace(/\/$/, '')}/`);
-    const response = await fetch(resultUrl, { headers });
+    const response = await fetch(resultUrl, { headers, signal: runnerSignal() });
     if (!response.ok) throw new Error(`Judge0 result failed: ${response.status}`);
     result = await response.json();
     if (Number(result.status?.id) > 2) break;

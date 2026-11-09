@@ -1,6 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ student: vi.fn(), configured: vi.fn(), client: vi.fn(), token: vi.fn() }));
+const mocks = vi.hoisted(() => ({ student: vi.fn(), configured: vi.fn(), client: vi.fn(), token: vi.fn(), capture: vi.fn() }));
+vi.mock('../../api/_lib/sentry.js', () => ({ captureApiError: mocks.capture }));
 vi.mock('../../api/_lib/supabase.js', () => ({ getStudentFromRequest: mocks.student }));
 vi.mock('../../api/_lib/serviceRole.js', () => ({ serviceRoleConfigured: mocks.configured, serviceRoleClient: mocks.client }));
 vi.mock('../../api/_lib/googleAuth.js', () => ({ getRefreshTokenForUser: mocks.token }));
@@ -60,5 +61,12 @@ describe('account deletion', () => {
     expect((await call()).body).toEqual({ deleted: true });
     expect(remove).toHaveBeenCalledWith(['course/file.pdf']);
     expect(deleteUser).toHaveBeenCalledWith('student-1');
+  });
+  it('reports a failed deletion to Sentry, not just the console', async () => {
+    const failure = new Error('auth admin unavailable');
+    deleteUser.mockResolvedValue({ error: failure });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect((await call()).code).toBe(500);
+    expect(mocks.capture).toHaveBeenCalledWith(failure, { route: 'account-delete' });
   });
 });
