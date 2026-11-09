@@ -136,12 +136,21 @@ export default function CoursePreview({ course, department, siblings = [], notes
 
       <header className="mb-8">
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <span className="text-xs font-mono px-2 py-0.5 rounded bg-ink text-cream">{course.code}</span>
           <Pill>{course.units} units</Pill>
           <Pill>{course.level} Level</Pill>
           {SEMESTERS[course.semester] && <Pill>{SEMESTERS[course.semester]}</Pill>}
         </div>
-        <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-3">{course.title}</h1>
+        {/* The code belongs IN the heading, not in a badge above it. Students
+            search by code ("gst 111 uniuyo") and an <h1> is weighted far more
+            heavily than a sibling <span> for matching that query — the badge
+            put the one word the page is looked up by outside the one element
+            that says what the page is about. It is not repeated as a badge now
+            that it is here; the breadcrumb above still carries it. */}
+        <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-3">
+          <span className="font-mono text-2xl sm:text-3xl text-coffee-600">{course.code}</span>
+          {' — '}
+          {course.title}
+        </h1>
         {/* Not "B.Sc. Cybersecurity" on GST 111. Areté serves the whole
             university, and 22 of these pages are courses every programme
             takes — naming one department there tells every other student the
