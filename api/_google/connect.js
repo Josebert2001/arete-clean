@@ -1,7 +1,7 @@
 // ============================================================================
 //  Arete — Start the "Connect Google" OAuth flow (Vercel)
 //  Signed-in student asks for a Google consent URL (Calendar + Drive scopes),
-//  redirects their browser to it, and lands back on api/google/callback.js.
+//  redirects their browser to it, and lands back on /api/google/callback (api/_google/callback.js, routed by api/google/[action].js).
 // ============================================================================
 
 import crypto from 'crypto';
