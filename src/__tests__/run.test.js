@@ -45,6 +45,7 @@ describe('api/run', () => {
   afterEach(() => {
     vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.clearAllMocks();
     delete process.env.JDOODLE_CLIENT_ID; delete process.env.JDOODLE_CLIENT_SECRET;
+    delete process.env.RUNNER_PROVIDER; delete process.env.JUDGE0_URL; delete process.env.JUDGE0_AUTH_TOKEN;
   });
 
   it('handles preflight and rejects other methods before auth', async () => {
@@ -124,5 +125,31 @@ describe('api/run', () => {
     const res = await call();
     expect(res).toMatchObject({ code: 500, body: { error: 'Internal error running code. Please try again.' } });
     expect(mocks.capture).toHaveBeenCalledWith(expect.any(SyntaxError), { route: 'run' });
+  });
+  it('runs Java through Judge0 and preserves the playground reply shape', async () => {
+    process.env.RUNNER_PROVIDER = 'judge0';
+    process.env.JUDGE0_URL = 'https://judge.example/';
+    process.env.JUDGE0_AUTH_TOKEN = 'private-token';
+    fetch.mockReset().mockResolvedValueOnce(ok({ token: 'submission-1' })).mockResolvedValueOnce(ok({
+      status: { id: 3 }, stdout: Buffer.from('hello\n').toString('base64'), stderr: null,
+      compile_output: null, time: '0.01', memory: 1000,
+    }));
+    const res = await call({ source_code: 'class Main {}', language: 'java' });
+    expect(res.body).toMatchObject({ output: 'hello', kind: 'success', creditsUsed: null, creditsRemaining: null });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    const [url, options] = fetch.mock.calls[0];
+    expect(url.href).toContain('/submissions?base64_encoded=true');
+    expect(options.headers['X-Auth-Token']).toBe('private-token');
+    expect(JSON.parse(options.body).language_id).toBe(62);
+    expect(JSON.stringify(res.body)).not.toContain('private-token');
+  });
+  it('maps Judge0 compiler output to a compile error', async () => {
+    process.env.RUNNER_PROVIDER = 'judge0';
+    process.env.JUDGE0_URL = 'https://judge.example/';
+    fetch.mockReset().mockResolvedValueOnce(ok({ token: 'submission-2' })).mockResolvedValueOnce(ok({
+      status: { id: 6 }, stdout: null, stderr: null,
+      compile_output: Buffer.from('syntax error').toString('base64'),
+    }));
+    expect((await call({ source_code: 'bad', language: 'c' })).body).toMatchObject({ output: 'syntax error', kind: 'compile_error' });
   });
 });

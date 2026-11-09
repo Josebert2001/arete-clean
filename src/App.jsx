@@ -6,11 +6,15 @@ import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import FeedbackPrompt from './components/FeedbackPrompt';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
+import UpgradeToast from './components/UpgradeToast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { StudyDaysProvider, useStudyDays } from './context/StudyDaysContext';
+import { PlanProvider } from './context/PlanContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
+import { hasSecurityEntry, clearSecurityEntry, SECURITY_START } from './utils/learningEntry';
 const Home = lazy(() => import('./pages/Home'));
+const Cybersecurity = lazy(() => import('./pages/Cybersecurity'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const CoursePublic = lazy(() => import('./pages/CoursePublic'));
@@ -28,6 +32,7 @@ const SignIn = lazy(() => import('./pages/SignIn'));
 const SetupProfile = lazy(() => import('./pages/SetupProfile'));
 const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
 const Welcome = lazy(() => import('./pages/Welcome'));
+const About = lazy(() => import('./pages/About'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const CheckIn = lazy(() => import('./pages/CheckIn'));
@@ -37,6 +42,7 @@ const Register = lazy(() => import('./pages/Register'));
 const Admin = lazy(() => import('./pages/Admin'));
 const CourseRep = lazy(() => import('./pages/CourseRep'));
 const Invitations = lazy(() => import('./pages/Invitations'));
+const Premium = lazy(() => import('./pages/Premium'));
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -116,7 +122,7 @@ const AUTH_PAGES = ['/signin', '/setup-profile', '/welcome'];
 function AuthStateWatcher() {
   const { user, profileComplete, authLoading, profileLoading } = useAuth();
   const navigate  = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   useEffect(() => {
     if (authLoading || profileLoading) return;
@@ -129,6 +135,11 @@ function AuthStateWatcher() {
     if (justSignedIn) {
       try { sessionStorage.removeItem('arete-just-signed-in'); } catch { /* ignore */ }
       if (user && profileComplete && (pathname === '/' || pathname === '/signin')) {
+        if (hasSecurityEntry() || new URLSearchParams(search).get('learn') === 'cybersecurity') {
+          clearSecurityEntry();
+          navigate(SECURITY_START, { replace: true });
+          return;
+        }
         const target = readLastLocation();
         if (target && target !== pathname) {
           navigate(target, { replace: true });
@@ -140,7 +151,7 @@ function AuthStateWatcher() {
     if (user && !profileComplete && !AUTH_PAGES.includes(pathname)) {
       navigate('/setup-profile', { replace: true });
     }
-  }, [user, profileComplete, authLoading, profileLoading, pathname, navigate]);
+  }, [user, profileComplete, authLoading, profileLoading, pathname, search, navigate]);
 
   return null;
 }
@@ -219,6 +230,7 @@ export default function App() {
   return (
     <ThemeProvider>
     <AuthProvider>
+    <PlanProvider>
     <StudyDaysProvider>
     <div className="min-h-screen flex flex-col paper-texture">
       <a
@@ -236,6 +248,7 @@ export default function App() {
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/cybersecurity" element={<Cybersecurity />} />
             <Route path="/courses" element={<PublicOrGated><Courses /></PublicOrGated>} />
             <Route path="/courses/:slug" element={<PublicOrGated><CourseDetail /></PublicOrGated>} />
             <Route path="/lab" element={<RequireAuth><CodeLab /></RequireAuth>} />
@@ -262,8 +275,15 @@ export default function App() {
             <Route path="/rep" element={<RequireAuth><CourseRep /></RequireAuth>} />
             <Route path="/invitations" element={<RequireAuth><Invitations /></RequireAuth>} />
             <Route path="/welcome" element={<Welcome />} />
+            {/* Public, like /install and /courses — it is prerendered, listed
+                in the sitemap, and is the page the author entity in
+                index.html's structured data points at. Behind the gate it
+                would be a canonical URL that answers a crawler with /signin. */}
+            <Route path="/about" element={<About />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            {/* Public so a signed-out student can see the price; checkout itself needs sign-in. */}
+            <Route path="/premium" element={<Premium />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
@@ -275,8 +295,10 @@ export default function App() {
       {/* Campus Places launcher (CampusMapFloatingButton) is paused until the
           places have real coordinates — re-add the import and this line then. */}
       <PWAUpdatePrompt />
+      <UpgradeToast />
     </div>
     </StudyDaysProvider>
+    </PlanProvider>
     </AuthProvider>
     </ThemeProvider>
   );

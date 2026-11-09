@@ -3,6 +3,7 @@ import { ArrowRight, BrainCircuit, CalendarDays, CloudUpload, Code2 } from 'luci
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
 import { findDepartmentByName, getDepartment, YEAR_LEVELS } from '../data/departments';
+import IndependentLearningHome from '../components/IndependentLearningHome';
 
 export default function Welcome() {
   usePageTitle('Welcome');
@@ -21,6 +22,7 @@ export default function Welcome() {
     );
   }
 
+  if (profile.learning_mode === 'independent') return <IndependentLearningHome profile={profile} welcome />;
   const firstName = profile.full_name.split(' ')[0];
   // Read from the lightweight department registry, never useCatalogue: Welcome
   // is a one-time hand-off screen shown once right after signup, and pulling

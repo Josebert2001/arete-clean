@@ -16,6 +16,7 @@ import { createGroq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited, PROBE_RATE_LIMIT } from './_lib/request-policy.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
+import { denyIfOverDailyQuota } from './_lib/plan.js';
 import { captureApiError } from './_lib/sentry.js';
 
 const SYSTEM_PROMPT = `You are Areté's study helper for beginner university students at the University of Uyo.
@@ -123,6 +124,10 @@ export default async function handler(req, res) {
     route: 'research',
     message: 'You have used your Explain-this lookups for now. Please wait a few minutes and try again.',
   })) return;
+
+  // Free-tier daily allowance — lifted by Premium, inert until billing is on.
+  // See api/_lib/plan.js.
+  if (await denyIfOverDailyQuota(req, res, student, 'research')) return;
 
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_API_KEY) {

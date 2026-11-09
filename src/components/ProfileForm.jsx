@@ -16,17 +16,25 @@ const OTHER_DEPARTMENT = '__other__';
 // what saving actually means.
 //
 // onSave receives values already resolved out of the OTHER_DEPARTMENT sentinel
-// — { full_name, reg_number, level, department, department_other } exactly as
-// they should be written to `profiles` — and returns an error string to
+// — { full_name, learning_mode, reg_number, level, department, department_other }
+// as written to `profiles` — and returns an error string to
 // display, or null/undefined on success. reg_number is optional and always
-// arrives as a trimmed, uppercased string or null — never ''.
+// arrives as a trimmed, uppercased string or null — never ''. Independent mode
+// clears academic fields and uses the general catalogue without inventing a year.
+//
+// allowIndependent=false (the learning_mode migration not applied yet — see
+// AuthContext) hides the mode picker, forces university mode and leaves
+// learning_mode out of the payload, so saving works against the older schema.
 export default function ProfileForm({
   initial = {},
   submitLabel = 'Save',
   savingLabel = 'Saving…',
+  defaultMode = 'university',
+  allowIndependent = true,
   onSave,
 }) {
   const [form, setForm] = useState({
+    learning_mode: allowIndependent ? (initial.learning_mode ?? defaultMode) : 'university',
     full_name: initial.full_name ?? '',
     reg_number: initial.reg_number ?? '',
     level: initial.level ?? '',
@@ -40,19 +48,20 @@ export default function ProfileForm({
 
   const setField = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
   const isOtherDept = form.department === OTHER_DEPARTMENT;
+  const independent = form.learning_mode === 'independent';
 
   const submit = async (e) => {
     e.preventDefault();
     const name = form.full_name.trim();
     const reg = form.reg_number.trim().toUpperCase();
     const departmentOther = form.department_other.trim();
-    if (!name || !form.level || !form.department) { setError('Please fill in all fields.'); return; }
-    if (isOtherDept && !departmentOther)  { setError('Please tell us your department.'); return; }
+    if (!name || (!independent && (!form.level || !form.department))) { setError('Please fill in all fields.'); return; }
+    if (!independent && isOtherDept && !departmentOther)  { setError('Please tell us your department.'); return; }
     // Reg number is optional — fresh students often don't have one yet — but
     // whatever is typed must still look real. A real reg number always mixes
     // letters and digits (e.g. CYB/21/1234); reject obvious junk before it
     // lands in the department record.
-    if (reg) {
+    if (!independent && reg) {
       if (reg.length < 4) { setError('Enter a valid reg number.'); return; }
       if (!/[A-Z]/.test(reg) || !/[0-9]/.test(reg)) {
         setError('Enter a valid reg number — it should contain both letters and digits.');
@@ -62,15 +71,17 @@ export default function ProfileForm({
 
     setSaving(true);
     setError('');
-    const message = await onSave({
+    let message;
+    try { message = await onSave({
       full_name: name,
+      ...(allowIndependent && { learning_mode: form.learning_mode }),
       // Never save '' — the DB's format CHECK constraint passes automatically
       // on NULL but would reject an empty string.
-      reg_number: reg || null,
-      level: form.level,
-      department: isOtherDept ? 'general' : form.department,
-      department_other: isOtherDept ? departmentOther : null,
-    });
+      reg_number: independent ? null : reg || null,
+      level: independent ? null : form.level,
+      department: independent || isOtherDept ? 'general' : form.department,
+      department_other: !independent && isOtherDept ? departmentOther : null,
+    }); } catch { message = 'Could not save your profile. Please try again.'; }
     // On success the page navigates away or re-renders; only re-enable the
     // form when it hands back something to show.
     if (message) {
@@ -79,11 +90,25 @@ export default function ProfileForm({
     }
   };
 
-  const ready = form.full_name.trim() && form.level && form.department
-    && (!isOtherDept || form.department_other.trim());
+  const ready = form.full_name.trim() && (independent || (form.level && form.department
+    && (!isOtherDept || form.department_other.trim())));
 
   return (
     <form onSubmit={submit} className="space-y-6">
+
+      {allowIndependent && <fieldset>
+        <legend className="text-xs font-medium text-coffee-700 mb-3">How will you use Areté?</legend>
+        <div className="grid gap-2">
+          {[
+            ['independent', 'Learn cybersecurity and coding', 'For independent learners, professionals, and students anywhere.'],
+            ['university', 'Study a UniUyo curriculum', 'Choose your department and year for course resources.'],
+          ].map(([value, label, description]) => <label key={value} className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer ${form.learning_mode === value ? 'border-ink bg-paper' : 'border-coffee-200 bg-cream'}`}>
+            <input type="radio" name="learning-mode" value={value} checked={form.learning_mode === value} onChange={() => { setForm(f => ({ ...f, learning_mode: value })); setError(''); }} className="mt-1 shrink-0" />
+            <span><span className="block text-sm font-semibold text-ink">{label}</span><span className="block text-xs text-coffee-600 mt-1">{description}</span></span>
+          </label>)}
+        </div>
+        {independent && <p className="text-xs text-coffee-600 mt-3">Start with the security rooms and programming tracks. No university details needed. You can change your learning mode later.</p>}
+      </fieldset>}
 
       {/* Full name */}
       <div>
@@ -102,6 +127,7 @@ export default function ProfileForm({
         />
       </div>
 
+      {!independent && <>
       {/* Reg number */}
       <div>
         <label htmlFor="profile-reg-number" className="flex items-center gap-1.5 text-xs font-medium text-coffee-700 mb-2">
@@ -198,6 +224,7 @@ export default function ProfileForm({
         </div>
       </div>
 
+      </>}
       {/* Error */}
       {error && (
         <div role="alert" className="flex items-center gap-2 text-sm text-rust">

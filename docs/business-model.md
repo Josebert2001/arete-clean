@@ -4,6 +4,18 @@ _Last updated: 2026-07-18. This is a living document — every `[VALIDATE]` mark
 is a number or claim that must be confirmed with real students/staff before it
 goes into any pitch, grant application, or pricing page._
 
+> **Status, 8 Nov 2026 — Premium is built, switched off.** Decided: ₦2,500
+> one-time **Semester Pass** (180 days, no auto-renew), paid through Paystack
+> (card / transfer / USSD). Free-tier daily limits and the exact gating live in
+> `src/data/plans.js` — that file, not the draft table in §2, is the source of
+> truth. Notes stay free. To go live: apply
+> `supabase/migrations/20261108000000_premium_billing.sql`, set
+> `PAYSTACK_SECRET_KEY` in Vercel, and register the webhook
+> `https://www.aretecyb.tech/api/paystack-webhook` in the Paystack dashboard.
+> Test with `sk_test_…` keys first. Next levers, not yet built: course-rep class
+> passes (rep buys for a cohort at a discount), a one-off 7-day trial in exam
+> season, and admin-console grants for sponsor-funded cohorts.
+
 ---
 
 ## 1. The problem, sharpened
@@ -304,7 +316,7 @@ pilot, or sponsor.
 ## 6. Standing checklist
 
 - [ ] Run the cost-of-problem survey (20+ students) → fill every ₦[VALIDATE].
-- [ ] Decide premium price point and what's gated (draft table above).
+- [x] Decide premium price point and what's gated — ₦2,500/semester; limits in `src/data/plans.js` (8 Nov 2026). Re-check against the survey once it runs.
 - [ ] Set up a Paystack account (needs: registered business name or personal
       account to start; CAC registration can come later).
 - [ ] Have the HOD/course-adviser conversation; write down their exact words.

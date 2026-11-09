@@ -16,9 +16,9 @@ const pad = (n) => String(n).padStart(2, '0');
 
 function firstOccurrenceOnOrAfter(from, byday) {
   const target = DAY_TO_NUM[byday];
-  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
-  const delta = (target - d.getDay() + 7) % 7;
-  d.setDate(d.getDate() + delta);
+  const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()));
+  const delta = (target - d.getUTCDay() + 7) % 7;
+  d.setUTCDate(d.getUTCDate() + delta);
   return d;
 }
 
@@ -26,14 +26,14 @@ function firstOccurrenceOnOrAfter(from, byday) {
 // resource, so Google interprets it in Africa/Lagos without us doing UTC math.
 function localDateTimeString(date, hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(h)}:${pad(m)}:00`;
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(h)}:${pad(m)}:00`;
 }
 
 // RRULE UNTIL must be UTC regardless of the event's own timeZone field.
 function untilStampUtc(date, hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
   const utc = new Date(Date.UTC(
-    date.getFullYear(), date.getMonth(), date.getDate(),
+    date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
     h - LAGOS_OFFSET_HOURS, m, 0,
   ));
   return `${utc.getUTCFullYear()}${pad(utc.getUTCMonth() + 1)}${pad(utc.getUTCDate())}` +
@@ -42,6 +42,9 @@ function untilStampUtc(date, hhmm) {
 
 // Builds a Google Calendar API event resource from a PlanEvent whose
 // firstDate/untilDate arrive as ISO date strings (JSON has no Date type).
+// Date-only strings parse at UTC midnight: keep all date/weekday maths in UTC
+// so a server west of UTC cannot move the calendar date back a day. The browser
+// twin instead reads local components from Planner's local-midnight Dates.
 export function buildGoogleEventResource(ev) {
   const firstDate = new Date(ev.firstDate);
   const untilDate = new Date(ev.untilDate);

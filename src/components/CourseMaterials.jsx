@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { supabase, isConfigured, getAccessToken } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { MATERIAL_QUOTA } from '../utils/materialQuota';
+import { rateLimitMessage } from '../utils/rateLimitMessage';
 
 const BUCKET = 'course-materials';
 const MAX_MB = 20;
@@ -69,6 +71,13 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
   // blocks the whole page and looks nothing like the rest of the app.
   const [confirmId, setConfirmId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [reportAvailable, setReportAvailable] = useState(false);
+  const [reportId, setReportId] = useState(null);
+  const [reportReason, setReportReason] = useState('wrong');
+  const [reportDetails, setReportDetails] = useState('');
+  const [reportBusy, setReportBusy] = useState(false);
+  const [reportReply, setReportReply] = useState('');
+  const [uploadCount, setUploadCount] = useState(null);
   const fileRef = useRef();
   const requestGeneration = useRef(0);
   const currentCourse = useRef({ courseSlug, department });
@@ -80,6 +89,8 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
       setShowForm(false);
       setDone(false);
       setError('');
+      setReportId(null);
+      setReportReply('');
       if (fileRef.current) fileRef.current.value = '';
     }
     currentCourse.current = { courseSlug, department };
@@ -129,6 +140,47 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
     };
   }, [load]);
 
+  useEffect(() => {
+    if (!isConfigured || !user) return;
+    let active = true;
+    supabase.rpc('material_reporting_available').then(({ data, error: probeError }) => {
+      if (active) setReportAvailable(!probeError && data === true);
+    }).catch(() => { if (active) setReportAvailable(false); });
+    return () => { active = false; };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    supabase.rpc('my_material_upload_count')
+      .then(({ data, error: countError }) => { if (active) setUploadCount(countError ? null : data); })
+      .catch(() => { if (active) setUploadCount(null); });
+    return () => { active = false; };
+  }, [user, done]);
+
+  async function handleReport(e, materialId) {
+    e.preventDefault();
+    setReportBusy(true);
+    setReportReply('');
+    try {
+      const { data, error: reportError } = await supabase.rpc('report_material', {
+        p_material_id: materialId, p_reason: reportReason, p_details: reportDetails.trim() || null,
+      });
+      if (reportError?.code === 'PGRST202' || reportError?.code === '42883') {
+        setReportAvailable(false);
+        setReportId(null);
+        return;
+      }
+      const reply = Array.isArray(data) ? data[0] : data;
+      setReportReply(reportError ? 'Could not submit the report. Please try again.' : reply?.message || 'Report submitted.');
+      if (reply?.ok) { setReportId(null); setReportDetails(''); load(); }
+    } catch {
+      setReportReply('Could not submit the report. Please try again.');
+    } finally {
+      setReportBusy(false);
+    }
+  }
+
   function handleFilePick(e) {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -153,6 +205,7 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
     const uploadDepartment = department;
     setUploading(true);
     setError('');
+    let uploadedPath = null;
 
     try {
       const fileExt = ext(file.name);
@@ -162,6 +215,7 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
         .from(BUCKET)
         .upload(path, file, { contentType: file.type });
       if (storageErr) throw storageErr;
+      uploadedPath = path;
 
       // The server writes the course_materials row — the browser no longer can,
       // and must not: it would otherwise be choosing `extracted_text`, which is
@@ -189,7 +243,9 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
 
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(payload.error || 'Could not save the material. Please try again.');
+        throw new Error(res.status === 429
+          ? rateLimitMessage('extract', res.headers.get('Retry-After'))
+          : payload.error || 'Could not save the material. Please try again.');
       }
 
       if (isCurrentCourse(uploadCourseSlug, uploadDepartment)) {
@@ -201,8 +257,15 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
         load();
       }
     } catch (err) {
+      let cleanupError = null;
+      if (uploadedPath) {
+        try {
+          const { error: removeError } = await supabase.storage.from(BUCKET).remove([uploadedPath]);
+          cleanupError = removeError;
+        } catch (removeError) { cleanupError = removeError; }
+      }
       if (isCurrentCourse(uploadCourseSlug, uploadDepartment)) {
-        setError(err?.message ?? 'Upload failed. Please try again.');
+        setError(`${err?.message ?? 'Upload failed. Please try again.'}${cleanupError ? ' The uploaded file could not be cleaned up; please contact support.' : ''}`);
       }
     } finally {
       setUploading(false);
@@ -285,6 +348,7 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
             <Paperclip size={16} className="text-coffee-700" />
             Student Materials
           </h2>
+          <p className="mt-1 text-xs text-coffee-600">Shared by students; lecturers and Areté have not checked these files, and they may be wrong.</p>
           {!fetching && (
             <p className="text-xs text-coffee-600 mt-0.5">
               {materials.length === 0
@@ -321,6 +385,7 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
       {/* Upload form */}
       {showForm && (
         <form onSubmit={handleUpload} className="bg-paper border border-coffee-200 rounded-xl p-5 space-y-4">
+          {uploadCount !== null && <p className="text-xs text-coffee-600">{uploadCount} of {MATERIAL_QUOTA.maxFiles} uploads used</p>}
           <div className="flex items-center justify-between">
             <h3 className="font-display font-bold text-ink text-sm">Upload a Material</h3>
             <button
@@ -492,6 +557,7 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
 
                 {/* Name + description */}
                 <p className="text-sm font-semibold leading-snug text-ink line-clamp-2">{m.display_name}</p>
+                <span className="mt-1 text-[11px] text-rust">Student upload · not reviewed</span>
                 {m.description && (
                   <p className="mt-1 text-xs leading-relaxed text-coffee-600 line-clamp-2">
                     {m.description}
@@ -549,10 +615,28 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
                   )}
                 </div>
               )}
+              {!m.uploaded_by_me && reportAvailable && (
+                <div className="mt-3 border-t border-coffee-100 pt-2.5">
+                  {reportId === m.id ? (
+                    <form onSubmit={e => handleReport(e, m.id)} className="space-y-2">
+                      <label htmlFor={`reason-${m.id}`} className="block text-xs text-coffee-700">Reason for report</label>
+                      <select id={`reason-${m.id}`} value={reportReason} onChange={e => setReportReason(e.target.value)} className="w-full rounded border border-coffee-300 bg-paper p-2 text-xs">
+                        <option value="wrong">Wrong information</option><option value="offensive">Offensive</option>
+                        <option value="copyright">Copyright</option><option value="personal_info">Personal information</option>
+                        <option value="spam">Spam</option><option value="other">Other</option>
+                      </select>
+                      <label htmlFor={`details-${m.id}`} className="block text-xs text-coffee-700">Details (optional)</label>
+                      <textarea id={`details-${m.id}`} maxLength={500} value={reportDetails} onChange={e => setReportDetails(e.target.value)} className="w-full rounded border border-coffee-300 bg-paper p-2 text-xs" />
+                      <div className="flex gap-2"><button type="submit" disabled={reportBusy} className="text-xs font-medium text-rust">Submit report</button><button type="button" onClick={() => setReportId(null)} className="text-xs text-coffee-600">Cancel</button></div>
+                    </form>
+                  ) : <button type="button" onClick={() => { setReportId(m.id); setReportReply(''); }} className="text-xs text-coffee-600 hover:text-rust">Report</button>}
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
+      {reportReply && <p role="status" className="text-xs text-coffee-700">{reportReply}</p>}
     </div>
   );
 }

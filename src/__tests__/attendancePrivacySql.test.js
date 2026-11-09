@@ -78,6 +78,6 @@ describe('attendance privacy migration', () => {
   it('describes the new storage behavior in the privacy policy', () => {
     expect(privacy).toContain('Without an enforced boundary, successful check-ins do not store your coordinates.');
     expect(privacy).toContain('stores only a one-way SHA-256 hash of that identifier in device bindings, successful check-ins, and attendance audit snapshots');
-    expect(privacy).toContain('Last updated: 2 November 2026');
+    expect(privacy).toContain('Last updated: 9 November 2026');
   });
 });

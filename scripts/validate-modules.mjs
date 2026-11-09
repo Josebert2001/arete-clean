@@ -214,6 +214,15 @@ for (const { department, courses } of catalogues) {
   for (const c of courses) {
     if (seenSlugs.has(c.slug)) errors.push(`[${department}] duplicate course slug "${c.slug}"`);
     seenSlugs.add(c.slug);
+    if (c.contentReview !== undefined) {
+      const review = c.contentReview;
+      const day = /^\d{4}-\d{2}-\d{2}$/.test(review?.reviewed ?? '')
+        ? new Date(`${review.reviewed}T00:00:00Z`) : new Date(NaN);
+      check(isNonEmptyString(review?.owner) && Number.isFinite(day.getTime())
+        && day.toISOString().slice(0, 10) === review.reviewed
+        && day.getTime() <= Date.now(),
+      `[${department}] course ${c.code ?? c.slug}: contentReview needs an owner and a valid, non-future ISO date`);
+    }
   }
 
   // Some courses ship a practice-quiz bank (course.quiz). Students pick how many

@@ -18,6 +18,21 @@
     <title>Areté — Excellence, Engineered.</title>
     <meta name="description" content="Academic companion for University of Uyo students — every course from 100L to 400L, interactive Java, Python & C tracks, and an AI tutor that knows the curriculum." />
     <meta name="theme-color" content="#FAF6EC" />
+    <!-- Only `max-image-preview:large` actually changes Google's behaviour: the
+         default there is `standard`, while an absent `max-snippet` already means
+         "Google chooses the length" — which is precisely what -1 asks for — and
+         "index, follow" is documented as the default with no effect if listed.
+         The two -1s stay anyway because they are an explicit grant to the
+         engines that are not Google and do read them, and they cost nothing.
+         Do not add "index, follow" back; a directive that does nothing invites
+         the reader to assume the rest of the line is equally decorative. -->
+    <meta name="robots" content="max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <!-- llms.txt v2 defines this relation: `describedby` points at the llms.txt
+         that COVERS this page. `rel="alternate" type="text/markdown"` is a
+         different claim — it means "here is this page rendered as markdown" —
+         and pointing that at a site-wide manifest tells an agent the manifest
+         is the markdown of whatever page it is reading. -->
+    <link rel="describedby" href="/llms.txt" />
     <!-- Apply the saved/system theme before first paint to avoid a flash.
          External (not inline) so it satisfies the strict CSP without a hash. -->
     <script src="/theme-init.js"></script>
@@ -120,7 +135,7 @@
       "@type": "Person",
       "@id": "https://www.aretecyb.tech/#author",
       "name": "JRsolvy",
-      "url": "https://www.aretecyb.tech/",
+      "url": "https://www.aretecyb.tech/about",
       "jobTitle": "Founder and author, Areté",
       "description": "Builds and writes Areté — the course outlines, transcribed lecture notes and practice banks are authored from the University of Uyo curriculum and lecturers' own workbooks.",
       "affiliation": { "@id": "https://www.uniuyo.edu.ng/#organization" },

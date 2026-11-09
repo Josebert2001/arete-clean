@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import { buildGoogleEventResource } from '../../api/_lib/googleEvents.js';
 
 const mocks = vi.hoisted(() => ({
   student: vi.fn(), ipLimit: vi.fn(), userLimit: vi.fn(), capture: vi.fn(), log: vi.fn(),
@@ -28,6 +29,17 @@ vi.mock('../../api/_lib/request-policy.js', () => ({
 let connect, callback, status, disconnect, sync, auth;
 const EVENT = { title: 'Study', byday: 'MO', start: '09:00', end: '10:00', firstDate: '2026-11-02', untilDate: '2026-12-02' };
 const CALENDAR_DESCRIPTION = 'Created by Areté study planner. Re-syncing replaces this calendar.';
+
+describe('Google event calendar dates', () => {
+  it('keeps the Tuesday anchor and final day in every server timezone', () => {
+    // UTC midnight Tuesday is still Monday in New York. The first Monday on
+    // or after this calendar date is the 9th, never the 2nd.
+    const resource = buildGoogleEventResource({ ...EVENT, firstDate: '2026-11-03' });
+    expect(resource.start.dateTime).toBe('2026-11-09T09:00:00');
+    expect(resource.end.dateTime).toBe('2026-11-09T10:00:00');
+    expect(resource.recurrence).toEqual(['RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261202T225900Z']);
+  });
+});
 
 function response() {
   return {
@@ -61,11 +73,11 @@ beforeAll(async () => {
   process.env.GOOGLE_CLIENT_SECRET = 'google-secret';
   process.env.GOOGLE_REDIRECT_URI = 'https://arete.example/api/google/callback';
   auth = await import('../../api/_lib/googleAuth.js');
-  connect = (await import('../../api/google/connect.js')).default;
-  callback = (await import('../../api/google/callback.js')).default;
-  status = (await import('../../api/google/status.js')).default;
-  disconnect = (await import('../../api/google/disconnect.js')).default;
-  sync = (await import('../../api/google/calendar-sync.js')).default;
+  connect = (await import('../../api/_google/connect.js')).default;
+  callback = (await import('../../api/_google/callback.js')).default;
+  status = (await import('../../api/_google/status.js')).default;
+  disconnect = (await import('../../api/_google/disconnect.js')).default;
+  sync = (await import('../../api/_google/calendar-sync.js')).default;
 });
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -395,5 +407,46 @@ describe('Google Calendar sync', () => {
     mocks.calendar.mockReturnValue({ calendarList: { list: vi.fn().mockRejectedValue(new Error('invalid_grant')) } });
     expect((await call(sync, { body: { events: [EVENT] } })).code).toBe(500);
     expect(remove).toHaveBeenCalled();
+  });
+});
+
+// The five handlers above are deployed as one function, api/google/[action].js
+// (Vercel Hobby allows 12 functions per deployment). These pin the routing.
+describe('Google router', () => {
+  let router, actionFromRequest;
+  beforeAll(async () => {
+    ({ default: router, actionFromRequest } = await import('../../api/google/[action].js'));
+  });
+  async function route(url, options = {}) {
+    const res = response();
+    await router({ method: 'POST', body: {}, query: {}, headers: {}, url, ...options }, res);
+    return res;
+  }
+
+  it('reads the action from the path, ignoring the query string', () => {
+    expect(actionFromRequest({ url: '/api/google/status' })).toBe('status');
+    expect(actionFromRequest({ url: '/api/google/calendar-sync/' })).toBe('calendar-sync');
+    expect(actionFromRequest({ url: '/api/google/callback?code=x&state=y&action=connect' })).toBe('callback');
+    expect(actionFromRequest({ url: '/api/google/a/b' })).toBeNull();
+    expect(actionFromRequest({ url: '/api/google/%E0%A4%A' })).toBeNull();
+    expect(actionFromRequest({})).toBeNull();
+  });
+
+  it('dispatches each public URL to its handler', async () => {
+    expect((await route('/api/google/status')).body).toEqual({ configured: true, connected: false, scope: null, connectedAt: null });
+    expect((await route('/api/google/connect', { body: { probe: true } })).body).toEqual({ configured: true });
+    mocks.service.mockReturnValue({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null }) }) }) }) });
+    expect((await route('/api/google/disconnect')).body).toEqual({ success: true });
+    expect((await route('/api/google/calendar-sync', { body: { events: [] } })).code).toBe(400);
+    const cb = await route('/api/google/callback?state=bad', { method: 'GET', query: { state: 'bad' } });
+    expect(cb.location).toBe('/planner?google=error');
+  });
+
+  it('answers 404 for unknown or inherited action names', async () => {
+    for (const url of ['/api/google/nope', '/api/google/constructor', '/api/google/__proto__', '/api/google/', '/api/google/status/extra']) {
+      const res = await route(url);
+      expect(res.code).toBe(404);
+      expect(res.body).toEqual({ error: 'Not found' });
+    }
   });
 });

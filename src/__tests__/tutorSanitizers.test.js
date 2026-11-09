@@ -3,7 +3,24 @@
 // stream-marker channel (src/utils/tutorStream.js), so regressions here are
 // security-relevant.
 import { describe, it, expect } from 'vitest';
-import { sanitizeLabel, sanitizeNoteBody } from '../../api/_lib/tutorTools.js';
+import { buildTutorTools, sanitizeLabel, sanitizeNoteBody } from '../../api/_lib/tutorTools.js';
+
+describe('getCourseOutline upload visibility', () => {
+  it('filters hidden materials and labels uploaded text as unreviewed', async () => {
+    const filters = [];
+    const query = {
+      select: () => query,
+      eq: (key, value) => { filters.push([key, value]); return query; },
+      not: () => query,
+      order: () => query,
+      limit: async () => ({ data: [{ display_name: 'Notes', extracted_text: 'Supplement' }], error: null }),
+    };
+    const tools = buildTutorTools({ db: { from: () => query } }, 'cybersecurity');
+    const result = await tools.getCourseOutline.execute({ courseCode: 'CYB 224' });
+    expect(filters).toContainEqual(['moderation_status', 'visible']);
+    expect(result).toContain('Student-submitted, unreviewed uploaded note');
+  });
+});
 
 describe('sanitizeLabel', () => {
   it('strips newlines, "=" and control chars, and caps length', () => {

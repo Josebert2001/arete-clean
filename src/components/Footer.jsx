@@ -13,7 +13,7 @@ export default function Footer() {
               <span className="font-display text-lg font-bold text-ink">Areté</span>
             </div>
             <p className="text-sm text-coffee-700 leading-relaxed">
-              Academic companion for University of Uyo students — courses, interactive programming tracks, and an AI tutor, all four years.
+              Cybersecurity and coding practice for learners everywhere, alongside University of Uyo course resources and study tools. Independent, and not affiliated with the university.
             </p>
             <p className="text-xs text-coffee-600 mt-3 italic font-display">ἀρετή · Greek for "excellence through practice"</p>
           </div>
@@ -21,7 +21,8 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-bold text-ink mb-3">What's inside</h4>
             <ul className="space-y-2 text-sm text-coffee-700">
-              <li>All courses · 100L to 400L</li>
+              <li><Link to="/cybersecurity" className="underline underline-offset-4 hover:text-ink">Cybersecurity learning · Team pilot inquiries</Link></li>
+              <li>Foundation courses + Cybersecurity &amp; Data Science · 100L to 400L</li>
               <li>Java · Python · C interactive tracks</li>
               <li>{totalModules} modules · quizzes · playgrounds</li>
               <li>AI Tutor · Code Lab</li>
@@ -47,8 +48,10 @@ export default function Footer() {
         <div className="border-t border-coffee-200 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-coffee-700">
           <p>© {new Date().getFullYear()} Areté by JRsolvy. Built for learners, everywhere.</p>
           <div className="flex items-center gap-4">
+            <Link to="/about" className="hover:text-ink transition-colors">About</Link>
             <Link to="/privacy" className="hover:text-ink transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-ink transition-colors">Terms of Service</Link>
+            <a href="https://github.com/Josebert2001/arete-clean/security/policy" className="hover:text-ink transition-colors">Security policy</a>
           </div>
         </div>
       </div>

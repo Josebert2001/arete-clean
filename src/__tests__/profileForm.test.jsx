@@ -18,6 +18,53 @@ const fillRequiredFields = ({ reg } = {}) => {
 };
 
 describe('ProfileForm — optional reg number', () => {
+  it('lets an independent learner save with only a name and no academic identity', async () => {
+    const onSave = vi.fn(async () => undefined);
+    render(<ProfileForm defaultMode="independent" onSave={onSave} />);
+    expect(screen.queryByLabelText(/Reg number/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '100L' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/Full name/i), { target: { value: ' Ada Obi ' } });
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith({
+      full_name: 'Ada Obi', learning_mode: 'independent', reg_number: null,
+      level: null, department: 'general', department_other: null,
+    }));
+  });
+
+  it('clears academic metadata when an existing university learner switches mode', async () => {
+    const onSave = vi.fn(async () => undefined);
+    render(<ProfileForm initial={{ full_name: 'Ada', level: '200L', department: 'cybersecurity', reg_number: 'CYB/22/1234' }} onSave={onSave} />);
+    fireEvent.click(screen.getByRole('radio', { name: /Learn cybersecurity and coding/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ learning_mode: 'independent', level: null, reg_number: null, department_other: null })));
+  });
+
+  it('requires academic context again when switching from independent to university mode', () => {
+    render(<ProfileForm initial={{ full_name: 'Ada', learning_mode: 'independent', department: 'general', level: null }} onSave={vi.fn()} />);
+    fireEvent.click(screen.getByRole('radio', { name: /Study a UniUyo curriculum/ }));
+    expect(screen.getByRole('button', { name: /Save/ })).toBeDisabled();
+    fillRequiredFields();
+    expect(screen.getByRole('button', { name: /Save/ })).toBeEnabled();
+  });
+
+  it('hides independent mode and omits learning_mode when the schema lacks it', async () => {
+    const onSave = vi.fn(async () => undefined);
+    render(<ProfileForm defaultMode="independent" allowIndependent={false} onSave={onSave} />);
+    expect(screen.queryByRole('radio', { name: /Learn cybersecurity and coding/ })).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/Reg number/i)).toBeInTheDocument();
+    fillRequiredFields();
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][0]).not.toHaveProperty('learning_mode');
+  });
+
+  it('lets a learner retry when saving throws', async () => {
+    render(<ProfileForm defaultMode="independent" onSave={vi.fn().mockRejectedValue(new Error('offline'))} />);
+    fireEvent.change(screen.getByLabelText(/Full name/i), { target: { value: 'Ada' } });
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not save your profile');
+    expect(screen.getByRole('button', { name: /Save/ })).toBeEnabled();
+  });
   it('submits reg_number as null when the field is left blank', async () => {
     const onSave = vi.fn(async () => undefined);
     render(<ProfileForm onSave={onSave} />);

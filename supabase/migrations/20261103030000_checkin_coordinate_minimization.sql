@@ -1,0 +1,21 @@
+-- SUPERSEDED — intentionally a no-op. Safe to run; it changes nothing.
+--
+-- This file used to redefine check_in() so that check-ins without an enforced
+-- location boundary store no coordinates. 20261102050000_attendance_privacy.sql
+-- does the same thing AND hashes device IDs, and it landed on master first.
+--
+-- The old body was written against the pre-hashing check_in(), which stores the
+-- raw device ID. Because this filename sorts after 20261102050000, applying the
+-- migrations in order would have replaced the hashing check_in() with that one:
+-- every stored binding is a SHA-256 hash, every incoming ID would be raw, and
+-- every student would be told "This is not your registered device".
+--
+-- If an older copy of this file was already applied BEFORE 20261102050000,
+-- nothing needs undoing: applying 20261102050000 redefines check_in() correctly.
+-- If it was applied AFTER 20261102050000, re-run the check_in() definition from
+-- 20261102050000_attendance_privacy.sql to restore hashing.
+--
+-- The file is kept, not deleted, so the migration numbering and history stay
+-- intact.
+
+NOTIFY pgrst, 'reload schema';

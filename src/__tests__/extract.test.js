@@ -38,6 +38,8 @@ let rpc;
 let download;
 let storageFrom;
 let ownedObject;
+let ownedRows;
+let removeObject;
 
 function request(overrides = {}) {
   ip += 1;
@@ -83,10 +85,15 @@ beforeEach(() => {
     ? { data: [{ allowed: true, remaining: 19, reset_at: new Date(Date.now() + 600_000).toISOString() }], error: null }
     : { data: [ownedObject], error: null });
   download = vi.fn(async () => ({ data: bytes('Real downloaded text'), error: null }));
-  storageFrom = vi.fn(() => ({ download }));
+  ownedRows = [];
+  removeObject = vi.fn(async () => ({ error: null }));
+  storageFrom = vi.fn(() => ({ download, remove: removeObject }));
   mocks.getStudent.mockResolvedValue({ user: { id: 'verified-user' }, db: { from: profile, rpc } });
   mocks.configured.mockReturnValue(true);
-  mocks.serviceClient.mockReturnValue({ from: vi.fn(() => ({ insert })), storage: { from: storageFrom } });
+  mocks.serviceClient.mockReturnValue({
+    from: vi.fn(() => ({ insert, select: () => ({ eq: async () => ({ data: ownedRows, error: null }) }) })),
+    storage: { from: storageFrom },
+  });
   mocks.findCourse.mockReturnValue({ code: 'DSC 111', slug: 'known-course', materialsDepartment: 'general' });
   mocks.pdfParse.mockResolvedValue({ text: 'PDF text' });
   mocks.mammothExtract.mockResolvedValue({ value: 'Word text' });
@@ -102,6 +109,40 @@ afterEach(() => {
 });
 
 describe('POST /api/extract', () => {
+  it('rejects a student over the 30-file quota and removes the fresh object', async () => {
+    ownedRows = Array.from({ length: 30 }, () => ({ file_size: 100 }));
+    const req = request();
+    const res = await call(req);
+    expect(res.statusCode).toBe(413);
+    expect(res.body.error).toMatch(/30 files or 150 MB/);
+    expect(removeObject).toHaveBeenCalledWith([req.body.filePath]);
+    expect(download).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+  it('rejects a student whose stored bytes would pass 150 MB, using the database size', async () => {
+    ownedRows = [{ file_size: 150 * 1024 * 1024 - 1000 }];
+    const res = await call();
+    expect(res.statusCode).toBe(413);
+    expect(insert).not.toHaveBeenCalled();
+  });
+  it('rejects an object over 20 MB by its stored size and removes it before downloading', async () => {
+    ownedObject = { ...ownedObject, size: 20 * 1024 * 1024 + 1 };
+    const req = request();
+    const res = await call(req);
+    expect(res.statusCode).toBe(413);
+    expect(res.body.error).toMatch(/20 MB/);
+    expect(removeObject).toHaveBeenCalledWith([req.body.filePath]);
+    expect(download).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+  it('fails closed when the quota lookup errors', async () => {
+    mocks.serviceClient.mockReturnValue({
+      from: vi.fn(() => ({ insert, select: () => ({ eq: async () => ({ data: null, error: { message: 'down' } }) }) })),
+      storage: { from: storageFrom },
+    });
+    expect((await call()).statusCode).toBe(503);
+    expect(insert).not.toHaveBeenCalled();
+  });
   it('sets CORS and cache headers for OPTIONS, then ends without authentication', async () => {
     const res = await call(request({ method: 'OPTIONS' }));
     expect(res.statusCode).toBe(200);

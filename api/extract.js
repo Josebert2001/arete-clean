@@ -38,6 +38,7 @@ import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, den
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { serviceRoleClient, serviceRoleConfigured } from './_lib/serviceRole.js';
 import { findCourseBySlug } from './_lib/courseData.js';
+import { MATERIAL_QUOTA } from '../src/utils/materialQuota.js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const BUCKET = 'course-materials';
@@ -65,6 +66,7 @@ const ALLOWED_EXT = new Set([
 // The path timestamp limits future skew; actual age comes from storage.objects.
 const FILE_PATH_RE = /^([^/]+)\/(\d+)-[a-z0-9]+\.([a-z0-9]+)$/i;
 const MAX_UPLOAD_AGE_MS = 10 * 60 * 1000;
+const MAX_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_FUTURE_SKEW_MS = 2 * 60 * 1000;
 
 const MAX_DISPLAY_NAME = 200;
@@ -204,6 +206,34 @@ export default async function handler(req, res) {
 
   const db = serviceRoleClient();
 
+  // The byte length comes from storage's own metadata for the owned object —
+  // a caller-controlled fileSize must never decide the size cap or the quota.
+  const storedSize = ownedObject.size;
+  const size = (typeof storedSize === 'number' || typeof storedSize === 'string')
+    && storedSize !== '' && Number.isSafeInteger(Number(storedSize)) && Number(storedSize) >= 0
+    ? Number(storedSize) : null;
+  if (size !== null && size > MAX_FILE_BYTES) {
+    const { error: removeError } = await db.storage.from(BUCKET).remove([filePath]);
+    if (removeError) console.error('extract: oversized object cleanup failed:', removeError);
+    return res.status(413).json({ error: 'File is too large. Maximum is 20 MB.' });
+  }
+
+  // Per-student quota, checked before any download so a student at the cap
+  // costs no extraction work. The rejected object is the caller's own (proven
+  // above), so removing it cannot touch anyone else's file.
+  const { data: owned, error: quotaError } = await db.from('course_materials')
+    .select('file_size').eq('uploaded_by', student.user.id);
+  if (quotaError) {
+    console.error('extract: quota lookup failed:', quotaError);
+    return res.status(503).json({ error: 'Could not check your upload quota. Please try again.' });
+  }
+  const usedBytes = (owned ?? []).reduce((sum, row) => sum + (Number(row.file_size) || 0), 0);
+  if ((owned ?? []).length >= MATERIAL_QUOTA.maxFiles || usedBytes + (size || 0) > MATERIAL_QUOTA.maxBytes) {
+    const { error: removeError } = await db.storage.from(BUCKET).remove([filePath]);
+    if (removeError) console.error('extract: quota-rejected object cleanup failed:', removeError);
+    return res.status(413).json({ error: `Upload quota reached: ${MATERIAL_QUOTA.maxFiles} files or 150 MB per student. Remove an older file before uploading again.` });
+  }
+
   // Extraction is best-effort: ownership is already proven above, so a storage
   // hiccup, a corrupt PDF or an unreadable .docx must still leave the student
   // with a material row pointing at their file, just without tutor text. Only
@@ -240,10 +270,6 @@ export default async function handler(req, res) {
 
   const name = cleanLabel(displayName, MAX_DISPLAY_NAME) || `Material.${pathExt}`;
   const desc = cleanLabel(description, MAX_DESCRIPTION) || null;
-  const storedSize = ownedObject.size;
-  const size = (typeof storedSize === 'number' || typeof storedSize === 'string')
-    && storedSize !== '' && Number.isSafeInteger(Number(storedSize)) && Number(storedSize) >= 0
-    ? Number(storedSize) : null;
 
   let rechecked;
   try {

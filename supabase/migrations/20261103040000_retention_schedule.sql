@@ -1,0 +1,28 @@
+-- Proposed retention defaults awaiting owner sign-off. This migration installs
+-- nothing that deletes data; uncomment/schedule only after approval. It is
+-- idempotent as written and ends with the standard schema notification.
+--
+-- Suggested daily job (run manually in the Supabase SQL editor after sign-off):
+-- CREATE OR REPLACE FUNCTION public.apply_arete_retention()
+-- RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+-- SET search_path = public, pg_temp AS $$
+-- BEGIN
+--   DELETE FROM rate_limits WHERE reset_at < now() - interval '7 days';
+--   DELETE FROM feedback WHERE created_at < now() - interval '2 years';
+--   DELETE FROM material_reports
+--     WHERE resolved_at IS NOT NULL AND resolved_at < now() - interval '1 year';
+--   -- course_offerings deletion cascades through sessions, attendance and
+--   -- offering_students rosters. The ending year in academic_session is the
+--   -- anchor, e.g. 2026/2027 expires after the end of 2029.
+--   DELETE FROM course_offerings
+--     WHERE academic_session ~ '^[0-9]{4}/[0-9]{4}$'
+--       AND to_date(split_part(academic_session, '/', 2) || '-12-31', 'YYYY-MM-DD')
+--           < current_date - interval '2 years';
+-- END;
+-- $$;
+-- REVOKE ALL ON FUNCTION public.apply_arete_retention() FROM PUBLIC, anon, authenticated;
+-- Schedule this function with Supabase cron only after review.
+-- Inactive accounts at 3 years: notify the owner/user, then handle deletion
+-- manually. Automated deletion is intentionally excluded.
+
+NOTIFY pgrst, 'reload schema';

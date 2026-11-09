@@ -3,10 +3,11 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
 import ProfileForm from '../components/ProfileForm';
+import { hasSecurityEntry, clearSecurityEntry } from '../utils/learningEntry';
 
 export default function SetupProfile() {
   usePageTitle('Set Up Profile');
-  const { user, profileComplete, authLoading, profileLoading, refreshProfile } = useAuth();
+  const { user, profileComplete, authLoading, profileLoading, refreshProfile, learningModeAvailable } = useAuth();
   const navigate = useNavigate();
 
   if (!authLoading && !user)                              return <Navigate to="/signin" replace />;
@@ -21,6 +22,7 @@ export default function SetupProfile() {
     });
     if (error) return error.message ?? 'Could not save your profile. Please try again.';
     await refreshProfile();
+    clearSecurityEntry();
     navigate('/welcome', { replace: true });
   };
 
@@ -36,12 +38,13 @@ export default function SetupProfile() {
           </span>
           <h1 className="font-display text-3xl font-bold text-ink mb-3">One last step.</h1>
           <p className="text-coffee-700 leading-relaxed">
-            Set up your profile so Areté knows who you are.
-            This links your progress and uploads to your department record.
+            Choose how you want to learn. Your account keeps your progress together across devices.
           </p>
         </div>
 
         <ProfileForm
+          defaultMode={hasSecurityEntry() ? 'independent' : 'university'}
+          allowIndependent={learningModeAvailable}
           submitLabel="Set up my profile"
           savingLabel="Setting up…"
           onSave={save}

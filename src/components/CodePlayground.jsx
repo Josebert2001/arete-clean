@@ -67,6 +67,11 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
       if (data.notConfigured) {
         setOutput(data.output);
         setKind('not_configured');
+      } else if (data.quotaExceeded || data.kind === 'fair_use') {
+        // This student's daily runs are spent — the shared JDoodle credits
+        // are not, so the credits counter is left alone.
+        setOutput(data.error);
+        setKind('limit');
       } else if (data.kind === 'limit' || data.responseStatus === 429) {
         setOutput(data.output || data.error || 'Daily run limit reached. Please try again later.');
         setKind('limit');

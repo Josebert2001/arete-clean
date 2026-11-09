@@ -6,6 +6,7 @@ import StudentDashboard from '../components/StudentDashboard';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
 import { useLevelGate } from '../components/useLevelGate';
 import { useAuth } from '../context/AuthContext';
+import IndependentLearningHome from '../components/IndependentLearningHome';
 
 // All four years, described by what every University of Uyo science programme
 // shares at that stage — not by one department's syllabus. This is the first
@@ -92,7 +93,7 @@ function OnboardingBanner() {
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user, authEnabled, authLoading } = useAuth();
+  const { user, profile, authEnabled, authLoading } = useAuth();
   // Picking a level here routes through the same sign-in prompt as the
   // Course Hub; signed-in students go straight to the year.
   const { gateLevel, requestLevel, gateSignIn, closeGate } =
@@ -105,12 +106,14 @@ export default function Home() {
   // Signed-in students get their daily dashboard, not the marketing page.
   // Wait out the session restore so the landing page never flashes first.
   if (authLoading) return null;
-  if (authEnabled && user) return <StudentDashboard />;
+  if (authEnabled && user) return profile?.learning_mode === 'independent'
+    ? <IndependentLearningHome profile={profile} /> : <StudentDashboard />;
 
   return (
     <div>
 
       <OnboardingBanner />
+      <div className="max-w-6xl mx-auto px-6 pt-6"><Link to="/cybersecurity" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rust/30 bg-paper p-4 text-sm text-ink"><span><strong>Explore cybersecurity</strong> · Guided security puzzles for learners everywhere.</span><span className="inline-flex items-center gap-2 font-semibold">Try a free exercise <ArrowRight size={15} /></span></Link></div>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">

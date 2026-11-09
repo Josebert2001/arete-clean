@@ -1,3 +1,6 @@
+import { gst121Quiz } from './lectureNotes/gst121Quiz.js';
+import { cyb211Quiz } from './lectureNotes/cyb211Quiz.js';
+import { cos121Quiz } from './lectureNotes/cos121Quiz.js';
 // B.Sc. Data Science — University of Uyo, Faculty of Computing.
 //
 // Course structure (codes, titles, units, LH/PH, level, semester) is transcribed
@@ -331,6 +334,7 @@ export const courses = [
   {
     code: 'GST 121',
     slug: 'gst-121',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-05' },
     title: 'Nigerian Peoples and Culture',
     units: 2, level: 100, semester: 2, lh: 15, ph: 45,
     subject: 'gst',
@@ -364,6 +368,8 @@ export const courses = [
       'Do not leave this course to the last week; it is easy marks that many students throw away',
     ],
     notesKey: 'gst121',
+    // Shared practice bank for both catalogues.
+    quiz: gst121Quiz,
     // Chapters 1–2 are the only ones transcribed so far. Chapter 1's item 8 is
     // `partial` rather than `covers`: the chapter's reorientation strategies are
     // the 3Rs, indigenization and the NYSC, not the MAMSER/WAI/EFCC/ICPC ones
@@ -379,6 +385,7 @@ export const courses = [
   {
     code: 'MTH 121',
     slug: 'mth-121',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-02' },
     title: 'General Mathematics II',
     units: 2, level: 100, semester: 2, lh: 30, ph: 0,
     subject: 'math',
@@ -462,6 +469,7 @@ export const courses = [
   {
     code: 'PHY 128',
     slug: 'phy-128',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-08' },
     title: 'General Practical Physics II',
     units: 1, level: 100, semester: 2, lh: 0, ph: 45,
     subject: 'phy',
@@ -511,6 +519,7 @@ export const courses = [
   {
     code: 'COS 121',
     slug: 'cos-121',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-01' },
     title: 'Problem Solving',
     units: 2, level: 100, semester: 2, lh: 30, ph: 45,
     subject: 'cs',
@@ -549,6 +558,8 @@ export const courses = [
       'Solve at least one small coding problem daily; consistency beats cramming for programming',
     ],
     notesKey: 'cos121',
+    // Shared practice bank for both catalogues.
+    quiz: cos121Quiz,
   },
   {
     code: 'UUY-DTS 121',
@@ -736,6 +747,7 @@ export const courses = [
   {
     code: 'COS 211',
     slug: 'cos-211',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-11-02' },
     title: 'Computer Programming I',
     units: 3, level: 200, semester: 1, lh: 30, ph: 45,
     subject: 'cs',
@@ -796,6 +808,7 @@ export const courses = [
   {
     code: 'CYB 211',
     slug: 'cyb-211',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-11-02' },
     title: 'Introduction to Cybersecurity and Strategy',
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'cyb',
@@ -806,6 +819,8 @@ export const courses = [
     // pool-agreement test in departments.test.js).
     sharedMaterials: true,
     notesKey: 'cyb211',
+    // Shared practice bank for both catalogues.
+    quiz: cyb211Quiz,
     // Indices are positions in THIS outline. Note 1 (law, regulation, national
     // policy, GDPR) reaches items 8 and 9; note 2 (cryptography, RSA) covers
     // item 5 except digital signatures, and the CIA goals of item 1.
@@ -954,6 +969,7 @@ export const courses = [
   {
     code: 'ENT 221',
     slug: 'ent-221',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-11-03' },
     title: 'Entrepreneurship and Innovation',
     units: 2, level: 200, semester: 2, lh: 30, ph: 0,
     subject: 'ent',
@@ -1091,6 +1107,7 @@ export const courses = [
   {
     code: 'COS 221',
     slug: 'cos-221',
+    contentReview: { owner: 'Areté editorial (student-built)', reviewed: '2026-08-22' },
     title: 'Computer Programming II',
     units: 3, level: 200, semester: 2, lh: 30, ph: 45,
     subject: 'cs',

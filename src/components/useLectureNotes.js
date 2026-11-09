@@ -14,8 +14,7 @@ const EMPTY = [];
 // existence a beat after the page settled would be worse than a badge that
 // fills in.
 //
-// Only the keyed case is asynchronous. Absent notes and the handful of courses
-// that still hold their notes inline are both resolved during render, so the
+// Absent notes resolve during render; keyed notes load asynchronously, so the
 // effect never sets state synchronously.
 //
 // Status is 'idle' (no notes), 'loading', 'ready' or 'error'. Handle 'error':
@@ -23,8 +22,7 @@ const EMPTY = [];
 // unexplained.
 export function useLectureNotes(course) {
   const key = course?.notesKey ?? null;
-  const inline = course?.lectureNotes?.length ? course.lectureNotes : null;
-  const hasNotes = Boolean(key) || Boolean(inline);
+  const hasNotes = Boolean(key);
 
   // Carries the key it was loaded for, so a switch to another course reads as
   // 'loading' immediately rather than briefly showing the previous course's
@@ -45,7 +43,6 @@ export function useLectureNotes(course) {
   }, [key]);
 
   if (!hasNotes) return { status: 'idle', notes: EMPTY, hasNotes: false };
-  if (!key) return { status: 'ready', notes: inline, hasNotes: true };
   if (loaded?.key !== key) return { status: 'loading', notes: EMPTY, hasNotes: true };
   if (loaded.error) return { status: 'error', notes: EMPTY, hasNotes: true };
   return { status: 'ready', notes: loaded.notes, hasNotes: true };

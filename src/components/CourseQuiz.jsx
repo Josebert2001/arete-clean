@@ -2,7 +2,10 @@ import { useMemo, useState } from 'react';
 import {
   GraduationCap, Play, Award, ArrowLeft, ListFilter, CheckCircle2, Circle,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Quiz from './Quiz';
+import UpgradePrompt from './UpgradePrompt';
+import { useUsageGate } from './useUsageGate';
 import { useProgress } from './useProgress';
 import { quizItemId, REVIEW_STORAGE_KEY } from '../utils/reviewSchedule';
 
@@ -33,6 +36,9 @@ export default function CourseQuiz({ course }) {
   // that this page and the Planner both read.
   const { recordReviews } = useProgress(REVIEW_STORAGE_KEY);
   const last = progress.quizScores?.[course.slug];
+  // Free tier: a few quiz starts a day across all courses (data/plans.js).
+  // Inert for Premium and whenever billing is off.
+  const gate = useUsageGate('quiz');
 
   // null = on the length picker; otherwise the sampled question set in play.
   const [questions, setQuestions] = useState(null);
@@ -100,6 +106,7 @@ export default function CourseQuiz({ course }) {
     // question unconditionally, so handing it an empty set crashes rather
     // than showing nothing.
     if (pool.length === 0) return;
+    if (!gate.consume()) return;
     const n = Math.max(1, Math.min(count, pool.length));
     setQuestions(sample(pool, n));
     setAttempt((a) => a + 1);
@@ -220,6 +227,17 @@ export default function CourseQuiz({ course }) {
         </div>
       )}
 
+      {gate.active && !gate.blocked && (
+        <p className="text-xs text-coffee-600 mb-4">
+          {gate.remaining} of {gate.limit} free quizzes left today ·{' '}
+          <Link to="/premium" className="underline underline-offset-2 hover:text-ink">Go unlimited</Link>
+        </p>
+      )}
+
+      {gate.blocked ? (
+        <UpgradePrompt feature="quiz" limit={gate.limit} />
+      ) : (
+      <>
       <p className="text-xs font-mono uppercase tracking-wider text-coffee-700 mb-3">
         Pick a length
       </p>
@@ -265,6 +283,8 @@ export default function CourseQuiz({ course }) {
         </div>
         {error && <p className="text-xs text-rust mt-2">{error}</p>}
       </div>
+      </>
+      )}
     </div>
   );
 }

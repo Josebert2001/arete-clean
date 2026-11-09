@@ -5,6 +5,7 @@ import AuthButton from './AuthButton';
 import InstallAppButton from './InstallAppButton';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../context/AuthContext';
+import { usePlan } from '../context/PlanContext';
 import { useLecturer } from './useLecturer';
 import { getDepartment } from '../data/departments';
 
@@ -18,7 +19,9 @@ import { getDepartment } from '../data/departments';
 // splitting. Only the department's NAME is needed here — no course data.
 function useTagline() {
   const { user, profile } = useAuth();
-  if (!user || !profile) return 'University of Uyo · Student Learning Platform';
+  const { pathname } = useLocation();
+  if (profile?.learning_mode === 'independent' || pathname === '/cybersecurity') return 'Cybersecurity · Coding · Learn at your pace';
+  if (!user || !profile) return 'Cybersecurity · Coding · University learning';
   const department = getDepartment(profile.department);
   if (department.status === 'foundation') {
     const own = profile.department_other?.trim();
@@ -39,8 +42,10 @@ export default function Navbar() {
   // guard is the RLS on every table plus the "Lecturers only" page gates, so
   // hiding a link is never the only thing standing between a student and
   // lecturer data.
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const independent = profile?.learning_mode === 'independent';
   const { isLecturer, role, repScope } = useLecturer();
+  const plan = usePlan();
 
   useEffect(() => {
     if (!open) return;
@@ -58,10 +63,13 @@ export default function Navbar() {
   // so the Code Lab item stays highlighted while browsing any of them.
   const baseLinks = [
     { to: '/', label: 'Home' },
+    { to: '/cybersecurity', label: 'Cybersecurity' },
     { to: '/courses', label: 'Courses' },
     { to: '/lab', label: 'Code Lab', also: ['/tracks', '/install', '/explainer', '/cheatsheet'] },
     { to: '/tutor', label: 'AI Tutor' },
-    { to: '/campus-map', label: 'Campus Places' },
+    ...(!independent ? [{ to: '/campus-map', label: 'Campus Places' }] : []),
+    ...(plan.status === 'ready' && plan.enabled === true && !plan.isPremium
+      ? [{ to: '/premium', label: 'Premium' }] : []),
   ];
 
   // Attendance links depend on the signed-in user's role:
@@ -81,7 +89,7 @@ export default function Navbar() {
           { to: '/register', label: 'Register' },
           ...(role === 'admin' ? [{ to: '/admin', label: 'Admin' }] : []),
         ]
-      : [
+      : independent ? [] : [
           { to: '/attendance', label: 'Check In' },
           { to: '/my-attendance', label: 'My Attendance' },
           ...(repScope?.active !== false && repScope ? [{ to: '/rep', label: 'Course Rep' }] : []),

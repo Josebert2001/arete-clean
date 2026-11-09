@@ -1,5 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { supabase, isConfigured } from '../lib/supabase';
+import {
+  BASE_PROFILE_COLUMNS, PROFILE_COLUMNS, LEARNING_MODE_COLUMN, isMissingColumnError,
+} from '../utils/profileSchema';
 
 // Default value, used only when a consumer renders outside AuthProvider. That
 // means no auth is in flight and nobody is signed in, so authLoading is false —
@@ -12,6 +15,7 @@ const AuthContext = createContext({
   authLoading: false,
   profileLoading: false,
   profileComplete: false,
+  learningModeAvailable: true,
   authEnabled: false,
   signInWithEmail: async () => {},
   signInWithGoogle: async () => {},
@@ -48,6 +52,9 @@ export function AuthProvider({ children }) {
   // synchronous setState in the effect below.
   const [authLoading, setAuthLoading]     = useState(Boolean(supabase));
   const [profileLoading, setProfileLoading] = useState(false);
+  // False once a profile fetch shows `profiles.learning_mode` is missing (its
+  // migration not applied yet) — the profile form then hides independent mode.
+  const [learningModeAvailable, setLearningModeAvailable] = useState(true);
   // Whose session is currently applied. Compared against every incoming auth
   // event so a re-announcement of the same student is ignored — see the
   // applySession comment below.
@@ -56,11 +63,21 @@ export function AuthProvider({ children }) {
   const loadProfile = useCallback(async (u) => {
     if (!u || !supabase) { setProfile(null); setProfileLoading(false); return; }
     setProfileLoading(true);
-    const { data, error } = await supabase
+    const fetchProfile = (columns) => supabase
       .from('profiles')
-      .select('id, full_name, reg_number, level, department, department_other, selected_courses, created_at')
+      .select(columns)
       .eq('id', u.id)
       .maybeSingle();
+    let { data, error } = await fetchProfile(PROFILE_COLUMNS);
+    // The independent-learners migration not applied yet: read the columns
+    // that do exist and switch independent signup off, so the app behaves as
+    // it did before that migration instead of failing every profile fetch.
+    if (isMissingColumnError(error, LEARNING_MODE_COLUMN)) {
+      setLearningModeAvailable(false);
+      ({ data, error } = await fetchProfile(BASE_PROFILE_COLUMNS));
+    } else if (!error) {
+      setLearningModeAvailable(true);
+    }
     if (error) {
       // A failed fetch (e.g. offline, reopening the installed PWA with no
       // connectivity) looks identical to "no row" unless we check `error`
@@ -128,12 +145,12 @@ export function AuthProvider({ children }) {
   // automatically (detectSessionInUrl). shouldCreateUser registers first-time
   // students. Note: PKCE ties the link to the browser that requested it, so it
   // must be opened on the same device.
-  const signInWithEmail = (email) =>
+  const signInWithEmail = (email, securityEntry = false) =>
     supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/signin`,
+        emailRedirectTo: `${window.location.origin}/signin${securityEntry ? '?learn=cybersecurity' : ''}`,
       },
     });
 
@@ -141,10 +158,10 @@ export function AuthProvider({ children }) {
   // /auth/v1/callback, then here to /signin — whose route guards forward a
   // returning user to /setup-profile (new) or / (existing profile). The
   // redirect target must be in the Supabase Auth "Redirect URLs" allow-list.
-  const signInWithGoogle = () =>
+  const signInWithGoogle = (securityEntry = false) =>
     supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/signin` },
+      options: { redirectTo: `${window.location.origin}/signin${securityEntry ? '?learn=cybersecurity' : ''}` },
     });
 
   const signOut = () => supabase.auth.signOut();
@@ -158,6 +175,7 @@ export function AuthProvider({ children }) {
       authLoading,
       profileLoading,
       profileComplete: !!profile,
+      learningModeAvailable,
       authEnabled: isConfigured,
       signInWithEmail,
       signInWithGoogle,

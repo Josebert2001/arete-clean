@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import Admin from '../pages/Admin';
 
 const mocks = vi.hoisted(() => ({
@@ -29,6 +29,9 @@ const mocks = vi.hoisted(() => ({
     removalRequests: [],
     removalListError: null,
     reps: [],
+    billingSummary: null,
+    billingError: null,
+    billingReject: false,
   },
 }));
 
@@ -55,6 +58,10 @@ vi.mock('../lib/supabase', () => ({
     from: () => query(),
     rpc: async (name, args) => {
       mocks.state.rpcCalls.push({ name, args });
+      if (name === 'admin_billing_summary') {
+        if (mocks.state.billingReject) throw new Error('Network unavailable');
+        return { data: mocks.state.billingSummary, error: mocks.state.billingError };
+      }
       if (name === 'admin_list_staff') return { data: mocks.state.staff, error: null };
       if (name === 'admin_find_users') return { data: mocks.state.found, error: null };
       if (name === 'admin_set_role') return { data: [{ ok: true, message: 'Now a lecturer.' }], error: null };
@@ -79,6 +86,18 @@ beforeEach(() => {
   mocks.state.removalListError = null;
   mocks.state.reps = [];
   mocks.state.invites[0].is_reinstatement = false;
+  mocks.state.billingError = null;
+  mocks.state.billingReject = false;
+  mocks.state.billingSummary = {
+    payments: {
+      counts: { success: 4, pending: 2, refunded: 1 },
+      revenue_kobo: 1000000, revenue_30d_kobo: 750000,
+      monthly: [{ month: '2026-10', revenue_kobo: 250000 }, { month: '2026-11', revenue_kobo: 750000 }],
+    },
+    passes: { active: 3, expiring_14d: 1 },
+    usage: { signups_7d: 12, signups_30d: 45, weekly_active: 20, daily_students: { 'daily:tutor': 8, 'daily:run': 6 } },
+    conversion: 0.15,
+  };
 });
 
 describe('Admin page', () => {
@@ -92,6 +111,57 @@ describe('Admin page', () => {
   it('lists current staff', async () => {
     render(<Admin />);
     expect(await screen.findByText('Dr Ada')).toBeInTheDocument();
+  });
+
+  it('renders aggregate payments, passes and usage', async () => {
+    render(<Admin />);
+    const panel = within(screen.getByRole('heading', { name: 'Premium and usage' }).closest('section'));
+    expect(await panel.findByText('₦10,000')).toBeInTheDocument();
+    for (const [label, value] of [
+      ['Successful revenue · last 30 days', '₦7,500'],
+      ['Active passes', '3'], ['Passes expiring · next 14 days', '1'],
+      ['Signups · last 7 days', '12'], ['Signups · last 30 days', '45'],
+      ['Weekly active students', '20'], ['Active passes / weekly active', '15%'],
+    ]) {
+      expect(within(panel.getByText(label).parentElement).getByText(value)).toBeInTheDocument();
+    }
+    expect(panel.getByText('success: 4')).toBeInTheDocument();
+    expect(panel.getByText('pending: 2')).toBeInTheDocument();
+    expect(panel.getByText('refunded: 1')).toBeInTheDocument();
+    expect(panel.getByRole('row', { name: '2026-10 ₦2,500' })).toBeInTheDocument();
+    expect(panel.getByRole('row', { name: '2026-11 ₦7,500' })).toBeInTheDocument();
+    expect(panel.getByText('AI Tutor messages: 8')).toBeInTheDocument();
+    expect(panel.getByText('code runs: 6')).toBeInTheDocument();
+    expect(mocks.state.rpcCalls).toContainEqual({ name: 'admin_billing_summary', args: undefined });
+  });
+
+  it('shows no conversion when there are no weekly active students', async () => {
+    mocks.state.billingSummary.usage.weekly_active = 0;
+    mocks.state.billingSummary.conversion = null;
+    render(<Admin />);
+    expect(await screen.findByText('—')).toBeInTheDocument();
+  });
+
+  it.each([
+    { code: 'PGRST202' },
+    { message: 'Could not find the function public.admin_billing_summary in the schema cache' },
+  ])('shows the migration note for a missing summary RPC: %j', async (error) => {
+    mocks.state.billingError = error;
+    render(<Admin />);
+    expect(await screen.findByText('Apply migration 20261108030000 to see payments.')).toBeInTheDocument();
+    expect(screen.getByText('Dr Ada')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Courses' })).toBeInTheDocument();
+  });
+
+  it.each([false, true])('keeps other sections working when billing fails (rejected promise: %s)', async (reject) => {
+    mocks.state.billingError = { code: '42501', message: 'Permission denied' };
+    mocks.state.billingReject = reject;
+    render(<Admin />);
+    expect(await screen.findByText('Could not load payments and usage. Please reload the page.')).toBeInTheDocument();
+    expect(screen.getByText('Dr Ada')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Invite log' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create course' })).toBeEnabled();
+    expect(screen.getByText('Lecturer via rep invite')).toBeInTheDocument();
   });
 
   it('keeps the threshold field for admin offering creation', async () => {
