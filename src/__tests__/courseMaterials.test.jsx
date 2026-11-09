@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CourseMaterials from '../components/CourseMaterials';
 
-const mocks = vi.hoisted(() => ({ requests: [], deletes: [], uploads: [], removedPaths: [], reports: [], reportingAvailable: true, holdUploads: false }));
+const mocks = vi.hoisted(() => ({ requests: [], deletes: [], uploads: [], removedPaths: [], reports: [], reportingAvailable: true, holdUploads: false, sign: null }));
 
 vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'student' } }) }));
 vi.mock('../lib/supabase', () => ({
@@ -29,6 +29,7 @@ vi.mock('../lib/supabase', () => ({
     },
     storage: { from: () => ({
       getPublicUrl: path => ({ data: { publicUrl: `/materials/${path}` } }),
+      createSignedUrls: (paths, ttl) => mocks.sign(paths, ttl),
       remove: async paths => { mocks.removedPaths.push(paths); return { error: null }; },
       upload: () => mocks.holdUploads
         ? new Promise(resolve => mocks.uploads.push(resolve))
@@ -52,6 +53,8 @@ beforeEach(() => {
   mocks.reports.length = 0;
   mocks.reportingAvailable = true;
   mocks.holdUploads = false;
+  // Default: signing refused, as on a database without the private-bucket migration.
+  mocks.sign = vi.fn(async () => ({ data: null, error: new Error('not allowed') }));
   vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({}) })));
 });
 afterEach(() => vi.unstubAllGlobals());
@@ -68,6 +71,20 @@ describe('CourseMaterials loads', () => {
     await waitFor(() => expect(screen.getByText('Quota reached.')).toBeInTheDocument());
     expect(mocks.removedPaths).toHaveLength(1);
     expect(mocks.removedPaths[0][0]).toMatch(/^csc-101\//);
+  });
+  it('opens a material through a signed link, and falls back to the public URL when signing is refused', async () => {
+    mocks.sign = vi.fn(async paths => ({
+      data: paths.map(path => (path === '2.pdf'
+        ? { path, signedUrl: `/signed/${path}?token=t`, error: null }
+        : { path, signedUrl: null, error: 'Object not found' })),
+      error: null,
+    }));
+    render(<CourseMaterials {...props} />);
+    await waitFor(() => expect(mocks.requests).toHaveLength(1));
+    await act(async () => mocks.requests[0]({ data: [material(2, 'Peer.pdf'), material(3, 'Other.pdf')], error: null }));
+    await waitFor(() => expect(screen.getByText('Peer.pdf').closest('a')).toHaveAttribute('href', '/signed/2.pdf?token=t'));
+    expect(mocks.sign).toHaveBeenCalledWith(['2.pdf', '3.pdf'], 6 * 60 * 60);
+    expect(screen.getByText('Other.pdf').closest('a')).toHaveAttribute('href', '/materials/3.pdf');
   });
   it('labels uploads and lets a student report someone else’s file', async () => {
     render(<CourseMaterials {...props} />);
