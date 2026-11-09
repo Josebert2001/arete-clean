@@ -3,7 +3,7 @@
 //
 //  Every metered endpoint calls denyIfOverDailyQuota() right after its existing
 //  per-10-minute limit. That short limit bounds abuse for everyone; this is the
-//  free-tier allowance that Premium lifts.
+//  free-tier allowance and the higher Premium fair-use allowance.
 //
 //  Built on consume_rate_limit() (migration 20260827000000) with a 24-hour
 //  window and a `daily:<feature>` namespace, so it is per-student, held in
@@ -20,7 +20,7 @@
 //  a free one, and charging a paying student's quota is the worse mistake.
 // ============================================================================
 
-import { FREE_DAILY_LIMITS, FEATURE_LABELS, DAY_MS } from '../../src/data/plans.js';
+import { FREE_DAILY_LIMITS, PREMIUM_DAILY_LIMITS, FEATURE_LABELS, DAY_MS } from '../../src/data/plans.js';
 import { paystackConfigured } from './paystack.js';
 import { serviceRoleConfigured } from './serviceRole.js';
 import { enforceUserRateLimit, logRequest } from './request-policy.js';
@@ -54,20 +54,30 @@ export async function getPlan(student) {
   }
 }
 
+function aboutHours(retryAfterSeconds) {
+  const hours = Math.max(1, Math.ceil((Number(retryAfterSeconds) || 0) / 3600));
+  return `about ${hours} hour${hours === 1 ? '' : 's'}`;
+}
+
 export function quotaMessage(feature, limit, retryAfterSeconds) {
   const label = FEATURE_LABELS[feature] || 'free uses';
-  const hours = Math.max(1, Math.ceil((Number(retryAfterSeconds) || 0) / 3600));
-  return `You've used today's ${limit} free ${label}. Your allowance refills in about ${hours} hour${hours === 1 ? '' : 's'} — or get Premium for unlimited use.`;
+  return `You've used today's ${limit} free ${label}. Your allowance refills in ${aboutHours(retryAfterSeconds)} — or get Premium for higher daily allowances.`;
+}
+
+export function fairUseMessage(feature, limit, retryAfterSeconds) {
+  const label = FEATURE_LABELS[feature] || 'uses';
+  return `You've reached today's fair-use limit of ${limit} ${label}. It resets in ${aboutHours(retryAfterSeconds)}.`;
 }
 
 // Returns true when the handler should stop (it has already written the 429).
 // Call as `if (await denyIfOverDailyQuota(req, res, student, 'tutor')) return;`
 export async function denyIfOverDailyQuota(req, res, student, feature) {
-  const limit = FREE_DAILY_LIMITS[feature];
-  if (!limit || !billingEnabled()) return false;
+  if (!FREE_DAILY_LIMITS[feature] || !billingEnabled()) return false;
 
   const plan = await getPlan(student);
-  if (plan.premium || plan.unknown) return false;
+  if (plan.unknown) return false;
+  const limit = (plan.premium ? PREMIUM_DAILY_LIMITS : FREE_DAILY_LIMITS)[feature];
+  if (!limit) return false;
 
   const verdict = await enforceUserRateLimit(student, {
     namespace: `daily:${feature}`,
@@ -80,14 +90,16 @@ export async function denyIfOverDailyQuota(req, res, student, feature) {
   res.setHeader('X-Quota-Remaining', String(verdict.remaining));
   if (verdict.allowed) return false;
 
-  logRequest(req, feature, { denied: 'daily_quota' });
+  logRequest(req, feature, { denied: plan.premium ? 'fair_use' : 'daily_quota' });
   res.setHeader('Retry-After', String(verdict.retryAfterSeconds));
   res.status(429).json({
-    error: quotaMessage(feature, limit, verdict.retryAfterSeconds),
-    kind: 'quota_exceeded',
+    error: plan.premium
+      ? fairUseMessage(feature, limit, verdict.retryAfterSeconds)
+      : quotaMessage(feature, limit, verdict.retryAfterSeconds),
+    kind: plan.premium ? 'fair_use' : 'quota_exceeded',
     feature,
     limit,
-    upgradePath: '/premium',
+    ...(!plan.premium ? { upgradePath: '/premium' } : {}),
   });
   return true;
 }

@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import { buildGoogleEventResource } from '../../api/_lib/googleEvents.js';
 
 const mocks = vi.hoisted(() => ({
   student: vi.fn(), ipLimit: vi.fn(), userLimit: vi.fn(), capture: vi.fn(), log: vi.fn(),
@@ -28,6 +29,17 @@ vi.mock('../../api/_lib/request-policy.js', () => ({
 let connect, callback, status, disconnect, sync, auth;
 const EVENT = { title: 'Study', byday: 'MO', start: '09:00', end: '10:00', firstDate: '2026-11-02', untilDate: '2026-12-02' };
 const CALENDAR_DESCRIPTION = 'Created by Areté study planner. Re-syncing replaces this calendar.';
+
+describe('Google event calendar dates', () => {
+  it('keeps the Tuesday anchor and final day in every server timezone', () => {
+    // UTC midnight Tuesday is still Monday in New York. The first Monday on
+    // or after this calendar date is the 9th, never the 2nd.
+    const resource = buildGoogleEventResource({ ...EVENT, firstDate: '2026-11-03' });
+    expect(resource.start.dateTime).toBe('2026-11-09T09:00:00');
+    expect(resource.end.dateTime).toBe('2026-11-09T10:00:00');
+    expect(resource.recurrence).toEqual(['RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261202T225900Z']);
+  });
+});
 
 function response() {
   return {

@@ -1,3 +1,8 @@
+import { gst121Quiz } from './lectureNotes/gst121Quiz.js';
+import { cyb213Quiz } from './lectureNotes/cyb213Quiz.js';
+import { cyb211Quiz } from './lectureNotes/cyb211Quiz.js';
+import { sen211Quiz } from './lectureNotes/sen211Quiz.js';
+import { cos121Quiz } from './lectureNotes/cos121Quiz.js';
 import { cyb224Quiz } from './lectureNotes/cyb224Quiz.js';
 import { cyb222Quiz } from './lectureNotes/cyb222Quiz.js';
 import { uuyCyb222Quiz } from './lectureNotes/uuyCyb222Quiz.js';
@@ -346,6 +351,8 @@ export const courses = [
     // textbook (May 2024) — see src/data/lectureNotes/gst121.js for provenance
     // and the full 17-chapter table of contents.
     notesKey: 'gst121',
+    // Shared practice bank for both catalogues.
+    quiz: gst121Quiz,
     // Chapters 1–2 are the only ones transcribed so far. Chapter 1 fully covers
     // the 3Rs and national orientation strategies, and touches the Civil War
     // and the indigenization/self-reliance material; Chapter 2 fully covers the
@@ -397,6 +404,8 @@ export const courses = [
       'Harvard CS50P (Introduction to Programming with Python) is free and excellent',
     ],
     notesKey: 'cos121',
+    // Shared practice bank for both catalogues.
+    quiz: cos121Quiz,
   },
   {
     code: 'MTH 121',
@@ -789,6 +798,8 @@ export const courses = [
     // not one of the foundation courses every UniUyo programme takes.
     sharedMaterials: true,
     notesKey: 'cyb211',
+    // Shared practice bank for both catalogues.
+    quiz: cyb211Quiz,
     // Note 1 (law, regulation, national policy, GDPR) covers item 7 and reaches
     // into 8 (privacy, impact) and 9 (ISO/IEC 27001). Note 2 (cryptography,
     // RSA) covers the cryptography half of item 4 and the CIA/authentication/
@@ -834,6 +845,8 @@ export const courses = [
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'cyb',
     notesKey: 'cyb213',
+    // Practice drawn from the lecture notes.
+    quiz: cyb213Quiz,
     // Not transcribed yet: international jurisdiction (item 7's second half)
     // and cyber law in Europe, the Americas and Asia (item 8).
     noteCoverage: {
@@ -887,12 +900,25 @@ export const courses = [
     units: 2, level: 200, semester: 1, lh: 30, ph: 0,
     subject: 'sen',
     notesKey: 'sen211',
+    // Practice drawn from the lecture notes.
+    quiz: sen211Quiz,
     // Topic 1 covers outline item 1; topics 2–3 (SDLC, process models + CMMI)
-    // cover part of item 2 — process metrics are not transcribed yet.
+    // cover part of item 2 — process metrics are not transcribed yet. Topics
+    // 4–10 come from the typed course notes: requirements and design (item 3),
+    // testing and quality (item 4), evolution/maintenance/re-engineering
+    // (item 5 — reuse not covered), project and risk management (item 6) and
+    // quality assurance (item 7 — configuration management not covered).
+    // Topic 6 (programming environments, CASE tools) has no outline item.
     noteCoverage: {
       1: { covers: [1] },
       2: { partial: [2] },
       3: { partial: [2] },
+      4: { partial: [3] },
+      5: { partial: [3] },
+      7: { partial: [4] },
+      8: { partial: [5] },
+      9: { partial: [6] },
+      10: { partial: [4, 7] },
     },
     description: 'The principles and practices of building software systematically: software development lifecycle models, requirements engineering, system design, testing, and project management. Context for how secure software is planned and built.',
     topics: [

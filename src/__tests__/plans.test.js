@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PREMIUM_PASS, FREE_DAILY_LIMITS, FEATURE_LABELS, FREE_CTF_ROOMS, formatNaira, planComparison } from '../data/plans';
+import { PREMIUM_PASS, PREMIUM_DAILY_LIMITS, FREE_DAILY_LIMITS, FEATURE_LABELS, FREE_CTF_ROOMS, formatNaira, planComparison } from '../data/plans';
 import { usedToday, recordUse, todayKey } from '../utils/dailyUsage';
 import { isQuotaExceeded, announceQuotaExceeded, QUOTA_EVENT } from '../utils/quotaEvents';
 import { referenceFromSearch } from '../utils/billingApi';
@@ -16,6 +16,28 @@ describe('plans config', () => {
     for (const [feature, limit] of Object.entries(FREE_DAILY_LIMITS)) {
       expect(Number.isInteger(limit) && limit > 0, feature).toBe(true);
       expect(FEATURE_LABELS[feature], feature).toBeTruthy();
+    }
+  });
+
+  it('gives all six server-metered features a higher Premium fair-use allowance', () => {
+    const features = ['tutor', 'explainer', 'simplify', 'summarize', 'research', 'run'];
+    expect(Object.keys(PREMIUM_DAILY_LIMITS).sort()).toEqual(features.sort());
+    for (const feature of features) {
+      expect(Number.isInteger(PREMIUM_DAILY_LIMITS[feature]), feature).toBe(true);
+      expect(PREMIUM_DAILY_LIMITS[feature], feature).toBeGreaterThan(FREE_DAILY_LIMITS[feature]);
+    }
+  });
+
+  it('quotes the real Premium cap on every server-metered row, never "Unlimited"', () => {
+    const rows = Object.fromEntries(planComparison().map((r) => [r.feature, r.premium]));
+    const P = PREMIUM_DAILY_LIMITS;
+    const metered = { 'AI Tutor': [P.tutor], 'Live code explanations': [P.explainer], 'Simplify / Key points': [P.simplify, P.summarize], 'Explain-this web lookups': [P.research], 'Code playground runs': [P.run] };
+    for (const [feature, caps] of Object.entries(metered)) {
+      expect(rows[feature], feature).not.toMatch(/unlimited/i);
+      for (const cap of caps) expect(rows[feature], feature).toContain(String(cap));
+    }
+    for (const feature of ['Course outlines, lecture notes, flashcards', 'Pre-written code walkthroughs', 'Practice quizzes (MCQ)', 'Written exam prep']) {
+      expect(rows[feature], feature).toBe('Unlimited');
     }
   });
 

@@ -37,7 +37,7 @@ function PlanSection() {
     <section className="mt-10 rounded-xl border border-ember/40 bg-cream p-5">
       <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2"><Sparkles size={16} className="text-ember" /> Your plan</h2>
       {plan.isPremium ? (
-        <p className="mt-1 text-sm text-coffee-700">Premium until <span className="font-medium text-ink">{until}</span>. Every daily limit is lifted.</p>
+        <p className="mt-1 text-sm text-coffee-700">Premium until <span className="font-medium text-ink">{until}</span>. Higher daily AI allowances and unlimited quizzes and exam prep.</p>
       ) : (
         <p className="mt-1 text-sm text-coffee-700">Free plan — notes are unlimited; AI help, quizzes and exam prep have daily allowances. Premium is {formatNaira(plan.pass.priceKobo)} per semester.</p>
       )}

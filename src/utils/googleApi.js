@@ -37,6 +37,22 @@ export function disconnectGoogle() {
   return authedPost('/api/google/disconnect', {});
 }
 
+function localCalendarDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function syncPlanToGoogleCalendar(events, calendarName) {
-  return authedPost('/api/google/calendar-sync', { events, calendarName });
+  // Planner's Dates are local midnight. Send the calendar day before JSON can
+  // turn it into a UTC instant on the previous day in Lagos.
+  return authedPost('/api/google/calendar-sync', {
+    events: events.map(ev => ({
+      ...ev,
+      firstDate: localCalendarDate(ev.firstDate),
+      untilDate: localCalendarDate(ev.untilDate),
+    })),
+    calendarName,
+  });
 }

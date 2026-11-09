@@ -69,7 +69,7 @@ export const NOTE_TOPIC_COUNTS = {
   gst121: 2,
   mth121: 6,
   phy128: 4,
-  sen211: 3,
+  sen211: 10,
 };
 
 // Topic count for a course, synchronously. Keyed courses read the map above;

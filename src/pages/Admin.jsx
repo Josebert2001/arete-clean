@@ -6,6 +6,7 @@ import { useLecturer } from '../components/useLecturer';
 import { getDepartment } from '../data/departments';
 import NewOfferingForm from '../components/NewOfferingForm';
 import { rpcAction } from '../utils/rpcAction';
+import { FEATURE_LABELS, formatNaira } from '../data/plans';
 
 /**
  * Admin console for attendance: who is a lecturer, which course offerings
@@ -95,7 +96,85 @@ export default function Admin() {
       <InviteLog version={version} onChange={changed} />
       <AttendanceChanges />
       <ReportedMaterials />
+      <BillingSummary />
     </div>
+  );
+}
+
+function BillingSummary() {
+  const [summary, setSummary] = useState(null);
+  const [status, setStatus] = useState('loading');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase.rpc('admin_billing_summary');
+        if (error) throw error;
+        if (!data) throw new Error('No billing summary returned');
+        if (cancelled) return;
+        setSummary(data);
+        setStatus('ready');
+      } catch (err) {
+        if (cancelled) return;
+        // The frontend may deploy before this migration is applied by hand.
+        const missing = err.code === 'PGRST202' || err.code === '42883'
+          || /could not find the function/i.test(err.message || '');
+        setStatus(missing ? 'missing' : 'error');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const figures = summary ? [
+    ['Successful revenue · total', formatNaira(summary.payments.revenue_kobo)],
+    ['Successful revenue · last 30 days', formatNaira(summary.payments.revenue_30d_kobo)],
+    ['Active passes', summary.passes.active],
+    ['Passes expiring · next 14 days', summary.passes.expiring_14d],
+    ['Signups · last 7 days', summary.usage.signups_7d],
+    ['Signups · last 30 days', summary.usage.signups_30d],
+    ['Weekly active students', summary.usage.weekly_active],
+    ['Active passes / weekly active', summary.conversion == null ? '—'
+      : `${(summary.conversion * 100).toLocaleString('en-NG', { maximumFractionDigits: 1 })}%`],
+  ] : [];
+
+  return (
+    <section className="mt-10 rounded-2xl border border-coffee-200 bg-cream p-5 sm:p-6">
+      <h2 className="font-display text-xl font-bold text-ink">Premium and usage</h2>
+      {status === 'loading' && <Loader2 className="mt-4 h-5 w-5 animate-spin text-coffee-500" />}
+      {status === 'missing' && <p className="mt-2 text-sm text-coffee-700">Apply migration 20261108030000 to see payments.</p>}
+      {status === 'error' && <p className="mt-2 text-sm text-rust">Could not load payments and usage. Please reload the page.</p>}
+      {status === 'ready' && <>
+        <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+          {figures.map(([label, value]) => <div key={label}>
+            <dt className="text-xs text-coffee-600">{label}</dt>
+            <dd className="font-mono text-lg text-ink">{value}</dd>
+          </div>)}
+        </dl>
+        <p className="mt-3 text-xs text-coffee-600">Weekly active: students who synced progress in the last 7 days.</p>
+        <h3 className="mt-5 font-medium text-ink">Payments by status</h3>
+        <ul className="mt-2 text-sm text-coffee-700">
+          {Object.entries(summary.payments.counts).map(([paymentStatus, count]) =>
+            <li key={paymentStatus}>{paymentStatus}: {count}</li>)}
+          {Object.keys(summary.payments.counts).length === 0 && <li>No payments yet.</li>}
+        </ul>
+        <h3 className="mt-5 font-medium text-ink">Monthly revenue (UTC)</h3>
+        <table className="mt-2 w-full text-left text-sm text-coffee-700">
+          <thead><tr><th scope="col" className="py-1">Month</th><th scope="col">Successful revenue</th></tr></thead>
+          <tbody>{summary.payments.monthly.map(month => <tr key={month.month} className="border-t border-coffee-200">
+            <th scope="row" className="py-2 font-normal">{month.month}</th>
+            <td>{formatNaira(month.revenue_kobo)}</td>
+          </tr>)}</tbody>
+        </table>
+        <h3 className="mt-5 font-medium text-ink">Students who used each tool today</h3>
+        <p className="mt-1 text-xs text-coffee-600">Counted per open 24-hour window. These counters only run while payments are switched on.</p>
+        <ul className="mt-2 text-sm text-coffee-700">
+          {Object.entries(summary.usage.daily_students).map(([bucket, count]) =>
+            <li key={bucket}>{FEATURE_LABELS[bucket.replace(/^daily:/, '')] ?? bucket}: {count}</li>)}
+          {Object.keys(summary.usage.daily_students).length === 0 && <li>No open daily windows.</li>}
+        </ul>
+      </>}
+    </section>
   );
 }
 

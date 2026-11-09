@@ -81,10 +81,10 @@ export default function Terms() {
           on the <Link to="/premium" className="font-medium text-ink underline hover:text-ember">Premium page</Link>.
         </p>
         <p>
-          Premium is an optional one-time payment, processed by Paystack, that lifts those daily allowances for the
+          Premium is an optional one-time payment, processed by Paystack, that increases those daily allowances for the
           period shown at checkout. It does not renew automatically. Buying again while Premium adds a new period
           after the current one ends. Premium belongs to your account and cannot be transferred. Deleting your
-          account ends any remaining Premium time.
+          account ends any remaining Premium time. A refunded payment ends the Premium time it bought. Premium is subject to reasonable fair-use limits shown on the Premium page.
         </p>
         <p>
           If you were charged but Premium did not switch on, or you were charged twice for the same purchase,

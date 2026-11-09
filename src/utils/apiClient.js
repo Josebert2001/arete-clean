@@ -61,6 +61,7 @@ export async function fetchJsonWithFallback(url, options, fallbackError) {
     announceQuotaExceeded(data);
     return { ...data, responseStatus: 429, quotaExceeded: true };
   }
+  if (res.status === 429 && data.kind === 'fair_use') return { ...data, responseStatus: 429 };
   if (res.status === 429) return { ...data, error: rateLimitMessage(url, res.headers.get('Retry-After')), responseStatus: 429 };
   return { ...data, responseStatus: res.status };
 }

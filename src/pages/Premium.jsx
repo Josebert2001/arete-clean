@@ -55,6 +55,9 @@ export default function Premium() {
       if (outcome?.status === 'granted') {
         setResult({ state: 'granted', premiumUntil: outcome.premiumUntil, reference });
         refresh();
+      } else if (outcome?.status === 'refunded') {
+        setResult({ state: 'refunded', reference, message: 'This payment was refunded. Premium from this payment is not active.' });
+        refresh();
       } else if (outcome?.status === 'failed' || outcome?.status === 'abandoned') {
         setResult({ state: 'failed', reference, message: 'The payment was not completed, so you have not been charged. You can try again below.' });
       } else if (outcome?.status === 'pending' || !outcome?.status) {
@@ -97,11 +100,11 @@ export default function Premium() {
       <span className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-ember mb-3">
         <Sparkles size={14} /> Areté Premium
       </span>
-      <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-3">Study without the daily limits</h1>
+      <h1 className="display-heading text-3xl sm:text-4xl text-ink mb-3">More room to study with Premium</h1>
       <p className="text-coffee-700 leading-relaxed mb-8 max-w-2xl">
-        Lecture notes, outlines and flashcards stay free for everyone — always. Premium removes the
-        daily caps on the tools built around them: the AI Tutor, live explanations, practice quizzes,
-        written exam prep and every Security CTF room.
+        Lecture notes, outlines and flashcards stay free for everyone — always. Premium raises the
+        daily allowances for AI tools and code runs, with unlimited practice quizzes, written exam
+        prep and access to every Security CTF room.
       </p>
 
       {(result || reference) && (
@@ -179,9 +182,9 @@ export default function Premium() {
         </table>
       </div>
       <p className="text-xs text-coffee-500 mb-10">
+        Daily allowances on both plans refill every 24 hours.{' '}
         * Code runs go through a shared execution service with a daily budget for the whole platform.
-        Premium lifts your personal cap, but runs can still pause when that shared budget is used up.
-        Free allowances refill every 24 hours.
+        Runs can still pause when that shared budget is used up.
       </p>
 
       <h2 className="font-display text-xl font-bold text-ink mb-4">Questions</h2>
@@ -217,7 +220,7 @@ function PaymentResult({ result }) {
         <CheckCircle2 size={18} className="text-moss shrink-0 mt-0.5" />
         <div>
           <p className="font-semibold">Payment confirmed — you&apos;re Premium{result.premiumUntil ? ` until ${formatDate(result.premiumUntil)}` : ''}.</p>
-          <p className="text-coffee-700 mt-0.5">Every daily limit is lifted. <Link to="/courses" className="underline hover:text-ink">Back to your courses</Link></p>
+          <p className="text-coffee-700 mt-0.5">Your Premium allowances are active. <Link to="/courses" className="underline hover:text-ink">Back to your courses</Link></p>
         </div>
       </div>
     );

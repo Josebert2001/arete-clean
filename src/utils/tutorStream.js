@@ -62,6 +62,7 @@ export async function streamTutor({ messages, moduleContext, signal, onChunk, on
       announceQuotaExceeded(data);
       return { ...data, responseStatus: 429, quotaExceeded: true };
     }
+    if (res.status === 429 && data.kind === 'fair_use') return { ...data, responseStatus: 429 };
     if (res.status === 429) return { ...data, error: rateLimitMessage('tutor', res.headers.get('Retry-After')), responseStatus: 429 };
     return { ...data, responseStatus: res.status };
   }

@@ -1,11 +1,12 @@
 // ============================================================================
 //  Arete — Premium checkout and settlement (Vercel functions)
 //
-//  Two operations, shared by api/billing.js (the browser's calls) and
+//  Checkout, settlement and revocation, shared by api/billing.js (the browser's calls) and
 //  api/paystack-webhook.js (Paystack's server-to-server notice):
 //
 //    createCheckout(student)        → pending billing_payments row + Paystack URL
 //    settlePayment(reference, opts) → ask Paystack, and grant the pass if paid
+//    revokePayment(reference)       → verify reversal, then remove unused time
 //
 //  settlePayment is safe to call any number of times, from either path, in any
 //  order: grant_premium_pass() locks the payment row and a pass is UNIQUE on its
@@ -21,6 +22,7 @@ import crypto from 'node:crypto';
 import { PREMIUM_PASS } from '../../src/data/plans.js';
 import { SITE_URL } from '../../src/data/siteMeta.js';
 import { serviceRoleClient } from './serviceRole.js';
+import { captureApiError } from './sentry.js';
 import { initializeTransaction, verifyTransaction } from './paystack.js';
 
 // arete_ + 32 hex chars. Checked on every inbound reference so nothing else —
@@ -106,6 +108,8 @@ export async function settlePayment(reference, { expectedUserId } = {}) {
   if (!payment) return { status: 'unknown' };
   if (expectedUserId && payment.user_id !== expectedUserId) return { status: 'unknown' };
 
+  if (payment.status === 'refunded') return { status: 'refunded' };
+
   if (payment.status === 'success') {
     return { status: 'granted', premiumUntil: await passEnd(db, reference) };
   }
@@ -142,6 +146,31 @@ export async function settlePayment(reference, { expectedUserId } = {}) {
   if (grantError) throw new Error(`billing: grant_premium_pass failed: ${grantError.message}`);
 
   return { status: 'granted', premiumUntil: endsAt ?? await passEnd(db, reference) };
+}
+
+// A refund notice is only a trigger: the provider must confirm a full reversal.
+export async function revokePayment(reference) {
+  if (typeof reference !== 'string' || !REFERENCE_PATTERN.test(reference)) return { status: 'unknown' };
+  const db = serviceRoleClient();
+  if (!db) throw new Error('billing: service role is not configured');
+  const { data: payment, error: readError } = await db
+    .from('billing_payments')
+    .select('reference')
+    .eq('reference', reference)
+    .maybeSingle();
+  if (readError) throw new Error(`billing: could not read refund payment: ${readError.message}`);
+  if (!payment) return { status: 'unknown' };
+
+  const tx = await verifyTransaction(reference);
+  if (tx.status !== 'reversed' || tx.reference !== reference) {
+    const err = new Error('billing: refund needs manual review; transaction is not confirmed reversed');
+    console.error(err.message, { reference, providerStatus: tx.status, providerReference: tx.reference });
+    await captureApiError(err, { route: 'billing-refund', reference });
+    return { status: 'not_reversed' };
+  }
+  const { data, error } = await db.rpc('revoke_premium_pass', { p_reference: reference });
+  if (error) throw new Error(`billing: revoke_premium_pass failed: ${error.message}`);
+  return { status: data };
 }
 
 async function passEnd(db, reference) {
