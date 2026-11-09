@@ -27,8 +27,8 @@ export default function Terms() {
 
       <Section title="1. What Areté is">
         <p>
-          Areté is an independent, student-built academic companion for students across supported departments at the
-          University of Uyo — a curriculum browser, programming tracks, an AI tutor, and study tools. It is not an
+          Areté is an independent, student-built learning platform with cybersecurity puzzles and programming tracks
+          for learners everywhere, alongside curriculum resources and study tools for University of Uyo students. It is not an
           official University of Uyo service and isn't endorsed by the university's administration.
         </p>
       </Section>

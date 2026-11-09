@@ -3,6 +3,7 @@ import CoursePreview from '../components/CoursePreview';
 import CourseIndexPreview from '../components/CourseIndexPreview';
 import HomePreview from '../components/HomePreview';
 import InstallPreview from '../components/InstallPreview';
+import CybersecurityLanding, { CYBERSECURITY_TITLE, CYBERSECURITY_DESCRIPTION } from '../components/CybersecurityLanding';
 import { tracks, installHowToJsonLd } from '../data/installGuides';
 import { loadPublicNotes, glossaryJsonLd } from '../data/publicNotes';
 import {
@@ -42,6 +43,17 @@ import {
 export async function collectPages({ buildDate } = {}) {
   const entries = await loadPublicCourses();
   const pages = [];
+  pages.push({
+    path: '/cybersecurity',
+    title: CYBERSECURITY_TITLE,
+    description: CYBERSECURITY_DESCRIPTION,
+    canonical: `${SITE_URL}/cybersecurity`,
+    ogType: 'website',
+    changefreq: 'monthly',
+    priority: '0.9',
+    jsonLd: [],
+    html: renderToStaticMarkup(<CybersecurityLanding />),
+  });
 
   // "/" writes dist/index.html — the same file Vercel serves as the SPA
   // fallback for every non-prerendered route. That is fine and deliberate:

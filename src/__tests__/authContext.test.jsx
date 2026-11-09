@@ -5,7 +5,7 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 // Shared handle so the test can drive the mocked Supabase auth client: fire
 // arbitrary auth events and count how many times the profile row was fetched.
 const mocks = vi.hoisted(() => ({
-  state: { listener: null, profileSelects: 0, session: { user: { id: 'u1' } }, profileError: null },
+  state: { listener: null, profileSelects: 0, session: { user: { id: 'u1' } }, profileError: null, missingColumn: null },
 }));
 
 vi.mock('../lib/supabase', () => ({
@@ -20,10 +20,14 @@ vi.mock('../lib/supabase', () => ({
       },
     },
     from: () => ({
-      select: () => ({
+      select: (columns) => ({
         eq: () => ({
           maybeSingle: async () => {
             mocks.state.profileSelects += 1;
+            // Mirrors PostgREST: one unknown column fails the whole select.
+            if (mocks.state.missingColumn && columns.includes(mocks.state.missingColumn)) {
+              return { data: null, error: { code: '42703', message: `column profiles.${mocks.state.missingColumn} does not exist` } };
+            }
             if (mocks.state.profileError) return { data: null, error: mocks.state.profileError };
             return { data: { id: 'u1', full_name: 'Ada', department: 'cybersecurity' } };
           },
@@ -38,10 +42,11 @@ vi.mock('../lib/supabase', () => ({
 const renders = [];
 
 function Probe() {
-  const { user, profile, authLoading, profileLoading } = useAuth();
+  const { user, profile, authLoading, profileLoading, learningModeAvailable } = useAuth();
   renders.push({ user, profile, authLoading, profileLoading });
   return (
     <div>
+      <span data-testid="mode">{learningModeAvailable ? 'available' : 'unavailable'}</span>
       <span data-testid="uid">{user?.id ?? 'none'}</span>
       <span data-testid="name">{profile?.full_name ?? 'none'}</span>
     </div>
@@ -56,6 +61,7 @@ beforeEach(() => {
   mocks.state.profileSelects = 0;
   mocks.state.session = { user: { id: 'u1' } };
   mocks.state.profileError = null;
+  mocks.state.missingColumn = null;
   sessionStorage.clear();
   localStorage.clear();
 });
@@ -132,5 +138,24 @@ describe('AuthContext session handling', () => {
 
     await waitFor(() => expect(screen.getByTestId('uid')).toHaveTextContent('u1'));
     expect(screen.getByTestId('name')).toHaveTextContent('Ada');
+  });
+
+  // Deploy-order guard: the frontend shipped before the learning_mode
+  // migration was applied. Without the fallback every profile fetch failed, so
+  // every student without a cached profile was sent to setup — where saving
+  // failed too.
+  it('still loads the profile when the learning_mode column does not exist yet', async () => {
+    mocks.state.missingColumn = 'learning_mode';
+    renderProvider();
+    await waitFor(() => expect(screen.getByTestId('name')).toHaveTextContent('Ada'));
+    expect(screen.getByTestId('mode')).toHaveTextContent('unavailable');
+    expect(mocks.state.profileSelects).toBe(2);
+  });
+
+  it('reports independent mode as available once the column exists', async () => {
+    renderProvider();
+    await waitFor(() => expect(screen.getByTestId('name')).toHaveTextContent('Ada'));
+    expect(screen.getByTestId('mode')).toHaveTextContent('available');
+    expect(mocks.state.profileSelects).toBe(1);
   });
 });

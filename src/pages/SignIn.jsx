@@ -1,14 +1,15 @@
-import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Mail, ArrowLeft, CloudUpload, BookOpen, BrainCircuit, Shield, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
+import { rememberSecurityEntry, clearSecurityEntry, SECURITY_START } from '../utils/learningEntry';
 
 const VALUE_PROPS = [
   { icon: CloudUpload,   text: 'Progress syncs across all your devices automatically' },
-  { icon: BookOpen,      text: 'Upload and access course materials shared by your class' },
-  { icon: BrainCircuit,  text: 'AI Tutor calibrated to your University of Uyo curriculum' },
-  { icon: Shield,        text: '4 years of content — 100L to 400L — always with you' },
+  { icon: BookOpen,      text: 'Guided security rooms and Java, Python, and C tracks' },
+  { icon: BrainCircuit,  text: 'AI help with security concepts and programming questions' },
+  { icon: Shield,        text: 'Independent learning or a UniUyo curriculum — choose your path' },
 ];
 
 // Google's brand "G" — lucide has no brand icons, so inline the official mark.
@@ -25,14 +26,20 @@ function GoogleIcon({ size = 16 }) {
 
 export default function SignIn() {
   usePageTitle('Sign In');
+  const { search } = useLocation();
+  const securityEntry = new URLSearchParams(search).get('learn') === 'cybersecurity';
   const { user, profileComplete, profileLoading, authLoading, authEnabled, signInWithEmail, signInWithGoogle } = useAuth();
+  useEffect(() => {
+    if (user && profileComplete) clearSecurityEntry();
+    else rememberSecurityEntry(search);
+  }, [search, user, profileComplete]);
   const [email,  setEmail]  = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [resending,   setResending]   = useState(false);
   const [resendError, setResendError] = useState('');
   const [googleStatus, setGoogleStatus] = useState('idle'); // idle | redirecting | error
 
-  if (!authLoading && user && profileComplete) return <Navigate to="/" replace />;
+  if (!authLoading && user && profileComplete) return <Navigate to={securityEntry ? SECURITY_START : '/'} replace />;
   // Only route an incomplete-profile user to setup once their profile has
   // actually been fetched — otherwise a returning user whose profile is still
   // loading (e.g. right after a Google redirect) flashes through /setup-profile
@@ -72,14 +79,14 @@ export default function SignIn() {
     const trimmed = email.trim();
     if (!trimmed || status === 'sending') return;
     setStatus('sending');
-    const { error } = await signInWithEmail(trimmed);
+    const { error } = await signInWithEmail(trimmed, securityEntry);
     setStatus(error ? 'error' : 'sent');
   };
 
   const google = async () => {
     if (googleStatus === 'redirecting') return;
     setGoogleStatus('redirecting');
-    const { error } = await signInWithGoogle();
+    const { error } = await signInWithGoogle(securityEntry);
     // On success the browser navigates away to Google; we only land here on
     // failure (e.g. provider not enabled, network), so re-enable the button.
     if (error) setGoogleStatus('error');
@@ -89,7 +96,7 @@ export default function SignIn() {
     if (resending) return;
     setResending(true);
     setResendError('');
-    const { error } = await signInWithEmail(email.trim());
+    const { error } = await signInWithEmail(email.trim(), securityEntry);
     if (error) setResendError('Could not resend the link — try again in a moment.');
     setResending(false);
   };
@@ -104,12 +111,12 @@ export default function SignIn() {
             <img src="/arete.svg" alt="Areté logo" className="w-10 h-10 rounded-xl" />
             <div className="leading-tight">
               <div className="font-display text-xl font-bold text-cream">Areté</div>
-              <div className="text-xs text-coffee-400 tracking-wide">University of Uyo · Student Learning Platform</div>
+              <div className="text-xs text-coffee-400 tracking-wide">Cybersecurity · Coding · University learning</div>
             </div>
           </div>
 
           <p className="font-display text-4xl font-bold text-cream leading-tight mb-4">
-            The academic aid<br />built for<br />University of Uyo.
+            Build your knowledge.<br />Put it into practice.
           </p>
           <p className="text-coffee-400 leading-relaxed mb-12 max-w-xs">
             Sign in once. Your progress, materials, and AI tutor follow you everywhere.
@@ -128,7 +135,7 @@ export default function SignIn() {
         </div>
 
         <p className="text-xs text-coffee-400 mt-16">
-          University of Uyo · Student Learning Platform
+          Open to learners everywhere. No university email required.
         </p>
       </div>
 

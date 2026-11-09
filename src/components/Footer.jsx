@@ -13,7 +13,7 @@ export default function Footer() {
               <span className="font-display text-lg font-bold text-ink">Areté</span>
             </div>
             <p className="text-sm text-coffee-700 leading-relaxed">
-              Academic companion for University of Uyo students — courses, interactive programming tracks, and an AI tutor, all four years.
+              Cybersecurity and coding practice for learners everywhere, alongside University of Uyo course resources and study tools.
             </p>
             <p className="text-xs text-coffee-600 mt-3 italic font-display">ἀρετή · Greek for "excellence through practice"</p>
           </div>
@@ -21,6 +21,7 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-bold text-ink mb-3">What's inside</h4>
             <ul className="space-y-2 text-sm text-coffee-700">
+              <li><Link to="/cybersecurity" className="underline underline-offset-4 hover:text-ink">Cybersecurity learning · Team pilot inquiries</Link></li>
               <li>All courses · 100L to 400L</li>
               <li>Java · Python · C interactive tracks</li>
               <li>{totalModules} modules · quizzes · playgrounds</li>

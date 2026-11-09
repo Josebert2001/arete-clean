@@ -12,7 +12,9 @@ import { ThemeProvider } from './context/ThemeContext';
 import { StudyDaysProvider, useStudyDays } from './context/StudyDaysContext';
 import { PlanProvider } from './context/PlanContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
+import { hasSecurityEntry, clearSecurityEntry, SECURITY_START } from './utils/learningEntry';
 const Home = lazy(() => import('./pages/Home'));
+const Cybersecurity = lazy(() => import('./pages/Cybersecurity'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const CoursePublic = lazy(() => import('./pages/CoursePublic'));
@@ -119,7 +121,7 @@ const AUTH_PAGES = ['/signin', '/setup-profile', '/welcome'];
 function AuthStateWatcher() {
   const { user, profileComplete, authLoading, profileLoading } = useAuth();
   const navigate  = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   useEffect(() => {
     if (authLoading || profileLoading) return;
@@ -132,6 +134,11 @@ function AuthStateWatcher() {
     if (justSignedIn) {
       try { sessionStorage.removeItem('arete-just-signed-in'); } catch { /* ignore */ }
       if (user && profileComplete && (pathname === '/' || pathname === '/signin')) {
+        if (hasSecurityEntry() || new URLSearchParams(search).get('learn') === 'cybersecurity') {
+          clearSecurityEntry();
+          navigate(SECURITY_START, { replace: true });
+          return;
+        }
         const target = readLastLocation();
         if (target && target !== pathname) {
           navigate(target, { replace: true });
@@ -143,7 +150,7 @@ function AuthStateWatcher() {
     if (user && !profileComplete && !AUTH_PAGES.includes(pathname)) {
       navigate('/setup-profile', { replace: true });
     }
-  }, [user, profileComplete, authLoading, profileLoading, pathname, navigate]);
+  }, [user, profileComplete, authLoading, profileLoading, pathname, search, navigate]);
 
   return null;
 }
@@ -240,6 +247,7 @@ export default function App() {
         <Suspense fallback={<RouteLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/cybersecurity" element={<Cybersecurity />} />
             <Route path="/courses" element={<PublicOrGated><Courses /></PublicOrGated>} />
             <Route path="/courses/:slug" element={<PublicOrGated><CourseDetail /></PublicOrGated>} />
             <Route path="/lab" element={<RequireAuth><CodeLab /></RequireAuth>} />

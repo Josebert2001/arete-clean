@@ -48,7 +48,7 @@ function PlanSection() {
 
 export default function ProfileSettings() {
   usePageTitle('Profile Settings');
-  const { user, profile, authLoading, profileLoading, refreshProfile, signOut } = useAuth();
+  const { user, profile, authLoading, profileLoading, refreshProfile, signOut, learningModeAvailable } = useAuth();
   const [saved, setSaved] = useState(false);
   const [dataError, setDataError] = useState('');
   const [exporting, setExporting] = useState(false);
@@ -144,13 +144,12 @@ export default function ProfileSettings() {
       <div className="mb-10">
         <h1 className="display-heading text-3xl text-ink mb-3">Profile settings</h1>
         <p className="text-coffee-700 leading-relaxed text-sm">
-          Update your details, level, or department. Changing your department switches which
-          curriculum Areté shows you — your track progress and quiz scores are saved against your
-          account, so they carry over.
+          Update your details or learning mode. Choose independent learning for security and coding,
+          or a UniUyo curriculum for course resources. Your track progress stays with your account.
         </p>
       </div>
 
-      {isFoundation && (
+      {isFoundation && profile.learning_mode !== 'independent' && (
         <div className="mb-8 p-4 bg-cream border border-coffee-200 rounded-xl">
           <p className="text-xs text-coffee-700 leading-relaxed">
             <span className="font-medium text-ink">You're in foundation mode. </span>
@@ -163,13 +162,14 @@ export default function ProfileSettings() {
       {saved && (
         <div role="status" className="mb-6 flex items-center gap-2 text-sm text-moss">
           <CheckCircle2 size={15} className="shrink-0" />
-          Saved. <Link to="/courses" className="underline hover:text-ink transition-colors">View your courses</Link>
+          Saved. <Link to={profile.learning_mode === 'independent' ? '/tracks/security' : '/courses'} className="underline hover:text-ink transition-colors">Continue learning</Link>
         </div>
       )}
 
       <ProfileForm
         key={profile.id}
         initial={profile}
+        allowIndependent={learningModeAvailable}
         submitLabel="Save changes"
         savingLabel="Saving…"
         onSave={async (values) => { setSaved(false); return save(values); }}

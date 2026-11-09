@@ -10,6 +10,16 @@ Independent of the University of Uyo and its departments; this is not an officia
 
 ## What's inside
 
+### Cybersecurity for independent learners
+
+`/cybersecurity` is a public entry page with a phishing sample that needs no account,
+the existing 12-room security track overview, and a team pilot inquiry. Learners can
+choose independent learning at signup without a university department, registration
+number, or year level. Independent welcome and home screens lead into security practice.
+
+Before deploying this flow, apply `supabase/migrations/20261108010000_independent_learners.sql`.
+See [the rollout guide](docs/cybersecurity-entry-rollout.md) for database and auth redirect checks.
+
 ### Course Hub — all four years
 
 The course hub covers the complete B.Sc. Cybersecurity programme: **57 courses** across 100L–400L, both semesters. Every course has a description, topic outline, recommended textbooks, study tips, and search terms for free online resources. A handful of courses also ship full **lecture notes** (definitions, bullet sections, term lists that double as flashcards, tables, MOSCA calculators, code blocks) with a "Simplify this" button that rewrites a dense section in plain English.

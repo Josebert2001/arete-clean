@@ -32,14 +32,14 @@ export default function Privacy() {
       <p className="text-xs text-coffee-500 mb-10">Last updated: 8 November 2026</p>
 
       <p className="text-sm text-coffee-700 leading-relaxed mb-8">
-        Areté is a student-built academic platform for University of Uyo students.
+        Areté is a student-built learning platform for independent cybersecurity and coding learners, and University of Uyo students.
         This page explains what data we collect, why, and how it's used. It isn't a substitute for legal advice
         — if you have questions, contact us (details at the bottom).
       </p>
 
       <Section title="1. Information we collect">
         <ul className="list-disc pl-5 space-y-2">
-          <li><span className="font-medium text-ink">Account info</span> — your email address, and once you complete setup, your full name, registration number, and level (100L–400L), used to identify your profile.</li>
+          <li><span className="font-medium text-ink">Account info</span> — your email address, full name, and learning mode. UniUyo curriculum learners also choose a department and level (100L–400L) and may provide a registration number. Independent learners do not need academic details.</li>
           <li><span className="font-medium text-ink">Progress data</span> — which modules and quizzes you've completed, and your scores, so progress syncs across devices.</li>
           <li><span className="font-medium text-ink">Attendance and rosters</span> — your department and level can place you on a course roster. Check-ins record the class, time, attendance status, and your name and registration number at the time, when present. Lecturers can also mark a student manually and record a reason. Lecturers assigned to that course can see its roster and register, add, change, or delete attendance, and download the register. You can see your own attendance and course percentages.</li>
           <li><span className="font-medium text-ink">Check-in location</span> — the browser requests your coordinates when you check in because the class discovery list does not say whether a boundary is enforced. If a lecturer enabled a location boundary, the system uses them to block an out-of-area check-in and stores the precise coordinates on a successful check-in. With no enforced boundary, the attendance record stores no coordinates. Lecturers assigned to the class can access its records. A lecturer's location and chosen radius are stored with the class when they enable a boundary. If your browser does not provide a location, a class with an enforced boundary will reject the check-in.</li>
@@ -98,7 +98,7 @@ export default function Privacy() {
 
       <Section title="6. Who can use Areté">
         <p>
-          Areté is built for university students and isn't directed at children under 13. If you believe a child
+          Areté is built for university students and adult independent learners, and isn't directed at children under 13. If you believe a child
           has used the platform and shared personal data with us, contact us and we'll remove it.
         </p>
       </Section>

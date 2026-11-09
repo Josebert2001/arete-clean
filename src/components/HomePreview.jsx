@@ -85,6 +85,7 @@ export default function HomePreview() {
           from them.
         </p>
         <div className="flex flex-wrap gap-3 mt-6">
+          <a href="/cybersecurity" className="btn-ghost text-sm">Explore cybersecurity · Try a free exercise</a>
           <a href="/courses" className="btn-primary text-sm">Browse all course outlines</a>
           <a href="/signin" className="btn-ghost text-sm">Sign in — free, no password</a>
         </div>
