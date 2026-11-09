@@ -130,8 +130,8 @@ describe('Admin page', () => {
     expect(panel.getByText('refunded: 1')).toBeInTheDocument();
     expect(panel.getByRole('row', { name: '2026-10 ₦2,500' })).toBeInTheDocument();
     expect(panel.getByRole('row', { name: '2026-11 ₦7,500' })).toBeInTheDocument();
-    expect(panel.getByText('daily:tutor: 8')).toBeInTheDocument();
-    expect(panel.getByText('daily:run: 6')).toBeInTheDocument();
+    expect(panel.getByText('AI Tutor messages: 8')).toBeInTheDocument();
+    expect(panel.getByText('code runs: 6')).toBeInTheDocument();
     expect(mocks.state.rpcCalls).toContainEqual({ name: 'admin_billing_summary', args: undefined });
   });
 

@@ -6,7 +6,7 @@ import { useLecturer } from '../components/useLecturer';
 import { getDepartment } from '../data/departments';
 import NewOfferingForm from '../components/NewOfferingForm';
 import { rpcAction } from '../utils/rpcAction';
-import { formatNaira } from '../data/plans';
+import { FEATURE_LABELS, formatNaira } from '../data/plans';
 
 /**
  * Admin console for attendance: who is a lecturer, which course offerings
@@ -166,9 +166,11 @@ function BillingSummary() {
             <td>{formatNaira(month.revenue_kobo)}</td>
           </tr>)}</tbody>
         </table>
-        <h3 className="mt-5 font-medium text-ink">Students in open daily windows</h3>
+        <h3 className="mt-5 font-medium text-ink">Students who used each tool today</h3>
+        <p className="mt-1 text-xs text-coffee-600">Counted per open 24-hour window. These counters only run while payments are switched on.</p>
         <ul className="mt-2 text-sm text-coffee-700">
-          {Object.entries(summary.usage.daily_students).map(([bucket, count]) => <li key={bucket}>{bucket}: {count}</li>)}
+          {Object.entries(summary.usage.daily_students).map(([bucket, count]) =>
+            <li key={bucket}>{FEATURE_LABELS[bucket.replace(/^daily:/, '')] ?? bucket}: {count}</li>)}
           {Object.keys(summary.usage.daily_students).length === 0 && <li>No open daily windows.</li>}
         </ul>
       </>}
