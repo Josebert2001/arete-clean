@@ -64,6 +64,7 @@ export default function Navbar() {
   const baseLinks = [
     { to: '/', label: 'Home' },
     { to: '/cybersecurity', label: 'Cybersecurity' },
+    { to: '/careers', label: 'Careers', also: ['/career', '/career-quiz'] },
     { to: '/courses', label: 'Courses' },
     { to: '/lab', label: 'Code Lab', also: ['/tracks', '/install', '/explainer', '/cheatsheet'] },
     { to: '/tutor', label: 'AI Tutor' },

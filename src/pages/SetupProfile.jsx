@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
 import ProfileForm from '../components/ProfileForm';
-import { hasSecurityEntry, clearSecurityEntry } from '../utils/learningEntry';
+import { hasSecurityEntry, clearSecurityEntry, hasCareerEntry, CAREER_START } from '../utils/learningEntry';
 
 export default function SetupProfile() {
   usePageTitle('Set Up Profile');
@@ -22,8 +22,9 @@ export default function SetupProfile() {
     });
     if (error) return error.message ?? 'Could not save your profile. Please try again.';
     await refreshProfile();
+    const careerEntry = hasCareerEntry();
     clearSecurityEntry();
-    navigate('/welcome', { replace: true });
+    navigate(careerEntry ? CAREER_START : '/welcome', { replace: true });
   };
 
   return (
@@ -43,7 +44,7 @@ export default function SetupProfile() {
         </div>
 
         <ProfileForm
-          defaultMode={hasSecurityEntry() ? 'independent' : 'university'}
+          defaultMode={hasSecurityEntry() || hasCareerEntry() ? 'independent' : 'university'}
           allowIndependent={learningModeAvailable}
           submitLabel="Set up my profile"
           savingLabel="Setting up…"

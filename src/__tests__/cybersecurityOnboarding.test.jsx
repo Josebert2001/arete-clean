@@ -30,6 +30,43 @@ it('takes an existing account straight to security without leaving a stale entry
   expect(mocks.upsert).not.toHaveBeenCalled();
 });
 
+it('takes an existing career learner to their roadmap without changing their academic profile', async () => {
+  mocks.profileComplete = true;
+  render(<MemoryRouter initialEntries={['/signin?learn=career']}><Routes>
+    <Route path="/signin" element={<SignIn />} />
+    <Route path="/career" element={<p>Career roadmap reached</p>} />
+  </Routes></MemoryRouter>);
+  expect(await screen.findByText('Career roadmap reached')).toBeInTheDocument();
+  expect(mocks.upsert).not.toHaveBeenCalled();
+  expect(sessionStorage.getItem('arete-learning-entry')).toBeNull();
+});
+
+it('honors an explicit security entry over an abandoned career sign-in', async () => {
+  mocks.profileComplete = true;
+  sessionStorage.setItem('arete-learning-entry', 'career');
+  render(<MemoryRouter initialEntries={['/signin?learn=cybersecurity']}><Routes>
+    <Route path="/signin" element={<SignIn />} />
+    <Route path="/tracks/security" element={<p>Explicit security destination</p>} />
+    <Route path="/career" element={<p>Wrong career destination</p>} />
+  </Routes></MemoryRouter>);
+  expect(await screen.findByText('Explicit security destination')).toBeInTheDocument();
+  expect(screen.queryByText('Wrong career destination')).not.toBeInTheDocument();
+});
+
+it('carries career discovery through independent profile setup to the roadmap', async () => {
+  render(<MemoryRouter initialEntries={['/signin?learn=career']}><Routes>
+    <Route path="/signin" element={<SignIn />} />
+    <Route path="/setup-profile" element={<SetupProfile />} />
+    <Route path="/career" element={<p>Career roadmap reached</p>} />
+  </Routes></MemoryRouter>);
+  expect(await screen.findByRole('radio', { name: /Learn cybersecurity and coding/ })).toBeChecked();
+  fireEvent.change(screen.getByLabelText(/Full name/), { target: { value: 'Ada' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Set up my profile' }));
+  expect(await screen.findByText('Career roadmap reached')).toBeInTheDocument();
+  expect(mocks.upsert).toHaveBeenCalledWith(expect.objectContaining({ learning_mode: 'independent', department: 'general', level: null }));
+  expect(sessionStorage.getItem('arete-learning-entry')).toBeNull();
+});
+
 it('carries the security entry through sign-in to independent setup and saves a real nonacademic profile', async () => {
   render(<MemoryRouter initialEntries={['/signin?learn=cybersecurity']}><Routes>
     <Route path="/signin" element={<SignIn />} />

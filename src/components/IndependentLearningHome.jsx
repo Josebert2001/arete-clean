@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Flag, Code2, User } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useProgress } from './useProgress';
+import CareerHomeCard from './CareerHomeCard';
 
 export default function IndependentLearningHome({ profile, welcome = false }) {
   const security = trackMeta.security;
@@ -14,6 +15,7 @@ export default function IndependentLearningHome({ profile, welcome = false }) {
       <p className="text-xs font-mono uppercase tracking-widest text-rust mb-4">Your learning space</p>
       <h1 className="display-heading text-4xl sm:text-5xl text-ink mb-4">{welcome ? `Welcome, ${name}.` : `Keep exploring, ${name}.`}</h1>
       <p className="text-coffee-700 leading-relaxed mb-8 max-w-2xl">Your security rooms and programming tracks are ready. Work at your own pace, use hints when you need them, and build your understanding one exercise at a time.</p>
+      <CareerHomeCard />
       <section className="bg-ink text-cream rounded-2xl p-6 sm:p-8 mb-8">
         <p className="flex items-center gap-2 text-sm text-cream/80 mb-3"><Flag size={17} /> Security fundamentals · {completed}/{security.moduleCount} rooms marked complete</p>
         <h2 className="font-display text-2xl font-bold mb-3">{next.title}</h2>

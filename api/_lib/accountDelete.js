@@ -1,7 +1,7 @@
-import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, denyIfUserRateLimited } from '../_lib/request-policy.js';
-import { getStudentFromRequest } from '../_lib/supabase.js';
-import { serviceRoleClient, serviceRoleConfigured } from '../_lib/serviceRole.js';
-import { getRefreshTokenForUser } from '../_lib/googleAuth.js';
+import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, denyIfUserRateLimited } from './request-policy.js';
+import { getStudentFromRequest } from './supabase.js';
+import { serviceRoleClient, serviceRoleConfigured } from './serviceRole.js';
+import { getRefreshTokenForUser } from './googleAuth.js';
 
 const RATE_LIMIT = { namespace: 'account-delete', limit: 2, windowMs: 24 * 60 * 60 * 1000 };
 
