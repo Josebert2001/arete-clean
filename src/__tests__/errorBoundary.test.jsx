@@ -47,7 +47,7 @@ describe('ErrorBoundary', () => {
       fireEvent.click(screen.getByRole('link', { name: 'Go to broken page' }));
       expect(screen.getByText('Something went wrong.')).toBeInTheDocument();
       // React's development renderer retries the thrown render internally.
-      expect(crashRender).toHaveBeenCalledTimes(5);
+      expect(crashRender).toHaveBeenCalledTimes(3);
       expect(Sentry.captureException).toHaveBeenCalledTimes(1);
 
       fireEvent.click(screen.getByRole('link', { name: 'Change level' }));
@@ -66,7 +66,7 @@ describe('ErrorBoundary', () => {
       render(<MemoryRouter initialEntries={['/courses']}><BoundaryRoutes /></MemoryRouter>);
       fireEvent.click(screen.getByRole('link', { name: 'Go to broken route' }));
       expect(screen.getByText('Something went wrong.')).toBeInTheDocument();
-      expect(crashRender).toHaveBeenCalledTimes(4);
+      expect(crashRender).toHaveBeenCalledTimes(2);
       expect(Sentry.captureException).toHaveBeenCalledTimes(1);
     } finally {
       errorOutput.mockRestore();

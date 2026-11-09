@@ -10,7 +10,7 @@ It is multi-department. Two departments have fully-authored catalogues — **Cyb
 **Department catalogues are standalone** — they do NOT import each other's course lists. The overlap between programmes is smaller than it looks (Data Science takes GST 211/311 and MTH 211/212/223 where Cybersecurity takes GST 212/312), and each department frames its shared courses for its own students; cross-importing would also drag one department's whole payload into another's chunk. The single exception is **lecture notes**: those are transcribed from the lecturer's workbook, so every catalogue imports the one copy in `src/data/lectureNotes/`.
 
 ## Stack
-- **Frontend:** React 18, React Router v7, Tailwind CSS (custom theme), Vite (port 5173)
+- **Frontend:** React 19, React Router v7, Tailwind CSS (custom theme), Vite (port 5173)
 - **Backend:** Vercel serverless functions in `api/` (Node.js ESM)
 - **Auth + DB:** Supabase (email OTP, PostgreSQL — profiles + user_progress + course_materials tables)
 - **AI:** Groq API via Vercel AI SDK (`openai/gpt-oss-120b`), streaming responses
@@ -32,6 +32,8 @@ node scripts/validate-modules.mjs  # validate module data structure
 ```
 
 **Toolchain: Node 24, npm ≥ 11.16.** CI (`.github/workflows/ci.yml`) runs Node 24 / npm 11.16. npm changed its mind twice about whether `@napi-rs/wasm-runtime`'s optional peers (`@emnapi/core`, `@emnapi/runtime`) belong in `package-lock.json` as top-level entries: npm 10 records them, npm 11.6 drops them, npm 11.16 records them again. Regenerate the lockfile on npm 11.6–11.15 and it silently loses those entries, and every CI run then dies at `npm ci` with `Missing: @emnapi/core@… from lock file` before a single check executes. Check `npm --version` before any command that rewrites the lockfile (`npm install`, `npm audit fix`, dependency bumps). The committed lockfile is valid for npm 10.9, 11.6 and 11.16 alike, so only *regenerating* it on a bad version breaks things — installing never does.
+
+**Dependency majors deliberately held back** (checked 9 November 2026): Tailwind 4 (config moves into CSS and several default utilities change — needs a page-by-page visual pass, not a version bump), ESLint 10 and `@vitejs/plugin-react` 6.3 (blocked by peer ranges of the React lint plugins / Babel 8), and `vite-plugin-pwa` 2 (changes the service worker build and does not clear the `workbox-build` advisories, which are build-time only). The AI SDK is on v7, which needs Node ≥ 22 on Vercel.
 
 ## Project Conventions
 - **No TypeScript** — stay in `.jsx`/`.js`; do not introduce `.ts` files
@@ -134,7 +136,7 @@ Browser → React SPA (Vite)
 | `docs/browser-test-plan.md` | Proposed Playwright/axe flows and CI gate; no dependencies installed |
 | `SECURITY.md` | Current deployment security scope, private reporting channels, response targets and good-faith research policy |
 | `src/__tests__/{sweepMaterials,accountDelete,rateLimitMessage,userDataExport}.test.js` | Tests for the new cron, account deletion, limit copy and data export |
-| `api/extract.js` | **Registers** a freshly uploaded course material: downloads the object the browser just stored, extracts its text (.txt/.docx/.pdf via mammoth + pdf-parse) and writes the `course_materials` row itself on the service-role client. The browser cannot insert that row any more — `authenticated` has no INSERT grant (migration `20260827010000`). Every security-relevant field is derived here, never taken from the body: `uploaded_by` from the verified token, `course_code`/`department` from the catalogue via `findCourseBySlug()` and the uploader's own profile, `extracted_text` from the real bytes. This is why it matters: that text is injected into every student's tutor context for that course, and the lookup takes the two most *recent* rows, so a forged row displaced the genuine notes. Signed-in only; answers 503 when `SUPABASE_SERVICE_ROLE_KEY` is unset |
+| `api/extract.js` | **Registers** a freshly uploaded course material: downloads the object the browser just stored, extracts its text (.txt/.docx/.pdf via mammoth + pdf-parse 2, both loaded lazily so a parser that fails to load costs the tutor text, not the upload) and writes the `course_materials` row itself on the service-role client. The browser cannot insert that row any more — `authenticated` has no INSERT grant (migration `20260827010000`). Every security-relevant field is derived here, never taken from the body: `uploaded_by` from the verified token, `course_code`/`department` from the catalogue via `findCourseBySlug()` and the uploader's own profile, `extracted_text` from the real bytes. This is why it matters: that text is injected into every student's tutor context for that course, and the lookup takes the two most *recent* rows, so a forged row displaced the genuine notes. Signed-in only; answers 503 when `SUPABASE_SERVICE_ROLE_KEY` is unset |
 | `api/simplify.js` | "Simplify this" — Groq rewrite of a dense lecture-note section in plain English; client caches results in localStorage |
 | `api/summarize.js` \| `src/utils/summarizeTopic.js` | "Key points" — exam-ready recap of a **whole topic**, for a student who has already read it. Deliberately separate from Simplify (one *section*, for a student who is stuck): different scope, prompt, cap (32k vs 4k chars) and rate bucket. Skips topics whose title is already a hand-written summary (`/exam focus\|key takeaways/i`) |
 | `src/components/LectureNotes.jsx` | Renders lecture-note sections (definition/bullets/termlist/table/mosca/…); termlists double as flashcards; hosts the Simplify and Key points buttons and the per-topic read markers. Takes `reading` from the *page* — see below |
@@ -223,7 +225,7 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 ## Testing — Important Context
 The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-library/react` available for component tests.
 - Config: `vitest.config.js` · setup file: `src/__tests__/setup.js` (imports `@testing-library/jest-dom`)
-- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 92 suites, 1,268 passing tests as of 9 November 2026. The suite passes in any timezone (the Google Calendar date maths used to need `TZ=UTC`).
+- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 92 suites, 1,269 passing tests as of 9 November 2026. The suite passes in any timezone (the Google Calendar date maths used to need `TZ=UTC`).
 - Run with `npm test` (single run) or `npm run test:watch`. CI runs `npm test` on every push.
 - When writing new logic, add or extend a test if the function is testable in isolation. Coverage is uneven — data/util logic is reasonably covered, most page-level components are not.
 - **Component tests use `fireEvent` from `@testing-library/react`** (see `profileForm.test.jsx`, `courseExamPrep.test.jsx`). `@testing-library/user-event` is *not* a dependency — do not import it.
