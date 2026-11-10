@@ -1,7 +1,5 @@
 // Consolidate account operations to preserve Vercel Hobby's function budget.
 // Existing /api/account/delete requests keep their URL and behavior.
-export const config = { api: { bodyParser: { sizeLimit: '32kb' } } };
-
 const ROUTES = {
   delete: () => import('../_lib/accountDelete.js'),
   career: () => import('../_lib/careerHandler.js'),

@@ -2,6 +2,8 @@
 
 Date: 9 November 2026. Source implementation only; no practitioner review, staffed pilot, live Supabase migration or running Linux environment is claimed.
 
+Release boundary: the current PR ships placement and the roadmap with `CAREER_ASSESSMENT_ENABLED=false`. Investigation/reviewer entry points are hidden and direct routes are gated by the server-reported capability. Do not apply this feature's migration or enable its flag as part of the placement rollout below. The remaining sections describe a separate future pilot.
+
 ## Implemented flow
 
 After [career discovery](career-discovery-rollout.md), a learner who selects blue team can open `/career/investigation`. An active pilot invitation is required to create a new case; the start transaction enforces it. Starting creates or resumes a private, server-assigned case. Invitation expiry stops new attempts, while already-owned work remains readable and its original case deadline still governs edits. The two versions differ in their evidence relationships: one includes a suspicious message; the other includes an approved renewal and unrelated failed sign-ins. Difficulty and rubric interpretation still need independent practitioner calibration.

@@ -39,6 +39,10 @@ assigned reviewer workspace. It requires the second migration and its own
 `CAREER_ASSESSMENT_ENABLED` switch. See the
 [investigation rollout](docs/blue-investigation-rollout.md) before enabling it.
 
+The placement release keeps `CAREER_ASSESSMENT_ENABLED=false`: no investigation
+or reviewer links appear on the roadmap, bookmarked assessment routes are gated,
+and assessment APIs return unavailable before querying their deferred tables.
+
 ### Course Hub — all four years
 
 The course hub covers the complete B.Sc. Cybersecurity programme: **57 courses** across 100L–400L, both semesters. Every course has a description, topic outline, recommended textbooks, study tips, and search terms for free online resources. A handful of courses also ship full **lecture notes** (definitions, bullet sections, term lists that double as flashcards, tables, MOSCA calculators, code blocks) with a "Simplify this" button that rewrites a dense section in plain English.

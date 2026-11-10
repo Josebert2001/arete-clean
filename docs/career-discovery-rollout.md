@@ -24,9 +24,14 @@ A chosen direction is not enrollment in a complete professional course. Starter 
 
 ## Deployment order
 
+This release enables placement and the roadmap only. Keep `CAREER_ASSESSMENT_ENABLED=false` in both Preview and Production. The API reports this capability to the client; the roadmap hides investigation/reviewer links and bookmarked assessment routes stop at the availability gate. The assessment handler independently refuses every assessment/review operation before reading its tables, so this release does not require the investigation migration.
+
 1. Apply `supabase/migrations/20261109000000_career_placement.sql` manually in the intended Supabase project after the normal authentication setup. It creates three tables and one service-role-only transaction function and reloads the API schema. It does not change academic profiles or authorization roles.
+   - If the independent-learner changes from master are not installed, apply `supabase/migrations/20261108010000_independent_learners.sql` first; the existing sign-up/profile flow relies on it. This is a prerequisite from master, not a new career migration.
+   - Do **not** apply `20261109010000_blue_investigations.sql` for this release. It remains deferred with the assessment feature disabled.
 2. Verify owner isolation and privileges in a disposable test project before enabling. `supabase/tests/career_placement.sql` checks reads, forbidden direct writes/RPC execution, retries, retained history and deletion cascade. The test runs in a transaction with temporary fixtures and must not be pointed at production.
 3. Configure the existing server-only `SUPABASE_SERVICE_ROLE_KEY` and set `CAREER_PLACEMENT_ENABLED=true` on the API deployment. Leave it false until the migration/policy checks pass. No new paid provider or VM infrastructure is required for this slice.
+   Set `CAREER_ASSESSMENT_ENABLED=false` explicitly. The checked-in `.env.example` describes the desired post-migration state; it does not update Vercel's runtime environment. Both deployed environments must be configured before redeployment.
 4. Add `/signin?learn=career` for the relevant production/preview origins to Supabase Auth's redirect allowlist. Keep existing sign-in and cybersecurity redirect entries.
 5. Deploy the compatible client and API together. The account route replacement must be present in the same deployment; do not leave both the old static delete function and the new dynamic router in place.
 6. Rehearse the flows below and verify the feature flag can disable new career reads/writes without changing the rest of the site. Disabling does not delete stored work.
@@ -35,7 +40,7 @@ With the flag disabled or tables unavailable, the quiz checks availability befor
 
 ## Checks
 
-Local verification on 9 November 2026: the full JavaScript suite passed all 1,242 tests across 94 files with two workers, ESLint passed, and the production build prerendered 101 pages. The career HTML/canonical/sitemap checks passed, the deployed function count remains 12, and the checked server-only case/RPC identifiers were absent from browser assets. Database and interactive-browser checks remain separate prerequisites below.
+Local verification on 10 November 2026: ESLint passed; the full JavaScript suite passed all 1,337 tests across 97 files using `npm test -- --pool=threads --maxWorkers=2 --reporter=verbose`; and `npm run build` validated the catalogue and prerendered 101 pages. Threads avoid an intermittent Windows fork-worker startup error. The deployable function count remains 12. Database and interactive-browser checks remain separate prerequisites below.
 
 Automated tests cover each recommended path, foundation gaps, close/tied and uncertain answers, invalid inputs, fixed auth entry destinations, request identity, fabricated client results, bounded notes, stale attempts, caching, router query overrides, public static rendering, all-30-answer submission, reflection saving, and delayed responses during account changes. Existing deletion and university/security onboarding tests remain relevant regression checks.
 

@@ -2,6 +2,7 @@ import { Component, lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, Link, useLocation, useNavigate, useParams as useRouteParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import Navbar from './components/Navbar';
+import CareerAssessmentGate from './components/CareerAssessmentGate';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import FeedbackPrompt from './components/FeedbackPrompt';
@@ -266,8 +267,26 @@ export default function App() {
             <Route path="/career-quiz" element={<RequireAuth><CareerQuiz /></RequireAuth>} />
             <Route path="/career" element={<RequireAuth><CareerDashboard /></RequireAuth>} />
             <Route path="/career/practice/:path" element={<CareerPractice />} />
-            <Route path="/career/investigation" element={<RequireAuth><BlueInvestigation /></RequireAuth>} />
-            <Route path="/career/reviews" element={<RequireAuth><CareerReviews /></RequireAuth>} />
+            <Route
+              path="/career/investigation"
+              element={
+                <RequireAuth>
+                  <CareerAssessmentGate>
+                    <BlueInvestigation />
+                  </CareerAssessmentGate>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/career/reviews"
+              element={
+                <RequireAuth>
+                  <CareerAssessmentGate>
+                    <CareerReviews />
+                  </CareerAssessmentGate>
+                </RequireAuth>
+              }
+            />
             <Route path="/courses" element={<PublicOrGated><Courses /></PublicOrGated>} />
             <Route path="/courses/:slug" element={<PublicOrGated><CourseDetail /></PublicOrGated>} />
             <Route path="/lab" element={<RequireAuth><CodeLab /></RequireAuth>} />
