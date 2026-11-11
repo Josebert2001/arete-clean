@@ -172,7 +172,7 @@ export default function CodeExplainer() {
                   value={language}
                   onChange={e => setLanguage(e.target.value)}
                   aria-label="Code language"
-                  className="bg-paper border border-coffee-200 rounded-md px-2 py-1 text-xs text-ink focus:border-coffee-500 outline-none"
+                  className="bg-paper border border-coffee-200 rounded-md px-2 py-1 text-xs text-ink focus:border-coffee-500 outline-hidden"
                 >
                   {LANGUAGES.map(l => (
                     <option key={l.value || 'auto'} value={l.value}>{l.label}</option>
@@ -189,7 +189,7 @@ export default function CodeExplainer() {
               placeholder="Paste your code here..."
               aria-label="Paste your code for explanation"
               rows={8}
-              className="w-full bg-ink text-cream font-mono text-sm rounded-xl p-4 outline-none border-2 border-transparent focus:border-ember-500 resize-y"
+              className="w-full bg-ink text-cream font-mono text-sm rounded-xl p-4 outline-hidden border-2 border-transparent focus:border-ember-500 resize-y"
               style={{ lineHeight: 1.6 }}
             />
           </div>

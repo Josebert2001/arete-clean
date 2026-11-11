@@ -38,7 +38,7 @@ export default function CampusMapPage() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search places…"
           aria-label="Search campus places"
-          className="w-full bg-transparent text-sm text-ink placeholder:text-coffee-400 outline-none"
+          className="w-full bg-transparent text-sm text-ink placeholder:text-coffee-400 outline-hidden"
         />
       </div>
 

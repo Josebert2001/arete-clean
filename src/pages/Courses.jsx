@@ -697,7 +697,7 @@ export default function Courses() {
             onChange={e => setQuery(e.target.value)}
             placeholder="Search courses — code, title, or topic (e.g. COS 121, networks, calculus)"
             aria-label="Search courses"
-            className="w-full pl-10 pr-10 py-2.5 bg-paper border border-coffee-200 rounded-xl text-sm text-ink placeholder:text-coffee-500 focus:outline-none focus:border-coffee-500 focus:ring-1 focus:ring-coffee-500 transition-colors"
+            className="w-full pl-10 pr-10 py-2.5 bg-paper border border-coffee-200 rounded-xl text-sm text-ink placeholder:text-coffee-500 focus:outline-hidden focus:border-coffee-500 focus:ring-1 focus:ring-coffee-500 transition-colors"
           />
           {query && (
             <button

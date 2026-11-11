@@ -159,7 +159,7 @@ function BillingSummary() {
           {Object.keys(summary.payments.counts).length === 0 && <li>No payments yet.</li>}
         </ul>
         <h3 className="mt-5 font-medium text-ink">Monthly revenue (UTC)</h3>
-        <table className="mt-2 w-full text-left text-sm text-coffee-700">
+        <table className="billing-monthly-table mt-2 w-full text-left text-sm text-coffee-700">
           <thead><tr><th scope="col" className="py-1">Month</th><th scope="col">Successful revenue</th></tr></thead>
           <tbody>{summary.payments.monthly.map(month => <tr key={month.month} className="border-t border-coffee-200">
             <th scope="row" className="py-2 font-normal">{month.month}</th>

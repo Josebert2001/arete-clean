@@ -253,7 +253,7 @@ export default function CourseAIChat({ course }) {
               }}
               placeholder={`Ask about ${course.code}…`}
               aria-label="Ask the AI about this course"
-              className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-2 font-display italic text-sm text-ink placeholder:text-coffee-400 outline-none transition-colors"
+              className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-2 font-display italic text-sm text-ink placeholder:text-coffee-400 outline-hidden transition-colors"
             />
             {responding ? (
               <button

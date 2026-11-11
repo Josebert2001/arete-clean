@@ -1,0 +1,92 @@
+{
+  "branch": "chore/tailwind-v4",
+  "baselineCommit": "26e24ed20eb4df41bc8c094e5bc4dc82d9003df7",
+  "finalPhase": "after-final",
+  "fullMatrixRecapturedAfterLastFix": true,
+  "routePatterns": [
+    "/",
+    "/cybersecurity",
+    "/courses",
+    "/courses/:slug",
+    "/lab",
+    "/tracks",
+    "/tracks/:lang",
+    "/tracks/:lang/:id",
+    "/modules",
+    "/modules/:id",
+    "/install",
+    "/tutor",
+    "/explainer",
+    "/cheatsheet",
+    "/planner",
+    "/review",
+    "/campus-map",
+    "/signin",
+    "/setup-profile",
+    "/profile",
+    "/attendance",
+    "/my-attendance",
+    "/teach",
+    "/register",
+    "/admin",
+    "/rep",
+    "/invitations",
+    "/welcome",
+    "/about",
+    "/privacy",
+    "/terms",
+    "/premium",
+    "*"
+  ],
+  "scenarios": 357,
+  "widths": [
+    1366,
+    390
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "fullPage": true,
+  "browser": "Chrome 157.0.8103.38 on Windows",
+  "fixtures": "Synthetic learner/staff/API data; time fixed to 2026-11-10T10:00:00Z; shared cached fonts.",
+  "originalFixtureHash": "d29808560161d7295d076d5d105a108a00112437c8f10f2f6084a1169a5ac2b6",
+  "finalFixtureHash": "d29808560161d7295d076d5d105a108a00112437c8f10f2f6084a1169a5ac2b6",
+  "sourceSha256": {
+    "src/index.css": "029bdf41c5e0fd7831cd9f1bd2399149fe65cf1ac5d77a5f3c97020907d6d4de",
+    "postcss.config.js": "ae0ce10635e1d6ecfad87c518daac6f7a0874ee0fccfb22daf362e146e30e63b",
+    "package.json": "ce31f839daf201fd96b68d394bd5af743cb7f5b252002fa48301565f98cb8bfa",
+    "package-lock.json": "27db7d0f108fcfed1cc93005a6feb1c85be99b96deec4c642ae2c09612ebf234",
+    "scripts/postcss/preserveUtilityCascade.mjs": "9467cd1015849721fe62a891cf4a9504b64eea3fda03dd4beeec44c041d574ba",
+    "src/styles/reading.css": "1717c83310c52b6c861629eaea66fa66663f12b7d8862b5883c7223f683c68b5",
+    "src/styles/tailwind-compat.css": "878dfddd63cf056dcc8522578947333aa3fa9f6550e66e1b159314cae16b33f8",
+    "src/styles/tailwind-theme.css": "3ab9a9e2267717a1fbbf07b3fdbbbcf65c754aa3ee803aacb5f2931616d96e42"
+  },
+  "validation": {
+    "node": "24.22.2",
+    "lint": "passed",
+    "testFiles": 93,
+    "testsPassed": 1262,
+    "fullBuild": "passed, including module validation and 100 prerendered pages",
+    "cleanInstall": "npm ci --ignore-scripts passed"
+  },
+  "results": {
+    "total": 1428,
+    "identical": 1080,
+    "differing": 348,
+    "differingUrls": 146,
+    "missing": 0,
+    "pageErrors": 0,
+    "dimensionChanges": 0,
+    "perceptualPixels": 0,
+    "perceptualSettings": {
+      "threshold": 0.1,
+      "includeAA": false
+    },
+    "rawComparison": "Every RGBA channel compared exactly; magenta diff images highlight every changed pixel."
+  },
+  "mergeApproval": "Pending: all remaining raw differences require user approval before merging.",
+  "localGallery": ".tailwind-visual.local/captures/index.html",
+  "localDifferences": ".tailwind-visual.local/captures/after-final-report.html",
+  "differencesFile": "docs/tailwind-v4-visual-differences.csv"
+}

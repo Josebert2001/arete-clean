@@ -230,7 +230,7 @@ export default function SignIn() {
                   placeholder="your@email.com"
                   autoComplete="email"
                   autoFocus
-                  className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
+                  className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-hidden focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
                 />
               </div>
 

@@ -1,10 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Keep preflight, reading rules and utilities in their original cascade order.
+   Existing app CSS below intentionally overrides utilities where needed. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css";
+@import "./styles/tailwind-theme.css";
+@import "./styles/tailwind-compat.css";
+@import "./styles/reading.css";
+@import "tailwindcss/utilities.css" source(none);
+
+@source "../index.html";
+@source "./";
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant hover (&:hover);
 
 /*
- * Palette as space-separated RGB channels so Tailwind's `<alpha-value>`
- * modifiers (e.g. `bg-paper/80`) keep working. The `.dark` block below swaps
+ * Palette as space-separated RGB channels, referenced by the inline CSS theme.
+ * Opacity modifiers (e.g. `bg-paper/80`) still work. The `.dark` block below swaps
  * these same variables, which re-themes every `bg-*`/`text-*` utility at once.
  * The coffee scale is intentionally INVERTED in dark mode (low numbers become
  * dark surfaces, high numbers become light text) so text utilities like
@@ -146,44 +157,6 @@ body {
 .code-block .com { color: #7A7268; font-style: italic; }
 .code-block .fn { color: #F0E4CD; }
 .code-block .type { color: #CFA665; }
-
-/*
- * Justified body copy.
- *
- * Hooked to the two reading tokens (see tailwind.config.js `fontSize`) plus an
- * opt-in `.prose-justify` class, rather than a blanket rule on <p>, so UI
- * chrome — nav, buttons, badges, card blurbs, headings — keeps its ragged
- * right. Anything that reads badly justified opts out with Tailwind's
- * `text-left`: utilities are emitted after this components layer, so they win.
- */
-@layer components {
-  .text-reading,
-  .text-reading-sm,
-  .prose-justify {
-    text-align: justify;
-  }
-
-  /*
-   * Opt back out for anything that reads worse justified:
-   *   th/td — a narrow column opens rivers of whitespace
-   *   pre   — preformatted text does not reflow at all
-   *   li    — a short list item stretches to meet a marker it should sit beside
-   *   h1-h6 — and RichText's pseudo-headings, which are bold <p> not real
-   *           heading tags (see RichText.jsx), so they need naming separately
-   * `code` is deliberately absent: it is inline, and text-align does not apply
-   * to inline elements, so listing it would only look reassuring.
-   */
-  .text-reading :is(th, td, pre, li, h1, h2, h3, h4, h5, h6),
-  .text-reading-sm :is(th, td, pre, li, h1, h2, h3, h4, h5, h6),
-  .prose-justify :is(th, td, pre, li, h1, h2, h3, h4, h5, h6),
-  .prose-justify > p.font-display,
-  /* List rows in LectureNotes/CourseDetail carry the reading token on the <li>
-     itself rather than descending from it, so the rules above miss them. */
-  li.text-reading,
-  li.text-reading-sm {
-    text-align: left;
-  }
-}
 
 /*
  * Editable code surface (CodePlayground) — pinned dark in BOTH themes, for the

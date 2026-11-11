@@ -212,7 +212,7 @@ export default function Planner() {
               <select
                 value={session}
                 onChange={e => setSession(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
+                className="w-full px-3 py-2.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink focus:outline-hidden focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
               >
                 {sessionOptions().map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -224,7 +224,7 @@ export default function Planner() {
               <select
                 value={semester}
                 onChange={e => setSemester(Number(e.target.value))}
-                className="w-full px-3 py-2.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
+                className="w-full px-3 py-2.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink focus:outline-hidden focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
               >
                 <option value={1}>First semester</option>
                 <option value={2}>Second semester</option>
@@ -264,7 +264,7 @@ export default function Planner() {
               type="date"
               value={startISO}
               onChange={e => setStartISO(e.target.value)}
-              className="w-full px-3 py-2.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
+              className="native-date-input w-full px-3 py-2.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink focus:outline-hidden focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
             />
             <p className="text-xs text-coffee-500 mt-1.5">Weekly blocks repeat for 15 teaching weeks from this date.</p>
           </div>

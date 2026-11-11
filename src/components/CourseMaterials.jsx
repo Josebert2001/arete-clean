@@ -450,7 +450,7 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
               placeholder={`e.g. Week 5 lecture notes on ${courseCode} — covers exam topics`}
               maxLength={200}
               rows={2}
-              className="w-full px-3 py-2 text-sm bg-cream border border-coffee-200 rounded-lg text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-400 resize-none"
+              className="w-full px-3 py-2 text-sm bg-cream border border-coffee-200 rounded-lg text-ink placeholder:text-coffee-400 focus:outline-hidden focus:border-coffee-400 resize-none"
             />
           </div>
 

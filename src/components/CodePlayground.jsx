@@ -190,7 +190,7 @@ export default function CodePlayground({ initialCode = '', language = 'java', st
           spellCheck={false}
           aria-label={`${LANGUAGE_LABELS[language] || 'Code'} editor`}
           title="Ctrl+Enter to run"
-          className="flex-1 resize-y bg-transparent px-4 py-4 text-sm outline-none sm:text-[0.8rem]"
+          className="flex-1 resize-y bg-transparent px-4 py-4 text-sm outline-hidden sm:text-[0.8rem]"
           style={{ fontFamily: 'JetBrains Mono', lineHeight: '1.6', minHeight: '220px' }}
         />
       </div>
