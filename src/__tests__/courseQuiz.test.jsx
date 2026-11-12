@@ -50,8 +50,8 @@ describe('the chapter picker', () => {
     render(<CourseQuiz course={courseWith(chaptered)} />);
 
     expect(screen.getByText(/Pick by chapter/i)).toBeInTheDocument();
-    expect(startButton(new RegExp(`${CH1} \\(2\\)`))).toBeInTheDocument();
-    expect(startButton(new RegExp(`${CH2} \\(1\\)`))).toBeInTheDocument();
+    expect(startButton(new RegExp(`${CH1}\\s*\\(2\\)`))).toBeInTheDocument();
+    expect(startButton(new RegExp(`${CH2}\\s*\\(1\\)`))).toBeInTheDocument();
   });
 
   it('renders no pills for a bank that declares no chapters', () => {

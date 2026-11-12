@@ -214,6 +214,22 @@ describe('Google connection routes', () => {
     expect(auth.decryptRefreshToken(stored.refresh_token)).toBe('plain-refresh-token');
   });
   it.each([
+    ['/courses/cyb-224', '/courses/cyb-224'],
+    ['//evil.example', '/planner'],
+    ['/\\evil.example', '/planner'],
+    ['/\t/evil.example', '/planner'],
+    ['/ok\\path', '/planner'],
+    ['https://evil.example', '/planner'],
+    [undefined, '/planner'],
+  ])('callback only returns to a same-origin path (%j)', async (returnTo, expected) => {
+    const { safeReturnTo } = await import('../../api/_google/callback.js');
+    expect(safeReturnTo(returnTo)).toBe(expected);
+    if (expected !== '/planner' || returnTo === undefined) return;
+    // Whatever is refused must really have left the site, or the rule is noise.
+    const resolved = new URL(returnTo, 'https://arete.example');
+    expect(resolved.origin === 'https://arete.example' && !returnTo.includes('\\')).toBe(false);
+  });
+  it.each([
     [[], '/planner?google=error'],
     [[{ user_id: 'student-1' }], '/planner?google=connected'],
   ])('callback without a refresh token redirects based on updated rows', async (rows, location) => {

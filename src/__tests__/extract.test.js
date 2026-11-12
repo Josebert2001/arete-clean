@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => {
     serviceClient: vi.fn(),
     findCourse: vi.fn(),
     pdfParse: vi.fn(),
+    pdfDestroy: vi.fn(),
     mammothExtract: vi.fn(),
   };
 });
@@ -22,7 +23,13 @@ vi.mock('../../api/_lib/serviceRole.js', () => ({
 }));
 vi.mock('../../api/_lib/courseData.js', () => ({ findCourseBySlug: mocks.findCourse }));
 vi.mock('mammoth', () => ({ default: { extractRawText: mocks.mammothExtract } }));
-vi.mock('pdf-parse/lib/pdf-parse.js', () => ({ default: mocks.pdfParse }));
+vi.mock('pdf-parse', () => ({
+  PDFParse: class {
+    constructor(options) { this.options = options; }
+    getText(params) { return mocks.pdfParse(Buffer.from(this.options.data), params); }
+    destroy() { mocks.pdfDestroy(); return Promise.resolve(); }
+  },
+}));
 
 import handler from '../../api/extract.js';
 
@@ -281,7 +288,10 @@ describe('POST /api/extract', () => {
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ extracted_text: expected }));
     expect(globalThis.fetch).not.toHaveBeenCalled();
     if (ext === 'docx') expect(mocks.mammothExtract).toHaveBeenCalledWith({ buffer: Buffer.from(content) });
-    if (ext === 'pdf') expect(mocks.pdfParse).toHaveBeenCalledWith(Buffer.from(content));
+    if (ext === 'pdf') {
+      expect(mocks.pdfParse).toHaveBeenCalledWith(Buffer.from(content), { pageJoiner: '' });
+      expect(mocks.pdfDestroy).toHaveBeenCalled();
+    }
   });
 
   it('caps extracted text at 50,000 characters and stores a non-extractable allowed type with null text', async () => {
