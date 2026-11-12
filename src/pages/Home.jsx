@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles, GraduationCap, Code2, Briefcase, Award, X, LogIn } from 'lucide-react';
+import { ArrowRight, Sparkles, GraduationCap, Code2, Briefcase, Award, LogIn } from 'lucide-react';
 import ProgressDashboard from '../components/ProgressDashboard';
 import StudentDashboard from '../components/StudentDashboard';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
@@ -47,48 +46,6 @@ const levelCards = [
   },
 ];
 
-// ─── Onboarding banner (first visit only) ─────────────────────────────────────
-
-const ONBOARDING_KEY = 'arete-onboarding-dismissed-v1';
-
-function OnboardingBanner() {
-  const [dismissed, setDismissed] = useState(() => {
-    try {
-      return localStorage.getItem(ONBOARDING_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
-
-  if (dismissed) return null;
-
-  const dismiss = () => {
-    setDismissed(true);
-    try {
-      localStorage.setItem(ONBOARDING_KEY, '1');
-    } catch { /* private mode — banner just reappears next visit */ }
-  };
-
-  return (
-    <div className="max-w-6xl mx-auto px-6 pt-6">
-      <div className="bg-moss/10 border border-moss/30 rounded-xl px-4 py-3 flex items-center gap-3 text-sm animate-fade-up">
-        <Sparkles size={16} className="text-moss shrink-0" />
-        <p className="text-ink flex-1 leading-snug">
-          <span className="font-bold">New here?</span> Sign in once (free, no password) → pick your level → start learning.
-          Your progress follows you on every device.
-        </p>
-        <button
-          onClick={dismiss}
-          aria-label="Dismiss welcome message"
-          className="text-coffee-700 hover:text-ink p-1 shrink-0 transition-colors"
-        >
-          <X size={16} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
@@ -112,7 +69,6 @@ export default function Home() {
   return (
     <div>
 
-      <OnboardingBanner />
       <div className="max-w-6xl mx-auto px-6 pt-6"><Link to="/cybersecurity" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rust/30 bg-paper p-4 text-sm text-ink"><span><strong>Explore cybersecurity</strong> · Guided security puzzles for learners everywhere.</span><span className="inline-flex items-center gap-2 font-semibold">Try a free exercise <ArrowRight size={15} /></span></Link></div>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
