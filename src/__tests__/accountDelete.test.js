@@ -10,7 +10,7 @@ vi.mock('../../api/_lib/request-policy.js', async () => ({
   enforceRateLimit: () => ({ allowed: true, remaining: 1 }),
   denyIfUserRateLimited: async () => false,
 }));
-import handler from '../../api/account/delete.js';
+import handler from '../../api/_lib/accountDelete.js';
 
 function response() {
   return { code: null, body: null, setHeader() { return this; }, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; }, end() { return this; } };

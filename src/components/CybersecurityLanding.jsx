@@ -27,6 +27,7 @@ export default function CybersecurityLanding({ sample, teamContact }) {
           <p className="text-lg text-coffee-700 leading-relaxed max-w-xl mb-7">Build your cybersecurity foundations with guided puzzles in cryptography, web security, networks, and digital forensics. Start wherever you are. No university enrolment required.</p>
           <div className="flex flex-wrap gap-3">
             <a href={SECURITY_SIGN_IN} className="btn-primary">Start learning <ArrowRight size={16} /></a>
+            <a href="/careers" className="btn-ghost">Find your career direction <ArrowRight size={16} /></a>
             <a href="#try-it" className="btn-ghost">Try an exercise first</a>
           </div>
           <p className="text-xs text-coffee-600 mt-4">Google or email sign-in · No card needed to start</p>

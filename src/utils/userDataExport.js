@@ -1,6 +1,6 @@
 // Accept only fields the signed-in student already received through RLS.
 // In particular, Google refresh tokens and uploaded file bytes are excluded.
-export function assembleUserData({ profile, progress, attendance, materials, google, billing = null }) {
+export function assembleUserData({ profile, progress, attendance, materials, google, billing = null, career = null }) {
   return {
     exportedAt: new Date().toISOString(),
     profile,
@@ -14,6 +14,7 @@ export function assembleUserData({ profile, progress, attendance, materials, goo
     // null when billing tables are not readable yet. Card and bank details are
     // never held by Areté, so there is nothing more to include.
     billing,
+    career,
     feedback: null, // feedback has INSERT-only RLS; students cannot read it back.
   };
 }

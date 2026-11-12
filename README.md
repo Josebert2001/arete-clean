@@ -20,6 +20,29 @@ number, or year level. Independent welcome and home screens lead into security p
 Before deploying this flow, apply `supabase/migrations/20261108010000_independent_learners.sql`.
 See [the rollout guide](docs/cybersecurity-entry-rollout.md) for database and auth redirect checks.
 
+### Cybersecurity career discovery
+
+`/careers` introduces blue team, red team, GRC, AppSec and planned specialties.
+The first implementation includes a 30-question server-scored guidance quiz,
+an account-saved direction and roadmap, and four synthetic evidence worksheets
+with reflection, worked feedback and export. Full assessed pathways, reviewer
+services, employer referrals and Linux VMs are still in development.
+
+Apply `supabase/migrations/20261109000000_career_placement.sql` and verify its
+policies before enabling `CAREER_PLACEMENT_ENABLED=true`. See the
+[career discovery rollout](docs/career-discovery-rollout.md) for auth redirects,
+API setup, integration checks and current verification limits.
+
+An optional independent blue-team investigation pilot adds assigned case evidence,
+saved report drafts, a containment simulator, immutable final submissions and an
+assigned reviewer workspace. It requires the second migration and its own
+`CAREER_ASSESSMENT_ENABLED` switch. See the
+[investigation rollout](docs/blue-investigation-rollout.md) before enabling it.
+
+The placement release keeps `CAREER_ASSESSMENT_ENABLED=false`: no investigation
+or reviewer links appear on the roadmap, bookmarked assessment routes are gated,
+and assessment APIs return unavailable before querying their deferred tables.
+
 ### Course Hub — all four years
 
 The course hub covers the complete B.Sc. Cybersecurity programme: **57 courses** across 100L–400L, both semesters. Every course has a description, topic outline, recommended textbooks, study tips, and search terms for free online resources. A handful of courses also ship full **lecture notes** (definitions, bullet sections, term lists that double as flashcards, tables, MOSCA calculators, code blocks) with a "Simplify this" button that rewrites a dense section in plain English.
