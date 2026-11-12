@@ -112,6 +112,8 @@ describe('api/run', () => {
     expect(url).toBe('https://api.jdoodle.com/v1/execute');
     expect(JSON.parse(options.body)).toMatchObject({ clientId: 'private-id', clientSecret: 'private-secret', language: 'java', versionIndex: '6' });
     expect(fetch.mock.calls[1][0]).toBe('https://api.jdoodle.com/v1/credit-spent');
+    expect(options.signal).toBeInstanceOf(AbortSignal);
+    expect(fetch.mock.calls[1][1].signal).toBeInstanceOf(AbortSignal);
     expect(JSON.stringify(res.body)).not.toMatch(/private-id|private-secret/);
   });
   it('recognizes the upstream daily quota without leaking its error', async () => {
@@ -129,6 +131,12 @@ describe('api/run', () => {
     const res = await call();
     expect(res).toMatchObject({ code: 500, body: { error: 'Internal error running code. Please try again.' } });
     expect(mocks.capture).toHaveBeenCalledWith(expect.any(SyntaxError), { route: 'run' });
+  });
+  it('answers a hung runner with a retryable 504 instead of an internal error', async () => {
+    fetch.mockReset().mockRejectedValue(new DOMException('The operation timed out.', 'TimeoutError'));
+    const res = await call();
+    expect(res).toMatchObject({ code: 504, body: { kind: 'runtime_error', status: 'Runner timed out' } });
+    expect(mocks.capture).not.toHaveBeenCalled();
   });
   it('runs Java through Judge0 and preserves the playground reply shape', async () => {
     process.env.RUNNER_PROVIDER = 'judge0';

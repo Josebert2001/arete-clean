@@ -62,3 +62,30 @@ describe('Navbar Premium link', () => {
     },
   );
 });
+
+describe('Navbar layout', () => {
+  it('keeps occasional links out of the main row, under More', () => {
+    render(<MemoryRouter><Navbar /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Courses' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Check In' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /More/ }));
+    for (const name of ['Check In', 'My Attendance', 'Study Planner', 'Campus Places']) {
+      expect(screen.getByRole('link', { name })).toBeInTheDocument();
+    }
+  });
+
+  it('shows the Cybersecurity landing link only to signed-out visitors', () => {
+    render(<MemoryRouter><Navbar /></MemoryRouter>);
+    expect(screen.queryByRole('link', { name: 'Cybersecurity' })).not.toBeInTheDocument();
+  });
+
+  it('shows a signed-out visitor\'s lone extra link inline, with no More menu', () => {
+    mocks.user = null;
+    render(<MemoryRouter><Navbar /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Cybersecurity' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /More/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Campus Places' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Check In' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Study Planner' })).not.toBeInTheDocument();
+  });
+});

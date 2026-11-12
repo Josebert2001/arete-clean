@@ -2,6 +2,7 @@ import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, denyIfUserRateL
 import { getStudentFromRequest } from './supabase.js';
 import { serviceRoleClient, serviceRoleConfigured } from './serviceRole.js';
 import { getRefreshTokenForUser } from './googleAuth.js';
+import { captureApiError } from './sentry.js';
 
 const RATE_LIMIT = { namespace: 'account-delete', limit: 2, windowMs: 24 * 60 * 60 * 1000 };
 
@@ -73,6 +74,8 @@ export default async function handler(req, res) {
     return res.status(200).json({ deleted: true });
   } catch (err) {
     console.error('account/delete failed:', err);
+    // A half-finished deletion needs a human; the console alone is easy to miss.
+    await captureApiError(err, { route: 'account-delete' });
     return res.status(500).json({ error: 'Could not delete your account. Please contact support.' });
   }
 }

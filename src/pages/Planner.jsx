@@ -257,16 +257,18 @@ export default function Planner() {
 
           {/* Semester start */}
           <div>
-            <label className="flex items-center gap-1.5 text-xs font-medium text-coffee-700 mb-2">
+            <label htmlFor="semester-start" className="flex items-center gap-1.5 text-xs font-medium text-coffee-700 mb-2">
               <CalendarDays size={12} /> Semester starts
             </label>
             <input
+              id="semester-start"
+              aria-describedby="semester-start-hint"
               type="date"
               value={startISO}
               onChange={e => setStartISO(e.target.value)}
               className="w-full px-3 py-2.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
             />
-            <p className="text-xs text-coffee-500 mt-1.5">Weekly blocks repeat for 15 teaching weeks from this date.</p>
+            <p id="semester-start-hint" className="text-xs text-coffee-500 mt-1.5">Weekly blocks repeat for 15 teaching weeks from this date.</p>
           </div>
 
           {/* Study days */}
