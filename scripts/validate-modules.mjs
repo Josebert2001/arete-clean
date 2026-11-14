@@ -8,6 +8,7 @@ import { pythonModules } from '../src/data/pythonModules.js';
 import { cModules } from '../src/data/cModules.js';
 import { securityModules } from '../src/data/securityModules.js';
 import { trackMeta } from '../src/data/trackMeta.js';
+import { buildMissionSteps, countableSteps } from '../src/utils/missionSteps.js';
 import { courses as cybersecurityCourses } from '../src/data/courses.js';
 import { courses as dataScienceCourses } from '../src/data/dataScienceCourses.js';
 import { noteLoaders, NOTE_TOPIC_COUNTS } from '../src/data/lectureNotes/index.js';
@@ -197,6 +198,11 @@ for (const { name, modules: list } of tracks) {
     const idx = meta.moduleIndex[i];
     if (idx.id !== m.id || idx.number !== m.number || idx.title !== m.title) {
       errors.push(`[${name}] trackMeta.moduleIndex[${i}] (${idx.id} #${idx.number} "${idx.title}") does not match module (${m.id} #${m.number} "${m.title}")`);
+    }
+    // The catalogue fields the Code Lab renders without loading the module.
+    const steps = countableSteps(buildMissionSteps(m)).length;
+    if (idx.difficulty !== m.difficulty || idx.hours !== m.estimatedHours || idx.steps !== steps) {
+      errors.push(`[${name}] trackMeta.moduleIndex[${i}] (${idx.id}) has difficulty ${idx.difficulty}, hours ${idx.hours}, steps ${idx.steps}; the module says difficulty ${m.difficulty}, hours ${m.estimatedHours}, steps ${steps}`);
     }
   });
 }

@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Flame, PlayCircle, Target, BrainCircuit,
-  CalendarDays, FileText, Code2, GraduationCap, CheckCircle2, BookOpen,
+  ArrowRight, Flame, PlayCircle, GraduationCap, CheckCircle2,
 } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +10,6 @@ import { getTrackProgress } from '../utils/trackProgress';
 import { readLastLocation } from '../utils/lastLocation';
 import { useStudyDays } from '../context/StudyDaysContext';
 import { computeStreak } from '../utils/streak';
-import { pickDailyChallenge } from '../utils/dailyChallenge';
 import { shouldShowGettingStarted, readDismissed, writeDismissed } from '../utils/gettingStarted';
 import { findDepartmentByName, getDepartment } from '../data/departments';
 import GettingStartedCard from './GettingStartedCard';
@@ -51,13 +49,6 @@ function describeLocation(path) {
   return fixed[path] || 'where you left off';
 }
 
-const QUICK_ACTIONS = [
-  { to: '/tutor', icon: BrainCircuit, label: 'AI Tutor', hint: 'Ask anything on the curriculum' },
-  { to: '/planner', icon: CalendarDays, label: 'Study Planner', hint: 'Your weekly revision timetable' },
-  { to: '/cheatsheet', icon: FileText, label: 'Cheatsheet', hint: 'Java · Python · C syntax' },
-  { to: '/explainer', icon: Code2, label: 'Code Explainer', hint: 'Paste code, get plain English' },
-];
-
 export default function StudentDashboard() {
   const { profile } = useAuth();
   const { days } = useStudyDays(); // account-wide, so the streak matches on every device
@@ -79,7 +70,6 @@ export default function StudentDashboard() {
   const { progress: readingProgress } = useProgress(READING_STORAGE_KEY);
   const topicsRead = readTopicTotal(readingProgress);
   const coursesRead = readCourseCount(readingProgress);
-  const challenge = pickDailyChallenge(Object.values(trackMeta), completedIds);
   const streak = computeStreak(days);
   const lastPath = readLastLocation();
   const firstName = (profile?.full_name || '').trim().split(/\s+/)[0] || 'there';
@@ -209,7 +199,11 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* ── Right column: review, reading, year, daily challenge, tools ── */}
+        {/* ── Right column: anything due for review, then the student's courses.
+            The tools that used to be listed here (Tutor, Planner, Cheatsheet,
+            Explainer) are one tap away in the nav and Code Lab, and the daily
+            challenge competed with "Continue" for the same job — one clear
+            next step reads better than three. ── */}
         <div className="space-y-6">
           <ReviewDueCard />
 
@@ -217,81 +211,23 @@ export default function StudentDashboard() {
               because knowing how many topics a course *has* means loading its
               note chunk, and the dashboard must not pull course data for a
               one-line stat (same reason ReviewDueCard avoids useCatalogue). */}
-          {topicsRead > 0 && (
-            <Link
-              to="/courses"
-              className="flex items-center gap-3 bg-paper border border-coffee-200 rounded-2xl p-5 hover:border-coffee-400 transition-colors group"
-            >
-              <div className="w-9 h-9 rounded-xl bg-moss/15 flex items-center justify-center shrink-0">
-                <BookOpen size={17} className="text-moss" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-ink text-sm">
-                  {topicsRead} lecture-note topic{topicsRead === 1 ? '' : 's'} read
-                </p>
-                <p className="text-xs text-coffee-600">
-                  Across {coursesRead} course{coursesRead === 1 ? '' : 's'}
-                </p>
-              </div>
-              <ArrowRight size={15} className="text-coffee-400 group-hover:text-ink transition-colors shrink-0" />
-            </Link>
-          )}
-
-          {level && (
-            <Link
-              to={`/courses?level=${level}`}
-              className="flex items-center gap-3 bg-paper border border-coffee-200 rounded-2xl p-5 hover:border-coffee-400 transition-colors group"
-            >
-              <div className="w-9 h-9 rounded-xl bg-coffee-100 flex items-center justify-center shrink-0">
-                <GraduationCap size={17} className="text-coffee-600" />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-ink text-sm">Your {level}L courses</p>
-                <p className="text-xs text-coffee-600">Outlines, lecture notes, and exam tips</p>
-              </div>
-              <ArrowRight size={15} className="text-coffee-400 group-hover:text-ink transition-colors" />
-            </Link>
-          )}
-
-          {/* An arbitrary uncompleted module is disorienting before a student
-              has done anything at all — hidden while the getting-started
-              checklist is showing instead. */}
-          {!showGettingStarted && challenge && (
-            <div className={`${challenge.track.accentBg} ${challenge.track.accentText} rounded-2xl p-6`}>
-              <div className="flex items-center gap-2 mb-3 opacity-80">
-                <Target size={15} />
-                <p className="text-xs font-mono uppercase tracking-widest">Today&rsquo;s challenge</p>
-              </div>
-              <p className="font-display text-xl font-bold leading-snug mb-1">{challenge.module.title}</p>
-              <p className="text-xs opacity-70 mb-4">{challenge.track.fullName}</p>
-              <Link
-                to={challenge.track.detailPath(challenge.module.id)}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold bg-cream/15 hover:bg-cream/25 transition-colors rounded-lg px-3.5 py-2"
-              >
-                {challenge.track.slug === 'security' ? 'Enter the room' : 'Open the module'} <ArrowRight size={13} />
-              </Link>
+          <Link
+            to={level ? `/courses?level=${level}` : '/courses'}
+            className="flex items-center gap-3 bg-paper border border-coffee-200 rounded-2xl p-5 hover:border-coffee-400 transition-colors group"
+          >
+            <div className="w-9 h-9 rounded-xl bg-moss/15 flex items-center justify-center shrink-0">
+              <GraduationCap size={17} className="text-moss" />
             </div>
-          )}
-
-          <div className="bg-paper border border-coffee-200 rounded-2xl p-5">
-            <p className="text-xs font-mono uppercase tracking-widest text-coffee-500 mb-4">Tools</p>
-            <div className="space-y-1">
-              {QUICK_ACTIONS.map(({ to, icon: Icon, label, hint }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-coffee-100 transition-colors group"
-                >
-                  <Icon size={16} className="text-coffee-600 shrink-0" />
-                  <div className="flex-1">
-                    <span className="text-sm font-semibold text-ink">{label}</span>
-                    <span className="hidden sm:inline text-xs text-coffee-600"> — {hint}</span>
-                  </div>
-                  <ArrowRight size={13} className="text-coffee-300 group-hover:text-coffee-600 transition-colors" />
-                </Link>
-              ))}
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-ink text-sm">{level ? `Your ${level}L courses` : 'Your courses'}</p>
+              <p className="text-xs text-coffee-600">
+                {topicsRead > 0
+                  ? `${topicsRead} lecture-note topic${topicsRead === 1 ? '' : 's'} read across ${coursesRead} course${coursesRead === 1 ? '' : 's'}`
+                  : 'Outlines, lecture notes, and exam tips'}
+              </p>
             </div>
-          </div>
+            <ArrowRight size={15} className="text-coffee-400 group-hover:text-ink transition-colors shrink-0" />
+          </Link>
         </div>
 
       </div>

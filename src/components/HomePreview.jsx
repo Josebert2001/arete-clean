@@ -1,5 +1,6 @@
 import { GraduationCap, Code2, ShieldCheck, Sparkles } from 'lucide-react';
 import { SITE_FAQS } from '../data/publicCatalogue';
+import { trackMeta } from '../data/trackMeta';
 
 // What a crawler gets for "/". Home.jsx cannot be prerendered — it reads
 // AuthContext, calls useNavigate, and swaps itself for the signed-in dashboard
@@ -39,7 +40,7 @@ const INSIDE = [
   },
   {
     icon: ShieldCheck,
-    title: '12 capture-the-flag security rooms',
+    title: `${trackMeta.security.moduleCount} capture-the-flag security rooms`,
     body:
       'A hands-on security track with escalating hints: the CIA triad, cryptography, SQL ' +
       'injection, the Linux command line, digital forensics and network defence.',

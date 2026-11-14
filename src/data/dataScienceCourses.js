@@ -853,7 +853,7 @@ export const courses = [
     studyTips: [
       'The NIST CSF five functions are near-certain exam content — learn all five and be ready to apply them to a scenario',
       'Anonymisation and re-identification risk is the direct data-science application here: understand why removing names does not make a dataset anonymous',
-      'Areté has a 12-room interactive Security track — the early rooms cover this course\'s ground hands-on',
+      'Areté has an 18-room interactive Security track — the early rooms cover this course\'s ground hands-on',
       'Learn the CIA triad well enough to argue which leg a given incident violated; that framing answers half the essay questions',
     ],
   },

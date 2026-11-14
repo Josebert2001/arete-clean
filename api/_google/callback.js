@@ -19,8 +19,20 @@ const RATE_LIMIT = {
 
 // Only ever same-origin app paths — never an external URL, so a forged
 // `returnTo` inside a validly-signed state can't be used as an open redirect.
-function safeReturnTo(returnTo) {
-  if (typeof returnTo !== 'string' || !returnTo.startsWith('/') || returnTo.startsWith('//')) {
+// Same-origin paths only. Browsers read a backslash as a slash and drop tabs
+// and newlines when resolving a Location, so "/\\host" and "/\t/host" both
+// leave the site exactly as "//host" does — refuse all three shapes.
+function hasUnsafeChar(value) {
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code < 0x20 || code === 0x7f || code === 0x5c) return true;
+  }
+  return false;
+}
+
+export function safeReturnTo(returnTo) {
+  if (typeof returnTo !== 'string' || !returnTo.startsWith('/') || returnTo.startsWith('//')
+    || hasUnsafeChar(returnTo)) {
     return '/planner';
   }
   return returnTo;

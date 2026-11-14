@@ -4,7 +4,7 @@
 //  Downloads that object, extracts its plain text where it can, and WRITES THE
 //  course_materials ROW ITSELF.
 //
-//  Supported for extraction: .txt (native), .docx (mammoth), .pdf (pdf-parse)
+//  Supported for extraction: .txt (native), .docx (mammoth), .pdf (pdf-parse 2)
 //  Anything else still gets a row — just with extracted_text NULL.
 //
 //  WHY THE SERVER WRITES THE ROW
@@ -31,9 +31,6 @@
 //  `authenticated`, so the browser cannot write the row at all any more.
 // ============================================================================
 
-// pdf-parse is CJS; import its internal module directly to skip the package
-// entry point's test-file auto-detection.
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { applyApiHeaders, enforceRateLimit, setRateLimitHeaders, logRequest, denyIfUserRateLimited } from './_lib/request-policy.js';
 import { getStudentFromRequest } from './_lib/supabase.js';
 import { serviceRoleClient, serviceRoleConfigured } from './_lib/serviceRole.js';
@@ -251,12 +248,20 @@ export default async function handler(req, res) {
         text = buffer.toString('utf-8');
       } else if (pathExt === 'docx') {
         // Imported here rather than at module scope: mammoth measures ~630ms to
-        // load, and the txt and pdf branches never touch it. pdf-parse stays
-        // eager above — it measures ~5ms, so deferring it would buy nothing.
+        // load, and the txt and pdf branches never touch it.
         const { default: mammoth } = await import('mammoth');
         text = (await mammoth.extractRawText({ buffer })).value;
       } else if (pathExt === 'pdf') {
-        text = (await pdfParse(buffer)).text;
+        // Lazy for the same reason as mammoth, and so a failure to load the
+        // parser on a given runtime costs the tutor text, not the upload.
+        const { PDFParse } = await import('pdf-parse');
+        const parser = new PDFParse({ data: new Uint8Array(buffer) });
+        try {
+          // No "-- 1 of 9 --" page markers: this text is tutor context.
+          text = (await parser.getText({ pageJoiner: '' })).text;
+        } finally {
+          await parser.destroy();
+        }
       }
     } catch (err) {
       console.error('extract: download or text extraction failed:', err);

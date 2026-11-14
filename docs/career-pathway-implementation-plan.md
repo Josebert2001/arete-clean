@@ -2,6 +2,8 @@
 
 Date: 8 November 2026; revised 9 November 2026 (judgment items rewritten with partial credit, pilot size reconciled with the pilot proposal, Phase 0 career explorer added). Status: proposed; no placement engine, partner commitment, or hiring outcome is claimed as delivered.
 
+Implementation status, 9 November 2026: career discovery and an introductory blue investigation pilot now have local source implementations behind separate deployment switches. See the [discovery rollout](career-discovery-rollout.md) and [investigation rollout](blue-investigation-rollout.md) for exact scope, migrations and verification limits. The wider career program below remains planned; these changes do not claim live hosting, partners, VMs or hiring outcomes.
+
 ## 1. Product decision
 
 Areté will help a learner choose a cybersecurity career direction, build demonstrable skills in that direction, and take concrete steps toward relevant work. The core journey is:

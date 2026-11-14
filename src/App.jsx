@@ -2,6 +2,7 @@ import { Component, lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, Link, useLocation, useNavigate, useParams as useRouteParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import Navbar from './components/Navbar';
+import CareerAssessmentGate from './components/CareerAssessmentGate';
 import Footer from './components/Footer';
 import FloatingHelp from './components/FloatingHelp';
 import FeedbackPrompt from './components/FeedbackPrompt';
@@ -12,9 +13,15 @@ import { ThemeProvider } from './context/ThemeContext';
 import { StudyDaysProvider, useStudyDays } from './context/StudyDaysContext';
 import { PlanProvider } from './context/PlanContext';
 import { recordLocation, readLastLocation } from './utils/lastLocation';
-import { hasSecurityEntry, clearSecurityEntry, SECURITY_START } from './utils/learningEntry';
+import { hasSecurityEntry, clearSecurityEntry, SECURITY_START, hasCareerEntry, CAREER_START, CAREER_SIGN_IN } from './utils/learningEntry';
 const Home = lazy(() => import('./pages/Home'));
 const Cybersecurity = lazy(() => import('./pages/Cybersecurity'));
+const Careers = lazy(() => import('./pages/Careers'));
+const CareerQuiz = lazy(() => import('./pages/CareerQuiz'));
+const CareerDashboard = lazy(() => import('./pages/CareerDashboard'));
+const CareerPractice = lazy(() => import('./pages/CareerPractice'));
+const BlueInvestigation = lazy(() => import('./pages/BlueInvestigation'));
+const CareerReviews = lazy(() => import('./pages/CareerReviews'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const CoursePublic = lazy(() => import('./pages/CoursePublic'));
@@ -135,6 +142,12 @@ function AuthStateWatcher() {
     if (justSignedIn) {
       try { sessionStorage.removeItem('arete-just-signed-in'); } catch { /* ignore */ }
       if (user && profileComplete && (pathname === '/' || pathname === '/signin')) {
+        const requestedEntry = new URLSearchParams(search).get('learn');
+        if (requestedEntry === 'career' || (!requestedEntry && hasCareerEntry())) {
+          clearSecurityEntry();
+          navigate(CAREER_START, { replace: true });
+          return;
+        }
         if (hasSecurityEntry() || new URLSearchParams(search).get('learn') === 'cybersecurity') {
           clearSecurityEntry();
           navigate(SECURITY_START, { replace: true });
@@ -164,8 +177,9 @@ function AuthStateWatcher() {
 // so AuthStateWatcher returns the user to it right after they sign in.
 function RequireAuth({ children }) {
   const { user, authLoading, authEnabled } = useAuth();
+  const { pathname } = useLocation();
   if (authLoading) return <RouteLoading />;
-  if (authEnabled && !user) return <Navigate to="/signin" replace />;
+  if (authEnabled && !user) return <Navigate to={pathname === '/career' || pathname === '/career-quiz' || pathname.startsWith('/career/') ? CAREER_SIGN_IN : '/signin'} replace />;
   return children;
 }
 
@@ -249,6 +263,30 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/cybersecurity" element={<Cybersecurity />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/career-quiz" element={<RequireAuth><CareerQuiz /></RequireAuth>} />
+            <Route path="/career" element={<RequireAuth><CareerDashboard /></RequireAuth>} />
+            <Route path="/career/practice/:path" element={<CareerPractice />} />
+            <Route
+              path="/career/investigation"
+              element={
+                <RequireAuth>
+                  <CareerAssessmentGate>
+                    <BlueInvestigation />
+                  </CareerAssessmentGate>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/career/reviews"
+              element={
+                <RequireAuth>
+                  <CareerAssessmentGate>
+                    <CareerReviews />
+                  </CareerAssessmentGate>
+                </RequireAuth>
+              }
+            />
             <Route path="/courses" element={<PublicOrGated><Courses /></PublicOrGated>} />
             <Route path="/courses/:slug" element={<PublicOrGated><CourseDetail /></PublicOrGated>} />
             <Route path="/lab" element={<RequireAuth><CodeLab /></RequireAuth>} />

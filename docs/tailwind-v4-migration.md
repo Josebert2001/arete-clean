@@ -5,6 +5,17 @@ The migration is isolated from the career-pathways branch and the other checkout
 unfinished catalogue/content work. Do not merge while visual differences remain
 unresolved or unapproved.
 
+## Sync with master, 14 November 2026
+
+Master `ade4a9f` was merged into this branch: React 19, the guided module pages,
+the Code Lab catalogue, the nav declutter and Security rooms 13-18. Three
+`outline-none` usages that arrived with that code were renamed to
+`outline-hidden`. Lint, 1,402 tests in 104 files and the full build pass.
+
+**The visual audit below predates this sync.** Its baseline is master `26e24ed`,
+so none of the pages added or reworked since have been captured under Tailwind 4.
+Repeat the audit against current master before approving the merge.
+
 ## Configuration
 
 - Tailwind and `@tailwindcss/postcss` are 4.3.5. Autoprefixer is no longer a direct dependency.

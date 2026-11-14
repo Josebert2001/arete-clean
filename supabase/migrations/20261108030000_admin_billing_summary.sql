@@ -6,7 +6,9 @@ CREATE OR REPLACE FUNCTION admin_billing_summary()
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+-- pg_temp last, like every other definer function here: left implicit it is
+-- searched first, so a temp table could shadow one this function reads.
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_now TIMESTAMPTZ := NOW();

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { supabase, isConfigured } from '../lib/supabase';
+import { signInEntryQuery } from '../utils/learningEntry';
 import {
   BASE_PROFILE_COLUMNS, PROFILE_COLUMNS, LEARNING_MODE_COLUMN, isMissingColumnError,
 } from '../utils/profileSchema';
@@ -150,7 +151,7 @@ export function AuthProvider({ children }) {
       email,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/signin${securityEntry ? '?learn=cybersecurity' : ''}`,
+        emailRedirectTo: `${window.location.origin}/signin${signInEntryQuery(securityEntry)}`,
       },
     });
 
@@ -161,7 +162,7 @@ export function AuthProvider({ children }) {
   const signInWithGoogle = (securityEntry = false) =>
     supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/signin${securityEntry ? '?learn=cybersecurity' : ''}` },
+      options: { redirectTo: `${window.location.origin}/signin${signInEntryQuery(securityEntry)}` },
     });
 
   const signOut = () => supabase.auth.signOut();

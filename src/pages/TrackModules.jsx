@@ -4,11 +4,16 @@ import { useTrack } from '../data/useTrack';
 import { useProgress } from '../components/useProgress';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { usePageTitle } from '../utils/usePageTitle';
+import { buildMissionSteps, countableSteps, stepId, levelLabel } from '../utils/missionSteps';
+
+// Same record TrackModuleDetail ticks steps into.
+const STEPS_STORAGE_KEY = 'mission-steps-v1';
 
 export default function TrackModules() {
   const { lang } = useParams();
   const { track, status } = useTrack(lang);
   const { isComplete, progress } = useProgress(track?.storageKey);
+  const stepProgress = useProgress(STEPS_STORAGE_KEY);
   usePageTitle(track ? `${track.label} Modules` : 'Track not found');
 
   if (status === 'loading') {
@@ -35,6 +40,12 @@ export default function TrackModules() {
   }
 
   const completedCount = progress.completedModules.length;
+  // "3 of 7 steps" for a module that is started but not finished, so the list
+  // shows where to pick up rather than only done / not done.
+  const stepsFor = (m) => {
+    const steps = countableSteps(buildMissionSteps(m));
+    return { total: steps.length, done: steps.filter(step => stepProgress.isComplete(stepId(m.id, step.key))).length };
+  };
   const progressPercent = Math.round((completedCount / track.modules.length) * 100);
 
   return (
@@ -101,15 +112,18 @@ export default function TrackModules() {
                   <h2 className="font-display text-xl font-bold text-ink group-hover:text-coffee-700 transition-colors">
                     {m.title}
                   </h2>
-                  <span className="text-xs font-mono text-coffee-700">
-                    {'●'.repeat(m.difficulty)}{'○'.repeat(5 - m.difficulty)}
+                  <span className="text-xs font-mono uppercase tracking-wider text-coffee-700">
+                    {levelLabel(m.difficulty)}
                   </span>
                 </div>
                 <p className="text-sm text-coffee-700 mb-2">{m.subtitle}</p>
                 <div className="flex flex-wrap items-center gap-4 text-xs text-coffee-700">
                   <span className="flex items-center gap-1"><Clock size={12} /> ~{m.estimatedHours}h</span>
                   <span>{m.practiceQuestions.length} questions</span>
-                  <span>{m.codeExamples.length} examples</span>
+                  <span>{stepsFor(m).total} steps</span>
+                  {!isComplete(m.id) && stepsFor(m).done > 0 && (
+                    <span className="font-medium text-ink">In progress · {stepsFor(m).done} of {stepsFor(m).total} steps</span>
+                  )}
                   {progress.quizScores[m.id] && (
                     <span className="text-moss">
                       Quiz: {progress.quizScores[m.id].score}/{progress.quizScores[m.id].total}

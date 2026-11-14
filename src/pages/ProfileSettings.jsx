@@ -27,6 +27,23 @@ async function loadBilling(userId) {
   return { passes: passes.data ?? [], payments: payments.data ?? [] };
 }
 
+async function loadCareer(userId) {
+  const records = await Promise.all(['career_profiles', 'career_placement_attempts', 'career_practice_notes'].map(table =>
+    supabase.from(table).select('*').eq('user_id', userId)));
+  // An unapplied optional migration has no career records to export. Other
+  // failures must not silently produce an apparently complete export.
+  if (records.some(record => record.error)) {
+    if (records.every(record => ['42P01', 'PGRST205'].includes(record.error?.code))) return null;
+    throw new Error('Could not load your career records. Please try the export again.');
+  }
+  const cases = await Promise.all(['career_case_attempts', 'career_case_submissions', 'career_case_reviews', 'career_case_invitations'].map(table => supabase.from(table).select('*').eq('user_id', userId)));
+  let investigations = null;
+  if (cases.some(record => record.error)) {
+    if (!cases.every(record => ['42P01', 'PGRST205'].includes(record.error?.code))) throw new Error('Could not load your investigation records. Please try the export again.');
+  } else investigations = { attempts: cases[0].data, submissions: cases[1].data, reviews: cases[2].data, invitations: cases[3].data };
+  return { profiles: records[0].data, attempts: records[1].data, practiceNotes: records[2].data, investigations };
+}
+
 function PlanSection() {
   const plan = usePlan();
   if (plan.status !== 'ready' || !plan.enabled) return null;
@@ -76,15 +93,16 @@ export default function ProfileSettings() {
     setExporting(true);
     setDataError('');
     try {
-      const [progress, attendance, materials, google, billing] = await Promise.all([
+      const [progress, attendance, materials, google, billing, career] = await Promise.all([
         supabase.from('user_progress').select('*').eq('user_id', user.id),
         supabase.from('attendance_records').select('*').eq('student_id', user.id),
         supabase.from('course_materials_visible').select('id, course_code, course_slug, department, display_name, file_size, file_type, description, uploaded_at, uploaded_by_me').eq('uploaded_by_me', true),
         getGoogleStatus(),
         loadBilling(user.id),
+        loadCareer(user.id),
       ]);
       if (progress.error || attendance.error || materials.error || google.error) throw new Error('Could not load all your data. Please try again.');
-      const data = assembleUserData({ profile, progress: progress.data ?? [], attendance: attendance.data ?? [], materials: materials.data ?? [], google, billing });
+      const data = assembleUserData({ profile, progress: progress.data ?? [], attendance: attendance.data ?? [], materials: materials.data ?? [], google, billing, career });
       const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
       const link = document.createElement('a');
       link.href = url;

@@ -3,10 +3,10 @@
 // existing track pages, progress sync, validator, and AI tutor all work
 // unchanged — PLUS a `challenge` field: an embedded capture-the-flag puzzle.
 //
-// Flags are validated CLIENT-SIDE by SHA-256 (see FlagChallenge.jsx). Only the
-// hash ships in the bundle, so answers cannot be found by reading the source
-// (except module 1, where reading the source IS the challenge). No backend, no
-// API cost, no JDoodle quota — every challenge is solvable purely in-browser.
+// Flags are validated CLIENT-SIDE by SHA-256 (see FlagChallenge.jsx).
+// Comparison hashes, hints and post-solve writeups all ship in the bundle;
+// this is a learning exercise, not a secrecy boundary. No backend, API cost
+// or JDoodle quota — every challenge is solvable purely in-browser.
 //
 // Each challenge:
 //   kind      — 'inspect' | 'decode' | 'crack' | 'analyze' (used for the badge)
@@ -17,7 +17,7 @@
 //                 'text'     → monospace block, e.g. headers/email (`content`)
 //                 'table'    → { columns: [], rows: [[]] }
 //   flagFormat— the shape of the flag, shown to the student (e.g. 'ARETE{...}')
-//   flagHash  — SHA-256 of the exact flag (lowercased, trimmed before hashing)
+//   flagHash  — SHA-256 of the exact flag (trimmed; case-sensitive)
 //   hints     — escalating hints, revealed one at a time
 //   writeup   — the explanation shown after the flag is solved
 
@@ -1448,6 +1448,693 @@ is now dead code. The firewall is effectively off.`,
         'The flag uses that rule number: ARETE{rule_7_any_any}.'
       ],
       writeup: 'Rule 7 (any/any/any ALLOW) is the culprit, so the flag is ARETE{rule_7_any_any}. Because firewalls take the first matching rule, this broad permit matches every packet before the default-deny on rule 8 is ever reached — turning the firewall off in practice. This is a genuinely common real-world misconfiguration: a temporary "allow all" added to diagnose a problem and forgotten. Auditing rule sets for stray any/any permits, and keeping the default-deny truly last, is exactly the defensive discipline this closing room is about.'
+    }
+  },
+
+  {
+    id: 'sec-web-xss',
+    number: 13,
+    title: 'Cross-Site Scripting',
+    subtitle: 'When untrusted text becomes code in the browser',
+    difficulty: 3,
+    estimatedHours: 2,
+    theory: [
+      {
+        heading: 'Follow the input to the output',
+        body: 'Cross-site scripting (XSS) happens when attacker-controlled content executes as code in another user\'s browser within a trusted site. Trace where input enters and where it is rendered. A comment, a URL parameter or an API response can carry untrusted text. The important boundary is where the application treats that text as HTML or script instead of data.'
+      },
+      {
+        heading: 'Stored, reflected and DOM-based XSS',
+        body: 'Stored XSS persists in saved content, such as a forum comment. Reflected XSS comes back in a response to a crafted request. DOM-based XSS involves client-side code passing untrusted data into an unsafe browser operation. These descriptions can overlap: stored data can reach a dangerous DOM sink. In this room, inspect the supplied snippets; you do not need to execute a payload.'
+      },
+      {
+        heading: 'Choose the right output operation',
+        body: 'For plain text, textContent avoids HTML interpretation; innerHTML parses markup, including potentially dangerous event handlers. Blocking only script tags is insufficient. If rich HTML is required, use a maintained sanitizer and a restrictive content policy as additional protection. Encoding must fit the output context: HTML text, URLs and JavaScript are different contexts.'
+      }
+    ],
+    codeExamples: [
+      {
+        title: 'The same input, two different boundaries',
+        language: 'javascript',
+        code: `const comment = '<b>Hello, reader</b>';
+
+// Parses the input as HTML; unsafe with untrusted content.
+preview.innerHTML = comment;
+
+// Shows the literal characters, including the angle brackets.
+preview.textContent = comment;`,
+        explanation: 'The source string is identical. The operation receiving it determines whether markup becomes elements or remains visible text. The examples are displayed as code in this room, not executed.'
+      },
+      {
+        title: 'A harmless-looking preview feature',
+        language: 'javascript',
+        code: `const message = new URLSearchParams(location.search).get('message') ?? '';
+const preview = document.querySelector('#preview');
+
+// A URL parameter is still untrusted, even on your own site.
+preview.textContent = message;`,
+        explanation: 'A convenience feature can cross a trust boundary. Rendering a message as plain text meets the feature\'s goal without allowing the visitor to create HTML elements.'
+      }
+    ],
+    practiceQuestions: [
+      {
+        question: 'Which operation should display an untrusted comment as plain text?',
+        options: ['Assign it to innerHTML', 'Assign it to textContent', 'Wrap it in a script tag', 'Remove spaces before rendering'],
+        correctIndex: 1,
+        explanation: 'textContent treats the comment as text rather than asking the browser to parse it as HTML.'
+      },
+      {
+        question: 'A malicious comment is saved and displayed to later readers. Which description fits?',
+        options: ['A network timeout', 'A hash collision', 'A stored XSS attack', 'A normal login redirect'],
+        correctIndex: 2,
+        explanation: 'The dangerous input persists in stored content and can affect people who view it later.'
+      },
+      {
+        question: 'Why is deleting only literal script tags an incomplete XSS defence?',
+        options: ['Other HTML features can run code', 'HTML has no executable features', 'It prevents all browser rendering', 'It changes every password hash'],
+        correctIndex: 0,
+        explanation: 'Event-handler attributes are one example of execution that does not require a script element.'
+      },
+      {
+        question: 'What should a reviewer trace when assessing a preview component?',
+        options: ['The page colour and font size', 'Only the hostname in the URL', 'Only the name of the variable', 'The input source and output sink'],
+        correctIndex: 3,
+        explanation: 'The path from untrusted input to an operation that interprets it reveals the security boundary.'
+      }
+    ],
+    miniProject: {
+      title: 'Review a comment preview',
+      description: 'Using only the snippets in this room, write a short review identifying the untrusted source, the unsafe sink and a plain-text replacement. Explain what a user would see when the comment contains <b>Hello</b>. This is a reading exercise; no payload execution or live website is needed.',
+      hints: [
+        'Label the URL parameter as a source and the rendering assignment as a sink.',
+        'Describe the difference between seeing bold text and seeing the literal markup.',
+        'If the feature later needs rich formatting, include a separate sanitization review.'
+      ]
+    },
+    challenge: {
+      kind: 'inspect',
+      title: 'Review the three renderers',
+      brief: 'All three renderers receive the same untrusted comment. Identify the renderer that directly parses it as HTML. Submit its letter in lowercase as ARETE{renderer_letter}. Everything needed is below; do not run the snippets.',
+      material: [
+        {
+          type: 'code',
+          language: 'javascript',
+          content: `// Untrusted input supplied by a visitor:
+const comment = '<img src="missing" onerror="console.log(42)">';
+
+// Renderer A
+preview.innerHTML = comment;
+
+// Renderer B
+preview.textContent = comment;
+
+// Renderer C: title is a plain tooltip attribute, not an event handler.
+preview.setAttribute('title', comment);`
+        }
+      ],
+      flagFormat: 'ARETE{renderer_letter}',
+      flagHash: 'ed56f27d0642c3ad735a711b9ae2c0b614c8e52b2f98b37779fc318d9b187e4a',
+      hints: [
+        'Find the operation that turns a string into HTML elements.',
+        'textContent and the fixed title attribute do not parse this string into an image element.',
+        'Renderer A uses innerHTML. Put its lowercase letter after renderer_ inside the wrapper.'
+      ],
+      writeup: 'Renderer A crosses the boundary by assigning the comment to innerHTML, so the flag is ARETE{renderer_a}. The onerror attribute illustrates why removing script tags alone is insufficient. Renderer B displays text, and renderer C assigns a fixed tooltip attribute. For this plain-text preview, replacing innerHTML with textContent removes the unnecessary HTML interpretation.'
+    }
+  },
+
+  {
+    id: 'sec-access-control',
+    number: 14,
+    title: 'Broken Access Control & IDOR',
+    subtitle: 'Being signed in does not mean every record is yours',
+    difficulty: 3,
+    estimatedHours: 2,
+    theory: [
+      {
+        heading: 'Identity is only the first question',
+        body: 'Authentication establishes who is making a request. Authorization decides what that identity may do. A signed-in learner may view their own invoice without being allowed to view another learner\'s. Every protected object needs an access decision on the server, including reads, updates and downloads.'
+      },
+      {
+        heading: 'An identifier is not permission',
+        body: 'Insecure direct object reference (IDOR) is an access-control failure where changing an object reference exposes an operation the caller is not permitted to perform. A numeric invoice ID is not itself a vulnerability: the missing permission check is. Random identifiers can make guessing harder, but cannot replace authorization.'
+      },
+      {
+        heading: 'Check the requested object',
+        body: 'Derive identity from the verified session, then fetch objects within the caller\'s permitted scope. Ignore client-supplied claims about ownership. Apply the same rule to each API route and file download; hiding a button in the interface does not protect the underlying endpoint. Separate administrator access from ordinary ownership with an explicit policy.'
+      }
+    ],
+    codeExamples: [
+      {
+        title: 'A login check without an ownership check',
+        language: 'javascript',
+        code: `// Illustrative server-side pseudocode.
+requireSignedIn(request);
+const invoice = await invoices.findById(request.params.id);
+return json(invoice); // Whose invoice did we just return?`,
+        explanation: 'This route checks that someone is signed in, then looks up any supplied invoice ID. It never relates that invoice to the authenticated identity.'
+      },
+      {
+        title: 'Scope the lookup to the verified caller',
+        language: 'javascript',
+        code: `// Illustrative server-side pseudocode.
+const user = requireSignedIn(request);
+const invoice = await invoices.findOne({
+  id: request.params.id,
+  ownerId: user.id
+});
+if (!invoice) return notFound();
+return json(invoice);`,
+        explanation: 'The ownership condition is part of the lookup. user.id comes from the verified session, not a query parameter or form field. A real application should test the entire policy, including permitted staff roles.'
+      }
+    ],
+    practiceQuestions: [
+      {
+        question: 'What does authentication establish?',
+        options: ['Who is making the request', 'Who owns every stored object', 'Which files are publicly shared', 'Which administrator rule applies'],
+        correctIndex: 0,
+        explanation: 'Authentication establishes identity. Authorization must separately decide which objects and actions that identity may access.'
+      },
+      {
+        question: 'Which observation demonstrates an IDOR in a private invoice feature?',
+        options: ['An invoice URL contains a number', 'A user guesses a missing invoice', 'A user receives a private invoice owned by someone else', 'A user receives their own invoice after signing in'],
+        correctIndex: 2,
+        explanation: 'The failure is unauthorized access to another owner\'s private object, not simply the presence of an identifier.'
+      },
+      {
+        question: 'Which source should supply the owner used in an access check?',
+        options: ['A hidden field in the browser form', 'The identity from the verified session', 'An ownerId appended to the URL', 'The display name typed by the caller'],
+        correctIndex: 1,
+        explanation: 'Client-controlled fields are claims. The server should use its authenticated identity and enforce the access policy.'
+      },
+      {
+        question: 'What changes if predictable IDs are replaced with random UUIDs?',
+        options: ['Ownership checks become unnecessary', 'Downloads automatically become private', 'Every user becomes an administrator', 'Guessing is harder; access checks remain necessary'],
+        correctIndex: 3,
+        explanation: 'Identifier complexity reduces guessability but does not grant or enforce permission.'
+      }
+    ],
+    miniProject: {
+      title: 'Write an ownership test matrix',
+      description: 'Using the fictional invoice records below, write expected outcomes for an owner, another signed-in user and a signed-out visitor attempting to read each invoice. Add one update operation and explain why its check must be enforced independently of the read route. Do not make requests to a live service.',
+      hints: [
+        'Start with the rule: only the owner may read or change these private invoices.',
+        'A missing invoice and a forbidden invoice must not expose private record details.',
+        'Include the case where the caller supplies another person\'s ownerId.'
+      ]
+    },
+    challenge: {
+      kind: 'analyze',
+      title: 'Find the invoice that crossed the boundary',
+      brief: 'This fictional portal allows only an invoice\'s owner to read it. All recorded requests were made as learner-17. Find the private invoice belonging to someone else that was actually returned with status 200. Submit ARETE{invoice_ID}; the records and responses are supplied, so no live requests are needed.',
+      material: [
+        {
+          type: 'table',
+          columns: ['Invoice ID', 'Owner', 'Visibility'],
+          rows: [['2047', 'learner-17', 'private'], ['2048', 'learner-88', 'private'], ['2049', 'learner-88', 'private']]
+        },
+        {
+          type: 'text',
+          content: `Verified session: learner-17
+GET /api/invoices/2047 -> 200 {"id":2047,"ownerId":"learner-17"}
+GET /api/invoices/2048 -> 200 {"id":2048,"ownerId":"learner-88"}
+GET /api/invoices/2049 -> 403 {"error":"Forbidden"}
+GET /api/invoices/9999 -> 404 {"error":"Not found"}`
+        }
+      ],
+      flagFormat: 'ARETE{invoice_ID}',
+      flagHash: '52fe9a97fd4c0c8870ac58f48a9ef7fdf04695af81981e02e06ad29e2ab6e158',
+      hints: [
+        'Compare the verified identity with the owner of each returned record.',
+        'A 403 response did not return an invoice. Concentrate on successful responses.',
+        'Invoice 2048 was returned to learner-17 even though its owner is learner-88.'
+      ],
+      writeup: 'The unauthorized successful response contains invoice 2048, giving ARETE{invoice_2048}. Invoice 2047 belongs to the caller; the other requests returned errors. A useful regression test repeats the same request under two different owners and checks that the non-owner cannot read or modify the record.'
+    }
+  },
+
+  {
+    id: 'sec-log-analysis',
+    number: 15,
+    title: 'Log Analysis',
+    subtitle: 'Turn individual events into an evidence-backed timeline',
+    difficulty: 3,
+    estimatedHours: 2,
+    theory: [
+      {
+        heading: 'Read events before writing a story',
+        body: 'A log records what one system observed: a timestamp, an actor or account, an action and a result. Begin by identifying the source and time zone. A failed login is an event, not proof of an attack. Repeated failures followed by success can justify investigation, but the account owner may also have mistyped a password. Keep observations separate from interpretations.'
+      },
+      {
+        heading: 'Correlate on more than one field',
+        body: 'Group related events by account, source address, request ID or session ID and compare their order. An IP address can represent a proxy or several users, so it is not a reliable personal identity. Check whether the application recorded the real client address or an intermediate proxy. When combining systems, account for time-zone differences and clock skew before claiming one event caused another.'
+      },
+      {
+        heading: 'Keep the evidence useful',
+        body: 'Preserve an original copy and record which filters produced your working set. Capture the time window and the events supporting a conclusion, including contradictory evidence. Logs may be incomplete, rotated or tampered with; absence of an event is not proof that nothing happened. Do not put passwords, session tokens or unnecessary personal data into a report.'
+      }
+    ],
+    codeExamples: [
+      {
+        title: 'One event, several useful fields',
+        language: 'json',
+        code: `{
+  "time": "2026-11-10T09:01:00Z",
+  "eventId": "auth-104",
+  "account": "ada",
+  "source": "198.51.100.23",
+  "action": "login",
+  "result": "FAIL"
+}`,
+        explanation: 'The Z suffix marks UTC. eventId identifies the record, account identifies the attempted login and result records the outcome. None of these fields alone explains the person\'s intent.'
+      },
+      {
+        title: 'A cautious analyst note',
+        language: 'text',
+        code: `Observation: three failures for ada from the same source,
+then a success within the supplied five-minute window.
+
+Interpretation: possible password guessing followed by access.
+Alternative: the owner corrected a forgotten password.
+Next check: correlate the successful session with account activity.
+Scope limit: this excerpt cannot establish the full incident.`,
+        explanation: 'A useful note states what was observed, a testable interpretation and a follow-up question. It avoids turning an alert into a claim of proven compromise.'
+      }
+    ],
+    practiceQuestions: [
+      {
+        question: 'A timestamp ends in Z. Which time zone does that indicate?',
+        options: ['The browser\'s current zone', 'The server\'s unnamed local zone', 'Coordinated Universal Time', 'A time zone that cannot be known'],
+        correctIndex: 2,
+        explanation: 'Z denotes UTC, which gives the analyst an explicit reference when comparing sources.'
+      },
+      {
+        question: 'What is the strongest conclusion from three failed logins followed by one success?',
+        options: ['An attacker has certainly taken over', 'The sequence deserves investigation', 'The IP identifies one named person', 'The server logs must be corrupted'],
+        correctIndex: 1,
+        explanation: 'The sequence is worth investigating, but it does not establish intent or attribution by itself.'
+      },
+      {
+        question: 'Two systems disagree about event order by a few seconds. What should you check?',
+        options: ['Their clock synchronization and time zones', 'Their page layout and browser colour scheme', 'Their account avatars and display names', 'Their file extensions and image dimensions'],
+        correctIndex: 0,
+        explanation: 'Different time zones or unsynchronized clocks can create a misleading cross-system timeline.'
+      },
+      {
+        question: 'Which item belongs in a shared investigation note?',
+        options: ['A complete reusable session token', 'The user\'s password in clear text', 'An unsupported claim of attribution', 'The relevant event IDs and time window'],
+        correctIndex: 3,
+        explanation: 'Evidence references help another analyst reproduce the reasoning without exposing reusable secrets.'
+      }
+    ],
+    miniProject: {
+      title: 'Write a five-minute triage note',
+      description: 'Use the log table in this room to write a short timeline for ada. Cite the relevant event IDs, distinguish observations from hypotheses, and name two follow-up checks. Keep the original table intact and work from your notes; no log-analysis software is required.',
+      hints: [
+        'Keep account and source together when grouping failures.',
+        'Include the successful login rather than counting failures alone.',
+        'Consider session activity and a trusted-channel check with the account owner.'
+      ]
+    },
+    challenge: {
+      kind: 'analyze',
+      title: 'Find the source worth investigating',
+      brief: 'Within this complete five-minute excerpt, find the single source with at least three FAIL events for ada followed by an OK event for ada. Submit ARETE{source_IP}. This identifies a pattern for triage, not a proven attacker.',
+      material: [
+        {
+          type: 'table',
+          columns: ['Event', 'Time (UTC)', 'Source', 'Account', 'Result'],
+          rows: [
+            ['auth-101', '09:00:10', '192.0.2.40', 'ada', 'FAIL'],
+            ['auth-102', '09:00:20', '198.51.100.23', 'ada', 'FAIL'],
+            ['auth-103', '09:00:35', '203.0.113.9', 'ben', 'FAIL'],
+            ['auth-104', '09:01:00', '198.51.100.23', 'ada', 'FAIL'],
+            ['auth-105', '09:01:30', '192.0.2.40', 'ada', 'OK'],
+            ['auth-106', '09:02:00', '198.51.100.23', 'ada', 'FAIL'],
+            ['auth-107', '09:02:20', '198.51.100.23', 'ada', 'OK'],
+            ['auth-108', '09:04:00', '203.0.113.9', 'ben', 'FAIL']
+          ]
+        }
+      ],
+      flagFormat: 'ARETE{source_IP}',
+      flagHash: 'bcb3e53c66c1f050b2dbea3ffe5510f81d04fa53cb3e273ae097dcc42124c47e',
+      hints: [
+        'Filter to account ada, then count failures separately for each source.',
+        'The source with failures at 09:00:20, 09:01:00 and 09:02:00 later succeeds.',
+        'Wrap 198.51.100.23 in ARETE{...}; keep the dots in the address.'
+      ],
+      writeup: 'The matching source is 198.51.100.23, so the flag is ARETE{198.51.100.23}. Events auth-102, auth-104 and auth-106 are failures for ada; auth-107 is a later success. The other sources do not satisfy both conditions for that account. These documentation-only addresses describe a fictional capture. Correlate the resulting session before deciding whether the success was malicious.'
+    }
+  },
+
+  {
+    id: 'sec-password-storage',
+    number: 16,
+    title: 'Password Storage & Salting',
+    subtitle: 'Unique salts, slow verification and the limits of hashing',
+    difficulty: 3,
+    estimatedHours: 2,
+    theory: [
+      {
+        heading: 'Verification without storing the password',
+        body: 'A password verifier lets a service check a login without retaining the original password. Use a password-hashing library with a suitable algorithm such as Argon2id. Fast general-purpose hashes such as SHA-256 are useful for integrity checks and this room\'s flag checker, but are unsuitable by themselves for storing passwords because guesses are cheap.'
+      },
+      {
+        heading: 'A different salt for each stored password',
+        body: 'A salt is a random value generated separately for each stored password. It can be stored with the verifier; it is not a secret. Different salts prevent identical passwords from routinely producing identical stored verifiers and stop one precomputed table from being reused across all accounts. A salt does not make a weak password strong or prevent targeted guessing.'
+      },
+      {
+        heading: 'Let the library own the format',
+        body: 'Use a maintained library to generate salts, encode parameters and verify passwords. Tune its work settings to the service and update them over time. A pepper is a separate secret kept outside the password database, with its own rotation plan. Password reset, rate limits and multi-factor authentication address risks that storage alone cannot solve.'
+      }
+    ],
+    codeExamples: [
+      {
+        title: 'Registration and verification are library operations',
+        language: 'text',
+        code: `Illustrative server-side pseudocode; not a browser dependency:
+
+register(password):
+  verifier = passwordLibrary.argon2id.hash(password)
+  # Library generates a fresh random salt and stores its parameters.
+  save(verifier)
+
+login(password, verifier):
+  return passwordLibrary.argon2id.verify(verifier, password)`,
+        explanation: 'The application asks a library to produce and verify an encoded record. It does not invent its own hashing scheme or decrypt stored passwords. The exercise below only requires reading the supplied configurations.'
+      },
+      {
+        title: 'Two identical passwords, different records',
+        language: 'text',
+        code: `Illustrative records; digest labels are placeholders, not real hashes:
+
+Account ada: algorithm=Argon2id salt=7b2c... digest=<digest-A>
+Account ben: algorithm=Argon2id salt=91e4... digest=<digest-B>
+
+Even if the passwords are equal, independently generated salts
+normally produce different verifier records.`,
+        explanation: 'A database reader should not be able to spot shared passwords just by comparing complete verifier records. The salt remains available to verification code, which must use the same stored salt and parameters.'
+      }
+    ],
+    practiceQuestions: [
+      {
+        question: 'Where may a per-password salt be stored?',
+        options: ['Only in the user\'s memory', 'Only inside an encrypted email', 'Nowhere after registration', 'Alongside the password verifier'],
+        correctIndex: 3,
+        explanation: 'A salt is not a secret. Verification needs the stored salt and algorithm parameters.'
+      },
+      {
+        question: 'What does a fresh salt for each stored password help prevent?',
+        options: ['Reuse of one precomputed table across all records', 'Every form of guessing against a weak password', 'Every phishing attempt against the account owner', 'All unauthorized access to a stolen database'],
+        correctIndex: 0,
+        explanation: 'Per-password salts defeat reusable precomputation across records; they do not stop all password guessing or account attacks.'
+      },
+      {
+        question: 'Why is SHA-256 alone a poor password-storage scheme?',
+        options: ['Its output is too long to compare', 'It always exposes the original input', 'Its speed makes password guesses cheap', 'It cannot accept a password as input'],
+        correctIndex: 2,
+        explanation: 'A fast integrity hash is designed for efficient computation. Password hashing deliberately makes guessing more expensive.'
+      },
+      {
+        question: 'Which statement distinguishes a pepper from a salt?',
+        options: ['A pepper must be published with each account', 'A pepper is a separate secret outside the database', 'A salt must be shared unchanged by every account', 'A salt is the user\'s original plaintext password'],
+        correctIndex: 1,
+        explanation: 'A pepper is a separately managed secret. A salt is per-password randomness that may be stored openly with the verifier.'
+      }
+    ],
+    miniProject: {
+      title: 'Review a registration design',
+      description: 'Compare the four schemes in the challenge table. For each, write whether it uses a password-hashing algorithm, whether it generates independent salts and whether it keeps a recoverable password. Recommend one and explain one risk it still does not solve. No password cracking or external library installation is needed.',
+      hints: [
+        'A shared salt does not provide per-password uniqueness.',
+        'Recoverable encryption is not the same as password verification.',
+        'Discuss weak passwords or stolen sessions as a remaining risk.'
+      ]
+    },
+    challenge: {
+      kind: 'analyze',
+      title: 'Choose the storage scheme',
+      brief: 'Choose the only supplied scheme that uses a password-hashing algorithm, generates an independent random salt for every stored password and verifies without decrypting a password. Use its lowercase letter in ARETE{scheme_letter}. Work settings in the Argon2id schemes have already been reviewed for this fictional service.',
+      material: [
+        {
+          type: 'table',
+          columns: ['Scheme', 'Algorithm', 'Salt handling', 'Login check'],
+          rows: [
+            ['A', 'SHA-256', 'No salt', 'Recompute and compare'],
+            ['B', 'Argon2id', 'One constant salt for every account', 'Library verifier'],
+            ['C', 'Argon2id', 'Library generates a fresh random salt per stored password', 'Library verifier'],
+            ['D', 'AES-GCM encryption', 'No password-hashing salt', 'Decrypt stored password and compare']
+          ]
+        }
+      ],
+      flagFormat: 'ARETE{scheme_letter}',
+      flagHash: 'dc0e9c79985f76da765d9d344c5dcd53c9b47fb51b445010ae243d0b76999663',
+      hints: [
+        'Apply all three conditions, not just the algorithm name.',
+        'Scheme B uses a password-hashing algorithm but shares the salt.',
+        'Scheme C satisfies the complete policy; use its lowercase letter.'
+      ],
+      writeup: 'Scheme C satisfies the stated policy, giving ARETE{scheme_c}. Scheme A is a fast unsalted hash, scheme B reuses a salt and scheme D keeps a recoverable password. Secure storage reduces damage from a database leak, but cannot guarantee that a weak password survives targeted guessing or that a user will resist phishing.'
+    }
+  },
+
+  {
+    id: 'sec-packet-reading',
+    number: 17,
+    title: 'Packet Reading',
+    subtitle: 'Follow a conversation through a Wireshark-style capture',
+    difficulty: 3,
+    estimatedHours: 2,
+    theory: [
+      {
+        heading: 'Packets belong to conversations',
+        body: 'A packet list usually shows time, source, destination, protocol and a short summary. Ports help distinguish services and client connections. A stream identifier groups one conversation; it is an index within a capture, not a universal identifier. Read both directions and match the requested resource to the response before interpreting payload text.'
+      },
+      {
+        heading: 'Arrival order is not byte order',
+        body: 'TCP delivers an ordered byte stream even when packets arrive out of order or are retransmitted. Sequence numbers identify byte positions separately in each direction. To reconstruct a simple excerpt, select one stream and one direction, order payload bytes by sequence number and avoid adding identical retransmitted bytes twice. Real captures can also contain gaps or conflicting overlaps that require more care.'
+      },
+      {
+        heading: 'Know what the capture cannot show',
+        body: 'Plain HTTP may expose application content. TLS normally encrypts that content; a port number alone does not reveal a password or message. Wireshark can follow streams, but decoding encrypted content requires appropriate session secrets and authorization. This room provides a fictional decoded HTTP excerpt, so you can practise stream reading without installing Wireshark or opening a packet file.'
+      }
+    ],
+    codeExamples: [
+      {
+        title: 'Read a display filter',
+        language: 'text',
+        code: `tcp.stream eq 7
+
+Meaning: display packets associated with TCP stream 7
+inside this capture, in both directions.
+
+Then inspect the client request and its server response.
+The filter alone does not establish what the traffic means.`,
+        explanation: 'This is Wireshark-style filter syntax shown for recognition. The challenge already supplies the relevant excerpts, so no filtering tool is required.'
+      },
+      {
+        title: 'Reassemble a small response',
+        language: 'text',
+        code: `Arrival   Direction       Seq   Len   Payload
+first     server->client  505   5     world
+second    server->client  500   5     hello
+third     server->client  500   5     hello  [retransmission]
+
+Ordered unique bytes: helloworld`,
+        explanation: 'The payload at sequence 500 precedes the payload at 505. The retransmission repeats the same byte positions and content, so it is not appended again.'
+      }
+    ],
+    practiceQuestions: [
+      {
+        question: 'What does tcp.stream eq 7 select?',
+        options: ['Every packet sent to TCP port 7', 'One indexed TCP conversation in this capture', 'Only the seventh byte of a response', 'Every encrypted session on the network'],
+        correctIndex: 1,
+        explanation: 'A stream number is a capture-local conversation index, distinct from a port or sequence number.'
+      },
+      {
+        question: 'Two payload segments arrive in reverse sequence-number order. How should you read their bytes?',
+        options: ['Keep their arrival order unchanged', 'Sort their text alphabetically', 'Discard both payload segments', 'Order them by sequence within one direction'],
+        correctIndex: 3,
+        explanation: 'Sequence numbers describe positions in the TCP byte stream; arrival order may differ.'
+      },
+      {
+        question: 'A retransmission repeats the same sequence range and payload. What should reconstruction do?',
+        options: ['Count those bytes once', 'Append the bytes twice', 'Reverse the second copy', 'Move the copy to another stream'],
+        correctIndex: 0,
+        explanation: 'The retransmission is another copy of the same byte positions, not additional application data.'
+      },
+      {
+        question: 'A capture shows TLS application data without session secrets. What is a reasonable limit?',
+        options: ['Every request body must be readable', 'The port reveals the plaintext password', 'Application content may remain encrypted', 'The capture proves which person was typing'],
+        correctIndex: 2,
+        explanation: 'Connection metadata does not automatically reveal encrypted application content or a person\'s identity.'
+      }
+    ],
+    miniProject: {
+      title: 'Annotate a conversation',
+      description: 'Use the supplied packet evidence to identify the requested resource, stream, client and server. Reconstruct the response body, mark the retransmission and list what this excerpt cannot tell you about the rest of the session. Work directly from the tables; no packet capture download is required.',
+      hints: [
+        'Choose the stream whose request asks for /lab-note.',
+        'Keep only server-to-client response-body bytes for reconstruction.',
+        'Use the sequence and length columns to check that the ranges meet without gaps.'
+      ]
+    },
+    challenge: {
+      kind: 'analyze',
+      title: 'Follow the right stream',
+      brief: 'Find the stream requesting /lab-note, then reconstruct its server response body. The table contains decoded body bytes only; response headers are omitted. Body bytes start at server-relative sequence 101. Arrival order is shown, and an identical retransmission must be counted once. The reconstructed body is the flag; no Wireshark installation is needed.',
+      material: [
+        {
+          type: 'table',
+          columns: ['Stream', 'Client', 'Server', 'Request'],
+          rows: [
+            ['4', '192.0.2.10:51000', '192.0.2.80:80', 'GET /health HTTP/1.1'],
+            ['7', '192.0.2.10:51001', '192.0.2.80:80', 'GET /lab-note HTTP/1.1']
+          ]
+        },
+        {
+          type: 'table',
+          columns: ['Arrival', 'Stream', 'Direction', 'Seq', 'Len', 'Decoded body bytes', 'Note'],
+          rows: [
+            ['1', '4', 'server->client', '101', '2', 'OK', 'Other resource'],
+            ['2', '7', 'server->client', '115', '13', 'tell_stories}', 'Out of order'],
+            ['3', '7', 'server->client', '101', '14', 'ARETE{streams_', 'Earlier byte range'],
+            ['4', '7', 'server->client', '101', '14', 'ARETE{streams_', 'Identical retransmission']
+          ]
+        }
+      ],
+      flagFormat: 'ARETE{...}',
+      flagHash: '38b55fad901b66a42ef2045caa927604a357d30114a503945a5e35817f989a09',
+      hints: [
+        'The /lab-note request belongs to stream 7. Ignore stream 4.',
+        'For stream 7, sequence 101 comes before 115; 101 plus 14 equals 115.',
+        'Join ARETE{streams_ with tell_stories}, counting the repeated first piece only once.'
+      ],
+      writeup: 'Stream 7 contains the requested resource. Its unique body ranges begin at sequences 101 and 115, reconstructing ARETE{streams_tell_stories}. Arrival 4 repeats the first range, so appending it would corrupt the body. This is a simplified, complete plaintext excerpt; a real capture could require handling missing bytes or encrypted payloads.'
+    }
+  },
+
+  {
+    id: 'sec-incident-response',
+    number: 18,
+    title: 'Incident Response Basics',
+    subtitle: 'Contain harm, preserve evidence and recover with a plan',
+    difficulty: 3,
+    estimatedHours: 2,
+    theory: [
+      {
+        heading: 'Prepare before the alert',
+        body: 'Incident response coordinates people, evidence and technical actions during a suspected security event. Preparation includes named contacts, authority to act, access to logs and tested recovery procedures. When an alert arrives, record what is known, assess likely impact and escalate through the agreed channel. An alert is a starting point for investigation, not a complete diagnosis.'
+      },
+      {
+        heading: 'Balance containment and preservation',
+        body: 'Containment limits ongoing harm, such as isolating an affected endpoint or revoking a stolen session. Evidence collection should preserve useful logs and, where appropriate, volatile data without unnecessarily delaying urgent containment. Record who acted, when and why. Rebooting or wiping can destroy evidence, while leaving an actively compromised system connected can increase damage. Follow the incident lead\'s priorities and the available response capabilities.'
+      },
+      {
+        heading: 'Recover and learn',
+        body: 'After scoping the incident, address its entry point and persistence, then restore from trusted sources and verify the service before reconnecting it. Monitor for recurrence and communicate through approved channels. Review what helped, what failed and which controls need improvement. Detection, response and recovery can overlap; a small classroom ordering exercise is not a universal sequence for every incident.'
+      }
+    ],
+    codeExamples: [
+      {
+        title: 'A useful first incident note',
+        language: 'text',
+        code: `Case: LAB-IR-18
+Observed at: 2026-11-10T10:20:00Z
+Asset: lab-laptop-03
+Observation: unexpected outbound upload using a lab service token
+Evidence: gateway event gw-281 and endpoint alert edr-92
+Unknown: whether the token was used on any other endpoint
+Owner: on-call incident lead
+Next decision: contain the upload while retaining evidence access`,
+        explanation: 'The note records an observation, references and an unanswered scoping question. It avoids distributing the reusable token or asserting that the first visible asset is the entire incident.'
+      },
+      {
+        title: 'Recovery has an exit check',
+        language: 'text',
+        code: `Before reconnecting the restored lab endpoint:
+- Address the entry point and known persistence.
+- Revoke exposed credentials from a clean administrative device.
+- Validate the restored image and required service behaviour.
+- Enable monitoring and agree who watches for recurrence.
+- Record the decision and the responsible owner.`,
+        explanation: 'Restoring a service is a controlled decision with verification and ownership. A machine that boots successfully is not automatically ready to return to service.'
+      }
+    ],
+    practiceQuestions: [
+      {
+        question: 'What is the immediate purpose of containment?',
+        options: ['Publish an attribution claim', 'Erase every affected disk', 'Limit ongoing harm and spread', 'Reconnect restored services'],
+        correctIndex: 2,
+        explanation: 'Containment reduces damage while the team investigates and prepares remediation and recovery.'
+      },
+      {
+        question: 'Why can an unplanned reboot harm an investigation?',
+        options: ['It can destroy useful volatile evidence', 'It proves the attack never happened', 'It automatically restores every backup', 'It identifies every stolen credential'],
+        correctIndex: 0,
+        explanation: 'Memory and active-session state may be lost. Responders balance preservation against the need to stop ongoing harm.'
+      },
+      {
+        question: 'Where should exposed credentials be rotated or revoked from?',
+        options: ['The suspicious process itself', 'An unverified link in an email', 'A shared public chat message', 'A trusted administrative device'],
+        correctIndex: 3,
+        explanation: 'A trusted device reduces the chance of handing replacement secrets to the same compromised environment.'
+      },
+      {
+        question: 'What should follow restoration of the affected service?',
+        options: ['Delete the incident timeline', 'Verify behaviour and monitor recurrence', 'Assume the root cause disappeared', 'Publish all collected private records'],
+        correctIndex: 1,
+        explanation: 'Recovery needs validation and monitoring, followed by lessons that improve the next response.'
+      }
+    ],
+    miniProject: {
+      title: 'Write a short response handover',
+      description: 'For the fictional endpoint incident below, write a handover containing the observed event, containment action, preserved evidence, credential action and recovery checks. Include one unanswered scoping question. This is a tabletop exercise: do not change a real machine or contact an outside service.',
+      hints: [
+        'Cite the gateway and endpoint event references.',
+        'Record that isolation retains the trusted evidence-collection channel.',
+        'Ask whether the exposed token was used elsewhere before declaring the scope complete.'
+      ]
+    },
+    challenge: {
+      kind: 'analyze',
+      title: 'Choose the next three actions',
+      brief: 'Use the fictional incident lead\'s explicit constraints to choose three action IDs in order. Join them with underscores inside ARETE{...}. All decisions are made from the supplied playbook; no real system action is required.',
+      material: [
+        {
+          type: 'text',
+          content: `Incident: lab-laptop-03 is actively uploading data with an exposed token.
+
+Lead's instructions for THIS exercise:
+1. Stop this endpoint's upload first. Isolation keeps power on and retains
+   a trusted management channel for evidence collection.
+2. Next capture volatile session details and export audit logs through
+   that channel before changing the token's active-session state.
+3. Then revoke the exposed token from a clean admin device.
+
+Other endpoints are blocked from using this lab token during these steps.
+Recovery and wider scoping happen after these three actions.`
+        },
+        {
+          type: 'table',
+          columns: ['Action ID', 'Action'],
+          rows: [
+            ['wipe', 'Erase the disk immediately and discard the logs'],
+            ['revoke', 'Invalidate the exposed token from a clean admin device'],
+            ['restore', 'Reconnect the endpoint and resume the service now'],
+            ['isolate', 'Block endpoint traffic while keeping power and trusted evidence access'],
+            ['preserve', 'Capture volatile session details and export audit logs']
+          ]
+        }
+      ],
+      flagFormat: 'ARETE{first_second_third}',
+      flagHash: 'e7c7615636f722be21e3e886ac6679bfe2991cfcf520a077d2f16344a03bfd19',
+      hints: [
+        'Match each numbered instruction to one action ID, preserving the stated order.',
+        'The first action stops endpoint traffic without a shutdown. The second retains the relevant records.',
+        'The IDs are isolate, preserve and revoke. Join those three IDs with underscores.'
+      ],
+      writeup: 'The supplied constraints give ARETE{isolate_preserve_revoke}: stop the upload, preserve the requested evidence, then invalidate the token from a clean device. Wiping would destroy evidence and immediate restoration would reconnect an unremediated endpoint. This order follows this exercise\'s stated capabilities and temporary token restriction; a real team may revoke credentials immediately or collect evidence in parallel when risk requires it.'
     }
   }
 ];

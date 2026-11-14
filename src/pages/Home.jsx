@@ -1,12 +1,12 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles, GraduationCap, Code2, Briefcase, Award, X, LogIn } from 'lucide-react';
+import { ArrowRight, Sparkles, GraduationCap, Code2, Briefcase, Award, LogIn } from 'lucide-react';
 import ProgressDashboard from '../components/ProgressDashboard';
 import StudentDashboard from '../components/StudentDashboard';
 import { LevelGatePrompt } from '../components/LevelGatePrompt';
 import { useLevelGate } from '../components/useLevelGate';
 import { useAuth } from '../context/AuthContext';
 import IndependentLearningHome from '../components/IndependentLearningHome';
+import { trackMeta } from '../data/trackMeta';
 
 // All four years, described by what every University of Uyo science programme
 // shares at that stage — not by one department's syllabus. This is the first
@@ -47,48 +47,6 @@ const levelCards = [
   },
 ];
 
-// ─── Onboarding banner (first visit only) ─────────────────────────────────────
-
-const ONBOARDING_KEY = 'arete-onboarding-dismissed-v1';
-
-function OnboardingBanner() {
-  const [dismissed, setDismissed] = useState(() => {
-    try {
-      return localStorage.getItem(ONBOARDING_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
-
-  if (dismissed) return null;
-
-  const dismiss = () => {
-    setDismissed(true);
-    try {
-      localStorage.setItem(ONBOARDING_KEY, '1');
-    } catch { /* private mode — banner just reappears next visit */ }
-  };
-
-  return (
-    <div className="max-w-6xl mx-auto px-6 pt-6">
-      <div className="bg-moss/10 border border-moss/30 rounded-xl px-4 py-3 flex items-center gap-3 text-sm animate-fade-up">
-        <Sparkles size={16} className="text-moss shrink-0" />
-        <p className="text-ink flex-1 leading-snug">
-          <span className="font-bold">New here?</span> Sign in once (free, no password) → pick your level → start learning.
-          Your progress follows you on every device.
-        </p>
-        <button
-          onClick={dismiss}
-          aria-label="Dismiss welcome message"
-          className="text-coffee-700 hover:text-ink p-1 shrink-0 transition-colors"
-        >
-          <X size={16} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
@@ -112,7 +70,6 @@ export default function Home() {
   return (
     <div>
 
-      <OnboardingBanner />
       <div className="max-w-6xl mx-auto px-6 pt-6"><Link to="/cybersecurity" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rust/30 bg-paper p-4 text-sm text-ink"><span><strong>Explore cybersecurity</strong> · Guided security puzzles for learners everywhere.</span><span className="inline-flex items-center gap-2 font-semibold">Try a free exercise <ArrowRight size={15} /></span></Link></div>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
@@ -210,7 +167,7 @@ export default function Home() {
           {[
             { num: '01', title: 'All 4 Years', body: 'Every course from 100L to 400L — topic outlines, recommended textbooks, exam tips, and full lecture notes for a growing set of courses, with flashcards and plain-English rewrites built in.' },
             { num: '02', title: '37 Modules', body: 'Java (COS 221), Python (COS 121), and C — full interactive tracks with theory, annotated code, live playgrounds, quizzes, and mini projects.' },
-            { num: '03', title: '12 CTF Rooms', body: 'A hands-on Security track of capture-the-flag challenges with escalating hints — practice real attack-and-defend thinking right in the browser, no setup needed.' },
+            { num: '03', title: `${trackMeta.security.moduleCount} CTF Rooms`, body: 'A hands-on Security track of capture-the-flag challenges with escalating hints — practice real attack-and-defend thinking right in the browser, no setup needed.' },
             { num: '04', title: 'AI Tutor', body: 'Ask any question about any course in the programme. Knows the full curriculum from 100L to 400L and explains concepts at the right level for your year.' },
             { num: '05', title: 'Code Explainer', body: "Paste Java, Python, C, or C++ code and get a plain-English breakdown. Useful when a lecturer's example isn't clicking or you're debugging your own code." },
             { num: '06', title: 'Study Planner', body: 'Build a personal study timetable around your courses and export it straight to your phone calendar. Cheatsheets keep exam-week revision fast.' },

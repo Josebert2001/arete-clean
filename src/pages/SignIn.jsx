@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Mail, ArrowLeft, CloudUpload, BookOpen, BrainCircuit, Shield, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
-import { rememberSecurityEntry, clearSecurityEntry, SECURITY_START } from '../utils/learningEntry';
+import { rememberSecurityEntry, clearSecurityEntry, SECURITY_START, rememberCareerEntry, hasCareerEntry, CAREER_START } from '../utils/learningEntry';
 
 const VALUE_PROPS = [
   { icon: CloudUpload,   text: 'Progress syncs across all your devices automatically' },
@@ -28,10 +28,12 @@ export default function SignIn() {
   usePageTitle('Sign In');
   const { search } = useLocation();
   const securityEntry = new URLSearchParams(search).get('learn') === 'cybersecurity';
+  const requestedEntry = new URLSearchParams(search).get('learn');
+  const careerEntry = requestedEntry === 'career' || (!requestedEntry && hasCareerEntry());
   const { user, profileComplete, profileLoading, authLoading, authEnabled, signInWithEmail, signInWithGoogle } = useAuth();
   useEffect(() => {
     if (user && profileComplete) clearSecurityEntry();
-    else rememberSecurityEntry(search);
+    else { rememberSecurityEntry(search); rememberCareerEntry(search); }
   }, [search, user, profileComplete]);
   const [email,  setEmail]  = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
@@ -39,7 +41,7 @@ export default function SignIn() {
   const [resendError, setResendError] = useState('');
   const [googleStatus, setGoogleStatus] = useState('idle'); // idle | redirecting | error
 
-  if (!authLoading && user && profileComplete) return <Navigate to={securityEntry ? SECURITY_START : '/'} replace />;
+  if (!authLoading && user && profileComplete) return <Navigate to={careerEntry ? CAREER_START : securityEntry ? SECURITY_START : '/'} replace />;
   // Only route an incomplete-profile user to setup once their profile has
   // actually been fetched — otherwise a returning user whose profile is still
   // loading (e.g. right after a Google redirect) flashes through /setup-profile
@@ -79,14 +81,14 @@ export default function SignIn() {
     const trimmed = email.trim();
     if (!trimmed || status === 'sending') return;
     setStatus('sending');
-    const { error } = await signInWithEmail(trimmed, securityEntry);
+    const { error } = await signInWithEmail(trimmed, careerEntry ? 'career' : securityEntry);
     setStatus(error ? 'error' : 'sent');
   };
 
   const google = async () => {
     if (googleStatus === 'redirecting') return;
     setGoogleStatus('redirecting');
-    const { error } = await signInWithGoogle(securityEntry);
+    const { error } = await signInWithGoogle(careerEntry ? 'career' : securityEntry);
     // On success the browser navigates away to Google; we only land here on
     // failure (e.g. provider not enabled, network), so re-enable the button.
     if (error) setGoogleStatus('error');
@@ -96,7 +98,7 @@ export default function SignIn() {
     if (resending) return;
     setResending(true);
     setResendError('');
-    const { error } = await signInWithEmail(email.trim(), securityEntry);
+    const { error } = await signInWithEmail(email.trim(), careerEntry ? 'career' : securityEntry);
     if (error) setResendError('Could not resend the link — try again in a moment.');
     setResending(false);
   };

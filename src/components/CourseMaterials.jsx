@@ -45,10 +45,21 @@ function FileIcon({ type, className }) {
 // Build the download link from the storage path, never from a stored URL —
 // a DB row's file_url could be tampered with to point anywhere (or be a
 // javascript: URL), while a bucket path can only resolve inside our bucket.
-function materialUrl(filePath) {
+//
+// The bucket is private (migration 20261110000000): a file opens through a
+// short-lived signed link that only a signed-in student can mint, and only for
+// a material that is registered and not hidden. The public URL is the fallback
+// for a database where that migration has not been applied yet — there the
+// bucket is still public and signing someone else's file is refused. Once the
+// bucket is private the fallback simply stops resolving, which is the point.
+function materialUrl(filePath, signedUrls) {
   if (!filePath) return null;
-  return supabase.storage.from(BUCKET).getPublicUrl(filePath).data.publicUrl;
+  return signedUrls?.[filePath] || supabase.storage.from(BUCKET).getPublicUrl(filePath).data.publicUrl;
 }
+
+// Long enough to outlast a study session with the page left open; short enough
+// that a link pasted into a group chat stops working the same day.
+const SIGNED_URL_TTL_SECONDS = 6 * 60 * 60;
 
 // `department` is the materials pool this course's uploads live in — see
 // materialsDepartmentFor() in data/departments.js. Both the listing and the
@@ -58,6 +69,10 @@ function materialUrl(filePath) {
 export default function CourseMaterials({ courseCode, courseSlug, department }) {
   const { user } = useAuth();
   const [materials, setMaterials] = useState([]);
+  const [signedUrls, setSignedUrls] = useState({});
+  // The id, not the user object: a new object for the same student must not
+  // re-mint every link.
+  const userId = user?.id;
   const [fetching, setFetching] = useState(isConfigured);
   const [loadError, setLoadError] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -139,6 +154,30 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
       requestGeneration.current += 1;
     };
   }, [load]);
+
+  // Mint the signed links for whatever is listed. Failure is not an error state:
+  // materialUrl() falls back to the public URL, which is correct wherever the
+  // bucket is still public.
+  useEffect(() => {
+    const paths = materials.map(m => m.file_path).filter(Boolean);
+    if (!isConfigured || !userId || !paths.length) return;
+    let active = true;
+    (async () => {
+      try {
+        const { data, error: signError } = await supabase.storage.from(BUCKET)
+          .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
+        if (!active || signError || !Array.isArray(data)) return;
+        const next = {};
+        for (const row of data) {
+          if (row?.path && row.signedUrl && !row.error) next[row.path] = row.signedUrl;
+        }
+        setSignedUrls(next);
+      } catch {
+        // Offline or storage unreachable: keep the fallback links.
+      }
+    })();
+    return () => { active = false; };
+  }, [materials, userId]);
 
   useEffect(() => {
     if (!isConfigured || !user) return;
@@ -540,7 +579,7 @@ export default function CourseMaterials({ courseCode, courseSlug, department }) 
               className="group flex h-full flex-col rounded-xl border border-coffee-200 bg-paper p-4 transition-all hover:border-ink hover:shadow-sm"
             >
               <a
-                href={materialUrl(m.file_path)}
+                href={materialUrl(m.file_path, signedUrls)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-1 flex-col"

@@ -1,15 +1,17 @@
 import { ArrowRight, Shield, Flag, Terminal, Users, CheckCircle2 } from 'lucide-react';
 import { SECURITY_SIGN_IN } from '../utils/learningEntry';
 import { PREMIUM_PASS, FREE_CTF_ROOMS, formatNaira } from '../data/plans';
+import { trackMeta } from '../data/trackMeta';
 
 const topics = [
   ['01—04', 'Build your security foundations', 'The security mindset, encoding, classical ciphers, and hashing. Learn to question what you see and check whether data has changed.'],
   ['05—08', 'Understand passwords, networks, and the web', 'Work through password cracking puzzles, ports and protocols, HTTP evidence, and SQL injection examples.'],
   ['09—12', 'Investigate and defend', 'Read Linux command output, examine forensic evidence, spot phishing, and reason about firewall rules.'],
+  ['13—18', 'Review applications and respond to incidents', 'Trace XSS and access-control flaws, correlate logs, review password storage, reconstruct packet streams, and practise incident response.'],
 ];
 
 export const CYBERSECURITY_TITLE = 'Learn cybersecurity through practice | Areté';
-export const CYBERSECURITY_DESCRIPTION = 'Start cybersecurity with 12 guided CTF rooms covering crypto, networking, web security, forensics, and phishing. Open to learners everywhere. Try a free sample.';
+export const CYBERSECURITY_DESCRIPTION = `Start cybersecurity with ${trackMeta.security.moduleCount} guided CTF rooms covering crypto, web security, log and packet analysis, and incident response. Open to learners everywhere. Try a free sample.`;
 
 // Also rendered at build time: public content and CTAs work without a Router.
 //
@@ -27,6 +29,7 @@ export default function CybersecurityLanding({ sample, teamContact }) {
           <p className="text-lg text-coffee-700 leading-relaxed max-w-xl mb-7">Build your cybersecurity foundations with guided puzzles in cryptography, web security, networks, and digital forensics. Start wherever you are. No university enrolment required.</p>
           <div className="flex flex-wrap gap-3">
             <a href={SECURITY_SIGN_IN} className="btn-primary">Start learning <ArrowRight size={16} /></a>
+            <a href="/careers" className="btn-ghost">Find your career direction <ArrowRight size={16} /></a>
             <a href="#try-it" className="btn-ghost">Try an exercise first</a>
           </div>
           <p className="text-xs text-coffee-600 mt-4">Google or email sign-in · No card needed to start</p>
@@ -43,7 +46,7 @@ export default function CybersecurityLanding({ sample, teamContact }) {
       </section>
 
       <div className="border-y border-coffee-200 py-5 flex flex-wrap gap-x-10 gap-y-3 text-sm text-coffee-700">
-        <span><strong className="text-ink">12</strong> introductory CTF rooms</span>
+        <span><strong className="text-ink">{trackMeta.security.moduleCount}</strong> introductory CTF rooms</span>
         <span>Browser puzzles · No lab installation</span>
         <span>Hints, quizzes, and explanations</span>
       </div>

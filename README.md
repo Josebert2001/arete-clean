@@ -13,12 +13,35 @@ Independent of the University of Uyo and its departments; this is not an officia
 ### Cybersecurity for independent learners
 
 `/cybersecurity` is a public entry page with a phishing sample that needs no account,
-the existing 12-room security track overview, and a team pilot inquiry. Learners can
+the existing 18-room security track overview, and a team pilot inquiry. Learners can
 choose independent learning at signup without a university department, registration
 number, or year level. Independent welcome and home screens lead into security practice.
 
 Before deploying this flow, apply `supabase/migrations/20261108010000_independent_learners.sql`.
 See [the rollout guide](docs/cybersecurity-entry-rollout.md) for database and auth redirect checks.
+
+### Cybersecurity career discovery
+
+`/careers` introduces blue team, red team, GRC, AppSec and planned specialties.
+The first implementation includes a 30-question server-scored guidance quiz,
+an account-saved direction and roadmap, and four synthetic evidence worksheets
+with reflection, worked feedback and export. Full assessed pathways, reviewer
+services, employer referrals and Linux VMs are still in development.
+
+Apply `supabase/migrations/20261109000000_career_placement.sql` and verify its
+policies before enabling `CAREER_PLACEMENT_ENABLED=true`. See the
+[career discovery rollout](docs/career-discovery-rollout.md) for auth redirects,
+API setup, integration checks and current verification limits.
+
+An optional independent blue-team investigation pilot adds assigned case evidence,
+saved report drafts, a containment simulator, immutable final submissions and an
+assigned reviewer workspace. It requires the second migration and its own
+`CAREER_ASSESSMENT_ENABLED` switch. See the
+[investigation rollout](docs/blue-investigation-rollout.md) before enabling it.
+
+The placement release keeps `CAREER_ASSESSMENT_ENABLED=false`: no investigation
+or reviewer links appear on the roadmap, bookmarked assessment routes are gated,
+and assessment APIs return unavailable before querying their deferred tables.
 
 ### Course Hub — all four years
 
@@ -31,16 +54,16 @@ The course hub covers the complete B.Sc. Cybersecurity programme: **57 courses**
 | 300L  | 13      |
 | 400L  | 14      |
 
-### Interactive tracks — 49 modules
+### Interactive tracks — 55 modules
 
 | Track    | Modules | Course        | Format |
 | -------- | ------- | ------------- | ------ |
 | Java     | 13      | COS 221       | Theory + code + playground + quiz + project |
 | Python   | 12      | COS 121       | Theory + code + playground + quiz + project |
 | C        | 12      | —             | Theory + code + playground + quiz + project |
-| Security | 12      | CYB           | Theory + quiz + **capture-the-flag challenge** |
+| Security | 18      | CYB           | Theory + quiz + **capture-the-flag challenge** |
 
-The **Security track** is 12 CTF-style rooms — CIA triad, encoding vs. encryption, classical/modern crypto, hashing, password cracking, networking, HTTP, SQL injection, the Linux CLI, digital forensics, phishing, and firewalls. Each room ends in a flag, validated client-side (SHA-256, no backend) with escalating hints. The other three tracks add a runnable in-browser code playground (via JDoodle) that the Security track skips.
+The **Security track** is 18 CTF-style rooms — CIA triad, encoding vs. encryption, classical/modern crypto, hashing, password cracking, networking, HTTP, SQL injection, the Linux CLI, digital forensics, phishing, firewalls, cross-site scripting, access control and IDOR, log analysis, password storage and salting, packet reading, and incident response. Each room ends in a flag, validated client-side (SHA-256, no backend) with escalating hints. Every challenge can be solved from the supplied browser evidence. The first four flag challenges are free; the remaining fourteen require Premium, while theory and practice content remain available under the existing free limits. The other three tracks add a runnable in-browser code playground (via JDoodle) that the Security track skips.
 
 ### AI features
 

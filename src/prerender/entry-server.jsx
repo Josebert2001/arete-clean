@@ -4,6 +4,7 @@ import CourseIndexPreview from '../components/CourseIndexPreview';
 import HomePreview from '../components/HomePreview';
 import InstallPreview from '../components/InstallPreview';
 import CybersecurityLanding, { CYBERSECURITY_TITLE, CYBERSECURITY_DESCRIPTION } from '../components/CybersecurityLanding';
+import CareerExplorer, { CAREERS_TITLE, CAREERS_DESCRIPTION } from '../components/CareerExplorer';
 import AboutPreview from '../components/AboutPreview';
 import { tracks, installHowToJsonLd } from '../data/installGuides';
 import { loadPublicNotes, glossaryJsonLd } from '../data/publicNotes';
@@ -46,6 +47,12 @@ import {
 export async function collectPages({ buildDate } = {}) {
   const entries = await loadPublicCourses();
   const pages = [];
+  pages.push({
+    path: '/careers', title: CAREERS_TITLE, description: CAREERS_DESCRIPTION,
+    canonical: `${SITE_URL}/careers`, ogType: 'website',
+    changefreq: 'monthly', priority: '0.8', jsonLd: [],
+    html: renderToStaticMarkup(<CareerExplorer />),
+  });
   pages.push({
     path: '/cybersecurity',
     title: CYBERSECURITY_TITLE,

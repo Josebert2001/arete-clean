@@ -1,8 +1,17 @@
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Download, BookMarked, Bug, GraduationCap, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock, Download, BookMarked, Bug, PlayCircle } from 'lucide-react';
 import { trackMeta } from '../data/trackMeta';
 import { useProgress } from '../components/useProgress';
+import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
+import { readLastModulePath } from '../utils/lastLocation';
+import {
+  LEVELS, buildCatalogue, filterCatalogue, shelfItems, pickResume, trackSummary,
+} from '../utils/labCatalogue';
+
+// Same record TrackModuleDetail ticks steps into.
+const STEPS_STORAGE_KEY = 'mission-steps-v1';
 
 // ─── Language marks (carried over from the old Tracks page) ───────────────────
 
@@ -45,211 +54,230 @@ function SecurityMark() {
   );
 }
 
-// Presentation extras for the track cards (logos + why-learn-this copy).
-const trackExtras = {
-  java: {
-    Mark: JavaMark,
-    why: 'COS 221 · Required for your degree. Deep interactive track with full module content, quizzes, and a live Java playground.',
-    bullets: ['13 full modules', 'Live code playground', 'Practice quizzes', 'Mini projects'],
-  },
-  python: {
-    Mark: PythonMark,
-    why: 'COS 121 · Intro to programming. Also the most widely-used language in data science, AI, automation, and cybersecurity scripting.',
-    bullets: ['12 full modules', 'Python 3 playground', 'Practice quizzes', 'Mini projects'],
-  },
-  c: {
-    Mark: CMark,
-    why: 'Teaches how computers actually work: memory, pointers, and systems thinking. Foundation of every lower-level language.',
-    bullets: ['12 full modules', 'C playground', 'Practice quizzes', 'Mini projects'],
-  },
-  security: {
-    Mark: SecurityMark,
-    why: 'The hands-on core of your degree. 12 CTF-style rooms — crypto, web attacks, forensics, phishing — each ending in a flag you capture right in the browser.',
-    bullets: ['12 capture-the-flag rooms', 'Solve in-browser', 'Maps to CYB courses', 'No setup needed'],
-  },
+const TRACK_MARKS = { java: JavaMark, python: PythonMark, c: CMark, security: SecurityMark };
+
+// A security module is a "room"; everything else is a "module".
+const unitWord = (slug, count = 1) => {
+  const word = slug === 'security' ? 'room' : 'module';
+  return count === 1 ? word : `${word}s`;
 };
 
-function ProgressPill({ storageKey, total }) {
-  const { progress } = useProgress(storageKey);
-  const count = progress.completedModules.length;
-  if (count === 0) return null;
-  return (
-    <span className="inline-flex items-center gap-1 text-xs text-moss font-medium">
-      <CheckCircle2 size={11} /> {count}/{total} done
-    </span>
-  );
-}
-
-function TrackCard({ track }) {
-  const extras = trackExtras[track.slug];
-  const Mark = extras.Mark;
-
-  return (
-    <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 flex flex-col gap-5 hover:border-coffee-400 hover:shadow-md transition-all group">
-      <div className="flex items-start justify-between gap-4">
-        <div className={`w-14 h-14 rounded-xl ${track.accentBg} ${track.accentText} flex items-center justify-center shrink-0`}>
-          <Mark />
-        </div>
-        <ProgressPill storageKey={track.storageKey} total={track.moduleCount} />
-      </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-display font-bold text-2xl text-ink">{track.label}</h3>
-          {track.courseCode && (
-            <span className={`text-xs font-mono px-2 py-0.5 rounded ${track.accentBg} ${track.accentText}`}>
-              {track.courseCode}
-            </span>
-          )}
-        </div>
-        <p className="text-sm text-coffee-600 italic mb-3">{track.tagline}</p>
-        <p className="text-sm text-coffee-700 leading-relaxed">{extras.why}</p>
-      </div>
-
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {extras.bullets.map(b => (
-          <li key={b} className="flex items-center gap-1.5 text-xs text-coffee-700">
-            <span className={`w-1.5 h-1.5 rounded-full ${track.dotColor} shrink-0`} />
-            {b}
-          </li>
-        ))}
-      </ul>
-
-      <Link
-        to={track.listPath}
-        className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${track.accentBg} ${track.accentText} hover:opacity-90`}
-      >
-        Open {track.label} track <ArrowRight size={15} />
-      </Link>
-    </div>
-  );
-}
-
-// ─── The workflow: every practical tool, in the order you actually use them ───
-
-const WORKFLOW = [
-  {
-    num: '01',
-    icon: Download,
-    title: 'Set up',
-    description: 'Install Java, Python, and a C compiler on your own laptop — step-by-step, with verification commands.',
-    label: 'Install guide',
-    to: '/install',
-  },
-  {
-    num: '02',
-    icon: GraduationCap,
-    title: 'Learn',
-    description: '49 interactive modules — three programming languages plus a hands-on Security track with capture-the-flag rooms.',
-    label: 'Pick a track',
-    href: '#tracks',
-  },
-  {
-    num: '03',
-    icon: BookMarked,
-    title: 'Reference',
-    description: 'The syntax you reach for most, on one page per language. Open it beside your editor while you code.',
-    label: 'Cheatsheets',
-    to: '/cheatsheet',
-  },
-  {
-    num: '04',
-    icon: Bug,
-    title: 'Debug',
-    description: "Code not clicking? Paste any Java, Python, C, or C++ snippet and get a plain-English breakdown.",
-    label: 'Code Explainer',
-    to: '/explainer',
-  },
+// The tools that live inside Code Lab and are not in the main nav.
+const TOOLS = [
+  { to: '/install', icon: Download, title: 'Install guide', text: 'Set up Java, Python and a C compiler on your own laptop.' },
+  { to: '/cheatsheet', icon: BookMarked, title: 'Cheatsheets', text: 'The syntax you reach for most, one page per language.' },
+  { to: '/explainer', icon: Bug, title: 'Code Explainer', text: 'Paste any snippet and get a plain-English breakdown.' },
 ];
 
-function WorkflowCard({ step }) {
-  const Icon = step.icon;
-  const body = (
-    <>
-      <div className="flex items-center justify-between">
-        <span className="font-mono text-xs text-coffee-400 tabular-nums">{step.num}</span>
-        <Icon size={18} className="text-coffee-500 group-hover:text-ink transition-colors" />
-      </div>
-      <div className="flex-1">
-        <h3 className="font-display font-bold text-xl text-ink mb-1">{step.title}</h3>
-        <p className="text-sm text-coffee-700 leading-relaxed">{step.description}</p>
-      </div>
-      <span className="inline-flex items-center gap-1 text-sm font-medium text-ink opacity-70 group-hover:opacity-100 group-hover:gap-2 transition-all">
-        {step.label} <ArrowRight size={13} />
-      </span>
-    </>
+function Chip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded-full border px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors ${
+        active ? 'border-ink bg-ink text-cream' : 'border-coffee-200 bg-paper text-coffee-700 hover:border-coffee-500 hover:text-ink'
+      }`}
+    >
+      {children}
+    </button>
   );
-  const className = 'bg-paper border border-coffee-200 rounded-2xl p-5 flex flex-col gap-3 hover:border-ink hover:shadow-md transition-all group';
+}
 
-  return step.href
-    ? <a href={step.href} className={className}>{body}</a>
-    : <Link to={step.to} className={className}>{body}</Link>;
+function ModuleCard({ item, track }) {
+  const percent = item.steps ? Math.round((item.stepsDone / item.steps) * 100) : 0;
+  return (
+    <Link
+      to={item.path}
+      className="group flex h-full flex-col rounded-xl border border-coffee-200 bg-paper p-5 transition-all hover:border-coffee-500 hover:shadow-md"
+    >
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <span className={`flex h-9 w-9 items-center justify-center rounded-lg font-display text-sm font-bold ${
+          item.status === 'done' ? 'bg-moss text-cream' : `${track.accentBg} ${track.accentText}`
+        }`}>
+          {item.status === 'done' ? <CheckCircle2 size={16} aria-hidden /> : String(item.number).padStart(2, '0')}
+        </span>
+        <span className="font-mono text-[11px] uppercase tracking-wider text-coffee-600">{item.level}</span>
+      </div>
+
+      <h3 className="mb-2 font-display text-lg font-bold leading-snug text-ink group-hover:text-coffee-700">{item.title}</h3>
+
+      <p className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-coffee-700">
+        <span className="inline-flex items-center gap-1"><Clock size={12} aria-hidden /> ~{item.hours}h</span>
+        <span>{item.steps} steps</span>
+      </p>
+
+      {item.status === 'done' && <p className="mt-2 text-xs font-medium text-moss">Completed</p>}
+      {item.status === 'started' && (
+        <div className="mt-2">
+          <p className="mb-1 text-xs font-medium text-ink">In progress · {item.stepsDone} of {item.steps} steps</p>
+          <div className="h-1.5 overflow-hidden rounded-full bg-coffee-100">
+            <div className={`h-full ${track.dotColor}`} style={{ width: `${percent}%` }} />
+          </div>
+        </div>
+      )}
+    </Link>
+  );
+}
+
+function Shelf({ track, items, shown }) {
+  const Mark = TRACK_MARKS[track.slug];
+  const summary = trackSummary(items);
+  return (
+    <section aria-labelledby={`shelf-${track.slug}`} className="mb-12">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${track.accentBg} ${track.accentText}`}>
+            {Mark && <Mark />}
+          </span>
+          <div>
+            <h2 id={`shelf-${track.slug}`} className="font-display text-2xl font-bold text-ink">{track.label}</h2>
+            <p className="text-sm text-coffee-700">
+              {summary.done > 0 ? `${summary.done} of ${summary.total} done` : `${summary.total} ${unitWord(track.slug, summary.total)}`}
+              {' · '}about {summary.hours} hours · {track.tagline}
+            </p>
+          </div>
+        </div>
+        <Link to={track.listPath} className="inline-flex flex-shrink-0 items-center gap-1 text-sm font-semibold text-ink hover:underline">
+          All {summary.total} {unitWord(track.slug, summary.total)} in order <ArrowRight size={14} />
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {shown.map(item => <ModuleCard key={item.key} item={item} track={track} />)}
+      </div>
+    </section>
+  );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CodeLab() {
   usePageTitle('Code Lab');
+  const { profile } = useAuth();
+  const [trackFilter, setTrackFilter] = useState('all');
+  const [levelFilter, setLevelFilter] = useState('all');
+
+  // One hook per track: each track's progress is its own record.
+  const java = useProgress(trackMeta.java.storageKey).progress;
+  const python = useProgress(trackMeta.python.storageKey).progress;
+  const c = useProgress(trackMeta.c.storageKey).progress;
+  const security = useProgress(trackMeta.security.storageKey).progress;
+  const ticked = useProgress(STEPS_STORAGE_KEY).progress;
+
+  // Independent learners come for security, so its shelf leads for them.
+  const independent = profile?.learning_mode === 'independent';
+  const tracks = useMemo(() => {
+    const all = Object.values(trackMeta);
+    return independent ? [...all.filter(t => t.slug === 'security'), ...all.filter(t => t.slug !== 'security')] : all;
+  }, [independent]);
+
+  const items = useMemo(() => buildCatalogue(tracks, {
+    java: java.completedModules,
+    python: python.completedModules,
+    c: c.completedModules,
+    security: security.completedModules,
+  }, ticked.completedModules), [tracks, java, python, c, security, ticked]);
+
+  const filters = { track: trackFilter, level: levelFilter };
+  const visible = filterCatalogue(items, filters);
+  const resume = useMemo(() => pickResume(items, readLastModulePath()), [items]);
+  const starter = items[0];
+  const totalDone = items.filter(item => item.status === 'done').length;
+  const filtered = trackFilter !== 'all' || levelFilter !== 'all';
+
+  const featured = resume?.item || starter;
+  const featuredTrack = trackMeta[featured.trackSlug];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-
-      {/* Hero */}
-      <div className="mb-14">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-coffee-100 border border-coffee-200 rounded-full text-xs font-medium text-coffee-700 mb-5">
-          <Sparkles size={12} />
-          <span>Practical programming · Java · Python · C · Security</span>
-        </div>
-        <h1 className="display-heading text-5xl sm:text-6xl text-ink mb-4 leading-tight">Code Lab</h1>
-        <p className="text-lg text-coffee-700 max-w-2xl leading-relaxed mb-8">
-          Everything hands-on lives here: set up your machine, learn a language module by module,
-          keep the syntax close, and get unstuck when code misbehaves.
+    <div className="mx-auto max-w-6xl px-6 py-12">
+      <header className="mb-8">
+        <h1 className="display-heading mb-3 text-5xl text-ink sm:text-6xl">Code Lab</h1>
+        <p className="max-w-2xl text-lg leading-relaxed text-coffee-700">
+          {items.length} hands-on modules across {tracks.length} paths. Every one is a guided, step-by-step page you can
+          finish in your browser.
+          {totalDone > 0 && <span className="text-ink"> You have completed {totalDone}.</span>}
         </p>
+      </header>
 
-        <div className="bg-ink rounded-xl px-5 py-4 font-mono text-sm max-w-xl leading-relaxed shadow-md">
-          <p className="text-coffee-400"><span className="text-moss">$</span> javac Arete.java <span className="text-coffee-600">&amp;&amp;</span> java Arete</p>
-          <p className="text-cream">Hello, future engineer. Let's get to work.</p>
+      {/* Resume, or a starting point for a learner with no history */}
+      <Link
+        to={featured.path}
+        className="group mb-10 flex flex-col gap-4 rounded-2xl bg-ink p-6 text-cream transition-shadow hover:shadow-lg sm:flex-row sm:items-center sm:justify-between sm:p-8"
+      >
+        <div>
+          <p className="mb-2 font-mono text-xs uppercase tracking-wider text-ember-400">
+            {resume ? 'Pick up where you left off' : 'Start here'}
+          </p>
+          <p className="display-heading mb-1 text-2xl sm:text-3xl">{featured.title}</p>
+          <p className="text-sm text-cream/80">
+            {featuredTrack.label} · {unitWord(featured.trackSlug)} {featured.number} of {featuredTrack.moduleCount} · {featured.level} · ~{featured.hours}h
+            {featured.status === 'started' && ` · ${featured.stepsDone} of ${featured.steps} steps done`}
+          </p>
         </div>
+        <span className="inline-flex flex-shrink-0 items-center gap-2 rounded-lg bg-cream px-5 py-2.5 text-sm font-semibold text-ink">
+          <PlayCircle size={16} /> {resume ? 'Continue' : 'Begin'}
+        </span>
+      </Link>
+
+      {/* Filters */}
+      <div className="mb-10 space-y-3">
+        <div role="group" aria-label="Filter by path" className="flex flex-wrap gap-2">
+          <Chip active={trackFilter === 'all'} onClick={() => setTrackFilter('all')}>All paths</Chip>
+          {tracks.map(track => (
+            <Chip key={track.slug} active={trackFilter === track.slug} onClick={() => setTrackFilter(track.slug)}>
+              {track.label}
+            </Chip>
+          ))}
+        </div>
+        <div role="group" aria-label="Filter by level" className="flex flex-wrap gap-2">
+          <Chip active={levelFilter === 'all'} onClick={() => setLevelFilter('all')}>All levels</Chip>
+          {LEVELS.map(level => (
+            <Chip key={level} active={levelFilter === level} onClick={() => setLevelFilter(level)}>{level}</Chip>
+          ))}
+        </div>
+        <p role="status" className="text-sm text-coffee-700">
+          {filtered
+            ? `${visible.length} of ${items.length} modules match.`
+            : 'Each path shows what is next for you. Choose a path or a level to see everything in it.'}
+        </p>
       </div>
 
-      {/* Workflow */}
-      <section className="mb-16">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-          <h2 className="display-heading text-2xl sm:text-3xl text-ink shrink-0">The workflow</h2>
-          <div className="h-px flex-1 bg-coffee-200" />
-          <span className="text-xs font-mono text-coffee-700 shrink-0">set up → learn → reference → debug</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {WORKFLOW.map(step => <WorkflowCard key={step.num} step={step} />)}
-        </div>
-      </section>
+      {/* Shelves */}
+      {tracks.map(track => {
+        const trackItems = items.filter(item => item.trackSlug === track.slug);
+        const matching = filterCatalogue(trackItems, filters);
+        if (matching.length === 0) return null;
+        return <Shelf key={track.slug} track={track} items={trackItems} shown={shelfItems(matching, filters)} />;
+      })}
 
-      {/* Tracks */}
-      <section id="tracks" className="scroll-mt-24 mb-16">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-          <h2 className="display-heading text-2xl sm:text-3xl text-ink shrink-0">Learning tracks</h2>
-          <div className="h-px flex-1 bg-coffee-200" />
-          <span className="text-xs font-mono text-coffee-700 shrink-0">49 modules · 4 tracks</span>
+      {visible.length === 0 && (
+        <div className="mb-12 rounded-xl border border-coffee-200 bg-paper p-8 text-center">
+          <p className="mb-4 text-coffee-700">No module matches that path and level together.</p>
+          <button type="button" className="btn-ghost mx-auto" onClick={() => { setTrackFilter('all'); setLevelFilter('all'); }}>
+            Show everything
+          </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Object.values(trackMeta).map(track => (
-            <TrackCard key={track.slug} track={track} />
+      )}
+
+      {/* Tools that live inside Code Lab */}
+      <section aria-labelledby="lab-tools">
+        <h2 id="lab-tools" className="mb-4 font-display text-xl font-bold text-ink">Tools</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {TOOLS.map(tool => (
+            <Link
+              key={tool.to}
+              to={tool.to}
+              className="group flex items-start gap-3 rounded-xl border border-coffee-200 bg-paper p-5 transition-colors hover:border-ink"
+            >
+              <tool.icon size={18} className="mt-0.5 flex-shrink-0 text-coffee-500 group-hover:text-ink" />
+              <span>
+                <span className="block font-display font-bold text-ink">{tool.title}</span>
+                <span className="block text-sm leading-relaxed text-coffee-700">{tool.text}</span>
+              </span>
+            </Link>
           ))}
         </div>
       </section>
-
-      {/* Bridge back to the academic side */}
-      <div className="p-6 bg-cream border border-coffee-200 rounded-xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div>
-          <h3 className="font-display font-bold text-ink mb-1">Looking for the rest of your courses?</h3>
-          <p className="text-sm text-coffee-700">
-            Topics, textbooks, study tips, and lecture notes for every Cybersecurity course — not just the programming ones.
-          </p>
-        </div>
-        <Link to="/courses" className="btn-ghost shrink-0">
-          Course Hub <ArrowRight size={14} />
-        </Link>
-      </div>
     </div>
   );
 }
