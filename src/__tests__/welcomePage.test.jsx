@@ -201,7 +201,7 @@ describe('Welcome — quick links', () => {
   it('surfaces the security rooms and the study planner', async () => {
     const { container } = renderWelcome();
     await waitFor(() => expect(screen.getByText(/Build a Study Plan/)).toBeInTheDocument());
-    // Code Lab used to advertise only "Java, Python, C" and omit the 12 CTF rooms.
+    // Code Lab used to advertise only "Java, Python, C" and omit the CTF rooms.
     expect(container.textContent).toContain('capture-the-flag');
   });
 });

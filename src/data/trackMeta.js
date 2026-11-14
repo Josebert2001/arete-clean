@@ -8,7 +8,7 @@
 //
 // Each entry also carries difficulty, hours and steps (the number of guided steps
 // the module page shows, from buildMissionSteps). The Code Lab catalogue renders
-// 49 module cards from these alone; without them it would have to download all
+// one card per module from these alone; without them it would have to download all
 // four ~90 kB module files to print a level and a time. The validator checks
 // these too, so an edited module that gains a theory section fails the build
 // until its `steps` here is bumped.
@@ -110,7 +110,7 @@ export const trackMeta = {
     label: 'Security',
     fullName: 'Security Fundamentals',
     tagline: 'Hands-on cybersecurity: crypto, web, forensics — capture the flag',
-    description: '12 CTF-style rooms covering the security fundamentals behind your degree: the CIA triad, encoding, classical and modern crypto, hashing, password cracking, networking, HTTP, SQL injection, the Linux CLI, digital forensics, phishing, and firewalls. Each room ends with a flag you capture in your browser.',
+    description: '18 CTF-style rooms covering the security fundamentals behind your degree: the CIA triad, encoding, cryptography, hashing, password cracking and storage, networking, HTTP, SQL injection, cross-site scripting, access control, the Linux CLI, digital forensics, phishing, firewalls, log analysis, packet reading, and incident response. Each room ends with a flag you capture in your browser.',
     storageKey: 'security-progress-v1',
     listPath: '/tracks/security',
     detailPath: (id) => `/tracks/security/${id}`,
@@ -133,6 +133,12 @@ export const trackMeta = {
       { id: 'sec-forensics', number: 10, title: 'Digital Forensics', difficulty: 3, hours: 2, steps: 7 },
       { id: 'sec-phishing', number: 11, title: 'Social Engineering & Phishing', difficulty: 2, hours: 2, steps: 7 },
       { id: 'sec-firewall', number: 12, title: 'Firewalls & Defense in Depth', difficulty: 3, hours: 2, steps: 7 },
+      { id: 'sec-web-xss', number: 13, title: 'Cross-Site Scripting', difficulty: 3, hours: 2, steps: 7 },
+      { id: 'sec-access-control', number: 14, title: 'Broken Access Control & IDOR', difficulty: 3, hours: 2, steps: 7 },
+      { id: 'sec-log-analysis', number: 15, title: 'Log Analysis', difficulty: 3, hours: 2, steps: 7 },
+      { id: 'sec-password-storage', number: 16, title: 'Password Storage & Salting', difficulty: 3, hours: 2, steps: 7 },
+      { id: 'sec-packet-reading', number: 17, title: 'Packet Reading', difficulty: 3, hours: 2, steps: 7 },
+      { id: 'sec-incident-response', number: 18, title: 'Incident Response Basics', difficulty: 3, hours: 2, steps: 7 },
     ],
   },
 };
