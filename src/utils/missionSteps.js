@@ -4,7 +4,7 @@
 // securityModules.js) are unchanged: every step here is DERIVED from fields a
 // module already carries — theory sections, code examples, the playground, the
 // practice questions, the flag challenge and the mini project. That is on
-// purpose. 49 modules were authored against that shape and validated by
+// purpose. Modules are authored against that shape and validated by
 // scripts/validate-modules.mjs; a second "steps" field would be a second copy
 // of the same lesson that could drift from the first.
 //

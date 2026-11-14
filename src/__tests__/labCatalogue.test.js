@@ -55,8 +55,9 @@ describe('filters and shelves', () => {
     const midway = buildCatalogue([security], { security: ids.slice(0, 5) });
     expect(shelfItems(midway).map(i => i.number)).toEqual([6, 7, 8, 9]);
 
-    const nearEnd = buildCatalogue([security], { security: ids.slice(0, 11) });
-    expect(shelfItems(nearEnd).map(i => i.number)).toEqual([9, 10, 11, 12]);
+    const last = ids.length;
+    const nearEnd = buildCatalogue([security], { security: ids.slice(0, last - 1) });
+    expect(shelfItems(nearEnd).map(i => i.number)).toEqual([last - 3, last - 2, last - 1, last]);
 
     const finished = buildCatalogue([security], { security: ids });
     expect(shelfItems(finished)).toHaveLength(SHELF_PREVIEW);
@@ -67,7 +68,7 @@ describe('filters and shelves', () => {
 
   it('summarises a path', () => {
     const summary = trackSummary(buildCatalogue([security], { security: ids.slice(0, 3) }));
-    expect(summary).toMatchObject({ total: 12, done: 3 });
+    expect(summary).toMatchObject({ total: ids.length, done: 3 });
     expect(summary.hours).toBeGreaterThan(0);
   });
 });

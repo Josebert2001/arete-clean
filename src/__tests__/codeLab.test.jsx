@@ -13,6 +13,7 @@ const open = () => render(<MemoryRouter><CodeLab /></MemoryRouter>);
 const shelf = name => screen.getByRole('region', { name });
 const cardTitles = region => within(region).getAllByRole('heading', { level: 3 }).map(h => h.textContent);
 const total = Object.values(trackMeta).reduce((sum, t) => sum + t.moduleCount, 0);
+const rooms = trackMeta.security.moduleCount;
 
 beforeEach(() => {
   localStorage.clear();
@@ -27,7 +28,7 @@ describe('Code Lab catalogue', () => {
     }
     expect(screen.getByText('Start here')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Start here.*Java Foundations.*Begin/s })).toHaveAttribute('href', '/tracks/java/foundations');
-    expect(screen.getByRole('link', { name: /All 12 rooms in order/ })).toHaveAttribute('href', '/tracks/security');
+    expect(screen.getByRole('link', { name: new RegExp(`All ${rooms} rooms in order`) })).toHaveAttribute('href', '/tracks/security');
     expect(screen.getByRole('link', { name: /Cheatsheets/ })).toHaveAttribute('href', '/cheatsheet');
   });
 
@@ -35,9 +36,9 @@ describe('Code Lab catalogue', () => {
     open();
     fireEvent.click(screen.getByRole('button', { name: 'Security' }));
     expect(screen.getByRole('button', { name: 'Security' })).toHaveAttribute('aria-pressed', 'true');
-    expect(cardTitles(shelf('Security'))).toHaveLength(12);
+    expect(cardTitles(shelf('Security'))).toHaveLength(rooms);
     expect(screen.queryByRole('region', { name: 'Java' })).not.toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent(`12 of ${total} modules match.`);
+    expect(screen.getByRole('status')).toHaveTextContent(`${rooms} of ${total} modules match.`);
   });
 
   it('filters by level across every path, and recovers from a combination with no match', () => {
@@ -66,12 +67,12 @@ describe('Code Lab catalogue', () => {
     open();
     const resume = screen.getByRole('link', { name: /Pick up where you left off/ });
     expect(resume).toHaveAttribute('href', '/tracks/security/sec-hashing');
-    expect(resume).toHaveTextContent('room 4 of 12');
+    expect(resume).toHaveTextContent(`room 4 of ${rooms}`);
     expect(resume).toHaveTextContent('2 of');
     const security = shelf('Security');
     expect(cardTitles(security)[0]).toBe('Hashing & File Integrity');
     expect(within(security).getByText(/In progress · 2 of \d+ steps/)).toBeInTheDocument();
-    expect(within(security).getByText(/3 of 12 done/)).toBeInTheDocument();
+    expect(within(security).getByText(new RegExp(`3 of ${rooms} done`))).toBeInTheDocument();
     expect(screen.getByText(/You have completed 3\./)).toBeInTheDocument();
   });
 

@@ -13,7 +13,7 @@ Independent of the University of Uyo and its departments; this is not an officia
 ### Cybersecurity for independent learners
 
 `/cybersecurity` is a public entry page with a phishing sample that needs no account,
-the existing 12-room security track overview, and a team pilot inquiry. Learners can
+the existing 18-room security track overview, and a team pilot inquiry. Learners can
 choose independent learning at signup without a university department, registration
 number, or year level. Independent welcome and home screens lead into security practice.
 
@@ -54,16 +54,16 @@ The course hub covers the complete B.Sc. Cybersecurity programme: **57 courses**
 | 300L  | 13      |
 | 400L  | 14      |
 
-### Interactive tracks — 49 modules
+### Interactive tracks — 55 modules
 
 | Track    | Modules | Course        | Format |
 | -------- | ------- | ------------- | ------ |
 | Java     | 13      | COS 221       | Theory + code + playground + quiz + project |
 | Python   | 12      | COS 121       | Theory + code + playground + quiz + project |
 | C        | 12      | —             | Theory + code + playground + quiz + project |
-| Security | 12      | CYB           | Theory + quiz + **capture-the-flag challenge** |
+| Security | 18      | CYB           | Theory + quiz + **capture-the-flag challenge** |
 
-The **Security track** is 12 CTF-style rooms — CIA triad, encoding vs. encryption, classical/modern crypto, hashing, password cracking, networking, HTTP, SQL injection, the Linux CLI, digital forensics, phishing, and firewalls. Each room ends in a flag, validated client-side (SHA-256, no backend) with escalating hints. The other three tracks add a runnable in-browser code playground (via JDoodle) that the Security track skips.
+The **Security track** is 18 CTF-style rooms — CIA triad, encoding vs. encryption, classical/modern crypto, hashing, password cracking, networking, HTTP, SQL injection, the Linux CLI, digital forensics, phishing, firewalls, cross-site scripting, access control and IDOR, log analysis, password storage and salting, packet reading, and incident response. Each room ends in a flag, validated client-side (SHA-256, no backend) with escalating hints. Every challenge can be solved from the supplied browser evidence. The first four flag challenges are free; the remaining fourteen require Premium, while theory and practice content remain available under the existing free limits. The other three tracks add a runnable in-browser code playground (via JDoodle) that the Security track skips.
 
 ### AI features
 

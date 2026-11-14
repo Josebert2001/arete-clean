@@ -95,7 +95,7 @@ export function planComparison() {
     { feature: 'Explain-this web lookups', free: `${L.research} a day`, premium: `${P.research} a day` },
     { feature: 'Practice quizzes (MCQ)', free: `${L.quiz} a day`, premium: 'Unlimited' },
     { feature: 'Written exam prep', free: `${L.examPrep} sessions a day`, premium: 'Unlimited' },
-    { feature: 'Security CTF challenges', free: `First ${FREE_CTF_ROOMS} rooms`, premium: 'All 12 rooms' },
+    { feature: 'Security CTF challenges', free: `First ${FREE_CTF_ROOMS} rooms`, premium: 'All Security rooms' },
     { feature: 'Code playground runs', free: `${L.run} a day`, premium: `${P.run} a day*` },
   ];
 }

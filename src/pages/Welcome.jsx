@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePageTitle } from '../utils/usePageTitle';
 import { findDepartmentByName, getDepartment, YEAR_LEVELS } from '../data/departments';
 import IndependentLearningHome from '../components/IndependentLearningHome';
+import { trackMeta } from '../data/trackMeta';
 
 export default function Welcome() {
   usePageTitle('Welcome');
@@ -72,7 +73,7 @@ export default function Welcome() {
       to: '/lab',
       icon: Code2,
       label: 'Explore Code Lab',
-      desc: 'Java, Python and C tracks, plus 12 capture-the-flag security rooms.',
+      desc: `Java, Python and C tracks, plus ${trackMeta.security.moduleCount} capture-the-flag security rooms.`,
     },
     {
       to: '/planner',

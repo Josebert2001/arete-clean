@@ -16,6 +16,7 @@
 
 import { departments, DEFAULT_DEPARTMENT, YEAR_LEVELS } from './departments';
 import { noteTopicCount } from './lectureNotes/index.js';
+import { trackMeta } from './trackMeta';
 import {
   SITE_URL,
   SITE_NAME,
@@ -414,7 +415,7 @@ export const SITE_FAQS = [
     a:
       `Java (13 modules, matching the COS 221 NetBeans labs), Python (12 modules), ` +
       `and C (12 modules) — each with theory, annotated code, an in-browser playground, quizzes ` +
-      `and a mini project. A twelve-room security track teaches capture-the-flag skills: the CIA ` +
+      `and a mini project. An ${trackMeta.security.moduleCount}-room security track teaches capture-the-flag skills: the CIA ` +
       `triad, cryptography, SQL injection, the Linux command line, digital forensics and network ` +
       `defence.`,
   },
