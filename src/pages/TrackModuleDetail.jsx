@@ -77,7 +77,7 @@ function StepNote({ stepKey, prompt, value, onChange }) {
         value={value}
         onChange={event => onChange(stepKey, event.target.value)}
         aria-describedby={`${id}-hint`}
-        className="w-full rounded-lg border border-coffee-300 bg-paper p-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-moss"
+        className="w-full rounded-lg border border-coffee-300 bg-paper p-3 text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-moss"
       />
       <p id={`${id}-hint`} className="mt-1 text-xs text-coffee-600">
         In your own words. Saved on this device and added to your write-up.

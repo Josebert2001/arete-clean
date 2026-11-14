@@ -184,7 +184,7 @@ function LongformQuestion({ q, courseSlug, awarded, onAward, explainReady, expla
                   ? 'Type your answer here, and sketch the diagram on paper — you can compare it against the real one once you reveal. Short points are fine.'
                   : 'Type your answer here. Full prose if you are at a keyboard, or just the points you would make — either works.'
             }
-            className={`w-full px-4 py-3 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-none bg-paper text-ink text-sm leading-relaxed resize-y ${
+            className={`w-full px-4 py-3 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-hidden bg-paper text-ink text-sm leading-relaxed resize-y ${
               code ? 'font-mono' : ''
             }`}
           />
@@ -374,7 +374,7 @@ function RecallQuestion({ q, awarded, onAward }) {
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && !checked && check()}
                 aria-label={`Item ${i + 1}`}
-                className={`flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 bg-paper text-ink text-sm focus:outline-none ${
+                className={`flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 bg-paper text-ink text-sm focus:outline-hidden ${
                   checked
                     ? hit ? 'border-moss bg-moss/5' : 'border-rust bg-rust/5'
                     : 'border-coffee-200 focus:border-rust'

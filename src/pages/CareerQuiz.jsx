@@ -66,7 +66,7 @@ function QuizForm({ ownerId }) {
         aria-label="Questions answered"
         className="w-full h-2 accent-moss mb-8"
       />
-      <h2 ref={heading} tabIndex={-1} className="font-display text-2xl text-ink mb-6 outline-none">
+      <h2 ref={heading} tabIndex={-1} className="font-display text-2xl text-ink mb-6 outline-hidden">
         {section}
       </h2>
       <div className="space-y-7">

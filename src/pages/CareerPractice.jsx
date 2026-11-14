@@ -51,7 +51,7 @@ function Notebook({ path, saved, ownerId }) {
           setNotes(event.target.value);
           setMessage('');
         }}
-        className="w-full rounded-xl border border-coffee-300 bg-paper text-ink p-4 focus:outline-none focus:ring-2 focus:ring-moss"
+        className="w-full rounded-xl border border-coffee-300 bg-paper text-ink p-4 focus:outline-hidden focus:ring-2 focus:ring-moss"
         placeholder="Cite artifact IDs, separate facts from inference, and explain your next step."
       />
       <p className="text-xs text-coffee-600 mt-2">

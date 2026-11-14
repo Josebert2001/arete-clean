@@ -10,7 +10,7 @@ It is multi-department. Two departments have fully-authored catalogues — **Cyb
 **Department catalogues are standalone** — they do NOT import each other's course lists. The overlap between programmes is smaller than it looks (Data Science takes GST 211/311 and MTH 211/212/223 where Cybersecurity takes GST 212/312), and each department frames its shared courses for its own students; cross-importing would also drag one department's whole payload into another's chunk. The single exception is **lecture notes**: those are transcribed from the lecturer's workbook, so every catalogue imports the one copy in `src/data/lectureNotes/`.
 
 ## Stack
-- **Frontend:** React 19, React Router v7, Tailwind CSS (custom theme), Vite (port 5173)
+- **Frontend:** React 19, React Router v7, Tailwind CSS 4 (CSS theme in `src/styles/tailwind-theme.css`), Vite (port 5173)
 - **Backend:** Vercel serverless functions in `api/` (Node.js ESM)
 - **Auth + DB:** Supabase (email OTP, PostgreSQL — profiles + user_progress + course_materials tables)
 - **AI:** Groq API via Vercel AI SDK (`openai/gpt-oss-120b`), streaming responses
@@ -229,7 +229,7 @@ Drive import (when Phase 4 is built) additionally needs client-exposed `VITE_GOO
 ## Testing — Important Context
 The project uses **Vitest** (jsdom environment, `globals: true`) with `@testing-library/react` available for component tests.
 - Config: `vitest.config.js` · setup file: `src/__tests__/setup.js` (imports `@testing-library/jest-dom`)
-- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 103 suites, 1,399 passing tests as of 14 November 2026. The suite passes in any timezone (the Google Calendar date maths used to need `TZ=UTC`).
+- Test files live in `src/__tests__/` as `*.test.js` (or `.test.jsx` for component tests). 104 suites, 1,402 passing tests as of 14 November 2026. The suite passes in any timezone (the Google Calendar date maths used to need `TZ=UTC`).
 - Run with `npm test` (single run) or `npm run test:watch`. CI runs `npm test` on every push.
 - When writing new logic, add or extend a test if the function is testable in isolation. Coverage is uneven — data/util logic is reasonably covered, most page-level components are not.
 - **Component tests use `fireEvent` from `@testing-library/react`** (see `profileForm.test.jsx`, `courseExamPrep.test.jsx`). `@testing-library/user-event` is *not* a dependency — do not import it.

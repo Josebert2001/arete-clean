@@ -275,7 +275,7 @@ export default function FeedbackPrompt() {
               aria-label="Feedback message"
               rows={3}
               maxLength={2000}
-              className="w-full resize-none bg-transparent border border-coffee-300 focus:border-ember-500 rounded-lg px-3 py-2 text-sm text-ink placeholder:text-coffee-400 outline-none transition-colors"
+              className="w-full resize-none bg-transparent border border-coffee-300 focus:border-ember-500 rounded-lg px-3 py-2 text-sm text-ink placeholder:text-coffee-400 outline-hidden transition-colors"
             />
 
             {status === 'error' && (

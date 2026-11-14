@@ -239,7 +239,7 @@ export default function AITutor() {
           value={selectedModule}
           onChange={e => setSelectedModule(e.target.value)}
           aria-label="Focus on a language or module (optional)"
-          className="ml-auto min-w-0 max-w-[240px] flex-1 sm:flex-none bg-paper border border-coffee-200 rounded-lg px-2.5 py-1.5 text-xs text-ink focus:border-coffee-500 outline-none"
+          className="ml-auto min-w-0 max-w-[240px] flex-1 sm:flex-none bg-paper border border-coffee-200 rounded-lg px-2.5 py-1.5 text-xs text-ink focus:border-coffee-500 outline-hidden"
         >
           <option value="">General — any language or topic</option>
           {FOCUS_GROUPS.map(group => (
@@ -368,7 +368,7 @@ export default function AITutor() {
             }}
             placeholder={availability === 'checking' ? 'Connecting to AI Tutor…' : 'Ask your next question…'}
             aria-label="Ask a programming or CS question"
-            className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-2 font-display italic text-base text-ink placeholder:text-coffee-400 outline-none transition-colors"
+            className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-2 font-display italic text-base text-ink placeholder:text-coffee-400 outline-hidden transition-colors"
           />
           {responding ? (
             <button
