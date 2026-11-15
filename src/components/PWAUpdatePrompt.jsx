@@ -37,7 +37,7 @@ export default function PWAUpdatePrompt() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-4 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-[70] mx-auto flex max-w-md items-center gap-3 rounded-xl border border-coffee-200 bg-paper px-4 py-3 shadow-xl animate-fade-in"
+      className="floating-toast fixed inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-[70] mx-auto flex max-w-md items-center gap-3 rounded-xl border border-coffee-200 bg-paper px-4 py-3 shadow-xl animate-fade-in"
     >
       {needRefresh ? (
         <>

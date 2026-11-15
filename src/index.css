@@ -352,6 +352,23 @@ body {
   bottom: 4.25rem;
 }
 
+/* Toasts (app update, Premium quota) used to sit at bottom-4 — on the same
+   strip as the floating Help and Campus Places buttons, so on a phone the
+   update notice covered "Need help?" and the quota toast sat on top of it on
+   desktop. They float one dock-height higher instead, and climb again with the
+   dock when the Listen bar is docked. */
+.floating-toast {
+  bottom: 5rem;
+}
+@media (min-width: 640px) {
+  .floating-toast {
+    bottom: 6rem;
+  }
+}
+.docked-player-open .floating-toast {
+  bottom: 9.5rem;
+}
+
 /* Entrance for the feedback prompt. It appears unbidden, so it rises into
    place rather than snapping in — a panel that simply materialises beside the
    campus map button reads as a glitch. Covered by the reduced-motion rule
