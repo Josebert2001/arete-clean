@@ -21,19 +21,25 @@ beforeEach(() => {
 
 describe('Navbar Premium link', () => {
   it.each(['/career', '/career-quiz', '/career/practice/blue'])(
-    'keeps Careers active for %s while preserving existing navigation',
+    'keeps Careers (under More) active for %s while preserving existing navigation',
     (pathname) => {
       render(
         <MemoryRouter initialEntries={[pathname]}>
           <Navbar />
         </MemoryRouter>,
       );
+      // Not in the main row while career saving is off; More lights up instead.
+      expect(screen.queryByRole('link', { name: 'Careers' })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /More/ })).toHaveClass('bg-ink', 'text-cream');
+      fireEvent.click(screen.getByRole('button', { name: /More/ }));
       expect(screen.getByRole('link', { name: 'Careers' })).toHaveAttribute('href', '/careers');
       expect(screen.getByRole('link', { name: 'Careers' })).toHaveClass('bg-ink', 'text-cream');
+      fireEvent.click(screen.getByRole('button', { name: /More/ }));
       expect(screen.getByRole('link', { name: 'Courses' })).toHaveAttribute('href', '/courses');
       expect(screen.getByRole('link', { name: 'Code Lab' })).toHaveAttribute('href', '/lab');
       fireEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
-      expect(screen.getAllByRole('link', { name: 'Careers' })).toHaveLength(2);
+      // The phone menu lists it in its More section.
+      expect(screen.getAllByRole('link', { name: 'Careers' })).toHaveLength(1);
       expect(screen.getAllByRole('link', { name: 'Premium' })).toHaveLength(2);
     },
   );

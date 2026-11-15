@@ -124,7 +124,6 @@ export default function Navbar() {
   const primaryLinks = [
     { to: '/', label: 'Home' },
     ...(!user ? [{ to: '/cybersecurity', label: 'Cybersecurity' }] : []),
-    { to: '/careers', label: 'Careers', also: ['/career', '/career-quiz'] },
     // The course catalogue is the University of Uyo's; an independent learner
     // has no programme in it, so the link would only lead them off their path.
     ...(!independent ? [{ to: '/courses', label: 'Courses' }] : []),
@@ -157,6 +156,11 @@ export default function Navbar() {
     ...roleLinks,
     ...(user ? [{ to: '/planner', label: 'Study Planner' }] : []),
     ...(!independent ? [{ to: '/campus-map', label: 'Campus Places' }] : []),
+    // Careers sits here, not in the main row, while career saving is switched
+    // off in production (CAREER_PLACEMENT_ENABLED): in the main row it sent
+    // every student to a roadmap that answered "Career saving is unavailable".
+    // Move it back to primaryLinks once that flag is on.
+    { to: '/careers', label: 'Careers', also: ['/career', '/career-quiz'] },
   ];
 
   const matches = (link) =>
