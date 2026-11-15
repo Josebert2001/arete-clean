@@ -42,8 +42,15 @@ export default defineConfig({
          * cap rather than a list of filenames: a new department catalogue or
          * lecture-note chunk lands on the right side of this automatically,
          * where a name list would silently start precaching megabytes.
+         *
+         * The cap has to stay ABOVE the app chunk (assets/index-*.js, 345 kB in
+         * November 2026). At 300 kB that chunk had quietly outgrown it: the
+         * build only warns, index.html was precached but the script it loads
+         * was not, and an installed app opened offline to a blank page. If the
+         * build warning ever names index-*.js again, raise this or split the
+         * entry — do not leave it.
          */
-        maximumFileSizeToCacheInBytes: 300 * 1024,
+        maximumFileSizeToCacheInBytes: 450 * 1024,
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api\//, /\/[^/?]+\.[a-z0-9]+(?:\?|$)/i],
         cleanupOutdatedCaches: true,

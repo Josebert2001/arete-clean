@@ -3,10 +3,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
-const mocks = vi.hoisted(() => ({ plan: {}, user: null }));
+const mocks = vi.hoisted(() => ({ plan: {}, user: null, profile: null }));
 vi.mock('../context/PlanContext', () => ({ usePlan: () => mocks.plan }));
 vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ user: mocks.user, profile: null, authEnabled: false }),
+  useAuth: () => ({ user: mocks.user, profile: mocks.profile, authEnabled: false }),
 }));
 vi.mock('../components/useLecturer', () => ({
   useLecturer: () => ({ isLecturer: false, role: null, repScope: null }),
@@ -16,6 +16,7 @@ vi.mock('../components/ThemeToggle', () => ({ default: () => null }));
 beforeEach(() => {
   mocks.plan = { status: 'ready', enabled: true, isPremium: false };
   mocks.user = { id: 'student' };
+  mocks.profile = null;
 });
 
 describe('Navbar Premium link', () => {
@@ -79,13 +80,25 @@ describe('Navbar layout', () => {
     expect(screen.queryByRole('link', { name: 'Cybersecurity' })).not.toBeInTheDocument();
   });
 
-  it('shows a signed-out visitor\'s lone extra link inline, with no More menu', () => {
+  it('keeps a signed-out visitor\'s lone extra link under More, so their longer row fits', () => {
     mocks.user = null;
     render(<MemoryRouter><Navbar /></MemoryRouter>);
     expect(screen.getByRole('link', { name: 'Cybersecurity' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /More/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Campus Places' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /More/ }));
     expect(screen.getByRole('link', { name: 'Campus Places' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Check In' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Study Planner' })).not.toBeInTheDocument();
+  });
+
+  it('gives an independent learner no university links', () => {
+    mocks.profile = { learning_mode: 'independent', department: 'general', level: null };
+    render(<MemoryRouter><Navbar /></MemoryRouter>);
+    expect(screen.queryByRole('link', { name: 'Courses' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Code Lab' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /More/ }));
+    for (const name of ['Check In', 'My Attendance', 'Campus Places']) {
+      expect(screen.queryByRole('link', { name })).not.toBeInTheDocument();
+    }
   });
 });

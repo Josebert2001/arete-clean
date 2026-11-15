@@ -111,9 +111,13 @@ export default function Install() {
                     href={a.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-coffee-700 hover:text-ink bg-coffee-50 border border-coffee-200 rounded-lg px-3 py-2 w-fit"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-coffee-700 hover:text-ink bg-coffee-50 border border-coffee-200 rounded-lg px-3 py-2 w-fit max-w-full"
                   >
-                    <Download size={14} /> {a.label} <ExternalLink size={12} />
+                    {/* A label like "Go to oracle.com/java/technologies/downloads"
+                        has no break points and ran off a 360px screen. */}
+                    <Download size={14} className="shrink-0" />
+                    <span className="min-w-0 [overflow-wrap:anywhere]">{a.label}</span>
+                    <ExternalLink size={12} className="shrink-0" />
                   </a>
                 ))}
               </div>

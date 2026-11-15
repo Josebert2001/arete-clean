@@ -61,13 +61,15 @@ export default function TrackModules() {
       <div className="mb-10">
       <div className="flex flex-wrap items-center gap-3 mb-3">
           <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold ${track.accentBg} ${track.accentText}`}>
-            {track.label}
+            {track.moduleCount} {lang === 'security' ? 'rooms' : 'modules'}
           </span>
           {track.courseCode && (
             <span className="text-xs font-mono text-coffee-700">{track.courseCode}</span>
           )}
         </div>
-        <h1 className="display-heading text-5xl text-ink mb-3">{track.moduleCount} Modules</h1>
+        {/* The track's name is the heading: a learner arriving from a search or
+            a shared link needs to know which path this is before how long it is. */}
+        <h1 className="display-heading text-5xl text-ink mb-3">{track.label} path</h1>
         <p className="text-lg text-coffee-700 max-w-2xl">{track.description}</p>
       </div>
 

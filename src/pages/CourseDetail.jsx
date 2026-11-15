@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, Paperclip, GraduationCap, PenLine, Terminal } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Search, Lightbulb, CheckCircle2, Sparkles, FileText, GraduationCap, PenLine, Terminal } from 'lucide-react';
 import { useCatalogue } from '../data/useCatalogue';
 import { materialsDepartmentFor } from '../data/departments';
 import LectureNotes from '../components/LectureNotes';
@@ -46,8 +46,25 @@ function getStoredTab(slug, course) {
   if (stored === 'quiz' && hasQuiz) return 'quiz';
   if (stored === 'exam' && hasExamPrep) return 'exam';
   if (stored === 'materials') return 'materials';
-  return 'resources';
+  if (stored === 'resources') return 'resources';
+  // Nothing remembered: a course with lecture notes opens on them — that is
+  // what a student came to study. The outline is one tap away.
+  return hasNotes ? 'notes' : 'resources';
 }
+
+// Three top-level tabs over the six views a course can have. A student opens a
+// course to learn it, to practise for the paper, or to find its resources — six
+// tabs split those three jobs by how the code is organised instead. The views
+// keep their old keys, so a tab remembered under the six-tab layout (and
+// CodeWalkthrough's jump to the exam questions) still lands in the right place.
+const VIEW_GROUP = {
+  notes: 'learn',
+  walkthrough: 'learn',
+  quiz: 'practice',
+  exam: 'practice',
+  resources: 'about',
+  materials: 'about',
+};
 
 function setStoredTab(slug, tab) {
   try {
@@ -73,6 +90,30 @@ const subjectStyles = {
   siwes: { codeBg: 'bg-coffee-700', codeText: 'text-cream' },
   ele:   { codeBg: 'bg-rust',       codeText: 'text-cream' },
 };
+
+// A two-way switch inside a tab (all topics / practicals, MCQ / written).
+// Buttons with aria-pressed rather than a second row of tabs: one level of
+// tabs is enough to keep track of.
+function ViewSwitch({ label, value, onChange, options }) {
+  return (
+    <div role="group" aria-label={label} className="mb-6 inline-flex flex-wrap gap-1 rounded-xl border border-coffee-200 bg-coffee-50 p-1">
+      {options.map(({ value: v, label: text, icon: Icon }) => (
+        <button
+          key={v}
+          type="button"
+          aria-pressed={value === v}
+          onClick={() => onChange(v)}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            value === v ? 'bg-ink text-cream' : 'text-coffee-700 hover:text-ink'
+          }`}
+        >
+          <Icon size={13} />
+          {text}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function CourseDetail() {
   const { slug } = useParams();
@@ -158,6 +199,37 @@ export default function CourseDetail() {
   const next = courseIndex < courses.length - 1 ? courses[courseIndex + 1] : null;
   const hasQuiz = course.quiz?.length > 0;
   const hasExamPrep = course.examPrep?.length > 0;
+
+  // A remembered view can outlive what it points at (a quiz since removed,
+  // notes that turned out to carry no listings): fall back within reason.
+  let activeGroup = VIEW_GROUP[activeTab] || 'about';
+  if (activeGroup === 'learn' && !hasNotes) activeGroup = 'about';
+  if (activeGroup === 'practice' && !hasQuiz && !hasExamPrep) activeGroup = 'about';
+  // "Practicals only" needs the notes loaded and at least one listing in them;
+  // until then (or if there are none) Learn shows the notes in reading order.
+  const showWalkthrough = activeTab === 'walkthrough' && codeTopics.length > 0;
+
+  const tabs = [
+    ...(hasNotes ? [{
+      key: 'learn',
+      view: 'notes',
+      label: 'Learn',
+      icon: FileText,
+      // Once anything has been read the badge switches to a fraction, so the
+      // tab shows how far through the notes the student is without opening it.
+      badge: !lectureNotes.length ? null
+        : readCount > 0 ? `${readCount}/${lectureNotes.length}`
+        : `${lectureNotes.length} ${lectureNotes.length === 1 ? 'topic' : 'topics'}`,
+    }] : []),
+    ...(hasQuiz || hasExamPrep ? [{
+      key: 'practice',
+      view: hasQuiz ? 'quiz' : 'exam',
+      label: 'Practice',
+      icon: GraduationCap,
+      badge: `${(course.quiz?.length || 0) + (course.examPrep?.length || 0)} Q`,
+    }] : []),
+    { key: 'about', view: 'resources', label: 'About this course', icon: BookOpen },
+  ];
 
   // Which outline topics the lecture notes actually reach, as 1-based indices
   // into `course.topics`: `covers` (fully) or `partial` (touched only).
@@ -246,51 +318,63 @@ export default function CourseDetail() {
         </div>
       )}
 
-      {/* Tab bar */}
-      <div className="flex gap-2 mb-8 border-b border-coffee-200 pb-0 overflow-x-auto no-scrollbar">
-        {[
-          { key: 'resources', label: 'Study Resources', icon: BookOpen },
-          // Once anything has been read the badge switches to a fraction, so the
-          // tab itself shows how far through the notes the student is without
-          // them having to open it.
-          ...(hasNotes ? [{
-            key: 'notes',
-            label: 'Lecture Notes',
-            icon: FileText,
-            badge: !lectureNotes.length ? null
-              : readCount > 0 ? `${readCount}/${lectureNotes.length}`
-              : `${lectureNotes.length} ${lectureNotes.length === 1 ? 'topic' : 'topics'}`,
-          }] : []),
-          ...(codeTopics.length > 0 ? [{
-            key: 'walkthrough',
-            label: 'Code Walkthrough',
-            icon: Terminal,
-            badge: `${codeTopics.length}`,
-          }] : []),
-          ...(hasQuiz ? [{ key: 'quiz', label: 'Practice Quiz', icon: GraduationCap, badge: `${course.quiz.length} Q` }] : []),
-          ...(hasExamPrep ? [{ key: 'exam', label: 'Written Exam Prep', icon: PenLine, badge: `${course.examPrep.length} Q` }] : []),
-          { key: 'materials', label: 'Materials', icon: Paperclip },
-        ].map(({ key, label, icon: Icon, badge }) => (
-          <button
-            key={key}
-            onClick={() => setActiveTab(key)}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-all -mb-px whitespace-nowrap ${
-              activeTab === key
-                ? 'border-ink text-ink bg-paper'
-                : 'border-transparent text-coffee-600 hover:text-ink hover:border-coffee-300'
-            }`}
-          >
-            <Icon size={14} />
-            {label}
-            {badge && (
-              <span className="text-xs font-mono px-1.5 py-0.5 bg-coffee-100 text-coffee-600 rounded-full">{badge}</span>
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Tab bar — Learn · Practice · About this course. A course with nothing
+          but an outline shows no bar at all: one tab is a heading, not a choice. */}
+      {tabs.length > 1 && (
+        <div className="flex gap-2 mb-6 border-b border-coffee-200 pb-0 overflow-x-auto no-scrollbar">
+          {tabs.map(({ key, view, label, icon: Icon, badge }) => {
+            const active = activeGroup === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={active}
+                onClick={() => { if (!active) setActiveTab(view); }}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-all -mb-px whitespace-nowrap ${
+                  active
+                    ? 'border-ink text-ink bg-paper'
+                    : 'border-transparent text-coffee-600 hover:text-ink hover:border-coffee-300'
+                }`}
+              >
+                <Icon size={14} />
+                {label}
+                {badge && (
+                  <span className="text-xs font-mono px-1.5 py-0.5 bg-coffee-100 text-coffee-600 rounded-full">{badge}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Lecture Notes tab */}
-      {activeTab === 'notes' && hasNotes && (
+      {/* Inside Learn: the notes in reading order, or just the practicals. */}
+      {activeGroup === 'learn' && codeTopics.length > 0 && (
+        <ViewSwitch
+          label="How to read the notes"
+          value={showWalkthrough ? 'walkthrough' : 'notes'}
+          onChange={setActiveTab}
+          options={[
+            { value: 'notes', label: 'All topics', icon: FileText },
+            { value: 'walkthrough', label: `Practicals only · ${codeTopics.length}`, icon: Terminal },
+          ]}
+        />
+      )}
+
+      {/* Inside Practice: the format, chosen here rather than as two tabs. */}
+      {activeGroup === 'practice' && hasQuiz && hasExamPrep && (
+        <ViewSwitch
+          label="Question format"
+          value={activeTab}
+          onChange={setActiveTab}
+          options={[
+            { value: 'quiz', label: `Multiple choice · ${course.quiz.length}`, icon: GraduationCap },
+            { value: 'exam', label: `Written · ${course.examPrep.length}`, icon: PenLine },
+          ]}
+        />
+      )}
+
+      {/* Learn → All topics */}
+      {activeGroup === 'learn' && !showWalkthrough && !(activeTab === 'walkthrough' && notesStatus === 'loading') && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
           {notesStatus === 'loading' && (
             <div role="status" className="space-y-3 animate-pulse">
@@ -328,14 +412,14 @@ export default function CourseDetail() {
         </div>
       )}
 
-      {/* Code Walkthrough tab */}
+      {/* Learn → Practicals only */}
       {activeTab === 'walkthrough' && notesStatus === 'loading' && (
         <div role="status" className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8 space-y-3 animate-pulse">
           <span className="sr-only">Loading the practicals…</span>
           {[0, 1, 2].map(i => <div key={i} className="h-14 rounded-xl bg-coffee-100" />)}
         </div>
       )}
-      {activeTab === 'walkthrough' && codeTopics.length > 0 && (
+      {showWalkthrough && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
           <CodeWalkthrough
             topics={lectureNotes}
@@ -347,33 +431,23 @@ export default function CourseDetail() {
         </div>
       )}
 
-      {/* Practice Quiz tab */}
+      {/* Practice → Multiple choice */}
       {activeTab === 'quiz' && hasQuiz && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
           <CourseQuiz course={course} />
         </div>
       )}
 
-      {/* Written Exam Prep tab */}
+      {/* Practice → Written */}
       {activeTab === 'exam' && hasExamPrep && (
         <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
           <CourseExamPrep course={course} />
         </div>
       )}
 
-      {/* Materials tab */}
-      {activeTab === 'materials' && (
-        <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mb-8">
-          <CourseMaterials
-            courseCode={course.code}
-            courseSlug={slug}
-            department={materialsDepartmentFor(course, department?.slug)}
-          />
-        </div>
-      )}
-
-      {/* Resources tab */}
-      {activeTab === 'resources' && (
+      {/* About this course: outline and resources, then students' uploads */}
+      {activeGroup === 'about' && (
+      <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* Left column — Topics */}
@@ -497,6 +571,14 @@ export default function CourseDetail() {
 
         </div>
       </div>
+      <div className="bg-paper border border-coffee-200 rounded-2xl p-6 sm:p-8 mt-8">
+        <CourseMaterials
+          courseCode={course.code}
+          courseSlug={slug}
+          department={materialsDepartmentFor(course, department?.slug)}
+        />
+      </div>
+      </>
       )}
 
       {/* AI course assistant */}

@@ -1,6 +1,6 @@
 # Cybersecurity entry and independent onboarding
 
-The public entry page is `/cybersecurity`. It includes an account-free phishing exercise, the current 12-room track outline, learner pricing sourced from `plans.js`, and an email inquiry for a team pilot. Team administration and verified assessments are explicitly described as planned.
+The public entry page is `/cybersecurity`. It includes an account-free phishing exercise, the current 18-room track outline, learner pricing sourced from `plans.js`, and an email inquiry for a team pilot. Team administration and verified assessments are explicitly described as planned.
 
 ## Deployment order
 
