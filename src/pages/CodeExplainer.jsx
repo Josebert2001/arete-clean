@@ -1,25 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Wand2, Copy, Check, ArrowRight } from 'lucide-react';
-import { fetchJsonWithFallback, useApiAvailability } from '../utils/apiClient';
+import { useApiAvailability } from '../utils/apiClient';
+import { askExplainer } from '../utils/explainerApi';
 import RichText from '../components/RichText';
 import { usePageTitle } from '../utils/usePageTitle';
 
 // Force the Coming Soon screen during local dev. The server also signals
-// "not configured" at runtime — see askExplainer below.
+// "not configured" at runtime — see askExplainer in utils/explainerApi.js.
 const DEMO_MODE = false;
-
-async function askExplainer(code, language) {
-  return fetchJsonWithFallback(
-    '/api/explainer',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, language }),
-    },
-    'The Code Explainer needs the Vercel API routes. Run the app with `vercel dev` or deploy it to use this feature.'
-  );
-}
 
 const LANGUAGES = [
   { value: '', label: 'Auto-detect' },
