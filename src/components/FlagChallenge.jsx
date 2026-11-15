@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Flag, CheckCircle2, Lightbulb, Terminal, ChevronRight } from 'lucide-react';
 import CodeBlock from './CodeBlock';
+import { hasSolvedFlag, persistSolvedFlag } from '../utils/solvedFlags';
 
 // Renders a CTF-style flag challenge and validates the submitted flag entirely
 // client-side: it SHA-256-hashes the trimmed input and compares to the stored
@@ -11,28 +12,6 @@ import CodeBlock from './CodeBlock';
 // Web Crypto (crypto.subtle) needs a secure context — HTTPS in production,
 // localhost in dev — both of which Arete runs in. We guard for its absence so
 // the component degrades gracefully rather than throwing.
-
-const SOLVED_STORE_KEY = 'arete-solved-flags-v1';
-
-function readSolved() {
-  try {
-    const raw = localStorage.getItem(SOLVED_STORE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function persistSolved(challengeId) {
-  try {
-    const set = new Set(readSolved());
-    set.add(challengeId);
-    localStorage.setItem(SOLVED_STORE_KEY, JSON.stringify([...set]));
-  } catch {
-    // localStorage unavailable (private mode / disabled) — solved state just
-    // won't persist across reloads. Not fatal.
-  }
-}
 
 async function sha256Hex(text) {
   if (typeof crypto === 'undefined' || !crypto.subtle) return null;
@@ -98,8 +77,12 @@ function MaterialBlock({ block }) {
   );
 }
 
-export default function FlagChallenge({ challenge, moduleId, onSolve }) {
-  const [solved, setSolved] = useState(() => readSolved().includes(moduleId));
+// `alreadySolved` is the page's answer to "has this account captured this
+// flag?" — it can turn true after mount, when synced progress arrives. Without
+// the prop the component falls back to this browser's own record.
+export default function FlagChallenge({ challenge, moduleId, onSolve, alreadySolved }) {
+  const [solvedHere, setSolved] = useState(() => alreadySolved === undefined && hasSolvedFlag(moduleId));
+  const solved = solvedHere || Boolean(alreadySolved);
   const [value, setValue] = useState('');
   const [status, setStatus] = useState('idle'); // 'idle' | 'checking' | 'wrong' | 'format'
   const [hintsShown, setHintsShown] = useState(0);
@@ -129,7 +112,7 @@ export default function FlagChallenge({ challenge, moduleId, onSolve }) {
 
     if (hex === challenge.flagHash) {
       setSolved(true);
-      persistSolved(moduleId);
+      persistSolvedFlag(moduleId);
       if (onSolve) onSolve();
     } else {
       setStatus('wrong');

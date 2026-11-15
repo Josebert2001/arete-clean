@@ -18,6 +18,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { usePlan } from '../context/PlanContext';
 import { FREE_CTF_ROOMS } from '../data/plans';
+import { hasSolvedFlag } from '../utils/solvedFlags';
 import { usePageTitle } from '../utils/usePageTitle';
 import {
   GUIDANCE_MODES, buildMissionSteps, visibleSteps, countableSteps, stepId,
@@ -141,14 +142,22 @@ export default function TrackModuleDetail() {
   const prev = track.modules[currentIndex - 1];
   const next = track.modules[currentIndex + 1];
   const done = isComplete(mod.id);
+  const stepDone = (key) => stepProgress.isComplete(stepId(mod.id, key));
+  // "This account captured the flag": the synced `flag` tick, which only a
+  // correct flag sets (the step has no manual tick). A room solved before step
+  // ticks existed has no tick, so this browser's solved list counts too — but
+  // only alongside the account's own completion, because that list is per
+  // device and would otherwise hand one learner another's solved rooms.
+  const flagSolved = Boolean(mod.challenge) && (stepDone('flag') || (done && hasSolvedFlag(mod.id)));
   // Free tier: the first FREE_CTF_ROOMS rooms keep their flag challenge; later
   // rooms keep theory and practice but the challenge needs Premium. A room the
-  // student already solved stays open — they earned it before the lock.
-  const challengeLocked = Boolean(mod.challenge) && gatesActive && currentIndex >= FREE_CTF_ROOMS && !done;
+  // student already solved stays open — they earned it before the lock. Keyed
+  // on the flag, not on `done`: "Mark as complete" is one click and must not
+  // open the challenge.
+  const challengeLocked = Boolean(mod.challenge) && gatesActive && currentIndex >= FREE_CTF_ROOMS && !flagSolved;
 
   const steps = visibleSteps(allSteps, mode);
   const counted = countableSteps(steps);
-  const stepDone = (key) => stepProgress.isComplete(stepId(mod.id, key));
   const doneCount = counted.filter(step => stepDone(step.key)).length;
   const percent = counted.length ? Math.round((doneCount / counted.length) * 100) : 0;
   const guided = mode === 'guided';
@@ -281,6 +290,7 @@ export default function TrackModuleDetail() {
           <FlagChallenge
             challenge={mod.challenge}
             moduleId={mod.id}
+            alreadySolved={flagSolved}
             onSolve={() => {
               stepProgress.markComplete(stepId(mod.id, 'flag'));
               completeModule();
@@ -481,9 +491,15 @@ export default function TrackModuleDetail() {
           <div className="space-y-12">
             {steps.map((step, index) => {
               const ticked = stepDone(step.key);
-              const tickable = step.kind !== 'brief' && step.kind !== 'wrap';
+              // The flag step is ticked by capturing the flag, never by hand:
+              // its tick is what unlocks a solved room and what the write-up
+              // reports as "captured".
+              const tickable = step.kind !== 'brief' && step.kind !== 'wrap' && step.kind !== 'flag';
+              // Keyed per module: the Next link reuses this page, and without
+              // it a solved flag panel, an open hint or a half-done quiz from
+              // one room would still be showing in the next.
               return (
-                <section key={step.key} id={`step-${step.key}`} aria-labelledby={`step-${step.key}-title`} className="scroll-mt-28">
+                <section key={`${mod.id}:${step.key}`} id={`step-${step.key}`} aria-labelledby={`step-${step.key}-title`} className="scroll-mt-28">
                   <div className="mb-4 flex items-start justify-between gap-4">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase tracking-wider text-coffee-600">

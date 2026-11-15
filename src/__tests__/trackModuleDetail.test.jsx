@@ -34,7 +34,9 @@ vi.mock('../components/Quiz', () => ({
   default: ({ onComplete }) => <button onClick={() => onComplete(1, 1)}>Finish quiz</button>,
 }));
 vi.mock('../components/FlagChallenge', () => ({
-  default: ({ onSolve }) => <button onClick={onSolve}>Submit flag</button>,
+  default: ({ onSolve, alreadySolved }) => (alreadySolved
+    ? <p>Flag already captured</p>
+    : <button onClick={onSolve}>Submit flag</button>),
 }));
 
 import TrackModuleDetail from '../pages/TrackModuleDetail';
@@ -157,5 +159,55 @@ describe('guided module page', () => {
 
     open('sec-two');
     expect(screen.getByRole('button', { name: 'Submit flag' })).toBeInTheDocument();
+  });
+
+  it('marking a locked room complete does not open its flag challenge', () => {
+    mocks.gatesActive = true;
+    open('sec-three');
+    fireEvent.click(screen.getByRole('button', { name: 'Mark as complete' }));
+    expect(screen.getByRole('button', { name: 'Completed' })).toBeInTheDocument();
+    expect(screen.getByText("Room 3's challenge is part of Premium")).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Submit flag' })).not.toBeInTheDocument();
+  });
+
+  it('keeps a captured room open on the free tier, and does not trust the device list alone', () => {
+    // Another learner solved room 3 in this browser; this account has not.
+    localStorage.setItem('arete-solved-flags-v1', JSON.stringify(['sec-three']));
+    const free = open('sec-three');
+    fireEvent.click(screen.getByRole('button', { name: 'Submit flag' }));
+    expect(screen.getByText('Flag already captured')).toBeInTheDocument();
+    free.unmount();
+
+    mocks.gatesActive = true;
+    const solved = open('sec-three');
+    expect(screen.getByText('Flag already captured')).toBeInTheDocument();
+    expect(screen.queryByText("Room 3's challenge is part of Premium")).not.toBeInTheDocument();
+    solved.unmount();
+
+    localStorage.removeItem('security-test-progress');
+    localStorage.removeItem('mission-steps-v1');
+    open('sec-three');
+    expect(screen.getByText("Room 3's challenge is part of Premium")).toBeInTheDocument();
+    expect(screen.queryByText('Flag already captured')).not.toBeInTheDocument();
+  });
+
+  it('gives the flag step no manual tick: only a captured flag ticks it', () => {
+    open();
+    // Two theory steps, the worked example, the quiz and the build step.
+    expect(screen.getAllByRole('button', { name: 'Mark done' })).toHaveLength(5);
+    const flagStep = screen.getByRole('heading', { level: 2, name: 'Find the flag' }).closest('section');
+    expect(within(flagStep).queryByRole('button', { name: /Mark done|Done/ })).not.toBeInTheDocument();
+  });
+
+  it('starts the next room fresh instead of carrying open panels over from the last one', () => {
+    open('sec-one');
+    fireEvent.click(screen.getByRole('radio', { name: /Some guidance/ }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Show the explanation' })[0]);
+    expect(screen.getByText('First idea body.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('link', { name: /^Next: Room Two/ }));
+    expect(screen.getByRole('heading', { level: 1, name: 'Room Two' })).toBeInTheDocument();
+    expect(screen.queryByText('First idea body.')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Show the explanation' })).toHaveLength(2);
   });
 });
