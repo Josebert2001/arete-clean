@@ -24,7 +24,7 @@ export default function UpgradeToast() {
   if (!notice || pathname === '/premium') return null;
 
   return (
-    <div className="fixed inset-x-4 bottom-4 z-50 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-sm" role="status" aria-live="polite">
+    <div className="floating-toast fixed inset-x-4 z-50 sm:left-auto sm:right-6 sm:max-w-sm" role="status" aria-live="polite">
       <div className="rounded-xl border border-ember/40 bg-paper shadow-lg p-4 flex items-start gap-3">
         <Sparkles size={18} className="text-ember shrink-0 mt-0.5" />
         <div className="min-w-0 flex-1">
