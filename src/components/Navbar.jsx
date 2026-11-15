@@ -30,8 +30,10 @@ function useTagline() {
   return `Dept of ${department.name} · UniUyo`;
 }
 
+// whitespace-nowrap: without it a tight row broke "Code Lab" and "Campus
+// Places" over two lines instead of the row ever reading as too full.
 const linkClass = (active, extra = '') =>
-  `rounded-md text-sm font-medium transition-colors ${extra} ${
+  `whitespace-nowrap rounded-md text-sm font-medium transition-colors ${extra} ${
     active ? 'bg-ink text-cream' : 'text-ink hover:bg-coffee-100'
   }`;
 
@@ -123,7 +125,9 @@ export default function Navbar() {
     { to: '/', label: 'Home' },
     ...(!user ? [{ to: '/cybersecurity', label: 'Cybersecurity' }] : []),
     { to: '/careers', label: 'Careers', also: ['/career', '/career-quiz'] },
-    { to: '/courses', label: 'Courses' },
+    // The course catalogue is the University of Uyo's; an independent learner
+    // has no programme in it, so the link would only lead them off their path.
+    ...(!independent ? [{ to: '/courses', label: 'Courses' }] : []),
     { to: '/lab', label: 'Code Lab', also: ['/tracks', '/install', '/explainer', '/cheatsheet'] },
     { to: '/tutor', label: 'AI Tutor' },
     ...(plan.status === 'ready' && plan.enabled === true && !plan.isPremium
@@ -172,7 +176,9 @@ export default function Navbar() {
             <div className="font-display text-lg font-bold tracking-tight text-ink">
               Areté
             </div>
-            <div className="max-w-[12rem] truncate text-[11px] tracking-wide text-coffee-700 xl:max-w-none">
+            {/* Hidden between lg and xl: that is where the full link row first
+                appears and the tagline is what pushed it to wrap. */}
+            <div className="max-w-[12rem] truncate text-[11px] tracking-wide text-coffee-700 lg:max-xl:hidden xl:max-w-none">
               {tagline}
             </div>
           </div>
@@ -201,19 +207,21 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-1 lg:flex">
-          {/* A "More" menu holding one item is a click for nothing — a lone
-              secondary link (a signed-out visitor's Campus Places) sits inline. */}
-          {(secondaryLinks.length === 1 ? [...primaryLinks, ...secondaryLinks] : primaryLinks).map(l => (
+          {/* Occasional links always sit under More, even a lone one (a
+              signed-out visitor's Campus Places). Inlining it made the visitor's
+              row — which also carries Cybersecurity and Sign in — wrap onto two
+              lines at every width up to ~1300px. */}
+          {primaryLinks.map(l => (
             <NavLink
               key={l.to}
               to={l.to}
               end={l.to === '/'}
-              className={() => linkClass(matches(l), 'px-3.5 py-2')}
+              className={() => linkClass(matches(l), 'px-3 py-2 xl:px-3.5')}
             >
               {l.label}
             </NavLink>
           ))}
-          {secondaryLinks.length > 1 && <MoreMenu links={secondaryLinks} isActive={matches} />}
+          {secondaryLinks.length > 0 && <MoreMenu links={secondaryLinks} isActive={matches} />}
           <span className="mx-1 h-6 w-px bg-coffee-200" aria-hidden />
           <InstallAppButton />
           <ThemeToggle />

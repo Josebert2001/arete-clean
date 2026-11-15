@@ -661,7 +661,7 @@ export default function Courses() {
           Course Hub
         </h1>
         <p className="text-lg text-coffee-700 max-w-2xl leading-relaxed">
-          Your complete academic companion for {heroProgramme}. Every course across all four years — study resources, recommended textbooks, topic outlines, and interactive learning tracks for the programming courses.
+          Your complete academic companion for {heroProgramme}. Your courses across all four years — study resources, recommended textbooks, topic outlines, and interactive learning tracks for the programming courses.
         </p>
 
         <div className="flex flex-wrap gap-6 mt-8 text-sm">
@@ -669,7 +669,7 @@ export default function Courses() {
             { label: 'Years Covered', value: 4 },
             { label: 'Total Courses', value: totalCourses },
             { label: 'Total Units', value: totalUnits },
-            { label: 'Interactive Tracks', value: interactiveCourses },
+            { label: 'With a coding track', value: interactiveCourses },
           ].map(stat => (
             <div key={stat.label} className="flex flex-col">
               <span className="font-display font-bold text-2xl text-ink">{stat.value}</span>

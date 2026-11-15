@@ -110,7 +110,7 @@ export const trackMeta = {
     label: 'Security',
     fullName: 'Security Fundamentals',
     tagline: 'Hands-on cybersecurity: crypto, web, forensics — capture the flag',
-    description: '18 CTF-style rooms covering the security fundamentals behind your degree: the CIA triad, encoding, cryptography, hashing, password cracking and storage, networking, HTTP, SQL injection, cross-site scripting, access control, the Linux CLI, digital forensics, phishing, firewalls, log analysis, packet reading, and incident response. Each room ends with a flag you capture in your browser.',
+    description: '18 CTF-style rooms covering the security fundamentals every defender needs: the CIA triad, encoding, cryptography, hashing, password cracking and storage, networking, HTTP, SQL injection, cross-site scripting, access control, the Linux CLI, digital forensics, phishing, firewalls, log analysis, packet reading, and incident response. Each room ends with a flag you capture in your browser.',
     storageKey: 'security-progress-v1',
     listPath: '/tracks/security',
     detailPath: (id) => `/tracks/security/${id}`,

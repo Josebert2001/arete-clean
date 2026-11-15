@@ -6,6 +6,8 @@ import { useApiAvailability } from '../utils/apiClient';
 import { streamTutor } from '../utils/tutorStream';
 import RichText from '../components/RichText';
 import { usePageTitle } from '../utils/usePageTitle';
+import { useAuth } from '../context/AuthContext';
+import { tutorGreeting } from '../utils/tutorGreeting';
 
 // Force the Coming Soon screen during local dev without removing the live
 // chat. The server also signals "not configured" at runtime.
@@ -37,7 +39,10 @@ const SUGGESTED = [
   'What is Big-O notation, in plain English?',
 ];
 
-const GREETING = { role: 'bot', text: "Hi! I'm your Areté tutor. I know the full B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks (Java, Python, C), cryptography, networking, ethical hacking, digital forensics, and more. Ask me anything. What are you working on?" };
+// Message 0 is always the greeting; its words come from tutorGreeting(profile)
+// at render time, so a conversation restored from sessionStorage (including one
+// saved before the greeting was personalised) never shows a stale one.
+const GREETING = { role: 'bot', text: '' };
 
 // Persist the conversation for the browser session so a reload doesn't wipe it.
 const CHAT_STORAGE_KEY = 'arete-tutor-chat-v1';
@@ -53,6 +58,7 @@ function loadStoredMessages() {
 
 export default function AITutor() {
   usePageTitle('AI Tutor');
+  const { profile } = useAuth();
   const [messages, setMessages] = useState(loadStoredMessages);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -197,7 +203,7 @@ export default function AITutor() {
           </div>
           <h2 className="display-heading text-3xl text-ink mb-4">Real answers. On their way.</h2>
           <p className="text-coffee-700 leading-relaxed mb-8 max-w-lg">
-            The AI Tutor knows the complete B.Sc. Cybersecurity curriculum — every course from 100L to 400L, all three programming tracks, and the full module content. Ask about concepts, errors, exam topics, or how to approach a problem and get a precise, curriculum-aligned answer.
+            The AI Tutor knows the courses on Areté and all four learning paths — Java, Python, C and Security. Ask about concepts, errors, exam topics, or how to approach a problem and get a clear, step-by-step answer.
           </p>
           <ul className="space-y-3 mb-8">
             {[
@@ -288,7 +294,7 @@ export default function AITutor() {
             // Canned greeting — a standfirst that opens the session, not an answer.
             <div key={i} className="border-b border-coffee-200 pb-6">
               <p className="font-display text-[17px] leading-relaxed text-coffee-700">
-                {m.text}
+                {tutorGreeting(profile)}
               </p>
             </div>
           ) : (

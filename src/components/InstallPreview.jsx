@@ -73,9 +73,10 @@ export default function InstallPreview() {
                           href={a.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-coffee-700 hover:text-ember-500"
+                          className="inline-flex max-w-full items-center gap-1.5 text-sm font-medium text-coffee-700 hover:text-ember-500"
                         >
-                          {a.label} <ExternalLink size={12} />
+                          <span className="min-w-0 [overflow-wrap:anywhere]">{a.label}</span>
+                          <ExternalLink size={12} className="shrink-0" />
                         </a>
                       </li>
                     ))}
