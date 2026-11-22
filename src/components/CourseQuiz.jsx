@@ -275,7 +275,7 @@ export default function CourseQuiz({ course }) {
             onKeyDown={(e) => e.key === 'Enter' && startCustom()}
             placeholder={`1–${pool.length}`}
             aria-label="Number of questions"
-            className="w-28 px-3 py-2.5 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-none bg-paper text-ink text-sm"
+            className="w-28 px-3 py-2.5 rounded-xl border-2 border-coffee-200 focus:border-rust focus:outline-hidden bg-paper text-ink text-sm"
           />
           <button onClick={startCustom} className="btn-primary text-sm">
             <Play size={14} /> Start

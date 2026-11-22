@@ -216,7 +216,7 @@ export default function FlagChallenge({ challenge, moduleId, onSolve, alreadySol
               spellCheck={false}
               aria-invalid={status === 'wrong' || status === 'format' ? true : undefined}
               aria-describedby="flag-feedback"
-              className="flex-1 px-4 py-2.5 rounded-lg border-2 border-coffee-200 bg-cream font-mono text-sm text-ink focus:border-ember-500 focus:outline-none transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-lg border-2 border-coffee-200 bg-cream font-mono text-sm text-ink focus:border-ember-500 focus:outline-hidden transition-colors"
             />
             <button
               type="submit"

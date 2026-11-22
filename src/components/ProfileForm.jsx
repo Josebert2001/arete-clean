@@ -123,7 +123,7 @@ export default function ProfileForm({
           onChange={setField('full_name')}
           placeholder="e.g. Josebert Sunday"
           autoComplete="name"
-          className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
+          className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-hidden focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
         />
       </div>
 
@@ -139,7 +139,7 @@ export default function ProfileForm({
           value={form.reg_number}
           onChange={setField('reg_number')}
           placeholder="e.g. CYB/21/1234"
-          className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all font-mono tracking-wide"
+          className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-hidden focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all font-mono tracking-wide"
         />
         <p className="text-xs text-coffee-500 mt-2 pl-0.5">
           Add it now or later in Profile settings — it links you to materials shared for your class.
@@ -189,7 +189,7 @@ export default function ProfileForm({
               maxLength={60}
               aria-label="Your department name"
               placeholder="e.g. Mechanical Engineering"
-              className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-none focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
+              className="w-full px-4 py-3.5 text-sm bg-cream border border-coffee-200 rounded-xl text-ink placeholder:text-coffee-400 focus:outline-hidden focus:border-coffee-500 focus:ring-2 focus:ring-coffee-100 transition-all"
             />
             <p className="text-xs text-coffee-500 mt-2 pl-0.5">
               You'll get the shared foundation courses and every interactive track now. That shared

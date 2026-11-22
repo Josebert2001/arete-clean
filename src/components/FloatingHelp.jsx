@@ -381,7 +381,7 @@ export default function FloatingHelp() {
                   }}
                   placeholder="Ask anything about your courses…"
                   aria-label="Ask the AI tutor"
-                  className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-1.5 font-display italic text-xs text-ink placeholder:text-coffee-400 outline-none transition-colors"
+                  className="flex-1 min-w-0 resize-none bg-transparent border-0 border-b border-coffee-300 focus:border-ember-500 px-1 py-1.5 font-display italic text-xs text-ink placeholder:text-coffee-400 outline-hidden transition-colors"
                 />
                 {responding ? (
                   <button
