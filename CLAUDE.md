@@ -47,7 +47,7 @@ node scripts/validate-modules.mjs  # validate module data structure
 ## Architecture
 ```
 Browser → React SPA (Vite)
-           ├── React Router (39 routes in App.jsx)
+           ├── React Router (40 routes in App.jsx)
            ├── PlanContext (Premium status + whether billing is on; drives the client gates)
            ├── AuthContext (Supabase OTP auth, profile state)
            ├── useProgress hook (localStorage + Supabase dual sync, 1s debounce)
@@ -67,7 +67,7 @@ Browser → React SPA (Vite)
 ## Key Files Map
 | File | Purpose |
 |------|---------|
-| `src/App.jsx` | Root router — all 39 routes, Error Boundary, auth watcher |
+| `src/App.jsx` | Root router — all 40 routes, Error Boundary, auth watcher |
 | `src/pages/Cybersecurity.jsx` \| `src/components/CybersecurityLanding.jsx` | `/cybersecurity` — public, prerendered entry page for independent learners: an account-free phishing exercise, the 18-room outline, free/Premium allowance copy read from `plans.js`, and a team-pilot inquiry. `CybersecurityLanding` follows the `*Preview` rules (no hooks, context or router). The team-pilot `mailto:` is passed in from `Cybersecurity.jsx` as `teamContact` so the address never appears in the prerendered HTML address harvesters read — keep it that way |
 | `src/components/IndependentLearningHome.jsx` | Home and Welcome screen for `learning_mode = 'independent'`: next security room, Code Lab, profile link |
 | `src/utils/learningEntry.js` | Remembers a `?learn=cybersecurity` entry in sessionStorage across the auth round-trip. Accepts only that fixed value — never turn a query parameter into a redirect target |
@@ -82,6 +82,7 @@ Browser → React SPA (Vite)
 | `src/context/PlanContext.jsx` \| `src/components/useUsageGate.js` \| `src/utils/dailyUsage.js` | Client gates. `gatesActive` is true only when the server said billing is on and the student is not Premium — loading, offline and API-missing all leave it false. Quiz and exam-prep starts are counted in localStorage per account per local day: those banks ship in the bundle, so a server count would add a network dependency (the PWA works offline) without making the gate harder to get round. CTF rooms past `FREE_CTF_ROOMS` lock only the flag challenge, never theory or practice, and never a room already solved |
 | `src/pages/Premium.jsx` | `/premium` — public pricing page, checkout button, and the Paystack return trip (`?reference=` → verify, retried while pending, then the query is stripped) |
 | `src/pages/CheckIn.jsx` | Student check-in: discovers open classes, sends the board code, browser device ID, and available coordinates to `check_in()` |
+| `src/pages/Timetable.jsx` \| `src/data/timetable.js` | `/timetable` — the 100 Level Cybersecurity first-semester timetable, shown only to signed-in students whose `department` is `cybersecurity` and `level` is 100 (`canSeeTimetable()`; also gates the Navbar's More link, and tolerates a NULL level). Static data, no network call. Transcribed 23 Nov 2026 from the Computer Science, Physics and Mathematics department sheets and confirmed with a course mate; the page labels itself student-built and unofficial. Slots name catalogue course codes and slugs, and `timetable.test.jsx` fails if one drifts from `courses.js` or two slots overlap. **Edit the slots in `timetable.js` when the department changes them**, and bump `TIMETABLE_100.updated` |
 | `src/pages/MyAttendance.jsx` | Student's own course attendance percentages and check-in history |
 | `src/pages/TeachSession.jsx` | Assigned lecturer's class sessions, rotating codes, optional geofence, manual marks, roster adds, and device resets |
 | `src/pages/Register.jsx` | Lecturer's course roster and attendance summary, with register export |
