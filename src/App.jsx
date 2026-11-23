@@ -44,6 +44,7 @@ const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const CheckIn = lazy(() => import('./pages/CheckIn'));
 const MyAttendance = lazy(() => import('./pages/MyAttendance'));
+const Timetable = lazy(() => import('./pages/Timetable'));
 const TeachSession = lazy(() => import('./pages/TeachSession'));
 const Register = lazy(() => import('./pages/Register'));
 const Admin = lazy(() => import('./pages/Admin'));
@@ -307,6 +308,7 @@ export default function App() {
             <Route path="/profile" element={<RequireAuth><ProfileSettings /></RequireAuth>} />
             <Route path="/attendance" element={<RequireAuth><CheckIn /></RequireAuth>} />
             <Route path="/my-attendance" element={<RequireAuth><MyAttendance /></RequireAuth>} />
+            <Route path="/timetable" element={<RequireAuth><Timetable /></RequireAuth>} />
             <Route path="/teach" element={<RequireAuth><TeachSession /></RequireAuth>} />
             <Route path="/register" element={<RequireAuth><Register /></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />

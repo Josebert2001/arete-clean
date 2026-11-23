@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePlan } from '../context/PlanContext';
 import { useLecturer } from './useLecturer';
 import { getDepartment } from '../data/departments';
+import { canSeeTimetable } from '../data/timetable';
 
 // Signed-in students see their own department; a signed-out visitor (who
 // hasn't picked one yet) gets neutral, university-wide copy instead of
@@ -154,6 +155,7 @@ export default function Navbar() {
         ];
   const secondaryLinks = [
     ...roleLinks,
+    ...(user && !isLecturer && canSeeTimetable(profile) ? [{ to: '/timetable', label: 'Timetable' }] : []),
     ...(user ? [{ to: '/planner', label: 'Study Planner' }] : []),
     ...(!independent ? [{ to: '/campus-map', label: 'Campus Places' }] : []),
     // Careers sits here, not in the main row, while career saving is switched
